@@ -32,14 +32,41 @@
   .gate-form button:active { transform: scale(0.98); }
   #gate-error { color: #c0392b; font-size: 0.8rem; letter-spacing: 0.05em; text-align: center; display: none; }
   #course-content { display: none; }
-  .course-header { border-bottom: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); z-index: 100; }
-  .header-brand { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }
-  .header-title { font-family: 'Montserrat', sans-serif; font-size: 0.7rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
-  .module-nav { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0 2rem; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-  .module-nav::-webkit-scrollbar { display: none; }
-  .module-nav a { display: inline-block; padding: 1.25rem 1.5rem; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
-  .module-nav a:hover { color: var(--cream); border-bottom-color: var(--gold); }
-  .course-body { max-width: 860px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  #course-content.active { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .course-header { border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); z-index: 200; flex-shrink: 0; }
+  .header-brand { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }
+  .header-title { font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .menu-toggle { display: none; background: none; border: 1px solid var(--border); color: var(--cream); padding: 0.5rem 0.75rem; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-family: 'Montserrat', sans-serif; }
+  .course-main { display: flex; flex: 1; overflow: hidden; }
+  .sidebar { width: 260px; flex-shrink: 0; background: var(--dark); border-right: 1px solid var(--border); overflow-y: auto; padding: 1.5rem 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; transition: transform 0.3s ease; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+  .sidebar-section { margin-bottom: 0.25rem; }
+  .sidebar-module { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; cursor: pointer; transition: background 0.15s; user-select: none; }
+  .sidebar-module:hover { background: rgba(255,255,255,0.03); }
+  .sidebar-module-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); transition: color 0.2s; }
+  .sidebar-module-label.active { color: var(--gold); }
+  .sidebar-chevron { font-size: 0.55rem; color: var(--muted); transition: transform 0.2s; }
+  .sidebar-section.open .sidebar-chevron { transform: rotate(90deg); }
+  .sidebar-items { display: none; }
+  .sidebar-section.open .sidebar-items { display: block; }
+  .sidebar-item { display: block; padding: 0.45rem 1.25rem 0.45rem 2rem; font-size: 0.7rem; color: var(--muted); text-decoration: none; transition: color 0.15s, background 0.15s; line-height: 1.4; border-left: 2px solid transparent; margin-left: 0; }
+  .sidebar-item:hover { color: var(--cream); background: rgba(255,255,255,0.02); }
+  .sidebar-item.active { color: var(--gold); border-left-color: var(--gold); background: rgba(201,169,110,0.06); }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 0.75rem 1.25rem; opacity: 0.4; }
+  .course-scroll { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .course-scroll::-webkit-scrollbar { width: 4px; }
+  .course-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+  .course-body { max-width: 800px; margin: 0 auto; padding: 3rem 2.5rem 6rem; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 149; }
+  .sidebar-overlay.visible { display: block; }
+  @media (max-width: 768px) {
+    .menu-toggle { display: block; }
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 150; transform: translateX(-100%); padding-top: 4rem; width: 280px; }
+    .sidebar.open { transform: translateX(0); }
+    .course-body { padding: 2rem 1rem 6rem; }
+    .header-title { display: none; }
+  }
   .module { margin-bottom: 5rem; }
   .module-header { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
   .module-number { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.75rem; }
@@ -110,18 +137,93 @@
 
 <div id="course-content">
   <header class="course-header">
-    <div class="header-brand">Lisa Fit Method</div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="menu-toggle" onclick="toggleSidebar()" id="menu-btn">☰ Menu</button>
+      <div class="header-brand">Lisa Fit Method</div>
+    </div>
     <div class="header-title">Training Foundations</div>
   </header>
-  <nav class="module-nav">
-    <a href="#intro">Introduction</a>
-    <a href="#module1">Module 1</a>
-    <a href="#module2">Module 2</a>
-    <a href="#module3">Module 3</a>
-    <a href="#module4">Module 4</a>
-    <a href="#whats-next">What's Next</a>
-  </nav>
 
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="course-main">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-section open" id="sec-intro">
+        <div class="sidebar-module" onclick="toggleSection('sec-intro')">
+          <span class="sidebar-module-label" id="lbl-intro">Introduction</span>
+          <span class="sidebar-chevron">▶</span>
+        </div>
+        <div class="sidebar-items">
+          <a class="sidebar-item" href="#intro" onclick="closeSidebar()">Why this guide exists</a>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section" id="sec-m1">
+        <div class="sidebar-module" onclick="toggleSection('sec-m1')">
+          <span class="sidebar-module-label" id="lbl-module1">Module 1 — Foundation Movements</span>
+          <span class="sidebar-chevron">▶</span>
+        </div>
+        <div class="sidebar-items">
+          <a class="sidebar-item" href="#e1-hiphinge" onclick="closeSidebar()">E1 — Hip Hinge</a>
+          <a class="sidebar-item" href="#e2-squat" onclick="closeSidebar()">E2 — Squat Pattern</a>
+          <a class="sidebar-item" href="#e3-push" onclick="closeSidebar()">E3 — Push Pattern</a>
+          <a class="sidebar-item" href="#e4-pull" onclick="closeSidebar()">E4 — Pull Pattern</a>
+          <a class="sidebar-item" href="#e5-core" onclick="closeSidebar()">E5 — Brace & Carry</a>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section" id="sec-m2">
+        <div class="sidebar-module" onclick="toggleSection('sec-m2')">
+          <span class="sidebar-module-label" id="lbl-module2">Module 2 — Core & Glute Priority</span>
+          <span class="sidebar-chevron">▶</span>
+        </div>
+        <div class="sidebar-items">
+          <a class="sidebar-item" href="#e6-deadbug" onclick="closeSidebar()">E1 — Dead Bug</a>
+          <a class="sidebar-item" href="#e7-birddog" onclick="closeSidebar()">E2 — Bird Dog</a>
+          <a class="sidebar-item" href="#e8-glutebridge" onclick="closeSidebar()">E3 — Glute Bridge</a>
+          <a class="sidebar-item" href="#e9-glutemed" onclick="closeSidebar()">E4 — Glute Medius</a>
+          <a class="sidebar-item" href="#e10-hipthrust" onclick="closeSidebar()">E5 — Hip Thrust</a>
+          <a class="sidebar-item" href="#e11-rdl" onclick="closeSidebar()">E6 — Romanian Deadlift</a>
+          <a class="sidebar-item" href="#e12-pallof" onclick="closeSidebar()">E7 — Pallof Press</a>
+          <a class="sidebar-item" href="#e13-carry" onclick="closeSidebar()">E8 — Farmer's Carry</a>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section" id="sec-m3">
+        <div class="sidebar-module" onclick="toggleSection('sec-m3')">
+          <span class="sidebar-module-label" id="lbl-module3">Module 3 — The Program</span>
+          <span class="sidebar-chevron">▶</span>
+        </div>
+        <div class="sidebar-items">
+          <a class="sidebar-item" href="#day-a" onclick="closeSidebar()">Day A — Lower Body</a>
+          <a class="sidebar-item" href="#day-b" onclick="closeSidebar()">Day B — Upper Body</a>
+          <a class="sidebar-item" href="#day-c" onclick="closeSidebar()">Day C — Integration</a>
+          <a class="sidebar-item" href="#weeks34" onclick="closeSidebar()">Weeks 3 & 4</a>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section" id="sec-m4">
+        <div class="sidebar-module" onclick="toggleSection('sec-m4')">
+          <span class="sidebar-module-label" id="lbl-module4">Module 4 — Nutrition</span>
+          <span class="sidebar-chevron">▶</span>
+        </div>
+        <div class="sidebar-items">
+          <a class="sidebar-item" href="#module4" onclick="closeSidebar()">5 Nutrition Principles</a>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section" id="sec-next">
+        <div class="sidebar-module" onclick="toggleSection('sec-next')">
+          <span class="sidebar-module-label" id="lbl-whats-next">What's Next</span>
+          <span class="sidebar-chevron">▶</span>
+        </div>
+        <div class="sidebar-items">
+          <a class="sidebar-item" href="#whats-next" onclick="closeSidebar()">Your next steps</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="course-scroll" id="course-scroll">
   <div class="course-body">
 
     <!-- INTRO -->
@@ -168,7 +270,7 @@
       </div>
 
       <!-- E1: HIP HINGE -->
-      <div class="exercise">
+      <div class="exercise" id="e1-hiphinge">
         <div class="exercise-label">Exercise 1</div>
         <div class="exercise-title">The Hip Hinge</div>
         <div class="exercise-subtitle">the most important movement you'll ever learn</div>
@@ -186,7 +288,7 @@
       </div>
 
       <!-- E2: SQUAT -->
-      <div class="exercise">
+      <div class="exercise" id="e2-squat">
         <div class="exercise-label">Exercise 2</div>
         <div class="exercise-title">The Squat Pattern</div>
         <div class="exercise-subtitle">knees, hips, and spine working together</div>
@@ -204,7 +306,7 @@
       </div>
 
       <!-- E3: PUSH -->
-      <div class="exercise">
+      <div class="exercise" id="e3-push">
         <div class="exercise-label">Exercise 3</div>
         <div class="exercise-title">The Push Pattern (horizontal)</div>
         <div class="exercise-subtitle">pressing without wrecking your shoulders</div>
@@ -222,7 +324,7 @@
       </div>
 
       <!-- E4: PULL -->
-      <div class="exercise">
+      <div class="exercise" id="e4-pull">
         <div class="exercise-label">Exercise 4</div>
         <div class="exercise-title">The Pull Pattern</div>
         <div class="exercise-subtitle">building the back that protects everything else</div>
@@ -242,7 +344,7 @@
       </div>
 
       <!-- E5: CORE -->
-      <div class="exercise">
+      <div class="exercise" id="e5-core">
         <div class="exercise-label">Exercise 5</div>
         <div class="exercise-title">The Brace & Carry</div>
         <div class="exercise-subtitle">how your core actually works</div>
@@ -268,7 +370,7 @@
       </div>
 
       <!-- E1: DEAD BUG -->
-      <div class="exercise">
+      <div class="exercise" id="e6-deadbug">
         <div class="exercise-label">Exercise 1</div>
         <div class="exercise-title">Dead Bug</div>
         <div class="exercise-subtitle">the safest core exercise you're not doing</div>
@@ -280,7 +382,7 @@
       </div>
 
       <!-- E2: BIRD DOG -->
-      <div class="exercise">
+      <div class="exercise" id="e7-birddog">
         <div class="exercise-label">Exercise 2</div>
         <div class="exercise-title">Bird Dog</div>
         <div class="exercise-subtitle">spinal stability from the ground up</div>
@@ -293,7 +395,7 @@
       </div>
 
       <!-- E3: GLUTE BRIDGE -->
-      <div class="exercise">
+      <div class="exercise" id="e8-glutebridge">
         <div class="exercise-label">Exercise 3</div>
         <div class="exercise-title">Glute Bridge</div>
         <div class="exercise-subtitle">activating the muscle that protects your spine</div>
@@ -306,7 +408,7 @@
       </div>
 
       <!-- E4: GLUTE MEDIUS -->
-      <div class="exercise">
+      <div class="exercise" id="e9-glutemed">
         <div class="exercise-label">Exercise 4</div>
         <div class="exercise-title">Glute Medius Training</div>
         <div class="exercise-subtitle">the work most programs ignore</div>
@@ -323,7 +425,7 @@
       </div>
 
       <!-- E5: HIP THRUST -->
-      <div class="exercise">
+      <div class="exercise" id="e10-hipthrust">
         <div class="exercise-label">Exercise 5</div>
         <div class="exercise-title">Hip Thrust</div>
         <div class="exercise-subtitle">the primary glute builder</div>
@@ -337,7 +439,7 @@
       </div>
 
       <!-- E6: RDL -->
-      <div class="exercise">
+      <div class="exercise" id="e11-rdl">
         <div class="exercise-label">Exercise 6</div>
         <div class="exercise-title">Romanian Deadlift</div>
         <div class="exercise-subtitle">building the posterior chain that keeps your back healthy</div>
@@ -350,7 +452,7 @@
       </div>
 
       <!-- E7: PALLOF -->
-      <div class="exercise">
+      <div class="exercise" id="e12-pallof">
         <div class="exercise-label">Exercise 7</div>
         <div class="exercise-title">Pallof Press</div>
         <div class="exercise-subtitle">anti-rotation core strength</div>
@@ -363,7 +465,7 @@
       </div>
 
       <!-- E8: FARMER'S CARRY -->
-      <div class="exercise">
+      <div class="exercise" id="e13-carry">
         <div class="exercise-label">Exercise 8</div>
         <div class="exercise-title">Farmer's Carry</div>
         <div class="exercise-subtitle">full body stability you can build anywhere</div>
@@ -392,7 +494,7 @@
       </div>
 
       <!-- DAY A -->
-      <div class="day-block">
+      <div class="day-block" id="day-a">
         <div class="day-header"><div class="day-tag">Day A</div><div class="day-name">Lower Body</div></div>
         <div class="day-body">
           <div class="section-label">Warm-Up — 10 minutes</div>
@@ -443,7 +545,7 @@
       </div>
 
       <!-- DAY B -->
-      <div class="day-block">
+      <div class="day-block" id="day-b">
         <div class="day-header"><div class="day-tag">Day B</div><div class="day-name">Upper Body</div></div>
         <div class="day-body">
           <div class="section-label">Warm-Up — 10 minutes</div>
@@ -502,7 +604,7 @@
       </div>
 
       <!-- DAY C -->
-      <div class="day-block">
+      <div class="day-block" id="day-c">
         <div class="day-header"><div class="day-tag">Day C</div><div class="day-name">Movement Quality & Integration</div></div>
         <div class="day-body">
           <p style="font-size:0.85rem;color:var(--muted);line-height:1.8;margin-bottom:2rem;">This day has a different feel to it. The loading is lighter, the focus is on movement quality, single leg stability, posture, and tying everything you have been building together. Think of it as the day you reinforce the patterns rather than push the intensity. It is still a real training session. It just has a different purpose.</p>
@@ -582,7 +684,8 @@
       </div>
 
       <!-- WEEKS 3 & 4 -->
-      <div style="padding:2rem;background:var(--card);border:1px solid var(--border);margin-top:1rem;">
+      <!-- WEEKS 3 & 4 -->
+      <div id="weeks34" style="padding:2rem;background:var(--card);border:1px solid var(--border);margin-top:1rem;">
         <div class="module-number" style="margin-bottom:0.75rem;">Weeks 3 and 4 — Progressive Overload</div>
         <p style="font-size:0.88rem;color:var(--muted);line-height:1.9;margin-bottom:1rem;">The program structure stays exactly the same across all three days. What changes is the demand you place on your body within that structure. On every exercise where you completed all sets and reps with clean form in Weeks 1 and 2, add a small amount of weight. For dumbbells that usually means going up one size. For band exercises, move to a heavier band. For bodyweight exercises like the dead bug, bird dog, push-up, and inverted row, add 2 to 3 reps per set rather than rushing to a weighted variation.</p>
         <p style="font-size:0.88rem;color:var(--muted);line-height:1.9;">If your form broke down on any exercise during Weeks 1 and 2, stay at the same weight in Weeks 3 and 4. Getting the pattern right is always the priority. The weight will come.</p>
@@ -630,26 +733,110 @@
       </div>
     </section>
 
-  </div>
-</div>
+    </div><!-- end course-body -->
+    </div><!-- end course-scroll -->
+  </div><!-- end course-main -->
+</div><!-- end course-content -->
 
 <script>
   const COURSE_PASSWORD = 'LFM-tf-2026.';
+
   function checkPassword() {
     const input = document.getElementById('pw-input').value;
     if (input === COURSE_PASSWORD) {
       document.getElementById('password-gate').style.display = 'none';
-      document.getElementById('course-content').style.display = 'block';
+      const cc = document.getElementById('course-content');
+      cc.style.display = 'flex';
+      cc.style.flexDirection = 'column';
+      cc.style.height = '100vh';
+      cc.style.overflow = 'hidden';
       window.scrollTo(0, 0);
+      initScrollSpy();
     } else {
       document.getElementById('gate-error').style.display = 'block';
       document.getElementById('pw-input').value = '';
       document.getElementById('pw-input').focus();
     }
   }
+
   document.getElementById('pw-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') checkPassword();
   });
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('visible');
+  }
+
+  function toggleSection(id) {
+    const sec = document.getElementById(id);
+    sec.classList.toggle('open');
+  }
+
+  function initScrollSpy() {
+    const scrollEl = document.getElementById('course-scroll');
+
+    const sections = [
+      { id: 'intro', section: 'sec-intro', label: 'lbl-intro' },
+      { id: 'e1-hiphinge', section: 'sec-m1', label: 'lbl-module1' },
+      { id: 'e2-squat', section: 'sec-m1', label: 'lbl-module1' },
+      { id: 'e3-push', section: 'sec-m1', label: 'lbl-module1' },
+      { id: 'e4-pull', section: 'sec-m1', label: 'lbl-module1' },
+      { id: 'e5-core', section: 'sec-m1', label: 'lbl-module1' },
+      { id: 'e6-deadbug', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e7-birddog', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e8-glutebridge', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e9-glutemed', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e10-hipthrust', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e11-rdl', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e12-pallof', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'e13-carry', section: 'sec-m2', label: 'lbl-module2' },
+      { id: 'module3', section: 'sec-m3', label: 'lbl-module3' },
+      { id: 'day-a', section: 'sec-m3', label: 'lbl-module3' },
+      { id: 'day-b', section: 'sec-m3', label: 'lbl-module3' },
+      { id: 'day-c', section: 'sec-m3', label: 'lbl-module3' },
+      { id: 'weeks34', section: 'sec-m3', label: 'lbl-module3' },
+      { id: 'module4', section: 'sec-m4', label: 'lbl-module4' },
+      { id: 'whats-next', section: 'sec-next', label: 'lbl-whats-next' },
+    ];
+
+    scrollEl.addEventListener('scroll', function() {
+      const scrollTop = scrollEl.scrollTop + 100;
+      let current = sections[0];
+
+      for (const s of sections) {
+        const el = document.getElementById(s.id);
+        if (el && el.offsetTop <= scrollTop) current = s;
+      }
+
+      // Clear all active states
+      document.querySelectorAll('.sidebar-item').forEach(a => a.classList.remove('active'));
+      document.querySelectorAll('.sidebar-module-label').forEach(l => l.classList.remove('active'));
+
+      // Set active on current section's module label
+      const lbl = document.getElementById(current.label);
+      if (lbl) lbl.classList.add('active');
+
+      // Set active on matching sidebar item
+      const matchingLink = document.querySelector(`.sidebar-item[href="#${current.id}"]`);
+      if (matchingLink) matchingLink.classList.add('active');
+
+      // Auto-open the correct sidebar section
+      const secEl = document.getElementById(current.section);
+      if (secEl && !secEl.classList.contains('open')) {
+        document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('open'));
+        secEl.classList.add('open');
+      }
+    });
+  }
 </script>
+
 </body>
 </html>
