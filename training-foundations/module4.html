@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 — Training Foundations</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0a;--dark:#111111;--card:#161616;--border:#2a2a2a;--cream:#f0e6d3;--gold:#c9a96e;--gold-light:#e8c98a;--muted:#888888}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--black);color:var(--cream);font-family:'Montserrat',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+#cc{display:none;flex-direction:column;height:100vh;overflow:hidden}
+.ch{border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,.98);backdrop-filter:blur(10px);z-index:200;flex-shrink:0}
+.hb{font-family:'Cormorant Garamond',serif;font-size:.9rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.ht{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.mt{display:none;background:none;border:1px solid var(--border);color:var(--cream);padding:.5rem .75rem;font-size:.65rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif}
+.cm{display:flex;flex:1;overflow:hidden}
+.sb{width:260px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);overflow-y:auto;padding:1.5rem 0;scrollbar-width:thin;transition:transform .3s ease}
+.sb::-webkit-scrollbar{width:4px}
+.sb::-webkit-scrollbar-thumb{background:var(--border)}
+.ss{margin-bottom:.25rem}
+.sm{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;cursor:pointer;transition:background .15s;user-select:none}
+.sm:hover{background:rgba(255,255,255,.03)}
+.sl{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.sl.cur{color:var(--gold)}
+.sc{font-size:.55rem;color:var(--muted);transition:transform .2s}
+.ss.open .sc{transform:rotate(90deg)}
+.si-wrap{display:none}
+.ss.open .si-wrap{display:block}
+.si{display:block;padding:.45rem 1.25rem .45rem 2rem;font-size:.7rem;color:var(--muted);text-decoration:none;transition:color .15s,background .15s;line-height:1.4;border-left:2px solid transparent}
+.si:hover{color:var(--cream);background:rgba(255,255,255,.02)}
+.si.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,169,110,.06)}
+.sd{height:1px;background:var(--border);margin:.75rem 1.25rem;opacity:.4}
+.cs{flex:1;overflow-y:auto;scrollbar-width:thin}
+.cs::-webkit-scrollbar{width:4px}
+.cs::-webkit-scrollbar-thumb{background:var(--border)}
+.cb{max-width:800px;margin:0 auto;padding:3rem 2.5rem 6rem}
+.so{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:149}
+.so.vis{display:block}
+.mn{font-size:.65rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.mt2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;color:var(--cream);line-height:1.2;margin-bottom:1rem}
+.mi{font-size:.9rem;color:var(--muted);line-height:1.9;max-width:700px;margin-bottom:3rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.pr{padding:2rem;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);margin-bottom:1.5rem}
+.pn{font-size:.65rem;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.pt{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;color:var(--cream);margin-bottom:.75rem}
+.pr p{font-size:.88rem;color:#b0a090;line-height:1.9}
+.cl{text-align:center;padding:4rem 0;border-top:1px solid var(--border);max-width:600px;margin:3rem auto 0}
+.cl h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:300;color:var(--cream);margin-bottom:1.5rem;line-height:1.2}
+.cl p{font-size:.9rem;color:var(--muted);line-height:1.9;margin-bottom:1rem}
+.clh{font-size:.8rem;font-weight:500;letter-spacing:.2em;color:var(--gold);margin-top:2rem}
+.cls{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;color:var(--cream);margin-top:2.5rem}
+.cbox{margin-top:1rem;padding:2rem;background:var(--card);border:1px solid var(--border);text-align:left}
+.nav-btns{display:flex;gap:1rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.nbtn{display:inline-block;background:var(--gold);color:var(--black);padding:.85rem 2rem;font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;font-family:'Montserrat',sans-serif;transition:background .2s}
+.nbtn:hover{background:var(--gold-light)}
+.nbtn.outline{background:none;color:var(--gold);border:1px solid var(--gold)}
+.nbtn.outline:hover{background:rgba(201,169,110,.1)}
+#auth-wall{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;z-index:999}
+#auth-wall p{color:var(--muted);font-size:.9rem}
+#auth-wall a{color:var(--gold);font-size:.85rem}
+@media(max-width:768px){.mt{display:block}.sb{position:fixed;top:0;left:0;bottom:0;z-index:150;transform:translateX(-100%);padding-top:4rem;width:280px}.sb.open{transform:translateX(0)}.cb{padding:2rem 1rem 6rem}.ht{display:none}}
+@media(max-width:600px){.ch{padding:1rem}.pr{padding:1.25rem}}
+</style>
+</head>
+<body>
+
+<div id="auth-wall">
+  <p>Please log in to access this course.</p>
+  <a href="index.html">← Go to login</a>
+</div>
+
+<div id="cc">
+  <header class="ch">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="mt" onclick="toggleSB()">☰ Menu</button>
+      <div class="hb">Lisa Fit Method</div>
+    </div>
+    <div class="ht">Training Foundations</div>
+  </header>
+  <div class="so" id="so" onclick="closeSB()"></div>
+  <div class="cm">
+    <nav class="sb" id="sb">
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Introduction</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="index.html">Why this guide exists</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Module 1 — Foundation Movements</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module1.html">E1 — Hip Hinge</a><a class="si" href="module1.html#e2">E2 — Squat Pattern</a><a class="si" href="module1.html#e3">E3 — Push Pattern</a><a class="si" href="module1.html#e4">E4 — Pull Pattern</a><a class="si" href="module1.html#e5">E5 — Brace & Carry</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Module 2 — Core & Glute Priority</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module2.html">E1 — Dead Bug</a><a class="si" href="module2.html#e2">E2 — Bird Dog</a><a class="si" href="module2.html#e3">E3 — Glute Bridge</a><a class="si" href="module2.html#e4">E4 — Glute Medius</a><a class="si" href="module2.html#e5">E5 — Hip Thrust</a><a class="si" href="module2.html#e6">E6 — Romanian Deadlift</a><a class="si" href="module2.html#e7">E7 — Pallof Press</a><a class="si" href="module2.html#e8">E8 — Farmer's Carry</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Module 3 — The Program</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module3.html">Day A — Lower Body</a><a class="si" href="module3.html#dayb">Day B — Upper Body</a><a class="si" href="module3.html#dayc">Day C — Integration</a><a class="si" href="module3.html#w34">Weeks 3 & 4</a></div></div>
+      <div class="sd"></div>
+      <div class="ss open"><div class="sm" onclick="toggleSec(this)"><span class="sl cur">Module 4 — Nutrition</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si active" href="#">5 Nutrition Principles</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">What's Next</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="#next">Your next steps</a></div></div>
+    </nav>
+    <div class="cs">
+      <div class="cb">
+        <div class="mn">Module 4</div>
+        <h2 class="mt2">Nutrition Foundations</h2>
+        <p class="mi">This is not a diet plan. It is not a calorie calculator. It is five principles that if you apply them consistently will support everything you do in the gym and help you build and maintain a healthy body composition without obsessing over food. About a year ago I started taking nutrition seriously for the first time. Not dieting, not tracking every gram, just genuinely understanding what my body needed to perform and recover. The difference it made was bigger than any program change I had ever made. Food is not separate from your fitness. It is half of it.</p>
+
+        <div class="pr"><div class="pn">Principle 1</div><div class="pt">Protein is your priority</div><p>Protein is the building block of muscle. Without enough of it the work you do in the gym doesn't translate into the results you want. A simple daily target is 0.7 to 1 gram of protein per pound of bodyweight. Build your meals around a protein source first and add everything else around it. Good sources: chicken, turkey, eggs, Greek yogurt, cottage cheese, fish, lean beef. Protein shakes can help you hit your target but they supplement real food, they don't replace it.</p></div>
+
+        <div class="pr"><div class="pn">Principle 2</div><div class="pt">Eat enough to train</div><p>Undereating while trying to build strength is one of the most common mistakes beginners make. If you are consistently tired, not recovering well between sessions, or not getting stronger over time, there is a good chance you are not eating enough. Strength training requires fuel. Your body cannot build muscle in a significant deficit.</p></div>
+
+        <div class="pr"><div class="pn">Principle 3</div><div class="pt">Consistency beats perfection</div><p>One bad meal does not ruin your progress. One perfect meal does not build your body. It is the pattern over weeks and months that determines your results. Stop looking for the perfect approach and start building the habit of eating mostly whole foods, mostly enough protein, and mostly in reasonable amounts.</p></div>
+
+        <div class="pr"><div class="pn">Principle 4</div><div class="pt">Hydration affects everything</div><p>Dehydration directly impairs performance, recovery, focus, and joint health. A simple daily target is half your bodyweight in ounces of water, which works out to roughly 1.5 to 2.5 liters depending on your size. If you train hard or sweat a lot, aim for the higher end.</p></div>
+
+        <div class="pr"><div class="pn">Principle 5</div><div class="pt">Don't complicate it until you've mastered the basics</div><p>Meal timing, detailed macro tracking, supplements, intermittent fasting. None of them matter until you have mastered eating enough protein, eating consistently, and staying hydrated. Build the foundation before you add complexity. The same principle that applies to your training applies here too.</p></div>
+
+        <!-- WHAT'S NEXT -->
+        <div id="next" class="cl">
+          <h2>You finished.<br><em>That's already more<br>than most people do.</em></h2>
+          <p>A lot of people buy guides and never open them. You not only opened this one, you worked through it. You now understand how to move well, why your glutes and core matter more than most people realize, how to structure your training, and how to fuel it. That foundation took most coaches years to learn. You built it in four weeks.</p>
+          <p>Everything you do from here will be better because of it.</p>
+          <div class="cbox">
+            <div class="mn" style="margin-bottom:.5rem">Follow along on Instagram and TikTok</div>
+            <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem">Weekly form breakdowns, training tips, and honest content built on the same principles in this guide. That is also where you will hear about everything coming next first, including the program that picks up exactly where this one leaves off.</p>
+            <div class="clh">@lisafitmethod</div>
+          </div>
+          <div class="cbox" style="margin-top:1rem">
+            <div class="mn" style="margin-bottom:.5rem">Questions or want more structure?</div>
+            <p style="font-size:.88rem;color:var(--muted)">DM me at @lisafitmethod on Instagram or TikTok. I read everything.</p>
+          </div>
+          <p style="margin-top:2rem;font-size:.88rem;color:var(--muted)">Thank you for trusting me with your training. Now go do the work.</p>
+          <div class="cls">Lisa McPherson</div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="nbtn outline" href="module3.html">← Module 3</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+if (!sessionStorage.getItem('lfm-auth')) {
+  document.getElementById('auth-wall').style.display = 'flex';
+} else {
+  document.getElementById('auth-wall').style.display = 'none';
+  document.getElementById('cc').style.display = 'flex';
+}
+function toggleSB(){document.getElementById('sb').classList.toggle('open');document.getElementById('so').classList.toggle('vis')}
+function closeSB(){document.getElementById('sb').classList.remove('open');document.getElementById('so').classList.remove('vis')}
+function toggleSec(el){el.closest('.ss').classList.toggle('open')}
+</script>
+</body>
+</html>
