@@ -155,8 +155,8 @@ async function sendMagicLink() {
   msg.style.display = 'none';
 
   // Check purchase first
-  const { data } = await sb.from('purchases').select('id').eq('email', email).maybeSingle();
-  if (!data) {
+  const { data } = await sb.from('purchases').select('id').eq('email', email).limit(1);
+  if (!data || data.length === 0) {
     msg.style.color='#e08a8a';
     msg.textContent='No purchase found for this email. Get the course at lisafitmethod.com';
     msg.style.display='block';
@@ -177,19 +177,13 @@ async function sendMagicLink() {
 document.getElementById('email-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendMagicLink(); });
 
 async function init() {
-  // Handle invite/magic link token in URL
-  const hash = window.location.hash;
-  if (hash && (hash.includes('access_token') || hash.includes('type=invite') || hash.includes('type=magiclink'))) {
-    const { data, error } = await sb.auth.getSession();
-    if (data?.session) { showCourse(); return; }
-  }
-
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) { showCourse(); return; }
-
+  // Register listener first so it catches the async magic link token exchange
   sb.auth.onAuthStateChange((event, session) => {
     if (session) showCourse();
   });
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) showCourse();
 }
 function showCourse() {
   document.getElementById('pg').style.display = 'none';
