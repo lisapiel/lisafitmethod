@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 — Training Foundations</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0a;--dark:#111111;--card:#161616;--border:#2a2a2a;--cream:#f0e6d3;--gold:#c9a96e;--gold-light:#e8c98a;--muted:#888888}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--black);color:var(--cream);font-family:'Montserrat',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+#cc{display:none;flex-direction:column;height:100vh;overflow:hidden}
+.ch{border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,.98);backdrop-filter:blur(10px);z-index:200;flex-shrink:0}
+.hb{font-family:'Cormorant Garamond',serif;font-size:.9rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.ht{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.mt{display:none;background:none;border:1px solid var(--border);color:var(--cream);padding:.5rem .75rem;font-size:.65rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif}
+.cm{display:flex;flex:1;overflow:hidden}
+.sb{width:260px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);overflow-y:auto;padding:1.5rem 0;scrollbar-width:thin;transition:transform .3s ease}
+.sb::-webkit-scrollbar{width:4px}
+.sb::-webkit-scrollbar-thumb{background:var(--border)}
+.ss{margin-bottom:.25rem}
+.sm{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;cursor:pointer;transition:background .15s;user-select:none}
+.sm:hover{background:rgba(255,255,255,.03)}
+.sl{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.sl.cur{color:var(--gold)}
+.sc{font-size:.55rem;color:var(--muted);transition:transform .2s}
+.ss.open .sc{transform:rotate(90deg)}
+.si-wrap{display:none}
+.ss.open .si-wrap{display:block}
+.si{display:block;padding:.45rem 1.25rem .45rem 2rem;font-size:.7rem;color:var(--muted);text-decoration:none;transition:color .15s,background .15s;line-height:1.4;border-left:2px solid transparent}
+.si:hover{color:var(--cream);background:rgba(255,255,255,.02)}
+.si.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,169,110,.06)}
+.sd{height:1px;background:var(--border);margin:.75rem 1.25rem;opacity:.4}
+.cs{flex:1;overflow-y:auto;scrollbar-width:thin}
+.cs::-webkit-scrollbar{width:4px}
+.cs::-webkit-scrollbar-thumb{background:var(--border)}
+.cb{max-width:800px;margin:0 auto;padding:3rem 2.5rem 6rem}
+.so{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:149}
+.so.vis{display:block}
+.mn{font-size:.65rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.mt2{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;color:var(--cream);line-height:1.2;margin-bottom:1rem}
+.mi{font-size:.9rem;color:var(--muted);line-height:1.9;max-width:700px;margin-bottom:3rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.ex{margin-bottom:4rem;padding-bottom:4rem;border-bottom:1px solid var(--border)}
+.ex:last-child{border-bottom:none}
+.el{font-size:.65rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.et{font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:400;color:var(--cream);margin-bottom:.25rem;line-height:1.2}
+.es{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--gold);margin-bottom:2rem;opacity:.8}
+.vw{position:relative;width:100%;aspect-ratio:16/9;background:#000;margin:1.5rem 0;overflow:hidden}
+.vw iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.cs2{margin-bottom:1.75rem}
+.cs2 h4{font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.cs2 p{font-size:.9rem;color:#b0a090;line-height:1.9}
+.cs2 ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.cs2 ul li{font-size:.88rem;color:#b0a090;line-height:1.7;padding-left:1.25rem;position:relative}
+.cs2 ul li::before{content:'—';position:absolute;left:0;color:var(--gold);opacity:.6;font-size:.75rem}
+.nav-btns{display:flex;gap:1rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.nbtn{display:inline-block;background:var(--gold);color:var(--black);padding:.85rem 2rem;font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;font-family:'Montserrat',sans-serif;transition:background .2s}
+.nbtn:hover{background:var(--gold-light)}
+.nbtn.outline{background:none;color:var(--gold);border:1px solid var(--gold)}
+.nbtn.outline:hover{background:rgba(201,169,110,.1)}
+#auth-wall{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;z-index:999}
+#auth-wall p{color:var(--muted);font-size:.9rem}
+#auth-wall a{color:var(--gold);font-size:.85rem}
+@media(max-width:768px){.mt{display:block}.sb{position:fixed;top:0;left:0;bottom:0;z-index:150;transform:translateX(-100%);padding-top:4rem;width:280px}.sb.open{transform:translateX(0)}.cb{padding:2rem 1rem 6rem}.ht{display:none}}
+@media(max-width:600px){.ch{padding:1rem}}
+</style>
+</head>
+<body>
+
+<div id="auth-wall">
+  <p style="color:#888;font-size:.9rem">Checking your access…</p>
+  <a href="index.html" style="color:#c9a96e;font-size:.85rem;margin-top:.5rem">← Back to login</a>
+</div>
+
+<div id="cc">
+  <header class="ch">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="mt" onclick="toggleSB()">☰ Menu</button>
+      <div class="hb">Lisa Fit Method</div>
+    </div>
+    <div class="ht">Training Foundations</div>
+  </header>
+  <div class="so" id="so" onclick="closeSB()"></div>
+  <div class="cm">
+    <nav class="sb" id="sb">
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Introduction</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="index.html">Why this guide exists</a></div></div>
+      <div class="sd"></div>
+      <div class="ss open"><div class="sm" onclick="toggleSec(this)"><span class="sl cur">Module 1 — Foundation Movements</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si active" href="#e1">E1 — Hip Hinge</a><a class="si" href="#e2">E2 — Squat Pattern</a><a class="si" href="#e3">E3 — Push Pattern</a><a class="si" href="#e4">E4 — Pull Pattern</a><a class="si" href="#e5">E5 — Brace & Carry</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Module 2 — Core & Glute Priority</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module2.html">E1 — Dead Bug</a><a class="si" href="module2.html#e2">E2 — Bird Dog</a><a class="si" href="module2.html#e3">E3 — Glute Bridge</a><a class="si" href="module2.html#e4">E4 — Glute Medius</a><a class="si" href="module2.html#e5">E5 — Hip Thrust</a><a class="si" href="module2.html#e6">E6 — Romanian Deadlift</a><a class="si" href="module2.html#e7">E7 — Pallof Press</a><a class="si" href="module2.html#e8">E8 — Farmer's Carry</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Module 3 — The Program</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module3.html">Day A — Lower Body</a><a class="si" href="module3.html#dayb">Day B — Upper Body</a><a class="si" href="module3.html#dayc">Day C — Integration</a><a class="si" href="module3.html#w34">Weeks 3 & 4</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">Module 4 — Nutrition</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module4.html">5 Nutrition Principles</a></div></div>
+      <div class="sd"></div>
+      <div class="ss"><div class="sm" onclick="toggleSec(this)"><span class="sl">What's Next</span><span class="sc">▶</span></div><div class="si-wrap"><a class="si" href="module4.html#next">Your next steps</a></div></div>
+    </nav>
+    <div class="cs" id="cs">
+      <div class="cb">
+        <div class="mn">Module 1</div>
+        <h2 class="mt2">The Foundation Movements</h2>
+        <p class="mi">These are the five movement patterns that form the base of almost every effective training program. Before you add weight, add complexity, or follow any program including the one in this guide, you need to understand these movements and be able to perform them with clean form. Watch the video first, read the cues, then practice the movement with light or no weight before your first session.</p>
+
+        <!-- E1 -->
+        <div class="ex" id="e1">
+          <div class="el">Exercise 1</div>
+          <div class="et">The Hip Hinge</div>
+          <div class="es">the most important movement you'll ever learn</div>
+          <div class="vw"><iframe data-src="https://www.youtube.com/embed/AyY0C8s5scU?rel=0&modestbranding=1" src="about:blank" allowfullscreen></iframe></div>
+          <div class="cs2"><h4>Why it matters</h4><p>The hip hinge is the foundation of deadlifts, Romanian deadlifts, kettlebell swings, and almost every posterior chain exercise you'll ever do. It is also the movement most responsible for lower back injuries when done incorrectly. Master this before anything else and every other exercise in this guide will feel more natural.</p></div>
+          <div class="cs2"><h4>What a hip hinge is</h4><p>A hip hinge is a movement where you load your hamstrings and glutes by pushing your hips back, not bending your knees down. Your spine stays neutral throughout the entire movement, not rounded, not hyperextended. The power comes from your hips, not your lower back. It sounds simple but most people have never been taught to move this way deliberately, and it takes some practice before it clicks.</p></div>
+          <div class="cs2"><h4>What most people get wrong</h4><p>The most common mistake is rounding the lower back under load, which is how discs get compressed over time. Most beginners also confuse the hinge with a squat, driving the knees forward instead of pushing the hips back. Looking up too aggressively is another one, forcing the neck and upper back into a compromised position. And the weight drifting away from the body is worth watching closely, because the further the weight travels from your center, the more stress lands directly on your spine.</p></div>
+          <div class="cs2"><h4>The cues that make it click</h4><ul><li>"Push the wall behind you with your hips" — this forces the hinge pattern naturally without overthinking it</li><li>"Soft bend in the knees, not a squat" — knees unlock slightly but don't drive forward</li><li>"Pack your shoulders" — shoulder blades slightly down and back before you move</li><li>"Bar stays close" — the weight should drag up your legs, not float away from your body</li></ul></div>
+          <div class="cs2"><h4>One thing to watch for</h4><p>If your lower back is rounding at the bottom of the movement, the weight is too heavy or your hamstring flexibility needs work. Drop the weight, don't push through it. The warm-up routine at the start of each session in Module 3 will help with this directly.</p></div>
+        </div>
+
+        <!-- E2 -->
+        <div class="ex" id="e2">
+          <div class="el">Exercise 2</div>
+          <div class="et">The Squat Pattern</div>
+          <div class="es">knees, hips, and spine working together</div>
+          <div class="vw"><iframe data-src="https://www.youtube.com/embed/NYf82VuzrQM?rel=0&modestbranding=1" src="about:blank" allowfullscreen></iframe></div>
+          <div class="cs2"><h4>Why it matters</h4><p>Squatting is one of the most fundamental human movement patterns. Done well it builds leg strength, glute development, and core stability. Done poorly it creates knee pain, hip impingement, and lower back strain. The goal in this guide is to teach you the goblet squat first because it is the safest and most beginner-friendly way to learn the pattern before progressing to barbell variations.</p></div>
+          <div class="cs2"><h4>What a squat is</h4><p>A squat is a movement where you bend at both the hips and knees simultaneously to lower your body toward the ground, then drive back up to standing. Unlike the hip hinge where the hips push back and the torso leans forward, a squat keeps your torso more upright while your knees travel forward over your toes. The depth you reach depends on your mobility, but the goal is always the same: controlled descent, neutral spine, and a strong drive back up.</p></div>
+          <div class="cs2"><h4>What most people get wrong</h4><p>Knee caving is the most common issue. The knees collapse inward under load, putting serious stress on the knee joint over time. Heels rising off the floor usually points to ankle mobility limitations. Forward trunk lean is another one, where the squat starts turning into a hinge because the chest drops and the hips shoot back too early. And going too heavy before the movement pattern is solid is probably the most common mistake of all.</p></div>
+          <div class="cs2"><h4>The cues that make it click</h4><ul><li>"Knees track over your second toe" — they follow the direction of your feet, they don't collapse inward</li><li>"Chest up, proud posture" — keeps your torso upright throughout the movement</li><li>"Sit between your heels, not behind them" — weight stays distributed across your full foot</li><li>"Spread the floor with your feet" — creates external hip rotation that keeps the knees stable and the glutes engaged</li></ul></div>
+          <div class="cs2"><h4>Start here — the goblet squat</h4><p>Hold a dumbbell or kettlebell at chest height. The counterbalance naturally pulls you into a better position, which makes it the ideal movement to learn the pattern with. Once you can do 3 sets of 10 with clean form and it feels controlled, you're ready to progress to the next variation.</p></div>
+        </div>
+
+        <!-- E3 -->
+        <div class="ex" id="e3">
+          <div class="el">Exercise 3</div>
+          <div class="et">The Push Pattern (horizontal)</div>
+          <div class="es">pressing without wrecking your shoulders</div>
+          <div class="vw"><iframe data-src="https://www.youtube.com/embed/vZTUnLTRkOg?rel=0&modestbranding=1" src="about:blank" allowfullscreen></iframe></div>
+          <div class="cs2"><h4>Why it matters</h4><p>Horizontal pressing builds chest, shoulder, and tricep strength and is one of the most satisfying patterns to get strong at over time. It is also one of the most important patterns to learn correctly early because shoulder issues from poor pressing mechanics tend to build up gradually and quietly until they become a real problem.</p></div>
+          <div class="cs2"><h4>What horizontal pressing is</h4><p>Any movement where you push a load away from your body on a horizontal plane. On a bench that means pressing the weight away from your chest toward the ceiling. On a push-up it means pushing the floor away from you. The chest, shoulders, and triceps all contribute, but the movement works best when your entire body is engaged, not just your arms.</p></div>
+          <div class="cs2"><h4>What most people get wrong</h4><p>Elbow position is the biggest one. Flaring the elbows out to 90 degrees feels natural at first but puts the shoulder joint under significant stress over time. The other common issue is skipping shoulder blade setup before the press, leaving the upper back slack and the shoulder in a vulnerable position before any load is applied. Your wrist should stay stacked directly over your elbow throughout the movement, not bent back under the load.</p></div>
+          <div class="cs2"><h4>The cues that make it click</h4><ul><li>"Elbows at 45 degrees" — not tucked all the way in and not flared straight out</li><li>"Shoulder blades together and down before you press" — set this position before you lower the weight, not after</li><li>"Drive your feet into the floor" — full body tension makes the press stronger</li><li>"Control the descent" — 2 to 3 seconds on the way down, then press with intent</li><li>"Wrist over elbow" — check this before every set until it becomes automatic</li></ul></div>
+        </div>
+
+        <!-- E4 -->
+        <div class="ex" id="e4">
+          <div class="el">Exercise 4</div>
+          <div class="et">The Pull Pattern</div>
+          <div class="es">building the back that protects everything else</div>
+          <div class="vw"><iframe data-src="https://www.youtube.com/embed/eKT-r-SV4x0?rel=0&modestbranding=1" src="about:blank" allowfullscreen></iframe></div>
+          <div class="vw"><iframe data-src="https://www.youtube.com/embed/O6lwJdTd_K4?rel=0&modestbranding=1" src="about:blank" allowfullscreen></iframe></div>
+          <div class="cs2"><h4>Why it matters</h4><p>Most beginners spend a lot of time on pressing movements and not nearly enough on pulling. Over time this creates a real imbalance. A strong back is also directly protective of your spine. For every pushing exercise in your program, there should be at least one pulling exercise to match it.</p></div>
+          <div class="cs2"><h4>What pulling movements are</h4><p>Any movement where you draw a load toward your body. Dumbbell rows, cable rows, lat pulldowns, and eventually pull-ups all fall into this category. They primarily train the lats, rhomboids, mid and lower traps, and rear delts. These are the muscles that keep your shoulders healthy, your posture strong, and your spine supported under load.</p></div>
+          <div class="cs2"><h4>What most people get wrong</h4><p>Using momentum instead of muscle is the most common issue. Rows get swung, reps get rushed, and the back never actually does the work. Shrugging the shoulders up during the pull is another one. Most people also stop short of a full contraction, which means they are getting maybe half the value out of every rep.</p></div>
+          <div class="cs2"><h4>The cues that make it click</h4><ul><li>"Pull your elbows to your back pockets" — activates the lats and stops the shrug</li><li>"Shoulders down before you pull" — set the position first, then initiate</li><li>"Squeeze at the end" — fully contract the back at the top of every rep</li><li>"Chest to the bar, not head to the bar" — the chest leads the movement</li><li>"Control the return" — lower the weight slowly, don't let it drop</li></ul></div>
+          <div class="cs2"><h4>Work toward this</h4><p>Once you have built a solid base of pulling strength through rows and lat pulldowns, the pull-up becomes your benchmark movement. It is the ultimate test of relative upper body pulling strength and something genuinely worth working toward.</p></div>
+        </div>
+
+        <!-- E5 -->
+        <div class="ex" id="e5">
+          <div class="el">Exercise 5</div>
+          <div class="et">The Brace & Carry</div>
+          <div class="es">how your core actually works</div>
+          <div class="cs2"><h4>Why it matters</h4><p>Most people think core training means crunches and sit-ups. It doesn't. Your core's primary job is not to create movement, it is to resist it. It keeps your spine stable while the rest of your body produces force, and that capacity is one of the most important things you can build for long term back health and injury prevention. Every deadlift, squat, row, and press you do requires your core to be working.</p></div>
+          <div class="cs2"><h4>What your core actually is</h4><p>Your core includes your deep abdominal muscles, your obliques, your lower back muscles, your diaphragm, and your pelvic floor. Together they form a cylinder of support around your spine. When this system is working correctly it creates intra-abdominal pressure that protects your spine under load. When it is not working correctly, your lower back compensates and that is where problems begin.</p></div>
+          <div class="cs2"><h4>What most people get wrong</h4><p>Treating core work as an afterthought is the main issue. Crunches train your core to flex, but your spine needs to learn to resist flexion, resist rotation, and stay neutral under load. Your core should be actively engaged on every rep of every exercise in this guide, not just during dedicated core work.</p></div>
+          <div class="cs2"><h4>The cues that make it click</h4><ul><li>"360 degree brace" — breathe into your belly and create pressure all the way around your trunk. Think of it as bracing for a punch</li><li>"Ribs down" — prevents the lower back from hyperextending during standing and overhead movements</li><li>"Tall spine" — imagine a string pulling the crown of your head toward the ceiling, especially during carries</li><li>"Brace before you move" — create tension in your core before the rep begins, not halfway through it</li></ul></div>
+          <div class="cs2"><h4>What this looks like in practice</h4><p>The exercises that train this directly are the dead bug, bird dog, farmer's carry, suitcase carry, and pallof press. All of them are covered in detail in Module 2. Before you get there, start practicing the brace on every exercise you do in this module.</p></div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="nbtn outline" href="index.html">← Introduction</a>
+          <a class="nbtn" href="module2.html">Module 2 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://xzhxabghtwxhyqclzuto.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6aHhhYmdodHd4aHlxY2x6dXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3OTEzNTksImV4cCI6MjA5NDM2NzM1OX0._gc3IHEWK_TuVkVqmDARUfpxyCNrsBJJwWSs6UhQFzc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    showCourse();
+  } else {
+    sb.auth.onAuthStateChange((_, session) => { if (session) showCourse(); });
+    // No session — redirect to login
+    setTimeout(() => {
+      if (!document.getElementById('cc') || document.getElementById('cc').style.display === 'none') {
+        window.location.href = 'index.html';
+      }
+    }, 1500);
+  }
+}
+function showCourse() {
+  document.getElementById('auth-wall').style.display = 'none';
+  document.getElementById('cc').style.display = 'flex';
+  if (typeof initLazy === 'function') initLazy();
+  if (typeof initScrollSpy === 'function') initScrollSpy();
+}
+init();
+function toggleSB(){document.getElementById('sb').classList.toggle('open');document.getElementById('so').classList.toggle('vis')}
+function closeSB(){document.getElementById('sb').classList.remove('open');document.getElementById('so').classList.remove('vis')}
+function toggleSec(el){el.closest('.ss').classList.toggle('open')}
+function initLazy(){
+  const cs=document.getElementById('cs');
+  const iframes=document.querySelectorAll('iframe[data-src]');
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.src=e.target.dataset.src;obs.unobserve(e.target)}})},{root:cs,rootMargin:'300px'});
+  iframes.forEach(i=>obs.observe(i));
+}
+function initScrollSpy(){
+  const cs=document.getElementById('cs');
+  const items=[{id:'e1',si:'[href="#e1"]'},{id:'e2',si:'[href="#e2"]'},{id:'e3',si:'[href="#e3"]'},{id:'e4',si:'[href="#e4"]'},{id:'e5',si:'[href="#e5"]'}];
+  cs.addEventListener('scroll',()=>{
+    const top=cs.scrollTop+120;
+    let cur=items[0];
+    items.forEach(i=>{const el=document.getElementById(i.id);if(el&&el.offsetTop<=top)cur=i});
+    document.querySelectorAll('.si').forEach(a=>a.classList.remove('active'));
+    const a=document.querySelector('.si'+cur.si);
+    if(a)a.classList.add('active');
+  });
+}
+</script>
+</body>
+</html>
