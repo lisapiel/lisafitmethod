@@ -15,10 +15,26 @@ frontend:
                 user_pool_id: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '',
                 aws_region: process.env.COGNITO_REGION || 'us-east-2',
                 user_pool_client_id: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID || '',
+                identity_pool_id: 'us-east-2:b45eadec-da26-43c3-adb0-933823ad5a6f',
                 username_attributes: ['email'],
                 user_verification_types: ['email'],
-                unauthenticated_identities_enabled: false,
+                unauthenticated_identities_enabled: true,
                 mfa_configuration: 'NONE'
+              },
+              storage: {
+                aws_region: 'us-east-2',
+                bucket_name: 'amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov',
+                buckets: [
+                  {
+                    name: 'lisafitmediastore',
+                    bucket_name: 'amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov',
+                    aws_region: 'us-east-2',
+                    paths: {
+                      'media/videos/*': { guest: ['read'], authenticated: ['read', 'write', 'delete'] },
+                      'media/photos/*': { guest: ['read'], authenticated: ['read', 'write', 'delete'] }
+                    }
+                  }
+                ]
               },
               data: {
                 url: process.env.APPSYNC_URL || '',
