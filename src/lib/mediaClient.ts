@@ -1,5 +1,6 @@
-const APPSYNC_URL = process.env.APPSYNC_URL ?? ""
-const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY ?? ""
+// These are public read-only values — the API key only allows listMediaAssets reads.
+const APPSYNC_URL = process.env.APPSYNC_URL ?? "https://kcr4zqjknjerveglimvj5ogi2m.appsync-api.us-east-2.amazonaws.com/graphql"
+const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY ?? "da2-y44brrwzkncnhcjg6wxr23xnve"
 
 type MediaItem = { assignedTo: string; url: string | null }
 
