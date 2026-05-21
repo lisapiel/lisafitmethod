@@ -524,10 +524,12 @@ export default async function HomePage() {
             }}>
               <video
                 src={trailerUrl}
-                controls
+                autoPlay
+                muted
                 loop
                 playsInline
-                preload="metadata"
+                controls
+                preload="auto"
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
               />
             </div>
