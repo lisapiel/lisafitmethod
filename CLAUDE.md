@@ -142,9 +142,13 @@ Tailwind CSS variables should be defined in `tailwind.config.ts` and referenced 
 - Authentication is handled by Amplify Auth (backed by Amazon Cognito).
 - Data models are defined in `amplify/data/resource.ts` using the Amplify Data schema.
 - Use `generateServerClientUsingCookies` from `aws-amplify/adapter-nextjs` for server-side data access in App Router pages and layouts.
-- Use the `useAuthenticator` hook and Amplify UI components for client-side auth flows.
+- Auth client flows use `aws-amplify/auth` functions directly (signIn, confirmSignIn, resetPassword, confirmResetPassword). Custom-built auth pages at `/login`, `/forgot-password` — do not add Amplify UI components.
 - Treat Amplify ClientSchema results as transport-only: normalize them through adapters that strip `null`, parse JSON fields, and coerce types before storing in UI state.
 - The Amplify CI/CD pipeline deploys from the `main` branch. The domain lisafitmethod.com is managed inside the Amplify console (no CNAME file needed).
+- `amplify_outputs.json` is gitignored. It is generated locally via `npx ampx sandbox` and in CI via `npx ampx generate outputs --branch $AWS_BRANCH --app-id $AWS_APP_ID`. You may run `npx ampx sandbox` on Lisa's behalf when a backend change needs testing locally.
+- Amplify client config (`src/lib/amplifyConfig.ts`) falls back to env vars (`NEXT_PUBLIC_COGNITO_USER_POOL_ID`, `NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID`) if `amplify_outputs.json` is absent.
+- When new env vars are needed, document them in `SETUP_PAYMENTS.md` and tell Lisa to add them in the Amplify console under App settings → Environment variables. You may use Lisa's AWS CLI profile to look up resource IDs (e.g. User Pool ID) to pre-fill instructions — always ask first before running AWS CLI commands.
+- `/training-foundations` and all sub-routes are auth-protected by `src/middleware.ts`. Unauthenticated users are redirected to `/login`.
 
 ---
 

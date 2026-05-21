@@ -1,0 +1,141 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Welcome — Lisa Fit Method",
+  description: "Your purchase is complete. Check your email for access.",
+}
+
+export default function PurchaseSuccessPage() {
+  return (
+    <main style={{
+      background: "#0a0a0a",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "40px 24px",
+      fontFamily: "var(--font-montserrat), sans-serif",
+      textAlign: "center",
+    }}>
+      <Link href="/" style={{ textDecoration: "none", marginBottom: 56 }}>
+        <span style={{
+          fontFamily: "var(--font-cormorant), serif",
+          fontSize: 24,
+          fontWeight: 600,
+          color: "#f0e6d3",
+        }}>
+          Lisa <span style={{ color: "#c9a96e" }}>Fit Method</span>
+        </span>
+      </Link>
+
+      {/* Gold checkmark */}
+      <div style={{
+        width: 64,
+        height: 64,
+        border: "1px solid rgba(201,169,110,0.4)",
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 32,
+      }}>
+        <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
+          <path d="M2 10L10 18L26 2" stroke="#c9a96e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+
+      <p style={{
+        fontSize: 10,
+        fontWeight: 600,
+        letterSpacing: "0.3em",
+        textTransform: "uppercase",
+        color: "#c9a96e",
+        marginBottom: 12,
+      }}>
+        Purchase Complete
+      </p>
+
+      <h1 style={{
+        fontFamily: "var(--font-cormorant), serif",
+        fontSize: "clamp(32px, 5vw, 52px)",
+        fontWeight: 400,
+        color: "#f0e6d3",
+        lineHeight: 1.2,
+        marginBottom: 20,
+        maxWidth: 520,
+      }}>
+        You&apos;re in.<br />
+        <em style={{ color: "#c9a96e" }}>Let&apos;s build something that lasts.</em>
+      </h1>
+
+      <div style={{
+        maxWidth: 440,
+        background: "#111",
+        border: "1px solid #1a1a1a",
+        padding: "32px 36px",
+        textAlign: "left",
+        marginBottom: 40,
+      }}>
+        <p style={{
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: "0.25em",
+          textTransform: "uppercase",
+          color: "#555",
+          marginBottom: 16,
+        }}>
+          What happens next
+        </p>
+        <ol style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 16 }}>
+          {[
+            { num: "1", text: "Check your email — you'll receive your login credentials within a few minutes." },
+            { num: "2", text: "Go to the login page and sign in with your email and the temporary password from the email." },
+            { num: "3", text: "You'll be prompted to set a permanent password, then you're in the course." },
+          ].map((step) => (
+            <li key={step.num} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+              <span style={{
+                fontFamily: "var(--font-cormorant), serif",
+                fontSize: 28,
+                fontWeight: 300,
+                color: "rgba(201,169,110,0.3)",
+                lineHeight: 1,
+                flexShrink: 0,
+              }}>
+                {step.num}
+              </span>
+              <p style={{ fontSize: 13, color: "#888", lineHeight: 1.7, paddingTop: 4 }}>
+                {step.text}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <Link
+        href="/login"
+        style={{
+          display: "inline-block",
+          background: "#c9a96e",
+          color: "#0a0a0a",
+          fontFamily: "var(--font-montserrat), sans-serif",
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          textDecoration: "none",
+          padding: "16px 40px",
+          marginBottom: 24,
+        }}
+      >
+        Go to Login →
+      </Link>
+
+      <p style={{ fontSize: 12, color: "#444", lineHeight: 1.8 }}>
+        Didn&apos;t get an email? Check your spam folder.<br />
+        Still nothing? Email <a href="mailto:lisa@lisafitmethod.com" style={{ color: "#c9a96e", textDecoration: "none" }}>lisa@lisafitmethod.com</a>
+      </p>
+    </main>
+  )
+}

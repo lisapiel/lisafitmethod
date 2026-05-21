@@ -136,8 +136,8 @@ export default function HomePage() {
                   fontFamily: "var(--font-dm-sans), sans-serif",
                 }}>Limited Time</span>
               </div>
-              <a
-                href="https://buy.stripe.com/9B614fdwi6IRaB4aQSawo01"
+              <Link
+                href="/checkout"
                 style={{
                   display: "inline-block",
                   background: "var(--accent)",
@@ -153,7 +153,7 @@ export default function HomePage() {
                 }}
               >
                 Get Instant Access
-              </a>
+              </Link>
               <p style={{ marginTop: 14, fontSize: 12, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 One-time payment.{" "}
                 <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Yours forever.</strong>
@@ -666,8 +666,8 @@ export default function HomePage() {
               fontFamily: "var(--font-dm-sans), sans-serif",
             }}>Limited Time Offer</span>
           </div>
-          <a
-            href="https://buy.stripe.com/9B614fdwi6IRaB4aQSawo01"
+          <Link
+            href="/checkout"
             style={{
               display: "inline-block",
               background: "var(--accent)",
@@ -682,7 +682,7 @@ export default function HomePage() {
             }}
           >
             Get Instant Access
-          </a>
+          </Link>
           <p style={{ marginTop: 18, fontSize: 14, color: "rgba(245,242,238,0.35)" }}>
             One-time payment.{" "}
             <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Yours forever.</strong>

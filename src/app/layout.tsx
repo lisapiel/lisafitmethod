@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Playfair_Display, DM_Sans, Cormorant_Garamond, Montserrat } from "next/font/google"
+import { AmplifyProvider } from "@/components/AmplifyProvider"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -45,7 +46,9 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${dmSans.variable} ${cormorant.variable} ${montserrat.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <AmplifyProvider>{children}</AmplifyProvider>
+      </body>
     </html>
   )
 }
