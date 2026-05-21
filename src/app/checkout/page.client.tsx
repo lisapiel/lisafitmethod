@@ -110,7 +110,7 @@ function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
           marginBottom: 16,
         }}
       >
-        {processing ? "Processing…" : "Pay $45 — Get Instant Access"}
+        {processing ? "Processing…" : "Pay $0.50 — Test Purchase"}
       </button>
 
       <div style={{

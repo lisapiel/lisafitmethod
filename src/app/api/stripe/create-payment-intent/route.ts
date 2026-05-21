@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 4500, // $45.00 in cents
+      amount: 50, // TEMP TEST $0.50 — change back to 4500 after testing
       currency: "usd",
       metadata: { customerEmail: email },
       automatic_payment_methods: { enabled: true },
