@@ -760,30 +760,33 @@ export default async function HomePage() {
         >
           Four weeks. Three days a week. Everything you need to actually understand how to train and a body that shows it.
         </p>
-        <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+        <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
+          <span style={{
+            display: "inline-block",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "#0a0a0a",
+            background: "var(--accent)",
+            padding: "6px 16px",
+            marginBottom: 20,
+            fontFamily: "var(--font-dm-sans), sans-serif",
+          }}>Limited Time Offer</span>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 28 }}>
             <span style={{
-              fontSize: 18,
+              fontSize: 20,
               color: "rgba(245,242,238,0.3)",
               textDecoration: "line-through",
               fontFamily: "var(--font-dm-sans), sans-serif",
             }}>$67</span>
             <span style={{
-              fontSize: 48,
+              fontSize: 72,
               fontWeight: 700,
-              color: "var(--gold)",
+              color: "var(--accent)",
               fontFamily: "var(--font-dm-sans), sans-serif",
               lineHeight: 1,
             }}>$45</span>
-            <span style={{
-              fontSize: 10,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--gold)",
-              border: "1px solid rgba(201,169,110,0.4)",
-              padding: "5px 12px",
-              fontFamily: "var(--font-dm-sans), sans-serif",
-            }}>Limited Time Offer</span>
           </div>
           <Link
             href="/checkout"
@@ -797,14 +800,14 @@ export default async function HomePage() {
               letterSpacing: "0.15em",
               textTransform: "uppercase",
               textDecoration: "none",
-              padding: "20px 64px",
+              padding: "20px 72px",
             }}
           >
             Get Instant Access
           </Link>
-          <p style={{ marginTop: 18, fontSize: 14, color: "rgba(245,242,238,0.35)" }}>
+          <p style={{ marginTop: 20, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
             One-time payment.{" "}
-            <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Yours forever.</strong>
+            <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Yours forever.</strong>
             {" · "}No subscription.
           </p>
         </div>
