@@ -106,10 +106,15 @@ export const VIDEO_SLOTS: Record<string, string> = {
   m3c_cd_figure4:        "5QdSahBkG20",
   m3c_cd_spinal_twist:   "3miActosoI8",
   m3c_cd_childs_pose:    "NWUojZcToTE",
+
+  // ── Landing Page ─────────────────────────────────────────────────────────
+  lp_trailer:            "",
 }
 
 export const PHOTO_SLOTS: Record<string, string> = {
   hero:          "Landing page hero image",
+  banner:        "Landing page banner (wide/horizontal)",
+  testimonials:  "Testimonials screenshot",
   module1_cover: "Module 1 cover photo",
   module2_cover: "Module 2 cover photo",
   module3_cover: "Module 3 cover photo",
@@ -208,4 +213,6 @@ export const VIDEO_SLOT_LABELS: Record<string, string> = {
   m3c_cd_figure4:        "Figure 4 Stretch",
   m3c_cd_spinal_twist:   "Lying Spinal Twist",
   m3c_cd_childs_pose:    "Child's Pose",
+
+  lp_trailer:            "Landing Page Trailer Video",
 }

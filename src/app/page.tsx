@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getPublishedPhotoUrl } from "@/lib/mediaClient"
+import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -10,7 +10,12 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const heroUrl = await getPublishedPhotoUrl("hero")
+  const [heroUrl, bannerUrl, testimonialsUrl, trailerUrl] = await Promise.all([
+    getPublishedPhotoUrl("hero"),
+    getPublishedPhotoUrl("banner"),
+    getPublishedPhotoUrl("testimonials"),
+    getPublishedVideoUrl("lp_trailer"),
+  ])
   return (
     <main
       style={{
@@ -308,6 +313,19 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* BANNER */}
+      {bannerUrl && (
+        <section style={{ position: "relative", overflow: "hidden", height: "clamp(180px, 28vw, 400px)" }}>
+          <Image
+            src={bannerUrl}
+            alt="Lisa Fit Method"
+            fill
+            style={{ objectFit: "cover", objectPosition: "center 30%" }}
+          />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)" }} />
+        </section>
+      )}
+
       {/* WHAT YOU GET */}
       <section style={{ background: "var(--black)", padding: "120px 80px" }} className="wyg-section">
         <style>{`
@@ -462,6 +480,100 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* TRAILER VIDEO */}
+      {trailerUrl && (
+        <section style={{ background: "#050505", padding: "100px 40px" }} className="trailer-section">
+          <style>{`
+            @media (max-width: 768px) {
+              .trailer-section { padding: 72px 24px !important; }
+            }
+          `}</style>
+          <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
+            <p style={{
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: "var(--accent)",
+              marginBottom: 20,
+            }}>
+              A look inside
+            </p>
+            <h2 style={{
+              fontFamily: "var(--font-playfair), serif",
+              fontSize: "clamp(28px, 3vw, 42px)",
+              fontWeight: 700,
+              color: "var(--off-white)",
+              lineHeight: 1.15,
+              marginBottom: 48,
+            }}>
+              See exactly what<br />
+              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>you&apos;re getting.</em>
+            </h2>
+            <div style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: 560,
+              margin: "0 auto",
+              aspectRatio: "1334 / 1080",
+              background: "#0a0a0a",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
+            }}>
+              <video
+                src={trailerUrl}
+                controls
+                playsInline
+                preload="metadata"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* TESTIMONIALS */}
+      {testimonialsUrl && (
+        <section style={{ background: "var(--off-white)", padding: "100px 40px" }} className="testimonials-section">
+          <style>{`
+            @media (max-width: 768px) {
+              .testimonials-section { padding: 72px 20px !important; }
+            }
+          `}</style>
+          <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+            <p style={{
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: "var(--accent-dark)",
+              marginBottom: 20,
+            }}>
+              Real results
+            </p>
+            <h2 style={{
+              fontFamily: "var(--font-playfair), serif",
+              fontSize: "clamp(28px, 3vw, 42px)",
+              fontWeight: 700,
+              color: "var(--black)",
+              lineHeight: 1.15,
+              marginBottom: 48,
+            }}>
+              What people<br />
+              <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>are saying.</em>
+            </h2>
+            <div style={{ position: "relative", width: "100%", borderRadius: 0 }}>
+              <Image
+                src={testimonialsUrl}
+                alt="Testimonials from Lisa Fit Method students"
+                width={1800}
+                height={1200}
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* WHO THIS IS FOR */}
       <section style={{ background: "var(--warm-white)", padding: "120px 80px" }} className="for-you-section">

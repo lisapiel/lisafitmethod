@@ -45,3 +45,8 @@ export async function getPublishedPhotoUrl(slot: string): Promise<string | null>
   const items = await fetchPublishedAssets("PHOTO")
   return items.find((i) => i.assignedTo === slot)?.url ?? null
 }
+
+export async function getPublishedVideoUrl(slot: string): Promise<string | null> {
+  const items = await fetchPublishedAssets("VIDEO")
+  return items.find((i) => i.assignedTo === slot)?.url ?? null
+}

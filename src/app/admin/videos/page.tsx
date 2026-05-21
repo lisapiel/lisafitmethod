@@ -13,6 +13,10 @@ type Asset = { assignedTo: string; url?: string | null; isPublished: boolean; ti
 
 const GROUPS: { label: string; keys: string[] }[] = [
   {
+    label: "Landing Page",
+    keys: ["lp_trailer"],
+  },
+  {
     label: "Module 1 — Foundation Movements",
     keys: ["m1_hip_hinge", "m1_goblet_squat", "m1_db_bench_press", "m1_db_row", "m1_lat_pulldown"],
   },
