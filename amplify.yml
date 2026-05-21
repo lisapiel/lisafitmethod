@@ -84,9 +84,13 @@ frontend:
             console.log('Generated amplify_outputs.json from env vars');
           "
         - |
-          printf "STRIPE_SECRET_KEY=%s\nSTRIPE_WEBHOOK_SECRET=%s\nCOGNITO_AWS_ACCESS_KEY_ID=%s\nCOGNITO_AWS_SECRET_ACCESS_KEY=%s\nCOGNITO_REGION=%s\nCOGNITO_USER_POOL_ID=%s\nAPPSYNC_URL=%s\nAPPSYNC_API_KEY=%s\n" \
-            "$STRIPE_SECRET_KEY" "$STRIPE_WEBHOOK_SECRET" "$COGNITO_AWS_ACCESS_KEY_ID" "$COGNITO_AWS_SECRET_ACCESS_KEY" \
-            "$COGNITO_REGION" "$COGNITO_USER_POOL_ID" "$APPSYNC_URL" "$APPSYNC_API_KEY" >> .env.production.local
+          node -e "
+            const fs = require('fs');
+            const keys = ['STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','COGNITO_AWS_ACCESS_KEY_ID','COGNITO_AWS_SECRET_ACCESS_KEY','COGNITO_REGION','COGNITO_USER_POOL_ID','APPSYNC_URL','APPSYNC_API_KEY'];
+            const lines = keys.map(k => { const v = process.env[k] || ''; console.log(k + '=' + (v ? 'SET' : 'EMPTY')); return k + '=' + v; });
+            fs.writeFileSync('.env.production.local', lines.join('\n') + '\n');
+            console.log('Written .env.production.local');
+          "
         - npm run build
   artifacts:
     baseDirectory: .next
