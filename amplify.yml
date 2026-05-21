@@ -25,7 +25,43 @@ frontend:
                 aws_region: process.env.COGNITO_REGION || 'us-east-2',
                 api_key: process.env.APPSYNC_API_KEY || '',
                 default_authorization_type: 'API_KEY',
-                authorization_types: ['AMAZON_COGNITO_USER_POOLS']
+                authorization_types: ['AMAZON_COGNITO_USER_POOLS'],
+                model_introspection: {
+                  version: 1,
+                  models: {
+                    MediaAsset: {
+                      name: 'MediaAsset',
+                      fields: {
+                        id: { name: 'id', isArray: false, type: 'ID', isRequired: true, attributes: [] },
+                        type: { name: 'type', isArray: false, type: { enum: 'MediaAssetType' }, isRequired: false, attributes: [] },
+                        title: { name: 'title', isArray: false, type: 'String', isRequired: true, attributes: [] },
+                        s3Key: { name: 's3Key', isArray: false, type: 'String', isRequired: true, attributes: [] },
+                        url: { name: 'url', isArray: false, type: 'String', isRequired: false, attributes: [] },
+                        assignedTo: { name: 'assignedTo', isArray: false, type: 'String', isRequired: true, attributes: [] },
+                        isPublished: { name: 'isPublished', isArray: false, type: 'Boolean', isRequired: true, attributes: [] },
+                        fileSize: { name: 'fileSize', isArray: false, type: 'Int', isRequired: false, attributes: [] },
+                        mimeType: { name: 'mimeType', isArray: false, type: 'String', isRequired: false, attributes: [] },
+                        createdAt: { name: 'createdAt', isArray: false, type: 'AWSDateTime', isRequired: false, attributes: [], isReadOnly: true },
+                        updatedAt: { name: 'updatedAt', isArray: false, type: 'AWSDateTime', isRequired: false, attributes: [], isReadOnly: true }
+                      },
+                      syncable: true,
+                      pluralName: 'MediaAssets',
+                      attributes: [
+                        { type: 'model', properties: {} },
+                        { type: 'auth', properties: { rules: [
+                          { allow: 'public', provider: 'apiKey', operations: ['read'] },
+                          { allow: 'public', provider: 'iam', operations: ['read'] },
+                          { allow: 'private', provider: 'userPools', operations: ['create', 'read', 'update', 'delete'] }
+                        ]}}
+                      ],
+                      primaryKeyInfo: { isCustomPrimaryKey: false, primaryKeyFieldName: 'id', sortKeyFieldNames: [] }
+                    }
+                  },
+                  enums: {
+                    MediaAssetType: { name: 'MediaAssetType', values: ['VIDEO', 'PHOTO'] }
+                  },
+                  nonModels: {}
+                }
               }
             };
             fs.writeFileSync('amplify_outputs.json', JSON.stringify(config, null, 2));

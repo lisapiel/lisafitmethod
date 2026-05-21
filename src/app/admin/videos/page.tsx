@@ -72,7 +72,7 @@ export default function AdminVideosPage() {
         map[a.assignedTo] = { assignedTo: a.assignedTo, url: a.url, isPublished: a.isPublished, title: a.title }
       }
       setAssetMap(map)
-    })
+    }).catch(() => {})
   }, [])
 
   return (

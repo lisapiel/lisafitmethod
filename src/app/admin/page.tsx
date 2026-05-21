@@ -46,6 +46,8 @@ export default function AdminDashboardPage() {
         photosPublished: photos.filter((p) => p.isPublished).length,
         photosDraft: photos.filter((p) => !p.isPublished).length,
       })
+    }).catch(() => {
+      setStats({ videosPublished: 0, videosDraft: 0, photosPublished: 0, photosDraft: 0 })
     })
   }, [])
 
