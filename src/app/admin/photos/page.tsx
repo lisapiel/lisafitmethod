@@ -6,7 +6,6 @@ import SlotCard from "@/components/admin/SlotCard"
 import type { Schema } from "@/lib/amplifyConfig"
 import { PHOTO_SLOTS } from "@/lib/videoSlots"
 
-const client = generateClient<Schema>({ authMode: "userPool" })
 
 type Asset = { assignedTo: string; url?: string | null; isPublished: boolean; title: string }
 
@@ -14,6 +13,7 @@ export default function AdminPhotosPage() {
   const [assetMap, setAssetMap] = useState<Record<string, Asset>>({})
 
   useEffect(() => {
+    const client = generateClient<Schema>({ authMode: "userPool" })
     client.models.MediaAsset.list({
       filter: { type: { eq: "PHOTO" } },
       authMode: "userPool",

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { generateClient } from "aws-amplify/data"
 import { uploadData } from "aws-amplify/storage"
 import { useRouter } from "next/navigation"
@@ -9,8 +9,6 @@ import Image from "next/image"
 import UploadProgress from "@/components/admin/UploadProgress"
 import type { Schema } from "@/lib/amplifyConfig"
 import { VIDEO_SLOT_LABELS, PHOTO_SLOTS } from "@/lib/videoSlots"
-
-const client = generateClient<Schema>({ authMode: "userPool" })
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -43,6 +41,7 @@ function getLabel(slot: string, type: "VIDEO" | "PHOTO") {
 }
 
 export default function UploadPageClient({ slot, type }: Props) {
+  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), [])
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
@@ -65,7 +64,7 @@ export default function UploadPageClient({ slot, type }: Props) {
       }
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [slot, type])
+  }, [slot, type, client.models.MediaAsset])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

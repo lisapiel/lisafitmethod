@@ -6,7 +6,6 @@ import SlotCard from "@/components/admin/SlotCard"
 import type { Schema } from "@/lib/amplifyConfig"
 import { VIDEO_SLOTS, VIDEO_SLOT_LABELS } from "@/lib/videoSlots"
 
-const client = generateClient<Schema>({ authMode: "userPool" })
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
@@ -63,6 +62,7 @@ export default function AdminVideosPage() {
   const [assetMap, setAssetMap] = useState<Record<string, Asset>>({})
 
   useEffect(() => {
+    const client = generateClient<Schema>({ authMode: "userPool" })
     client.models.MediaAsset.list({
       filter: { type: { eq: "VIDEO" } },
       authMode: "userPool",

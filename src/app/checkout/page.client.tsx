@@ -227,18 +227,27 @@ const ctaButtonStyle: React.CSSProperties = {
 export function CheckoutClient() {
   const [email, setEmail] = useState<string | null>(null)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [loadingIntent, setLoadingIntent] = useState(false)
+  const [intentError, setIntentError] = useState<string | null>(null)
 
   const handleEmailNext = useCallback(async (submittedEmail: string) => {
+    setLoadingIntent(true)
+    setIntentError(null)
     setEmail(submittedEmail)
-    // Pre-fetch the payment intent so Stripe Elements loads immediately
-    const res = await fetch("/api/stripe/create-payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: submittedEmail }),
-    })
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/stripe/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: submittedEmail }),
+      })
+      if (!res.ok) throw new Error("Failed to initialize payment.")
       const { clientSecret: cs } = await res.json() as { clientSecret: string }
       setClientSecret(cs)
+    } catch {
+      setIntentError("Something went wrong. Please try again.")
+      setEmail(null)
+    } finally {
+      setLoadingIntent(false)
     }
   }, [])
 
@@ -447,15 +456,26 @@ export function CheckoutClient() {
             Complete your purchase
           </p>
 
-          {!email || !clientSecret ? (
-            <EmailStep onNext={handleEmailNext} />
-          ) : (
+          {loadingIntent ? (
+            <div style={{ padding: "48px 0", textAlign: "center", color: "#555", fontSize: 13, letterSpacing: "0.1em" }}>
+              Preparing secure payment…
+            </div>
+          ) : email && clientSecret ? (
             <Elements
               stripe={stripePromise}
               options={{ clientSecret, appearance: stripeAppearance }}
             >
               <PaymentForm email={email} onBack={() => { setEmail(null); setClientSecret(null) }} />
             </Elements>
+          ) : (
+            <>
+              {intentError && (
+                <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>
+                  {intentError}
+                </p>
+              )}
+              <EmailStep onNext={handleEmailNext} />
+            </>
           )}
 
           <p style={{

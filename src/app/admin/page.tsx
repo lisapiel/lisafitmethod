@@ -6,7 +6,6 @@ import Link from "next/link"
 import type { Schema } from "@/lib/amplifyConfig"
 import { VIDEO_SLOTS, PHOTO_SLOTS } from "@/lib/videoSlots"
 
-const client = generateClient<Schema>({ authMode: "userPool" })
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
@@ -37,6 +36,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
 
   useEffect(() => {
+    const client = generateClient<Schema>({ authMode: "userPool" })
     client.models.MediaAsset.list({ authMode: "userPool" }).then(({ data }) => {
       const videos = data.filter((a) => a.type === "VIDEO")
       const photos = data.filter((a) => a.type === "PHOTO")
