@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react"
 import { getCurrentUser } from "aws-amplify/auth"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import AdminHeader from "@/components/admin/AdminHeader"
 
 const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [authorized, setAuthorized] = useState(false)
 
+  const isLoginPage = pathname === "/admin/login"
+
   useEffect(() => {
+    if (isLoginPage) return
     getCurrentUser()
       .then((user) => {
         if (user.signInDetails?.loginId === ADMIN_EMAIL) {
@@ -23,7 +27,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .catch(() => {
         router.replace("/admin/login")
       })
-  }, [router])
+  }, [router, isLoginPage])
+
+  if (isLoginPage) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#f0e6d3" }}>
+        {children}
+      </div>
+    )
+  }
 
   if (!authorized) {
     return (
