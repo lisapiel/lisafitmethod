@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { getPublishedPhotoUrl } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
     "A 4-week beginner program built around what actually matters. Proper movement, a real foundation, and a body built to last.",
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const heroUrl = await getPublishedPhotoUrl("hero")
   return (
     <main
       style={{
@@ -166,7 +168,7 @@ export default function HomePage() {
             style={{ position: "relative", overflow: "hidden", alignSelf: "stretch" }}
           >
             <Image
-              src="/hero.png"
+              src={heroUrl ?? "/hero.png"}
               alt="Lisa McPherson — Lisa Fit Method"
               fill
               style={{ objectFit: "cover", objectPosition: "center top" }}

@@ -1,5 +1,6 @@
 import Link from "next/link"
 import VideoEmbed from "@/components/training/VideoEmbed"
+import { getPublishedVideoUrls } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -64,7 +65,10 @@ function Para({ children }: { children: React.ReactNode }) {
   return <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.9 }}>{children}</p>
 }
 
-export default function Module1Page() {
+export default async function Module1Page() {
+  const urlMap = await getPublishedVideoUrls([
+    "m1_hip_hinge", "m1_goblet_squat", "m1_db_bench_press", "m1_db_row", "m1_lat_pulldown",
+  ])
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "3rem 2.5rem 6rem" }} className="course-body">
       <style>{`@media (max-width: 768px) { .course-body { padding: 2rem 1rem 6rem !important; } }`}</style>
@@ -79,7 +83,7 @@ export default function Module1Page() {
 
       {/* E1 */}
       <ExerciseBlock id="e1" num="Exercise 1" title="The Hip Hinge" subtitle="the most important movement you'll ever learn">
-        <VideoEmbed videoId="AyY0C8s5scU" title="Hip Hinge" />
+        <VideoEmbed videoId="AyY0C8s5scU" title="Hip Hinge" s3Url={urlMap["m1_hip_hinge"]} />
         <ContentBlock heading="Why it matters">
           <Para>The hip hinge is the foundation of deadlifts, Romanian deadlifts, kettlebell swings, and almost every posterior chain exercise you&apos;ll ever do. It is also the movement most responsible for lower back injuries when done incorrectly. Master this before anything else and every other exercise in this guide will feel more natural.</Para>
         </ContentBlock>
@@ -104,7 +108,7 @@ export default function Module1Page() {
 
       {/* E2 */}
       <ExerciseBlock id="e2" num="Exercise 2" title="The Squat Pattern" subtitle="knees, hips, and spine working together">
-        <VideoEmbed videoId="NYf82VuzrQM" title="Goblet Squat" />
+        <VideoEmbed videoId="NYf82VuzrQM" title="Goblet Squat" s3Url={urlMap["m1_goblet_squat"]} />
         <ContentBlock heading="Why it matters">
           <Para>Squatting is one of the most fundamental human movement patterns. Done well it builds leg strength, glute development, and core stability. Done poorly it creates knee pain, hip impingement, and lower back strain. The goal in this guide is to teach you the goblet squat first because it is the safest and most beginner-friendly way to learn the pattern before progressing to barbell variations.</Para>
         </ContentBlock>
@@ -129,7 +133,7 @@ export default function Module1Page() {
 
       {/* E3 */}
       <ExerciseBlock id="e3" num="Exercise 3" title="The Push Pattern (horizontal)" subtitle="pressing without wrecking your shoulders">
-        <VideoEmbed videoId="vZTUnLTRkOg" title="Dumbbell Bench Press" />
+        <VideoEmbed videoId="vZTUnLTRkOg" title="Dumbbell Bench Press" s3Url={urlMap["m1_db_bench_press"]} />
         <ContentBlock heading="Why it matters">
           <Para>Horizontal pressing builds chest, shoulder, and tricep strength and is one of the most satisfying patterns to get strong at over time. It is also one of the most important patterns to learn correctly early because shoulder issues from poor pressing mechanics tend to build up gradually and quietly until they become a real problem.</Para>
         </ContentBlock>
@@ -152,8 +156,8 @@ export default function Module1Page() {
 
       {/* E4 */}
       <ExerciseBlock id="e4" num="Exercise 4" title="The Pull Pattern" subtitle="building the back that protects everything else">
-        <VideoEmbed videoId="eKT-r-SV4x0" title="Dumbbell Row" />
-        <VideoEmbed videoId="O6lwJdTd_K4" title="Lat Pulldown" />
+        <VideoEmbed videoId="eKT-r-SV4x0" title="Dumbbell Row" s3Url={urlMap["m1_db_row"]} />
+        <VideoEmbed videoId="O6lwJdTd_K4" title="Lat Pulldown" s3Url={urlMap["m1_lat_pulldown"]} />
         <ContentBlock heading="Why it matters">
           <Para>Most beginners spend a lot of time on pressing movements and not nearly enough on pulling. Over time this creates a real imbalance. A strong back is also directly protective of your spine. For every pushing exercise in your program, there should be at least one pulling exercise to match it.</Para>
         </ContentBlock>
