@@ -111,37 +111,54 @@ export default function HomePage() {
             >
               A 4-week beginner program built around what actually matters. Proper movement, a real foundation, and a body built to last. No random workouts. No ego lifting. Just the method that changed everything for me.
             </p>
-            <a
-              href="https://buy.stripe.com/9B614fdwi6IRaB4aQSawo01"
-              className="fade-up-4"
-              style={{
-                display: "inline-block",
-                background: "var(--accent)",
-                color: "var(--black)",
-                fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: 13,
-                fontWeight: 500,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                textDecoration: "none",
-                padding: "18px 42px",
-                transition: "background 0.2s ease, transform 0.2s ease",
-                alignSelf: "flex-start",
-              }}
-            >
-              Get Instant Access — $47 (Reg. $67)
-            </a>
-            <p
-              className="fade-up-5"
-              style={{
-                marginTop: 20,
-                fontSize: 13,
-                color: "rgba(245,242,238,0.4)",
-              }}
-            >
-              Limited time offer. One-time payment.{" "}
-              <strong style={{ color: "var(--off-white)", fontWeight: 500 }}>Yours forever.</strong>
-            </p>
+            <div className="fade-up-4" style={{ alignSelf: "flex-start" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <span style={{
+                  fontSize: 16,
+                  color: "rgba(245,242,238,0.35)",
+                  textDecoration: "line-through",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                }}>$67</span>
+                <span style={{
+                  fontSize: 36,
+                  fontWeight: 700,
+                  color: "var(--accent)",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                  lineHeight: 1,
+                }}>$45</span>
+                <span style={{
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--accent)",
+                  border: "1px solid rgba(200,169,126,0.4)",
+                  padding: "4px 10px",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                }}>Limited Time</span>
+              </div>
+              <a
+                href="https://buy.stripe.com/9B614fdwi6IRaB4aQSawo01"
+                style={{
+                  display: "inline-block",
+                  background: "var(--accent)",
+                  color: "var(--black)",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  padding: "18px 42px",
+                  transition: "background 0.2s ease, transform 0.2s ease",
+                }}
+              >
+                Get Instant Access
+              </a>
+              <p style={{ marginTop: 14, fontSize: 12, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                One-time payment.{" "}
+                <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Yours forever.</strong>
+              </p>
+            </div>
           </div>
 
           <div
@@ -624,32 +641,54 @@ export default function HomePage() {
         >
           Four weeks. Three days a week. Everything you need to actually understand how to train and a body that shows it.
         </p>
-        <a
-          href="https://buy.stripe.com/9B614fdwi6IRaB4aQSawo01"
-          style={{
-            display: "inline-block",
-            background: "var(--accent)",
-            color: "var(--black)",
-            fontFamily: "var(--font-dm-sans), sans-serif",
-            fontSize: 13,
-            fontWeight: 500,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            textDecoration: "none",
-            padding: "20px 56px",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          Get Instant Access — $47
-        </a>
-        <p style={{ marginTop: 24, fontSize: 15, color: "rgba(245,242,238,0.35)", position: "relative", zIndex: 1 }}>
-          One-time payment.{" "}
-          <strong style={{ color: "var(--off-white)", fontSize: 22, fontWeight: 300 }}>Yours forever.</strong>
-        </p>
-        <p style={{ marginTop: 16, fontSize: 12, color: "rgba(245,242,238,0.25)", letterSpacing: "0.05em", position: "relative", zIndex: 1 }}>
-          Instant digital access. No subscription.
-        </p>
+        <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+            <span style={{
+              fontSize: 18,
+              color: "rgba(245,242,238,0.3)",
+              textDecoration: "line-through",
+              fontFamily: "var(--font-dm-sans), sans-serif",
+            }}>$67</span>
+            <span style={{
+              fontSize: 48,
+              fontWeight: 700,
+              color: "var(--gold)",
+              fontFamily: "var(--font-dm-sans), sans-serif",
+              lineHeight: 1,
+            }}>$45</span>
+            <span style={{
+              fontSize: 10,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--gold)",
+              border: "1px solid rgba(201,169,110,0.4)",
+              padding: "5px 12px",
+              fontFamily: "var(--font-dm-sans), sans-serif",
+            }}>Limited Time Offer</span>
+          </div>
+          <a
+            href="https://buy.stripe.com/9B614fdwi6IRaB4aQSawo01"
+            style={{
+              display: "inline-block",
+              background: "var(--accent)",
+              color: "var(--black)",
+              fontFamily: "var(--font-dm-sans), sans-serif",
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              padding: "20px 64px",
+            }}
+          >
+            Get Instant Access
+          </a>
+          <p style={{ marginTop: 18, fontSize: 14, color: "rgba(245,242,238,0.35)" }}>
+            One-time payment.{" "}
+            <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Yours forever.</strong>
+            {" · "}No subscription.
+          </p>
+        </div>
       </section>
 
       {/* FOOTER */}
