@@ -1,10 +1,20 @@
 "use client"
 
+import { signOut } from "aws-amplify/auth"
+import { useRouter } from "next/navigation"
+
 interface CourseHeaderProps {
   onMenuToggle: () => void
 }
 
 export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
+  const router = useRouter()
+
+  async function handleSignOut() {
+    await signOut()
+    router.push("/")
+  }
+
   return (
     <header
       style={{
@@ -57,17 +67,35 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
           Lisa Fit Method
         </div>
       </div>
-      <div
-        className="header-subtitle"
-        style={{
-          fontSize: "0.65rem",
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: "#888888",
-          fontFamily: "var(--font-montserrat), sans-serif",
-        }}
-      >
-        Training Foundations
+      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+        <div
+          className="header-subtitle"
+          style={{
+            fontSize: "0.65rem",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "#888888",
+            fontFamily: "var(--font-montserrat), sans-serif",
+          }}
+        >
+          Training Foundations
+        </div>
+        <button
+          onClick={handleSignOut}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#555",
+            fontSize: "0.65rem",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            fontFamily: "var(--font-montserrat), sans-serif",
+            padding: 0,
+          }}
+        >
+          Sign Out
+        </button>
       </div>
     </header>
   )

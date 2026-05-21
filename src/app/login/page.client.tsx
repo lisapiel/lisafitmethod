@@ -1,8 +1,8 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { signIn, confirmSignIn } from "aws-amplify/auth"
+import { signIn, confirmSignIn, fetchAuthSession, signOut } from "aws-amplify/auth"
 
 type Step = "credentials" | "new-password"
 
@@ -59,6 +59,12 @@ export function LoginClient() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    fetchAuthSession().then((session) => {
+      if (session.tokens) router.push(redirect)
+    }).catch(() => {})
+  }, [redirect, router])
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -74,7 +80,10 @@ export function LoginClient() {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Sign in failed."
-      if (message.includes("Incorrect username or password")) {
+      if (message.includes("There is already a signed in user")) {
+        await signOut()
+        setError("Previous session cleared. Please sign in again.")
+      } else if (message.includes("Incorrect username or password")) {
         setError("Incorrect email or password.")
       } else if (message.includes("User does not exist")) {
         setError("No account found with that email.")
