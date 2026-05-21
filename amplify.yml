@@ -83,6 +83,10 @@ frontend:
             fs.writeFileSync('amplify_outputs.json', JSON.stringify(config, null, 2));
             console.log('Generated amplify_outputs.json from env vars');
           "
+        - |
+          printf "STRIPE_SECRET_KEY=%s\nSTRIPE_WEBHOOK_SECRET=%s\nCOGNITO_AWS_ACCESS_KEY_ID=%s\nCOGNITO_AWS_SECRET_ACCESS_KEY=%s\nCOGNITO_REGION=%s\nCOGNITO_USER_POOL_ID=%s\nAPPSYNC_URL=%s\nAPPSYNC_API_KEY=%s\n" \
+            "$STRIPE_SECRET_KEY" "$STRIPE_WEBHOOK_SECRET" "$COGNITO_AWS_ACCESS_KEY_ID" "$COGNITO_AWS_SECRET_ACCESS_KEY" \
+            "$COGNITO_REGION" "$COGNITO_USER_POOL_ID" "$APPSYNC_URL" "$APPSYNC_API_KEY" >> .env.production.local
         - npm run build
   artifacts:
     baseDirectory: .next

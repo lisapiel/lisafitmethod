@@ -4,8 +4,8 @@ import Stripe from "stripe"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
     const { email } = await request.json() as { email: string }
 
     if (!email || !email.includes("@")) {
