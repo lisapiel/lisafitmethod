@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
+export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
   try {
     const { email } = await request.json() as { email: string }
 

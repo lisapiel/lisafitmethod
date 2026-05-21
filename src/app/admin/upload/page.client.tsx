@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { generateClient } from "aws-amplify/data"
 import { uploadData } from "aws-amplify/storage"
 import { useRouter } from "next/navigation"
@@ -40,8 +40,11 @@ function getLabel(slot: string, type: "VIDEO" | "PHOTO") {
   return PHOTO_SLOTS[slot] ?? slot
 }
 
+function makeClient() {
+  return generateClient<Schema>({ authMode: "userPool" })
+}
+
 export default function UploadPageClient({ slot, type }: Props) {
-  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), [])
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
@@ -54,6 +57,7 @@ export default function UploadPageClient({ slot, type }: Props) {
 
   useEffect(() => {
     if (!slot) { setLoading(false); return }
+    const client = makeClient()
     client.models.MediaAsset.list({
       filter: { and: [{ assignedTo: { eq: slot } }, { type: { eq: type } }] },
       authMode: "userPool",
@@ -64,7 +68,7 @@ export default function UploadPageClient({ slot, type }: Props) {
       }
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [slot, type, client.models.MediaAsset])
+  }, [slot, type])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -91,6 +95,7 @@ export default function UploadPageClient({ slot, type }: Props) {
         },
       }).result
 
+      const client = makeClient()
       if (asset) {
         await client.models.MediaAsset.update({
           id: asset.id,
@@ -131,7 +136,7 @@ export default function UploadPageClient({ slot, type }: Props) {
     setError(null)
     const next = !asset.isPublished
     try {
-      await client.models.MediaAsset.update({ id: asset.id, isPublished: next })
+      await makeClient().models.MediaAsset.update({ id: asset.id, isPublished: next })
       setAsset({ ...asset, isPublished: next })
       setSuccess(next ? "Published — live on the site." : "Unpublished — hidden from the site.")
     } catch (err) {
@@ -145,7 +150,7 @@ export default function UploadPageClient({ slot, type }: Props) {
     setDeleting(true)
     setError(null)
     try {
-      await client.models.MediaAsset.delete({ id: asset.id })
+      await makeClient().models.MediaAsset.delete({ id: asset.id })
       setAsset(null)
       setSuccess("Asset deleted.")
     } catch (err) {

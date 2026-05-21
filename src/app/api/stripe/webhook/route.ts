@@ -6,18 +6,24 @@ import {
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
+export const dynamic = "force-dynamic"
 
-const cognito = new CognitoIdentityProviderClient({
-  region: process.env.COGNITO_REGION ?? "us-east-1",
-  credentials: {
-    accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-    secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-  },
-})
+function makeStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
+}
+
+function makeCognito() {
+  return new CognitoIdentityProviderClient({
+    region: process.env.COGNITO_REGION ?? "us-east-1",
+    credentials: {
+      accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
+      secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
+    },
+  })
+}
 
 async function createCognitoUser(email: string) {
-  await cognito.send(
+  await makeCognito().send(
     new AdminCreateUserCommand({
       UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
       Username: email,
@@ -26,12 +32,12 @@ async function createCognitoUser(email: string) {
         { Name: "email_verified", Value: "true" },
       ],
       DesiredDeliveryMediums: ["EMAIL"],
-      // Cognito sends its built-in welcome email with a temporary password
     })
   )
 }
 
 export async function POST(request: NextRequest) {
+  const stripe = makeStripe()
   const body = await request.text()
   const signature = request.headers.get("stripe-signature") ?? ""
 
