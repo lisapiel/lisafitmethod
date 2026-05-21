@@ -3,7 +3,7 @@ import Link from "next/link"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Lisa Fit Method — Train the Right Way",
