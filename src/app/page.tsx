@@ -61,8 +61,8 @@ export default async function HomePage() {
           <style>{`
             @media (max-width: 768px) {
               .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; }
-              .hero-photo-wrap { max-height: 460px; order: 2; }
-              .hero-left-wrap { padding: 48px 24px 32px !important; order: 1; }
+              .hero-photo-wrap { height: 72vw; min-height: 300px; max-height: 480px; order: 1; }
+              .hero-left-wrap { padding: 40px 24px 48px !important; order: 0; }
               .hero-line-deco { display: none !important; }
             }
           `}</style>
@@ -176,7 +176,7 @@ export default async function HomePage() {
               src={heroUrl ?? "/hero.png"}
               alt="Lisa McPherson — Lisa Fit Method"
               fill
-              style={{ objectFit: "cover", objectPosition: "center top" }}
+              style={{ objectFit: "cover", objectPosition: "center 15%" }}
               priority
             />
           </div>
