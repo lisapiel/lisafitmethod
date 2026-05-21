@@ -15,7 +15,7 @@ async function fetchPublishedAssets(type: "VIDEO" | "PHOTO"): Promise<MediaItem[
       body: JSON.stringify({
         query: `query {
           listMediaAssets(filter: {
-            and: [{ isPublished: { eq: true } }, { type: { eq: "${type}" } }]
+            and: [{ isPublished: { eq: true } }, { type: { eq: ${type} } }]
           }) { items { assignedTo url } }
         }`,
       }),
