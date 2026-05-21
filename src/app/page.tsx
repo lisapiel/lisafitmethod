@@ -525,6 +525,7 @@ export default async function HomePage() {
               <video
                 src={trailerUrl}
                 controls
+                loop
                 playsInline
                 preload="metadata"
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
