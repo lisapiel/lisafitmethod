@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "aws-amplify/auth"
+import { signIn, signOut } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 
 const gold = "#c9a96e"
@@ -19,6 +19,8 @@ export default function AdminLoginClient() {
     setLoading(true)
     setError(null)
     try {
+      // Clear any stale session before signing in
+      try { await signOut() } catch { /* no session, that's fine */ }
       await signIn({ username: email, password })
       router.push("/admin")
       router.refresh()
