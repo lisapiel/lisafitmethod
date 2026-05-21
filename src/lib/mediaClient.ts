@@ -1,16 +1,5 @@
-type Outputs = { data?: { url?: string; api_key?: string } }
-
-let APPSYNC_URL = ""
-let APPSYNC_API_KEY = ""
-
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const outputs: Outputs = require("../../amplify_outputs.json")
-  APPSYNC_URL = outputs.data?.url ?? ""
-  APPSYNC_API_KEY = outputs.data?.api_key ?? ""
-} catch {
-  // amplify_outputs.json not yet generated — mediaClient returns empty results
-}
+const APPSYNC_URL = process.env.APPSYNC_URL ?? ""
+const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY ?? ""
 
 type MediaItem = { assignedTo: string; url: string | null }
 

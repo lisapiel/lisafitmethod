@@ -6,7 +6,31 @@ frontend:
         - npm install
     build:
       commands:
-        - npx ampx generate outputs --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        - |
+          node -e "
+            const fs = require('fs');
+            const config = {
+              version: '1',
+              auth: {
+                user_pool_id: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '',
+                aws_region: process.env.COGNITO_REGION || 'us-east-2',
+                user_pool_client_id: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID || '',
+                username_attributes: ['email'],
+                user_verification_types: ['email'],
+                unauthenticated_identities_enabled: false,
+                mfa_configuration: 'NONE'
+              },
+              data: {
+                url: process.env.APPSYNC_URL || '',
+                aws_region: process.env.COGNITO_REGION || 'us-east-2',
+                api_key: process.env.APPSYNC_API_KEY || '',
+                default_authorization_type: 'API_KEY',
+                authorization_types: ['AMAZON_COGNITO_USER_POOLS']
+              }
+            };
+            fs.writeFileSync('amplify_outputs.json', JSON.stringify(config, null, 2));
+            console.log('Generated amplify_outputs.json from env vars');
+          "
         - npm run build
   artifacts:
     baseDirectory: .next
