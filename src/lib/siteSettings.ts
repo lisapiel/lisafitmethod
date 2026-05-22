@@ -92,9 +92,9 @@ export const DEFAULTS: SiteSettings = {
     homeFinalSubtext:
       "Structured workouts, guided exercise instruction, built-in tracking, and the foundations most people never learn.",
     coursePrice: "47",
-    aboutHeroHeadline: "I spent years burning calories without building anything. Then I found structure.",
+    aboutHeroHeadline: "Spent years burning calories\nwithout building strength or the body I wanted.\nThen I found structure.",
     aboutHeroSubtext:
-      "Double master's in engineering. Certified personal trainer. Spent years doing everything in the gym except what actually worked — now I give you the shortcut I had to find the hard way.",
+      "Double master's in engineering. Certified personal trainer. Years of trial and error, injury, rebuilding, and relearning what actually matters in strength training. My background taught me to think in systems and structure, which completely changed the way I approach fitness. Now I help people build strong, aesthetic bodies through movement quality, intelligent programming, and training that lasts.",
     aboutPara1:
       "I grew up in France, got two master's degrees in engineering — one in France, one in Canada in renewable energy and energy efficiency — and spent most of my twenties building a career, not a body. When I moved to Australia and started my own business, I found the gym for the first time. Classes, cardio, group workouts. I was consistent, I worked hard, and I went nowhere. Years of effort without anything to show for it.",
     aboutPara2:
@@ -106,15 +106,15 @@ export const DEFAULTS: SiteSettings = {
     aboutPara5:
       "Lisa Fit Method exists because that foundation should have been the starting point. I'm an engineer by training — I think in systems and structures. That's how I approach programming: the warm-up, the movements, the progression, the recovery. Everything connects. Whether you're brand new to the gym or you've been winging it for years, this is what I wish someone had handed me.",
     aboutQuote: "The fundamentals aren't optional. They're the whole game.",
-    aboutCred1Label: "Certified Personal Trainer",
+    aboutCred1Label: "Certified & Evidence-Based",
     aboutCred1Body:
-      "Formally trained in movement, programming, and corrective exercise. With a background in engineering, I approach training systematically — with logic behind every decision.",
-    aboutCred2Label: "Built from scratch",
+      "Formally trained in movement, programming, and corrective exercise. My background in engineering taught me to approach fitness through systems, structure, and intelligent progression.",
+    aboutCred2Label: "Rebuilt Through Injury",
     aboutCred2Body:
-      "Not just study — I rebuilt my own body after a serious injury. I know what it takes to train when things go wrong.",
-    aboutCred3Label: "@lisafitmethod",
+      "I didn't just study this. I had to rebuild my own body after serious back pain. I know what it feels like when training stops working — and what it takes to come back stronger.",
+    aboutCred3Label: "Real-World Coaching",
     aboutCred3Body:
-      "Building a community of people who train smart, not just hard. Real content, real movement, no gimmicks.",
+      "No gimmicks. No random workouts. Just intelligent training focused on movement quality, long-term progress, and building a body that actually lasts.",
     coursesHeroHeadline: "Training Foundations",
     coursesHeroSubtext:
       "A 4-week beginner program built around the movements, habits, and structure that actually create results — and keep you training for life.",

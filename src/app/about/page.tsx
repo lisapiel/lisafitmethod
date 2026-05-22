@@ -44,7 +44,7 @@ export default async function AboutPage() {
     description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt her training from scratch after a serious back injury and now helps people build a real foundation.",
     sameAs: ["https://instagram.com/lisafitmethod"],
     worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
-    knowsAbout: ["Strength Training", "Women's Fitness", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Hip Hinge", "Core Stability"],
+    knowsAbout: ["Strength Training", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Hip Hinge", "Core Stability", "Intelligent Programming"],
     hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Certification", name: "Certified Personal Trainer (CPT)" },
   }
 
@@ -69,7 +69,7 @@ export default async function AboutPage() {
         `}</style>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
-            About
+            About Me
           </p>
           <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
             {t.aboutHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
@@ -89,23 +89,26 @@ export default async function AboutPage() {
         `}</style>
         <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "stretch" }}>
           <div>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#6b6560", marginBottom: 24 }}>
-              {t.aboutPara1}
-            </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#6b6560", marginBottom: 24 }}>
-              {t.aboutPara2}
-            </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#6b6560", marginBottom: 24 }}>
-              {t.aboutPara3}
-            </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#6b6560", marginBottom: 24 }}>
-              {t.aboutPara4}
-            </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#1a1a1a", marginBottom: 32 }}>
-              <strong style={{ fontWeight: 500 }}>{t.aboutPara5}</strong>
-            </p>
+            {[
+              "I grew up in France and earned two master's degrees in engineering — one in France and one in Canada. For most of my twenties, I was building a career, not a body.",
+              "When I moved to Australia and started my own business, I found the gym for the first time. Classes, cardio, group workouts. I was consistent, I worked hard, and I still had almost nothing to show for it. Years of effort without real progress.",
+              "Everything changed when I moved to the United States.",
+              "Seven years ago, I landed in Miami and started taking strength training seriously for the first time. Within months, I finally understood what had been missing: structure, progressive overload, and real programming. My body started changing in a way it never had before, and I became obsessed with understanding how fitness actually works.",
+              "But I made the mistake a lot of people make once they start seeing progress. I pushed heavier weights before building the foundation to support them. Warm-ups felt optional. Mobility work wasn't on my radar. Eventually my back gave out.",
+              "For almost a year, I lived with serious pain. That period forced me to slow down, relearn movement mechanics, and completely rethink the way I approached fitness.",
+              "I rebuilt everything from the ground up: movement quality, mobility, recovery, warm-ups, and programming. I became a certified personal trainer because I needed to genuinely understand what I had been missing all along.",
+              "I came back pain-free and stronger than I had ever been. And I realized a lot of people are going through the exact same thing I went through — training hard without understanding how to build a body that can actually support it long term.",
+              "Some are already dealing with pain. Others are heading toward it without realizing it yet.",
+              "Lisa Fit Method exists to help people build strength the right way from the beginning — through movement quality, intelligent programming, and training that lasts.",
+              "I'm an engineer by training, and I naturally think in systems and structure. That mindset completely changed the way I approach fitness: the warm-up, the movements, the progression, the recovery — everything connects.",
+              "Whether you're completely new to lifting or you've been winging it for years, this is the approach I wish someone had handed me from the beginning.",
+            ].map((para, i) => (
+              <p key={i} style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#6b6560", marginBottom: 20 }}>
+                {para}
+              </p>
+            ))}
 
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 12 }}>
               <Link href="/courses" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
                 Get The Course
               </Link>
@@ -144,7 +147,7 @@ export default async function AboutPage() {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16 }}>What I bring</p>
           <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "#1a1a1a", marginBottom: 48 }}>
-            Not just a certification.<br />
+            Not just certification.<br />
             <em style={{ fontStyle: "italic", color: "#a8895e" }}>Experience from both sides.</em>
           </h2>
           <div className="creds-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40 }}>
@@ -165,8 +168,8 @@ export default async function AboutPage() {
         `}</style>
         <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 16 }}>Follow along</p>
         <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 20 }}>
-          Training, tips, and the real stuff.<br />
-          <em style={{ fontStyle: "italic", color: accent }}>No fluff.</em>
+          Training, movement, and the real stuff.<br />
+          <em style={{ fontStyle: "italic", color: accent }}>No gimmicks.</em>
         </h2>
         <a
           href="https://instagram.com/lisafitmethod"
