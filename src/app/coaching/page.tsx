@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
 import CoachingClient from "./page.client"
+import { fetchSiteSettings } from "@/lib/siteSettings"
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Online Coaching — 1:1 with Lisa McPherson",
@@ -12,6 +15,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function CoachingPage() {
-  return <CoachingClient />
+export default async function CoachingPage() {
+  const settings = await fetchSiteSettings()
+  return <CoachingClient settings={settings} />
 }

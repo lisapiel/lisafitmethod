@@ -1,12 +1,27 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { DEFAULTS, S3_SETTINGS_URL } from "@/lib/siteSettings"
 
 const HIDDEN_PREFIXES = ["/admin", "/training-foundations"]
+const DEFAULT_TAGLINE = DEFAULTS.text.footerTagline
 
 export default function SiteFooter() {
   const pathname = usePathname()
+  const [tagline, setTagline] = useState(DEFAULT_TAGLINE)
+
+  useEffect(() => {
+    fetch(S3_SETTINGS_URL, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json: { text?: { footerTagline?: string } } | null) => {
+        const t = json?.text?.footerTagline
+        if (t) setTagline(t)
+      })
+      .catch(() => {})
+  }, [])
+
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null
 
   return (
@@ -51,7 +66,7 @@ export default function SiteFooter() {
             lineHeight: 1.6,
             maxWidth: 240,
           }}>
-            A real foundation for women who want to train smart, move well, and build a body that lasts.
+            {tagline}
           </p>
           <a
             href="https://instagram.com/lisafitmethod"

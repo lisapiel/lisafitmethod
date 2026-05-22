@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
+import { fetchSiteSettings } from "@/lib/siteSettings"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -17,12 +18,19 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [heroUrl, bannerUrl, testimonialsUrl, trailerUrl] = await Promise.all([
+  const [heroUrl, bannerUrl, testimonialsUrl, trailerUrl, settings] = await Promise.all([
     getPublishedPhotoUrl("hero"),
     getPublishedPhotoUrl("banner"),
     getPublishedPhotoUrl("testimonials"),
     getPublishedVideoUrl("lp_trailer"),
+    fetchSiteSettings(),
   ])
+
+  const t = settings.text
+  const sp = settings.spacing.home
+  const accent = settings.colors.accent
+  const hs = settings.typography.headingScale
+  const bs = settings.typography.bodyScale
 
   return (
     <main
@@ -39,10 +47,12 @@ export default async function HomePage() {
           --black: #0a0a0a;
           --off-white: #f5f2ee;
           --warm-white: #faf8f5;
-          --accent: #c8a97e;
+          --accent: ${accent};
           --accent-dark: #a8895e;
           --text: #1a1a1a;
           --muted: #6b6560;
+          --heading-scale: ${hs};
+          --body-scale: ${bs};
         }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(24px); }
@@ -75,18 +85,18 @@ export default async function HomePage() {
             <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 28 }}>
               Lisa Fit Method — Foundations
             </p>
-            <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(48px, 5vw, 72px)", fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 32 }}>
-              Stop guessing.<br />
-              Start training<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>the right way.</em>
+            <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(48px, 5vw, 72px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 32 }}>
+              {t.homeHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
+                <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
+              ))}
             </h1>
-            <p className="fade-up-3" style={{ fontSize: 17, color: "rgba(245,242,238,0.65)", lineHeight: 1.7, maxWidth: 420, marginBottom: 48 }}>
-              A 4-week beginner program built around what actually matters. Proper movement, a real foundation, and a body built to last. No random workouts. No ego lifting. Just the method that changed everything for me.
+            <p className="fade-up-3" style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.7, maxWidth: 420, marginBottom: 48 }}>
+              {t.homeHeroSubtext}
             </p>
             <div className="fade-up-4" style={{ alignSelf: "flex-start" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 16, color: "rgba(245,242,238,0.35)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67</span>
-                <span style={{ fontSize: 36, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$47</span>
+                <span style={{ fontSize: 36, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
                 <span style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600 }}>Limited Time</span>
               </div>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -103,12 +113,12 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden", alignSelf: "stretch" }}>
+          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden", alignSelf: "stretch", maxHeight: settings.imageSizes.hero }}>
             <Image
               src={heroUrl ?? "/hero.png"}
               alt="Lisa McPherson — Lisa Fit Method"
               fill
-              style={{ objectFit: "cover", objectPosition: "center 15%" }}
+              style={{ objectFit: "cover", objectPosition: settings.crops.hero }}
               priority
             />
           </div>
@@ -120,7 +130,7 @@ export default async function HomePage() {
       </section>
 
       {/* STORY */}
-      <section style={{ background: "var(--off-white)", padding: "80px 80px" }} className="story-section">
+      <section style={{ background: "var(--off-white)", padding: `${Math.round(80 * sp.story)}px 80px` }} className="story-section">
         <style>{`
           @media (max-width: 768px) {
             .story-section { padding: 72px 28px !important; }
@@ -130,18 +140,19 @@ export default async function HomePage() {
         <div className="story-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center", maxWidth: 1100, margin: "0 auto" }}>
           <div>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 24 }}>Why this exists</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(36px, 3.5vw, 52px)", fontWeight: 700, lineHeight: 1.15, color: "var(--black)", marginBottom: 32 }}>
-              I learned the hard way.<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>You don&apos;t have to.</em>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 3.5vw, 52px) * ${hs})`, fontWeight: 700, lineHeight: 1.15, color: "var(--black)", marginBottom: 32 }}>
+              {t.homeStoryHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
+                <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
+              ))}
             </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.85, color: "var(--muted)", marginBottom: 20 }}>
-              A few years ago I was training consistently and doing everything I thought was right. I wasn&apos;t. I was skipping warm-ups, ignoring mobility, following random programs with no structure. I thought pushing more weight was the path to results.
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.85, color: "var(--muted)", marginBottom: 20 }}>
+              {t.homeStoryPara1}
             </p>
-            <p style={{ fontSize: 16, lineHeight: 1.85, color: "var(--muted)", marginBottom: 20 }}>
-              Then my back gave out. For almost a year I lived with serious pain. That year taught me more about training than all the years before it combined. I became a certified personal trainer because I needed to actually understand what I&apos;d been doing wrong.
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.85, color: "var(--muted)", marginBottom: 20 }}>
+              {t.homeStoryPara2}
             </p>
-            <p style={{ fontSize: 16, lineHeight: 1.85, color: "var(--muted)" }}>
-              <strong style={{ color: "var(--text)", fontWeight: 500 }}>This guide is everything I wish someone had handed me before I started.</strong> The movements, structure, and habits that would have saved me a year of pain.
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.85, color: "var(--muted)" }}>
+              {t.homeStoryPara3}
             </p>
             <Link href="/about" style={{ display: "inline-block", marginTop: 28, fontSize: 12, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none" }}>
               My full story →
@@ -150,8 +161,8 @@ export default async function HomePage() {
           <div>
             <div style={{ background: "var(--black)", color: "var(--off-white)", padding: "48px 40px", position: "relative" }}>
               <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 120, color: "var(--accent)", opacity: 0.3, position: "absolute", top: -20, left: 28, lineHeight: 1, userSelect: "none" }}>&ldquo;</span>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 22, fontStyle: "italic", lineHeight: 1.6, color: "var(--off-white)", position: "relative", zIndex: 1 }}>
-                You don&apos;t need to learn the hard way. That&apos;s already been done.
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontStyle: "italic", lineHeight: 1.6, color: "var(--off-white)", position: "relative", zIndex: 1 }}>
+                {t.homeStoryQuote}
               </p>
               <cite style={{ display: "block", marginTop: 24, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontStyle: "normal", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent)" }}>
                 — Lisa McPherson, CPT
@@ -163,14 +174,14 @@ export default async function HomePage() {
 
       {/* BANNER */}
       {bannerUrl && (
-        <section style={{ position: "relative", overflow: "hidden", height: "clamp(180px, 28vw, 400px)" }}>
-          <Image src={bannerUrl} alt="Lisa Fit Method" fill style={{ objectFit: "cover", objectPosition: "center 30%" }} />
+        <section style={{ position: "relative", overflow: "hidden", height: settings.imageSizes.banner }}>
+          <Image src={bannerUrl} alt="Lisa Fit Method" fill style={{ objectFit: "cover", objectPosition: settings.crops.banner }} />
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)" }} />
         </section>
       )}
 
       {/* SHORT COURSE PREVIEW */}
-      <section style={{ background: "var(--black)", padding: "100px 80px" }} className="preview-section">
+      <section style={{ background: "var(--black)", padding: `${Math.round(100 * sp.coursePreview)}px 80px` }} className="preview-section">
         <style>{`
           @media (max-width: 768px) {
             .preview-section { padding: 72px 28px !important; }
@@ -180,7 +191,7 @@ export default async function HomePage() {
         <div className="preview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center", maxWidth: 1100, margin: "0 auto" }}>
           <div>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>Training Foundations</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(32px, 3.5vw, 48px)", fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 28 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 28 }}>
               Four modules.<br />
               <em style={{ fontStyle: "italic", color: "var(--accent)" }}>One solid foundation.</em>
             </h2>
@@ -191,7 +202,7 @@ export default async function HomePage() {
                 "The 4-Week Program — 3 days/week, fully structured",
                 "Nutrition Foundations — 5 principles, no obsessing",
               ].map((item) => (
-                <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: 14, color: "rgba(245,242,238,0.6)", lineHeight: 1.5 }}>
+                <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.5 }}>
                   <span style={{ color: "var(--accent)", flexShrink: 0 }}>→</span>
                   {item}
                 </li>
@@ -199,7 +210,7 @@ export default async function HomePage() {
             </ul>
             <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 20 }}>
               <span style={{ fontSize: 16, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67</span>
-              <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$47</span>
+              <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
               <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
             </div>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
@@ -232,7 +243,7 @@ export default async function HomePage() {
           `}</style>
           <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>A look inside</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(28px, 3vw, 42px)", fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 48 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 48 }}>
               See exactly what<br />
               <em style={{ fontStyle: "italic", color: "var(--accent)" }}>you&apos;re getting.</em>
             </h2>
@@ -262,7 +273,7 @@ export default async function HomePage() {
           `}</style>
           <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 20 }}>Real results</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(28px, 3vw, 42px)", fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 48 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 48 }}>
               What people<br />
               <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>are saying.</em>
             </h2>
@@ -272,7 +283,7 @@ export default async function HomePage() {
       )}
 
       {/* FINAL CTA */}
-      <section style={{ background: "var(--black)", padding: "140px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta-section">
+      <section style={{ background: "var(--black)", padding: `${Math.round(140 * sp.cta)}px 80px`, textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta-section">
         <style>{`
           @media (max-width: 768px) {
             .final-cta-section { padding: 100px 28px !important; }
@@ -280,18 +291,19 @@ export default async function HomePage() {
         `}</style>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 800, height: 800, background: "radial-gradient(circle, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
         <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
-        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(42px, 5vw, 68px)", fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
-          Build the foundation.<br />
-          <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Train for life.</em>
+        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(42px, 5vw, 68px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
+          {t.homeFinalHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
+          ))}
         </h2>
-        <p style={{ fontSize: 17, color: "rgba(245,242,238,0.5)", maxWidth: 480, margin: "0 auto 48px", lineHeight: 1.7, position: "relative", zIndex: 1 }}>
-          Four weeks. Three days a week. Everything you need to actually understand how to train and a body that shows it.
+        <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: 480, margin: "0 auto 48px", lineHeight: 1.7, position: "relative", zIndex: 1 }}>
+          {t.homeFinalSubtext}
         </p>
         <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#0a0a0a", background: "var(--accent)", padding: "6px 16px", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>Limited Time Offer</span>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 28 }}>
             <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67</span>
-            <span style={{ fontSize: 72, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$47</span>
+            <span style={{ fontSize: 72, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
           </div>
           <Link href="/checkout" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px" }}>
             Get Instant Access

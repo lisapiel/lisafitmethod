@@ -20,6 +20,7 @@ export default function AdminHeader() {
     { href: "/admin", label: "Dashboard" },
     { href: "/admin/videos", label: "Videos" },
     { href: "/admin/photos", label: "Photos" },
+    { href: "/admin/design", label: "Design" },
   ]
 
   return (
