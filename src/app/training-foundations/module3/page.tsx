@@ -3,6 +3,8 @@ import VideoEmbed from "@/components/training/VideoEmbed"
 import { getPublishedVideoUrls } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 import DayWorkoutPanel, { DayStatusBadge } from "@/components/training/DayWorkoutPanel.client"
+import { DayLogsProvider } from "@/components/training/DayLogsContext"
+import InlineExerciseTracker from "@/components/training/InlineExerciseTracker.client"
 
 export const metadata: Metadata = {
   title: "Module 3 — The 4-Week Program | Lisa Fit Method",
@@ -135,11 +137,11 @@ export default async function Module3Page() {
         </p>
         <SectionLabel>Track your progress</SectionLabel>
         <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8 }}>
-          At the bottom of each day below, log your sets and weights as you go. Four weeks is the minimum — the program is designed to be repeated. In Round 2 you go heavier. In Round 3 heavier still. The results compound. Use the tracker to see exactly how far you&apos;ve come.
+          Log your sets right under each exercise as you go, or use the full tracker panel at the bottom of each day. Both are linked — entering data in one updates the other. Use the sidebar links to jump straight to any day&apos;s tracker.
         </p>
       </div>
 
-      {/* DAY A */}
+      {/* ── DAY A ──────────────────────────────────────────────── */}
       <DayBlock id="daya" day="Day A" title="Lower Body">
         <SubLabel>Warm-Up — 10 minutes</SubLabel>
         <WarmupItem name="90/90 Hip Stretch" note="8 to 10 reps per side, alternating. Breathe into it, don't force the range." videoId="VbjfMt1C_y8" s3Url={urlMap["m3a_wu_9090_hip"]} />
@@ -153,23 +155,34 @@ export default async function Module3Page() {
         <WarmupItem name="Lateral Lunge" note="8 reps per side. Slow and controlled, sit into the hip, keep the working knee tracking over the toes." videoId="EVKyneKe5w8" s3Url={urlMap["m3a_wu_lateral_lunge"]} />
 
         <DayStatusBadge day="a" />
-        <SubLabel>Working Sets</SubLabel>
-        <ExerciseRow name="Goblet Squat" prescription="3 sets × 10 reps — Rest 2 min" note="Chest up, knees tracking over toes, sit between your heels not behind them. Refer back to Module 1 Exercise 2." videoIds={["NYf82VuzrQM"]} s3Urls={[urlMap["m3a_goblet_squat"]]} />
-        <ExerciseRow name="Romanian Deadlift" prescription="3 sets × 10 reps — Rest 2 min" note="Push your hips back, keep the weights close to your body, stop before your lower back rounds. Refer back to Module 2 Exercise 6." videoIds={["AyY0C8s5scU"]} s3Urls={[urlMap["m3a_rdl"]]} />
-        <ExerciseRow name="Hip Thrust" prescription="3 sets × 12 reps — Rest 2 min" note="Drive through your heels, squeeze hard at the top, ribs down. Start with a barbell at a comfortable weight, progress to single leg when ready." videoIds={["Rxxd0gmzwFU", "8bSvHhnWVnE"]} s3Urls={[urlMap["m3a_hip_thrust"], urlMap["m3a_hip_thrust_var"]]} />
-        <ExerciseRow name="Seated Band Abduction" prescription="3 sets × 15 reps — Rest 60 sec" note="Controlled the entire time. Feel the glute medius working on every rep, don't just push your knees out mindlessly." videoIds={["qVEzTP09HC0"]} s3Urls={[urlMap["m3a_seated_band_abd"]]} />
-        <ExerciseRow name="Dead Bug" prescription="3 sets × 8 reps per side — Rest 60 sec" note="Lower back pressed into the floor the entire time. The moment it lifts, you have gone too far. Slow this down." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3a_dead_bug"]]} />
-        <ExerciseRow name="Farmer's Carry" prescription="3 sets × 20 to 30 meters — Rest 90 sec" note="Tall spine, shoulders back and down, core braced throughout. The moment your posture breaks, the set is over." videoIds={["vJIu3hgUYlg"]} s3Urls={[urlMap["m3a_farmers_carry"]]} />
 
-        <SubLabel>Cool-Down — 5 minutes</SubLabel>
-        <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. These tighten up on lower body days and contribute directly to lower back discomfort if left unaddressed." videoId="cfqgjN8b2vg" s3Url={urlMap["m3a_cd_hip_flexor"]} />
-        <WarmupItem name="90/90 Hamstring Stretch" note="60 seconds per side. Don't force the range, breathe into it." videoId="4vIoROvmLQM" s3Url={urlMap["m3a_cd_hamstring"]} />
-        <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. You just worked your glutes hard, they need this." videoId="5QdSahBkG20" s3Url={urlMap["m3a_cd_figure4"]} />
-        <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3a_cd_childs_pose"]} />
-        <DayWorkoutPanel day="a" />
+        <DayLogsProvider day="a">
+          <div id="daya-tracker">
+            <SubLabel>Working Sets</SubLabel>
+            <ExerciseRow name="Goblet Squat" prescription="3 sets × 10 reps — Rest 2 min" note="Chest up, knees tracking over toes, sit between your heels not behind them. Refer back to Module 1 Exercise 2." videoIds={["NYf82VuzrQM"]} s3Urls={[urlMap["m3a_goblet_squat"]]} />
+            <InlineExerciseTracker day="a" exerciseId="goblet_squat" />
+            <ExerciseRow name="Romanian Deadlift" prescription="3 sets × 10 reps — Rest 2 min" note="Push your hips back, keep the weights close to your body, stop before your lower back rounds. Refer back to Module 2 Exercise 6." videoIds={["AyY0C8s5scU"]} s3Urls={[urlMap["m3a_rdl"]]} />
+            <InlineExerciseTracker day="a" exerciseId="rdl" />
+            <ExerciseRow name="Hip Thrust" prescription="3 sets × 12 reps — Rest 2 min" note="Drive through your heels, squeeze hard at the top, ribs down. Start with a barbell at a comfortable weight, progress to single leg when ready." videoIds={["Rxxd0gmzwFU", "8bSvHhnWVnE"]} s3Urls={[urlMap["m3a_hip_thrust"], urlMap["m3a_hip_thrust_var"]]} />
+            <InlineExerciseTracker day="a" exerciseId="hip_thrust" />
+            <ExerciseRow name="Seated Band Abduction" prescription="3 sets × 15 reps — Rest 60 sec" note="Controlled the entire time. Feel the glute medius working on every rep, don't just push your knees out mindlessly." videoIds={["qVEzTP09HC0"]} s3Urls={[urlMap["m3a_seated_band_abd"]]} />
+            <InlineExerciseTracker day="a" exerciseId="band_abduction" />
+            <ExerciseRow name="Dead Bug" prescription="3 sets × 8 reps per side — Rest 60 sec" note="Lower back pressed into the floor the entire time. The moment it lifts, you have gone too far. Slow this down. You can add a light dumbbell overhead if this becomes easy." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3a_dead_bug"]]} />
+            <InlineExerciseTracker day="a" exerciseId="dead_bug_a" />
+            <ExerciseRow name="Farmer's Carry" prescription="3 sets × 20 to 30 meters — Rest 90 sec" note="Tall spine, shoulders back and down, core braced throughout. The moment your posture breaks, the set is over." videoIds={["vJIu3hgUYlg"]} s3Urls={[urlMap["m3a_farmers_carry"]]} />
+            <InlineExerciseTracker day="a" exerciseId="farmers_carry" />
+
+            <SubLabel>Cool-Down — 5 minutes</SubLabel>
+            <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. These tighten up on lower body days and contribute directly to lower back discomfort if left unaddressed." videoId="cfqgjN8b2vg" s3Url={urlMap["m3a_cd_hip_flexor"]} />
+            <WarmupItem name="90/90 Hamstring Stretch" note="60 seconds per side. Don't force the range, breathe into it." videoId="4vIoROvmLQM" s3Url={urlMap["m3a_cd_hamstring"]} />
+            <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. You just worked your glutes hard, they need this." videoId="5QdSahBkG20" s3Url={urlMap["m3a_cd_figure4"]} />
+            <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3a_cd_childs_pose"]} />
+            <DayWorkoutPanel day="a" />
+          </div>
+        </DayLogsProvider>
       </DayBlock>
 
-      {/* DAY B */}
+      {/* ── DAY B ──────────────────────────────────────────────── */}
       <DayBlock id="dayb" day="Day B" title="Upper Body">
         <SubLabel>Warm-Up — 10 minutes</SubLabel>
         <WarmupItem name="Cat-Cow" note="10 reps. Full range, inhale to extend, exhale to round." videoId="SboCzGvi8RE" s3Url={urlMap["m3b_wu_cat_cow"]} />
@@ -182,27 +195,40 @@ export default async function Module3Page() {
         <WarmupItem name="Push-Up (easy prep)" note="5 to 8 reps. Easy effort, just preparing the pressing pattern before you load it." videoId="oZmBz-BN7ZY" s3Url={urlMap["m3b_wu_pushup"]} />
 
         <DayStatusBadge day="b" />
-        <SubLabel>Working Sets</SubLabel>
-        <ExerciseRow name="Dumbbell Bench Press or Push-Up" prescription="3 sets × 10 reps — Rest 90 sec" note="Elbows at 45 degrees, shoulder blades set before you press, wrist stacked over elbow throughout. Refer back to Module 1 Exercise 3." videoIds={["vZTUnLTRkOg", "oZmBz-BN7ZY"]} s3Urls={[urlMap["m3b_db_bench"], urlMap["m3b_pushup"]]} />
-        <ExerciseRow name="Overhead Press" prescription="3 sets × 10 reps — Rest 90 sec" note="Core braced throughout, ribs down, don't let your lower back arch as you press overhead. Press the weight up and slightly back." videoIds={["H8-O20oL3yc"]} s3Urls={[urlMap["m3b_ohp"]]} />
-        <ExerciseRow name="Chest Supported Row" prescription="3 sets × 12 reps — Rest 90 sec" note="Because you are supported against the bench your lower back is completely out of the equation. No cheating the rep with momentum. Squeeze fully at the top of every rep and control the return." videoIds={["eKT-r-SV4x0"]} s3Urls={[urlMap["m3b_chest_row"]]} />
-        <ExerciseRow name="Band Assisted Pull-Up" prescription="3 sets × 8 reps — Rest 90 sec" note="Loop the band around the bar and place your knees or feet in it. Pull your elbows down toward your back pockets, chest leads toward the bar, control the descent. This is your goal movement. Work toward doing it without the band." videoIds={["H-RxZVrZH2I"]} s3Urls={[urlMap["m3b_band_pullup"]]} />
-        <Superset tag="Superset — Arms" note="No rest between the two exercises. Rest 60 seconds after both are done. 3 rounds.">
-          <ExerciseRow name="Dumbbell Curl" prescription="10 to 12 reps" note="Keep your elbows pinned at your sides, control the return, don't swing the weight up." videoIds={["rPcp_rfWLRU"]} s3Urls={[urlMap["m3b_db_curl"]]} />
-          <ExerciseRow name="Overhead Tricep Extension" prescription="10 to 12 reps" note="Keep your elbows pointing forward and close to your head, lower the weight slowly behind you, press back up to full extension." videoIds={["uht9IRmLvcQ"]} s3Urls={[urlMap["m3b_tri_extension"]]} />
-        </Superset>
-        <ExerciseRow name="Bird Dog" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Hold 2 seconds at the top of every rep. Keep your pelvis level, don't let the hips rotate to get the leg higher." videoIds={["Mr73_KR-fS8"]} s3Urls={[urlMap["m3b_bird_dog"]]} />
-        <ExerciseRow name="Pallof Press" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Brace hard before you press, resist the rotation the entire time, hold 2 seconds at full extension." videoIds={["lae10X6yOII"]} s3Urls={[urlMap["m3b_pallof_press"]]} />
 
-        <SubLabel>Cool-Down — 5 minutes</SubLabel>
-        <WarmupItem name="Open Book Stretch" note="60 seconds per side. A thoracic rotation stretch that releases the upper back and chest after all the pressing and pulling." videoId="YJ92IS_RuRY" s3Url={urlMap["m3b_cd_open_book"]} />
-        <WarmupItem name="Band Lat Stretch" note="60 seconds per side. Grab the band attached to something stable, shift your hips away and feel the entire side of your back release." videoId="lQuimKNJRWU" s3Url={urlMap["m3b_cd_band_lat"]} />
-        <WarmupItem name="Thread the Needle Stretch" note="60 seconds per side. Gets deeper into the thoracic rotation and releases tension through the upper back and shoulders." videoId="GJGSah1mNWw" s3Url={urlMap["m3b_cd_thread_needle"]} />
-        <WarmupItem name="Triceps Stretch" note="30 seconds per side. You just worked your triceps directly, give them a proper stretch before you leave." videoId="44rhonVBVRU" s3Url={urlMap["m3b_cd_triceps"]} />
-        <DayWorkoutPanel day="b" />
+        <DayLogsProvider day="b">
+          <div id="dayb-tracker">
+            <SubLabel>Working Sets</SubLabel>
+            <ExerciseRow name="Dumbbell Bench Press or Push-Up" prescription="3 sets × 10 reps — Rest 90 sec" note="Elbows at 45 degrees, shoulder blades set before you press, wrist stacked over elbow throughout. Refer back to Module 1 Exercise 3." videoIds={["vZTUnLTRkOg", "oZmBz-BN7ZY"]} s3Urls={[urlMap["m3b_db_bench"], urlMap["m3b_pushup"]]} />
+            <InlineExerciseTracker day="b" exerciseId="db_bench" />
+            <ExerciseRow name="Overhead Press" prescription="3 sets × 10 reps — Rest 90 sec" note="Core braced throughout, ribs down, don't let your lower back arch as you press overhead. Press the weight up and slightly back." videoIds={["H8-O20oL3yc"]} s3Urls={[urlMap["m3b_ohp"]]} />
+            <InlineExerciseTracker day="b" exerciseId="overhead_press" />
+            <ExerciseRow name="Chest Supported Row" prescription="3 sets × 12 reps — Rest 90 sec" note="Because you are supported against the bench your lower back is completely out of the equation. No cheating the rep with momentum. Squeeze fully at the top of every rep and control the return." videoIds={["eKT-r-SV4x0"]} s3Urls={[urlMap["m3b_chest_row"]]} />
+            <InlineExerciseTracker day="b" exerciseId="chest_row" />
+            <ExerciseRow name="Band Assisted Pull-Up" prescription="3 sets × 8 reps — Rest 90 sec" note="Loop the band around the bar and place your knees or feet in it. Pull your elbows down toward your back pockets, chest leads toward the bar, control the descent. This is your goal movement. Work toward doing it without the band." videoIds={["H-RxZVrZH2I"]} s3Urls={[urlMap["m3b_band_pullup"]]} />
+            <InlineExerciseTracker day="b" exerciseId="band_pullup" />
+            <Superset tag="Superset — Arms" note="No rest between the two exercises. Rest 60 seconds after both are done. 3 rounds.">
+              <ExerciseRow name="Dumbbell Curl" prescription="10 to 12 reps" note="Keep your elbows pinned at your sides, control the return, don't swing the weight up." videoIds={["rPcp_rfWLRU"]} s3Urls={[urlMap["m3b_db_curl"]]} />
+              <InlineExerciseTracker day="b" exerciseId="bicep_curl" />
+              <ExerciseRow name="Overhead Tricep Extension" prescription="10 to 12 reps" note="Keep your elbows pointing forward and close to your head, lower the weight slowly behind you, press back up to full extension." videoIds={["uht9IRmLvcQ"]} s3Urls={[urlMap["m3b_tri_extension"]]} />
+              <InlineExerciseTracker day="b" exerciseId="tricep_ext" />
+            </Superset>
+            <ExerciseRow name="Bird Dog" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Hold 2 seconds at the top of every rep. Keep your pelvis level, don't let the hips rotate to get the leg higher." videoIds={["Mr73_KR-fS8"]} s3Urls={[urlMap["m3b_bird_dog"]]} />
+            <InlineExerciseTracker day="b" exerciseId="bird_dog_b" />
+            <ExerciseRow name="Pallof Press" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Brace hard before you press, resist the rotation the entire time, hold 2 seconds at full extension." videoIds={["lae10X6yOII"]} s3Urls={[urlMap["m3b_pallof_press"]]} />
+            <InlineExerciseTracker day="b" exerciseId="pallof_press" />
+
+            <SubLabel>Cool-Down — 5 minutes</SubLabel>
+            <WarmupItem name="Open Book Stretch" note="60 seconds per side. A thoracic rotation stretch that releases the upper back and chest after all the pressing and pulling." videoId="YJ92IS_RuRY" s3Url={urlMap["m3b_cd_open_book"]} />
+            <WarmupItem name="Band Lat Stretch" note="60 seconds per side. Grab the band attached to something stable, shift your hips away and feel the entire side of your back release." videoId="lQuimKNJRWU" s3Url={urlMap["m3b_cd_band_lat"]} />
+            <WarmupItem name="Thread the Needle Stretch" note="60 seconds per side. Gets deeper into the thoracic rotation and releases tension through the upper back and shoulders." videoId="GJGSah1mNWw" s3Url={urlMap["m3b_cd_thread_needle"]} />
+            <WarmupItem name="Triceps Stretch" note="30 seconds per side. You just worked your triceps directly, give them a proper stretch before you leave." videoId="44rhonVBVRU" s3Url={urlMap["m3b_cd_triceps"]} />
+            <DayWorkoutPanel day="b" />
+          </div>
+        </DayLogsProvider>
       </DayBlock>
 
-      {/* DAY C */}
+      {/* ── DAY C ──────────────────────────────────────────────── */}
       <DayBlock id="dayc" day="Day C" title="Movement Quality & Integration">
         <p style={{ fontSize: "0.85rem", color: "#888", lineHeight: 1.8, marginBottom: "2rem" }}>
           This day has a different feel to it. The loading is lighter, the focus is on movement quality, single leg stability, posture, and tying everything you have been building together. Think of it as the day you reinforce the patterns rather than push the intensity.
@@ -222,30 +248,45 @@ export default async function Module3Page() {
         <WarmupItem name="Lateral Lunge" note="8 reps per side. Slow and controlled." videoId="EVKyneKe5w8" s3Url={urlMap["m3c_wu_lateral_lunge"]} />
 
         <DayStatusBadge day="c" />
-        <SubLabel>Working Sets</SubLabel>
-        <ExerciseRow name="Single Leg Glute Bridge" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Drive through your heel, squeeze the glute hard at the top, and keep your hips level throughout. If your hips drop to one side that is a stability weakness worth noting and working on." videoIds={["95b9yp9kfEg"]} s3Urls={[urlMap["m3c_sl_glute_bridge"]]} />
-        <ExerciseRow name="Reverse Lunge" prescription="3 sets × 10 reps per side — Rest 90 sec" note="Step back into the lunge rather than forward. Chest up, front knee tracks over toes, back knee hovers just above the floor. Drive through your front heel to return to standing." videoIds={["ysR2LxObJbo"]} s3Urls={[urlMap["m3c_rev_lunge"]]} />
-        <Superset tag="Glute Medius Circuit — 3 rounds" note="Go through all three exercises back to back with minimal rest. Rest 45 seconds between rounds.">
-          <ExerciseRow name="Band Monster Walk" prescription="20 steps forward, 20 steps backward" note="Slight squat position, chest up, core braced, constant tension on the band." videoIds={["cR8WIVDloo4"]} s3Urls={[urlMap["m3c_band_monster_walk"]]} />
-          <ExerciseRow name="Lateral Band Walk" prescription="20 steps each direction" note="Keep your feet parallel, small controlled steps, constant tension throughout." videoIds={["4yr4bFNYX9w"]} s3Urls={[urlMap["m3c_lateral_band_walk"]]} />
-          <ExerciseRow name="Side Lying Hip Abduction" prescription="12 to 15 reps per side" note="Foot flexed, toes pointing slightly down, control the return completely." videoIds={["efiJbMV-ZaE"]} s3Urls={[urlMap["m3c_hip_abduction"]]} />
-        </Superset>
-        <Superset tag="Superset — Push-Up + Inverted Row" note="No rest between the two exercises. Rest 90 seconds after both are done. 3 rounds.">
-          <ExerciseRow name="Push-Up" prescription="10 reps" note="Elbows at 45 degrees, shoulder blades set before you lower, full range of motion. Drop to your knees if needed. Same form rules apply." videoIds={["oZmBz-BN7ZY"]} s3Urls={[urlMap["m3c_pushup"]]} />
-          <ExerciseRow name="Inverted Row Overhand" prescription="10 reps" note="Set the bar at roughly hip height. Hang underneath it with straight arms, body in a straight line. Pull your chest toward the bar, squeeze at the top, lower with control." videoIds={["BKEfa9ixLuc"]} s3Urls={[urlMap["m3c_inv_row"]]} />
-        </Superset>
-        <Superset tag="Superset — Dead Bug + Copenhagen Plank" note="No rest between the two exercises. Rest 60 seconds after both are done. 3 rounds.">
-          <ExerciseRow name="Dead Bug" prescription="8 reps per side" note="Lower back pressed into the floor the entire time. Slow and controlled, stop before your lower back lifts." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3c_dead_bug"]]} />
-          <ExerciseRow name="Copenhagen Plank Knee Variation" prescription="20 to 30 seconds per side" note="Place your bottom knee on a bench or chair, top leg straight. Squeeze your inner thigh into the bench and keep your hips level throughout." videoIds={["i1Ll-EnhYhQ"]} s3Urls={[urlMap["m3c_copenhagen"]]} />
-        </Superset>
-        <ExerciseRow name="Stability Ball Stir-the-Pot" prescription="3 sets × 8 circles each direction — Rest 60 sec" note="Place your forearms on the stability ball and assume a plank position. Make small controlled circles with your forearms. Keep your hips level and your lower back neutral throughout." videoIds={["WaOewOUic3c"]} s3Urls={[urlMap["m3c_stir_pot"]]} />
 
-        <SubLabel>Cool-Down — 5 minutes</SubLabel>
-        <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. Single leg work and lunges tighten the hip flexors. This one is non-negotiable after Day C." videoId="cfqgjN8b2vg" s3Url={urlMap["m3c_cd_hip_flexor"]} />
-        <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. Your glutes have worked hard today." videoId="5QdSahBkG20" s3Url={urlMap["m3c_cd_figure4"]} />
-        <WarmupItem name="Lying Spinal Twist" note="60 seconds per side. Releases the lower back and hips after all the single leg and stability work." videoId="3miActosoI8" s3Url={urlMap["m3c_cd_spinal_twist"]} />
-        <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3c_cd_childs_pose"]} />
-        <DayWorkoutPanel day="c" />
+        <DayLogsProvider day="c">
+          <div id="dayc-tracker">
+            <SubLabel>Working Sets</SubLabel>
+            <ExerciseRow name="Single Leg Glute Bridge" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Drive through your heel, squeeze the glute hard at the top, and keep your hips level throughout. If your hips drop to one side that is a stability weakness worth noting and working on." videoIds={["95b9yp9kfEg"]} s3Urls={[urlMap["m3c_sl_glute_bridge"]]} />
+            <InlineExerciseTracker day="c" exerciseId="sl_glute_bridge" />
+            <ExerciseRow name="Reverse Lunge" prescription="3 sets × 10 reps per side — Rest 90 sec" note="Step back into the lunge rather than forward. Chest up, front knee tracks over toes, back knee hovers just above the floor. Drive through your front heel to return to standing." videoIds={["ysR2LxObJbo"]} s3Urls={[urlMap["m3c_rev_lunge"]]} />
+            <InlineExerciseTracker day="c" exerciseId="reverse_lunge" />
+            <Superset tag="Glute Medius Circuit — 3 rounds" note="Go through all three exercises back to back with minimal rest. Rest 45 seconds between rounds.">
+              <ExerciseRow name="Band Monster Walk" prescription="20 steps forward, 20 steps backward" note="Slight squat position, chest up, core braced, constant tension on the band." videoIds={["cR8WIVDloo4"]} s3Urls={[urlMap["m3c_band_monster_walk"]]} />
+              <InlineExerciseTracker day="c" exerciseId="monster_walk" />
+              <ExerciseRow name="Lateral Band Walk" prescription="20 steps each direction" note="Keep your feet parallel, small controlled steps, constant tension throughout." videoIds={["4yr4bFNYX9w"]} s3Urls={[urlMap["m3c_lateral_band_walk"]]} />
+              <InlineExerciseTracker day="c" exerciseId="lateral_band" />
+              <ExerciseRow name="Side Lying Hip Abduction" prescription="12 to 15 reps per side" note="Foot flexed, toes pointing slightly down, control the return completely." videoIds={["efiJbMV-ZaE"]} s3Urls={[urlMap["m3c_hip_abduction"]]} />
+              <InlineExerciseTracker day="c" exerciseId="hip_abduction_c" />
+            </Superset>
+            <Superset tag="Superset — Push-Up + Inverted Row" note="No rest between the two exercises. Rest 90 seconds after both are done. 3 rounds.">
+              <ExerciseRow name="Push-Up" prescription="10 reps" note="Elbows at 45 degrees, shoulder blades set before you lower, full range of motion. Drop to your knees if needed. Same form rules apply." videoIds={["oZmBz-BN7ZY"]} s3Urls={[urlMap["m3c_pushup"]]} />
+              <InlineExerciseTracker day="c" exerciseId="pushup_c" />
+              <ExerciseRow name="Inverted Row Overhand" prescription="10 reps" note="Set the bar at roughly hip height. Hang underneath it with straight arms, body in a straight line. Pull your chest toward the bar, squeeze at the top, lower with control." videoIds={["BKEfa9ixLuc"]} s3Urls={[urlMap["m3c_inv_row"]]} />
+              <InlineExerciseTracker day="c" exerciseId="inverted_row" />
+            </Superset>
+            <Superset tag="Superset — Dead Bug + Copenhagen Plank" note="No rest between the two exercises. Rest 60 seconds after both are done. 3 rounds.">
+              <ExerciseRow name="Dead Bug" prescription="8 reps per side" note="Lower back pressed into the floor the entire time. Slow and controlled, stop before your lower back lifts. Add a light dumbbell overhead if this becomes easy." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3c_dead_bug"]]} />
+              <InlineExerciseTracker day="c" exerciseId="dead_bug_c" />
+              <ExerciseRow name="Copenhagen Plank Knee Variation" prescription="20 to 30 seconds per side" note="Place your bottom knee on a bench or chair, top leg straight. Squeeze your inner thigh into the bench and keep your hips level throughout." videoIds={["i1Ll-EnhYhQ"]} s3Urls={[urlMap["m3c_copenhagen"]]} />
+              <InlineExerciseTracker day="c" exerciseId="copenhagen" />
+            </Superset>
+            <ExerciseRow name="Stability Ball Stir-the-Pot" prescription="3 sets × 8 circles each direction — Rest 60 sec" note="Place your forearms on the stability ball and assume a plank position. Make small controlled circles with your forearms. Keep your hips level and your lower back neutral throughout." videoIds={["WaOewOUic3c"]} s3Urls={[urlMap["m3c_stir_pot"]]} />
+            <InlineExerciseTracker day="c" exerciseId="stir_the_pot" />
+
+            <SubLabel>Cool-Down — 5 minutes</SubLabel>
+            <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. Single leg work and lunges tighten the hip flexors. This one is non-negotiable after Day C." videoId="cfqgjN8b2vg" s3Url={urlMap["m3c_cd_hip_flexor"]} />
+            <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. Your glutes have worked hard today." videoId="5QdSahBkG20" s3Url={urlMap["m3c_cd_figure4"]} />
+            <WarmupItem name="Lying Spinal Twist" note="60 seconds per side. Releases the lower back and hips after all the single leg and stability work." videoId="3miActosoI8" s3Url={urlMap["m3c_cd_spinal_twist"]} />
+            <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3c_cd_childs_pose"]} />
+            <DayWorkoutPanel day="c" />
+          </div>
+        </DayLogsProvider>
       </DayBlock>
 
       {/* WEEKS 3 & 4 */}

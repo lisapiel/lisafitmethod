@@ -9,6 +9,9 @@ const dayForHref: Record<string, "a" | "b" | "c"> = {
   "/training-foundations/module3": "a",
   "/training-foundations/module3#dayb": "b",
   "/training-foundations/module3#dayc": "c",
+  "/training-foundations/module3#daya-tracker": "a",
+  "/training-foundations/module3#dayb-tracker": "b",
+  "/training-foundations/module3#dayc-tracker": "c",
 }
 
 const nav = [
@@ -46,6 +49,14 @@ const nav = [
       { href: "/training-foundations/module3#dayb", label: "Day B — Upper Body" },
       { href: "/training-foundations/module3#dayc", label: "Day C — Integration" },
       { href: "/training-foundations/module3#w34", label: "Weeks 3 & 4" },
+    ],
+  },
+  {
+    label: "Workout Tracker",
+    items: [
+      { href: "/training-foundations/module3#daya-tracker", label: "Track Day A" },
+      { href: "/training-foundations/module3#dayb-tracker", label: "Track Day B" },
+      { href: "/training-foundations/module3#dayc-tracker", label: "Track Day C" },
     ],
   },
   {

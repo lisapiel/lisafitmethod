@@ -9,10 +9,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "About Lisa McPherson — Certified Personal Trainer",
   description:
-    "I trained wrong for years, my back gave out, and I had to relearn everything. Now I help women build a real foundation so they don't have to go through what I did.",
+    "Certified personal trainer and founder of Lisa Fit Method. Spent years in classes before finding structured strength training — learned the foundation the hard way, now here to give it to you straight.",
   openGraph: {
     title: "About Lisa McPherson — Certified Personal Trainer",
-    description: "I trained wrong for years, my back gave out, and I had to relearn everything. Now I help women build a real foundation.",
+    description: "Certified personal trainer and founder of Lisa Fit Method. Learned the foundation the hard way — now here to give it to you straight.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -41,7 +41,7 @@ export default async function AboutPage() {
     jobTitle: "Certified Personal Trainer",
     url: "https://lisafitmethod.com/about",
     image: photoUrl ?? "https://lisafitmethod.com/hero.png",
-    description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt her training from scratch after a serious back injury and now helps women build a real foundation.",
+    description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt her training from scratch after a serious back injury and now helps people build a real foundation.",
     sameAs: ["https://instagram.com/lisafitmethod"],
     worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
     knowsAbout: ["Strength Training", "Women's Fitness", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Hip Hinge", "Core Stability"],

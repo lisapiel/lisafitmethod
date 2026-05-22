@@ -2,6 +2,7 @@ export interface SetLog {
   reps: number
   weight: number // 0 = bodyweight
   unit: "lbs" | "kg"
+  distanceTime?: string // for distance/time-based exercises (e.g. "30m", "45s")
 }
 
 export interface ExerciseLog {
@@ -22,6 +23,7 @@ export interface CourseProgress {
   version: 1
   weightUnit: "lbs" | "kg"
   sessions: WorkoutSession[]
+  weeksPerRound?: number // default 6
 }
 
 const EMPTY: CourseProgress = { version: 1, weightUnit: "lbs", sessions: [] }
@@ -70,7 +72,7 @@ export interface ProgressPosition {
   startedAt: string | null
 }
 
-export function getCurrentPosition(sessions: WorkoutSession[]): ProgressPosition {
+export function getCurrentPosition(sessions: WorkoutSession[], weeksPerRound = 6): ProgressPosition {
   if (sessions.length === 0) {
     return { round: 1, week: 1, nextDay: "a", totalSessions: 0, startedAt: null }
   }
@@ -83,7 +85,7 @@ export function getCurrentPosition(sessions: WorkoutSession[]): ProgressPosition
   // Find next incomplete session in order
   const days: ("a" | "b" | "c")[] = ["a", "b", "c"]
   for (let round = 1; round <= 99; round++) {
-    for (let week = 1; week <= 4; week++) {
+    for (let week = 1; week <= weeksPerRound; week++) {
       for (const day of days) {
         if (!getSession(sessions, round, week, day)) {
           return { round, week, nextDay: day, totalSessions: sessions.length, startedAt }

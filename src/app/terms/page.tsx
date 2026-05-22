@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "May 22, 2026"
+const LAST_UPDATED = "May 23, 2026"
 const CONTACT_EMAIL = "lisafitmethod.course@gmail.com"
 
 export default function TermsPage() {
@@ -72,15 +72,18 @@ export default function TermsPage() {
           <h3>Access duration</h3>
           <p>Your course access is ongoing for as long as we operate the platform. We will provide reasonable advance notice if we discontinue a product or service.</p>
 
-          <h2>4. Health and Fitness Disclaimer</h2>
-          <p><strong>Important: Please read this section carefully.</strong></p>
-          <p>The information and programs provided on this Site, including Training Foundations and all blog content, are for informational and educational purposes only. They are not a substitute for professional medical advice, diagnosis, or treatment.</p>
-          <ul>
-            <li>Consult your physician or a qualified healthcare provider before starting any new exercise program, particularly if you have a medical condition, injury, or are pregnant.</li>
-            <li>Exercise involves inherent risks. You assume full responsibility for any injury, loss, or damage that may result from your use of our programs.</li>
-            <li>Results vary based on individual effort, genetics, experience, and other factors. We make no guarantees regarding specific fitness outcomes.</li>
-            <li>Lisa McPherson is a certified personal trainer, not a physician, physical therapist, or registered dietitian. Nothing on this Site constitutes medical advice.</li>
-          </ul>
+          <h2>4. Health Disclaimer, Assumption of Risk, and Results</h2>
+          <p><strong>Important: Please read this section carefully. By using this Site or purchasing any product, you agree to the terms below.</strong></p>
+
+          <h3>Health and medical disclaimer</h3>
+          <p>The information, programs, and content on this Site — including Training Foundations and all blog content — are for informational and educational purposes only and are not a substitute for professional medical advice, diagnosis, or treatment. Lisa McPherson is a certified personal trainer, not a physician, physical therapist, or registered dietitian. Nothing on this Site constitutes medical advice. Consult your physician or a qualified healthcare provider before beginning any exercise program, particularly if you have a pre-existing medical condition, injury, or are pregnant.</p>
+
+          <h3>Assumption of risk and liability release</h3>
+          <p>Exercise and physical training involve inherent risks, including the risk of physical injury, illness, or death. By participating in any exercise program or following any content on this Site, <strong>you voluntarily and knowingly assume all such risks</strong> associated with physical activity and fitness training. You represent that you are physically capable of participating in the activities described and that you take full responsibility for your own health and safety.</p>
+          <p>To the fullest extent permitted by applicable law, you hereby <strong>release, waive, and discharge Lisa Fit Method and Lisa McPherson</strong> — and their successors, assigns, and representatives — from any and all claims, demands, actions, or causes of action, whether known or unknown, arising from or related to any physical injury, illness, loss, or damage you may sustain as a direct or indirect result of participating in any program, following any content, or using any service offered through this Site. This release applies even if such injury or loss results from the negligence of Lisa Fit Method or Lisa McPherson, to the extent permitted by law.</p>
+
+          <h3>Results disclaimer</h3>
+          <p>Fitness results vary significantly from person to person based on many factors including starting fitness level, age, genetics, nutrition, sleep, consistency, effort, and adherence to the program. Any results, testimonials, or examples presented on this Site represent individual experiences and <strong>are not typical or guaranteed</strong>. We make no representations, warranties, or guarantees — express or implied — that you will achieve any specific fitness outcome. Individual results may vary.</p>
 
           <h2>5. Intellectual Property</h2>
           <p>All content on this Site — including text, images, video, graphics, logos, program design, and code — is the property of Lisa Fit Method or its content suppliers and is protected by United States and international copyright laws. See our <Link href="/licensing">Licensing & Copyright Policy</Link> for details.</p>

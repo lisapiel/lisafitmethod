@@ -33,6 +33,7 @@ interface CourseProgressContextValue {
     day: "a" | "b" | "c"
   ) => WorkoutSession | undefined
   setWeightUnit: (unit: "lbs" | "kg") => void
+  addWeek: () => void
 }
 
 const CourseProgressContext = createContext<CourseProgressContextValue | null>(null)
@@ -96,14 +97,20 @@ export function CourseProgressProvider({ children }: { children: React.ReactNode
     [progress, persist]
   )
 
+  const addWeek = useCallback(
+    () => persist({ ...progress, weeksPerRound: (progress.weeksPerRound ?? 6) + 1 }),
+    [progress, persist]
+  )
+
   const value: CourseProgressContextValue = {
     ready,
     progress,
-    currentPosition: getCurrentPosition(progress.sessions),
+    currentPosition: getCurrentPosition(progress.sessions, progress.weeksPerRound ?? 6),
     prs: getPRs(progress.sessions),
     logSession,
     getSessionFor,
     setWeightUnit,
+    addWeek,
   }
 
   return (

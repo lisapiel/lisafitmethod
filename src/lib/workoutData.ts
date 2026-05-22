@@ -5,6 +5,8 @@ export interface ExerciseDef {
   defaultReps: number | null // null = distance/time-based
   bodyweight: boolean
   note?: string // e.g. "per side", "20–30 m"
+  optionalWeight?: boolean      // bodyweight exercise that can have weight added
+  trackDistanceOrTime?: boolean // show editable distance/time input instead of reps
 }
 
 export interface DayDef {
@@ -20,8 +22,8 @@ export const WORKOUT_DAYS: Record<"a" | "b" | "c", DayDef> = {
       { id: "rdl",             name: "Romanian Deadlift",     defaultSets: 3, defaultReps: 10, bodyweight: false },
       { id: "hip_thrust",      name: "Hip Thrust",            defaultSets: 3, defaultReps: 12, bodyweight: false },
       { id: "band_abduction",  name: "Seated Band Abduction", defaultSets: 3, defaultReps: 15, bodyweight: true,  note: "band resistance" },
-      { id: "dead_bug_a",      name: "Dead Bug",              defaultSets: 3, defaultReps: 8,  bodyweight: true,  note: "per side" },
-      { id: "farmers_carry",   name: "Farmer's Carry",        defaultSets: 3, defaultReps: null, bodyweight: false, note: "20–30 m" },
+      { id: "dead_bug_a",      name: "Dead Bug",              defaultSets: 3, defaultReps: 8,  bodyweight: true,  optionalWeight: true, note: "per side" },
+      { id: "farmers_carry",   name: "Farmer's Carry",        defaultSets: 3, defaultReps: null, bodyweight: false, trackDistanceOrTime: true, note: "20–30 m" },
     ],
   },
   b: {
@@ -42,13 +44,13 @@ export const WORKOUT_DAYS: Record<"a" | "b" | "c", DayDef> = {
     exercises: [
       { id: "sl_glute_bridge", name: "Single-Leg Glute Bridge", defaultSets: 3, defaultReps: 10, bodyweight: true,  note: "per side" },
       { id: "reverse_lunge",   name: "Reverse Lunge",           defaultSets: 3, defaultReps: 10, bodyweight: false, note: "per side" },
-      { id: "monster_walk",    name: "Monster Walk",            defaultSets: 3, defaultReps: null, bodyweight: true, note: "circuit ×3" },
-      { id: "lateral_band",    name: "Lateral Band Walk",       defaultSets: 3, defaultReps: null, bodyweight: true, note: "circuit ×3" },
+      { id: "monster_walk",    name: "Monster Walk",            defaultSets: 3, defaultReps: null, bodyweight: true, trackDistanceOrTime: true, note: "circuit ×3" },
+      { id: "lateral_band",    name: "Lateral Band Walk",       defaultSets: 3, defaultReps: null, bodyweight: true, trackDistanceOrTime: true, note: "circuit ×3" },
       { id: "hip_abduction_c", name: "Hip Abduction",           defaultSets: 3, defaultReps: 15, bodyweight: true,  note: "circuit ×3" },
       { id: "pushup_c",        name: "Push-Up",                 defaultSets: 3, defaultReps: 10, bodyweight: true,  note: "superset" },
       { id: "inverted_row",    name: "Inverted Row",            defaultSets: 3, defaultReps: 10, bodyweight: true,  note: "superset" },
-      { id: "dead_bug_c",      name: "Dead Bug",                defaultSets: 3, defaultReps: 8,  bodyweight: true,  note: "superset / per side" },
-      { id: "copenhagen",      name: "Copenhagen Plank",        defaultSets: 3, defaultReps: null, bodyweight: true, note: "superset / hold" },
+      { id: "dead_bug_c",      name: "Dead Bug",                defaultSets: 3, defaultReps: 8,  bodyweight: true,  optionalWeight: true, note: "superset / per side" },
+      { id: "copenhagen",      name: "Copenhagen Plank",        defaultSets: 3, defaultReps: null, bodyweight: true, trackDistanceOrTime: true, note: "superset / hold" },
       { id: "stir_the_pot",    name: "Stir the Pot",            defaultSets: 3, defaultReps: 8,  bodyweight: true,  note: "each direction" },
     ],
   },

@@ -92,7 +92,7 @@ export const DEFAULTS: SiteSettings = {
     homeFinalSubtext:
       "Four weeks. Three days a week. Everything you need to actually understand how to train and a body that shows it.",
     coursePrice: "47",
-    aboutHeroHeadline: "I spent years burning calories\nwithout building anything.\nThen I found structure.",
+    aboutHeroHeadline: "I spent years burning calories without building anything. Then I found structure.",
     aboutHeroSubtext:
       "Certified personal trainer. Found strength training after years of classes that never changed my body. Learned the foundation the hard way — now here to give it to you straight.",
     aboutPara1:
@@ -100,7 +100,7 @@ export const DEFAULTS: SiteSettings = {
     aboutPara2:
       "It wasn't until I started following a real structured strength training program that things actually shifted. For the first time, I was building something. The squat got stronger week over week. I could feel my body actually changing. It was addictive — and I pushed it too hard, too fast.",
     aboutPara3:
-      "I kept adding weight before I had the foundation to support it. Warm-ups felt like a waste of time. Mobility work wasn't on my radar. I knew the movements, but I was skipping the preparation that makes heavier loads safe. Eventually my back gave out. For almost a year I lived with serious pain — the kind that makes getting out of bed uncomfortable and the gym feel completely out of reach.",
+      "I kept adding weight before I had the foundation to support it. Warm-ups felt like a waste of time. Mobility work wasn't on my radar. I knew the movements, but I was skipping the preparation that makes heavier loads safe. Eventually my back gave out. For almost a year I lived with serious pain — the kind that makes getting out of bed uncomfortable and the gym feel completely out of reach. That year was one of the hardest things I've been through, not just physically but mentally. I had built my identity around training, and suddenly I couldn't do it. Having to slow down, relearn movements I thought I already knew, and accept that the way I'd been approaching everything needed to change — that wasn't easy.",
     aboutPara4:
       "That year I rebuilt everything properly. Movement mechanics, warm-up protocols, mobility, real programming logic. I became a certified personal trainer not to teach what I was doing before, but to genuinely understand what I'd been skipping. I came back pain-free and stronger than I had ever been.",
     aboutPara5:

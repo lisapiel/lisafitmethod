@@ -131,6 +131,9 @@ export default async function HomePage() {
               .hero-left-wrap { padding: 40px 24px 48px !important; order: 0; }
               .hero-line-deco { display: none !important; }
             }
+            @media (max-height: 740px) {
+              .hero-line-deco { display: none !important; }
+            }
           `}</style>
           <div
             className="hero-left-wrap"
