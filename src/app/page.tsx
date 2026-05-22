@@ -119,14 +119,14 @@ export default async function HomePage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "var(--black)", position: "relative", overflow: "hidden" }}>
+      <section style={{ background: "var(--black)", position: "relative" }}>
         <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", height: "calc(100vh - 64px)", minHeight: 600, alignItems: "stretch" }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 64px)", alignItems: "stretch" }}
           className="hero-grid"
         >
           <style>{`
             @media (max-width: 768px) {
-              .hero-grid { grid-template-columns: 1fr !important; height: auto !important; min-height: auto !important; }
+              .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; }
               .hero-photo-wrap { height: 90vw !important; min-height: 420px !important; max-height: 600px !important; order: 1; }
               .hero-left-wrap { padding: 40px 24px 48px !important; order: 0; }
               .hero-line-deco { display: none !important; }
@@ -134,21 +134,21 @@ export default async function HomePage() {
           `}</style>
           <div
             className="hero-left-wrap"
-            style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "80px 60px 80px 80px", position: "relative", zIndex: 2 }}
+            style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "64px 52px 64px 72px", position: "relative", zIndex: 2 }}
           >
-            <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 28 }}>
+            <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
               Lisa Fit Method — Training Foundations
             </p>
-            <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(48px, 5vw, 72px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 32 }}>
+            <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 24 }}>
               {t.homeHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
                 <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
               ))}
             </h1>
-            <p className="fade-up-3" style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.7, maxWidth: 420, marginBottom: 48 }}>
+            <p className="fade-up-3" style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.7, maxWidth: 440, marginBottom: 32 }}>
               {t.homeHeroSubtext}
             </p>
             <div className="fade-up-4" style={{ alignSelf: "flex-start" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 16, color: "rgba(245,242,238,0.35)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67</span>
                 <span style={{ fontSize: 36, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
                 <span style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600 }}>Limited Time</span>
