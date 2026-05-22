@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 export default function ContactClient() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" })
+  const [form, setForm] = useState({ name: "", email: "", message: "", website: "" })
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle")
 
   async function handleSubmit(e: React.FormEvent) {
@@ -75,6 +75,7 @@ export default function ContactClient() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <input type="text" name="website" value={form.website} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} style={{ position: "absolute", left: "-9999px" }} tabIndex={-1} autoComplete="off" />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label style={{ display: "block", fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6560", marginBottom: 6 }}>Name *</label>
