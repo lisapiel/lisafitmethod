@@ -71,8 +71,8 @@ export default async function AboutPage() {
             .about-hero-photo { max-height: 480px !important; overflow: hidden; }
           }
         `}</style>
-        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 420px", alignItems: "stretch", maxWidth: 1200, margin: "0 auto" }}>
-          <div className="about-hero-text" style={{ padding: "100px 64px 80px 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", alignItems: "center", maxWidth: 1200, margin: "0 auto", padding: "80px 80px 80px 0" }}>
+          <div className="about-hero-text" style={{ padding: "0 64px 0 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
               About Me
             </p>
@@ -85,7 +85,7 @@ export default async function AboutPage() {
               {t.aboutHeroSubtext}
             </p>
           </div>
-          <div className="about-hero-photo">
+          <div className="about-hero-photo" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Image
               src="/lisa-about-hero.jpg"
               alt="Lisa McPherson — Certified Personal Trainer"
@@ -103,7 +103,7 @@ export default async function AboutPage() {
         <style>{`
           @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } .about-photo { min-height: 640px !important; } }
         `}</style>
-        <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "stretch" }}>
+        <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
           <div>
             {[
               "I grew up in France and earned two master's degrees in engineering — one in France and one in Canada. For most of my twenties, I was building a career, not a body.",
