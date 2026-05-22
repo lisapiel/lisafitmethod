@@ -85,13 +85,13 @@ export default async function AboutPage() {
               {t.aboutHeroSubtext}
             </p>
           </div>
-          <div className="about-hero-photo" style={{ position: "relative" }}>
+          <div className="about-hero-photo">
             <Image
               src="/lisa-about-hero.jpg"
               alt="Lisa McPherson — Certified Personal Trainer"
-              width={840}
-              height={1200}
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+              width={1730}
+              height={2404}
+              style={{ width: "100%", height: "auto", display: "block" }}
               priority
             />
           </div>
