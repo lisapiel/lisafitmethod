@@ -1,15 +1,18 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { posts, getPost } from "@/lib/posts"
+import { getBlogPost, getBlogIndex } from "@/lib/blogClient"
 import type { Metadata } from "next"
 
-export function generateStaticParams() {
+export const revalidate = 60
+
+export async function generateStaticParams() {
+  const posts = await getBlogIndex()
   return posts.map((p) => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const post = getPost(slug)
+  const post = await getBlogPost(slug)
   if (!post) return {}
   return {
     title: post.title,
@@ -20,7 +23,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: "article",
       publishedTime: post.date,
       authors: ["Lisa McPherson"],
-      images: [{ url: "/hero.png", width: 1200, height: 800 }],
+      images: post.coverImage
+        ? [{ url: post.coverImage, width: 1200, height: 630 }]
+        : [{ url: "/hero.png", width: 1200, height: 800 }],
     },
   }
 }
@@ -31,18 +36,21 @@ function formatDate(date: string) {
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = getPost(slug)
+  const post = await getBlogPost(slug)
   if (!post) notFound()
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
     datePublished: post.date,
+    dateModified: post.date,
+    ...(post.coverImage ? { image: post.coverImage } : { image: "https://lisafitmethod.com/hero.png" }),
     author: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
-    publisher: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+    publisher: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com", logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png" } },
     url: `https://lisafitmethod.com/blog/${post.slug}`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://lisafitmethod.com/blog/${post.slug}` },
   }
 
   return (
@@ -73,6 +81,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </p>
         </div>
       </section>
+
+      {/* COVER IMAGE */}
+      {post.coverImage && (
+        <div style={{ width: "100%", maxHeight: 480, overflow: "hidden", background: "#e8e0d8" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={post.coverImage} alt={post.title} style={{ width: "100%", height: 480, objectFit: "cover" }} />
+        </div>
+      )}
 
       {/* ARTICLE BODY */}
       <article style={{ padding: "80px 80px" }} className="post-body">

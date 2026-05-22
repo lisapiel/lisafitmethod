@@ -32,7 +32,62 @@ export default async function HomePage() {
   const hs = settings.typography.headingScale
   const bs = settings.typography.bodyScale
 
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Lisa Fit Method",
+      url: "https://lisafitmethod.com",
+      description: "A 4-week beginner strength training program for women. Proper movement, a real foundation, and a body built to last.",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: "https://lisafitmethod.com/blog?q={search_term_string}" },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      name: "Lisa Fit Method",
+      url: "https://lisafitmethod.com",
+      logo: "https://lisafitmethod.com/hero.png",
+      image: "https://lisafitmethod.com/hero.png",
+      description: "Online personal training and strength programming for women — built around proper movement and a real foundation.",
+      founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer" },
+      sameAs: ["https://instagram.com/lisafitmethod"],
+      serviceType: "Personal Training",
+      areaServed: "Worldwide",
+      knowsAbout: ["Strength Training", "Women's Fitness", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise"],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      name: "Training Foundations",
+      description: "A 4-week beginner strength training program for women. Three days a week. Built around the five foundational movement patterns.",
+      provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+      instructor: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
+      url: "https://lisafitmethod.com/courses",
+      courseMode: "online",
+      educationalLevel: "Beginner",
+      timeRequired: "P4W",
+      offers: {
+        "@type": "Offer",
+        price: t.coursePrice,
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: "https://lisafitmethod.com/checkout",
+      },
+      hasCourseInstance: {
+        "@type": "CourseInstance",
+        courseMode: "online",
+        instructor: { "@type": "Person", name: "Lisa McPherson" },
+      },
+    },
+  ]
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <main
       style={{
         background: "var(--warm-white, #faf8f5)",
@@ -314,5 +369,6 @@ export default async function HomePage() {
         </div>
       </section>
     </main>
+    </>
   )
 }

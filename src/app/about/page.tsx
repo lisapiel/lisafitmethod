@@ -35,7 +35,23 @@ export default async function AboutPage() {
     { label: t.aboutCred3Label, body: t.aboutCred3Body },
   ]
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Lisa McPherson",
+    jobTitle: "Certified Personal Trainer",
+    url: "https://lisafitmethod.com/about",
+    image: photoUrl ?? "https://lisafitmethod.com/hero.png",
+    description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt her training from scratch after a serious back injury and now helps women build a real foundation.",
+    sameAs: ["https://instagram.com/lisafitmethod"],
+    worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+    knowsAbout: ["Strength Training", "Women's Fitness", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Hip Hinge", "Core Stability"],
+    hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Certification", name: "Certified Personal Trainer (CPT)" },
+  }
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
       <style>{`
         :root {
@@ -163,5 +179,6 @@ export default async function AboutPage() {
         </a>
       </section>
     </main>
+    </>
   )
 }

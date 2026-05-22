@@ -68,7 +68,38 @@ export default async function CoursesPage() {
     { num: "04", tag: "Module 4", title: t.mod4Title, desc: t.mod4Desc, items: MODULE_ITEMS[3] },
   ]
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: t.coursesHeroHeadline,
+    description: t.coursesHeroSubtext,
+    url: "https://lisafitmethod.com/courses",
+    provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+    instructor: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
+    courseMode: "online",
+    educationalLevel: "Beginner",
+    timeRequired: "P4W",
+    numberOfCredits: 0,
+    teaches: ["Hip Hinge", "Squat Pattern", "Push Pattern", "Pull Pattern", "Core Stability", "Progressive Overload", "Nutrition Fundamentals"],
+    hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", instructor: { "@type": "Person", name: "Lisa McPherson" } },
+    offers: {
+      "@type": "Offer",
+      price: t.coursePrice,
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: "https://lisafitmethod.com/checkout",
+      seller: { "@type": "Organization", name: "Lisa Fit Method" },
+    },
+    hasPart: modules.map((m) => ({
+      "@type": "CourseUnit",
+      name: m.title,
+      description: m.desc,
+    })),
+  }
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
       <style>{`
         :root {
@@ -254,5 +285,6 @@ export default async function CoursesPage() {
         />
       </section>
     </main>
+    </>
   )
 }

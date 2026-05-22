@@ -1,6 +1,8 @@
 import Link from "next/link"
-import { posts } from "@/lib/posts"
+import { getBlogIndex } from "@/lib/blogClient"
 import type { Metadata } from "next"
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Blog — Training Tips & Advice for Women",
@@ -17,8 +19,34 @@ function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
 }
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = await getBlogIndex()
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Lisa Fit Method Blog",
+    description: "Strength training tips and advice for women, by certified personal trainer Lisa McPherson.",
+    url: "https://lisafitmethod.com/blog",
+    author: {
+      "@type": "Person",
+      name: "Lisa McPherson",
+      jobTitle: "Certified Personal Trainer",
+      url: "https://lisafitmethod.com/about",
+    },
+    blogPost: posts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      description: p.excerpt,
+      datePublished: p.date,
+      url: `https://lisafitmethod.com/blog/${p.slug}`,
+      author: { "@type": "Person", name: "Lisa McPherson" },
+    })),
+  }
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", minHeight: "70vh" }}>
       <style>{`
         :root { --accent: #c8a97e; --accent-dark: #a8895e; --muted: #6b6560; }
@@ -90,5 +118,6 @@ export default function BlogPage() {
         </div>
       </section>
     </main>
+    </>
   )
 }
