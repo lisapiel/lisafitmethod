@@ -1,7 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { signOut } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
+import { useCourseProgress } from "./CourseProgressContext"
 
 interface CourseHeaderProps {
   onMenuToggle: () => void
@@ -9,6 +11,7 @@ interface CourseHeaderProps {
 
 export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
   const router = useRouter()
+  const { ready, currentPosition } = useCourseProgress()
 
   async function handleSignOut() {
     await signOut()
@@ -53,6 +56,7 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
           @media (max-width: 768px) {
             .mobile-menu-btn { display: block !important; }
             .header-subtitle { display: none !important; }
+            .header-progress-badge { display: none !important; }
           }
         `}</style>
         <div
@@ -80,6 +84,23 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
         >
           Training Foundations
         </div>
+        {ready && currentPosition.totalSessions > 0 && (
+          <Link
+            href="/training-foundations/tracker"
+            style={{
+              fontSize: "0.6rem",
+              letterSpacing: "0.1em",
+              color: "#c9a96e",
+              textDecoration: "none",
+              fontFamily: "var(--font-montserrat), sans-serif",
+              padding: "0.3rem 0.6rem",
+              border: "1px solid rgba(201,169,110,0.3)",
+            }}
+            className="header-progress-badge"
+          >
+            W{currentPosition.week} · {currentPosition.totalSessions} sessions
+          </Link>
+        )}
         <button
           onClick={handleSignOut}
           style={{

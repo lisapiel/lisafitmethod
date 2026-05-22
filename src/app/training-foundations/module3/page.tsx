@@ -2,6 +2,7 @@ import Link from "next/link"
 import VideoEmbed from "@/components/training/VideoEmbed"
 import { getPublishedVideoUrls } from "@/lib/mediaClient"
 import type { Metadata } from "next"
+import DayWorkoutPanel, { DayStatusBadge } from "@/components/training/DayWorkoutPanel.client"
 
 export const metadata: Metadata = {
   title: "Module 3 — The 4-Week Program | Lisa Fit Method",
@@ -147,6 +148,7 @@ export default async function Module3Page() {
         <WarmupItem name="Leg Swing Side to Side" note="10 reps per side. Controlled, not sloppy." videoId="o0oRKIM1cTo" s3Url={urlMap["m3a_wu_leg_swing_ss"]} />
         <WarmupItem name="Lateral Lunge" note="8 reps per side. Slow and controlled, sit into the hip, keep the working knee tracking over the toes." videoId="EVKyneKe5w8" s3Url={urlMap["m3a_wu_lateral_lunge"]} />
 
+        <DayStatusBadge day="a" />
         <SubLabel>Working Sets</SubLabel>
         <ExerciseRow name="Goblet Squat" prescription="3 sets × 10 reps — Rest 2 min" note="Chest up, knees tracking over toes, sit between your heels not behind them. Refer back to Module 1 Exercise 2." videoIds={["NYf82VuzrQM"]} s3Urls={[urlMap["m3a_goblet_squat"]]} />
         <ExerciseRow name="Romanian Deadlift" prescription="3 sets × 10 reps — Rest 2 min" note="Push your hips back, keep the weights close to your body, stop before your lower back rounds. Refer back to Module 2 Exercise 6." videoIds={["AyY0C8s5scU"]} s3Urls={[urlMap["m3a_rdl"]]} />
@@ -160,6 +162,7 @@ export default async function Module3Page() {
         <WarmupItem name="90/90 Hamstring Stretch" note="60 seconds per side. Don't force the range, breathe into it." videoId="4vIoROvmLQM" s3Url={urlMap["m3a_cd_hamstring"]} />
         <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. You just worked your glutes hard, they need this." videoId="5QdSahBkG20" s3Url={urlMap["m3a_cd_figure4"]} />
         <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3a_cd_childs_pose"]} />
+        <DayWorkoutPanel day="a" />
       </DayBlock>
 
       {/* DAY B */}
@@ -174,6 +177,7 @@ export default async function Module3Page() {
         <WarmupItem name="Bird Dog (activation)" note="1 set of 8 reps per side. Slow, hold 2 seconds at the top of each rep." videoId="Mr73_KR-fS8" s3Url={urlMap["m3b_wu_bird_dog"]} />
         <WarmupItem name="Push-Up (easy prep)" note="5 to 8 reps. Easy effort, just preparing the pressing pattern before you load it." videoId="oZmBz-BN7ZY" s3Url={urlMap["m3b_wu_pushup"]} />
 
+        <DayStatusBadge day="b" />
         <SubLabel>Working Sets</SubLabel>
         <ExerciseRow name="Dumbbell Bench Press or Push-Up" prescription="3 sets × 10 reps — Rest 90 sec" note="Elbows at 45 degrees, shoulder blades set before you press, wrist stacked over elbow throughout. Refer back to Module 1 Exercise 3." videoIds={["vZTUnLTRkOg", "oZmBz-BN7ZY"]} s3Urls={[urlMap["m3b_db_bench"], urlMap["m3b_pushup"]]} />
         <ExerciseRow name="Overhead Press" prescription="3 sets × 10 reps — Rest 90 sec" note="Core braced throughout, ribs down, don't let your lower back arch as you press overhead. Press the weight up and slightly back." videoIds={["H8-O20oL3yc"]} s3Urls={[urlMap["m3b_ohp"]]} />
@@ -191,6 +195,7 @@ export default async function Module3Page() {
         <WarmupItem name="Band Lat Stretch" note="60 seconds per side. Grab the band attached to something stable, shift your hips away and feel the entire side of your back release." videoId="lQuimKNJRWU" s3Url={urlMap["m3b_cd_band_lat"]} />
         <WarmupItem name="Thread the Needle Stretch" note="60 seconds per side. Gets deeper into the thoracic rotation and releases tension through the upper back and shoulders." videoId="GJGSah1mNWw" s3Url={urlMap["m3b_cd_thread_needle"]} />
         <WarmupItem name="Triceps Stretch" note="30 seconds per side. You just worked your triceps directly, give them a proper stretch before you leave." videoId="44rhonVBVRU" s3Url={urlMap["m3b_cd_triceps"]} />
+        <DayWorkoutPanel day="b" />
       </DayBlock>
 
       {/* DAY C */}
@@ -212,6 +217,7 @@ export default async function Module3Page() {
         <WarmupItem name="Leg Swing Side to Side" note="10 reps per side." videoId="o0oRKIM1cTo" s3Url={urlMap["m3c_wu_leg_swing_ss"]} />
         <WarmupItem name="Lateral Lunge" note="8 reps per side. Slow and controlled." videoId="EVKyneKe5w8" s3Url={urlMap["m3c_wu_lateral_lunge"]} />
 
+        <DayStatusBadge day="c" />
         <SubLabel>Working Sets</SubLabel>
         <ExerciseRow name="Single Leg Glute Bridge" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Drive through your heel, squeeze the glute hard at the top, and keep your hips level throughout. If your hips drop to one side that is a stability weakness worth noting and working on." videoIds={["95b9yp9kfEg"]} s3Urls={[urlMap["m3c_sl_glute_bridge"]]} />
         <ExerciseRow name="Reverse Lunge" prescription="3 sets × 10 reps per side — Rest 90 sec" note="Step back into the lunge rather than forward. Chest up, front knee tracks over toes, back knee hovers just above the floor. Drive through your front heel to return to standing." videoIds={["ysR2LxObJbo"]} s3Urls={[urlMap["m3c_rev_lunge"]]} />
@@ -235,6 +241,7 @@ export default async function Module3Page() {
         <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. Your glutes have worked hard today." videoId="5QdSahBkG20" s3Url={urlMap["m3c_cd_figure4"]} />
         <WarmupItem name="Lying Spinal Twist" note="60 seconds per side. Releases the lower back and hips after all the single leg and stability work." videoId="3miActosoI8" s3Url={urlMap["m3c_cd_spinal_twist"]} />
         <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3c_cd_childs_pose"]} />
+        <DayWorkoutPanel day="c" />
       </DayBlock>
 
       {/* WEEKS 3 & 4 */}

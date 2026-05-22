@@ -3,6 +3,13 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { useCourseProgress } from "./CourseProgressContext"
+
+const dayForHref: Record<string, "a" | "b" | "c"> = {
+  "/training-foundations/module3": "a",
+  "/training-foundations/module3#dayb": "b",
+  "/training-foundations/module3#dayc": "c",
+}
 
 const nav = [
   {
@@ -58,6 +65,7 @@ function isActive(pathname: string, href: string) {
 
 export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
+  const { ready, currentPosition, getSessionFor } = useCourseProgress()
   const [openSections, setOpenSections] = useState<Record<number, boolean>>(() => {
     const initial: Record<number, boolean> = {}
     nav.forEach((section, i) => {
@@ -115,6 +123,36 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
           }
         `}</style>
 
+        {/* My Progress link + week pill */}
+        <div style={{ padding: "0 1.25rem 1rem" }}>
+          <Link
+            href="/training-foundations/tracker"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0.6rem 0.75rem",
+              background: pathname === "/training-foundations/tracker" ? "rgba(201,169,110,0.12)" : "rgba(201,169,110,0.06)",
+              border: "1px solid rgba(201,169,110,0.3)",
+              textDecoration: "none",
+              fontFamily: "var(--font-montserrat), sans-serif",
+              fontSize: "0.6rem",
+              fontWeight: 700,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "#c9a96e",
+            }}
+          >
+            <span>My Progress</span>
+            {ready && currentPosition.totalSessions > 0 && (
+              <span style={{ fontSize: "0.55rem", fontWeight: 400, color: "#888", letterSpacing: "0.05em", textTransform: "none" }}>
+                W{currentPosition.week} · R{currentPosition.round}
+              </span>
+            )}
+          </Link>
+        </div>
+        <div style={{ height: 1, background: "#2a2a2a", margin: "0 1.25rem 0.75rem", opacity: 0.4 }} />
+
         {nav.map((section, i) => {
           const isCurrent = section.items.some((item) => isActive(pathname, item.href))
           const isOpen_ = openSections[i] ?? false
@@ -163,12 +201,18 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                   <div>
                     {section.items.map((item) => {
                       const active = isActive(pathname, item.href)
+                      const dayKey = dayForHref[item.href]
+                      const dayDone = ready && dayKey
+                        ? !!getSessionFor(currentPosition.round, currentPosition.week, dayKey)
+                        : false
                       return (
                         <Link
                           key={item.href}
                           href={item.href}
                           style={{
-                            display: "block",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
                             padding: "0.45rem 1.25rem 0.45rem 2rem",
                             fontSize: "0.7rem",
                             color: active ? "#c9a96e" : "#888888",
@@ -180,7 +224,8 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                             fontFamily: "var(--font-montserrat), sans-serif",
                           }}
                         >
-                          {item.label}
+                          <span>{item.label}</span>
+                          {dayDone && <span style={{ color: "#c9a96e", fontSize: "0.5rem", flexShrink: 0 }}>●</span>}
                         </Link>
                       )
                     })}
