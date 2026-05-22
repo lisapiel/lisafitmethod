@@ -126,8 +126,8 @@ export default async function HomePage() {
         >
           <style>{`
             @media (max-width: 768px) {
-              .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; }
-              .hero-photo-wrap { height: 72vw; min-height: 300px; max-height: 480px; order: 1; }
+              .hero-grid { grid-template-columns: 1fr !important; height: auto !important; min-height: auto !important; }
+              .hero-photo-wrap { height: 90vw !important; min-height: 420px !important; max-height: 600px !important; order: 1; }
               .hero-left-wrap { padding: 40px 24px 48px !important; order: 0; }
               .hero-line-deco { display: none !important; }
             }

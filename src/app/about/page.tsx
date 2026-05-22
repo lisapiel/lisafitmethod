@@ -85,7 +85,7 @@ export default async function AboutPage() {
       {/* STORY + PHOTO */}
       <section style={{ padding: "100px 80px" }} className="about-story">
         <style>{`
-          @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }
+          @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } .about-photo { min-height: 560px !important; } }
         `}</style>
         <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "stretch" }}>
           <div>
@@ -116,7 +116,7 @@ export default async function AboutPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ position: "relative", flex: 1, minHeight: 480, overflow: "hidden", background: "#e8e0d8" }}>
+            <div className="about-photo" style={{ position: "relative", flex: 1, minHeight: 480, overflow: "hidden", background: "#e8e0d8" }}>
               <Image
                 src={photoUrl ?? "/hero.png"}
                 alt="Lisa McPherson — Certified Personal Trainer"
