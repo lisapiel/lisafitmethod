@@ -77,20 +77,20 @@ export const DEFAULTS: SiteSettings = {
     accent: "#c8a97e",
   },
   text: {
-    homeHeroHeadline: "Stop guessing.\nStart training\nthe right way.",
+    homeHeroHeadline: "Most people don't need a harder workout.\nThey need a better foundation.",
     homeHeroSubtext:
-      "A 4-week beginner program built around what actually matters. Proper movement, a real foundation, and a body built to last. No random workouts. No ego lifting. Just the method that changed everything for me.",
-    homeStoryHeadline: "I did it the long way.\nYou don't have to.",
+      "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your weights, reps, and progress, and finally understand what actually changes your body. No random workouts. No ego lifting. Just smart training built to last.",
+    homeStoryHeadline: "I did it the hard way.\nYou don't have to.",
     homeStoryPara1:
-      "I spent years in fitness classes before I ever touched a barbell. Cardio, cycling, group workouts — I was consistent, I was working hard, but I wasn't building anything. I was burning calories without changing my body. My strength didn't improve. My shape didn't improve. Things only changed when I started following a real strength training plan.",
+      "I spent years doing fitness classes before I ever touched a barbell. Cardio, cycling, group workouts. I was consistent, I worked hard, but I wasn't actually building anything. I was burning calories without changing my body. My strength wasn't improving. My shape wasn't improving. Everything changed when I finally started following a real strength training program.",
     homeStoryPara2:
-      "I finally started making real progress — and I got ahead of myself. I kept pushing the weight without building the foundation to support it. Warm-ups were rushed. Mobility work wasn't something I took seriously. Eventually my back had enough. For almost a year I dealt with serious pain. That year forced me to actually learn what I'd been skipping.",
+      "Then I made the mistake a lot of people make once they start seeing progress. I focused on pushing harder instead of building a proper foundation first. Warm-ups and mobility work felt optional. I was lifting heavier, but my body wasn't prepared to support it. Eventually my back had enough. For almost a year, I dealt with serious pain. And that year forced me to relearn everything I thought I understood about training. Not just exercises, but movement quality, stability, recovery, proper progression, and the fundamentals most people skip until their body forces them to pay attention.",
     homeStoryPara3:
-      "I became a certified personal trainer, rebuilt from the ground up, and came back stronger than before. This guide is that foundation — the structure, the warm-up protocols, the movement knowledge I wish I'd had from day one.",
-    homeStoryQuote: "You don't need to learn the hard way. That's already been done.",
-    homeFinalHeadline: "Build the foundation.\nTrain for life.",
+      "I rebuilt from the ground up, became a certified personal trainer, and came back stronger than before. This course is the system I wish I had from the beginning. The structure, movement education, warm-up protocols, progression, workout tracking, nutrition foundations, and training principles that actually matter if you want a strong body that lasts.",
+    homeStoryQuote: "The goal isn't just to look strong. It's to build a body that lasts.",
+    homeFinalHeadline: "Stronger. Smarter. Built to last.",
     homeFinalSubtext:
-      "Four weeks. Three days a week. Everything you need to actually understand how to train and a body that shows it.",
+      "Structured workouts, guided exercise instruction, built-in tracking, and the foundations most people never learn.",
     coursePrice: "47",
     aboutHeroHeadline: "I spent years burning calories without building anything. Then I found structure.",
     aboutHeroSubtext:
@@ -150,7 +150,7 @@ export const DEFAULTS: SiteSettings = {
     coachingFormSubtext:
       "I take on a limited number of coaching clients so I can give everyone real attention. Fill out the form and I'll get back to you within 48 hours.",
     footerTagline:
-      "A real foundation for anyone who wants to train smart, move well, and build a body that lasts.",
+      "Strength training built on movement quality, real structure, and a body that lasts.",
   },
 }
 

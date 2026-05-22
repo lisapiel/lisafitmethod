@@ -9,10 +9,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Lisa Fit Method — Train the Right Way",
   description:
-    "A 4-week beginner strength training program for women. Proper movement, a real foundation, and a body built to last.",
+    "A 4-week training system for beginners and returners. Learn proper form, follow a structured program, track your progress, and finally understand what actually changes your body.",
   openGraph: {
     title: "Lisa Fit Method — Train the Right Way",
-    description: "A 4-week beginner strength training program for women. Proper movement, a real foundation, and a body built to last.",
+    description: "A 4-week training system for beginners and returners. Proper movement, real structure, and a body built to last.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -37,7 +37,7 @@ export default async function HomePage() {
       "@type": "WebSite",
       name: "Lisa Fit Method",
       url: "https://lisafitmethod.com",
-      description: "A 4-week beginner strength training program for women. Proper movement, a real foundation, and a body built to last.",
+      description: "A 4-week training system for beginners and returners. Learn proper form, follow a structured program, track your progress, and build a body that lasts.",
       potentialAction: {
         "@type": "SearchAction",
         target: { "@type": "EntryPoint", urlTemplate: "https://lisafitmethod.com/blog?q={search_term_string}" },
@@ -51,18 +51,18 @@ export default async function HomePage() {
       url: "https://lisafitmethod.com",
       logo: "https://lisafitmethod.com/hero.png",
       image: "https://lisafitmethod.com/hero.png",
-      description: "Online personal training and strength programming for women — built around proper movement and a real foundation.",
+      description: "Online personal training and strength programming — built around proper movement, real structure, and a foundation that lasts.",
       founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer" },
       sameAs: ["https://instagram.com/lisafitmethod"],
       serviceType: "Personal Training",
       areaServed: "Worldwide",
-      knowsAbout: ["Strength Training", "Women's Fitness", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise"],
+      knowsAbout: ["Strength Training", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise", "Progressive Overload"],
     },
     {
       "@context": "https://schema.org",
       "@type": "Course",
       name: "Training Foundations",
-      description: "A 4-week beginner strength training program for women. Three days a week. Built around the five foundational movement patterns.",
+      description: "A 4-week training system for beginners and returners. Three days a week. Built around the five foundational movement patterns, structured programming, and built-in workout tracking.",
       provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
       instructor: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
       url: "https://lisafitmethod.com/courses",
@@ -137,7 +137,7 @@ export default async function HomePage() {
             style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "80px 60px 80px 80px", position: "relative", zIndex: 2 }}
           >
             <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 28 }}>
-              Lisa Fit Method — Foundations
+              Lisa Fit Method — Training Foundations
             </p>
             <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(48px, 5vw, 72px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 32 }}>
               {t.homeHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
@@ -158,11 +158,11 @@ export default async function HomePage() {
                   Get Instant Access
                 </Link>
                 <Link href="/coaching" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.45)", color: "rgba(245,242,238,0.7)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "18px 28px" }}>
-                  Book Coaching
+                  Book 1:1 Coaching
                 </Link>
               </div>
               <p style={{ marginTop: 14, fontSize: 12, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Yours forever.</strong>
+                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Lifetime access.</strong> More programs coming soon.
               </p>
             </div>
           </div>
@@ -227,17 +227,13 @@ export default async function HomePage() {
 
       {/* BANNER */}
       {bannerUrl && (
-        <section style={{ background: "#0a0a0a", position: "relative" }} className="banner-section">
-          <style>{`
-            .banner-section { height: 280px; }
-            @media (max-width: 768px) { .banner-section { height: 200px; } }
-            @media (max-width: 480px) { .banner-section { height: 150px; } }
-          `}</style>
+        <section style={{ background: "#0a0a0a", width: "100%" }}>
           <Image
             src={bannerUrl}
             alt="Lisa Fit Method"
-            fill
-            style={{ objectFit: "contain" }}
+            width={2400}
+            height={800}
+            style={{ width: "100%", height: "auto", display: "block" }}
             sizes="100vw"
           />
         </section>
@@ -260,10 +256,10 @@ export default async function HomePage() {
             </h2>
             <ul style={{ listStyle: "none", marginBottom: 36 }}>
               {[
-                "Foundation Movements — the 5 patterns every lifter needs",
-                "Core & Glute Priority — the muscles that protect your back",
-                "The 4-Week Program — 3 days/week, fully structured",
-                "Nutrition Foundations — 5 principles, no obsessing",
+                "Foundation Movements: Learn the movement patterns every strong body is built on",
+                "Core & Glute Priority: Build spinal stability, stronger glutes, better posture, and a body that moves properly under load",
+                "The 4-Week Program: Fully structured workouts with sets, reps, progression, warm-ups, mobility work, and built-in workout tracking",
+                "Nutrition Foundations: Simple nutrition principles for building muscle, supporting recovery, and staying lean without obsessing over food",
               ].map((item) => (
                 <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.5 }}>
                   <span style={{ color: "var(--accent)", flexShrink: 0 }}>→</span>
@@ -276,14 +272,17 @@ export default async function HomePage() {
               <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
               <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
             </div>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
               <Link href="/checkout" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
                 Get Instant Access
               </Link>
               <Link href="/courses" style={{ display: "inline-block", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 0" }}>
-                See full details →
+                Explore the Course →
               </Link>
             </div>
+            <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+              Includes 50+ exercise videos, built-in workout and progress tracking, and lifetime access.
+            </p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {["Foundation\nMovements", "Core &\nGlute Priority", "The 4-Week\nProgram", "Nutrition\nFoundations"].map((label, i) => (
@@ -307,8 +306,8 @@ export default async function HomePage() {
           <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>A look inside</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 48 }}>
-              See exactly what<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>you&apos;re getting.</em>
+              Real instruction.<br />
+              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Real structure.</em>
             </h2>
             <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "1334 / 1080", background: "#0a0a0a", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
               <video
@@ -322,6 +321,9 @@ export default async function HomePage() {
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
               />
             </div>
+            <p style={{ marginTop: 28, fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.7, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              Every exercise includes guided demonstrations, movement cues, and progression built directly into the course.
+            </p>
           </div>
         </section>
       )}
@@ -372,7 +374,7 @@ export default async function HomePage() {
             Get Instant Access
           </Link>
           <p style={{ marginTop: 20, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Yours forever.</strong> · No subscription.
+            One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access.</strong> No subscription.
           </p>
         </div>
       </section>
