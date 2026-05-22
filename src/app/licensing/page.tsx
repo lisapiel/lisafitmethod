@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "May 22, 2026"
+const LAST_UPDATED = "May 23, 2026"
 const CONTACT_EMAIL = "lisafitmethod.course@gmail.com"
 
 export default function LicensingPage() {
@@ -75,6 +75,7 @@ export default function LicensingPage() {
             <li><strong>Purchased course content</strong> — course purchasers may access and use course materials for their own personal fitness training, subject to the restrictions in our <Link href="/terms">Terms of Use</Link>.</li>
             <li><strong>Fair use</strong> — brief quotation of written content for commentary, criticism, or educational purposes, with clear attribution to Lisa Fit Method and a link to the original source, may be permissible under fair use doctrine. When in doubt, ask us first.</li>
             <li><strong>Press and media</strong> — journalists and media outlets may request permission to use specific images or quotes by contacting us at the email below.</li>
+            <li><strong>Social media sharing</strong> — sharing a direct link to this website or any page on it is welcome and encouraged. If we make a video trailer publicly available with an embed feature, embedding that specific trailer using the platform's native embed code is permitted. Downloading, re-uploading, or re-hosting any content — including any video — is not permitted regardless of how you discovered it.</li>
           </ul>
 
           <h2>4. AI and Machine Learning Prohibition</h2>

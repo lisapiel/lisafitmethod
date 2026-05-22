@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "May 22, 2026"
+const LAST_UPDATED = "May 23, 2026"
 const CONTACT_EMAIL = "lisafitmethod.course@gmail.com"
 
 export default function PrivacyPage() {
@@ -46,6 +46,7 @@ export default function PrivacyPage() {
             <li><strong>Contact form submissions</strong> — your name, email address, and message when you fill out the contact or coaching inquiry form.</li>
             <li><strong>Account registration</strong> — your email address when you purchase a course and create a member account.</li>
             <li><strong>Payment information</strong> — your card details are collected and processed directly by Stripe. We do not store your full card number or CVV on our servers.</li>
+            <li><strong>Workout tracking data</strong> — if you use the workout logging feature available to course members, we collect the fitness data you enter (exercises, sets, reps, weights, and notes). This data is used solely to display your personal progress within the Site and is never shared or sold.</li>
           </ul>
 
           <h3>Information collected automatically</h3>
@@ -92,16 +93,19 @@ export default function PrivacyPage() {
           <h2>6. California Privacy Rights (CCPA)</h2>
           <p>California residents have additional rights under the California Consumer Privacy Act. We do not sell personal information. California residents may request disclosure of categories of personal information collected and the purposes for which they are used. Contact us at the email below to submit a request.</p>
 
-          <h2>7. Children's Privacy</h2>
+          <h2>7. Do Not Track</h2>
+          <p>Some browsers include a "Do Not Track" (DNT) feature that signals websites not to track your activity. Our Site does not currently respond to browser Do Not Track signals, as there is no universal industry standard for doing so. You may opt out of Google Analytics tracking at any time using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>.</p>
+
+          <h2>8. Children's Privacy</h2>
           <p>Our site is not directed at children under 13. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us and we will delete it promptly.</p>
 
-          <h2>8. International Users</h2>
+          <h2>9. International Users</h2>
           <p>Our services are based in the United States. If you are accessing our site from outside the United States, your information will be transferred to and processed in the United States. By using our site, you consent to this transfer.</p>
 
-          <h2>9. Changes to This Policy</h2>
+          <h2>10. Changes to This Policy</h2>
           <p>We may update this Privacy Policy from time to time. We will post any changes on this page with an updated date. Continued use of our site after changes constitutes your acceptance of the updated policy.</p>
 
-          <h2>10. Contact Us</h2>
+          <h2>11. Contact Us</h2>
           <p>If you have questions about this Privacy Policy or your personal data, contact us at:</p>
           <p>
             Lisa Fit Method<br />

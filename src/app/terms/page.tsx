@@ -104,12 +104,29 @@ export default function TermsPage() {
           <p>You agree to indemnify and hold harmless Lisa Fit Method, its owner, and affiliates from any claims, losses, liabilities, damages, and expenses (including legal fees) arising from your violation of these Terms or your use of the Site.</p>
 
           <h2>11. Governing Law</h2>
-          <p>These Terms are governed by the laws of the United States and the state where Lisa Fit Method is principally located, without regard to conflict of law principles. Any disputes shall be resolved in the appropriate courts of that jurisdiction.</p>
+          <p>These Terms are governed by the laws of the State of Florida and the United States, without regard to conflict of law principles. Any court proceedings not subject to arbitration under Section 13 shall be brought exclusively in the state or federal courts located in Broward County, Florida, and you consent to the personal jurisdiction of those courts.</p>
 
-          <h2>12. Changes to These Terms</h2>
+          <h2>12. User-Generated Data</h2>
+          <p>Certain features of this Site — including workout tracking functionality available to course purchasers — allow you to input and store personal fitness data such as exercise logs, weights, sets, reps, and progress notes ("User Data").</p>
+          <ul>
+            <li><strong>Ownership</strong> — you retain ownership of your User Data. By submitting it, you grant us a limited license to store and display it to you through the Site.</li>
+            <li><strong>Storage and retention</strong> — User Data is retained for as long as your account is active. Upon account deletion, your User Data will be removed within 30 days.</li>
+            <li><strong>No medical use</strong> — User Data is for personal tracking purposes only. We do not analyze, share, or sell your workout logs.</li>
+            <li><strong>Accuracy</strong> — you are solely responsible for the accuracy of data you enter. We are not liable for errors, omissions, or data loss in the tracking feature.</li>
+          </ul>
+          <p>See our <Link href="/privacy">Privacy Policy</Link> for more information on how we handle your data.</p>
+
+          <h2>13. Dispute Resolution and Arbitration</h2>
+          <p><strong>Please read this section carefully — it affects your legal rights.</strong></p>
+          <p><strong>Informal resolution first.</strong> Before filing any formal claim, you agree to contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and attempt to resolve the dispute informally. We will make a good-faith effort to resolve any issue within 30 days of receiving your written notice.</p>
+          <p><strong>Binding arbitration.</strong> If informal resolution fails, any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Site shall be resolved by binding arbitration administered by the American Arbitration Association (AAA) under its Consumer Arbitration Rules. The arbitration shall take place in Broward County, Florida, or virtually at the arbitrator's discretion. The arbitrator's decision shall be final and binding and may be entered as a judgment in any court of competent jurisdiction.</p>
+          <p><strong>Class action waiver.</strong> To the fullest extent permitted by law, you waive the right to bring or participate in any class-action lawsuit or class-wide arbitration against Lisa Fit Method.</p>
+          <p><strong>Exceptions.</strong> Either party may seek emergency injunctive or other equitable relief in a court of competent jurisdiction in Broward County, Florida, solely to prevent irreparable harm pending arbitration. Claims properly brought in small claims court within applicable jurisdictional limits are also exempt from this arbitration provision.</p>
+
+          <h2>14. Changes to These Terms</h2>
           <p>We may update these Terms at any time. Continued use of the Site after changes constitutes acceptance. We will post any material changes on this page with an updated date.</p>
 
-          <h2>13. Contact</h2>
+          <h2>15. Contact</h2>
           <p>
             Lisa Fit Method<br />
             Email: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a><br />
