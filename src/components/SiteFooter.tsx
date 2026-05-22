@@ -192,9 +192,10 @@ export default function SiteFooter() {
               href={l.href}
               style={{
                 fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: 11,
-                color: "rgba(240,230,211,0.25)",
-                textDecoration: "none",
+                fontSize: 12,
+                color: "rgba(240,230,211,0.6)",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
               }}
             >
               {l.label}
