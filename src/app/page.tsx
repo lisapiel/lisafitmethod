@@ -131,9 +131,6 @@ export default async function HomePage() {
               .hero-left-wrap { padding: 40px 24px 48px !important; order: 0; }
               .hero-line-deco { display: none !important; }
             }
-            @media (max-height: 740px) {
-              .hero-line-deco { display: none !important; }
-            }
           `}</style>
           <div
             className="hero-left-wrap"
@@ -178,12 +175,11 @@ export default async function HomePage() {
               style={{ objectFit: "cover", objectPosition: settings.crops.hero }}
               priority
             />
+            <p className="hero-line-deco" style={{ position: "absolute", bottom: 20, left: 20, display: "flex", alignItems: "center", gap: 16, color: "rgba(245,242,238,0.45)", fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", zIndex: 2, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              Certified Personal Trainer · @lisafitmethod
+            </p>
           </div>
         </div>
-
-        <p className="hero-line-deco" style={{ position: "absolute", bottom: 60, left: 80, display: "flex", alignItems: "center", gap: 16, color: "rgba(245,242,238,0.25)", fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", zIndex: 2 }}>
-          Certified Personal Trainer · @lisafitmethod
-        </p>
       </section>
 
       {/* STORY */}

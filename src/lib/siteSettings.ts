@@ -94,21 +94,21 @@ export const DEFAULTS: SiteSettings = {
     coursePrice: "47",
     aboutHeroHeadline: "I spent years burning calories without building anything. Then I found structure.",
     aboutHeroSubtext:
-      "Certified personal trainer. Found strength training after years of classes that never changed my body. Learned the foundation the hard way — now here to give it to you straight.",
+      "Double master's in engineering. Certified personal trainer. Spent years doing everything in the gym except what actually worked — now I give you the shortcut I had to find the hard way.",
     aboutPara1:
-      "I started where a lot of people start — scared of the weight room, sticking to what felt safe. Classes, cardio, group workouts. I was consistent and I was working hard. But I was burning calories, not building anything. My body wasn't changing the way I wanted it to. My strength wasn't increasing. The gym felt like maintenance, not progress.",
+      "I grew up in France, got two master's degrees in engineering — one in France, one in Canada in renewable energy and energy efficiency — and spent most of my twenties building a career, not a body. When I moved to Australia and started my own business, I found the gym for the first time. Classes, cardio, group workouts. I was consistent, I worked hard, and I went nowhere. Years of effort without anything to show for it.",
     aboutPara2:
-      "It wasn't until I started following a real structured strength training program that things actually shifted. For the first time, I was building something. The squat got stronger week over week. I could feel my body actually changing. It was addictive — and I pushed it too hard, too fast.",
+      "The move that changed everything was coming to the United States. Seven years ago I landed in Miami, started taking strength training seriously for the first time, and within months I finally understood what I'd been missing. Structure. Progressive overload. Real programming. My body started changing in a way it never had before. I was building something — and I got addicted.",
     aboutPara3:
-      "I kept adding weight before I had the foundation to support it. Warm-ups felt like a waste of time. Mobility work wasn't on my radar. I knew the movements, but I was skipping the preparation that makes heavier loads safe. Eventually my back gave out. For almost a year I lived with serious pain — the kind that makes getting out of bed uncomfortable and the gym feel completely out of reach. That year was one of the hardest things I've been through, not just physically but mentally. I had built my identity around training, and suddenly I couldn't do it. Having to slow down, relearn movements I thought I already knew, and accept that the way I'd been approaching everything needed to change — that wasn't easy.",
+      "I kept adding weight before I had the foundation to support it. Warm-ups felt like a waste of time. Mobility work wasn't on my radar. I knew the movements, but I was skipping the preparation that makes heavier loads safe. Eventually my back gave out. For almost a year I lived with serious pain — the kind that makes getting out of bed uncomfortable and the gym feel completely out of reach. That year was one of the hardest things I've been through, not just physically but mentally. Having to slow down, relearn movements I thought I already knew, and accept that the way I'd been approaching everything needed to change — that wasn't easy.",
     aboutPara4:
-      "That year I rebuilt everything properly. Movement mechanics, warm-up protocols, mobility, real programming logic. I became a certified personal trainer not to teach what I was doing before, but to genuinely understand what I'd been skipping. I came back pain-free and stronger than I had ever been.",
+      "I rebuilt everything. Movement mechanics, warm-up protocols, mobility, real programming logic. I became a certified personal trainer not because it was a career plan — my plan had always been engineering — but because I needed to genuinely understand what I'd been skipping. I came back pain-free and stronger than I had ever been. And I realized the foundation I'd had to find the hard way was something I could hand to other people.",
     aboutPara5:
-      "Lisa Fit Method exists because that foundation — the stuff I had to learn the hard way — should have been the starting point. Not something I figured out after a year of pain. Whether you're brand new to the gym or you've been winging it for years, this is what I wish someone had handed me.",
+      "Lisa Fit Method exists because that foundation should have been the starting point. I'm an engineer by training — I think in systems and structures. That's how I approach programming: the warm-up, the movements, the progression, the recovery. Everything connects. Whether you're brand new to the gym or you've been winging it for years, this is what I wish someone had handed me.",
     aboutQuote: "The fundamentals aren't optional. They're the whole game.",
     aboutCred1Label: "Certified Personal Trainer",
     aboutCred1Body:
-      "Formally trained in movement, programming, and corrective exercise. I know the science and I live the practice.",
+      "Formally trained in movement, programming, and corrective exercise. With a background in engineering, I approach training systematically — with logic behind every decision.",
     aboutCred2Label: "Built from scratch",
     aboutCred2Body:
       "Not just study — I rebuilt my own body after a serious injury. I know what it takes to train when things go wrong.",
