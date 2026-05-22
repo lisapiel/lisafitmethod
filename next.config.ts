@@ -11,6 +11,7 @@ const SERVER_KEYS = [
   "COGNITO_AWS_SECRET_ACCESS_KEY",
   "COGNITO_REGION",
   "COGNITO_USER_POOL_ID",
+  "RESEND_API_KEY",
 ]
 
 const nextConfig: NextConfig = {
