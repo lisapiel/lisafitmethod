@@ -3,7 +3,7 @@ import Link from "next/link"
 import { getPublishedPhotoUrl } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
-export const revalidate = 3600
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "About Lisa McPherson — Certified Personal Trainer",
@@ -83,7 +83,7 @@ export default async function AboutPage() {
                 src={photoUrl ?? "/hero.png"}
                 alt="Lisa McPherson — Certified Personal Trainer"
                 fill
-                style={{ objectFit: "cover", objectPosition: "center 10%" }}
+                style={{ objectFit: "cover", objectPosition: "center top" }}
               />
             </div>
             <div style={{ marginTop: 24, padding: "24px 28px", background: "#f0ebe3", borderLeft: "3px solid #c8a97e" }}>
