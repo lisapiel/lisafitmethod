@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import DayWorkoutPanel, { DayStatusBadge } from "@/components/training/DayWorkoutPanel.client"
 import { DayLogsProvider } from "@/components/training/DayLogsContext"
 import InlineExerciseTracker from "@/components/training/InlineExerciseTracker.client"
+import DayWeekSelector from "@/components/training/DayWeekSelector.client"
 
 export const metadata: Metadata = {
   title: "Module 3 — The 4-Week Program | Lisa Fit Method",
@@ -158,6 +159,7 @@ export default async function Module3Page() {
 
         <DayLogsProvider day="a">
           <div id="daya-tracker">
+            <DayWeekSelector />
             <SubLabel>Working Sets</SubLabel>
             <ExerciseRow name="Goblet Squat" prescription="3 sets × 10 reps — Rest 2 min" note="Chest up, knees tracking over toes, sit between your heels not behind them. Refer back to Module 1 Exercise 2." videoIds={["NYf82VuzrQM"]} s3Urls={[urlMap["m3a_goblet_squat"]]} />
             <InlineExerciseTracker day="a" exerciseId="goblet_squat" />
@@ -198,6 +200,7 @@ export default async function Module3Page() {
 
         <DayLogsProvider day="b">
           <div id="dayb-tracker">
+            <DayWeekSelector />
             <SubLabel>Working Sets</SubLabel>
             <ExerciseRow name="Dumbbell Bench Press or Push-Up" prescription="3 sets × 10 reps — Rest 90 sec" note="Elbows at 45 degrees, shoulder blades set before you press, wrist stacked over elbow throughout. Refer back to Module 1 Exercise 3." videoIds={["vZTUnLTRkOg", "oZmBz-BN7ZY"]} s3Urls={[urlMap["m3b_db_bench"], urlMap["m3b_pushup"]]} />
             <InlineExerciseTracker day="b" exerciseId="db_bench" />
@@ -251,6 +254,7 @@ export default async function Module3Page() {
 
         <DayLogsProvider day="c">
           <div id="dayc-tracker">
+            <DayWeekSelector />
             <SubLabel>Working Sets</SubLabel>
             <ExerciseRow name="Single Leg Glute Bridge" prescription="3 sets × 10 reps per side — Rest 60 sec" note="Drive through your heel, squeeze the glute hard at the top, and keep your hips level throughout. If your hips drop to one side that is a stability weakness worth noting and working on." videoIds={["95b9yp9kfEg"]} s3Urls={[urlMap["m3c_sl_glute_bridge"]]} />
             <InlineExerciseTracker day="c" exerciseId="sl_glute_bridge" />
