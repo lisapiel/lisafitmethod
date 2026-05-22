@@ -228,9 +228,19 @@ export default async function HomePage() {
 
       {/* BANNER */}
       {bannerUrl && (
-        <section style={{ position: "relative", overflow: "hidden" }}>
-          <Image src={bannerUrl} alt="Lisa Fit Method" width={3000} height={1000} style={{ width: "100%", height: "auto", display: "block" }} />
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)" }} />
+        <section style={{ background: "#0a0a0a", position: "relative" }} className="banner-section">
+          <style>{`
+            .banner-section { height: 280px; }
+            @media (max-width: 768px) { .banner-section { height: 200px; } }
+            @media (max-width: 480px) { .banner-section { height: 150px; } }
+          `}</style>
+          <Image
+            src={bannerUrl}
+            alt="Lisa Fit Method"
+            fill
+            style={{ objectFit: "contain" }}
+            sizes="100vw"
+          />
         </section>
       )}
 
