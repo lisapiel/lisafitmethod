@@ -14,6 +14,8 @@ interface Stats {
   videosDraft: number
   photosPublished: number
   photosDraft: number
+  contactsNew: number
+  contactsTotal: number
 }
 
 function StatCard({ label, value, sub }: { label: string; value: number; sub: string }) {
@@ -37,17 +39,22 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.MediaAsset.list({ authMode: "userPool" }).then(({ data }) => {
-      const videos = data.filter((a) => a.type === "VIDEO")
-      const photos = data.filter((a) => a.type === "PHOTO")
+    Promise.all([
+      client.models.MediaAsset.list({ authMode: "userPool" }),
+      client.models.ContactSubmission.list({ authMode: "userPool" }),
+    ]).then(([{ data: assets }, { data: contacts }]) => {
+      const videos = assets.filter((a) => a.type === "VIDEO")
+      const photos = assets.filter((a) => a.type === "PHOTO")
       setStats({
         videosPublished: videos.filter((v) => v.isPublished).length,
         videosDraft: videos.filter((v) => !v.isPublished).length,
         photosPublished: photos.filter((p) => p.isPublished).length,
         photosDraft: photos.filter((p) => !p.isPublished).length,
+        contactsNew: contacts.filter((c) => !c.status || c.status === "New").length,
+        contactsTotal: contacts.length,
       })
     }).catch(() => {
-      setStats({ videosPublished: 0, videosDraft: 0, photosPublished: 0, photosDraft: 0 })
+      setStats({ videosPublished: 0, videosDraft: 0, photosPublished: 0, photosDraft: 0, contactsNew: 0, contactsTotal: 0 })
     })
   }, [])
 
@@ -68,9 +75,10 @@ export default function AdminDashboardPage() {
         <StatCard label="Videos Draft" value={stats?.videosDraft ?? 0} sub="uploaded, not published" />
         <StatCard label="Photos Live" value={stats?.photosPublished ?? 0} sub={`of ${totalPhotoSlots} slots`} />
         <StatCard label="Photos Draft" value={stats?.photosDraft ?? 0} sub="uploaded, not published" />
+        <StatCard label="New Messages" value={stats?.contactsNew ?? 0} sub={`of ${stats?.contactsTotal ?? 0} total`} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
         <Link href="/admin/videos" style={{ display: "block", background: "#161616", border: `1px solid ${border}`, padding: "2rem", textDecoration: "none" }}>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: "0.75rem" }}>
             Manage →
@@ -91,6 +99,17 @@ export default function AdminDashboardPage() {
           </p>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888", marginTop: "0.5rem" }}>
             Upload and manage photos for the landing page, module covers, and about section.
+          </p>
+        </Link>
+        <Link href="/admin/contacts" style={{ display: "block", background: "#161616", border: `1px solid ${border}`, padding: "2rem", textDecoration: "none" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: "0.75rem" }}>
+            View →
+          </p>
+          <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.5rem", fontWeight: 300, color: "#f0e6d3" }}>
+            Contacts
+          </p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888", marginTop: "0.5rem" }}>
+            View messages from the contact form, add notes, and track follow-up status.
           </p>
         </Link>
       </div>

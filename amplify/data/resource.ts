@@ -7,10 +7,12 @@ const schema = a.schema({
       email: a.string().required(),
       message: a.string().required(),
       type: a.enum(["coaching", "contact"]),
+      status: a.string(),
+      notes: a.string(),
     })
     .authorization((allow) => [
       allow.publicApiKey().to(["create"]),
-      allow.authenticated().to(["read", "delete"]),
+      allow.authenticated().to(["read", "update", "delete"]),
     ]),
   Purchase: a
     .model({
