@@ -85,7 +85,7 @@ export default async function AboutPage() {
       {/* STORY + PHOTO */}
       <section style={{ padding: "100px 80px" }} className="about-story">
         <style>{`
-          @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } .about-photo { min-height: 560px !important; } }
+          @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } .about-photo { min-height: 640px !important; } }
         `}</style>
         <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "stretch" }}>
           <div>
