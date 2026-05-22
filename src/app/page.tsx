@@ -27,7 +27,6 @@ export default async function HomePage() {
   ])
 
   const t = settings.text
-  const sp = settings.spacing.home
   const accent = settings.colors.accent
   const hs = settings.typography.headingScale
   const bs = settings.typography.bodyScale
@@ -168,7 +167,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden", alignSelf: "stretch", maxHeight: settings.imageSizes.hero }}>
+          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden", alignSelf: "stretch" }}>
             <Image
               src={heroUrl ?? "/hero.png"}
               alt="Lisa McPherson — Lisa Fit Method"
@@ -185,7 +184,7 @@ export default async function HomePage() {
       </section>
 
       {/* STORY */}
-      <section style={{ background: "var(--off-white)", padding: `${Math.round(80 * sp.story)}px 80px` }} className="story-section">
+      <section style={{ background: "var(--off-white)", padding: "80px 80px" }} className="story-section">
         <style>{`
           @media (max-width: 768px) {
             .story-section { padding: 72px 28px !important; }
@@ -229,14 +228,14 @@ export default async function HomePage() {
 
       {/* BANNER */}
       {bannerUrl && (
-        <section style={{ position: "relative", overflow: "hidden", height: settings.imageSizes.banner }}>
+        <section style={{ position: "relative", overflow: "hidden", height: 280 }}>
           <Image src={bannerUrl} alt="Lisa Fit Method" fill style={{ objectFit: "cover", objectPosition: settings.crops.banner }} />
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)" }} />
         </section>
       )}
 
       {/* SHORT COURSE PREVIEW */}
-      <section style={{ background: "var(--black)", padding: `${Math.round(100 * sp.coursePreview)}px 80px` }} className="preview-section">
+      <section style={{ background: "var(--black)", padding: "100px 80px" }} className="preview-section">
         <style>{`
           @media (max-width: 768px) {
             .preview-section { padding: 72px 28px !important; }
@@ -338,7 +337,7 @@ export default async function HomePage() {
       )}
 
       {/* FINAL CTA */}
-      <section style={{ background: "var(--black)", padding: `${Math.round(140 * sp.cta)}px 80px`, textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta-section">
+      <section style={{ background: "var(--black)", padding: "140px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta-section">
         <style>{`
           @media (max-width: 768px) {
             .final-cta-section { padding: 100px 28px !important; }

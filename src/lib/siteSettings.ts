@@ -4,16 +4,6 @@ export type SiteSettings = {
     about_bio: string
     banner: string
   }
-  imageSizes: {
-    hero: number
-    about_bio: number
-    banner: number
-  }
-  spacing: {
-    home: { story: number; coursePreview: number; cta: number }
-    about: { hero: number; story: number; credentials: number }
-    courses: { hero: number; modules: number; cta: number }
-  }
   typography: {
     headingScale: number
     bodyScale: number
@@ -78,16 +68,6 @@ export const DEFAULTS: SiteSettings = {
     hero: "center 15%",
     about_bio: "center 8%",
     banner: "center 30%",
-  },
-  imageSizes: {
-    hero: 600,
-    about_bio: 500,
-    banner: 280,
-  },
-  spacing: {
-    home: { story: 1.0, coursePreview: 1.0, cta: 1.0 },
-    about: { hero: 1.0, story: 1.0, credentials: 1.0 },
-    courses: { hero: 1.0, modules: 1.0, cta: 1.0 },
   },
   typography: {
     headingScale: 1.0,

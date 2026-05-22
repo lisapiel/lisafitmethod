@@ -394,8 +394,6 @@ export default function DesignPage() {
 
   // per-section state
   const [crops, setCrops] = useState(DEFAULTS.crops)
-  const [sizes, setSizes] = useState(DEFAULTS.imageSizes)
-  const [spacing, setSpacing] = useState(DEFAULTS.spacing)
   const [typography, setTypography] = useState(DEFAULTS.typography)
   const [colors, setColors] = useState(DEFAULTS.colors)
   const [text, setText] = useState(DEFAULTS.text)
@@ -410,14 +408,6 @@ export default function DesignPage() {
       .then((json: SiteSettings | null) => {
         if (!json) return
         if (json.crops) setCrops({ ...DEFAULTS.crops, ...json.crops })
-        if (json.imageSizes) setSizes({ ...DEFAULTS.imageSizes, ...json.imageSizes })
-        if (json.spacing) {
-          setSpacing({
-            home: { ...DEFAULTS.spacing.home, ...(json.spacing.home ?? {}) },
-            about: { ...DEFAULTS.spacing.about, ...(json.spacing.about ?? {}) },
-            courses: { ...DEFAULTS.spacing.courses, ...(json.spacing.courses ?? {}) },
-          })
-        }
         if (json.typography) setTypography({ ...DEFAULTS.typography, ...json.typography })
         if (json.colors) setColors({ ...DEFAULTS.colors, ...json.colors })
         if (json.text) setText({ ...DEFAULTS.text, ...json.text })
@@ -428,14 +418,7 @@ export default function DesignPage() {
 
   async function handleSave() {
     setSaving(true)
-    const settings: SiteSettings = {
-      crops,
-      imageSizes: sizes,
-      spacing,
-      typography,
-      colors,
-      text,
-    }
+    const settings: SiteSettings = { crops, typography, colors, text }
     try {
       await uploadData({
         path: "media/settings.json",
@@ -447,6 +430,29 @@ export default function DesignPage() {
     } catch (err) {
       console.error("Save failed:", err)
       setToast("Save failed — please try again.")
+      setTimeout(() => setToast(null), 5000)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleResetAll() {
+    if (!confirm("Reset ALL settings (crops, colors, typography, text) to defaults and save? This will overwrite everything you've customized.")) return
+    setSaving(true)
+    try {
+      await uploadData({
+        path: "media/settings.json",
+        data: new Blob([JSON.stringify(DEFAULTS, null, 2)], { type: "application/json" }),
+        options: { contentType: "application/json" },
+      }).result
+      setCrops(DEFAULTS.crops)
+      setTypography(DEFAULTS.typography)
+      setColors(DEFAULTS.colors)
+      setText(DEFAULTS.text)
+      setToast("All settings reset to defaults and saved.")
+      setTimeout(() => setToast(null), 6000)
+    } catch {
+      setToast("Reset failed — please try again.")
       setTimeout(() => setToast(null), 5000)
     } finally {
       setSaving(false)
@@ -517,25 +523,45 @@ export default function DesignPage() {
             Changes go live on the site within ~60 seconds after saving.
           </p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            background: saving ? "none" : gold,
-            color: saving ? gold : "#0a0a0a",
-            border: `1px solid ${gold}`,
-            fontFamily: "var(--font-montserrat), sans-serif",
-            fontSize: "0.65rem",
-            fontWeight: 600,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            padding: "12px 28px",
-            cursor: saving ? "not-allowed" : "pointer",
-            opacity: saving ? 0.7 : 1,
-          }}
-        >
-          {saving ? "Saving…" : "Save All Changes"}
-        </button>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <button
+            onClick={handleResetAll}
+            disabled={saving}
+            style={{
+              background: "none",
+              color: "#555",
+              border: `1px solid ${border}`,
+              fontFamily: "var(--font-montserrat), sans-serif",
+              fontSize: "0.6rem",
+              fontWeight: 500,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              padding: "12px 18px",
+              cursor: saving ? "not-allowed" : "pointer",
+            }}
+          >
+            Reset all to defaults
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              background: saving ? "none" : gold,
+              color: saving ? gold : "#0a0a0a",
+              border: `1px solid ${gold}`,
+              fontFamily: "var(--font-montserrat), sans-serif",
+              fontSize: "0.65rem",
+              fontWeight: 600,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              padding: "12px 28px",
+              cursor: saving ? "not-allowed" : "pointer",
+              opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? "Saving…" : "Save All Changes"}
+          </button>
+        </div>
       </div>
 
       {toast && (
@@ -615,14 +641,11 @@ export default function DesignPage() {
         </div>
       </div>
 
-      {/* 2. Photo Crops & Sizes */}
+      {/* 2. Photo Crops */}
       <div style={sectionStyle}>
         <SectionHeader
-          title="Photo Crops & Sizes"
-          onReset={() => {
-            setCrops(DEFAULTS.crops)
-            setSizes(DEFAULTS.imageSizes)
-          }}
+          title="Photo Crops"
+          onReset={() => setCrops(DEFAULTS.crops)}
         />
         <p
           style={{
@@ -632,187 +655,27 @@ export default function DesignPage() {
             marginBottom: 24,
           }}
         >
-          Click or drag on each photo to set the focal point (where the camera centers the crop).
+          Click or drag to set the focal point. The preview shows how the photo will actually appear on the page.
         </p>
         <div style={gridStyle}>
           {[
-            { key: "hero" as const, label: "Hero photo", h: 220, sz: { min: 400, max: 900 } },
-            { key: "about_bio" as const, label: "About photo", h: 280, sz: { min: 300, max: 800 } },
-            { key: "banner" as const, label: "Banner photo", h: 100, sz: { min: 120, max: 500 } },
-          ].map(({ key, label, h, sz }) => (
-            <div key={key}>
-              <CropTool
-                label={label}
-                photoUrl={photos[key]}
-                value={crops[key]}
-                onChange={(v) => setCrops({ ...crops, [key]: v })}
-                heightPx={h}
-              />
-              <RangeField
-                label="Image height (px)"
-                value={sizes[key]}
-                min={sz.min}
-                max={sz.max}
-                step={20}
-                unit="px"
-                onChange={(v) => setSizes({ ...sizes, [key]: v })}
-              />
-            </div>
+            { key: "hero" as const, label: "Hero photo (homepage right column)", h: 300 },
+            { key: "about_bio" as const, label: "About page photo (3:4 portrait)", h: 320 },
+            { key: "banner" as const, label: "Banner strip (full-width)", h: 60 },
+          ].map(({ key, label, h }) => (
+            <CropTool
+              key={key}
+              label={label}
+              photoUrl={photos[key]}
+              value={crops[key]}
+              onChange={(v) => setCrops({ ...crops, [key]: v })}
+              heightPx={h}
+            />
           ))}
         </div>
       </div>
 
-      {/* 3. Spacing */}
-      <div style={sectionStyle}>
-        <SectionHeader title="Section Spacing" onReset={() => setSpacing(DEFAULTS.spacing)} />
-        <p
-          style={{
-            fontFamily: "var(--font-montserrat), sans-serif",
-            fontSize: "0.6rem",
-            color: "#555",
-            marginBottom: 24,
-          }}
-        >
-          1× is the default spacing. Increase for more breathing room, decrease for a tighter layout.
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 32 }}>
-          <div>
-            <p
-              style={{
-                fontFamily: "var(--font-montserrat), sans-serif",
-                fontSize: "0.6rem",
-                color: gold,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: 16,
-              }}
-            >
-              Home page
-            </p>
-            <RangeField
-              label="Story section"
-              value={spacing.home.story}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) => setSpacing({ ...spacing, home: { ...spacing.home, story: v } })}
-            />
-            <RangeField
-              label="Course preview"
-              value={spacing.home.coursePreview}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) =>
-                setSpacing({ ...spacing, home: { ...spacing.home, coursePreview: v } })
-              }
-            />
-            <RangeField
-              label="Final CTA"
-              value={spacing.home.cta}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) => setSpacing({ ...spacing, home: { ...spacing.home, cta: v } })}
-            />
-          </div>
-          <div>
-            <p
-              style={{
-                fontFamily: "var(--font-montserrat), sans-serif",
-                fontSize: "0.6rem",
-                color: gold,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: 16,
-              }}
-            >
-              About page
-            </p>
-            <RangeField
-              label="Hero"
-              value={spacing.about.hero}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) => setSpacing({ ...spacing, about: { ...spacing.about, hero: v } })}
-            />
-            <RangeField
-              label="Story section"
-              value={spacing.about.story}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) => setSpacing({ ...spacing, about: { ...spacing.about, story: v } })}
-            />
-            <RangeField
-              label="Credentials"
-              value={spacing.about.credentials}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) =>
-                setSpacing({ ...spacing, about: { ...spacing.about, credentials: v } })
-              }
-            />
-          </div>
-          <div>
-            <p
-              style={{
-                fontFamily: "var(--font-montserrat), sans-serif",
-                fontSize: "0.6rem",
-                color: gold,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: 16,
-              }}
-            >
-              Courses page
-            </p>
-            <RangeField
-              label="Hero"
-              value={spacing.courses.hero}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) =>
-                setSpacing({ ...spacing, courses: { ...spacing.courses, hero: v } })
-              }
-            />
-            <RangeField
-              label="Modules"
-              value={spacing.courses.modules}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) =>
-                setSpacing({ ...spacing, courses: { ...spacing.courses, modules: v } })
-              }
-            />
-            <RangeField
-              label="Final CTA"
-              value={spacing.courses.cta}
-              min={0.5}
-              max={2.0}
-              step={0.25}
-              unit="×"
-              onChange={(v) =>
-                setSpacing({ ...spacing, courses: { ...spacing.courses, cta: v } })
-              }
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Home Page Text */}
+      {/* 3. Home Page Text */}
       <div style={sectionStyle}>
         <SectionHeader
           title="Home Page Text"

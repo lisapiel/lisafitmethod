@@ -24,7 +24,6 @@ export default async function AboutPage() {
   ])
 
   const t = settings.text
-  const sp = settings.spacing.about
   const accent = settings.colors.accent
   const hs = settings.typography.headingScale
   const bs = settings.typography.bodyScale
@@ -64,7 +63,7 @@ export default async function AboutPage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "#0a0a0a", padding: `${Math.round(100 * sp.hero)}px 80px ${Math.round(80 * sp.hero)}px` }} className="about-hero">
+      <section style={{ background: "#0a0a0a", padding: "100px 80px 80px" }} className="about-hero">
         <style>{`
           @media (max-width: 768px) { .about-hero { padding: 72px 28px 60px !important; } }
         `}</style>
@@ -84,7 +83,7 @@ export default async function AboutPage() {
       </section>
 
       {/* STORY + PHOTO */}
-      <section style={{ padding: `${Math.round(100 * sp.story)}px 80px` }} className="about-story">
+      <section style={{ padding: "100px 80px" }} className="about-story">
         <style>{`
           @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }
         `}</style>
@@ -117,7 +116,7 @@ export default async function AboutPage() {
           </div>
 
           <div>
-            <div style={{ position: "relative", height: settings.imageSizes.about_bio, overflow: "hidden", background: "#e8e0d8" }}>
+            <div style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden", background: "#e8e0d8" }}>
               <Image
                 src={photoUrl ?? "/hero.png"}
                 alt="Lisa McPherson — Certified Personal Trainer"
@@ -138,7 +137,7 @@ export default async function AboutPage() {
       </section>
 
       {/* CREDENTIALS */}
-      <section style={{ background: "#f0ebe3", padding: `${Math.round(80 * sp.credentials)}px 80px` }} className="creds-section">
+      <section style={{ background: "#f0ebe3", padding: "80px 80px" }} className="creds-section">
         <style>{`
           @media (max-width: 768px) { .creds-section { padding: 60px 28px !important; } .creds-grid { grid-template-columns: 1fr !important; gap: 32px !important; } }
         `}</style>

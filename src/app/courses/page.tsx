@@ -56,7 +56,6 @@ export default async function CoursesPage() {
   ])
 
   const t = settings.text
-  const sp = settings.spacing.courses
   const accent = settings.colors.accent
   const hs = settings.typography.headingScale
   const bs = settings.typography.bodyScale
@@ -110,7 +109,7 @@ export default async function CoursesPage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "#0a0a0a", padding: `${Math.round(120 * sp.hero)}px 80px`, textAlign: "center" }} className="courses-hero">
+      <section style={{ background: "#0a0a0a", padding: "120px 80px", textAlign: "center" }} className="courses-hero">
         <style>{`
           @media (max-width: 768px) { .courses-hero { padding: 80px 28px !important; } }
         `}</style>
@@ -137,7 +136,7 @@ export default async function CoursesPage() {
       </section>
 
       {/* MODULES */}
-      <section style={{ background: "#0a0a0a", padding: `0 80px ${Math.round(120 * sp.modules)}px` }} className="modules-section">
+      <section style={{ background: "#0a0a0a", padding: "0 80px 120px" }} className="modules-section">
         <style>{`
           @media (max-width: 768px) { .modules-section { padding: 0 28px 80px !important; } .modules-grid { grid-template-columns: 1fr !important; } }
         `}</style>
@@ -244,7 +243,7 @@ export default async function CoursesPage() {
       </section>
 
       {/* FINAL CTA */}
-      <section style={{ background: "#0a0a0a", padding: `${Math.round(120 * sp.cta)}px 80px`, textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta">
+      <section style={{ background: "#0a0a0a", padding: "120px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta">
         <style>{`
           @media (max-width: 768px) { .final-cta { padding: 80px 28px !important; } }
         `}</style>
