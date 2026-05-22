@@ -181,6 +181,26 @@ export default function SiteFooter() {
         }}>
           © {new Date().getFullYear()} Lisa Fit Method. All rights reserved.
         </p>
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+          {[
+            { href: "/privacy", label: "Privacy Policy" },
+            { href: "/terms", label: "Terms of Use" },
+            { href: "/licensing", label: "Licensing & Copyright" },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              style={{
+                fontFamily: "var(--font-dm-sans), sans-serif",
+                fontSize: 11,
+                color: "rgba(240,230,211,0.25)",
+                textDecoration: "none",
+              }}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
       </div>
     </footer>
   )
