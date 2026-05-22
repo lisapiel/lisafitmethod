@@ -121,7 +121,7 @@ export default async function HomePage() {
       {/* HERO */}
       <section style={{ background: "var(--black)", position: "relative", overflow: "hidden" }}>
         <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 64px)", alignItems: "center" }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", height: "calc(100vh - 64px)", minHeight: 600, alignItems: "stretch" }}
           className="hero-grid"
         >
           <style>{`
@@ -167,7 +167,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden", alignSelf: "stretch" }}>
+          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden" }}>
             <Image
               src={heroUrl ?? "/hero.png"}
               alt="Lisa McPherson — Lisa Fit Method"
@@ -228,8 +228,8 @@ export default async function HomePage() {
 
       {/* BANNER */}
       {bannerUrl && (
-        <section style={{ position: "relative", overflow: "hidden", height: 280 }}>
-          <Image src={bannerUrl} alt="Lisa Fit Method" fill style={{ objectFit: "cover", objectPosition: settings.crops.banner }} />
+        <section style={{ position: "relative", overflow: "hidden" }}>
+          <Image src={bannerUrl} alt="Lisa Fit Method" width={3000} height={1000} style={{ width: "100%", height: "auto", display: "block" }} />
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)" }} />
         </section>
       )}
