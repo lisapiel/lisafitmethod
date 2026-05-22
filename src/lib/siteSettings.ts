@@ -92,7 +92,7 @@ export const DEFAULTS: SiteSettings = {
     homeFinalSubtext:
       "Structured workouts, guided exercise instruction, built-in tracking, and the foundations most people never learn.",
     coursePrice: "47",
-    aboutHeroHeadline: "Spent years burning calories\nwithout building strength or the body I wanted.\nThen I found structure.",
+    aboutHeroHeadline: "Spent years burning calories without building strength or the body I wanted. Then I found structure.",
     aboutHeroSubtext:
       "Double master's in engineering. Certified personal trainer. Years of trial and error, injury, rebuilding, and relearning what actually matters in strength training. My background taught me to think in systems and structure, which completely changed the way I approach fitness. Now I help people build strong, aesthetic bodies through movement quality, intelligent programming, and training that lasts.",
     aboutPara1:

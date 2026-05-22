@@ -119,12 +119,14 @@ export default async function AboutPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div className="about-photo" style={{ position: "relative", flex: 1, minHeight: 480, overflow: "hidden", background: "#e8e0d8" }}>
+            <div className="about-photo" style={{ background: "#e8e0d8", overflow: "hidden" }}>
               <Image
                 src={photoUrl ?? "/hero.png"}
                 alt="Lisa McPherson — Certified Personal Trainer"
-                fill
-                style={{ objectFit: "cover", objectPosition: settings.crops.about_bio }}
+                width={900}
+                height={1200}
+                style={{ width: "100%", height: "auto", display: "block" }}
+                sizes="(max-width: 768px) 100vw, 45vw"
               />
             </div>
             <div style={{ marginTop: 24, padding: "24px 28px", background: "#f0ebe3", borderLeft: "3px solid #c8a97e" }}>
