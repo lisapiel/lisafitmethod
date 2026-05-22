@@ -130,8 +130,12 @@ export default async function Module3Page() {
           Sets x Reps. So 3×10 means 3 sets of 10 repetitions. Rest 60 to 90 seconds between sets on most exercises. For heavier compound movements like the RDL, hip thrust, and goblet squat, take a full 2 minutes between sets.
         </p>
         <SectionLabel>How to progress</SectionLabel>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8 }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8, marginBottom: "1rem" }}>
           If you complete all sets and reps with clean form and the last few reps feel challenging but controlled, add a small amount of weight next session. For dumbbells that usually means going up one size. If the form breaks down before you finish the reps, stay at the same weight until it doesn&apos;t.
+        </p>
+        <SectionLabel>Track your progress</SectionLabel>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8 }}>
+          At the bottom of each day below, log your sets and weights as you go. Four weeks is the minimum — the program is designed to be repeated. In Round 2 you go heavier. In Round 3 heavier still. The results compound. Use the tracker to see exactly how far you&apos;ve come.
         </p>
       </div>
 
@@ -258,10 +262,10 @@ export default async function Module3Page() {
       <div style={{ padding: "2.5rem", background: cardBg, border: `1px solid ${border}`, borderLeft: `3px solid ${gold}`, marginBottom: "2rem" }}>
         <SectionLabel>You finished the program. Here&apos;s what that means.</SectionLabel>
         <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
-          Four weeks ago you walked into the gym with a foundation to build. Now you have one. You know how to hinge, squat, push, pull, and brace. You have trained your glutes and core with real intention and structure. You have warmed up before every session. You have done the work that most people who exercise regularly have never done, and your body is more resilient because of it.
+          Four weeks ago you walked into the gym and started building something. Now you have it. You know how to hinge, squat, push, pull, and brace. You have trained your glutes and core with real intention. You have done the work most people who exercise regularly have never done.
         </p>
         <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9 }}>
-          This is not the finish line. It is the starting point for everything that comes next.
+          This is not the finish line. It is the starting point. The program is designed to be run again — and the second time, you go heavier. The third time, heavier still. Open your training log and look at Week 1 versus Week 4. That gap is what Round 2 will build on.
         </p>
       </div>
 

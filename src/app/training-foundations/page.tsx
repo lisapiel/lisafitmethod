@@ -53,38 +53,36 @@ export default function TrainingFoundationsIntroPage() {
 
         <div style={{ marginBottom: "1.75rem" }}>
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
-            A few years ago I was training hard, going to the gym consistently, and doing everything I thought was right.
-          </p>
-          <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>I wasn&apos;t.</p>
-          <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
-            I was always cautious about my form, but I realize now that intent, tempo, and structure were just as important. I was skipping warm-ups because they felt like a waste of time. Stretching after workouts wasn&apos;t a priority either. My mobility work was inconsistent at best, and most of my training came from random workouts I found online with no real structure or logic behind them. I thought pushing more weight and working harder was the path to results. I was wrong about all of it.
-          </p>
-          <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>Then my back gave out.</p>
-          <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
-            For almost a year I lived with serious back pain. I couldn&apos;t train the way I wanted to. Simple things like getting out of bed, sitting at a desk, or tying my shoes became genuinely uncomfortable. I had built my routine around the gym, and suddenly that was gone. That year taught me more about training than all the years before it combined.
+            I started in fitness classes. Cardio, cycling, group workouts — the kind of training that feels approachable when the weight room feels intimidating. I was consistent, I showed up, I worked hard. But nothing was really changing. I was burning calories without building anything. The shape I wanted wasn&apos;t coming from what I was doing.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
-            I had to relearn everything. Proper movement mechanics. How to actually warm up. Why mobility and recovery are not optional extras. How to eat in a way that supports training rather than works against it. How to build a program that makes sense. I became a certified personal trainer not just to help others, but because I needed to truly understand what I had been doing wrong.
+            The moment I started following a real strength training program, everything shifted. For the first time I was actually building muscle. Week over week I could feel it. The squat moved more weight. The deadlift felt different. My body started changing in a way it never had from classes. I got hooked — and I pushed too hard, too fast.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
-            I rebuilt my body from the ground up. I became pain-free. I became stronger than I had ever been before. And I have maintained healthier habits consistently ever since, not through motivation or willpower, but through genuinely understanding why the right approach works.
+            I kept loading more weight before I had the foundation to support it. Warm-ups were something I rushed through or skipped. Mobility and recovery weren&apos;t things I took seriously — they felt optional. I was making progress, which made it easy to ignore the warning signs. Eventually my back gave out.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
-            This guide is everything I wish someone had handed me before I started. It is not a shortcut. It is a foundation. The movements, the structure, the habits, and the knowledge that would have saved me a year of pain if I had learned them first.
+            For almost a year I lived with serious back pain. Getting out of bed was uncomfortable. Tying my shoes was uncomfortable. The gym — something I had built my entire routine around — was suddenly out of reach. That year taught me more about training than all the years before it combined.
+          </p>
+          <br />
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+            I had to relearn everything properly. Movement mechanics. How to actually warm up. Why mobility and recovery are not optional. How to build a program with real structure and logic. I became a certified personal trainer because I needed to genuinely understand what I had been skipping — not just fix it, understand it.
+          </p>
+          <br />
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+            I rebuilt my body from scratch. Properly. I became pain-free. I became stronger than I had ever been. And I have maintained those habits consistently ever since — not through motivation, but through understanding why the right approach works.
+          </p>
+          <br />
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+            This guide is everything I wish someone had handed me before I started. The movements, the structure, the warm-up and recovery protocols I used to think were optional. Everything that would have changed my trajectory if I had learned it from the beginning.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
             You don&apos;t need to learn the hard way. That&apos;s already been done.
           </p>
-          <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>Let&apos;s build something that lasts.</p>
           <br />
           <p
             style={{

@@ -68,6 +68,20 @@ export default function RootLayout({
       className={`${playfair.variable} ${dmSans.variable} ${cormorant.variable} ${montserrat.variable}`}
     >
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: "Lisa McPherson",
+              jobTitle: "Certified Personal Trainer",
+              url: "https://lisafitmethod.com",
+              description: "Certified personal trainer and founder of Lisa Fit Method. Specializes in foundational strength training for beginners.",
+              sameAs: ["https://www.instagram.com/lisafitmethod"],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-BZWMNEQ83F"
           strategy="beforeInteractive"

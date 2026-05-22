@@ -9,10 +9,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Training Foundations — Lisa Fit Method",
   description:
-    "A 4-week strength training program for women beginners. Learn the movements, build the habits, and create a foundation that lasts. One-time payment, yours forever.",
+    "A 4-week beginner strength training program. Learn the movements, build the habits, and create a foundation that lasts. One-time payment, yours forever.",
   openGraph: {
     title: "Training Foundations — Lisa Fit Method",
-    description: "A 4-week strength training program for women beginners. $47 one-time, yours forever.",
+    description: "A 4-week beginner strength training program. $47 one-time, yours forever.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -38,6 +38,7 @@ const MODULE_ITEMS = [
     "Day C — Movement quality & integration",
     "Weeks 3 & 4 — Progressive overload built in",
     "10-minute warm-ups and 5-minute cool-downs included",
+    "Built-in workout tracker — log every set and watch your strength grow",
   ],
   [
     "Protein is your priority",
@@ -70,15 +71,14 @@ export default async function CoursesPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Course",
-    name: t.coursesHeroHeadline,
-    description: t.coursesHeroSubtext,
+    name: "Training Foundations",
+    description: "A 4-week beginner strength training program. Learn the foundational movements, build consistent habits, and create a base that supports your training for life.",
     url: "https://lisafitmethod.com/courses",
-    provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+    provider: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
     instructor: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
     courseMode: "online",
     educationalLevel: "Beginner",
     timeRequired: "P4W",
-    numberOfCredits: 0,
     teaches: ["Hip Hinge", "Squat Pattern", "Push Pattern", "Pull Pattern", "Core Stability", "Progressive Overload", "Nutrition Fundamentals"],
     hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", instructor: { "@type": "Person", name: "Lisa McPherson" } },
     offers: {
@@ -96,9 +96,33 @@ export default async function CoursesPage() {
     })),
   }
 
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      { "@type": "Question", name: "How long does each session take?", acceptedAnswer: { "@type": "Answer", text: "Between 45 and 60 minutes including warm-up and cool-down." } },
+      { "@type": "Question", name: "Do I need a gym membership?", acceptedAnswer: { "@type": "Answer", text: "You need access to basic equipment: dumbbells, a resistance band, and a flat bench or equivalent." } },
+      { "@type": "Question", name: "Is this for complete beginners?", acceptedAnswer: { "@type": "Answer", text: "Yes. It's designed for people who are new to structured training or feel like they've been winging it — regardless of experience level." } },
+      { "@type": "Question", name: "Can I do more than 4 weeks?", acceptedAnswer: { "@type": "Answer", text: "Absolutely. The program is designed to be run in multiple rounds. Each round you add weight and progress further. Four weeks is the foundation — most people who see real results run it 2 or 3 times." } },
+      { "@type": "Question", name: "Is this a one-time payment?", acceptedAnswer: { "@type": "Answer", text: "Yes. One-time payment, yours forever, no subscription." } },
+      { "@type": "Question", name: "Can men do this program?", acceptedAnswer: { "@type": "Answer", text: "Yes. The movements and principles apply to everyone. The program has no gender-specific requirements." } },
+    ],
+  }
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://lisafitmethod.com" },
+      { "@type": "ListItem", position: 2, name: "Training Foundations", item: "https://lisafitmethod.com/courses" },
+    ],
+  }
+
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }} />
     <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
       <style>{`
         :root {
@@ -223,21 +247,33 @@ export default async function CoursesPage() {
             </ul>
           </div>
           <div className="for-right" style={{ paddingTop: 80 }}>
-            <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(26px * ${hs})`, fontWeight: 700, color: "#0a0a0a", marginBottom: 8 }}>This is not for you</h3>
-            <p style={{ fontSize: `calc(13px * ${bs})`, color: "#6b6560", marginBottom: 24 }}>(and that&apos;s okay)</p>
-            <ul style={{ listStyle: "none" }}>
-              {[
-                "You're looking for a quick fix or a 7-day transformation",
-                "You already have years of consistent structured training",
-                "You're not willing to do warm-ups or cool-downs",
-                "You want someone to tell you to push through bad form",
-              ].map((item) => (
-                <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "14px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(15px * ${bs})`, color: "#6b6560", lineHeight: 1.5 }}>
-                  <span style={{ color: "#bbb", fontSize: 18, flexShrink: 0 }}>×</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16 }}>Want more?</p>
+            <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(26px * ${hs})`, fontWeight: 700, color: "#0a0a0a", marginBottom: 20, lineHeight: 1.2 }}>
+              Ready for a fully<br /><em style={{ fontStyle: "italic", color: "#a8895e" }}>personalized plan?</em>
+            </h3>
+            <p style={{ fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.75, marginBottom: 16 }}>
+              The course gives you the foundation. If you want a fully custom program — your goals, your schedule, me in your corner every week — that&apos;s what 1:1 coaching is for.
+            </p>
+            <p style={{ fontSize: `calc(14px * ${bs})`, color: "#6b6560", lineHeight: 1.7, marginBottom: 32 }}>
+              I only work with people who are ready to commit. No quitting halfway. We go until you get your result.
+            </p>
+            <Link
+              href="/coaching"
+              style={{
+                display: "inline-block",
+                border: "2px solid #a8895e",
+                color: "#a8895e",
+                fontFamily: "var(--font-dm-sans), sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                textDecoration: "none",
+                padding: "16px 32px",
+              }}
+            >
+              Ask about 1:1 coaching →
+            </Link>
           </div>
         </div>
       </section>
@@ -268,20 +304,6 @@ export default async function CoursesPage() {
           </p>
         </div>
 
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Course",
-              name: "Training Foundations",
-              description: "A 4-week beginner strength training program for women. Learn the movements, build the habits, and create a foundation that lasts.",
-              provider: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer" },
-              offers: { "@type": "Offer", price: t.coursePrice, priceCurrency: "USD", availability: "https://schema.org/InStock" },
-              url: "https://lisafitmethod.com/courses",
-            }),
-          }}
-        />
       </section>
     </main>
     </>

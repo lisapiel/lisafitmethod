@@ -80,31 +80,31 @@ export const DEFAULTS: SiteSettings = {
     homeHeroHeadline: "Stop guessing.\nStart training\nthe right way.",
     homeHeroSubtext:
       "A 4-week beginner program built around what actually matters. Proper movement, a real foundation, and a body built to last. No random workouts. No ego lifting. Just the method that changed everything for me.",
-    homeStoryHeadline: "I learned the hard way.\nYou don't have to.",
+    homeStoryHeadline: "I did it the long way.\nYou don't have to.",
     homeStoryPara1:
-      "A few years ago I was training consistently and doing everything I thought was right. I wasn't. I was skipping warm-ups, ignoring mobility, following random programs with no structure. I thought pushing more weight was the path to results.",
+      "I spent years in fitness classes before I ever touched a barbell. Cardio, cycling, group workouts — I was consistent, I was working hard, but I wasn't building anything. I was burning calories without changing my body. My strength didn't improve. My shape didn't improve. Things only changed when I started following a real strength training plan.",
     homeStoryPara2:
-      "Then my back gave out. For almost a year I lived with serious pain. That year taught me more about training than all the years before it combined. I became a certified personal trainer because I needed to actually understand what I'd been doing wrong.",
+      "I finally started making real progress — and I got ahead of myself. I kept pushing the weight without building the foundation to support it. Warm-ups were rushed. Mobility work wasn't something I took seriously. Eventually my back had enough. For almost a year I dealt with serious pain. That year forced me to actually learn what I'd been skipping.",
     homeStoryPara3:
-      "This guide is everything I wish someone had handed me before I started. The movements, structure, and habits that would have saved me a year of pain.",
+      "I became a certified personal trainer, rebuilt from the ground up, and came back stronger than before. This guide is that foundation — the structure, the warm-up protocols, the movement knowledge I wish I'd had from day one.",
     homeStoryQuote: "You don't need to learn the hard way. That's already been done.",
     homeFinalHeadline: "Build the foundation.\nTrain for life.",
     homeFinalSubtext:
       "Four weeks. Three days a week. Everything you need to actually understand how to train and a body that shows it.",
     coursePrice: "47",
-    aboutHeroHeadline: "I trained wrong for years.\nThen my back gave out.",
+    aboutHeroHeadline: "I spent years burning calories\nwithout building anything.\nThen I found structure.",
     aboutHeroSubtext:
-      "Certified personal trainer. Back from the worst training injury of my life. Now building the foundation I wish I'd had from the start.",
+      "Certified personal trainer. Found strength training after years of classes that never changed my body. Learned the foundation the hard way — now here to give it to you straight.",
     aboutPara1:
-      "For years I was training consistently and doing what I thought was right. I wasn't. I was skipping warm-ups, ignoring mobility work, and jumping between random programs that had no real structure. I pushed heavier weights thinking that was the path to results.",
+      "I started where a lot of people start — scared of the weight room, sticking to what felt safe. Classes, cardio, group workouts. I was consistent and I was working hard. But I was burning calories, not building anything. My body wasn't changing the way I wanted it to. My strength wasn't increasing. The gym felt like maintenance, not progress.",
     aboutPara2:
-      "Then my back gave out. Not from one bad lift — from years of ignoring the fundamentals. For almost a year I lived with serious back pain. Getting off the couch was uncomfortable. The gym felt like something I might never go back to. That year changed everything.",
+      "It wasn't until I started following a real structured strength training program that things actually shifted. For the first time, I was building something. The squat got stronger week over week. I could feel my body actually changing. It was addictive — and I pushed it too hard, too fast.",
     aboutPara3:
-      "I became a certified personal trainer because I needed to actually understand what I'd been doing wrong. Not just fix it — understand it. I rebuilt my body from scratch, this time with the right foundation: mobility, movement patterns, progressive structure, and real recovery.",
+      "I kept adding weight before I had the foundation to support it. Warm-ups felt like a waste of time. Mobility work wasn't on my radar. I knew the movements, but I was skipping the preparation that makes heavier loads safe. Eventually my back gave out. For almost a year I lived with serious pain — the kind that makes getting out of bed uncomfortable and the gym feel completely out of reach.",
     aboutPara4:
-      "I came back stronger than I'd ever been. Pain-free. And I've stayed that way. Not because I found some secret — because I finally stopped skipping the basics.",
+      "That year I rebuilt everything properly. Movement mechanics, warm-up protocols, mobility, real programming logic. I became a certified personal trainer not to teach what I was doing before, but to genuinely understand what I'd been skipping. I came back pain-free and stronger than I had ever been.",
     aboutPara5:
-      "Lisa Fit Method exists because I don't want you to spend a year learning what I learned the hard way. The movements, the structure, the habits — everything that would have changed my trajectory if I'd had it from the beginning.",
+      "Lisa Fit Method exists because that foundation — the stuff I had to learn the hard way — should have been the starting point. Not something I figured out after a year of pain. Whether you're brand new to the gym or you've been winging it for years, this is what I wish someone had handed me.",
     aboutQuote: "The fundamentals aren't optional. They're the whole game.",
     aboutCred1Label: "Certified Personal Trainer",
     aboutCred1Body:
@@ -114,7 +114,7 @@ export const DEFAULTS: SiteSettings = {
       "Not just study — I rebuilt my own body after a serious injury. I know what it takes to train when things go wrong.",
     aboutCred3Label: "@lisafitmethod",
     aboutCred3Body:
-      "Building a community of women who train smart, not just hard. Real content, real movement, no gimmicks.",
+      "Building a community of people who train smart, not just hard. Real content, real movement, no gimmicks.",
     coursesHeroHeadline: "Training Foundations",
     coursesHeroSubtext:
       "A 4-week beginner program built around the movements, habits, and structure that actually create results — and keep you training for life.",
@@ -133,7 +133,7 @@ export const DEFAULTS: SiteSettings = {
     coursesFinalHeadline: "Build the foundation.\nTrain for life.",
     coachingHeroHeadline: "Train directly\nwith me.",
     coachingHeroSubtext:
-      "1:1 coaching for women who want more than a template. Personalized programming built around your goals, your schedule, and where you actually are — not where a random plan assumes you are.",
+      "1:1 coaching for people who want more than a template. Personalized programming built around your goals, your schedule, and where you actually are — not where a random plan assumes you are.",
     coachingFeature1Title: "Custom programming",
     coachingFeature1Body:
       "A program built specifically for your goals, equipment, and schedule. Updated every month based on your progress.",
@@ -150,7 +150,7 @@ export const DEFAULTS: SiteSettings = {
     coachingFormSubtext:
       "I take on a limited number of coaching clients so I can give everyone real attention. Fill out the form and I'll get back to you within 48 hours.",
     footerTagline:
-      "A real foundation for women who want to train smart, move well, and build a body that lasts.",
+      "A real foundation for anyone who wants to train smart, move well, and build a body that lasts.",
   },
 }
 
