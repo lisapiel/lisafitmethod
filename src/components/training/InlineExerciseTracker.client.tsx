@@ -117,7 +117,7 @@ export default function InlineExerciseTracker({
     >
       <div
         style={{
-          fontSize: "0.55rem",
+          fontSize: "0.6rem",
           color: muted,
           letterSpacing: "0.15em",
           textTransform: "uppercase",

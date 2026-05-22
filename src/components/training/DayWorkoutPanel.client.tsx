@@ -312,34 +312,61 @@ function CompletedSummary({ exercises, day, onEdit }: CompletedSummaryProps) {
 }
 
 export default function DayWorkoutPanel({ day }: { day: DayKey }) {
-  const { ready } = useCourseProgress()
+  const { ready, currentPosition } = useCourseProgress()
   const {
+    selectedRound, selectedWeek,
     logs, updateExerciseSets, handleComplete, existingSession, isCompleted,
     setSelectedRound, setSelectedWeek, setEditing,
-    weekOptions, addWeek, weightUnit,
+    weekOptions, addWeek, weightUnit, isControlled,
   } = useDayLogs()
 
   if (!ready) return null
 
   const exercises = WORKOUT_DAYS[day].exercises
 
+  // Navigation helpers
+  const activeIdx = weekOptions.findIndex((o) => o.active)
+  const prevOpt = activeIdx > 0 ? weekOptions[activeIdx - 1] : null
+  const nextOpt = activeIdx < weekOptions.length - 1 ? weekOptions[activeIdx + 1] : null
+  const weeksPerRound = weekOptions.filter((o) => o.round === 1).length
+
+  const isOnCurrentWeek =
+    selectedRound === currentPosition.round && selectedWeek === currentPosition.week
+
+  function goTo(opt: { round: number; week: number }) {
+    setSelectedRound(opt.round)
+    setSelectedWeek(opt.week)
+    setEditing(false)
+  }
+
+  function goToCurrentWeek() {
+    setSelectedRound(currentPosition.round)
+    setSelectedWeek(currentPosition.week)
+    setEditing(false)
+  }
+
+  const weekLabel =
+    selectedRound === 1
+      ? `Week ${selectedWeek} of ${weeksPerRound}`
+      : `Round ${selectedRound} · Week ${selectedWeek}`
+
   return (
     <div
       style={{
-        margin: "48px 0 0",
+        margin: isControlled ? "0" : "48px 0 0",
         border: isCompleted ? `1px solid ${gold}` : `1px solid ${border}`,
         background: cardBg,
         padding: "28px 28px 32px",
         transition: "border-color 0.2s",
       }}
     >
-      {/* Header row */}
+      {/* Header */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 24,
+          marginBottom: isControlled ? 20 : 12,
           flexWrap: "wrap",
           gap: 12,
         }}
@@ -359,18 +386,118 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
             {isCompleted ? "Session Logged" : "Log This Session"}
           </span>
         </div>
+      </div>
 
-        {/* Week selector + add-week button */}
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
-          {weekOptions.map((opt) => {
-            return (
+      {/* Week selector — hidden in controlled mode (parent owns selection) */}
+      {!isControlled && (
+        <div style={{ marginBottom: 20 }}>
+          {/* Tier 1 — arrow navigation */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <button
+              onClick={() => prevOpt && goTo(prevOpt)}
+              disabled={!prevOpt}
+              style={{
+                background: "none",
+                border: `1px solid ${border}`,
+                color: prevOpt ? cream : "#333",
+                cursor: prevOpt ? "pointer" : "default",
+                fontSize: "0.75rem",
+                width: 28,
+                height: 28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 3,
+                flexShrink: 0,
+              }}
+              title="Previous week"
+            >
+              ←
+            </button>
+
+            <span
+              style={{
+                fontFamily: "var(--font-montserrat), sans-serif",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: cream,
+                minWidth: 140,
+                textAlign: "center",
+              }}
+            >
+              {weekLabel}
+            </span>
+
+            <button
+              onClick={() => nextOpt && goTo(nextOpt)}
+              disabled={!nextOpt}
+              style={{
+                background: "none",
+                border: `1px solid ${border}`,
+                color: nextOpt ? cream : "#333",
+                cursor: nextOpt ? "pointer" : "default",
+                fontSize: "0.75rem",
+                width: 28,
+                height: 28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 3,
+                flexShrink: 0,
+              }}
+              title="Next week"
+            >
+              →
+            </button>
+
+            <button
+              onClick={addWeek}
+              title="Add a week"
+              style={{
+                fontFamily: "var(--font-montserrat), sans-serif",
+                fontSize: "0.55rem",
+                letterSpacing: "0.08em",
+                padding: "5px 8px",
+                border: `1px dashed ${border}`,
+                background: "transparent",
+                color: muted,
+                cursor: "pointer",
+                marginLeft: 4,
+              }}
+            >
+              + wk
+            </button>
+          </div>
+
+          {/* Back-to-current-week link */}
+          {!isOnCurrentWeek && (
+            <button
+              onClick={goToCurrentWeek}
+              style={{
+                background: "none",
+                border: "none",
+                color: muted,
+                fontSize: "0.55rem",
+                fontFamily: "var(--font-montserrat), sans-serif",
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                padding: "0 0 6px",
+                textDecoration: "underline",
+                display: "block",
+              }}
+            >
+              ← Back to current week
+            </button>
+          )}
+
+          {/* Tier 2 — quick-jump pills */}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
+            {weekOptions.map((opt) => (
               <button
                 key={`${opt.round}-${opt.week}`}
-                onClick={() => {
-                  setSelectedRound(opt.round)
-                  setSelectedWeek(opt.week)
-                  setEditing(false)
-                }}
+                onClick={() => goTo(opt)}
                 style={{
                   fontFamily: "var(--font-montserrat), sans-serif",
                   fontSize: "0.55rem",
@@ -393,26 +520,10 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
                   </span>
                 )}
               </button>
-            )
-          })}
-          <button
-            onClick={addWeek}
-            title="Add a week"
-            style={{
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: "0.55rem",
-              letterSpacing: "0.08em",
-              padding: "5px 8px",
-              border: `1px dashed ${border}`,
-              background: "transparent",
-              color: muted,
-              cursor: "pointer",
-            }}
-          >
-            + wk
-          </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Body */}
       {isCompleted ? (

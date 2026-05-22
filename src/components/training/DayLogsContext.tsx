@@ -52,13 +52,23 @@ interface DayLogsContextValue {
   weeksPerRound: number
   addWeek: () => void
   weightUnit: "lbs" | "kg"
+  isControlled: boolean
 }
 
 const DayLogsContext = createContext<DayLogsContextValue | null>(null)
 
-export function DayLogsProvider({ day, children }: { day: DayKey; children: React.ReactNode }) {
+interface DayLogsProviderProps {
+  day: DayKey
+  children: React.ReactNode
+  controlledRound?: number
+  controlledWeek?: number
+}
+
+export function DayLogsProvider({ day, children, controlledRound, controlledWeek }: DayLogsProviderProps) {
   const { ready, progress, currentPosition, logSession, getSessionFor, addWeek } = useCourseProgress()
   const exercises = WORKOUT_DAYS[day].exercises
+
+  const isControlled = controlledRound !== undefined && controlledWeek !== undefined
 
   const [selectedRound, setSelectedRound] = useState(1)
   const [selectedWeek, setSelectedWeek] = useState(1)
@@ -67,8 +77,13 @@ export function DayLogsProvider({ day, children }: { day: DayKey; children: Reac
     buildInitialLogs(exercises, "lbs")
   )
 
-  // Auto-select the next incomplete week for this day once context is ready
+  // Effective values — controlled by parent or internal state
+  const effectiveRound = isControlled ? controlledRound! : selectedRound
+  const effectiveWeek = isControlled ? controlledWeek! : selectedWeek
+
+  // Auto-select the next incomplete week for this day (skipped when controlled)
   useEffect(() => {
+    if (isControlled) return
     if (!ready) return
     const weeksPerRound = progress.weeksPerRound ?? 6
     const pos = currentPosition
@@ -86,9 +101,9 @@ export function DayLogsProvider({ day, children }: { day: DayKey; children: Reac
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready])
 
-  // Pre-fill from existing log when selected week/round changes
+  // Pre-fill from existing log whenever the effective week/round changes
   useEffect(() => {
-    const existing = getSessionFor(selectedRound, selectedWeek, day)
+    const existing = getSessionFor(effectiveRound, effectiveWeek, day)
     if (existing) {
       const filled: Record<string, SetLog[]> = {}
       for (const ex of exercises) {
@@ -100,9 +115,9 @@ export function DayLogsProvider({ day, children }: { day: DayKey; children: Reac
       setLogs(buildInitialLogs(exercises, progress.weightUnit))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRound, selectedWeek, day])
+  }, [effectiveRound, effectiveWeek, day])
 
-  const existingSession = getSessionFor(selectedRound, selectedWeek, day)
+  const existingSession = getSessionFor(effectiveRound, effectiveWeek, day)
   const isCompleted = !!existingSession && !editing
 
   const updateExerciseSets = useCallback((exerciseId: string, sets: SetLog[]) => {
@@ -114,13 +129,13 @@ export function DayLogsProvider({ day, children }: { day: DayKey; children: Reac
       exerciseId: ex.id,
       sets: logs[ex.id] ?? defaultSets(ex, progress.weightUnit),
     }))
-    logSession(selectedRound, selectedWeek, day, exerciseLogs)
+    logSession(effectiveRound, effectiveWeek, day, exerciseLogs)
     setEditing(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exercises, logs, progress.weightUnit, logSession, selectedRound, selectedWeek, day])
+  }, [exercises, logs, progress.weightUnit, logSession, effectiveRound, effectiveWeek, day])
 
   const weeksPerRound = progress.weeksPerRound ?? 6
-  const maxRound = Math.max(currentPosition.round, selectedRound)
+  const maxRound = Math.max(currentPosition.round, effectiveRound)
   const weekOptions: WeekOption[] = []
   for (let r = 1; r <= maxRound + 1; r++) {
     for (let w = 1; w <= weeksPerRound; w++) {
@@ -129,7 +144,7 @@ export function DayLogsProvider({ day, children }: { day: DayKey; children: Reac
         week: w,
         label: r === 1 ? `Wk ${w}` : `R${r}·W${w}`,
         done: !!getSessionFor(r, w, day),
-        active: r === selectedRound && w === selectedWeek,
+        active: r === effectiveRound && w === effectiveWeek,
       })
     }
   }
@@ -137,10 +152,23 @@ export function DayLogsProvider({ day, children }: { day: DayKey; children: Reac
   return (
     <DayLogsContext.Provider
       value={{
-        day, selectedRound, selectedWeek, setSelectedRound, setSelectedWeek,
-        logs, updateExerciseSets, handleComplete, existingSession, isCompleted,
-        editing, setEditing, weekOptions, weeksPerRound, addWeek,
+        day,
+        selectedRound: effectiveRound,
+        selectedWeek: effectiveWeek,
+        setSelectedRound: isControlled ? () => {} : setSelectedRound,
+        setSelectedWeek: isControlled ? () => {} : setSelectedWeek,
+        logs,
+        updateExerciseSets,
+        handleComplete,
+        existingSession,
+        isCompleted,
+        editing,
+        setEditing,
+        weekOptions,
+        weeksPerRound,
+        addWeek,
         weightUnit: progress.weightUnit,
+        isControlled,
       }}
     >
       {children}

@@ -24,7 +24,7 @@ function dayLabel(day: "a" | "b" | "c") {
   return day === "a" ? "Day A" : day === "b" ? "Day B" : "Day C"
 }
 
-function CalendarGrid({ sessions, round }: { sessions: WorkoutSession[]; round: number }) {
+function CalendarGrid({ sessions, round, weeksPerRound }: { sessions: WorkoutSession[]; round: number; weeksPerRound: number }) {
   const roundSessions = getSessionsForRound(sessions, round)
 
   return (
@@ -39,7 +39,7 @@ function CalendarGrid({ sessions, round }: { sessions: WorkoutSession[]; round: 
         ))}
 
         {/* Rows */}
-        {[1, 2, 3, 4].map((week) => (
+        {Array.from({ length: weeksPerRound }, (_, i) => i + 1).map((week) => (
           <>
             <div key={`w${week}-label`} style={{ display: "flex", alignItems: "center", fontSize: "0.6rem", fontFamily: "var(--font-montserrat), sans-serif", color: muted, letterSpacing: "0.05em" }}>
               Week {week}
@@ -248,9 +248,10 @@ export default function ProgressTracker() {
     )
   }
 
+  const weeksPerRound = progress.weeksPerRound ?? 6
   const { round, week, totalSessions, startedAt } = currentPosition
   const sessionsInRound = getSessionsForRound(progress.sessions, round).length
-  const totalInRound = 12 // 4 weeks × 3 days
+  const totalInRound = weeksPerRound * 3
   const pct = Math.round((sessionsInRound / totalInRound) * 100)
 
   const maxRound = Math.max(...progress.sessions.map((s) => s.round), 1)
@@ -300,7 +301,7 @@ export default function ProgressTracker() {
             )}
             <div>
               <p style={{ fontSize: "0.55rem", letterSpacing: "0.15em", color: muted, textTransform: "uppercase", marginBottom: 4 }}>This round</p>
-              <p style={{ fontSize: "0.75rem", color: cream, fontWeight: 500 }}>{sessionsInRound} / 12</p>
+              <p style={{ fontSize: "0.75rem", color: cream, fontWeight: 500 }}>{sessionsInRound} / {totalInRound}</p>
             </div>
           </div>
 
@@ -358,7 +359,7 @@ export default function ProgressTracker() {
           )}
 
           {/* Calendar */}
-          <CalendarGrid sessions={progress.sessions} round={activeRound} />
+          <CalendarGrid sessions={progress.sessions} round={activeRound} weeksPerRound={weeksPerRound} />
 
           {/* PRs */}
           <PRsTable />

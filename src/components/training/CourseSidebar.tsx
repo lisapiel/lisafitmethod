@@ -54,6 +54,7 @@ const nav = [
   {
     label: "Workout Tracker",
     items: [
+      { href: "/training-foundations/log", label: "Weekly Log" },
       { href: "/training-foundations/module3#daya-tracker", label: "Track Day A" },
       { href: "/training-foundations/module3#dayb-tracker", label: "Track Day B" },
       { href: "/training-foundations/module3#dayc-tracker", label: "Track Day C" },
