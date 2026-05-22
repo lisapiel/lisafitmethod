@@ -68,7 +68,7 @@ export default async function AboutPage() {
           @media (max-width: 768px) {
             .about-hero-grid { grid-template-columns: 1fr !important; }
             .about-hero-text { padding: 64px 28px 48px !important; }
-            .about-hero-photo { max-height: 480px !important; overflow: hidden; }
+            .about-hero-photo { height: 360px !important; }
           }
         `}</style>
         <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", alignItems: "center", maxWidth: 1200, margin: "0 auto", padding: "80px 80px 80px 0" }}>
@@ -85,13 +85,12 @@ export default async function AboutPage() {
               {t.aboutHeroSubtext}
             </p>
           </div>
-          <div className="about-hero-photo" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="about-hero-photo" style={{ position: "relative", width: "100%", height: 480 }}>
             <Image
               src="/lisa-about-hero.jpg"
               alt="Lisa McPherson — Certified Personal Trainer"
-              width={1730}
-              height={2404}
-              style={{ width: "100%", height: "auto", display: "block" }}
+              fill
+              style={{ objectFit: "contain", objectPosition: "center" }}
               priority
             />
           </div>
