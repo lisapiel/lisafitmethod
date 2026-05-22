@@ -63,22 +63,38 @@ export default async function AboutPage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "#0a0a0a", padding: "100px 80px 80px" }} className="about-hero">
+      <section style={{ background: "#0a0a0a" }} className="about-hero">
         <style>{`
-          @media (max-width: 768px) { .about-hero { padding: 72px 28px 60px !important; } }
+          @media (max-width: 768px) {
+            .about-hero-grid { grid-template-columns: 1fr !important; }
+            .about-hero-text { padding: 64px 28px 48px !important; }
+            .about-hero-photo { max-height: 480px !important; overflow: hidden; }
+          }
         `}</style>
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
-            About Me
-          </p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
-            {t.aboutHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
-              <span key={i}>{line}{i < arr.length - 1 ? <em style={{ fontStyle: "italic", color: accent }}><br /></em> : null}</span>
-            ))}
-          </h1>
-          <p style={{ fontSize: `calc(18px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.7, maxWidth: 600 }}>
-            {t.aboutHeroSubtext}
-          </p>
+        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 420px", alignItems: "stretch", maxWidth: 1200, margin: "0 auto" }}>
+          <div className="about-hero-text" style={{ padding: "100px 64px 80px 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
+              About Me
+            </p>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 58px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 28 }}>
+              {t.aboutHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
+                <span key={i}>{line}{i < arr.length - 1 ? <em style={{ fontStyle: "italic", color: accent }}><br /></em> : null}</span>
+              ))}
+            </h1>
+            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75, maxWidth: 520 }}>
+              {t.aboutHeroSubtext}
+            </p>
+          </div>
+          <div className="about-hero-photo" style={{ position: "relative" }}>
+            <Image
+              src="/lisa-about-hero.jpg"
+              alt="Lisa McPherson — Certified Personal Trainer"
+              width={840}
+              height={1200}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+              priority
+            />
+          </div>
         </div>
       </section>
 
