@@ -39,23 +39,23 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     const client = generateClient<Schema>({ authMode: "userPool" })
-    Promise.all([
-      client.models.MediaAsset.list({ authMode: "userPool" }),
-      client.models.ContactSubmission.list({ authMode: "userPool" }),
-    ]).then(([{ data: assets }, { data: contacts }]) => {
-      const videos = assets.filter((a) => a.type === "VIDEO")
-      const photos = assets.filter((a) => a.type === "PHOTO")
-      setStats({
-        videosPublished: videos.filter((v) => v.isPublished).length,
-        videosDraft: videos.filter((v) => !v.isPublished).length,
-        photosPublished: photos.filter((p) => p.isPublished).length,
-        photosDraft: photos.filter((p) => !p.isPublished).length,
-        contactsNew: contacts.filter((c) => !c.status || c.status === "New").length,
-        contactsTotal: contacts.length,
+    const assetsPromise = client.models.MediaAsset?.list({ authMode: "userPool" }) ?? Promise.resolve({ data: [] })
+    const contactsPromise = client.models.ContactSubmission?.list({ authMode: "userPool" }) ?? Promise.resolve({ data: [] })
+    Promise.all([assetsPromise, contactsPromise])
+      .then(([{ data: assets }, { data: contacts }]) => {
+        const videos = assets.filter((a) => a.type === "VIDEO")
+        const photos = assets.filter((a) => a.type === "PHOTO")
+        setStats({
+          videosPublished: videos.filter((v) => v.isPublished).length,
+          videosDraft: videos.filter((v) => !v.isPublished).length,
+          photosPublished: photos.filter((p) => p.isPublished).length,
+          photosDraft: photos.filter((p) => !p.isPublished).length,
+          contactsNew: contacts.filter((c) => !c.status || c.status === "New").length,
+          contactsTotal: contacts.length,
+        })
+      }).catch(() => {
+        setStats({ videosPublished: 0, videosDraft: 0, photosPublished: 0, photosDraft: 0, contactsNew: 0, contactsTotal: 0 })
       })
-    }).catch(() => {
-      setStats({ videosPublished: 0, videosDraft: 0, photosPublished: 0, photosDraft: 0, contactsNew: 0, contactsTotal: 0 })
-    })
   }, [])
 
   const totalVideoSlots = Object.keys(VIDEO_SLOTS).length

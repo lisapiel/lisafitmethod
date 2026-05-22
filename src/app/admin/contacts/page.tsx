@@ -12,7 +12,6 @@ type Contact = Schema["ContactSubmission"]["type"]
 const STATUS_OPTIONS = ["New", "Replied", "Interested in Coaching", "Not Interested"]
 
 function ContactCard({ contact, onDelete }: { contact: Contact; onDelete: (id: string) => void }) {
-  const client = generateClient<Schema>({ authMode: "userPool" })
   const [status, setStatus] = useState(contact.status ?? "New")
   const [notes, setNotes] = useState(contact.notes ?? "")
   const [saving, setSaving] = useState(false)
@@ -21,12 +20,14 @@ function ContactCard({ contact, onDelete }: { contact: Contact; onDelete: (id: s
 
   async function updateStatus(newStatus: string) {
     setStatus(newStatus)
-    await client.models.ContactSubmission.update({ id: contact.id, status: newStatus })
+    const client = generateClient<Schema>({ authMode: "userPool" })
+    await client.models.ContactSubmission?.update({ id: contact.id, status: newStatus })
   }
 
   async function saveNotes() {
     setSaving(true)
-    await client.models.ContactSubmission.update({ id: contact.id, notes })
+    const client = generateClient<Schema>({ authMode: "userPool" })
+    await client.models.ContactSubmission?.update({ id: contact.id, notes })
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -35,7 +36,8 @@ function ContactCard({ contact, onDelete }: { contact: Contact; onDelete: (id: s
   async function handleDelete() {
     if (!confirm(`Delete message from ${contact.name}?`)) return
     setDeleting(true)
-    await client.models.ContactSubmission.delete({ id: contact.id })
+    const client = generateClient<Schema>({ authMode: "userPool" })
+    await client.models.ContactSubmission?.delete({ id: contact.id })
     onDelete(contact.id)
   }
 
@@ -123,7 +125,8 @@ export default function AdminContactsPage() {
 
   useEffect(() => {
     const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.ContactSubmission.list({ authMode: "userPool" }).then(({ data }) => {
+    const promise = client.models.ContactSubmission?.list({ authMode: "userPool" }) ?? Promise.resolve({ data: [] })
+    promise.then(({ data }) => {
       const sorted = [...data].sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
       setContacts(sorted)
       setLoading(false)
