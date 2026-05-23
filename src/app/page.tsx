@@ -361,9 +361,9 @@ export default async function HomePage() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {["Foundation\nMovements", "Core &\nGlute Priority", "The 4-Week\nProgram", "Nutrition\nFoundations"].map((label, i) => (
-              <div key={label} style={{ background: "#111", padding: "28px 24px", borderLeft: "2px solid rgba(200,169,126,0.2)" }}>
-                <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 32, fontWeight: 900, color: "rgba(200,169,126,0.15)", display: "block", lineHeight: 1, marginBottom: 8 }}>0{i + 1}</span>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(245,242,238,0.55)", lineHeight: 1.4, whiteSpace: "pre-line" }}>{label}</p>
+              <div key={label} style={{ background: "#141414", padding: "36px 32px", borderTop: "2px solid rgba(200,169,126,0.4)" }}>
+                <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>0{i + 1}</p>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 17, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.3, whiteSpace: "pre-line" }}>{label}</p>
               </div>
             ))}
           </div>
