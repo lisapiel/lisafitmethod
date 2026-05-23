@@ -85,37 +85,34 @@ export default async function AboutPage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "#0a0a0a" }} className="about-hero">
+      <section style={{ background: "#0a0a0a", padding: "96px 80px 80px", textAlign: "center" }} className="about-hero">
         <style>{`
-          @media (max-width: 768px) {
-            .about-hero-grid { grid-template-columns: 1fr !important; }
-            .about-hero-text { padding: 40px 24px 48px !important; order: 2; }
-            .about-hero-photo { height: 460px !important; order: 1; }
-          }
+          @media (max-width: 768px) { .about-hero { padding: 80px 28px 64px !important; } }
         `}</style>
-        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 420px", alignItems: "stretch", maxWidth: 1200, margin: "0 auto" }}>
-          <div className="about-hero-text" style={{ padding: "80px 48px 80px 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
-              About Me
-            </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 58px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 28 }}>
-              {t.aboutHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
-                <span key={i}>{line}{i < arr.length - 1 ? <em style={{ fontStyle: "italic", color: accent }}><br /></em> : null}</span>
-              ))}
-            </h1>
-            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
-              {t.aboutHeroSubtext}
-            </p>
-          </div>
-          <div className="about-hero-photo" style={{ position: "relative", width: "100%", minHeight: 540 }}>
-            <Image
-              src="/lisa-about-hero.jpg"
-              alt="Lisa McPherson — Certified Personal Trainer"
-              fill
-              style={{ objectFit: "cover", objectPosition: "center top" }}
-              priority
-            />
-          </div>
+        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+          {photoUrl && (
+            <div style={{ width: 108, height: 108, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.25)", flexShrink: 0 }}>
+              <Image
+                src={photoUrl}
+                alt="Lisa McPherson — Certified Personal Trainer"
+                width={216}
+                height={216}
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: settings.crops.about_bio }}
+                priority
+              />
+            </div>
+          )}
+          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
+            About Me
+          </p>
+          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 48px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.15, marginBottom: 24 }}>
+            {t.aboutHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 ? <><em style={{ fontStyle: "italic", color: accent }}></em><br /></> : null}</span>
+            ))}
+          </h1>
+          <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75, maxWidth: 520, margin: "0 auto" }}>
+            {t.aboutHeroSubtext}
+          </p>
         </div>
       </section>
 

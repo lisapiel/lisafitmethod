@@ -194,6 +194,20 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* BANNER */}
+      {bannerUrl && (
+        <section style={{ background: "#0a0a0a", width: "100%" }}>
+          <Image
+            src={bannerUrl}
+            alt="Lisa Fit Method"
+            width={2400}
+            height={800}
+            style={{ width: "100%", height: "auto", display: "block" }}
+            sizes="100vw"
+          />
+        </section>
+      )}
+
       {/* STORY */}
       <section style={{ background: "var(--off-white)", padding: "80px 80px" }} className="story-section">
         <style>{`
@@ -236,20 +250,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* BANNER */}
-      {bannerUrl && (
-        <section style={{ background: "#0a0a0a", width: "100%" }}>
-          <Image
-            src={bannerUrl}
-            alt="Lisa Fit Method"
-            width={2400}
-            height={800}
-            style={{ width: "100%", height: "auto", display: "block" }}
-            sizes="100vw"
-          />
-        </section>
-      )}
 
       {/* SHORT COURSE PREVIEW */}
       <section style={{ background: "var(--black)", padding: "100px 80px" }} className="preview-section">
