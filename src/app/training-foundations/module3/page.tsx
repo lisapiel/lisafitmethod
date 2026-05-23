@@ -297,10 +297,22 @@ export default async function Module3Page() {
       <div id="w34" style={{ padding: "2rem", background: cardBg, border: `1px solid ${border}`, marginBottom: "2rem" }}>
         <SectionLabel>Weeks 3 and 4 — Progressive Overload</SectionLabel>
         <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
-          The program structure stays exactly the same across all three days. What changes is the demand you place on your body within that structure. On every exercise where you completed all sets and reps with clean form in Weeks 1 and 2, add a small amount of weight. For dumbbells that usually means going up one size. For band exercises, move to a heavier band. For bodyweight exercises like the dead bug, bird dog, push-up, and inverted row, add 2 to 3 reps per set rather than rushing to a weighted variation.
+          The program structure stays exactly the same across all three days. What changes is the demand you place on your body within that structure.
+        </p>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+          On every exercise where you completed all sets and reps with clean form in Weeks 1 and 2, add a small amount of weight. For dumbbells, that usually means going up one size. For band exercises, move to a heavier band. For bodyweight exercises like the dead bug, bird dog, push-up, and inverted row, add 2–3 reps per set rather than rushing into weighted variations.
+        </p>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+          If your form broke down on any exercise during Weeks 1 and 2, stay at the same weight in Weeks 3 and 4. Getting the movement pattern right is always the priority. The weight will come.
+        </p>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+          And remember: this doesn&apos;t stop after Week 4.
+        </p>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+          The goal is to teach you how to progressively overload correctly so you can continue building strength and seeing progress long after the program ends. If you continue tracking your workouts, improving your form, and gradually increasing the challenge over time, your body will keep adapting with you.
         </p>
         <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9 }}>
-          If your form broke down on any exercise during Weeks 1 and 2, stay at the same weight in Weeks 3 and 4. Getting the pattern right is always the priority. The weight will come.
+          That&apos;s why the tracking system matters. The more consistently you use it, the easier it becomes to see your progress, push intelligently, and keep building momentum over the long term.
         </p>
       </div>
 
