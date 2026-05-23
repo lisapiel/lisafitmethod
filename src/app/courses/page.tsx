@@ -160,6 +160,22 @@ export default async function CoursesPage() {
         </p>
       </section>
 
+      {/* TRAILER */}
+      {trailerUrl && (
+        <section style={{ background: "#050505", padding: "100px 40px", textAlign: "center" }}>
+          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>A look inside</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.15, marginBottom: 48 }}>
+            See exactly what <em style={{ fontStyle: "italic", color: accent }}>you&apos;re getting.</em>
+          </h2>
+          <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "1334 / 1080", background: "#0a0a0a", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
+            <video src={trailerUrl} autoPlay muted loop playsInline controls preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
+          </div>
+          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", maxWidth: 520, margin: "32px auto 0", lineHeight: 1.7, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Full exercise walkthroughs, movement breakdowns, built-in workout tracking, progression systems, warm-ups, and real structure from day one.
+          </p>
+        </section>
+      )}
+
       {/* MODULES */}
       <section style={{ background: "#0a0a0a", padding: "0 80px 120px" }} className="modules-section">
         <style>{`
@@ -194,22 +210,6 @@ export default async function CoursesPage() {
           </div>
         </div>
       </section>
-
-      {/* TRAILER */}
-      {trailerUrl && (
-        <section style={{ background: "#050505", padding: "100px 40px", textAlign: "center" }}>
-          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>A look inside</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.15, marginBottom: 48 }}>
-            See exactly what <em style={{ fontStyle: "italic", color: accent }}>you&apos;re getting.</em>
-          </h2>
-          <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "1334 / 1080", background: "#0a0a0a", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
-            <video src={trailerUrl} autoPlay muted loop playsInline controls preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
-          </div>
-          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", maxWidth: 520, margin: "32px auto 0", lineHeight: 1.7, fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            Full exercise walkthroughs, movement breakdowns, built-in workout tracking, progression systems, warm-ups, and real structure from day one.
-          </p>
-        </section>
-      )}
 
       {/* TESTIMONIALS */}
       {testimonialsUrl && (

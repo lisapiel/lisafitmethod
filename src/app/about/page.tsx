@@ -89,11 +89,11 @@ export default async function AboutPage() {
         <style>{`
           @media (max-width: 768px) {
             .about-hero-grid { grid-template-columns: 1fr !important; }
-            .about-hero-text { padding: 56px 24px 40px !important; }
-            .about-hero-photo { height: 420px !important; }
+            .about-hero-text { padding: 40px 24px 48px !important; order: 2; }
+            .about-hero-photo { height: 460px !important; order: 1; }
           }
         `}</style>
-        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", alignItems: "center", maxWidth: 1200, margin: "0 auto" }}>
+        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 420px", alignItems: "stretch", maxWidth: 1200, margin: "0 auto" }}>
           <div className="about-hero-text" style={{ padding: "80px 48px 80px 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
               About Me
@@ -107,12 +107,12 @@ export default async function AboutPage() {
               {t.aboutHeroSubtext}
             </p>
           </div>
-          <div className="about-hero-photo" style={{ position: "relative", width: "100%", height: 480 }}>
+          <div className="about-hero-photo" style={{ position: "relative", width: "100%", minHeight: 540 }}>
             <Image
               src="/lisa-about-hero.jpg"
               alt="Lisa McPherson — Certified Personal Trainer"
               fill
-              style={{ objectFit: "contain", objectPosition: "center" }}
+              style={{ objectFit: "cover", objectPosition: "center top" }}
               priority
             />
           </div>
@@ -122,10 +122,16 @@ export default async function AboutPage() {
       {/* STORY + PHOTO */}
       <section style={{ padding: "100px 80px" }} className="about-story">
         <style>{`
-          @media (max-width: 768px) { .about-story { padding: 72px 28px !important; } .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; } .about-photo { min-height: 640px !important; } }
+          @media (max-width: 768px) {
+            .about-story { padding: 72px 28px !important; }
+            .about-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+            .about-photo { min-height: 480px !important; }
+            .about-story-text { order: 2; }
+            .about-story-photo { order: 1; }
+          }
         `}</style>
         <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
-          <div>
+          <div className="about-story-text">
             {[
               "I'm originally from France and now live in Miami.",
               "Like a lot of people, when I first started training, I focused mostly on classes, cardio, and group workouts. I was consistent, I worked hard, and I still had almost nothing to show for it. Years of effort without real progress.",
@@ -153,8 +159,8 @@ export default async function AboutPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div className="about-photo" style={{ background: "#e8e0d8", overflow: "hidden" }}>
+          <div className="about-story-photo" style={{ display: "flex", flexDirection: "column" }}>
+            <div className="about-photo" style={{ background: "#e8e0d8", overflow: "hidden", borderRadius: 16 }}>
               <Image
                 src={photoUrl ?? "/hero.png"}
                 alt="Lisa McPherson — Certified Personal Trainer"
