@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [bannerUrl, testimonialsUrl, trailerUrl, settings] = await Promise.all([
+  const [heroUrl, bannerUrl, testimonialsUrl, trailerUrl, settings] = await Promise.all([
+    getPublishedPhotoUrl("hero"),
     getPublishedPhotoUrl("banner"),
     getPublishedPhotoUrl("testimonials"),
     getPublishedVideoUrl("lp_trailer"),
@@ -236,6 +237,25 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* HERO PHOTO */}
+      {heroUrl && (
+        <section style={{ background: "#0a0a0a" }} className="home-hero-photo">
+          <style>{`
+            .home-hero-photo-wrap { position: relative; width: 100%; height: 70vh; overflow: hidden; }
+            @media (max-width: 768px) { .home-hero-photo-wrap { height: 80vw; } }
+          `}</style>
+          <div className="home-hero-photo-wrap">
+            <Image
+              src={heroUrl}
+              alt="Lisa McPherson — Lisa Fit Method"
+              fill
+              style={{ objectFit: "cover", objectPosition: settings.crops.hero }}
+              sizes="100vw"
+            />
+          </div>
+        </section>
+      )}
 
       {/* STORY */}
       <section style={{ background: "var(--off-white)", padding: "80px 80px" }} className="story-section">
