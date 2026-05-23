@@ -372,8 +372,8 @@ export function CheckoutClient() {
             paddingBottom: 28,
             borderBottom: "1px solid #1a1a1a",
           }}>
-            <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>$67</span>
-            <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$45</span>
+            <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>$97</span>
+            <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$47</span>
             <span style={{
               fontSize: 9,
               letterSpacing: "0.18em",
