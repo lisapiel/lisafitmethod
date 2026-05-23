@@ -76,7 +76,7 @@ export default function RootLayout({
               "@type": "Person",
               name: "Lisa McPherson",
               jobTitle: "Certified Personal Trainer",
-              url: "https://lisafitmethod.com",
+              url: "https://lisafitmethod.com/about",
               description: "Certified personal trainer and founder of Lisa Fit Method. Specializes in foundational strength training for beginners.",
               sameAs: ["https://www.instagram.com/lisafitmethod"],
             }).replace(/</g, "\\u003c"),
