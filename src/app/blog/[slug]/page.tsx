@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getBlogPost, getBlogIndex } from "@/lib/blogClient"
+import MarkdownBody from "@/components/blog/MarkdownBody"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -105,14 +106,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <article style={{ padding: "80px 80px" }} className="post-body">
         <style>{`
           @media (max-width: 768px) { .post-body { padding: 60px 28px !important; } }
-          .post-body p { font-size: 17px; line-height: 1.9; color: #3a3530; margin-bottom: 24px; white-space: pre-line; }
+          .post-body p { font-size: 17px; line-height: 1.9; color: #3a3530; margin-bottom: 24px; }
           .post-body h2 { font-family: var(--font-playfair), serif; font-size: clamp(22px, 2.5vw, 30px); font-weight: 700; color: #1a1a1a; line-height: 1.25; margin: 48px 0 20px; }
+          .post-body h3 { font-family: var(--font-playfair), serif; font-size: clamp(18px, 2vw, 22px); font-weight: 700; color: #1a1a1a; line-height: 1.3; margin: 36px 0 14px; }
+          .post-body ul { margin: 0 0 24px; padding-left: 20px; }
+          .post-body li { font-size: 17px; line-height: 1.9; color: #3a3530; padding-bottom: 4px; }
+          .post-body a { color: #c8a97e; text-decoration: underline; }
+          .post-body a:hover { color: #a8895e; }
         `}</style>
         <div style={{ maxWidth: 680, margin: "0 auto" }}>
           {post.sections.map((section, i) => (
             <div key={i}>
               {section.heading && <h2>{section.heading}</h2>}
-              <p>{section.body}</p>
+              <MarkdownBody body={section.body} />
             </div>
           ))}
 
