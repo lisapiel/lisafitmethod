@@ -132,11 +132,12 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
           .course-sidebar::-webkit-scrollbar-thumb { background: #2a2a2a; }
           @media (max-width: 768px) {
             .course-sidebar { position: fixed !important; top: 0; left: 0; bottom: 0; z-index: 150; transform: translateX(-100%); padding-top: 4rem; width: 280px !important; }
+            .sidebar-progress-block { position: sticky; top: 0; z-index: 2; background: #111111; }
           }
         `}</style>
 
-        {/* My Progress link + week pill */}
-        <div style={{ padding: "0 1.25rem 1rem" }}>
+        {/* My Progress link + week pill — sticky so it stays visible when scrolling nav */}
+        <div className="sidebar-progress-block" style={{ padding: "0 1.25rem 1rem" }}>
           <Link
             href="/training-foundations/tracker"
             style={{
