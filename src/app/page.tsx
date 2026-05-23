@@ -19,8 +19,7 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [heroUrl, bannerUrl, testimonialsUrl, trailerUrl, settings] = await Promise.all([
-    getPublishedPhotoUrl("hero"),
+  const [bannerUrl, testimonialsUrl, trailerUrl, settings] = await Promise.all([
     getPublishedPhotoUrl("banner"),
     getPublishedPhotoUrl("testimonials"),
     getPublishedVideoUrl("lp_trailer"),
@@ -131,39 +130,80 @@ export default async function HomePage() {
         .fade-up-4 { animation: fadeUp 0.8s ease forwards 0.8s; opacity: 0; }
       `}</style>
 
-      {/* BANNER — brand visual first */}
-      {bannerUrl && (
-        <section style={{ background: "#0a0a0a", width: "100%" }}>
-          <Image
-            src={bannerUrl}
-            alt="Lisa Fit Method"
-            width={2400}
-            height={800}
-            style={{ width: "100%", height: "auto", display: "block" }}
-            sizes="100vw"
-            priority
-          />
-        </section>
-      )}
+      {/* HERO — video first, directly under nav */}
+      <section style={{ background: "#0a0a0a" }} className="home-hero">
+        <style>{`
+          .home-video-band {
+            width: 100%;
+            height: 62vh;
+            min-height: 340px;
+            overflow: hidden;
+            background: #111;
+          }
+          .home-hero-text {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 56px 80px 80px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 60px;
+            align-items: start;
+          }
+          .home-hero-cta-col { min-width: 240px; }
+          .home-hero-fallback {
+            padding: 100px 80px 80px;
+            max-width: 1100px;
+            margin: 0 auto;
+          }
+          @media (max-width: 768px) {
+            .home-video-band { height: 56vw; min-height: 240px; }
+            .home-hero-text { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 56px; }
+            .home-hero-fallback { padding: 64px 24px 56px; }
+          }
+        `}</style>
 
-      {/* HERO */}
-      <section style={{ background: "var(--black)", position: "relative" }}>
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 64px)", alignItems: "stretch" }}
-          className="hero-grid"
-        >
-          <style>{`
-            @media (max-width: 768px) {
-              .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; }
-              .hero-photo-wrap { height: 90vw !important; min-height: 420px !important; max-height: 600px !important; order: 1; }
-              .hero-left-wrap { padding: 40px 24px 48px !important; order: 0; }
-              .hero-line-deco { display: none !important; }
-            }
-          `}</style>
-          <div
-            className="hero-left-wrap"
-            style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "64px 52px 64px 72px", position: "relative", zIndex: 2 }}
-          >
+        {trailerUrl && (
+          <div className="home-video-band">
+            <VideoPlayer src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          </div>
+        )}
+
+        {trailerUrl ? (
+          <div className="home-hero-text">
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
+                Lisa Fit Method — Training Foundations
+              </p>
+              <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 20 }}>
+                {t.homeHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
+                  <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
+                ))}
+              </h1>
+              <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.4, maxWidth: 440 }}>
+                {t.homeHeroSubtext}
+              </p>
+            </div>
+            <div className="home-hero-cta-col">
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 16, color: "rgba(245,242,238,0.35)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
+                <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
+                <span style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600 }}>Limited Time</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link href="/checkout" style={{ display: "block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 32px", textAlign: "center" }}>
+                  Get Instant Access
+                </Link>
+                <Link href="/coaching" style={{ display: "block", border: "1px solid rgba(200,169,126,0.45)", color: "rgba(245,242,238,0.7)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "16px 20px", textAlign: "center" }}>
+                  Book 1:1 Coaching
+                </Link>
+              </div>
+              <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Lifetime access.</strong>
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="home-hero-fallback">
             <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
               Lisa Fit Method — Training Foundations
             </p>
@@ -172,7 +212,7 @@ export default async function HomePage() {
                 <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
               ))}
             </h1>
-            <p className="fade-up-3" style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.7, maxWidth: 440, marginBottom: 32 }}>
+            <p className="fade-up-3" style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.4, maxWidth: 440, marginBottom: 32 }}>
               {t.homeHeroSubtext}
             </p>
             <div className="fade-up-4" style={{ alignSelf: "flex-start" }}>
@@ -194,20 +234,7 @@ export default async function HomePage() {
               </p>
             </div>
           </div>
-
-          <div className="hero-photo-wrap" style={{ position: "relative", overflow: "hidden" }}>
-            <Image
-              src={heroUrl ?? "/hero.png"}
-              alt="Lisa McPherson — Lisa Fit Method"
-              fill
-              style={{ objectFit: "cover", objectPosition: settings.crops.hero }}
-              priority
-            />
-            <p className="hero-line-deco" style={{ position: "absolute", bottom: 20, left: 20, display: "flex", alignItems: "center", gap: 16, color: "rgba(245,242,238,0.45)", fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", zIndex: 2, fontFamily: "var(--font-dm-sans), sans-serif" }}>
-              Certified Personal Trainer · @lisafitmethod
-            </p>
-          </div>
-        </div>
+        )}
       </section>
 
       {/* STORY */}
@@ -226,13 +253,13 @@ export default async function HomePage() {
                 <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
               ))}
             </h2>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.85, color: "var(--muted)", marginBottom: 20 }}>
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.4, color: "var(--muted)", marginBottom: 20 }}>
               {t.homeStoryPara1}
             </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.85, color: "var(--muted)", marginBottom: 20 }}>
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.4, color: "var(--muted)", marginBottom: 20 }}>
               {t.homeStoryPara2}
             </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.85, color: "var(--muted)" }}>
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.4, color: "var(--muted)" }}>
               {t.homeStoryPara3}
             </p>
             <Link href="/about" style={{ display: "inline-block", marginTop: 28, fontSize: 12, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none" }}>
@@ -252,6 +279,20 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* BANNER — between story and course preview */}
+      {bannerUrl && (
+        <section style={{ background: "#0a0a0a", width: "100%" }}>
+          <Image
+            src={bannerUrl}
+            alt="Lisa Fit Method"
+            width={2400}
+            height={800}
+            style={{ width: "100%", height: "auto", display: "block" }}
+            sizes="100vw"
+          />
+        </section>
+      )}
 
       {/* SHORT COURSE PREVIEW */}
       <section style={{ background: "var(--black)", padding: "100px 80px" }} className="preview-section">
@@ -275,7 +316,7 @@ export default async function HomePage() {
                 "The 4-Week Program: Fully structured workouts with sets, reps, progression, warm-ups, mobility work, and built-in workout tracking",
                 "Nutrition Foundations: Simple nutrition principles for building muscle, supporting recovery, and staying lean without obsessing over food",
               ].map((item) => (
-                <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.5 }}>
+                <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.4 }}>
                   <span style={{ color: "var(--accent)", flexShrink: 0 }}>→</span>
                   {item}
                 </li>
@@ -294,7 +335,7 @@ export default async function HomePage() {
                 Explore the Course →
               </Link>
             </div>
-            <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
               Includes 50+ exercise videos, built-in workout and progress tracking, and lifetime access.
             </p>
           </div>
@@ -308,30 +349,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* TRAILER VIDEO */}
-      {trailerUrl && (
-        <section style={{ background: "#050505", padding: "100px 40px" }} className="trailer-section">
-          <style>{`
-            @media (max-width: 768px) {
-              .trailer-section { padding: 72px 24px !important; }
-            }
-          `}</style>
-          <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>A look inside</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 48 }}>
-              Real instruction.<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Real structure.</em>
-            </h2>
-            <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "1334 / 1080", background: "#0a0a0a", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
-              <VideoPlayer src={trailerUrl} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
-            </div>
-            <p style={{ marginTop: 28, fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.7, fontFamily: "var(--font-dm-sans), sans-serif" }}>
-              Every exercise includes guided demonstrations, movement cues, and progression built directly into the course.
-            </p>
-          </div>
-        </section>
-      )}
 
       {/* TESTIMONIALS */}
       {testimonialsUrl && (
@@ -366,7 +383,7 @@ export default async function HomePage() {
             <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
           ))}
         </h2>
-        <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: 480, margin: "0 auto 48px", lineHeight: 1.7, position: "relative", zIndex: 1 }}>
+        <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: 480, margin: "0 auto 48px", lineHeight: 1.4, position: "relative", zIndex: 1 }}>
           {t.homeFinalSubtext}
         </p>
         <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>

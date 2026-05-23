@@ -186,7 +186,7 @@ export default async function CoursesPage() {
               <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 20 }}>
                 {t.coursesHeroHeadline}
               </h1>
-              <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
+              <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.4 }}>
                 {t.coursesHeroSubtext}
               </p>
             </div>
@@ -199,7 +199,7 @@ export default async function CoursesPage() {
               <Link href="/checkout" style={{ display: "block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 32px", textAlign: "center" }}>
                 Get Instant Access
               </Link>
-              <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.7 }}>
+              <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
                 One-time payment · Lifetime access<br />Built-in workout &amp; progress tracking
               </p>
             </div>
@@ -212,7 +212,7 @@ export default async function CoursesPage() {
             <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 24 }}>
               {t.coursesHeroHeadline}
             </h1>
-            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75, marginBottom: 40 }}>
+            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.4, marginBottom: 40 }}>
               {t.coursesHeroSubtext}
             </p>
             <div style={{ display: "flex", alignItems: "baseline", gap: 14, justifyContent: "center", marginBottom: 24 }}>
@@ -250,7 +250,7 @@ export default async function CoursesPage() {
                 </span>
                 <p style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14 }}>{mod.tag}</p>
                 <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(24px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 14, lineHeight: 1.3 }}>{mod.title}</h3>
-                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.75, color: "rgba(245,242,238,0.45)", marginBottom: 20 }}>{mod.desc}</p>
+                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.4, color: "rgba(245,242,238,0.45)", marginBottom: 20 }}>{mod.desc}</p>
                 <ul style={{ listStyle: "none" }}>
                   {mod.items.map((item) => (
                     <li key={item} style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.4)", padding: "6px 0 6px 16px", position: "relative", lineHeight: 1.5 }}>
@@ -310,10 +310,10 @@ export default async function CoursesPage() {
             <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(26px * ${hs})`, fontWeight: 700, color: "#0a0a0a", marginBottom: 20, lineHeight: 1.2 }}>
               Ready for a fully<br /><em style={{ fontStyle: "italic", color: "#a8895e" }}>personalized plan?</em>
             </h3>
-            <p style={{ fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.75, marginBottom: 16 }}>
+            <p style={{ fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.4, marginBottom: 16 }}>
               Training Foundations gives you the system. 1:1 coaching gives you a program fully built around your body, goals, schedule, injuries, recovery, and progress.
             </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "#6b6560", lineHeight: 1.7, marginBottom: 32 }}>
+            <p style={{ fontSize: `calc(14px * ${bs})`, color: "#6b6560", lineHeight: 1.4, marginBottom: 32 }}>
               You&apos;ll get direct feedback, personalized programming, ongoing adjustments, and real accountability every step of the way.
             </p>
             <Link

@@ -106,11 +106,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <article style={{ padding: "80px 80px" }} className="post-body">
         <style>{`
           @media (max-width: 768px) { .post-body { padding: 60px 28px !important; } }
-          .post-body p { font-size: 17px; line-height: 1.9; color: #3a3530; margin-bottom: 24px; }
+          .post-body p { font-size: 17px; line-height: 1.55; color: #3a3530; margin-bottom: 24px; }
           .post-body h2 { font-family: var(--font-playfair), serif; font-size: clamp(22px, 2.5vw, 30px); font-weight: 700; color: #1a1a1a; line-height: 1.25; margin: 48px 0 20px; }
           .post-body h3 { font-family: var(--font-playfair), serif; font-size: clamp(18px, 2vw, 22px); font-weight: 700; color: #1a1a1a; line-height: 1.3; margin: 36px 0 14px; }
           .post-body ul { margin: 0 0 24px; padding-left: 20px; }
-          .post-body li { font-size: 17px; line-height: 1.9; color: #3a3530; padding-bottom: 4px; }
+          .post-body li { font-size: 17px; line-height: 1.55; color: #3a3530; padding-bottom: 4px; }
           .post-body a { color: #c8a97e; text-decoration: underline; }
           .post-body a:hover { color: #a8895e; }
         `}</style>

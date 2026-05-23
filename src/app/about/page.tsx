@@ -139,7 +139,7 @@ export default async function AboutPage() {
               "Lisa Fit Method exists to help people build strength the right way from the beginning, through movement quality, intelligent programming, and training that lasts.",
               "Whether you're completely new to lifting or you've been winging it for years, this is the approach I wish someone had handed me from the beginning.",
             ].map((para, i) => (
-              <p key={i} style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.9, color: "#6b6560", marginBottom: 20 }}>
+              <p key={i} style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.4, color: "#6b6560", marginBottom: 20 }}>
                 {para}
               </p>
             ))}
@@ -192,7 +192,7 @@ export default async function AboutPage() {
             {creds.map((c) => (
               <div key={c.label}>
                 <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(20px * ${hs})`, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>{c.label}</p>
-                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.75, color: "#6b6560" }}>{c.body}</p>
+                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.4, color: "#6b6560" }}>{c.body}</p>
               </div>
             ))}
           </div>

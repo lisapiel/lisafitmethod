@@ -74,7 +74,7 @@ export default function CoachingClient({ settings }: Props) {
           <p style={{ fontSize: `calc(15px * ${bs})`, fontWeight: 500, letterSpacing: "0.04em", color: accent, marginBottom: 24, fontFamily: "var(--font-dm-sans), sans-serif" }}>
             Smart programming. Real accountability. Long-term progress.
           </p>
-          <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
+          <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.4 }}>
             {t.coachingHeroSubtext}
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function CoachingClient({ settings }: Props) {
             {features.map((item) => (
               <div key={item.title} style={{ background: "#f0ebe3", padding: "40px 36px", borderBottom: "2px solid #c8a97e" }}>
                 <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontWeight: 700, color: "#1a1a1a", marginBottom: 14 }}>{item.title}</h3>
-                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.75, color: "#6b6560" }}>{item.body}</p>
+                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.4, color: "#6b6560" }}>{item.body}</p>
               </div>
             ))}
           </div>
@@ -115,7 +115,7 @@ export default function CoachingClient({ settings }: Props) {
                 <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
               ))}
             </h2>
-            <p style={{ fontSize: `calc(15px * ${bs})`, lineHeight: 1.75, color: "#6b6560", marginBottom: 28 }}>
+            <p style={{ fontSize: `calc(15px * ${bs})`, lineHeight: 1.4, color: "#6b6560", marginBottom: 28 }}>
               {t.coachingFormSubtext}
             </p>
             <p style={{ fontSize: 13, color: "#a8895e", fontWeight: 500 }}>
