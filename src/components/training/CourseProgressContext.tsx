@@ -1,7 +1,7 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react"
-import { getCurrentUser } from "aws-amplify/auth"
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react"
+import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth"
 import {
   CourseProgress,
   WorkoutSession,
@@ -38,6 +38,40 @@ interface CourseProgressContextValue {
 
 const CourseProgressContext = createContext<CourseProgressContextValue | null>(null)
 
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const session = await fetchAuthSession()
+    return session.tokens?.accessToken?.toString() ?? null
+  } catch {
+    return null
+  }
+}
+
+async function fetchServerProgress(token: string): Promise<CourseProgress | null> {
+  try {
+    const res = await fetch("/api/training/progress", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) return null
+    const data = await res.json() as { progress: CourseProgress | null }
+    return data.progress
+  } catch {
+    return null
+  }
+}
+
+async function pushServerProgress(token: string, progress: CourseProgress): Promise<void> {
+  try {
+    await fetch("/api/training/progress", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ progress }),
+    })
+  } catch {
+    // fire-and-forget — localStorage already has the save
+  }
+}
+
 export function CourseProgressProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null)
   const [progress, setProgress] = useState<CourseProgress>({
@@ -46,25 +80,50 @@ export function CourseProgressProvider({ children }: { children: React.ReactNode
     sessions: [],
   })
   const [ready, setReady] = useState(false)
+  const tokenRef = useRef<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     getCurrentUser()
-      .then((user) => {
+      .then(async (user) => {
+        if (cancelled) return
         const sub = user.userId
         setUserId(sub)
-        setProgress(loadProgress(sub))
+
+        // Load localStorage immediately so UI is responsive
+        const local = loadProgress(sub)
+        setProgress(local)
         setReady(true)
+
+        // Then fetch server data in background and merge (server wins)
+        const token = await getAccessToken()
+        if (cancelled) return
+        tokenRef.current = token
+
+        if (token) {
+          const server = await fetchServerProgress(token)
+          if (cancelled) return
+          if (server && server.sessions.length >= local.sessions.length) {
+            // Server has equal or more data — trust it and update localStorage cache
+            setProgress(server)
+            saveProgress(sub, server)
+          } else if (local.sessions.length > 0 && token) {
+            // localStorage has data the server doesn't — push it up
+            pushServerProgress(token, local)
+          }
+        }
       })
       .catch(() => {
-        // Not authenticated — still mark ready so UI doesn't hang
-        setReady(true)
+        if (!cancelled) setReady(true)
       })
+    return () => { cancelled = true }
   }, [])
 
   const persist = useCallback(
     (next: CourseProgress) => {
       setProgress(next)
       if (userId) saveProgress(userId, next)
+      if (tokenRef.current) pushServerProgress(tokenRef.current, next)
     },
     [userId]
   )

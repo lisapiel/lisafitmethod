@@ -33,7 +33,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
     borderRadius: 4,
     color: cream,
     fontFamily: "var(--font-montserrat), sans-serif",
-    fontSize: "0.7rem",
+    fontSize: "16px",
     padding: "6px 8px",
     width: 56,
     textAlign: "center",
@@ -74,7 +74,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             type="text"
             value={set.distanceTime ?? ""}
             placeholder="e.g. 30m"
-            onChange={(e) => onChange({ ...set, distanceTime: e.target.value })}
+            onChange={(e) => onChange({ ...set, distanceTime: e.target.value, confirmed: false })}
             style={{ ...inp, width: 68 }}
           />
           <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -88,7 +88,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             min={0}
             value={set.reps || ""}
             placeholder="reps"
-            onChange={(e) => onChange({ ...set, reps: Number(e.target.value) })}
+            onChange={(e) => onChange({ ...set, reps: Number(e.target.value), confirmed: false })}
             style={inp}
           />
           <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -113,7 +113,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
       ) : (
         <>
           <button
-            onClick={() => onChange({ ...set, weight: Math.max(0, (set.weight ?? 0) - WEIGHT_STEP) })}
+            onClick={() => onChange({ ...set, weight: Math.max(0, (set.weight ?? 0) - WEIGHT_STEP), confirmed: false })}
             style={stepBtn}
           >
             −
@@ -124,11 +124,11 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             step={WEIGHT_STEP}
             value={set.weight || ""}
             placeholder="wt"
-            onChange={(e) => onChange({ ...set, weight: Number(e.target.value) })}
+            onChange={(e) => onChange({ ...set, weight: Number(e.target.value), confirmed: false })}
             style={inp}
           />
           <button
-            onClick={() => onChange({ ...set, weight: (set.weight ?? 0) + WEIGHT_STEP })}
+            onClick={() => onChange({ ...set, weight: (set.weight ?? 0) + WEIGHT_STEP, confirmed: false })}
             style={stepBtn}
           >
             +
@@ -138,6 +138,27 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
           </span>
         </>
       )}
+
+      {/* Log Set button */}
+      <button
+        onClick={() => onChange({ ...set, confirmed: true })}
+        title={set.confirmed ? "Set logged" : "Log this set"}
+        style={{
+          background: set.confirmed ? "rgba(201,169,110,0.12)" : "none",
+          border: `1px solid ${set.confirmed ? gold : border}`,
+          color: set.confirmed ? gold : "#555",
+          cursor: "pointer",
+          fontSize: "0.55rem",
+          fontFamily: "var(--font-montserrat), sans-serif",
+          letterSpacing: "0.08em",
+          padding: "4px 8px",
+          borderRadius: 3,
+          flexShrink: 0,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {set.confirmed ? "✓ Logged" : "Log Set"}
+      </button>
 
       {canRemove && (
         <button
@@ -179,7 +200,7 @@ function ExerciseBlock({ ex, sets, unit, onChange }: ExerciseBlockProps) {
 
   function addSet() {
     const last = sets[sets.length - 1] ?? { reps: ex.defaultReps ?? 0, weight: 0, unit }
-    onChange([...sets, { ...last }])
+    onChange([...sets, { ...last, confirmed: false }])
   }
 
   function removeSet(i: number) {

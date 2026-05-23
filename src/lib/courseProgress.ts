@@ -3,6 +3,7 @@ export interface SetLog {
   weight: number // 0 = bodyweight
   unit: "lbs" | "kg"
   distanceTime?: string // for distance/time-based exercises (e.g. "30m", "45s")
+  confirmed?: boolean
 }
 
 export interface ExerciseLog {

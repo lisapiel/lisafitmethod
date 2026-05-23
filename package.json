@@ -12,6 +12,7 @@
     "@aws-amplify/adapter-nextjs": "^1.7.3",
     "@aws-sdk/client-cognito-identity-provider": "^3.1051.0",
     "@aws-sdk/client-ssm": "^3.1053.0",
+    "@aws-sdk/lib-dynamodb": "^3.1053.0",
     "@stripe/react-stripe-js": "^6.4.0",
     "@stripe/stripe-js": "^9.6.0",
     "aws-amplify": "^6.17.0",

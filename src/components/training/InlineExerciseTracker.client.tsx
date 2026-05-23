@@ -16,7 +16,7 @@ const inp: React.CSSProperties = {
   borderRadius: 4,
   color: cream,
   fontFamily: "var(--font-montserrat), sans-serif",
-  fontSize: "0.65rem",
+  fontSize: "16px",
   padding: "5px 7px",
   width: 48,
   textAlign: "center",
@@ -63,7 +63,7 @@ export default function InlineExerciseTracker({
 
   function addSet() {
     const last = sets[sets.length - 1] ?? { reps: def!.defaultReps ?? 0, weight: 0, unit: weightUnit }
-    updateExerciseSets(exerciseId, [...sets, { ...last }])
+    updateExerciseSets(exerciseId, [...sets, { ...last, confirmed: false }])
   }
 
   function removeSet(i: number) {
@@ -151,7 +151,7 @@ export default function InlineExerciseTracker({
                 type="text"
                 value={set.distanceTime ?? ""}
                 placeholder="30m"
-                onChange={(e) => updateSet(i, { ...set, distanceTime: e.target.value })}
+                onChange={(e) => updateSet(i, { ...set, distanceTime: e.target.value, confirmed: false })}
                 style={{ ...inp, width: 58 }}
               />
               <span
@@ -171,7 +171,7 @@ export default function InlineExerciseTracker({
                 min={0}
                 value={set.reps || ""}
                 placeholder="reps"
-                onChange={(e) => updateSet(i, { ...set, reps: Number(e.target.value) })}
+                onChange={(e) => updateSet(i, { ...set, reps: Number(e.target.value), confirmed: false })}
                 style={inp}
               />
               <span
@@ -203,7 +203,7 @@ export default function InlineExerciseTracker({
             <>
               <button
                 onClick={() =>
-                  updateSet(i, { ...set, weight: Math.max(0, (set.weight ?? 0) - STEP) })
+                  updateSet(i, { ...set, weight: Math.max(0, (set.weight ?? 0) - STEP), confirmed: false })
                 }
                 style={stepBtn}
               >
@@ -215,11 +215,11 @@ export default function InlineExerciseTracker({
                 step={STEP}
                 value={set.weight || ""}
                 placeholder="0"
-                onChange={(e) => updateSet(i, { ...set, weight: Number(e.target.value) })}
+                onChange={(e) => updateSet(i, { ...set, weight: Number(e.target.value), confirmed: false })}
                 style={inp}
               />
               <button
-                onClick={() => updateSet(i, { ...set, weight: (set.weight ?? 0) + STEP })}
+                onClick={() => updateSet(i, { ...set, weight: (set.weight ?? 0) + STEP, confirmed: false })}
                 style={stepBtn}
               >
                 +
@@ -235,6 +235,27 @@ export default function InlineExerciseTracker({
               </span>
             </>
           )}
+
+          {/* Log Set button */}
+          <button
+            onClick={() => updateSet(i, { ...set, confirmed: true })}
+            title={set.confirmed ? "Set logged" : "Log this set"}
+            style={{
+              background: set.confirmed ? "rgba(201,169,110,0.12)" : "none",
+              border: `1px solid ${set.confirmed ? gold : border}`,
+              color: set.confirmed ? gold : "#555",
+              cursor: "pointer",
+              fontSize: "0.5rem",
+              fontFamily: "var(--font-montserrat), sans-serif",
+              letterSpacing: "0.08em",
+              padding: "3px 6px",
+              borderRadius: 3,
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {set.confirmed ? "✓" : "Log"}
+          </button>
 
           {sets.length > 1 && (
             <button
