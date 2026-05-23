@@ -136,35 +136,60 @@ export default async function CoursesPage() {
       {/* HERO */}
       <section style={{ background: "#0a0a0a", paddingBottom: 0 }} className="courses-hero">
         <style>{`
+          .cha-headline { grid-area: headline; padding: 100px 40px 20px 80px; }
+          .cha-body     { grid-area: body;     padding: 0 40px 0 80px; align-self: start; }
+          .cha-video    { grid-area: video; }
+          .courses-hero-grid.has-video {
+            display: grid;
+            grid-template-areas: "headline video" "body video";
+            grid-template-columns: 1fr 1fr;
+            row-gap: 0;
+            max-width: 1100px;
+            margin: 0 auto;
+          }
+          .courses-hero-grid.no-video {
+            display: grid;
+            grid-template-areas: "headline" "body";
+            grid-template-columns: 1fr;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 100px 80px 0;
+          }
           @media (max-width: 768px) {
-            .courses-hero-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
-            .courses-hero-text { padding: 72px 24px 0 !important; }
-            .courses-hero-cta { padding: 36px 24px 64px !important; text-align: center; }
+            .courses-hero-grid.has-video {
+              grid-template-areas: "headline" "video" "body" !important;
+              grid-template-columns: 1fr !important;
+              row-gap: 0 !important;
+            }
+            .cha-headline { padding: 64px 24px 20px !important; }
+            .cha-body     { padding: 16px 24px 0 !important; }
+            .courses-hero-cta { padding: 32px 24px 56px !important; text-align: center; }
           }
         `}</style>
 
-        {/* Title + Video */}
-        <div className="courses-hero-grid" style={{ display: "grid", gridTemplateColumns: trailerUrl ? "1fr 1fr" : "1fr", gap: 64, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
-          <div className="courses-hero-text" style={{ padding: "100px 0 0 80px" }}>
+        <div className={`courses-hero-grid ${trailerUrl ? "has-video" : "no-video"}`}>
+          <div className="cha-headline">
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
               Lisa Fit Method
             </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 20 }}>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 0 }}>
               {t.coursesHeroHeadline}
             </h1>
+          </div>
+          {trailerUrl && (
+            <div className="cha-video" style={{ position: "relative", aspectRatio: "1334 / 1080", background: "#111" }}>
+              <video src={trailerUrl} autoPlay muted loop playsInline controls preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
+            </div>
+          )}
+          <div className="cha-body">
             <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
               {t.coursesHeroSubtext}
             </p>
           </div>
-          {trailerUrl && (
-            <div style={{ position: "relative", width: "100%", aspectRatio: "1334 / 1080", background: "#111", alignSelf: "stretch" }}>
-              <video src={trailerUrl} autoPlay muted loop playsInline controls preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
-            </div>
-          )}
         </div>
 
-        {/* Price + CTA below */}
-        <div className="courses-hero-cta" style={{ padding: "52px 80px 80px", textAlign: "center" }}>
+        {/* Price + CTA */}
+        <div className="courses-hero-cta" style={{ padding: "48px 80px 80px", textAlign: "center" }}>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 14, marginBottom: 28 }}>
             <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
             <span style={{ fontSize: 52, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>

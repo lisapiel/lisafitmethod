@@ -130,6 +130,21 @@ export default async function HomePage() {
         .fade-up-4 { animation: fadeUp 0.8s ease forwards 0.8s; opacity: 0; }
       `}</style>
 
+      {/* BANNER — brand visual first */}
+      {bannerUrl && (
+        <section style={{ background: "#0a0a0a", width: "100%" }}>
+          <Image
+            src={bannerUrl}
+            alt="Lisa Fit Method"
+            width={2400}
+            height={800}
+            style={{ width: "100%", height: "auto", display: "block" }}
+            sizes="100vw"
+            priority
+          />
+        </section>
+      )}
+
       {/* HERO */}
       <section style={{ background: "var(--black)", position: "relative" }}>
         <div
@@ -193,20 +208,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* BANNER */}
-      {bannerUrl && (
-        <section style={{ background: "#0a0a0a", width: "100%" }}>
-          <Image
-            src={bannerUrl}
-            alt="Lisa Fit Method"
-            width={2400}
-            height={800}
-            style={{ width: "100%", height: "auto", display: "block" }}
-            sizes="100vw"
-          />
-        </section>
-      )}
 
       {/* STORY */}
       <section style={{ background: "var(--off-white)", padding: "80px 80px" }} className="story-section">

@@ -85,23 +85,21 @@ export default async function AboutPage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "#0a0a0a", padding: "96px 80px 80px", textAlign: "center" }} className="about-hero">
+      <section style={{ background: "#0a0a0a", padding: "64px 80px 72px", textAlign: "center" }} className="about-hero">
         <style>{`
-          @media (max-width: 768px) { .about-hero { padding: 80px 28px 64px !important; } }
+          @media (max-width: 768px) { .about-hero { padding: 56px 28px 56px !important; } }
         `}</style>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          {photoUrl && (
-            <div style={{ width: 108, height: 108, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.25)", flexShrink: 0 }}>
-              <Image
-                src={photoUrl}
-                alt="Lisa McPherson — Certified Personal Trainer"
-                width={216}
-                height={216}
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: settings.crops.about_bio }}
-                priority
-              />
-            </div>
-          )}
+          <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.3)", flexShrink: 0 }}>
+            <Image
+              src="/lisa-about-hero.jpg"
+              alt="Lisa McPherson — Certified Personal Trainer"
+              width={280}
+              height={280}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 18%" }}
+              priority
+            />
+          </div>
           <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
             About Me
           </p>
