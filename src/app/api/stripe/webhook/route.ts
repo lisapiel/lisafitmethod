@@ -3,8 +3,11 @@ import Stripe from "stripe"
 import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
+  AdminSetUserPasswordCommand,
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
+import { Resend } from "resend"
+import { randomBytes } from "crypto"
 
 export const dynamic = "force-dynamic"
 
@@ -14,7 +17,7 @@ function makeStripe() {
 
 function makeCognito() {
   return new CognitoIdentityProviderClient({
-    region: process.env.COGNITO_REGION ?? "us-east-1",
+    region: process.env.COGNITO_REGION ?? "us-east-2",
     credentials: {
       accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
       secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
@@ -22,18 +25,158 @@ function makeCognito() {
   })
 }
 
-async function createCognitoUser(email: string) {
-  await makeCognito().send(
-    new AdminCreateUserCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-      Username: email,
-      UserAttributes: [
-        { Name: "email", Value: email },
-        { Name: "email_verified", Value: "true" },
-      ],
-      DesiredDeliveryMediums: ["EMAIL"],
-    })
-  )
+function generateTempPassword(): string {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+  const lower = "abcdefghjkmnpqrstuvwxyz"
+  const digits = "23456789"
+  const special = "!@#$"
+  const rand = (set: string) => set[randomBytes(1)[0] % set.length]
+  const chars = [
+    rand(upper), rand(upper),
+    rand(lower), rand(lower), rand(lower),
+    rand(digits), rand(digits), rand(digits),
+    rand(special),
+  ]
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = randomBytes(1)[0] % (i + 1)
+    ;[chars[i], chars[j]] = [chars[j], chars[i]]
+  }
+  return chars.join("")
+}
+
+function welcomeEmail(email: string, tempPassword: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Training Foundations course is ready!</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0ebe4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ebe4;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;letter-spacing:0.04em;">
+                Lisa <span style="color:#c9a96e;">Fit Method</span>
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#ffffff;border-radius:4px;padding:48px 44px;border-left:4px solid #c9a96e;">
+
+              <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c9a96e;">
+                Training Foundations
+              </p>
+              <h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
+                Your course is ready.
+              </h1>
+
+              <p style="margin:0 0 24px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                Really excited for you to get started on this.
+              </p>
+
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="background:#c9a96e;border-radius:2px;">
+                    <a href="https://lisafitmethod.com/login" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+                      Access Training Foundations
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f5f1;border:1px solid #e8e0d6;border-radius:2px;margin-bottom:32px;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 12px;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#888;">Your login details</p>
+                    <p style="margin:0 0 6px;font-size:13px;color:#4a4a4a;"><strong style="color:#1a1a1a;">Email:</strong> ${email}</p>
+                    <p style="margin:0;font-size:13px;color:#4a4a4a;"><strong style="color:#1a1a1a;">Temporary password:</strong> ${tempPassword}</p>
+                    <p style="margin:8px 0 0;font-size:11px;color:#999;">You'll be prompted to set a new password on first login.</p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                Start with the Introduction before jumping into the modules. Watch every video — the foundation knowledge is what everything else is built on.
+              </p>
+
+              <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                Any questions along the way, DM me on Instagram or TikTok
+                <a href="https://www.instagram.com/lisafitmethod" style="color:#c9a96e;text-decoration:none;">@lisafitmethod</a>,
+                or reach me through the
+                <a href="https://lisafitmethod.com/contact" style="color:#c9a96e;text-decoration:none;">contact form on the website</a>.
+                I also work with people 1:1 if you ever want something more personalised.
+              </p>
+
+              <p style="margin:0;font-size:15px;color:#1a1a1a;line-height:1.7;">
+                Now go do the work.<br />
+                <span style="font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#c9a96e;">Lisa</span>
+              </p>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="margin:0;font-size:11px;color:#aaa;letter-spacing:0.04em;">
+                Lisa Fit Method &middot; lisafitmethod.com
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+async function provisionUser(email: string) {
+  const cognito = makeCognito()
+  const tempPassword = generateTempPassword()
+
+  try {
+    await cognito.send(
+      new AdminCreateUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+        Username: email,
+        UserAttributes: [
+          { Name: "email", Value: email },
+          { Name: "email_verified", Value: "true" },
+        ],
+        TemporaryPassword: tempPassword,
+        MessageAction: "SUPPRESS",
+      })
+    )
+  } catch (error) {
+    if (error instanceof UsernameExistsException) {
+      // Already purchased — reset their temp password and resend the email
+      await cognito.send(
+        new AdminSetUserPasswordCommand({
+          UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+          Username: email,
+          Password: tempPassword,
+          Permanent: false,
+        })
+      )
+    } else {
+      throw error
+    }
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+  await resend.emails.send({
+    from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    to: email,
+    subject: "Your Training Foundations course is ready!",
+    html: welcomeEmail(email, tempPassword),
+  })
 }
 
 export async function POST(request: NextRequest) {
@@ -58,13 +201,10 @@ export async function POST(request: NextRequest) {
 
     if (email) {
       try {
-        await createCognitoUser(email)
+        await provisionUser(email)
       } catch (error) {
-        // User already exists — they may have purchased again; that's fine
-        if (!(error instanceof UsernameExistsException)) {
-          console.error("Cognito user creation failed:", error)
-          return NextResponse.json({ error: "Account setup failed" }, { status: 500 })
-        }
+        console.error("User provisioning failed:", error)
+        return NextResponse.json({ error: "Account setup failed" }, { status: 500 })
       }
     }
   }
