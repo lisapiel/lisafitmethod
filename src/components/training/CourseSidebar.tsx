@@ -78,18 +78,15 @@ function isActive(pathname: string, href: string) {
 export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
   const { ready, currentPosition, getSessionFor } = useCourseProgress()
-  const [openSections, setOpenSections] = useState<Record<number, boolean>>(() => {
-    const initial: Record<number, boolean> = {}
-    nav.forEach((section, i) => {
-      if (section.items.some((item) => isActive(pathname, item.href))) {
-        initial[i] = true
-      }
-    })
-    return initial
+  const [openSection, setOpenSection] = useState<number | null>(() => {
+    const idx = nav.findIndex((section) =>
+      section.items.some((item) => isActive(pathname, item.href))
+    )
+    return idx >= 0 ? idx : null
   })
 
   function toggleSection(i: number) {
-    setOpenSections((prev) => ({ ...prev, [i]: !prev[i] }))
+    setOpenSection((prev) => (prev === i ? null : i))
   }
 
   return (
@@ -146,6 +143,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
         <div style={{ flexShrink: 0, padding: "1rem 1.25rem 0.75rem" }}>
           <Link
             href="/training-foundations/tracker"
+            onClick={onClose}
             style={{
               display: "flex",
               alignItems: "center",
@@ -176,7 +174,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
         <div className="sidebar-nav-scroll" style={{ flex: 1, padding: "0.5rem 0 1.5rem" }}>
           {nav.map((section, i) => {
             const isCurrent = section.items.some((item) => isActive(pathname, item.href))
-            const isOpen_ = openSections[i] ?? false
+            const isOpen_ = openSection === i
 
             return (
               <div key={i}>
@@ -232,6 +230,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                           <Link
                             key={item.href}
                             href={item.href}
+                            onClick={onClose}
                             style={{
                               display: "flex",
                               alignItems: "center",
