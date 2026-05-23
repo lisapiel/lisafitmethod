@@ -13,11 +13,11 @@ export const posts: Post[] = [
     title: "The Best Strength Training Program for Women Beginners",
     date: "2025-04-10",
     excerpt:
-      "Most beginner programs give you a list of exercises and call it a day. Here's what a real strength training program for women actually looks like — and why the foundation you build now matters more than any exercise you'll ever do.",
+      "Most beginner programs give you a list of exercises and call it a day. Here's what a real strength training program for women actually looks like, and why the foundation you build now matters more than any exercise you'll ever do.",
     readingTime: 7,
     sections: [
       {
-        body: "I get this question constantly: what's the best strength training program for women who are just starting out? Or for people who have been working out for a while but still are not seeing real results?\n\nAnd every time I answer it, I have to fight the urge to just name a program and move on. Because the honest answer is this: the best program is the one built on the right foundation and the one you can stick to consistently, even when it stops feeling exciting.\n\nNot the trendiest one.\nNot the one your friend is doing.\nThe one that teaches you how to move properly before it asks you to move heavy.",
+        body: "I get this question constantly: what's the best strength training program for women who are just starting out? Or for people who have been working out for a while but still are not seeing real results?\n\nAnd every time I answer it, I have to fight the urge to just name a program and move on. Because the honest answer is this: the best program is the one built on the right foundation, the one you can stick to consistently even when it stops feeling exciting. Not the trendiest one. Not the one your friend is doing. The one that teaches you how to move properly before it asks you to move heavy.",
       },
       {
         heading: "Why most beginner programs fail women",
@@ -46,11 +46,11 @@ export const posts: Post[] = [
     title: "Back Pain and the Gym: What You're Doing Wrong and How to Fix It",
     date: "2025-04-17",
     excerpt:
-      "Back pain doesn't mean you need to stop training. Usually it means you need to start training differently. Here's what most people are doing wrong — and what to do instead.",
+      "Back pain doesn't mean you need to stop training. Usually it means you need to start training differently. Here's what most people are doing wrong, and what to do instead.",
     readingTime: 6,
     sections: [
       {
-        body: "If you've ever dealt with back pain at the gym, or been told to stop training because of it, this is for you.\n\nI lived with serious lower back pain for almost a year. I understand the frustration of not being able to train the way you used to, and the fear that every movement might make things worse. But what I learned is that, in most cases, the answer is not to stop training completely. The answer is to learn how to move properly.",
+        body: "If you've ever dealt with back pain at the gym, or been told to stop training because of it, this is for you. I lived with serious lower back pain for almost a year. I understand the frustration of not being able to train the way you used to, and the fear that every movement might make things worse. But what I learned is that, in most cases, the answer is not to stop training completely. The answer is to learn how to move properly.",
       },
       {
         heading: "Why your back hurts (it's probably not what you think)",
