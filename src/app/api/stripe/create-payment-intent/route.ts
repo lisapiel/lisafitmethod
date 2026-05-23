@@ -10,10 +10,10 @@ const MIN_CHARGE_CENTS = 50
 async function applyPromo(code: string): Promise<{ valid: boolean; discountPct: number; finalAmount: number }> {
   const codes = await getPromoCodes()
   const normalized = code.trim().toUpperCase()
-  if (!(normalized in codes)) return { valid: false, discountPct: 0, finalAmount: BASE_PRICE_CENTS }
-  const pct = codes[normalized]
-  const discounted = Math.round(BASE_PRICE_CENTS * (1 - pct / 100))
-  return { valid: true, discountPct: pct, finalAmount: Math.max(discounted, MIN_CHARGE_CENTS) }
+  const entry = codes[normalized]
+  if (!entry || !entry.active) return { valid: false, discountPct: 0, finalAmount: BASE_PRICE_CENTS }
+  const discounted = Math.round(BASE_PRICE_CENTS * (1 - entry.discountPct / 100))
+  return { valid: true, discountPct: entry.discountPct, finalAmount: Math.max(discounted, MIN_CHARGE_CENTS) }
 }
 
 export async function POST(request: NextRequest) {

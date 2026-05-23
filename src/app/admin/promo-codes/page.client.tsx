@@ -1,12 +1,13 @@
 "use client"
 import { useState, useTransition } from "react"
-import { addPromoCode, deletePromoCode } from "./actions"
+import { addPromoCode, deletePromoCode, togglePromoCode } from "./actions"
+import type { PromoCodes } from "@/lib/promoCodes"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 const mono: React.CSSProperties = { fontFamily: "monospace", fontSize: "0.85rem", letterSpacing: "0.08em" }
 
-export function PromoCodesClient({ initialCodes }: { initialCodes: Record<string, number> }) {
+export function PromoCodesClient({ initialCodes }: { initialCodes: PromoCodes }) {
   const [codes, setCodes] = useState(initialCodes)
   const [newCode, setNewCode] = useState("")
   const [newDiscount, setNewDiscount] = useState<string>("100")
@@ -20,11 +21,8 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: Record<string
     const pct = parseInt(newDiscount, 10)
     startTransition(async () => {
       const result = await addPromoCode(newCode, pct)
-      if (result.error) {
-        setError(result.error)
-        return
-      }
-      setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: pct }))
+      if (result.error) { setError(result.error); return }
+      setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: { discountPct: pct, active: true } }))
       setNewCode("")
       setNewDiscount("100")
     })
@@ -33,11 +31,14 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: Record<string
   function handleDelete(code: string) {
     startTransition(async () => {
       await deletePromoCode(code)
-      setCodes((prev) => {
-        const next = { ...prev }
-        delete next[code]
-        return next
-      })
+      setCodes((prev) => { const next = { ...prev }; delete next[code]; return next })
+    })
+  }
+
+  function handleToggle(code: string, active: boolean) {
+    startTransition(async () => {
+      await togglePromoCode(code, active)
+      setCodes((prev) => ({ ...prev, [code]: { ...prev[code], active } }))
     })
   }
 
@@ -61,8 +62,8 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: Record<string
       {/* Code list */}
       <div style={{ background: "#161616", border: `1px solid ${border}`, marginBottom: "2rem" }}>
         {/* Header row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px", gap: "1rem", padding: "0.75rem 1.5rem", borderBottom: `1px solid ${border}` }}>
-          {["Code", "Discount", ""].map((h) => (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 150px 90px 220px", gap: "1rem", padding: "0.75rem 1.5rem", borderBottom: `1px solid ${border}` }}>
+          {["Code", "Discount", "Status", ""].map((h) => (
             <span key={h} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555" }}>{h}</span>
           ))}
         </div>
@@ -73,18 +74,34 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: Record<string
           </p>
         )}
 
-        {entries.map(([code, pct]) => (
-          <div key={code} style={{ display: "grid", gridTemplateColumns: "1fr 140px 160px", gap: "1rem", padding: "1rem 1.5rem", borderBottom: `1px solid ${border}`, alignItems: "center" }}>
+        {entries.map(([code, entry]) => (
+          <div key={code} style={{ display: "grid", gridTemplateColumns: "1fr 150px 90px 220px", gap: "1rem", padding: "1rem 1.5rem", borderBottom: `1px solid ${border}`, alignItems: "center", opacity: entry.active ? 1 : 0.55 }}>
             <span style={{ ...mono, color: "#f0e6d3" }}>{code}</span>
-            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: pct === 100 ? gold : "#f0e6d3" }}>
-              {pct === 100 ? "Free (100% off)" : `${pct}% off`}
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: entry.discountPct === 100 ? gold : "#f0e6d3" }}>
+              {entry.discountPct === 100 ? "Free (100% off)" : `${entry.discountPct}% off`}
             </span>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <span style={{
+              fontFamily: "var(--font-montserrat), sans-serif",
+              fontSize: "0.6rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: entry.active ? "#6dbf7e" : "#888",
+            }}>
+              {entry.active ? "Active" : "Inactive"}
+            </span>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
               <button
                 onClick={() => handleCopy(code)}
                 style={{ background: "none", border: `1px solid ${border}`, color: copied === code ? gold : "#888", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "0.35rem 0.75rem", cursor: "pointer" }}
               >
                 {copied === code ? "Copied!" : "Copy"}
+              </button>
+              <button
+                onClick={() => handleToggle(code, !entry.active)}
+                disabled={isPending}
+                style={{ background: "none", border: `1px solid ${entry.active ? "#2a3a2a" : "#2a2a3a"}`, color: entry.active ? "#6dbf7e" : "#7e8dbf", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "0.35rem 0.75rem", cursor: "pointer", opacity: isPending ? 0.5 : 1 }}
+              >
+                {entry.active ? "Deactivate" : "Activate"}
               </button>
               <button
                 onClick={() => handleDelete(code)}
@@ -150,7 +167,7 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: Record<string
 
         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#555", marginTop: "1rem", lineHeight: 1.6 }}>
           Set discount to <strong style={{ color: "#888" }}>100%</strong> for free access ($0.50 processing fee applies via Stripe).
-          Set it to any value between 1–99 for a partial discount.
+          New codes are active by default. Deactivate to block a code without deleting it.
         </p>
       </div>
     </div>

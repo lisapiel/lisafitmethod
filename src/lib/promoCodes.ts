@@ -4,6 +4,13 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dyn
 const TABLE = "lfm-user-progress"
 const PROMO_KEY = "__promo_codes__"
 
+export interface PromoCodeEntry {
+  discountPct: number
+  active: boolean
+}
+
+export type PromoCodes = Record<string, PromoCodeEntry>
+
 function makeDb() {
   return DynamoDBDocumentClient.from(
     new DynamoDBClient({
@@ -16,18 +23,18 @@ function makeDb() {
   )
 }
 
-export async function getPromoCodes(): Promise<Record<string, number>> {
+export async function getPromoCodes(): Promise<PromoCodes> {
   try {
     const db = makeDb()
     const result = await db.send(new GetCommand({ TableName: TABLE, Key: { userId: PROMO_KEY } }))
     if (!result.Item?.codes) return {}
-    return result.Item.codes as Record<string, number>
+    return result.Item.codes as PromoCodes
   } catch {
     return {}
   }
 }
 
-export async function savePromoCodes(codes: Record<string, number>): Promise<void> {
+export async function savePromoCodes(codes: PromoCodes): Promise<void> {
   const db = makeDb()
   await db.send(
     new PutCommand({
