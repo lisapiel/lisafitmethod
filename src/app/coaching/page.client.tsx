@@ -67,12 +67,13 @@ export default function CoachingClient({ settings }: Props) {
           @media (max-width: 768px) { .coaching-hero { padding: 72px 28px 60px !important; } }
         `}</style>
         <div style={{ maxWidth: 680, margin: "0 auto" }}>
-          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>Online Coaching</p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
-            {t.coachingHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
-              <span key={i}>{line}{i < arr.length - 1 ? <em style={{ fontStyle: "italic", color: accent }}><br /></em> : null}</span>
-            ))}
+          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>Online coaching 1:1</p>
+          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 20 }}>
+            {t.coachingHeroHeadline}
           </h1>
+          <p style={{ fontSize: `calc(15px * ${bs})`, fontWeight: 500, letterSpacing: "0.04em", color: accent, marginBottom: 24, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Intelligent programming. Real accountability. Long-term progress.
+          </p>
           <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
             {t.coachingHeroSubtext}
           </p>
@@ -88,7 +89,7 @@ export default function CoachingClient({ settings }: Props) {
           <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16 }}>What you get</p>
           <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 44px) * ${hs})`, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.15, marginBottom: 56 }}>
             Personalized to you.<br />
-            <em style={{ fontStyle: "italic", color: "#a8895e" }}>Not a template.</em>
+            <em style={{ fontStyle: "italic", color: "#a8895e" }}>Training that adapts to your body, your goals, and your life.</em>
           </h2>
           <div className="coaching-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}>
             {features.map((item) => (

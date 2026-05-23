@@ -131,24 +131,24 @@ export const DEFAULTS: SiteSettings = {
     mod4Desc:
       "Five principles that support everything you do in the gym without obsessing over food or following a complicated diet.",
     coursesFinalHeadline: "Build the foundation.\nTrain for life.",
-    coachingHeroHeadline: "Train directly\nwith me.",
+    coachingHeroHeadline: "Coaching built around you.",
     coachingHeroSubtext:
-      "1:1 coaching for people who want more than a template. Personalized programming built around your goals, your schedule, and where you actually are — not where a random plan assumes you are.",
+      "Coaching is designed for people serious about building strength, improving movement quality, and creating long-term results. I keep coaching intentionally limited so every client gets real attention, detailed feedback, and programming that evolves as they progress. Fill out the form below and I'll personally review your application.",
     coachingFeature1Title: "Custom programming",
     coachingFeature1Body:
-      "A program built specifically for your goals, equipment, and schedule. Updated every month based on your progress.",
+      "Training built specifically for your goals, experience level, schedule, equipment, and recovery capacity. Updated as you progress so your body keeps adapting instead of plateauing.",
     coachingFeature2Title: "Form review & feedback",
     coachingFeature2Body:
-      "Send me videos of your lifts. I'll review your technique and give you specific cues to improve — not just generic notes.",
+      "Send me videos of your lifts and I'll break down your technique with detailed cues and corrections so you understand not just what to change, but why.",
     coachingFeature3Title: "Check-ins & adjustments",
     coachingFeature3Body:
-      "Weekly check-ins so we can adjust what's not working before it becomes a problem. No waiting four weeks to find out.",
+      "Weekly check-ins to adjust your training, recovery, workload, or nutrition before small issues become setbacks. Real coaching means adapting as your body evolves.",
     coachingFeature4Title: "Direct access to me",
     coachingFeature4Body:
-      "Questions between sessions? Message me directly. I'm not handing you off to an algorithm or an automated response.",
-    coachingFormHeadline: "Tell me a bit about yourself.",
+      "Questions between check-ins? Message me directly. No outsourced coaching or automated replies — just real guidance when you need it.",
+    coachingFormHeadline: "Tell me about your goals.",
     coachingFormSubtext:
-      "I take on a limited number of coaching clients so I can give everyone real attention. Fill out the form and I'll get back to you within 48 hours.",
+      "I keep coaching intentionally limited so every client gets real attention, detailed feedback, and programming built specifically around them. Fill out the form below and I'll personally review your application within 48 hours. No commitment required to apply.",
     footerTagline:
       "Strength training built on movement quality, real structure, and a body that lasts.",
   },
