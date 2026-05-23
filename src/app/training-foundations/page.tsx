@@ -52,35 +52,35 @@ export default function TrainingFoundationsIntroPage() {
         </h2>
 
         <div style={{ marginBottom: "1.75rem" }}>
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             I started in fitness classes. Cardio, cycling, group workouts — the kind of training that feels approachable when the weight room feels intimidating. I was consistent, I showed up, I worked hard. But nothing was really changing. I was burning calories without building anything. The shape I wanted wasn&apos;t coming from what I was doing.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             The moment I started following a real strength training program, everything shifted. For the first time I was actually building muscle. Week over week I could feel it. The squat moved more weight. The deadlift felt different. My body started changing in a way it never had from classes. I got hooked — and I pushed too hard, too fast.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             I kept loading more weight before I had the foundation to support it. Warm-ups were something I rushed through or skipped. Mobility and recovery weren&apos;t things I took seriously — they felt optional. I was making progress, which made it easy to ignore the warning signs. Eventually my back gave out.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             For almost a year I lived with serious back pain. Getting out of bed was uncomfortable. Tying my shoes was uncomfortable. The gym — something I had built my entire routine around — was suddenly out of reach. That year taught me more about training than all the years before it combined.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             I had to relearn everything properly. Movement mechanics. How to actually warm up. Why mobility and recovery are not optional. How to build a program with real structure and logic. I became a certified personal trainer because I needed to genuinely understand what I had been skipping — not just fix it, understand it.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             I rebuilt my body from scratch. Properly. I became pain-free. I became stronger than I had ever been. And I have maintained those habits consistently ever since — not through motivation, but through understanding why the right approach works.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             This guide is everything I wish someone had handed me before I started. The movements, the structure, the warm-up and recovery protocols I used to think were optional. Everything that would have changed my trajectory if I had learned it from the beginning.
           </p>
           <br />
-          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.9 }}>
+          <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
             You don&apos;t need to learn the hard way. That&apos;s already been done.
           </p>
           <br />
@@ -130,7 +130,7 @@ export default function TrainingFoundationsIntroPage() {
                 style={{
                   fontSize: "0.88rem",
                   color: "#b0a090",
-                  lineHeight: 1.7,
+                  lineHeight: 1.35,
                   paddingLeft: "1.25rem",
                   position: "relative",
                 }}
@@ -170,7 +170,7 @@ export default function TrainingFoundationsIntroPage() {
             >
               How to use this guide
             </div>
-            <p style={{ fontSize: "0.88rem", color: "#888888", lineHeight: 1.8 }}>
+            <p style={{ fontSize: "0.88rem", color: "#888888", lineHeight: 1.45 }}>
               Read Module 1 and 2 before touching the program. Watch every video. The form knowledge is the product, the program is what you do with it.
             </p>
           </div>

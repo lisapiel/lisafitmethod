@@ -20,7 +20,7 @@ export default function TrainingFoundationsLayout({ children }: { children: Reac
           color: "#f0e6d3",
           fontFamily: "var(--font-montserrat), sans-serif",
           fontWeight: 300,
-          lineHeight: 1.7,
+          lineHeight: 1.35,
         }}
       >
         <CourseHeader onMenuToggle={() => setSidebarOpen((v) => !v)} />

@@ -26,7 +26,7 @@ function PrincipleCard({ num, title, children }: { num: string; title: string; c
       <div style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.3rem", fontWeight: 400, color: cream, marginBottom: "0.75rem" }}>
         {title}
       </div>
-      <p style={{ fontSize: "0.88rem", color: "#b0a090", lineHeight: 1.9 }}>{children}</p>
+      <p style={{ fontSize: "0.88rem", color: "#b0a090", lineHeight: 1.5 }}>{children}</p>
     </div>
   )
 }
@@ -40,7 +40,7 @@ export default function Module4Page() {
       <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1rem" }}>
         Nutrition Foundations
       </h2>
-      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.9, maxWidth: 700, marginBottom: "3rem", paddingBottom: "2rem", borderBottom: `1px solid ${border}` }}>
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, maxWidth: 700, marginBottom: "3rem", paddingBottom: "2rem", borderBottom: `1px solid ${border}` }}>
         This is not a diet plan. It is not a calorie calculator. It is five principles that if you apply them consistently will support everything you do in the gym and help you build and maintain a healthy body composition without obsessing over food. About a year ago I started taking nutrition seriously for the first time. Not dieting, not tracking every gram, just genuinely understanding what my body needed to perform and recover. The difference it made was bigger than any program change I had ever made. Food is not separate from your fitness. It is half of it.
       </p>
 
@@ -82,10 +82,10 @@ export default function Module4Page() {
           You finished.<br />
           <em>That&apos;s already more<br />than most people do.</em>
         </h2>
-        <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           A lot of people buy guides and never open them. You not only opened this one, you worked through it. You now understand how to move well, why your glutes and core matter more than most people realize, how to structure your training, and how to fuel it. That foundation took most coaches years to learn. You built it in four weeks.
         </p>
-        <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           Everything you do from here will be better because of it.
         </p>
 

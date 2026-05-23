@@ -52,7 +52,7 @@ function BulletList({ items }: { items: string[] }) {
   return (
     <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
       {items.map((item) => (
-        <li key={item} style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.7, paddingLeft: "1.25rem", position: "relative" }}>
+        <li key={item} style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.35, paddingLeft: "1.25rem", position: "relative" }}>
           <span style={{ position: "absolute", left: 0, color: gold, opacity: 0.6, fontSize: "0.75rem" }}>—</span>
           {item}
         </li>
@@ -62,7 +62,7 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 function Para({ children }: { children: React.ReactNode }) {
-  return <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.9 }}>{children}</p>
+  return <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.5 }}>{children}</p>
 }
 
 export default async function Module1Page() {
@@ -77,7 +77,7 @@ export default async function Module1Page() {
       <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1rem" }}>
         The Foundation Movements
       </h2>
-      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.9, maxWidth: 700, marginBottom: "3rem", paddingBottom: "2rem", borderBottom: `1px solid ${border}` }}>
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, maxWidth: 700, marginBottom: "3rem", paddingBottom: "2rem", borderBottom: `1px solid ${border}` }}>
         These are the five movement patterns that form the base of almost every effective training program. Before you add weight, add complexity, or follow any program including the one in this guide, you need to understand these movements and be able to perform them with clean form. Watch the video first, read the cues, then practice the movement with light or no weight before your first session.
       </p>
 

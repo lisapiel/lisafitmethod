@@ -106,7 +106,7 @@ export default function WeeklyLogClient() {
       <h1 style={{ fontFamily: "var(--font-cormorant, var(--font-montserrat)), serif", fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 700, color: cream, marginBottom: 8, lineHeight: 1.15 }}>
         Weekly Log
       </h1>
-      <p style={{ fontSize: "0.75rem", color: muted, marginBottom: 32, lineHeight: 1.6 }}>
+      <p style={{ fontSize: "0.75rem", color: muted, marginBottom: 32, lineHeight: 1.3 }}>
         Log all three days for the selected week. Pick any week to review or update what you lifted.
       </p>
 

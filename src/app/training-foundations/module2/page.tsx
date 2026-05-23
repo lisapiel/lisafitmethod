@@ -41,7 +41,7 @@ function CB({ heading, children }: { heading: string; children: React.ReactNode 
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.9 }}>{children}</p>
+  return <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.5 }}>{children}</p>
 }
 
 export default async function Module2Page() {
@@ -56,7 +56,7 @@ export default async function Module2Page() {
 
       <SectionLabel>Module 2</SectionLabel>
       <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1rem" }}>Core & Glute Priority</h2>
-      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.9, maxWidth: 700, marginBottom: "3rem", paddingBottom: "2rem", borderBottom: `1px solid ${border}` }}>
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, maxWidth: 700, marginBottom: "3rem", paddingBottom: "2rem", borderBottom: `1px solid ${border}` }}>
         Weak glutes and a poorly trained core are two of the most common and most overlooked causes of lower back pain in people who exercise regularly. I know this because they were my problem. Work through them in order. The first four are corrective and foundational. The last four are builders. Don&apos;t skip ahead.
       </p>
 

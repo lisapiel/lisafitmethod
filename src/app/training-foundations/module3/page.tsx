@@ -53,7 +53,7 @@ function ExerciseRow({ name, prescription, note, videoIds, s3Urls }: { name: str
       <div style={{ padding: "1.25rem 0", borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
         <div style={{ fontSize: "0.9rem", color: cream, fontWeight: 400, marginBottom: "0.25rem" }}>{name}</div>
         <div style={{ fontSize: "0.75rem", color: gold, marginBottom: "0.25rem" }}>{prescription}</div>
-        <div style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.6 }}>{note}</div>
+        <div style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.3 }}>{note}</div>
       </div>
       {videoIds?.map((id, i) => <VideoEmbed key={i} videoId={id} title={name} s3Url={s3Urls?.[i]} />)}
     </>
@@ -123,21 +123,21 @@ export default async function Module3Page() {
       <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1rem" }}>
         The 4-Week Program
       </h2>
-      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.9, maxWidth: 700, marginBottom: "2rem" }}>
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, maxWidth: 700, marginBottom: "2rem" }}>
         Everything in Modules 1 and 2 was knowledge. This is where you apply it. The program runs 3 days per week with at least one rest day between sessions. Each session takes between 45 and 60 minutes including your warm-up and cool-down. They are not optional and not something to rush through.
       </p>
 
       <div style={{ padding: "1.5rem 2rem", background: cardBg, border: `1px solid ${border}`, marginBottom: "2rem" }}>
         <SectionLabel>How to read the program</SectionLabel>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.45, marginBottom: "1rem" }}>
           Sets x Reps. So 3×10 means 3 sets of 10 repetitions. Rest 60 to 90 seconds between sets on most exercises. For heavier compound movements like the RDL, hip thrust, and goblet squat, take a full 2 minutes between sets.
         </p>
         <SectionLabel>How to progress</SectionLabel>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.45, marginBottom: "1rem" }}>
           If you complete all sets and reps with clean form and the last few reps feel challenging but controlled, add a small amount of weight next session. For dumbbells that usually means going up one size. If the form breaks down before you finish the reps, stay at the same weight until it doesn&apos;t.
         </p>
         <SectionLabel>Track your progress</SectionLabel>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.8 }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.45 }}>
           Log your sets right under each exercise as you go, or use the full tracker panel at the bottom of each day. Both are linked — entering data in one updates the other. Use the sidebar links to jump straight to any day&apos;s tracker.
         </p>
       </div>
@@ -233,7 +233,7 @@ export default async function Module3Page() {
 
       {/* ── DAY C ──────────────────────────────────────────────── */}
       <DayBlock id="dayc" day="Day C" title="Movement Quality & Integration">
-        <p style={{ fontSize: "0.85rem", color: "#888", lineHeight: 1.8, marginBottom: "2rem" }}>
+        <p style={{ fontSize: "0.85rem", color: "#888", lineHeight: 1.45, marginBottom: "2rem" }}>
           This day has a different feel to it. The loading is lighter, the focus is on movement quality, single leg stability, posture, and tying everything you have been building together. Think of it as the day you reinforce the patterns rather than push the intensity.
         </p>
 
@@ -296,32 +296,32 @@ export default async function Module3Page() {
       {/* WEEKS 3 & 4 */}
       <div id="w34" style={{ padding: "2rem", background: cardBg, border: `1px solid ${border}`, marginBottom: "2rem" }}>
         <SectionLabel>Weeks 3 and 4 — Progressive Overload</SectionLabel>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           The program structure stays exactly the same across all three days. What changes is the demand you place on your body within that structure.
         </p>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           On every exercise where you completed all sets and reps with clean form in Weeks 1 and 2, add a small amount of weight. For dumbbells, that usually means going up one size. For band exercises, move to a heavier band. For bodyweight exercises like the dead bug, bird dog, push-up, and inverted row, add 2–3 reps per set rather than rushing into weighted variations.
         </p>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           If your form broke down on any exercise during Weeks 1 and 2, stay at the same weight in Weeks 3 and 4. Getting the movement pattern right is always the priority. The weight will come.
         </p>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           And remember: this doesn&apos;t stop after Week 4.
         </p>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           The goal is to teach you how to progressively overload correctly so you can continue building strength and seeing progress long after the program ends. If you continue tracking your workouts, improving your form, and gradually increasing the challenge over time, your body will keep adapting with you.
         </p>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9 }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5 }}>
           That&apos;s why the tracking system matters. The more consistently you use it, the easier it becomes to see your progress, push intelligently, and keep building momentum over the long term.
         </p>
       </div>
 
       <div style={{ padding: "2.5rem", background: cardBg, border: `1px solid ${border}`, borderLeft: `3px solid ${gold}`, marginBottom: "2rem" }}>
         <SectionLabel>You finished the program. Here&apos;s what that means.</SectionLabel>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9, marginBottom: "1rem" }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5, marginBottom: "1rem" }}>
           Four weeks ago you walked into the gym and started building something. Now you have it. You know how to hinge, squat, push, pull, and brace. You have trained your glutes and core with real intention. You have done the work most people who exercise regularly have never done.
         </p>
-        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.9 }}>
+        <p style={{ fontSize: "0.88rem", color: "#888", lineHeight: 1.5 }}>
           This is not the finish line. It is the starting point. The program is designed to be run again — and the second time, you go heavier. The third time, heavier still. Open your training log and look at Week 1 versus Week 4. That gap is what Round 2 will build on.
         </p>
       </div>
