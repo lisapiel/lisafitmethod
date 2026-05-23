@@ -19,33 +19,32 @@ export const metadata: Metadata = {
 
 const MODULE_ITEMS = [
   [
-    "Hip Hinge — the most important movement you'll learn",
-    "Squat Pattern — knees, hips, and spine working together",
-    "Push Pattern — pressing without wrecking your shoulders",
-    "Pull Pattern — building the back that protects everything",
-    "Brace & Carry — how your core actually works",
+    "Hip hinge: learn how to protect your back under load",
+    "Squat pattern: build strength through the hips, knees, and core",
+    "Push pattern: press safely without destroying your shoulders",
+    "Pull pattern: build posture, stability, and upper body strength",
+    "Brace & carry: understand how your core actually works",
   ],
   [
-    "Dead Bug & Bird Dog — anti-extension stability",
-    "Glute Bridge & Hip Thrust — the primary glute builders",
-    "Glute Medius Circuit — the work most programs ignore",
-    "Romanian Deadlift — posterior chain under load",
-    "Pallof Press & Farmer's Carry — anti-rotation and bracing",
+    "Core stability fundamentals",
+    "Glute strength & lower body stability",
+    "Learn to load the posterior chain safely",
+    "Build a stronger core that supports heavier lifting",
   ],
   [
-    "Day A — Lower body focus",
-    "Day B — Upper body focus",
-    "Day C — Movement quality & integration",
-    "Weeks 3 & 4 — Progressive overload built in",
-    "10-minute warm-ups and 5-minute cool-downs included",
-    "Built-in workout tracker — log every set and watch your strength grow",
+    "3 structured training days per week",
+    "Built-in warm-ups and cool-downs",
+    "Progressive overload system included",
+    "Step-by-step exercise guidance",
+    "Workout & progress tracking built in",
+    "Designed to be repeated and progressed beyond the first 4 weeks",
   ],
   [
-    "Protein is your priority",
-    "Eat enough to train",
-    "Consistency beats perfection",
+    "Protein first",
+    "Fuel your training properly",
+    "Consistency over perfection",
     "Hydration affects everything",
-    "Don't complicate it until you've mastered the basics",
+    "Stop overcomplicating nutrition",
   ],
 ]
 
@@ -147,7 +146,7 @@ export default async function CoursesPage() {
           {t.coursesHeroSubtext}
         </p>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 14, marginBottom: 28 }}>
-          <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67</span>
+          <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
           <span style={{ fontSize: 56, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
           <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
         </div>
@@ -155,7 +154,7 @@ export default async function CoursesPage() {
           Get Instant Access
         </Link>
         <p style={{ marginTop: 16, fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-          One-time payment · Yours forever · No subscription
+          One-time payment · Lifetime access · Built-in workout &amp; progress tracking
         </p>
       </section>
 
@@ -168,7 +167,7 @@ export default async function CoursesPage() {
           <div style={{ borderBottom: "1px solid rgba(245,242,238,0.08)", paddingBottom: 40, marginBottom: 48 }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 16 }}>What&apos;s inside</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3vw, 48px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.1 }}>
-              Four modules. <em style={{ fontStyle: "italic", color: accent }}>One foundation.</em>
+              Four modules. <em style={{ fontStyle: "italic", color: accent }}>One real foundation.</em>
             </h2>
           </div>
           <div className="modules-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2, background: "rgba(245,242,238,0.04)" }}>
@@ -204,6 +203,9 @@ export default async function CoursesPage() {
           <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "1334 / 1080", background: "#0a0a0a", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
             <video src={trailerUrl} autoPlay muted loop playsInline controls preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
           </div>
+          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", maxWidth: 520, margin: "32px auto 0", lineHeight: 1.7, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Full exercise walkthroughs, movement breakdowns, built-in workout tracking, progression systems, warm-ups, and real structure from day one.
+          </p>
         </section>
       )}
 
@@ -233,11 +235,12 @@ export default async function CoursesPage() {
             </h2>
             <ul style={{ listStyle: "none" }}>
               {[
-                "You're new to structured training or feel like you've been winging it",
-                "You want to understand the why behind every movement, not just follow a list",
-                "You've had nagging injuries or lower back pain and want to train safely",
-                "You're tired of random workouts that don't build on each other",
-                "You're ready to commit to 3 days a week for 4 weeks",
+                "You're tired of random workouts that lead nowhere",
+                "You want structure instead of guessing",
+                "You want to understand why you're doing each movement",
+                "You've dealt with nagging pain, instability, or recurring injuries",
+                "You want a program you can continue progressing",
+                "You're ready to train consistently and actually build strength",
               ].map((item) => (
                 <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "14px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.5 }}>
                   <span style={{ color: "#a8895e", fontWeight: 700, flexShrink: 0 }}>✓</span>
@@ -252,10 +255,10 @@ export default async function CoursesPage() {
               Ready for a fully<br /><em style={{ fontStyle: "italic", color: "#a8895e" }}>personalized plan?</em>
             </h3>
             <p style={{ fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.75, marginBottom: 16 }}>
-              The course gives you the foundation. If you want a fully custom program — your goals, your schedule, me in your corner every week — that&apos;s what 1:1 coaching is for.
+              Training Foundations gives you the system. 1:1 coaching gives you a program fully built around your body, goals, schedule, injuries, recovery, and progress.
             </p>
             <p style={{ fontSize: `calc(14px * ${bs})`, color: "#6b6560", lineHeight: 1.7, marginBottom: 32 }}>
-              I only work with people who are ready to commit. No quitting halfway. We go until you get your result.
+              You&apos;ll get direct feedback, personalized programming, ongoing adjustments, and real accountability every step of the way.
             </p>
             <Link
               href="/coaching"
@@ -293,14 +296,14 @@ export default async function CoursesPage() {
         <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#0a0a0a", background: accent, padding: "6px 16px", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>Limited Time Offer</span>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 28 }}>
-            <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67</span>
+            <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
             <span style={{ fontSize: 64, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
           </div>
           <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px" }}>
             Get Instant Access
           </Link>
           <p style={{ marginTop: 18, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Yours forever</strong> · No subscription
+            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access</strong> · Built-in workout &amp; progress tracking
           </p>
         </div>
 

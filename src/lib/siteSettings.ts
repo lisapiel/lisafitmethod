@@ -117,19 +117,19 @@ export const DEFAULTS: SiteSettings = {
       "No gimmicks. No random workouts. Just intelligent training focused on movement quality, long-term progress, and building a body that actually lasts.",
     coursesHeroHeadline: "Training Foundations",
     coursesHeroSubtext:
-      "A 4-week beginner program built around the movements, habits, and structure that actually create results — and keep you training for life.",
+      "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your weights, reps, and progress, and finally understand what actually changes your body. No random workouts. No ego lifting. Just smart training built to last.",
     mod1Title: "Foundation Movements",
     mod1Desc:
-      "The five movement patterns every lifter needs before adding weight or complexity. Skip this and everything else becomes harder and more dangerous.",
+      "Learn the movement patterns every strong body is built on before adding more weight, intensity, or complexity. This is the foundation most people skip.",
     mod2Title: "Core & Glute Priority",
     mod2Desc:
-      "Targeted training for the muscles most responsible for lower back health, posture, and strength. This is the work most programs skip.",
-    mod3Title: "The 4-Week Program",
+      "Build the muscles most responsible for stability, posture, lower back support, and long-term strength.",
+    mod3Title: "The Training System",
     mod3Desc:
-      "Three days a week. Warm-ups, working sets, and cool-downs. Every session structured with intent. Weeks 3 and 4 include progressive overload built in.",
+      "A structured 3-day training system designed to help you progressively build strength, improve movement quality, and learn how to train properly long term.",
     mod4Title: "Nutrition Foundations",
     mod4Desc:
-      "Five principles that support everything you do in the gym without obsessing over food or following a complicated diet.",
+      "Simple nutrition principles that support muscle growth, recovery, energy, and long-term consistency without obsessing over food.",
     coursesFinalHeadline: "Build the foundation.\nTrain for life.",
     coachingHeroHeadline: "Coaching built around you.",
     coachingHeroSubtext:

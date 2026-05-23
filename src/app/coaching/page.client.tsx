@@ -72,7 +72,7 @@ export default function CoachingClient({ settings }: Props) {
             {t.coachingHeroHeadline}
           </h1>
           <p style={{ fontSize: `calc(15px * ${bs})`, fontWeight: 500, letterSpacing: "0.04em", color: accent, marginBottom: 24, fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            Intelligent programming. Real accountability. Long-term progress.
+            Smart programming. Real accountability. Long-term progress.
           </p>
           <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
             {t.coachingHeroSubtext}
