@@ -67,12 +67,12 @@ export default async function AboutPage() {
         <style>{`
           @media (max-width: 768px) {
             .about-hero-grid { grid-template-columns: 1fr !important; }
-            .about-hero-text { padding: 64px 28px 48px !important; }
-            .about-hero-photo { height: 360px !important; }
+            .about-hero-text { padding: 56px 24px 40px !important; }
+            .about-hero-photo { height: 420px !important; }
           }
         `}</style>
-        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", alignItems: "center", maxWidth: 1200, margin: "0 auto", padding: "80px 80px 80px 0" }}>
-          <div className="about-hero-text" style={{ padding: "0 64px 0 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div className="about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", alignItems: "center", maxWidth: 1200, margin: "0 auto" }}>
+          <div className="about-hero-text" style={{ padding: "80px 48px 80px 80px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>
               About Me
             </p>
@@ -81,7 +81,7 @@ export default async function AboutPage() {
                 <span key={i}>{line}{i < arr.length - 1 ? <em style={{ fontStyle: "italic", color: accent }}><br /></em> : null}</span>
               ))}
             </h1>
-            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75, maxWidth: 520 }}>
+            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
               {t.aboutHeroSubtext}
             </p>
           </div>
