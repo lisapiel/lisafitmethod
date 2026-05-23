@@ -37,6 +37,9 @@ export default function TrainingFoundationsLayout({ children }: { children: Reac
             <style>{`
               .course-scroll-area::-webkit-scrollbar { width: 4px; }
               .course-scroll-area::-webkit-scrollbar-thumb { background: #2a2a2a; }
+              @media (max-width: 768px) {
+                .course-scroll-area { padding-top: 3.5rem; }
+              }
             `}</style>
             {children}
           </div>

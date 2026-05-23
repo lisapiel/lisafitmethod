@@ -20,6 +20,7 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
 
   return (
     <header
+      className="course-header-bar"
       style={{
         borderBottom: "1px solid #2a2a2a",
         padding: "1rem 1.5rem",
@@ -57,6 +58,13 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
             .mobile-menu-btn { display: block !important; }
             .header-subtitle { display: none !important; }
             .header-progress-badge { display: none !important; }
+            .course-header-bar {
+              position: fixed !important;
+              top: 0;
+              left: 0;
+              right: 0;
+              z-index: 200;
+            }
           }
         `}</style>
         <div
