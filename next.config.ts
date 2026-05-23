@@ -12,6 +12,7 @@ const SERVER_KEYS = [
   "COGNITO_REGION",
   "COGNITO_USER_POOL_ID",
   "RESEND_API_KEY",
+  "PROMO_CODES",
 ]
 
 const nextConfig: NextConfig = {
