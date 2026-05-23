@@ -79,7 +79,7 @@ export const DEFAULTS: SiteSettings = {
   text: {
     homeHeroHeadline: "Most people don't need a harder workout.\nThey need a better foundation.",
     homeHeroSubtext:
-      "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your weights, reps, and progress, and finally understand what actually changes your body. No random workouts. No ego lifting. Just smart training built to last.",
+      "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your workouts and progress, and finally understand what actually changes your body. Designed to teach you how to progressively overload correctly so you can continue building strength long after the first four weeks are over. No random workouts. No ego lifting. Just intelligent training built to last.",
     homeStoryHeadline: "I did it the hard way.\nYou don't have to.",
     homeStoryPara1:
       "I spent years doing fitness classes before I ever touched a barbell. Cardio, cycling, group workouts. I was consistent, I worked hard, but I wasn't actually building anything. I was burning calories without changing my body. My strength wasn't improving. My shape wasn't improving. Everything changed when I finally started following a real strength training program.",
