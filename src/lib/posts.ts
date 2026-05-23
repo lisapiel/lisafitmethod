@@ -173,6 +173,167 @@ export const posts: Post[] = [
       },
     ],
   },
+  {
+    slug: "progressive-overload-explained",
+    title: "Progressive Overload Explained Simply",
+    date: "2025-05-15",
+    excerpt:
+      "Progressive overload is the most talked-about concept in strength training and possibly the most misunderstood. Here's what it actually means, why most people fail at it, and how to apply it simply.",
+    readingTime: 5,
+    sections: [
+      {
+        body: "Progressive overload is the most talked-about concept in strength training and possibly the most misunderstood. Most people have heard the phrase. Far fewer actually apply it consistently. And almost no one explains it simply enough to be useful. Here's what it actually means and how to use it.",
+      },
+      {
+        heading: "What progressive overload actually means",
+        body: "Progressive overload means giving your body a slightly greater challenge than it has already adapted to. That's it. Your body is extremely good at becoming efficient at the things you repeatedly ask it to do. The moment it has adapted to a stimulus, that stimulus stops being a growth signal. Which means if you want to keep getting stronger, you have to keep giving your body a reason to change.\n\nThis is not about going heavier every single session. It's about maintaining a consistent, trackable increase in demand over time. Sometimes that's more weight. Sometimes it's more reps. Sometimes it's better technique under the same load. The specific method matters less than the consistency of applying it.",
+      },
+      {
+        heading: "The simplest ways to apply it",
+        body: "For beginners, progressive overload is almost embarrassingly straightforward. You don't need complicated periodization or a plan mapped out for the next twelve weeks. You just need to consistently do slightly more than you did before.\n\nIn practice, that usually looks like:\n\n- Complete all your reps with good form at a given weight. Then add a small amount of weight next session.\n- If the weight feels too heavy to increase, add a rep or two instead. Once you've added reps to the top of your target range, then move the weight up.\n- Track what you lifted. If you don't write it down, you're guessing.\n\nApplied consistently over months, this is what actually builds strength. Nothing more complicated is needed at the beginner stage.",
+      },
+      {
+        heading: "What it doesn't mean",
+        body: "Progressive overload does not mean maxing out every session. It does not mean adding weight regardless of how your body feels that day. And it does not mean pushing through poor technique to move heavier loads.\n\nOne of the most common ways people get hurt in the gym is treating progressive overload as permission to ego lift. Adding weight before your movement quality can support it is not progressive overload. It is loading a broken pattern. The result is usually [back pain](/blog/back-pain-and-the-gym), stalled progress, or both. The foundation has to be there first.",
+      },
+      {
+        heading: "Why most people fail at it",
+        body: "The main reason people fail to apply progressive overload consistently is not lack of effort. It's that they aren't tracking anything. If you go into a session without knowing what you lifted last time, you cannot make a meaningful increase. You're just selecting weights based on how you feel that day and hoping something sticks.\n\nThe second reason is program hopping. Progressive overload works over weeks and months. It doesn't work if you switch to a different program every two weeks because something more interesting showed up online. A mediocre program followed consistently beats an excellent program started and abandoned repeatedly.\n\nThe third reason is skipping the fundamentals. You cannot progressively overload a broken movement pattern. If your [hip hinge](/blog/how-to-hip-hinge) is poor, adding weight to your deadlift isn't progress. It's progressive damage.",
+      },
+      {
+        heading: "The minimum tracking system that actually works",
+        body: "Before each session, look at what you lifted last time. During the session, write down what you're doing. After the session, note anything that felt off. That's the whole system.\n\nYou do not need an app or a sophisticated spreadsheet. A notebook, a phone note, or the built-in tracker inside [Training Foundations](/courses) is more than enough. The people who make steady progress over years aren't smarter or more naturally gifted. They just know what they lifted last session and show up to do slightly more.",
+      },
+    ],
+  },
+  {
+    slug: "beginner-gym-mistakes",
+    title: "The Biggest Beginner Gym Mistakes (And How to Avoid Them)",
+    date: "2025-05-22",
+    excerpt:
+      "Most beginner gym mistakes aren't random. The same ones come up over and over, and almost all of them trace back to the same root cause: starting with the wrong priorities.",
+    readingTime: 7,
+    sections: [
+      {
+        body: "Most beginner gym mistakes aren't random. The same ones come up over and over, and almost all of them trace back to the same root cause: starting with the wrong priorities. Here are the most common ones, why they happen, and what to do instead.",
+      },
+      {
+        heading: "Skipping the warm-up",
+        body: "The warm-up is the most skipped part of any training session and one of the most consequential. Most beginners treat it as optional, or as something that wastes time before the real training starts. It isn't optional. The purpose of a warm-up is to prepare your body to move well under load: to activate the muscles you're about to use, increase range of motion, and prime your nervous system for coordinated movement.\n\nWithout that preparation, you're asking your body to perform complex, loaded movements from a cold, stiff starting point. Most of the [back pain](/blog/back-pain-and-the-gym) people develop from training builds up over many sessions of loading a body that wasn't ready to be loaded. Ten minutes of targeted warm-up work before every session is not optional. It is the difference between training well and slowly breaking things.",
+      },
+      {
+        heading: "Using too much weight too soon",
+        body: "Beginners almost universally start too heavy. Choosing a lighter weight feels like a failure, so people default to weights that look respectable rather than weights that allow them to move correctly. The point of training is not to move the most weight possible. The point is to provide a stimulus for adaptation. A weight that's too heavy forces compensation: your body finds a way to lift it using muscles and joint positions it shouldn't be using. That compensation is where injuries live.\n\nThe correct weight for any movement is the heaviest load you can use with full control and good technique throughout every rep. At the beginning, that is often lighter than your ego would prefer. That is fine. Good movement under a moderate load builds a real foundation. Poor movement under a heavy load builds injuries.",
+      },
+      {
+        heading: "No consistent structure",
+        body: "The most expensive gym mistake is not choosing the wrong program. It's having no program at all. Training randomly, picking whatever exercises feel right in the moment, or following whatever you saw posted online that week gives your body no consistent reason to adapt. A lot of activity is created without anything being built.\n\nA structured training routine, even a simple one, outperforms random training almost every time. The structure does not need to be complicated. Three days a week, the same foundational movements, [progressive overload](/blog/progressive-overload-explained) applied consistently over time. That is more than enough to build meaningful strength as a beginner. The complexity can come much later.",
+      },
+      {
+        heading: "Copying advanced programs",
+        body: "Beginners frequently make the mistake of following programs designed for experienced lifters. They see what competitive athletes or advanced gym-goers are doing and try to replicate it. The problem is that advanced programs are designed for bodies that have already built a foundation: real strength, movement quality, and work capacity. A beginner does not have that foundation yet.\n\nAdvanced programming applied too early usually results in one of three things: overuse injuries from too much volume, technical breakdown from too much complexity, or burnout from unrealistic demands. [Beginner strength training](/blog/strength-training-for-women-beginners) should be simple, structured, and built around learning the foundational movement patterns. The time for advanced programming comes after the basics are genuinely solid.",
+      },
+      {
+        heading: "Not tracking anything",
+        body: "If you're not tracking your training, you're flying blind. You cannot apply progressive overload without knowing what you lifted last session. You can't identify what's working or what isn't. You can't notice when you've stopped making progress until weeks have passed. Tracking does not need to be complicated. Exercise, weight, sets, reps. That's it. Review it before each session and use it to decide what to do.",
+      },
+      {
+        heading: "Training too often, recovering too little",
+        body: "Recovery is not the passive part of training. It's where adaptation happens. Training creates a stimulus for change. Rest is where your body responds to that stimulus by rebuilding stronger. Skip the recovery and you remove the adaptation. You just accumulate fatigue without getting stronger.\n\nBeginners who train every day, take no real rest days, and sleep poorly are often genuinely confused about why they aren't progressing. More training is not always better training. For most beginners, three well-structured sessions per week with genuine recovery between them will produce better results than five or six depleted sessions with no rest.",
+      },
+    ],
+  },
+  {
+    slug: "why-random-workouts-dont-work",
+    title: "Why Random Workouts Don't Work",
+    date: "2025-05-29",
+    excerpt:
+      "If you've been training consistently and still aren't making real progress, random workouts are probably part of the reason. The problem usually isn't effort. It's structure.",
+    readingTime: 5,
+    sections: [
+      {
+        body: "If you've ever spent six months training consistently and still felt like you weren't really getting anywhere, random workouts are probably part of the reason. The problem usually isn't effort. It's structure.",
+      },
+      {
+        heading: "What random training actually looks like",
+        body: "Random training isn't always obvious. It doesn't just mean showing up to the gym and doing whatever. It also looks like:\n\n- Following a different program every two to three weeks because you found something new online.\n- Doing different exercises each session with no connecting logic between them.\n- Choosing weights based on what feels like a reasonable number that day.\n- Mixing cardio, lifting, yoga, and group classes without progressing in any of them.\n\nThe common thread is the absence of a structure that builds on itself. Every session feels like work. Nothing compounds.",
+      },
+      {
+        heading: "Why it feels like it's working at first",
+        body: "At the very beginning, almost any training produces results. If you go from sedentary to regularly active, your body will respond. Strength increases, movements feel more familiar, and you start feeling better. This initial adaptation can last a few months. The problem comes when it runs out and you have no structure in place to keep driving progress.\n\nRandom training gives your body a reason to change at first, but no consistent reason to keep changing. Without [progressive overload](/blog/progressive-overload-explained) applied over time, progress stops. Most people interpret this as a plateau and either push harder or switch to something new. Neither actually addresses the real issue.",
+      },
+      {
+        heading: "What structure actually gives you",
+        body: "A structured training program solves three things that random training can't.\n\nFirst, it creates progressive overload by design. The program is built to increase demand over time in a controlled way. You don't have to figure out when and how to progress. The structure handles it.\n\nSecond, it gives your body consistent practice with the same movements. Strength is partly skill. The more times you perform a movement correctly under load, the more efficient your neuromuscular coordination becomes, and the more strength you can express. Random training never lets that efficiency develop.\n\nThird, it gives you something to measure. You can look back at what you lifted eight weeks ago and see concrete progress. That feedback loop is one of the most powerful things in long-term training.",
+      },
+      {
+        heading: "What a structured program actually requires",
+        body: "A structured beginner program doesn't need to be complicated. It needs three things: a consistent set of foundational movements repeated across sessions, a method for tracking and progressing over time, and a realistic training frequency that allows for recovery.\n\nThree days per week. The same movement patterns in each session. Weights and reps recorded and progressively increased. Warm-ups built in. That's the whole framework. The specifics can vary, but anything built on those principles will produce far more results than random training over the same period.\n\n[Training Foundations](/courses) is built around exactly this structure if you want a ready-made place to start.",
+      },
+    ],
+  },
+  {
+    slug: "core-training-mistakes",
+    title: "Why Your Core Training Is Probably Wrong",
+    date: "2025-06-05",
+    excerpt:
+      "Most people who train regularly have some version of core work in their program. Most of them still have weak cores. That's not a coincidence. It's what happens when you train the core for the wrong thing.",
+    readingTime: 6,
+    sections: [
+      {
+        body: "Most people who train regularly have some version of core work in their program. A few sets of crunches, maybe some planks, perhaps a cable crunch at the end of a session. And most of those people still have weak cores. That's not a coincidence. It's a symptom of training the core for the wrong thing.",
+      },
+      {
+        heading: "The real job of your core",
+        body: "The core's primary job is not to create movement. It's to resist movement and stabilize your spine while the rest of your body works.\n\nThink about what's happening during a heavy deadlift. Your legs and hips are doing the primary work. Your core's job is to hold your spine stable while that happens, transferring force efficiently without letting your lower back buckle under load. A strong core in this context means one that can maintain position, resist rotation, and prevent spinal flexion when it's under load. Crunches train none of this.",
+      },
+      {
+        heading: "The problem with most core training",
+        body: "Most core training is built around spinal flexion: sit-ups, crunches, leg raises. These exercises do work the rectus abdominis, but they're not training the core in the way it actually functions during compound lifting and daily movement.\n\nThe deeper issue is that repeated spinal flexion under load is exactly what causes many lower back problems. If your lower back is already struggling, training the core with constant flexion movements is often counterproductive. This is part of why so many people who faithfully do core work still end up with [back pain from the gym](/blog/back-pain-and-the-gym) and unstable spines under load.",
+      },
+      {
+        heading: "What effective core training actually looks like",
+        body: "Effective core training focuses on three things: anti-extension, anti-rotation, and carrying under load.\n\nAnti-extension trains your ability to resist your spine from arching under load. Dead bugs, hollow body holds, and ab wheel rollouts train this directly.\n\nAnti-rotation trains your ability to resist your torso from twisting when force is applied to one side. Pallof presses, single-arm carries, and unilateral loading in general train this.\n\nCarrying under load, specifically farmer's carries and suitcase carries, forces your entire stabilization system to work while you're moving. They train grip, posture, lateral stability, and core bracing simultaneously.\n\nThese aren't glamorous exercises. They don't look impressive. But they build the kind of core strength that actually transfers to your lifts and protects your spine over the long term.",
+      },
+      {
+        heading: "How this connects to everything else",
+        body: "Core stability isn't a separate category of training. It shows up in every major compound movement. Every time you deadlift, squat, press, or row, your core is working to keep your spine stable under load. When that stabilization fails, your body compensates somewhere else, and it's usually your lower back.\n\nThis is exactly why learning the [hip hinge](/blog/how-to-hip-hinge) correctly matters so much. A proper hip hinge requires your core to brace effectively so your spine stays neutral while your hips do the work. If your core can't hold that position, the movement falls apart and the load ends up in the wrong place.\n\nBuilding real core strength means training it the way it actually functions: as a stabilizer. Once you do that, everything else in your training tends to feel more controlled and solid.",
+      },
+    ],
+  },
+  {
+    slug: "why-you-plateau-in-the-gym",
+    title: "Why You've Stopped Making Progress in the Gym",
+    date: "2025-06-12",
+    excerpt:
+      "A training plateau almost always has a straightforward explanation. Before blaming your genetics or switching programs again, here's what's actually going on and how to fix it.",
+    readingTime: 6,
+    sections: [
+      {
+        body: "Hitting a training plateau is one of the most frustrating experiences in fitness. You're consistent, you're showing up, you're working hard, and nothing seems to be changing. Before blaming your genetics or deciding you need a completely new program, it's worth looking at the actual causes, because most plateaus have a fairly straightforward explanation.",
+      },
+      {
+        heading: "The most common reason: no progressive overload",
+        body: "The single most common cause of a plateau is the absence of [progressive overload](/blog/progressive-overload-explained). Most people find a set of weights they can handle comfortably and stay there indefinitely. The workouts feel challenging. They're sweating, they're tired afterward. It feels like real training. But if the demand on your body isn't increasing over time, your body has no reason to change.\n\nYour body is built to become as efficient as possible at whatever you repeatedly ask it to do. Once it adapts to a given load, that load stops being a growth signal. The stimulus that produced progress three months ago is just maintenance today.",
+      },
+      {
+        heading: "Program hopping",
+        body: "The second most common cause is switching programs before any single program has had time to work. Strength development takes weeks and months of consistent application. Most people give a new program two or three weeks, don't see dramatic changes, and move on to the next thing.\n\nThis cycle feels productive because there's always novelty. But novelty and progress aren't the same thing. A [well-structured routine](/blog/how-to-build-a-workout-routine) needs six to twelve weeks of consistent effort to show meaningful results. Program hopping resets that timeline every few weeks and ensures you never accumulate enough stimulus in one direction to actually create change.",
+      },
+      {
+        heading: "Not recovering enough",
+        body: "Training provides the stimulus for adaptation. Recovery is where adaptation actually happens. If your recovery is consistently poor, your body cannot complete the repair and rebuilding process, and you plateau despite training hard.\n\nRecovery isn't just about rest days. Sleep is where the majority of muscle repair happens. Nutrition provides the raw materials for that repair. Chronic stress depletes the same resources that training uses. If you're training hard, sleeping poorly, undereating, and managing high life stress, adding more training is usually not the answer. The limiting factor is not the training. It's the recovery.",
+      },
+      {
+        heading: "Trying to build on a weak foundation",
+        body: "Some plateaus aren't about overtraining or under-recovering. They're the result of trying to build on a foundation that was never properly established. If your movement patterns are poor, your core stability is weak, or restricted mobility is limiting your range of motion, you can only build so much before those limitations create a ceiling.\n\nA lot of people who've been training for a few years and feel stuck are experiencing exactly this. Adding more weight, more sets, or more frequency doesn't help because the limiting factor isn't effort. It's movement quality and structural weakness.\n\nThe solution is often counterintuitive: go back to basics. [Rebuild your foundation](/courses) with proper movement patterns, core stability work, and honest attention to mobility. Once those are genuinely solid, progress tends to start moving again.",
+      },
+      {
+        heading: "What to actually do when you plateau",
+        body: "Before making any changes, figure out which of these is actually your problem. If you're not tracking your training, start there. If you've been on the same program for four months without adding any weight, apply progressive overload. If you've been switching programs every three weeks, pick one and commit to it for ten weeks minimum. If you're training hard and feeling constantly exhausted, look at your sleep and recovery.\n\nMost plateaus don't require a new program. They require honesty about which fundamental you've been skipping.",
+      },
+    ],
+  },
 ]
 
 export function getPost(slug: string): Post | undefined {
