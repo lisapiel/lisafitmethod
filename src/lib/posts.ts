@@ -75,31 +75,31 @@ export const posts: Post[] = [
     title: "How to Hip Hinge Correctly (The Foundation of Every Major Lift)",
     date: "2025-04-24",
     excerpt:
-      "The hip hinge is the most important movement pattern in strength training — and the one most people never actually learn. Here's exactly how to do it, and why getting it right changes everything.",
+      "The hip hinge is the most important movement pattern in strength training. And most people never actually learn it. Here's exactly how to do it, and why getting it right changes everything.",
     readingTime: 5,
     sections: [
       {
-        body: "If I could teach every beginning lifter one thing before they ever touched a barbell, it would be the hip hinge. Not a squat. Not a deadlift. Not a bench press. The hip hinge. Because the hip hinge is the foundation underneath all of them — and most people have never been shown how to actually do it.",
+        body: "If I could teach every beginning lifter one thing before they ever touched a barbell, it would be the hip hinge. Not a squat. Not a deadlift. Not a bench press. The hip hinge. Because the hip hinge is the foundation underneath all of them. And most people have never been shown how to actually do it.",
       },
       {
         heading: "What is the hip hinge?",
-        body: "The hip hinge is a movement pattern where you bend forward by pushing your hips back while keeping your spine neutral. It sounds simple. It's not. Most people, when told to bend forward, bend their lower back instead of their hips. This distinction matters enormously. When you load a lumbar flexion pattern (lower back rounding forward), you're compressing your discs and taking the work away from the muscles that are supposed to be doing it — your glutes and hamstrings. When you load a proper hip hinge (hips push back, spine stays long), you activate the posterior chain and protect your spine.",
+        body: "The hip hinge is a movement pattern where you bend forward by pushing your hips back while keeping your spine neutral. It sounds simple. It's not. Most people, when told to bend forward, bend their lower back instead of their hips. This distinction matters enormously. When you load a lumbar flexion pattern (lower back rounding forward), you're compressing your discs and taking the work away from the muscles that are supposed to be doing it: your glutes and hamstrings. When you load a proper hip hinge (hips push back, spine stays long), you activate the posterior chain and protect your spine.",
       },
       {
         heading: "How to practice the hip hinge",
-        body: "Here's the simplest drill:\n\nStand about a foot away from a wall. Push your hips back until they touch the wall. Notice what happened: your hips went back, your chest tipped slightly forward, but your lower back stayed neutral. That's the hip hinge.\n\nStep 2: Move farther from the wall — two feet, three feet. The more distance, the deeper the hinge. Each time, you're training your body to find the movement from the hip joint, not the lower back.\n\nStep 3: Add a dowel rod or broomstick along your spine. Hold it in contact with three points — the back of your head, between your shoulder blades, and your tailbone. Now hinge. If the rod loses contact at any point, you've lost your neutral spine.",
+        body: "Here's the simplest drill:\n\nStand about a foot away from a wall. Push your hips back until they touch the wall. Notice what happened: your hips went back, your chest tipped slightly forward, but your lower back stayed neutral. That's the hip hinge.\n\nStep 2: Move farther from the wall. Two feet, three feet. The more distance, the deeper the hinge. Each time, you're training your body to find the movement from the hip joint, not the lower back.\n\nStep 3: Add a dowel rod or broomstick along your spine. Hold it in contact with three points: the back of your head, between your shoulder blades, and your tailbone. Now hinge. If the rod loses contact at any point, you've lost your neutral spine.",
       },
       {
         heading: "Common hip hinge mistakes",
-        body: "Rounding the lower back — the most common and most harmful. Usually happens when the hamstrings are tight or when someone is moving too fast.\n\nHyperextending the lower back at the top — locking out by pushing your hips too far forward and arching aggressively. This compresses your lumbar vertebrae from the opposite direction.\n\nBending the knees too much — this turns a hip hinge into a squat. The hip hinge keeps a soft knee bend (not straight, not heavily bent). If your hips are dropping and your knees are bending significantly, you're squatting.\n\nShifting forward onto the toes — in a hip hinge, your weight should stay in your mid-foot to heel. If you're going up onto your toes, your hips aren't going back far enough.",
+        body: "Rounding the lower back: the most common and most harmful. Usually happens when the hamstrings are tight or when someone is moving too fast.\n\nHyperextending the lower back at the top: locking out by pushing your hips too far forward and arching aggressively. This compresses your lumbar vertebrae from the opposite direction.\n\nBending the knees too much: this turns a hip hinge into a squat. The hip hinge keeps a soft knee bend (not straight, not heavily bent). If your hips are dropping and your knees are bending significantly, you're squatting.\n\nShifting forward onto the toes: in a hip hinge, your weight should stay in your mid-foot to heel. If you're going up onto your toes, your hips aren't going back far enough.",
       },
       {
         heading: "Where the hip hinge shows up",
-        body: "Once you have a solid hip hinge, you'll recognize it in:\n\nDeadlift — the entire setup and pull is a hip hinge pattern.\nRomanian deadlift — this is the hip hinge with load, with a focus on the eccentric (lowering) phase.\nKettlebell swing — a dynamic, explosive hip hinge.\nGood mornings — a loaded hip hinge without pulling anything from the floor.\nSingle-leg Romanian deadlift — a unilateral hip hinge that challenges balance and reveals left/right asymmetry.",
+        body: "Once you have a solid hip hinge, you'll recognize it in:\n\nDeadlift: the entire setup and pull is a hip hinge pattern.\nRomanian deadlift: this is the hip hinge with load, with a focus on the eccentric (lowering) phase.\nKettlebell swing: a dynamic, explosive hip hinge.\nGood mornings: a loaded hip hinge without pulling anything from the floor.\nSingle-leg Romanian deadlift: a unilateral hip hinge that challenges balance and reveals left/right asymmetry.",
       },
       {
         heading: "Why this matters more than any single exercise",
-        body: "You can go your entire fitness career doing exercises that involve a hip hinge without ever actually learning the pattern correctly. You'll get some results. You'll also accumulate wear on your lower back that will eventually catch up with you. Learning the hip hinge properly — not just understanding it conceptually but training it until it's automatic — is one of the best investments you can make in your long-term health and training.",
+        body: "You can go your entire fitness career doing exercises that involve a hip hinge without ever actually learning the pattern correctly. You'll get some results. You'll also accumulate wear on your lower back that will eventually catch up with you. Learning the hip hinge properly, not just understanding it conceptually but training it until it's automatic, is one of the best investments you can make in your long-term health and training.",
       },
     ],
   },
