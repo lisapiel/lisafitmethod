@@ -14,10 +14,10 @@ export default function VideoPlayer({
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    // iOS Safari ignores the autoplay attribute on page load — must call play() programmatically
-    video.play().catch(() => {
-      // Autoplay blocked by browser; video will start on first user interaction
-    })
+    // React doesn't reliably apply the muted prop to the DOM node on iOS Safari.
+    // Setting it directly on the element is required for autoplay to be permitted.
+    video.muted = true
+    video.play().catch(() => {})
   }, [])
 
   return (
