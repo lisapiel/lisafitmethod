@@ -90,13 +90,13 @@ export default async function AboutPage() {
           @media (max-width: 768px) { .about-hero { padding: 56px 28px 56px !important; } }
         `}</style>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{ width: 180, height: 180, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.3)", flexShrink: 0 }}>
+          <div style={{ width: 230, height: 230, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.3)", flexShrink: 0 }}>
             <Image
               src="/lisa-about-hero.jpg"
               alt="Lisa McPherson — Certified Personal Trainer"
-              width={360}
-              height={360}
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 25%" }}
+              width={460}
+              height={460}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%" }}
               priority
             />
           </div>
@@ -108,7 +108,7 @@ export default async function AboutPage() {
               <span key={i}>{line}{i < arr.length - 1 ? <><em style={{ fontStyle: "italic", color: accent }}></em><br /></> : null}</span>
             ))}
           </h1>
-          <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75, maxWidth: 520, margin: "0 auto" }}>
+          <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.4, maxWidth: 520, margin: "0 auto" }}>
             {t.aboutHeroSubtext}
           </p>
         </div>

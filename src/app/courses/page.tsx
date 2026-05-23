@@ -135,74 +135,99 @@ export default async function CoursesPage() {
       `}</style>
 
       {/* HERO */}
-      <section style={{ background: "#0a0a0a", paddingBottom: 0 }} className="courses-hero">
+      <section style={{ background: "#0a0a0a" }} className="courses-hero">
         <style>{`
-          .cha-headline { grid-area: headline; padding: 100px 40px 0 80px; }
-          .cha-body     { grid-area: body;     padding: 0 40px 0 80px; align-self: start; }
-          .cha-video    { grid-area: video; }
-          .courses-hero-grid.has-video {
-            display: grid;
-            grid-template-areas: "headline video" "body video";
-            grid-template-columns: 1fr 1fr;
-            row-gap: 0;
+          .courses-video-band {
+            width: 100%;
+            height: 62vh;
+            min-height: 320px;
+            overflow: hidden;
+            background: #111;
+          }
+          .courses-hero-text {
             max-width: 1100px;
             margin: 0 auto;
-          }
-          .courses-hero-grid.no-video {
+            padding: 52px 80px 80px;
             display: grid;
-            grid-template-areas: "headline" "body";
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr auto;
+            gap: 60px;
+            align-items: start;
+          }
+          .courses-hero-cta-col {
+            min-width: 220px;
+          }
+          .courses-hero-no-video {
             max-width: 680px;
             margin: 0 auto;
-            padding: 100px 80px 0;
+            padding: 100px 80px 80px;
+            text-align: center;
           }
           @media (max-width: 768px) {
-            .courses-hero-grid.has-video {
-              grid-template-areas: "headline" "video" "body" !important;
-              grid-template-columns: 1fr !important;
-              row-gap: 0 !important;
-            }
-            .cha-headline { padding: 64px 24px 0 !important; }
-            .cha-body     { padding: 16px 24px 0 !important; }
-            .courses-hero-cta { padding: 32px 24px 56px !important; text-align: center; }
+            .courses-video-band { height: 56vw; min-height: 220px; }
+            .courses-hero-text { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 56px; }
+            .courses-hero-no-video { padding: 64px 24px 56px; }
           }
         `}</style>
 
-        <div className={`courses-hero-grid ${trailerUrl ? "has-video" : "no-video"}`}>
-          <div className="cha-headline">
+        {/* Video — directly under navbar, no gap */}
+        {trailerUrl && (
+          <div className="courses-video-band">
+            <VideoPlayer src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          </div>
+        )}
+
+        {/* Content */}
+        {trailerUrl ? (
+          <div className="courses-hero-text">
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
+                Lisa Fit Method
+              </p>
+              <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 20 }}>
+                {t.coursesHeroHeadline}
+              </h1>
+              <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
+                {t.coursesHeroSubtext}
+              </p>
+            </div>
+            <div className="courses-hero-cta-col">
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
+                <span style={{ fontSize: 52, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
+                <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
+              </div>
+              <Link href="/checkout" style={{ display: "block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 32px", textAlign: "center" }}>
+                Get Instant Access
+              </Link>
+              <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.7 }}>
+                One-time payment · Lifetime access<br />Built-in workout &amp; progress tracking
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="courses-hero-no-video">
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
               Lisa Fit Method
             </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 0 }}>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 24 }}>
               {t.coursesHeroHeadline}
             </h1>
-          </div>
-          {trailerUrl && (
-            <div className="cha-video" style={{ position: "relative", aspectRatio: "1334 / 1080", background: "#111" }}>
-              <VideoPlayer src={trailerUrl} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
-            </div>
-          )}
-          <div className="cha-body">
-            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75 }}>
+            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.75, marginBottom: 40 }}>
               {t.coursesHeroSubtext}
             </p>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 14, justifyContent: "center", marginBottom: 24 }}>
+              <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
+              <span style={{ fontSize: 52, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
+              <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
+            </div>
+            <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 64px" }}>
+              Get Instant Access
+            </Link>
+            <p style={{ marginTop: 16, fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              One-time payment · Lifetime access · Built-in workout &amp; progress tracking
+            </p>
           </div>
-        </div>
-
-        {/* Price + CTA */}
-        <div className="courses-hero-cta" style={{ padding: "48px 80px 80px", textAlign: "center" }}>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 14, marginBottom: 28 }}>
-            <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
-            <span style={{ fontSize: 52, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-            <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
-          </div>
-          <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 64px" }}>
-            Get Instant Access
-          </Link>
-          <p style={{ marginTop: 16, fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment · Lifetime access · Built-in workout &amp; progress tracking
-          </p>
-        </div>
+        )}
       </section>
 
       {/* MODULES */}
