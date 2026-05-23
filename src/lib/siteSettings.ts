@@ -82,11 +82,11 @@ export const DEFAULTS: SiteSettings = {
       "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your workouts and progress, and finally understand what actually changes your body. Designed to teach you how to progressively overload correctly so you can continue building strength long after the first four weeks are over. No random workouts. No ego lifting. Just intelligent training built to last.",
     homeStoryHeadline: "I did it the hard way.\nYou don't have to.",
     homeStoryPara1:
-      "I spent years doing fitness classes before I ever touched a barbell. Cardio, cycling, group workouts. I was consistent, I worked hard, but I wasn't actually building anything. I was burning calories without changing my body. My strength wasn't improving. My shape wasn't improving. Everything changed when I finally started following a real strength training program.",
+      "I spent years training hard without actually building strength or changing my body. Everything changed when I finally discovered structure, progressive overload, and proper programming.",
     homeStoryPara2:
-      "Then I made the mistake a lot of people make once they start seeing progress. I focused on pushing harder instead of building a proper foundation first. Warm-ups and mobility work felt optional. I was lifting heavier, but my body wasn't prepared to support it. Eventually my back had enough. For almost a year, I dealt with serious pain. And that year forced me to relearn everything I thought I understood about training. Not just exercises, but movement quality, stability, recovery, proper progression, and the fundamentals most people skip until their body forces them to pay attention.",
+      "Then my back injury forced me to relearn everything I thought I understood about fitness. Movement quality, stability, recovery, progression. The fundamentals most people skip until their body forces them to pay attention.",
     homeStoryPara3:
-      "I rebuilt from the ground up, became a certified personal trainer, and came back stronger than before. This course is the system I wish I had from the beginning. The structure, movement education, warm-up protocols, progression, workout tracking, nutrition foundations, and training principles that actually matter if you want a strong body that lasts.",
+      "This course is the system I wish I had from the beginning. The structure, movement education, warm-ups, progression, workout tracking, and training principles that actually matter if you want a strong body that lasts.",
     homeStoryQuote: "The goal isn't just to look strong. It's to build a body that lasts.",
     homeFinalHeadline: "Stronger. Smarter. Built to last.",
     homeFinalSubtext:
