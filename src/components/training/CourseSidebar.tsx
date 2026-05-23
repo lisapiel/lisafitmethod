@@ -207,14 +207,16 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                     </span>
                     <span
                       style={{
-                        fontSize: "0.55rem",
-                        color: "#888888",
-                        transition: "transform 0.2s",
+                        fontSize: "0.8rem",
+                        color: isOpen_ ? "#c9a96e" : "#444",
+                        transition: "transform 0.2s, color 0.2s",
                         transform: isOpen_ ? "rotate(90deg)" : "none",
                         display: "inline-block",
+                        lineHeight: 1,
+                        fontFamily: "sans-serif",
                       }}
                     >
-                      ▶
+                      ›
                     </span>
                   </div>
 
