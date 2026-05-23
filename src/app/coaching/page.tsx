@@ -17,6 +17,15 @@ export const metadata: Metadata = {
 
 export default async function CoachingPage() {
   const settings = await fetchSiteSettings()
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://lisafitmethod.com" },
+      { "@type": "ListItem", position: 2, name: "Coaching", item: "https://lisafitmethod.com/coaching" },
+    ],
+  }
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -48,6 +57,7 @@ export default async function CoachingPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }} />
       <CoachingClient settings={settings} />
     </>
   )
