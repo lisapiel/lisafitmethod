@@ -54,12 +54,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif" }}>
       <style>{`
         :root { --accent: #c8a97e; --accent-dark: #a8895e; --muted: #6b6560; }
       `}</style>
-
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* HEADER */}
       <section style={{ background: "#0a0a0a", padding: "100px 80px 80px" }} className="post-header">
@@ -135,5 +135,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </div>
       </section>
     </main>
+    </>
   )
 }

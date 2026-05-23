@@ -83,14 +83,14 @@ export default async function CoursesPage() {
     hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", instructor: { "@type": "Person", name: "Lisa McPherson" } },
     offers: {
       "@type": "Offer",
-      price: t.coursePrice,
+      price: Number(t.coursePrice),
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
       url: "https://lisafitmethod.com/checkout",
       seller: { "@type": "Organization", name: "Lisa Fit Method" },
     },
     hasPart: modules.map((m) => ({
-      "@type": "CourseUnit",
+      "@type": "Course",
       name: m.title,
       description: m.desc,
     })),

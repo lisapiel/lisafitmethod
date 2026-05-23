@@ -34,23 +34,35 @@ export default async function AboutPage() {
     { label: t.aboutCred3Label, body: t.aboutCred3Body },
   ]
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Lisa McPherson",
-    jobTitle: "Certified Personal Trainer",
-    url: "https://lisafitmethod.com/about",
-    image: photoUrl ?? "https://lisafitmethod.com/hero.png",
-    description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt her training from scratch after a serious back injury and now helps people build a real foundation.",
-    sameAs: ["https://instagram.com/lisafitmethod"],
-    worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
-    knowsAbout: ["Strength Training", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Hip Hinge", "Core Stability", "Intelligent Programming"],
-    hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Certification", name: "Certified Personal Trainer (CPT)" },
-  }
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: "Lisa McPherson",
+      jobTitle: "Certified Personal Trainer",
+      url: "https://lisafitmethod.com/about",
+      image: photoUrl ?? "https://lisafitmethod.com/hero.png",
+      description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt her training from scratch after a serious back injury and now helps people build a real foundation.",
+      sameAs: ["https://instagram.com/lisafitmethod"],
+      worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+      knowsAbout: ["Strength Training", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Hip Hinge", "Core Stability", "Intelligent Programming"],
+      hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Certification", name: "Certified Personal Trainer (CPT)" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Lisa Fit Method",
+      url: "https://lisafitmethod.com",
+      logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png" },
+      description: "Online personal training and strength programming — built around proper movement, real structure, and a foundation that lasts.",
+      founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
+      sameAs: ["https://instagram.com/lisafitmethod"],
+    },
+  ]
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
       <style>{`
         :root {

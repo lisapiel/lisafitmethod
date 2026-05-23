@@ -46,17 +46,27 @@ export default async function HomePage() {
     },
     {
       "@context": "https://schema.org",
-      "@type": "ProfessionalService",
+      "@type": "Organization",
       name: "Lisa Fit Method",
       url: "https://lisafitmethod.com",
-      logo: "https://lisafitmethod.com/hero.png",
+      logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png" },
       image: "https://lisafitmethod.com/hero.png",
       description: "Online personal training and strength programming — built around proper movement, real structure, and a foundation that lasts.",
-      founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer" },
+      founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
       sameAs: ["https://instagram.com/lisafitmethod"],
-      serviceType: "Personal Training",
-      areaServed: "Worldwide",
-      knowsAbout: ["Strength Training", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise", "Progressive Overload"],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: "Lisa McPherson",
+      jobTitle: "Certified Personal Trainer",
+      url: "https://lisafitmethod.com/about",
+      image: "https://lisafitmethod.com/hero.png",
+      description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt training from scratch after a serious back injury — now helps people build strength the right way.",
+      sameAs: ["https://instagram.com/lisafitmethod"],
+      worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+      knowsAbout: ["Strength Training", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Core Stability"],
+      hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Certification", name: "Certified Personal Trainer (CPT)" },
     },
     {
       "@context": "https://schema.org",
@@ -71,7 +81,7 @@ export default async function HomePage() {
       timeRequired: "P4W",
       offers: {
         "@type": "Offer",
-        price: t.coursePrice,
+        price: Number(t.coursePrice),
         priceCurrency: "USD",
         availability: "https://schema.org/InStock",
         url: "https://lisafitmethod.com/checkout",
@@ -86,7 +96,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <main
       style={{
         background: "var(--warm-white, #faf8f5)",
