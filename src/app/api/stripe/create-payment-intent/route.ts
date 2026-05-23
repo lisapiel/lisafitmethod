@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
+import { getPromoCodes } from "@/lib/promoCodes"
 
 export const dynamic = "force-dynamic"
 
 const BASE_PRICE_CENTS = 4700
 const MIN_CHARGE_CENTS = 50
 
-function loadPromoCodes(): Record<string, number> {
-  try {
-    return JSON.parse(process.env.PROMO_CODES ?? "{}")
-  } catch {
-    return {}
-  }
-}
-
-function applyPromo(code: string): { valid: boolean; discountPct: number; finalAmount: number } {
-  const codes = loadPromoCodes()
+async function applyPromo(code: string): Promise<{ valid: boolean; discountPct: number; finalAmount: number }> {
+  const codes = await getPromoCodes()
   const normalized = code.trim().toUpperCase()
   if (!(normalized in codes)) return { valid: false, discountPct: 0, finalAmount: BASE_PRICE_CENTS }
   const pct = codes[normalized]
@@ -36,7 +29,7 @@ export async function POST(request: NextRequest) {
     let finalAmount = BASE_PRICE_CENTS
 
     if (promoCode?.trim()) {
-      const result = applyPromo(promoCode)
+      const result = await applyPromo(promoCode)
       if (!result.valid) {
         return NextResponse.json({ error: "Invalid promo code" }, { status: 400 })
       }

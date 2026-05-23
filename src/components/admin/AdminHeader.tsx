@@ -22,6 +22,7 @@ export default function AdminHeader() {
     { href: "/admin/photos", label: "Photos" },
     { href: "/admin/design", label: "Design" },
     { href: "/admin/blog", label: "Blog" },
+    { href: "/admin/promo-codes", label: "Promo Codes" },
   ]
 
   return (
