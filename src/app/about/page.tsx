@@ -90,13 +90,13 @@ export default async function AboutPage() {
           @media (max-width: 768px) { .about-hero { padding: 56px 28px 56px !important; } }
         `}</style>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.3)", flexShrink: 0 }}>
+          <div style={{ width: 180, height: 180, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.3)", flexShrink: 0 }}>
             <Image
               src="/lisa-about-hero.jpg"
               alt="Lisa McPherson — Certified Personal Trainer"
-              width={280}
-              height={280}
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 18%" }}
+              width={360}
+              height={360}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 25%" }}
               priority
             />
           </div>

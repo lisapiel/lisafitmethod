@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { getPublishedVideoUrl, getPublishedPhotoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
+import VideoPlayer from "@/components/VideoPlayer.client"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -136,7 +137,7 @@ export default async function CoursesPage() {
       {/* HERO */}
       <section style={{ background: "#0a0a0a", paddingBottom: 0 }} className="courses-hero">
         <style>{`
-          .cha-headline { grid-area: headline; padding: 100px 40px 20px 80px; }
+          .cha-headline { grid-area: headline; padding: 100px 40px 0 80px; }
           .cha-body     { grid-area: body;     padding: 0 40px 0 80px; align-self: start; }
           .cha-video    { grid-area: video; }
           .courses-hero-grid.has-video {
@@ -161,7 +162,7 @@ export default async function CoursesPage() {
               grid-template-columns: 1fr !important;
               row-gap: 0 !important;
             }
-            .cha-headline { padding: 64px 24px 20px !important; }
+            .cha-headline { padding: 64px 24px 0 !important; }
             .cha-body     { padding: 16px 24px 0 !important; }
             .courses-hero-cta { padding: 32px 24px 56px !important; text-align: center; }
           }
@@ -178,7 +179,7 @@ export default async function CoursesPage() {
           </div>
           {trailerUrl && (
             <div className="cha-video" style={{ position: "relative", aspectRatio: "1334 / 1080", background: "#111" }}>
-              <video src={trailerUrl} autoPlay muted loop playsInline controls preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
+              <VideoPlayer src={trailerUrl} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
             </div>
           )}
           <div className="cha-body">

@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
+import VideoPlayer from "@/components/VideoPlayer.client"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -323,16 +324,7 @@ export default async function HomePage() {
               <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Real structure.</em>
             </h2>
             <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "1334 / 1080", background: "#0a0a0a", boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
-              <video
-                src={trailerUrl}
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                preload="auto"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }}
-              />
+              <VideoPlayer src={trailerUrl} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
             </div>
             <p style={{ marginTop: 28, fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.7, fontFamily: "var(--font-dm-sans), sans-serif" }}>
               Every exercise includes guided demonstrations, movement cues, and progression built directly into the course.
