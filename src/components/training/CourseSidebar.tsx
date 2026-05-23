@@ -114,9 +114,8 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
           flexShrink: 0,
           background: "#111111",
           borderRight: "1px solid #2a2a2a",
-          overflowY: "auto",
-          padding: "1.5rem 0",
-          scrollbarWidth: "thin",
+          display: "flex",
+          flexDirection: "column",
           transition: "transform 0.3s ease",
           position: isOpen ? "fixed" : undefined,
           top: isOpen ? 0 : undefined,
@@ -128,16 +127,23 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
         className="course-sidebar"
       >
         <style>{`
-          .course-sidebar::-webkit-scrollbar { width: 4px; }
-          .course-sidebar::-webkit-scrollbar-thumb { background: #2a2a2a; }
           @media (max-width: 768px) {
-            .course-sidebar { position: fixed !important; top: 0; left: 0; bottom: 0; z-index: 150; transform: translateX(-100%); padding-top: 4rem; width: 280px !important; }
-            .sidebar-progress-block { position: sticky; top: 0; z-index: 2; background: #111111; }
+            .course-sidebar {
+              position: fixed !important;
+              top: 0; left: 0; bottom: 0;
+              z-index: 150;
+              transform: translateX(-100%);
+              width: 280px !important;
+              padding-top: 3.5rem;
+            }
           }
+          .sidebar-nav-scroll { overflow-y: auto; scrollbar-width: thin; }
+          .sidebar-nav-scroll::-webkit-scrollbar { width: 4px; }
+          .sidebar-nav-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; }
         `}</style>
 
-        {/* My Progress link + week pill — sticky so it stays visible when scrolling nav */}
-        <div className="sidebar-progress-block" style={{ padding: "0 1.25rem 1rem" }}>
+        {/* My Progress — always visible, never scrolls */}
+        <div style={{ flexShrink: 0, padding: "1rem 1.25rem 0.75rem" }}>
           <Link
             href="/training-foundations/tracker"
             style={{
@@ -164,93 +170,96 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
             )}
           </Link>
         </div>
-        <div style={{ height: 1, background: "#2a2a2a", margin: "0 1.25rem 0.75rem", opacity: 0.4 }} />
+        <div style={{ height: 1, background: "#2a2a2a", margin: "0 1.25rem 0.5rem", opacity: 0.4, flexShrink: 0 }} />
 
-        {nav.map((section, i) => {
-          const isCurrent = section.items.some((item) => isActive(pathname, item.href))
-          const isOpen_ = openSections[i] ?? false
+        {/* Nav sections — scrollable */}
+        <div className="sidebar-nav-scroll" style={{ flex: 1, padding: "0.5rem 0 1.5rem" }}>
+          {nav.map((section, i) => {
+            const isCurrent = section.items.some((item) => isActive(pathname, item.href))
+            const isOpen_ = openSections[i] ?? false
 
-          return (
-            <div key={i}>
-              <div style={{ marginBottom: "0.25rem" }}>
-                <div
-                  onClick={() => toggleSection(i)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "0.75rem 1.25rem",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                >
-                  <span
+            return (
+              <div key={i}>
+                <div style={{ marginBottom: "0.25rem" }}>
+                  <div
+                    onClick={() => toggleSection(i)}
                     style={{
-                      fontSize: "0.6rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: isCurrent ? "#c9a96e" : "#888888",
-                      fontFamily: "var(--font-montserrat), sans-serif",
-                      transition: "color 0.2s",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "0.75rem 1.25rem",
+                      cursor: "pointer",
+                      userSelect: "none",
                     }}
                   >
-                    {section.label}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      color: "#888888",
-                      transition: "transform 0.2s",
-                      transform: isOpen_ ? "rotate(90deg)" : "none",
-                      display: "inline-block",
-                    }}
-                  >
-                    ▶
-                  </span>
-                </div>
-
-                {isOpen_ && (
-                  <div>
-                    {section.items.map((item) => {
-                      const active = isActive(pathname, item.href)
-                      const dayKey = dayForHref[item.href]
-                      const dayDone = ready && dayKey
-                        ? !!getSessionFor(currentPosition.round, currentPosition.week, dayKey)
-                        : false
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            padding: "0.45rem 1.25rem 0.45rem 2rem",
-                            fontSize: "0.7rem",
-                            color: active ? "#c9a96e" : "#888888",
-                            textDecoration: "none",
-                            transition: "color 0.15s, background 0.15s",
-                            lineHeight: 1.4,
-                            borderLeft: active ? "2px solid #c9a96e" : "2px solid transparent",
-                            background: active ? "rgba(201,169,110,0.06)" : "transparent",
-                            fontFamily: "var(--font-montserrat), sans-serif",
-                          }}
-                        >
-                          <span>{item.label}</span>
-                          {dayDone && <span style={{ color: "#c9a96e", fontSize: "0.5rem", flexShrink: 0 }}>●</span>}
-                        </Link>
-                      )
-                    })}
+                    <span
+                      style={{
+                        fontSize: "0.6rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        color: isCurrent ? "#c9a96e" : "#888888",
+                        fontFamily: "var(--font-montserrat), sans-serif",
+                        transition: "color 0.2s",
+                      }}
+                    >
+                      {section.label}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.55rem",
+                        color: "#888888",
+                        transition: "transform 0.2s",
+                        transform: isOpen_ ? "rotate(90deg)" : "none",
+                        display: "inline-block",
+                      }}
+                    >
+                      ▶
+                    </span>
                   </div>
+
+                  {isOpen_ && (
+                    <div>
+                      {section.items.map((item) => {
+                        const active = isActive(pathname, item.href)
+                        const dayKey = dayForHref[item.href]
+                        const dayDone = ready && dayKey
+                          ? !!getSessionFor(currentPosition.round, currentPosition.week, dayKey)
+                          : false
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "0.45rem 1.25rem 0.45rem 2rem",
+                              fontSize: "0.7rem",
+                              color: active ? "#c9a96e" : "#888888",
+                              textDecoration: "none",
+                              transition: "color 0.15s, background 0.15s",
+                              lineHeight: 1.4,
+                              borderLeft: active ? "2px solid #c9a96e" : "2px solid transparent",
+                              background: active ? "rgba(201,169,110,0.06)" : "transparent",
+                              fontFamily: "var(--font-montserrat), sans-serif",
+                            }}
+                          >
+                            <span>{item.label}</span>
+                            {dayDone && <span style={{ color: "#c9a96e", fontSize: "0.5rem", flexShrink: 0 }}>●</span>}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+                {i < nav.length - 1 && (
+                  <div style={{ height: 1, background: "#2a2a2a", margin: "0.75rem 1.25rem", opacity: 0.4 }} />
                 )}
               </div>
-              {i < nav.length - 1 && (
-                <div style={{ height: 1, background: "#2a2a2a", margin: "0.75rem 1.25rem", opacity: 0.4 }} />
-              )}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </nav>
     </>
   )
