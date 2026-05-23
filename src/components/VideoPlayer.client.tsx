@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 
 export default function VideoPlayer({
   src,
@@ -9,8 +9,20 @@ export default function VideoPlayer({
   style?: React.CSSProperties
 }) {
   const [controls, setControls] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    // iOS Safari ignores the autoplay attribute on page load — must call play() programmatically
+    video.play().catch(() => {
+      // Autoplay blocked by browser; video will start on first user interaction
+    })
+  }, [])
+
   return (
     <video
+      ref={videoRef}
       src={src}
       autoPlay
       muted
