@@ -53,13 +53,13 @@ export default function WeeklyLogClient() {
   const maxRound = Math.max(currentPosition.round, round)
   type WeekOpt = { round: number; week: number; label: string; done: boolean; active: boolean }
   const weekOptions: WeekOpt[] = []
-  for (let r = 1; r <= maxRound + 1; r++) {
+  for (let r = 1; r <= maxRound; r++) {
     for (let w = 1; w <= weeksPerRound; w++) {
       const allDone = DAYS.every((d) => !!getSessionFor(r, w, d))
       weekOptions.push({
         round: r,
         week: w,
-        label: r === 1 ? `Wk ${w}` : `R${r}·W${w}`,
+        label: `Week ${(r - 1) * weeksPerRound + w}`,
         done: allDone,
         active: r === round && w === week,
       })
@@ -76,10 +76,8 @@ export default function WeeklyLogClient() {
     setWeek(opt.week)
   }
 
-  const weekLabel =
-    round === 1
-      ? `Week ${week} of ${weeksPerRound}`
-      : `Round ${round} · Week ${week}`
+  const totalWeek = (round - 1) * weeksPerRound + week
+  const weekLabel = `Week ${totalWeek}`
 
   const arrowBtn = (enabled: boolean): React.CSSProperties => ({
     background: "none",

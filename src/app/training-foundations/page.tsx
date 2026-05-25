@@ -53,27 +53,27 @@ export default function TrainingFoundationsIntroPage() {
 
         <div style={{ marginBottom: "1.75rem" }}>
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
-            I started in fitness classes. Cardio, cycling, group workouts — the kind of training that feels approachable when the weight room feels intimidating. I was consistent, I showed up, I worked hard. But nothing was really changing. I was burning calories without building anything. The shape I wanted wasn&apos;t coming from what I was doing.
+            I started in fitness classes. Cardio, cycling, group workouts. The kind of training that feels approachable when the weight room feels intimidating. I was consistent, I showed up, I worked hard. But nothing was really changing. I was burning calories without building anything. The shape I wanted wasn&apos;t coming from what I was doing.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
-            The moment I started following a real strength training program, everything shifted. For the first time I was actually building muscle. Week over week I could feel it. The squat moved more weight. The deadlift felt different. My body started changing in a way it never had from classes. I got hooked — and I pushed too hard, too fast.
+            The moment I started following a real strength training program, everything shifted. For the first time I was actually building muscle. Week over week I could feel it. The squat moved more weight. The deadlift felt different. My body started changing in a way it never had from classes. I got hooked. And I pushed too hard, too fast.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
-            I kept loading more weight before I had the foundation to support it. Warm-ups were something I rushed through or skipped. Mobility and recovery weren&apos;t things I took seriously — they felt optional. I was making progress, which made it easy to ignore the warning signs. Eventually my back gave out.
+            I kept loading more weight before I had the foundation to support it. Warm-ups were something I rushed through or skipped. Mobility and recovery weren&apos;t things I took seriously. They felt optional. I was making progress, which made it easy to ignore the warning signs. Eventually my back gave out.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
-            For almost a year I lived with serious back pain. Getting out of bed was uncomfortable. Tying my shoes was uncomfortable. The gym — something I had built my entire routine around — was suddenly out of reach. That year taught me more about training than all the years before it combined.
+            For almost a year I lived with serious back pain. Getting out of bed was uncomfortable. Tying my shoes was uncomfortable. The gym, the thing I had built my entire routine around, was suddenly out of reach. That year taught me more about training than all the years before it combined.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
-            I had to relearn everything properly. Movement mechanics. How to actually warm up. Why mobility and recovery are not optional. How to build a program with real structure and logic. I became a certified personal trainer because I needed to genuinely understand what I had been skipping — not just fix it, understand it.
+            I had to relearn everything properly. Movement mechanics. How to actually warm up. Why mobility and recovery are not optional. How to build a program with real structure and logic. I became a certified personal trainer because I needed to genuinely understand what I had been skipping. Not just fix it, but actually understand it.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
-            I rebuilt my body from scratch. Properly. I became pain-free. I became stronger than I had ever been. And I have maintained those habits consistently ever since — not through motivation, but through understanding why the right approach works.
+            I rebuilt my body from scratch. Properly. I became pain-free. I became stronger than I had ever been. And I have maintained those habits consistently ever since. Not through motivation, but through understanding why the right approach works.
           </p>
           <br />
           <p style={{ fontSize: "0.9rem", color: "#b0a090", lineHeight: 1.5 }}>
@@ -92,7 +92,7 @@ export default function TrainingFoundationsIntroPage() {
               color: "#f0e6d3",
             }}
           >
-            — Lisa McPherson
+            Lisa McPherson
           </p>
         </div>
 
@@ -144,7 +144,7 @@ export default function TrainingFoundationsIntroPage() {
                     fontSize: "0.75rem",
                   }}
                 >
-                  —
+                  ›
                 </span>
                 {item}
               </li>

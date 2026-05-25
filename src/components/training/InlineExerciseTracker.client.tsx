@@ -44,12 +44,13 @@ export default function InlineExerciseTracker({
   day: "a" | "b" | "c"
   exerciseId: string
 }) {
-  const { logs, updateExerciseSets, isCompleted, weekOptions, weightUnit } = useDayLogs()
+  const { logs, updateExerciseSets, isCompleted, weightUnit, selectedRound, selectedWeek, weeksPerRound } = useDayLogs()
   const def = WORKOUT_DAYS[day].exercises.find((e) => e.id === exerciseId)
   if (!def) return null
 
   const sets = logs[exerciseId] ?? []
-  const activeLabel = weekOptions.find((o) => o.active)?.label ?? "Wk 1"
+  const totalWeek = (selectedRound - 1) * weeksPerRound + selectedWeek
+  const activeLabel = `Week ${totalWeek}`
 
   const isBodyweightOnly = def.bodyweight && !def.optionalWeight
   const isDistanceTime = !!def.trackDistanceOrTime
@@ -65,11 +66,6 @@ export default function InlineExerciseTracker({
   function addSet() {
     const last = sets[sets.length - 1] ?? { reps: def!.defaultReps ?? 0, weight: 0, unit: weightUnit }
     updateExerciseSets(exerciseId, [...sets, { ...last, confirmed: false }])
-  }
-
-  function removeSet(i: number) {
-    if (sets.length <= 1) return
-    updateExerciseSets(exerciseId, sets.filter((_, idx) => idx !== i))
   }
 
   if (isCompleted) {
@@ -136,7 +132,7 @@ export default function InlineExerciseTracker({
           marginBottom: 8,
         }}
       >
-        {activeLabel} — log sets
+        {activeLabel} · Log Sets
       </div>
 
       {sets.map((set, i) => (
@@ -148,12 +144,12 @@ export default function InlineExerciseTracker({
             style={{
               fontSize: "0.55rem",
               color: "#555",
-              width: 22,
+              width: 42,
               fontFamily: "var(--font-montserrat), sans-serif",
               flexShrink: 0,
             }}
           >
-            S{i + 1}
+            Set {i + 1}
           </span>
 
           {isDistanceTime ? (
@@ -268,23 +264,6 @@ export default function InlineExerciseTracker({
             {set.confirmed ? "✓" : "Log"}
           </button>
 
-          {sets.length > 1 && (
-            <button
-              onClick={() => removeSet(i)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#444",
-                cursor: "pointer",
-                fontSize: "0.65rem",
-                padding: "0 3px",
-                lineHeight: 1,
-              }}
-              title="Remove set"
-            >
-              ✕
-            </button>
-          )}
         </div>
       ))}
 

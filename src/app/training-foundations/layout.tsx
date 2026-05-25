@@ -1,12 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import CourseHeader from "@/components/training/CourseHeader"
 import CourseSidebar from "@/components/training/CourseSidebar"
 import { CourseProgressProvider } from "@/components/training/CourseProgressContext"
 
 export default function TrainingFoundationsLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Reset scroll position when navigating to a new page
+  useEffect(() => {
+    const el = document.querySelector(".course-scroll-area")
+    if (el) el.scrollTop = 0
+  }, [pathname])
 
   return (
     <CourseProgressProvider>
@@ -37,8 +45,10 @@ export default function TrainingFoundationsLayout({ children }: { children: Reac
             <style>{`
               .course-scroll-area::-webkit-scrollbar { width: 4px; }
               .course-scroll-area::-webkit-scrollbar-thumb { background: #2a2a2a; }
+              .course-scroll-area [id] { scroll-margin-top: 1rem; }
               @media (max-width: 768px) {
                 .course-scroll-area { padding-top: 3.5rem; }
+                .course-scroll-area [id] { scroll-margin-top: 4.5rem; }
               }
             `}</style>
             {children}
