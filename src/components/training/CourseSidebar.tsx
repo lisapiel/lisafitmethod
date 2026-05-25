@@ -102,7 +102,13 @@ const nav: NavSection[] = [
   },
   {
     label: "Module 4: Nutrition",
-    items: [{ href: "/training-foundations/module4", label: "5 Nutrition Principles" }],
+    items: [
+      { href: "/training-foundations/module4#protein",     label: "Protein Is Your Priority" },
+      { href: "/training-foundations/module4#fuel",        label: "Eat Enough To Train" },
+      { href: "/training-foundations/module4#consistency", label: "Consistency Beats Perfection" },
+      { href: "/training-foundations/module4#hydration",   label: "Hydration Affects Everything" },
+      { href: "/training-foundations/module4#basics",      label: "Don't Complicate It" },
+    ],
   },
   {
     label: "What's Next",
