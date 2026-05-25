@@ -18,6 +18,8 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
 
     // iOS Safari ignores the muted attribute on the element — must be set imperatively
     video.muted = true
+    // Kick off playback immediately (required for reliable mobile autoplay)
+    video.play().catch(() => {})
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -27,7 +29,7 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
           video.pause()
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.2 }
     )
 
     observer.observe(video)
@@ -35,16 +37,7 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
   }, [s3Url])
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100%",
-        aspectRatio: "16/9",
-        background: "#000",
-        margin: "1.5rem 0",
-        overflow: "hidden",
-      }}
-    >
+    <div style={{ margin: "1.5rem 0", background: "#000", overflow: "hidden", position: "relative" }}>
       {s3Url ? (
         <>
           <video
@@ -55,17 +48,16 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             controls={controlsVisible}
             style={{
-              position: "absolute",
-              inset: 0,
               width: "100%",
-              height: "100%",
+              height: "auto",
+              display: "block",
               background: "#0a0a0a",
             }}
           />
-          {/* Transparent overlay — captures the first tap/click to reveal controls */}
+          {/* Transparent overlay — captures first tap to reveal native controls */}
           {!controlsVisible && (
             <div
               onClick={() => setControlsVisible(true)}
@@ -74,13 +66,15 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
           )}
         </>
       ) : (
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-          title={title}
-          allowFullScreen
-          loading="lazy"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
-        />
+        <div style={{ position: "relative", aspectRatio: "16/9" }}>
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+            title={title}
+            allowFullScreen
+            loading="lazy"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+          />
+        </div>
       )}
     </div>
   )

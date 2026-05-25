@@ -180,7 +180,9 @@ export default async function Module3Page() {
             <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3a_cd_childs_pose"]} />
 
             <MarkCompleteButton />
-            <DayWorkoutPanel day="a" />
+            <div id="daya-log" style={{ scrollMarginTop: "80px" }}>
+              <DayWorkoutPanel day="a" />
+            </div>
           </div>
         </DayLogsProvider>
       </DayBlock>
@@ -227,7 +229,9 @@ export default async function Module3Page() {
             <WarmupItem name="Triceps Stretch" note="30 seconds per side. You just worked your triceps directly, give them a proper stretch before you leave." videoId="44rhonVBVRU" s3Url={urlMap["m3b_cd_triceps"]} />
 
             <MarkCompleteButton />
-            <DayWorkoutPanel day="b" />
+            <div id="dayb-log" style={{ scrollMarginTop: "80px" }}>
+              <DayWorkoutPanel day="b" />
+            </div>
           </div>
         </DayLogsProvider>
       </DayBlock>
@@ -290,7 +294,9 @@ export default async function Module3Page() {
             <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3c_cd_childs_pose"]} />
 
             <MarkCompleteButton />
-            <DayWorkoutPanel day="c" />
+            <div id="dayc-log" style={{ scrollMarginTop: "80px" }}>
+              <DayWorkoutPanel day="c" />
+            </div>
           </div>
         </DayLogsProvider>
       </DayBlock>
