@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { getPromoCodesDebug } from "@/lib/promoCodes"
+import { getPromoCodes } from "@/lib/promoCodes"
 
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  const { codes, error } = await getPromoCodesDebug()
-  return NextResponse.json({ codes, error: error ?? undefined })
+  const codes = await getPromoCodes()
+  return NextResponse.json({ codes })
 }

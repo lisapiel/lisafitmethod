@@ -24,18 +24,13 @@ function makeDb() {
 }
 
 export async function getPromoCodes(): Promise<PromoCodes> {
-  const { codes } = await getPromoCodesDebug()
-  return codes
-}
-
-export async function getPromoCodesDebug(): Promise<{ codes: PromoCodes; error?: string }> {
   try {
     const db = makeDb()
     const result = await db.send(new GetCommand({ TableName: TABLE, Key: { userId: PROMO_KEY } }))
-    if (!result.Item?.codes) return { codes: {}, error: "item_not_found" }
-    return { codes: result.Item.codes as PromoCodes }
-  } catch (e) {
-    return { codes: {}, error: e instanceof Error ? e.message : String(e) }
+    if (!result.Item?.codes) return {}
+    return result.Item.codes as PromoCodes
+  } catch {
+    return {}
   }
 }
 
