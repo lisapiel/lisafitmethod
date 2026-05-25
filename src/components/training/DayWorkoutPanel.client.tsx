@@ -60,12 +60,13 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
         style={{
           fontSize: "0.6rem",
           color: muted,
-          width: 36,
+          width: 20,
           fontFamily: "var(--font-montserrat), sans-serif",
           letterSpacing: "0.05em",
+          flexShrink: 0,
         }}
       >
-        Set {index + 1}
+        S{index + 1}
       </span>
 
       {distanceOrTime ? (
@@ -163,7 +164,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
           whiteSpace: "nowrap",
         }}
       >
-        {set.confirmed ? "✓ Logged" : "Log Set"}
+        {set.confirmed ? "✓" : "Log"}
       </button>
 
       {canRemove && (
