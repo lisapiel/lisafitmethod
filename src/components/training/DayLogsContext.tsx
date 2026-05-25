@@ -137,7 +137,7 @@ export function DayLogsProvider({ day, children, controlledRound, controlledWeek
   const weeksPerRound = progress.weeksPerRound ?? 6
   const maxRound = Math.max(currentPosition.round, effectiveRound)
   const weekOptions: WeekOption[] = []
-  for (let r = 1; r <= maxRound + 1; r++) {
+  for (let r = 1; r <= maxRound; r++) {
     for (let w = 1; w <= weeksPerRound; w++) {
       weekOptions.push({
         round: r,

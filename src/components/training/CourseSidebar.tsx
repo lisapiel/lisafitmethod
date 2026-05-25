@@ -196,7 +196,8 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
     setActiveAnchor(found)
   }, [])
 
-  // Attach scroll listener whenever the pathname changes
+  // Attach scroll listener whenever the pathname changes.
+  // The scrollable container is .course-scroll-area (not window) — must target it directly.
   useEffect(() => {
     const anchors = getPageAnchors(pathname)
     if (anchors.length === 0) {
@@ -204,16 +205,18 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
       return
     }
 
+    const scrollEl: Element | Window = document.querySelector(".course-scroll-area") ?? window
+
     function onScroll() {
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
       rafRef.current = requestAnimationFrame(() => updateActive(anchors))
     }
 
-    window.addEventListener("scroll", onScroll, { passive: true })
+    scrollEl.addEventListener("scroll", onScroll, { passive: true })
     updateActive(anchors)
 
     return () => {
-      window.removeEventListener("scroll", onScroll)
+      scrollEl.removeEventListener("scroll", onScroll)
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
     }
   }, [pathname, updateActive])
