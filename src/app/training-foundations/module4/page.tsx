@@ -16,7 +16,7 @@ const calloutBorder = "rgba(201,169,110,0.25)"
 
 // ── Icon system ───────────────────────────────────────────────────────────────
 
-type IconType = "zap" | "drop" | "check" | "x-circle" | "repeat" | "target" | "layers" | "sun" | "flame" | "trend" | "leaf" | "coffee" | "grain" | "check-plain" | "minus"
+type IconType = "zap" | "drop" | "check" | "x-circle" | "repeat" | "target" | "layers" | "sun" | "flame" | "trend" | "leaf" | "coffee" | "grain" | "check-plain" | "minus" | "bowl" | "fork" | "spin" | "recover" | "head-pain"
 
 function GoldIcon({ type, size = 18 }: { type: IconType; size?: number }) {
   const p = {
@@ -41,6 +41,11 @@ function GoldIcon({ type, size = 18 }: { type: IconType; size?: number }) {
     case "grain":      return <svg {...p}><line x1="12" y1="2" x2="12" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
     case "check-plain":return <svg {...p}><polyline points="20 6 9 17 4 12" /></svg>
     case "minus":      return <svg {...p}><line x1="5" y1="12" x2="19" y2="12" /></svg>
+    case "bowl":       return <svg {...p}><path d="M2 12h20" /><path d="M20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8" /></svg>
+    case "fork":       return <svg {...p}><line x1="9" y1="2" x2="9" y2="8" /><line x1="15" y1="2" x2="15" y2="8" /><path d="M9 8a3 3 0 0 0 6 0" /><line x1="12" y1="11" x2="12" y2="22" /></svg>
+    case "spin":       return <svg {...p}><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
+    case "recover":    return <svg {...p}><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4" /></svg>
+    case "head-pain":  return <svg {...p}><circle cx="12" cy="9" r="5" /><line x1="10" y1="7" x2="14" y2="11" /><line x1="14" y1="7" x2="10" y2="11" /><line x1="12" y1="14" x2="12" y2="18" /><line x1="9" y1="21" x2="15" y2="21" /></svg>
     default:           return <svg {...p}><circle cx="12" cy="12" r="10" /></svg>
   }
 }
@@ -87,24 +92,27 @@ function SectionDivider() {
 // ── Section 1: Protein ────────────────────────────────────────────────────────
 
 const proteinSources = [
-  { icon: "flame" as IconType, name: "Chicken Breast",          portion: "150g cooked",                      grams: "~45g protein" },
-  { icon: "flame" as IconType, name: "White Fish",              portion: "225g cooked",                      grams: "~45g protein" },
-  { icon: "flame" as IconType, name: "Shrimp",                  portion: "225g cooked",                      grams: "~45g protein" },
-  { icon: "flame" as IconType, name: "Lean Ground Beef",        portion: "200g cooked",                      grams: "~45g protein" },
-  { icon: "flame" as IconType, name: "Eggs + Greek Yogurt",     portion: "300g egg whites + 200g Greek yogurt", grams: "~40–45g protein" },
+  { name: "Chicken Breast",      portion: "150g cooked",                         grams: "~45g protein" },
+  { name: "White Fish",          portion: "225g cooked",                         grams: "~45g protein" },
+  { name: "Shrimp",              portion: "225g cooked",                         grams: "~45g protein" },
+  { name: "Lean Ground Beef",    portion: "200g cooked",                         grams: "~45g protein" },
+  { name: "Salmon",              portion: "200g cooked",                         grams: "~40–45g protein" },
+  { name: "Eggs + Greek Yogurt", portion: "3 eggs + 200g Greek yogurt",          grams: "~40–45g protein" },
 ]
 
 function ProteinCard({ name, portion, grams }: { name: string; portion: string; grams: string }) {
   return (
-    <div style={{ background: card, border: `1px solid ${border}`, padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.25rem" }}>
-        <div style={{ width: 28, height: 28, background: "rgba(201,169,110,0.1)", border: `1px solid ${calloutBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <GoldIcon type="target" size={14} />
+    <div style={{ background: card, border: `1px solid ${border}`, padding: "1rem 1.1rem", display: "flex", flexDirection: "column", gap: "0.3rem", height: "100%", boxSizing: "border-box" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div style={{ width: 24, height: 24, background: "rgba(201,169,110,0.1)", border: `1px solid ${calloutBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <GoldIcon type="target" size={12} />
         </div>
-        <span style={{ fontSize: "0.75rem", fontWeight: 600, color: cream, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.04em" }}>{name}</span>
+        <span style={{ fontSize: "0.72rem", fontWeight: 600, color: cream, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.03em", lineHeight: 1.3 }}>{name}</span>
       </div>
-      <div style={{ fontSize: "0.7rem", color: dim, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.4 }}>{portion}</div>
-      <div style={{ fontSize: "0.8rem", fontWeight: 700, color: gold, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em" }}>{grams}</div>
+      <div style={{ fontSize: "0.66rem", color: dim, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.35, paddingLeft: "0.1rem" }}>{portion}</div>
+      <div style={{ marginTop: "auto", paddingTop: "0.45rem", borderTop: `1px solid ${border}` }}>
+        <span style={{ fontSize: "0.88rem", fontWeight: 700, color: gold, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.04em" }}>{grams}</span>
+      </div>
     </div>
   )
 }
@@ -112,13 +120,14 @@ function ProteinCard({ name, portion, grams }: { name: string; portion: string; 
 // ── Section 2: Fuel ───────────────────────────────────────────────────────────
 
 const carbSources = [
-  "Rice", "Oats", "Potatoes", "Fruit", "Sourdough", "Rice Cakes", "Pasta",
+  "Rice", "Oats", "Potatoes", "Fruit", "Sourdough", "Rice Cakes", "Pasta", "Quinoa",
 ]
 
 const preMeals = [
   "Chicken, jasmine rice, and fruit",
   "Oats with whey protein and berries",
   "Eggs with sourdough toast and fruit",
+  "Chicken wrap with fruit",
 ]
 
 const postMeals = [
@@ -131,22 +140,23 @@ const postMeals = [
 // ── Section 3: Consistency ────────────────────────────────────────────────────
 
 const mattersItems = [
-  { icon: "target" as IconType, label: "Enough Protein" },
-  { icon: "leaf" as IconType,   label: "Whole Foods Mostly" },
-  { icon: "zap" as IconType,    label: "Fueling Workouts" },
-  { icon: "repeat" as IconType, label: "Sustainable Habits" },
-  { icon: "trend" as IconType,  label: "Consistency Over Time" },
+  { icon: "target" as IconType,  label: "Enough Protein" },
+  { icon: "fork" as IconType,    label: "Whole Foods Mostly" },
+  { icon: "zap" as IconType,     label: "Fueling Workouts" },
+  { icon: "repeat" as IconType,  label: "Sustainable Habits" },
+  { icon: "trend" as IconType,   label: "Consistency Over Time" },
+  { icon: "recover" as IconType, label: "Recovery" },
 ]
 
 // ── Section 4: Hydration ──────────────────────────────────────────────────────
 
 const dehydrationSigns = [
-  { icon: "zap" as IconType,    label: "Fatigue" },
-  { icon: "minus" as IconType,  label: "Poor Performance" },
-  { icon: "coffee" as IconType, label: "Brain Fog" },
-  { icon: "drop" as IconType,   label: "Headaches" },
-  { icon: "sun" as IconType,    label: "Dizziness" },
-  { icon: "trend" as IconType,  label: "Poor Recovery" },
+  { icon: "zap" as IconType,       label: "Fatigue" },
+  { icon: "minus" as IconType,     label: "Poor Performance" },
+  { icon: "coffee" as IconType,    label: "Brain Fog" },
+  { icon: "head-pain" as IconType, label: "Headaches" },
+  { icon: "spin" as IconType,      label: "Dizziness" },
+  { icon: "recover" as IconType,   label: "Poor Recovery" },
 ]
 
 const waterTargets = [
@@ -177,9 +187,9 @@ export default function Module4Page() {
       <style>{`
         @media (max-width: 768px) { .course-body { padding: 2rem 1rem 6rem !important; } }
         .protein-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .carb-grid    { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .carb-grid    { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .icon-grid    { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .two-col      { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .two-col      { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .water-grid   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         @media (min-width: 560px) { .protein-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 480px) {
@@ -218,7 +228,7 @@ export default function Module4Page() {
       <div style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: dim, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "0.75rem" }}>
         Protein Sources — 45g Per Meal
       </div>
-      <div className="protein-grid" style={{ marginBottom: "1.75rem" }}>
+      <div className="protein-grid" style={{ marginBottom: "1.75rem", alignItems: "stretch" }}>
         {proteinSources.map((s) => (
           <ProteinCard key={s.name} name={s.name} portion={s.portion} grams={s.grams} />
         ))}
@@ -297,7 +307,7 @@ export default function Module4Page() {
         <div className="carb-grid">
           {carbSources.map((s) => (
             <div key={s} style={{ background: card, border: `1px solid ${border}`, padding: "0.65rem 0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <GoldIcon type="grain" size={13} />
+              <GoldIcon type="bowl" size={13} />
               <span style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>{s}</span>
             </div>
           ))}
@@ -398,7 +408,7 @@ export default function Module4Page() {
           ))}
         </div>
         <div style={{ marginTop: "0.75rem", fontSize: "0.78rem", color: dim, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.5 }}>
-          None of these erase your progress. What matters is what you consistently return to afterward.
+          None of these erase your progress. Your long-term results are shaped far more by your overall habits and weekly consistency than by any single meal, dessert, or weekend. What matters is the pattern you return to.
         </div>
       </div>
 
