@@ -188,7 +188,7 @@ function SessionHistory() {
             >
               <div>
                 <span style={{ fontSize: "0.7rem", color: cream, fontFamily: "var(--font-montserrat), sans-serif", fontWeight: 500 }}>
-                  {dayLabel(s.day)} — {dayDef.label.replace(/^Day [ABC] — /, "")}
+                  {dayLabel(s.day)} — {dayDef.label.replace(/^Day [ABC]: /, "")}
                 </span>
                 <span style={{ display: "block", fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", marginTop: 2 }}>
                   Round {s.round} · Week {s.week} · {formatDate(s.completedAt)}

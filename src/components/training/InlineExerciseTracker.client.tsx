@@ -56,8 +56,9 @@ export default function InlineExerciseTracker({
   const STEP = 2.5
 
   function updateSet(i: number, s: SetLog) {
+    const hasValue = (s.reps != null && s.reps > 0) || (s.distanceTime != null && s.distanceTime.trim() !== "")
     const next = [...sets]
-    next[i] = s
+    next[i] = hasValue ? { ...s, confirmed: true } : s
     updateExerciseSets(exerciseId, next)
   }
 
@@ -72,36 +73,46 @@ export default function InlineExerciseTracker({
   }
 
   if (isCompleted) {
-    const weightedSets = sets.filter((s) => s.weight > 0)
-    const maxW = weightedSets.length > 0 ? Math.max(...weightedSets.map((s) => s.weight)) : null
-    const distTime = sets.map((s) => s.distanceTime).find(Boolean)
     return (
       <div
         style={{
           margin: "0 0 20px",
-          padding: "7px 14px",
+          padding: "8px 14px",
           background: "rgba(201,169,110,0.05)",
           border: "1px solid rgba(201,169,110,0.2)",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
         }}
       >
-        <span style={{ color: gold, fontSize: "0.65rem" }}>✓</span>
-        <span
-          style={{
-            fontSize: "0.6rem",
-            color: gold,
-            fontFamily: "var(--font-montserrat), sans-serif",
-            letterSpacing: "0.05em",
-          }}
-        >
-          {sets.length} sets
-          {maxW ? ` · ${maxW} ${sets[0]?.unit ?? weightUnit}` : isBodyweightOnly ? " · BW" : ""}
-          {distTime ? ` · ${distTime}` : ""}
-          {" · "}
-          {activeLabel}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+          <span style={{ color: gold, fontSize: "0.6rem" }}>✓</span>
+          <span style={{ fontSize: "0.55rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            {activeLabel}
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+          {sets.map((set, i) => {
+            const label = isDistanceTime
+              ? set.distanceTime || "—"
+              : set.reps > 0
+              ? `${set.reps} reps${set.weight > 0 ? ` · ${set.weight}${set.unit}` : isBodyweightOnly ? " · BW" : ""}`
+              : "—"
+            return (
+              <span
+                key={i}
+                style={{
+                  fontSize: "0.6rem",
+                  color: muted,
+                  fontFamily: "var(--font-montserrat), sans-serif",
+                  background: "#1a1a1a",
+                  padding: "2px 7px",
+                  borderRadius: 3,
+                  border: `1px solid ${border}`,
+                }}
+              >
+                S{i + 1}: {label}
+              </span>
+            )
+          })}
+        </div>
       </div>
     )
   }

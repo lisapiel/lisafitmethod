@@ -74,7 +74,10 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             type="text"
             value={set.distanceTime ?? ""}
             placeholder="e.g. 30m"
-            onChange={(e) => onChange({ ...set, distanceTime: e.target.value, confirmed: false })}
+            onChange={(e) => {
+              const v = e.target.value
+              onChange({ ...set, distanceTime: v, confirmed: v.trim() !== "" })
+            }}
             style={{ ...inp, width: 68 }}
           />
           <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -88,7 +91,10 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             min={0}
             value={set.reps || ""}
             placeholder="reps"
-            onChange={(e) => onChange({ ...set, reps: Number(e.target.value), confirmed: false })}
+            onChange={(e) => {
+              const reps = Number(e.target.value)
+              onChange({ ...set, reps, confirmed: reps > 0 })
+            }}
             style={inp}
           />
           <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -279,35 +285,37 @@ function CompletedSummary({ exercises, day, onEdit }: CompletedSummaryProps) {
       {exercises.map((ex) => {
         const def = defs.find((d) => d.id === ex.exerciseId)
         if (!def) return null
-        const weightedSets = ex.sets.filter((s) => s.weight > 0)
-        const maxWeight = weightedSets.length > 0 ? Math.max(...weightedSets.map((s) => s.weight)) : null
-        const distTime = ex.sets.map((s) => s.distanceTime).find(Boolean)
+        const isBodyweightOnly = def.bodyweight && !def.optionalWeight
+        const isDistTime = !!def.trackDistanceOrTime
         return (
-          <div
-            key={ex.exerciseId}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "5px 0",
-              borderBottom: `1px solid ${border}`,
-            }}
-          >
-            <span
-              style={{ fontSize: "0.65rem", color: "#aaa", fontFamily: "var(--font-montserrat), sans-serif" }}
-            >
+          <div key={ex.exerciseId} style={{ padding: "8px 0", borderBottom: `1px solid ${border}` }}>
+            <span style={{ fontSize: "0.65rem", color: "#aaa", fontFamily: "var(--font-montserrat), sans-serif", display: "block", marginBottom: 4 }}>
               {def.name}
             </span>
-            <span
-              style={{ fontSize: "0.65rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif" }}
-            >
-              {ex.sets.length} sets
-              {maxWeight
-                ? ` · ${maxWeight} ${ex.sets[0]?.unit ?? "lbs"}`
-                : def.bodyweight && !def.optionalWeight
-                ? " · BW"
-                : ""}
-              {distTime ? ` · ${distTime}` : ""}
-            </span>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {ex.sets.map((set, i) => {
+                const label = isDistTime
+                  ? set.distanceTime || "—"
+                  : set.reps > 0
+                  ? `${set.reps} reps${set.weight > 0 ? ` · ${set.weight}${set.unit}` : isBodyweightOnly ? " · BW" : ""}`
+                  : "—"
+                return (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: "0.6rem",
+                      color: gold,
+                      fontFamily: "var(--font-montserrat), sans-serif",
+                      background: "rgba(201,169,110,0.08)",
+                      padding: "2px 7px",
+                      borderRadius: 3,
+                    }}
+                  >
+                    S{i + 1}: {label}
+                  </span>
+                )
+              })}
+            </div>
           </div>
         )
       })}
@@ -598,6 +606,62 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+// Button placed inline after cool-down, for people going through the page with videos
+export function MarkCompleteButton() {
+  const { isCompleted, handleComplete, setEditing } = useDayLogs()
+  if (isCompleted) {
+    return (
+      <div
+        style={{
+          margin: "20px 0",
+          padding: "14px 20px",
+          border: `1px solid ${gold}`,
+          background: "rgba(201,169,110,0.06)",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <span style={{ color: gold, fontSize: "0.85rem" }}>✓</span>
+        <span style={{ fontSize: "0.65rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em" }}>
+          Session logged
+        </span>
+        <button
+          onClick={() => setEditing(true)}
+          style={{ marginLeft: "auto", background: "none", border: `1px solid ${border}`, color: muted, fontSize: "0.55rem", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", padding: "5px 10px" }}
+        >
+          Edit
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div style={{ margin: "20px 0" }}>
+      <button
+        onClick={handleComplete}
+        style={{
+          background: gold,
+          color: "#0a0a0a",
+          border: "none",
+          fontFamily: "var(--font-montserrat), sans-serif",
+          fontSize: "0.65rem",
+          fontWeight: 700,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          padding: "14px 32px",
+          cursor: "pointer",
+          width: "100%",
+        }}
+      >
+        Mark Session Complete
+      </button>
+      <p style={{ marginTop: 8, fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", textAlign: "center" }}>
+        Tap here when you are done with your workout.
+      </p>
     </div>
   )
 }

@@ -20,48 +20,48 @@ const nav = [
     items: [{ href: "/training-foundations", label: "Why this guide exists" }],
   },
   {
-    label: "Module 1 — Foundation Movements",
+    label: "Module 1: Foundation Movements",
     items: [
-      { href: "/training-foundations/module1", label: "E1 — Hip Hinge" },
-      { href: "/training-foundations/module1#e2", label: "E2 — Squat Pattern" },
-      { href: "/training-foundations/module1#e3", label: "E3 — Push Pattern" },
-      { href: "/training-foundations/module1#e4", label: "E4 — Pull Pattern" },
-      { href: "/training-foundations/module1#e5", label: "E5 — Brace & Carry" },
+      { href: "/training-foundations/module1", label: "E1: Hip Hinge" },
+      { href: "/training-foundations/module1#e2", label: "E2: Squat Pattern" },
+      { href: "/training-foundations/module1#e3", label: "E3: Push Pattern" },
+      { href: "/training-foundations/module1#e4", label: "E4: Pull Pattern" },
+      { href: "/training-foundations/module1#e5", label: "E5: Brace & Carry" },
     ],
   },
   {
-    label: "Module 2 — Core & Glute Priority",
+    label: "Module 2: Core & Glute Priority",
     items: [
-      { href: "/training-foundations/module2", label: "E1 — Dead Bug" },
-      { href: "/training-foundations/module2#e2", label: "E2 — Bird Dog" },
-      { href: "/training-foundations/module2#e3", label: "E3 — Glute Bridge" },
-      { href: "/training-foundations/module2#e4", label: "E4 — Glute Medius" },
-      { href: "/training-foundations/module2#e5", label: "E5 — Hip Thrust" },
-      { href: "/training-foundations/module2#e6", label: "E6 — Romanian Deadlift" },
-      { href: "/training-foundations/module2#e7", label: "E7 — Pallof Press" },
-      { href: "/training-foundations/module2#e8", label: "E8 — Farmer's Carry" },
+      { href: "/training-foundations/module2", label: "E1: Dead Bug" },
+      { href: "/training-foundations/module2#e2", label: "E2: Bird Dog" },
+      { href: "/training-foundations/module2#e3", label: "E3: Glute Bridge" },
+      { href: "/training-foundations/module2#e4", label: "E4: Glute Medius" },
+      { href: "/training-foundations/module2#e5", label: "E5: Hip Thrust" },
+      { href: "/training-foundations/module2#e6", label: "E6: Romanian Deadlift" },
+      { href: "/training-foundations/module2#e7", label: "E7: Pallof Press" },
+      { href: "/training-foundations/module2#e8", label: "E8: Farmer's Carry" },
     ],
   },
   {
-    label: "Module 3 — The Program",
+    label: "Module 3: The Program",
     items: [
-      { href: "/training-foundations/module3", label: "Day A — Lower Body" },
-      { href: "/training-foundations/module3#dayb", label: "Day B — Upper Body" },
-      { href: "/training-foundations/module3#dayc", label: "Day C — Integration" },
+      { href: "/training-foundations/module3", label: "Day A: Lower Body" },
+      { href: "/training-foundations/module3#dayb", label: "Day B: Upper Body" },
+      { href: "/training-foundations/module3#dayc", label: "Day C: Integration" },
       { href: "/training-foundations/module3#w34", label: "Weeks 3 & 4" },
     ],
   },
   {
     label: "Workout Tracker",
     items: [
-      { href: "/training-foundations/module3#daya-tracker", label: "Track Day A — Lower Body" },
-      { href: "/training-foundations/module3#dayb-tracker", label: "Track Day B — Upper Body" },
-      { href: "/training-foundations/module3#dayc-tracker", label: "Track Day C — Full Body" },
+      { href: "/training-foundations/module3#daya-tracker", label: "Track Day A: Lower Body" },
+      { href: "/training-foundations/module3#dayb-tracker", label: "Track Day B: Upper Body" },
+      { href: "/training-foundations/module3#dayc-tracker", label: "Track Day C: Integration" },
       { href: "/training-foundations/log", label: "Weekly Log" },
     ],
   },
   {
-    label: "Module 4 — Nutrition",
+    label: "Module 4: Nutrition",
     items: [{ href: "/training-foundations/module4", label: "5 Nutrition Principles" }],
   },
   {
@@ -78,12 +78,12 @@ function isActive(pathname: string, href: string) {
 export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
   const { ready, currentPosition, getSessionFor } = useCourseProgress()
-  const [openSection, setOpenSection] = useState<number | null>(() => {
-    const idx = nav.findIndex((section) =>
-      section.items.some((item) => isActive(pathname, item.href))
-    )
-    return idx >= 0 ? idx : null
-  })
+  const currentSectionIdx = nav.findIndex((section) =>
+    section.items.some((item) => isActive(pathname, item.href))
+  )
+  const [openSection, setOpenSection] = useState<number | null>(() =>
+    currentSectionIdx >= 0 ? currentSectionIdx : null
+  )
 
   function toggleSection(i: number) {
     setOpenSection((prev) => (prev === i ? null : i))
@@ -173,7 +173,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
         {/* Nav sections — scrollable */}
         <div className="sidebar-nav-scroll" style={{ flex: 1, padding: "0.5rem 0 1.5rem" }}>
           {nav.map((section, i) => {
-            const isCurrent = section.items.some((item) => isActive(pathname, item.href))
+            const isCurrent = i === currentSectionIdx
             const isOpen_ = openSection === i
 
             return (
