@@ -1,5 +1,5 @@
 "use client"
-import { useState, useTransition } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { addPromoCode, deletePromoCode, togglePromoCode } from "./actions"
 import type { PromoCodes } from "@/lib/promoCodes"
 
@@ -7,13 +7,28 @@ const gold = "#c9a96e"
 const border = "#2a2a2a"
 const mono: React.CSSProperties = { fontFamily: "monospace", fontSize: "0.85rem", letterSpacing: "0.08em" }
 
-export function PromoCodesClient({ initialCodes }: { initialCodes: PromoCodes }) {
-  const [codes, setCodes] = useState(initialCodes)
+export function PromoCodesClient() {
+  const [codes, setCodes] = useState<PromoCodes>({})
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [newCode, setNewCode] = useState("")
   const [newDiscount, setNewDiscount] = useState<string>("100")
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    fetch("/api/admin/promo-codes")
+      .then((r) => r.json())
+      .then((data: { codes: PromoCodes }) => {
+        setCodes(data.codes ?? {})
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoadError(true)
+        setLoading(false)
+      })
+  }, [])
 
   function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -68,7 +83,19 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: PromoCodes })
           ))}
         </div>
 
-        {entries.length === 0 && (
+        {loading && (
+          <p style={{ padding: "2rem 1.5rem", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#555" }}>
+            Loading…
+          </p>
+        )}
+
+        {!loading && loadError && (
+          <p style={{ padding: "2rem 1.5rem", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#c97070" }}>
+            Could not load codes. Please refresh the page.
+          </p>
+        )}
+
+        {!loading && !loadError && entries.length === 0 && (
           <p style={{ padding: "2rem 1.5rem", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#555" }}>
             No codes yet. Add one below.
           </p>
@@ -80,13 +107,7 @@ export function PromoCodesClient({ initialCodes }: { initialCodes: PromoCodes })
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: entry.discountPct === 100 ? gold : "#f0e6d3" }}>
               {entry.discountPct === 100 ? "Free (100% off)" : `${entry.discountPct}% off`}
             </span>
-            <span style={{
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: "0.6rem",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: entry.active ? "#6dbf7e" : "#888",
-            }}>
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", color: entry.active ? "#6dbf7e" : "#888" }}>
               {entry.active ? "Active" : "Inactive"}
             </span>
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
