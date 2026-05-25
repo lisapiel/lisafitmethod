@@ -94,10 +94,10 @@ const nav: NavSection[] = [
   {
     label: "Workout Tracker",
     items: [
-      { href: "/training-foundations/module3#daya-tracker", label: "Track Day A: Lower Body",  dayKey: "a" },
-      { href: "/training-foundations/module3#dayb-tracker", label: "Track Day B: Upper Body",  dayKey: "b" },
-      { href: "/training-foundations/module3#dayc-tracker", label: "Track Day C: Integration", dayKey: "c" },
-      { href: "/training-foundations/log",                  label: "Weekly Log" },
+      { href: "/training-foundations/tracker", label: "Track Day A: Lower Body",  dayKey: "a" },
+      { href: "/training-foundations/tracker", label: "Track Day B: Upper Body",  dayKey: "b" },
+      { href: "/training-foundations/tracker", label: "Track Day C: Integration", dayKey: "c" },
+      { href: "/training-foundations/log",     label: "Weekly Log" },
     ],
   },
   {

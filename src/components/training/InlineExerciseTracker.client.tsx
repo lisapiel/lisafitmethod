@@ -7,35 +7,27 @@ import { SetLog } from "@/lib/courseProgress"
 const gold = "#c9a96e"
 const muted = "#888"
 const border = "#2a2a2a"
-const inputBg = "#1e1e1e"
-const cream = "#f0e6d3"
 
-const inp: React.CSSProperties = {
-  background: inputBg,
-  border: `1px solid ${border}`,
-  borderRadius: 4,
-  color: cream,
-  fontFamily: "var(--font-montserrat), sans-serif",
-  fontSize: "16px",
-  padding: "5px 7px",
-  width: 48,
-  textAlign: "center",
-}
-
-const stepBtn: React.CSSProperties = {
-  background: "#252525",
-  border: "none",
-  color: muted,
-  cursor: "pointer",
-  fontSize: "0.7rem",
-  width: 24,
-  height: 28,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: 3,
-  flexShrink: 0,
-}
+const srStyles = `
+  .sr-row { display:flex; align-items:center; gap:3px; margin-bottom:6px; flex-wrap:nowrap; }
+  .sr-label { font-size:0.55rem; color:#888; width:14px; flex-shrink:0; font-family:var(--font-montserrat),sans-serif; }
+  .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:36px; text-align:center; flex-shrink:0; }
+  .sr-inp-wide { width:54px; }
+  .sr-step { background:#252525; border:none; color:#888; cursor:pointer; font-size:0.7rem; width:20px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
+  .sr-unit { font-size:0.5rem; color:#888; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
+  .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:3px 5px; border-radius:3px; flex-shrink:0; white-space:nowrap; }
+  .sr-log--done { background:rgba(201,169,110,0.12); border-color:#c9a96e; color:#c9a96e; }
+  .sr-del { background:none; border:none; color:#555; cursor:pointer; font-size:0.6rem; padding:0 2px; line-height:1; flex-shrink:0; }
+  @media (min-width: 480px) {
+    .sr-row { gap:6px; }
+    .sr-label { width:22px; font-size:0.6rem; }
+    .sr-inp { width:52px; padding:6px 6px; }
+    .sr-inp-wide { width:72px; }
+    .sr-step { width:26px; height:30px; }
+    .sr-unit { font-size:0.6rem; }
+    .sr-log { font-size:0.55rem; padding:4px 8px; }
+  }
+`
 
 export default function InlineExerciseTracker({
   day,
@@ -61,6 +53,10 @@ export default function InlineExerciseTracker({
     const next = [...sets]
     next[i] = hasValue ? { ...s, confirmed: true } : s
     updateExerciseSets(exerciseId, next)
+  }
+
+  function removeSet(i: number) {
+    updateExerciseSets(exerciseId, sets.filter((_, idx) => idx !== i))
   }
 
   function addSet() {
@@ -122,6 +118,8 @@ export default function InlineExerciseTracker({
         border: `1px solid ${border}`,
       }}
     >
+      <style>{srStyles}</style>
+
       <div
         style={{
           fontSize: "0.6rem",
@@ -136,21 +134,8 @@ export default function InlineExerciseTracker({
       </div>
 
       {sets.map((set, i) => (
-        <div
-          key={i}
-          style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6, flexWrap: "wrap" }}
-        >
-          <span
-            style={{
-              fontSize: "0.55rem",
-              color: "#555",
-              width: 42,
-              fontFamily: "var(--font-montserrat), sans-serif",
-              flexShrink: 0,
-            }}
-          >
-            Set {i + 1}
-          </span>
+        <div key={i} className="sr-row">
+          <span className="sr-label">S{i + 1}</span>
 
           {isDistanceTime ? (
             <>
@@ -159,17 +144,9 @@ export default function InlineExerciseTracker({
                 value={set.distanceTime ?? ""}
                 placeholder="30m"
                 onChange={(e) => updateSet(i, { ...set, distanceTime: e.target.value, confirmed: false })}
-                style={{ ...inp, width: 58 }}
+                className="sr-inp sr-inp-wide"
               />
-              <span
-                style={{
-                  fontSize: "0.55rem",
-                  color: muted,
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                }}
-              >
-                dist/time
-              </span>
+              <span className="sr-unit">dist/time</span>
             </>
           ) : (
             <>
@@ -179,17 +156,9 @@ export default function InlineExerciseTracker({
                 value={set.reps || ""}
                 placeholder="reps"
                 onChange={(e) => updateSet(i, { ...set, reps: Number(e.target.value), confirmed: false })}
-                style={inp}
+                className="sr-inp"
               />
-              <span
-                style={{
-                  fontSize: "0.55rem",
-                  color: muted,
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                }}
-              >
-                reps
-              </span>
+              <span className="sr-unit">reps</span>
             </>
           )}
 
@@ -202,6 +171,7 @@ export default function InlineExerciseTracker({
                 padding: "3px 7px",
                 borderRadius: 3,
                 fontFamily: "var(--font-montserrat), sans-serif",
+                flexShrink: 0,
               }}
             >
               BW
@@ -209,10 +179,8 @@ export default function InlineExerciseTracker({
           ) : (
             <>
               <button
-                onClick={() =>
-                  updateSet(i, { ...set, weight: Math.max(0, (set.weight ?? 0) - STEP), confirmed: false })
-                }
-                style={stepBtn}
+                onClick={() => updateSet(i, { ...set, weight: Math.max(0, (set.weight ?? 0) - STEP), confirmed: false })}
+                className="sr-step"
               >
                 −
               </button>
@@ -223,47 +191,29 @@ export default function InlineExerciseTracker({
                 value={set.weight || ""}
                 placeholder="0"
                 onChange={(e) => updateSet(i, { ...set, weight: Number(e.target.value), confirmed: false })}
-                style={inp}
+                className="sr-inp"
               />
               <button
                 onClick={() => updateSet(i, { ...set, weight: (set.weight ?? 0) + STEP, confirmed: false })}
-                style={stepBtn}
+                className="sr-step"
               >
                 +
               </button>
-              <span
-                style={{
-                  fontSize: "0.55rem",
-                  color: muted,
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                }}
-              >
-                {set.unit}
-              </span>
+              <span className="sr-unit">{set.unit}</span>
             </>
           )}
 
-          {/* Log Set button */}
           <button
             onClick={() => updateSet(i, { ...set, confirmed: true })}
             title={set.confirmed ? "Set logged" : "Log this set"}
-            style={{
-              background: set.confirmed ? "rgba(201,169,110,0.12)" : "none",
-              border: `1px solid ${set.confirmed ? gold : border}`,
-              color: set.confirmed ? gold : "#555",
-              cursor: "pointer",
-              fontSize: "0.5rem",
-              fontFamily: "var(--font-montserrat), sans-serif",
-              letterSpacing: "0.08em",
-              padding: "3px 6px",
-              borderRadius: 3,
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-            }}
+            className={`sr-log${set.confirmed ? " sr-log--done" : ""}`}
           >
             {set.confirmed ? "✓" : "Log"}
           </button>
 
+          {sets.length > 1 && (
+            <button onClick={() => removeSet(i)} className="sr-del">✕</button>
+          )}
         </div>
       ))}
 
