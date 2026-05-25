@@ -49,56 +49,72 @@ function PaymentForm({
   }
 
   const isFree = discountPct === 100
-  const buttonLabel = processing
-    ? "Processing…"
-    : isFree
-    ? "Get Free Access — $0.50 processing fee"
-    : discountPct > 0
-    ? `Complete Purchase — $${(finalAmount / 100).toFixed(2)}`
-    : "Complete Purchase — $47"
+  const displayAmount = `$${(finalAmount / 100).toFixed(2)}`
 
   return (
     <form onSubmit={handleSubmit}>
-      <div style={{ marginBottom: 24 }}>
+      {/* Price summary */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "14px 16px",
+        background: "#111",
+        border: "1px solid #2a2a2a",
+        marginBottom: 20,
+      }}>
+        <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
+          Training Foundations
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {discountPct > 0 && (
+            <span style={{ fontSize: 12, color: "#555", textDecoration: "line-through", fontFamily: "var(--font-montserrat), sans-serif" }}>$47</span>
+          )}
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif" }}>
+            {isFree ? "$0.50" : displayAmount}
+          </span>
+        </div>
+      </div>
 
-        {/* Discount banner */}
-        {discountPct > 0 && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 14px",
-            background: "rgba(201,169,110,0.08)",
-            border: "1px solid rgba(201,169,110,0.25)",
-            marginBottom: 16,
-          }}>
-            <span style={{ color: "#c9a96e", fontSize: 14 }}>✓</span>
-            <span style={{ fontSize: 12, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
-              {isFree ? "Promo code applied — free access" : `Promo code applied — ${discountPct}% off`}
-            </span>
-          </div>
-        )}
-
-        {/* Email chip */}
+      {/* Discount banner */}
+      {discountPct > 0 && (
         <div style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          padding: "12px 16px",
-          background: "#1a1a1a",
-          border: "1px solid #2a2a2a",
-          marginBottom: 20,
+          gap: 8,
+          padding: "10px 14px",
+          background: "rgba(201,169,110,0.08)",
+          border: "1px solid rgba(201,169,110,0.25)",
+          marginBottom: 16,
         }}>
-          <span style={{ fontSize: 13, color: "#888", fontFamily: "var(--font-montserrat), sans-serif" }}>{email}</span>
-          <button
-            type="button"
-            onClick={onBack}
-            style={{ background: "none", border: "none", color: "#c9a96e", fontSize: 12, cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em" }}
-          >
-            Change
-          </button>
+          <span style={{ color: "#c9a96e", fontSize: 14 }}>✓</span>
+          <span style={{ fontSize: 12, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
+            {isFree ? "Promo code applied — free access ($0.50 processing fee)" : `Promo code applied — ${discountPct}% off`}
+          </span>
         </div>
+      )}
 
+      {/* Email chip */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "12px 16px",
+        background: "#1a1a1a",
+        border: "1px solid #2a2a2a",
+        marginBottom: 20,
+      }}>
+        <span style={{ fontSize: 13, color: "#888", fontFamily: "var(--font-montserrat), sans-serif" }}>{email}</span>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{ background: "none", border: "none", color: "#c9a96e", fontSize: 12, cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em" }}
+        >
+          Change
+        </button>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
         <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } } }} />
       </div>
 
@@ -127,7 +143,7 @@ function PaymentForm({
           marginBottom: 16,
         }}
       >
-        {buttonLabel}
+        {processing ? "Processing…" : isFree ? `Complete Purchase — $0.50` : `Complete Purchase — ${displayAmount}`}
       </button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "#555", fontSize: 11, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em" }}>
@@ -153,7 +169,6 @@ function EmailStep({
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState<string | null>(null)
   const [promoCode, setPromoCode] = useState("")
-  const [showPromo, setShowPromo] = useState(false)
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault()
@@ -166,6 +181,24 @@ function EmailStep({
 
   return (
     <form onSubmit={handleContinue}>
+      {/* Price display */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "14px 16px",
+        background: "#111",
+        border: "1px solid #2a2a2a",
+        marginBottom: 24,
+      }}>
+        <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
+          Training Foundations
+        </span>
+        <span style={{ fontSize: 16, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif" }}>
+          $47.00
+        </span>
+      </div>
+
       <label style={labelStyle}>Email Address</label>
       <input
         type="email"
@@ -182,34 +215,21 @@ function EmailStep({
         </p>
       )}
 
-      {/* Promo code toggle */}
-      <div style={{ marginBottom: 20 }}>
-        <button
-          type="button"
-          onClick={() => setShowPromo(!showPromo)}
-          style={{ background: "none", border: "none", color: "#c9a96e", fontSize: 12, cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em", padding: 0 }}
-        >
-          {showPromo ? "▾ Have a promo code?" : "▸ Have a promo code?"}
-        </button>
-
-        {showPromo && (
-          <div style={{ marginTop: 10 }}>
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter code"
-              style={{ ...inputStyle, marginBottom: 0 }}
-              autoComplete="off"
-            />
-            {promoError && (
-              <p style={{ color: "#ff6b6b", fontSize: 13, marginTop: 8, fontFamily: "var(--font-montserrat), sans-serif" }}>
-                {promoError}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Promo code — always visible */}
+      <label style={labelStyle}>Promo Code <span style={{ color: "#555", fontWeight: 400, letterSpacing: 0, textTransform: "none", fontSize: 11 }}>(optional)</span></label>
+      <input
+        type="text"
+        value={promoCode}
+        onChange={(e) => setPromoCode(e.target.value)}
+        placeholder="Enter code if you have one"
+        style={{ ...inputStyle, marginBottom: promoError ? 0 : 16 }}
+        autoComplete="off"
+      />
+      {promoError && (
+        <p style={{ color: "#ff6b6b", fontSize: 13, marginTop: 8, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>
+          {promoError}
+        </p>
+      )}
 
       <p style={{ fontSize: 12, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.7, marginBottom: 24 }}>
         This is the email your course access will be sent to. After payment, you&apos;ll receive a link to set your password and log in.
@@ -241,7 +261,7 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #2a2a2a",
   color: "#f0e6d3",
   fontFamily: "var(--font-montserrat), sans-serif",
-  fontSize: 14,
+  fontSize: 16,
   padding: "14px 16px",
   outline: "none",
   marginBottom: 16,
@@ -287,7 +307,7 @@ export function CheckoutClient() {
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
         if (data.error === "Invalid promo code") {
-          setPromoError("Invalid promo code — please check and try again.")
+          setPromoError("That promo code isn't valid — please check and try again.")
         } else {
           setIntentError("Something went wrong. Please try again.")
         }
