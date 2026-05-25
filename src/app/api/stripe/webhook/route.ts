@@ -72,7 +72,7 @@ function welcomeEmail(email: string, tempPassword: string): string {
               <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
                   <td style="width:64px;vertical-align:middle;">
-                    <img src="https://lisafitmethod.com/lisa-about-hero.jpg" alt="Lisa McPherson" width="56" height="56" style="width:56px;height:56px;border-radius:50%;object-fit:cover;display:block;" />
+                    <img src="https://lisafitmethod.com/lisa-email.jpg" alt="Lisa McPherson" width="56" height="56" style="width:56px;height:56px;border-radius:50%;object-fit:cover;display:block;" />
                   </td>
                   <td style="padding-left:16px;vertical-align:middle;">
                     <p style="margin:0;font-size:14px;font-weight:600;color:#1a1a1a;">Lisa McPherson</p>
