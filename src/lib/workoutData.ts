@@ -41,7 +41,7 @@ export const WORKOUT_DAYS: Record<"a" | "b" | "c", DayDef> = {
   c: {
     label: "Day C: Movement Quality & Integration",
     exercises: [
-      { id: "sl_glute_bridge", name: "Single-Leg Glute Bridge",  defaultSets: 3, defaultReps: 10, bodyweight: true,  note: "per side" },
+      { id: "sl_glute_bridge", name: "Single-Leg Glute Bridge",  defaultSets: 3, defaultReps: 10, bodyweight: true, optionalWeight: true, note: "per side" },
       { id: "reverse_lunge",   name: "Reverse Lunge",            defaultSets: 3, defaultReps: 10, bodyweight: false, note: "per side" },
       { id: "pushup_c",        name: "Push-Up",                  defaultSets: 3, defaultReps: 10, bodyweight: true,  note: "superset" },
       { id: "inverted_row",    name: "Inverted Row",             defaultSets: 3, defaultReps: 10, bodyweight: true,  note: "superset" },
