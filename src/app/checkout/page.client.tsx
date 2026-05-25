@@ -1,5 +1,5 @@
 "use client"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
@@ -53,29 +53,6 @@ function PaymentForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Price summary */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 16px",
-        background: "#111",
-        border: "1px solid #2a2a2a",
-        marginBottom: 20,
-      }}>
-        <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
-          Training Foundations
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {discountPct > 0 && (
-            <span style={{ fontSize: 12, color: "#555", textDecoration: "line-through", fontFamily: "var(--font-montserrat), sans-serif" }}>$47</span>
-          )}
-          <span style={{ fontSize: 16, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif" }}>
-            {isFree ? "$0.50" : displayAmount}
-          </span>
-        </div>
-      </div>
-
       {/* Discount banner */}
       {discountPct > 0 && (
         <div style={{
@@ -169,6 +146,12 @@ function EmailStep({
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState<string | null>(null)
   const [promoCode, setPromoCode] = useState("")
+  const [promoOpen, setPromoOpen] = useState(false)
+
+  // If a promo error comes back, open the field so they can fix it
+  useEffect(() => {
+    if (promoError) setPromoOpen(true)
+  }, [promoError])
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault()
@@ -181,24 +164,6 @@ function EmailStep({
 
   return (
     <form onSubmit={handleContinue}>
-      {/* Price display */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 16px",
-        background: "#111",
-        border: "1px solid #2a2a2a",
-        marginBottom: 24,
-      }}>
-        <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
-          Training Foundations
-        </span>
-        <span style={{ fontSize: 16, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif" }}>
-          $47.00
-        </span>
-      </div>
-
       <label style={labelStyle}>Email Address</label>
       <input
         type="email"
@@ -215,21 +180,34 @@ function EmailStep({
         </p>
       )}
 
-      {/* Promo code — always visible */}
-      <label style={labelStyle}>Promo Code <span style={{ color: "#555", fontWeight: 400, letterSpacing: 0, textTransform: "none", fontSize: 11 }}>(optional)</span></label>
-      <input
-        type="text"
-        value={promoCode}
-        onChange={(e) => setPromoCode(e.target.value)}
-        placeholder="Enter code if you have one"
-        style={{ ...inputStyle, marginBottom: promoError ? 0 : 16 }}
-        autoComplete="off"
-      />
-      {promoError && (
-        <p style={{ color: "#ff6b6b", fontSize: 13, marginTop: 8, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>
-          {promoError}
-        </p>
-      )}
+      {/* Promo code — collapsible */}
+      <div style={{ marginBottom: 16 }}>
+        <button
+          type="button"
+          onClick={() => setPromoOpen((o) => !o)}
+          style={{ background: "none", border: "none", color: "#555", fontSize: 12, cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", padding: 0, display: "flex", alignItems: "center", gap: 6 }}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1, color: promoOpen ? "#c9a96e" : "#555", fontWeight: 300 }}>{promoOpen ? "−" : "+"}</span>
+          Have a promo code?
+        </button>
+        {promoOpen && (
+          <div style={{ marginTop: 10 }}>
+            <input
+              type="text"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder="Enter promo code"
+              style={{ ...inputStyle, marginBottom: 0 }}
+              autoComplete="off"
+            />
+          </div>
+        )}
+        {promoError && (
+          <p style={{ color: "#ff6b6b", fontSize: 13, marginTop: 8, fontFamily: "var(--font-montserrat), sans-serif" }}>
+            {promoError}
+          </p>
+        )}
+      </div>
 
       <p style={{ fontSize: 12, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.7, marginBottom: 24 }}>
         This is the email your course access will be sent to. After payment, you&apos;ll receive a link to set your password and log in.

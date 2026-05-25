@@ -43,7 +43,8 @@ The payment webhook needs permission to create Cognito accounts. Create a dedica
       "Effect": "Allow",
       "Action": [
         "cognito-idp:AdminCreateUser",
-        "cognito-idp:AdminGetUser"
+        "cognito-idp:AdminGetUser",
+        "cognito-idp:AdminSetUserPassword"
       ],
       "Resource": "arn:aws:cognito-idp:YOUR_REGION:*:userpool/YOUR_USER_POOL_ID"
     }
@@ -75,8 +76,27 @@ The payment webhook needs permission to create Cognito accounts. Create a dedica
 | `COGNITO_USER_POOL_ID` | Same as your User Pool ID |
 | `COGNITO_AWS_ACCESS_KEY_ID` | Access Key ID from Step 3 |
 | `COGNITO_AWS_SECRET_ACCESS_KEY` | Secret Access Key from Step 3 |
+| `RESEND_API_KEY` | Your Resend API key — see Step 4b below |
 
 4. Click **Save**.
+
+---
+
+## Step 4b — Get your Resend API key (required for purchase emails)
+
+The welcome email after purchase is sent via [Resend](https://resend.com). Without this key, no email will be sent to customers after they pay.
+
+1. Go to [resend.com](https://resend.com) and sign in (or create a free account).
+2. In the left sidebar click **API Keys → Create API key**.
+3. Name it `lisafitmethod-production`, set permission to **Sending access**, and click **Add**.
+4. Copy the key (starts with `re_...`). You will only see it once.
+5. Add it to Amplify environment variables (same step as above):
+
+| Variable | Value |
+|---|---|
+| `RESEND_API_KEY` | Your Resend key (`re_...`) |
+
+> **Note:** Resend requires a verified domain to send from a custom `from` address. Make sure `lisafitmethod.com` is verified in your Resend account under **Domains**. If it isn't, emails will fail silently.
 
 ---
 
@@ -128,6 +148,9 @@ COGNITO_REGION=us-east-1
 COGNITO_USER_POOL_ID=us-east-1_XXXXXXXX
 COGNITO_AWS_ACCESS_KEY_ID=AKIAXXXXXXXXXXXXXXXX
 COGNITO_AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Email (purchase welcome email)
+RESEND_API_KEY=re_...
 ```
 
 ---
