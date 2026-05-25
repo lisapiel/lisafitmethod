@@ -199,7 +199,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
-                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Lifetime access.</strong>
+                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Lifetime access.</strong> Reuse it, track it, and keep progressing.
               </p>
             </div>
           </div>
@@ -333,7 +333,7 @@ export default async function HomePage() {
               {[
                 "Foundation Movements: Learn the movement patterns every strong body is built on",
                 "Core & Glute Priority: Build spinal stability, stronger glutes, better posture, and a body that moves properly under load",
-                "The 4-Week Program: Fully structured workouts with sets, reps, progression, warm-ups, mobility work, and built-in workout tracking",
+                "The 4-Week Program: Fully structured workouts with sets, reps, warm-ups, mobility work, progressive overload guidance, and built-in workout tracking so you can clearly see your progress over time. Most exercises can be done with dumbbells, resistance bands, and minimal equipment if you're starting from home, while still transitioning naturally into a gym environment over time.",
                 "Nutrition Foundations: Simple nutrition principles for building muscle, supporting recovery, and staying lean without obsessing over food",
               ].map((item) => (
                 <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.4 }}>
@@ -356,7 +356,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
-              Includes 50+ exercise videos, built-in workout and progress tracking, and lifetime access.
+              Includes 50+ exercise videos, built-in workout and progress tracking, full warm-ups and cool-downs, progression guidance, and lifetime access so you can keep using the program beyond the first four weeks.
             </p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
@@ -416,7 +416,7 @@ export default async function HomePage() {
             Get Instant Access
           </Link>
           <p style={{ marginTop: 20, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access.</strong> No subscription.
+            One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access.</strong> No subscription. Keep the program, the videos, and the tracking system for life.
           </p>
         </div>
       </section>

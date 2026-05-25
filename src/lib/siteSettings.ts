@@ -79,18 +79,18 @@ export const DEFAULTS: SiteSettings = {
   text: {
     homeHeroHeadline: "Most people don't need a harder workout.\nThey need a better foundation.",
     homeHeroSubtext:
-      "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your workouts and progress, and finally understand what actually changes your body. Designed to teach you how to progressively overload correctly so you can continue building strength long after the first four weeks are over. No random workouts. No ego lifting. Just intelligent training built to last.",
+      "A 4-week strength training system for beginners, returners, and anyone who wants to stop guessing in the gym. Learn proper form, follow a structured program, track your workouts and progress, and finally understand how to train in a way that actually changes your body. This is not a challenge you finish and forget. It is a foundation you can repeat, progress, and build on long after the first four weeks are over. No random workouts. No ego lifting. Just smart training built to last.",
     homeStoryHeadline: "I did it the hard way.\nYou don't have to.",
     homeStoryPara1:
       "I spent years training hard without actually building strength or changing my body. Everything changed when I finally discovered structure, progressive overload, and proper programming.",
     homeStoryPara2:
       "Then my back injury forced me to relearn everything I thought I understood about fitness. Movement quality, stability, recovery, progression. The fundamentals most people skip until their body forces them to pay attention.",
     homeStoryPara3:
-      "This course is the system I wish I had from the beginning. The structure, movement education, warm-ups, progression, workout tracking, and training principles that actually matter if you want a strong body that lasts.",
+      "This course is the system I wish I had from the beginning. Proper movement education, structured workouts, warm-ups, progressive overload, built-in tracking, and the training principles that actually matter if you want a strong body that lasts. It gives you the foundation most people skip, so you can train with more confidence, more intention, and less guessing.",
     homeStoryQuote: "The goal isn't just to look strong. It's to build a body that lasts.",
-    homeFinalHeadline: "Stronger. Smarter. Built to last.",
+    homeFinalHeadline: "Learn the foundations once. Use them forever.",
     homeFinalSubtext:
-      "Structured workouts, guided exercise instruction, built-in tracking, and the foundations most people never learn.",
+      "Get structured workouts, guided exercise instruction, built-in workout tracking, and the progression system most beginners are never taught. Run the program once, repeat it stronger, and keep building from your own numbers.",
     coursePrice: "47",
     aboutHeroHeadline: "Spent years burning calories without building strength or the body I wanted. Then I found structure.",
     aboutHeroSubtext:
@@ -150,7 +150,7 @@ export const DEFAULTS: SiteSettings = {
     coachingFormSubtext:
       "I keep coaching intentionally limited so every client gets real attention, detailed feedback, and programming built specifically around them. Fill out the form below and I'll personally review your application within 48 hours. No commitment required to apply.",
     footerTagline:
-      "Strength training built on movement quality, real structure, and a body that lasts.",
+      "Strength training built on movement quality, real structure, smart progression, and a body that lasts.",
   },
 }
 
