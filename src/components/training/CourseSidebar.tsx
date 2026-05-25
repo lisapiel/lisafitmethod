@@ -399,8 +399,8 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                               display: "flex",
                               alignItems: "center",
                               borderLeft: itemActive ? `2px solid ${gold}` : "2px solid transparent",
-                              background: itemActive ? "rgba(201,169,110,0.05)" : "transparent",
-                              transition: "background 0.15s, border-color 0.15s",
+                              background: itemActive ? "rgba(201,169,110,0.14)" : "transparent",
+                              transition: "background 0.2s, border-color 0.2s",
                             }}
                           >
                             <Link
@@ -470,9 +470,10 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                                       textDecoration: "none",
                                       lineHeight: 1.4,
                                       borderLeft: subActive ? `2px solid ${gold}` : "2px solid transparent",
+                                      background: subActive ? "rgba(201,169,110,0.10)" : "transparent",
                                       fontFamily: "var(--font-montserrat), sans-serif",
                                       letterSpacing: "0.03em",
-                                      transition: "color 0.15s, border-color 0.15s",
+                                      transition: "color 0.15s, border-color 0.15s, background 0.2s",
                                     }}
                                   >
                                     {sub.label}
