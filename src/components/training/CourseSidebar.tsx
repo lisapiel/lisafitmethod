@@ -25,15 +25,6 @@ interface NavSection {
   items: NavItem[]
 }
 
-// ─── Anchors tracked for scroll-based active state ────────────────────────────
-
-const MODULE3_ANCHORS = [
-  "daya-warmup", "daya-tracker", "daya-cooldown",
-  "dayb-warmup", "dayb-tracker", "dayb-cooldown",
-  "dayc-warmup", "dayc-tracker", "dayc-cooldown",
-  "w34",
-]
-
 // ─── Nav data ─────────────────────────────────────────────────────────────────
 
 const nav: NavSection[] = [
@@ -44,24 +35,24 @@ const nav: NavSection[] = [
   {
     label: "Module 1: Foundation Movements",
     items: [
-      { href: "/training-foundations/module1", label: "E1: Hip Hinge" },
-      { href: "/training-foundations/module1#e2", label: "E2: Squat Pattern" },
-      { href: "/training-foundations/module1#e3", label: "E3: Push Pattern" },
-      { href: "/training-foundations/module1#e4", label: "E4: Pull Pattern" },
-      { href: "/training-foundations/module1#e5", label: "E5: Brace & Carry" },
+      { href: "/training-foundations/module1",     label: "E1: Hip Hinge" },
+      { href: "/training-foundations/module1#e2",  label: "E2: Squat Pattern" },
+      { href: "/training-foundations/module1#e3",  label: "E3: Push Pattern" },
+      { href: "/training-foundations/module1#e4",  label: "E4: Pull Pattern" },
+      { href: "/training-foundations/module1#e5",  label: "E5: Brace & Carry" },
     ],
   },
   {
     label: "Module 2: Core & Glute Priority",
     items: [
-      { href: "/training-foundations/module2", label: "E1: Dead Bug" },
-      { href: "/training-foundations/module2#e2", label: "E2: Bird Dog" },
-      { href: "/training-foundations/module2#e3", label: "E3: Glute Bridge" },
-      { href: "/training-foundations/module2#e4", label: "E4: Glute Medius" },
-      { href: "/training-foundations/module2#e5", label: "E5: Hip Thrust" },
-      { href: "/training-foundations/module2#e6", label: "E6: Romanian Deadlift" },
-      { href: "/training-foundations/module2#e7", label: "E7: Pallof Press" },
-      { href: "/training-foundations/module2#e8", label: "E8: Farmer's Carry" },
+      { href: "/training-foundations/module2",     label: "E1: Dead Bug" },
+      { href: "/training-foundations/module2#e2",  label: "E2: Bird Dog" },
+      { href: "/training-foundations/module2#e3",  label: "E3: Glute Bridge" },
+      { href: "/training-foundations/module2#e4",  label: "E4: Glute Medius" },
+      { href: "/training-foundations/module2#e5",  label: "E5: Hip Thrust" },
+      { href: "/training-foundations/module2#e6",  label: "E6: Romanian Deadlift" },
+      { href: "/training-foundations/module2#e7",  label: "E7: Pallof Press" },
+      { href: "/training-foundations/module2#e8",  label: "E8: Farmer's Carry" },
     ],
   },
   {
@@ -72,9 +63,9 @@ const nav: NavSection[] = [
         label: "Day A: Lower Body",
         dayKey: "a",
         subsections: [
-          { href: "/training-foundations/module3#daya-warmup",   label: "Warm-Up",     anchor: "daya-warmup" },
+          { href: "/training-foundations/module3#daya-warmup",   label: "Warm-Up",      anchor: "daya-warmup" },
           { href: "/training-foundations/module3#daya-tracker",  label: "Main Workout", anchor: "daya-tracker" },
-          { href: "/training-foundations/module3#daya-cooldown", label: "Cool-Down",   anchor: "daya-cooldown" },
+          { href: "/training-foundations/module3#daya-cooldown", label: "Cool-Down",    anchor: "daya-cooldown" },
         ],
       },
       {
@@ -82,9 +73,9 @@ const nav: NavSection[] = [
         label: "Day B: Upper Body",
         dayKey: "b",
         subsections: [
-          { href: "/training-foundations/module3#dayb-warmup",   label: "Warm-Up",     anchor: "dayb-warmup" },
+          { href: "/training-foundations/module3#dayb-warmup",   label: "Warm-Up",      anchor: "dayb-warmup" },
           { href: "/training-foundations/module3#dayb-tracker",  label: "Main Workout", anchor: "dayb-tracker" },
-          { href: "/training-foundations/module3#dayb-cooldown", label: "Cool-Down",   anchor: "dayb-cooldown" },
+          { href: "/training-foundations/module3#dayb-cooldown", label: "Cool-Down",    anchor: "dayb-cooldown" },
         ],
       },
       {
@@ -92,12 +83,21 @@ const nav: NavSection[] = [
         label: "Day C: Integration",
         dayKey: "c",
         subsections: [
-          { href: "/training-foundations/module3#dayc-warmup",   label: "Warm-Up",     anchor: "dayc-warmup" },
+          { href: "/training-foundations/module3#dayc-warmup",   label: "Warm-Up",      anchor: "dayc-warmup" },
           { href: "/training-foundations/module3#dayc-tracker",  label: "Main Workout", anchor: "dayc-tracker" },
-          { href: "/training-foundations/module3#dayc-cooldown", label: "Cool-Down",   anchor: "dayc-cooldown" },
+          { href: "/training-foundations/module3#dayc-cooldown", label: "Cool-Down",    anchor: "dayc-cooldown" },
         ],
       },
       { href: "/training-foundations/module3#w34", label: "Weeks 3 & 4" },
+    ],
+  },
+  {
+    label: "Workout Tracker",
+    items: [
+      { href: "/training-foundations/module3#daya-tracker", label: "Track Day A: Lower Body",  dayKey: "a" },
+      { href: "/training-foundations/module3#dayb-tracker", label: "Track Day B: Upper Body",  dayKey: "b" },
+      { href: "/training-foundations/module3#dayc-tracker", label: "Track Day C: Integration", dayKey: "c" },
+      { href: "/training-foundations/log",                  label: "Weekly Log" },
     ],
   },
   {
@@ -106,17 +106,63 @@ const nav: NavSection[] = [
   },
   {
     label: "What's Next",
-    items: [
-      { href: "/training-foundations/module4#next", label: "Your next steps" },
-      { href: "/training-foundations/log", label: "Weekly Log" },
-    ],
+    items: [{ href: "/training-foundations/module4#next", label: "Your next steps" }],
   },
 ]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function baseMatch(pathname: string, href: string) {
-  return pathname === href.split("#")[0]
+function baseOf(href: string) {
+  return href.split("#")[0]
+}
+
+function hashOf(href: string) {
+  return href.split("#")[1] ?? null
+}
+
+// Build the ordered list of anchor IDs to track for the current pathname.
+// Document order matters: we always pick the deepest anchor whose top is
+// above the scroll threshold, so the list must match page order.
+function getPageAnchors(pathname: string): string[] {
+  const seen = new Set<string>()
+  const anchors: string[] = []
+
+  function push(id: string) {
+    if (!seen.has(id)) { seen.add(id); anchors.push(id) }
+  }
+
+  for (const section of nav) {
+    for (const item of section.items) {
+      if (baseOf(item.href) !== pathname) continue
+      if (item.subsections) {
+        item.subsections.forEach((s) => push(s.anchor))
+      } else {
+        const h = hashOf(item.href)
+        if (h) push(h)
+      }
+    }
+  }
+  return anchors
+}
+
+// Determine whether a nav item should be highlighted given the current state.
+function isItemActive(item: NavItem, pathname: string, activeAnchor: string | null): boolean {
+  if (baseOf(item.href) !== pathname) return false
+
+  if (item.subsections) {
+    // Day items: active when any of their subsections is the active anchor
+    return item.subsections.some((s) => s.anchor === activeAnchor)
+  }
+
+  const h = hashOf(item.href)
+  if (h) {
+    // Hash item: active when that specific anchor is active
+    return activeAnchor === h
+  }
+
+  // No-hash item (e.g. E1 which is the page root): active when no anchor
+  // has been reached yet (user is near the top of the page)
+  return activeAnchor === null
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -125,50 +171,54 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
   const pathname = usePathname()
   const { ready, currentPosition, getSessionFor } = useCourseProgress()
 
-  // Which top-level accordion is open
+  // Which top-level section accordion is open
   const currentSectionIdx = nav.findIndex((s) =>
-    s.items.some((item) => baseMatch(pathname, item.href))
+    s.items.some((item) => baseOf(item.href) === pathname)
   )
   const [openSection, setOpenSection] = useState<number | null>(() =>
     currentSectionIdx >= 0 ? currentSectionIdx : null
   )
 
-  // Which day items within Module 3 have subsections expanded
+  // Which Module 3 day items have their subsections expanded
   const [expandedDays, setExpandedDays] = useState<Set<string>>(() => new Set())
 
-  // Scroll-tracked active anchor (module3 only)
+  // The anchor ID that is currently "in view" based on scroll position
   const [activeAnchor, setActiveAnchor] = useState<string | null>(null)
   const rafRef = useRef<number | undefined>(undefined)
 
-  const updateActive = useCallback(() => {
+  const updateActive = useCallback((anchors: string[]) => {
     const threshold = window.innerHeight * 0.45
     let found: string | null = null
-    for (const id of MODULE3_ANCHORS) {
+    for (const id of anchors) {
       const el = document.getElementById(id)
       if (el && el.getBoundingClientRect().top <= threshold) found = id
     }
     setActiveAnchor(found)
   }, [])
 
-  // Attach/detach scroll listener when on module3 page
+  // Attach scroll listener whenever the pathname changes
   useEffect(() => {
-    if (pathname !== "/training-foundations/module3") {
+    const anchors = getPageAnchors(pathname)
+    if (anchors.length === 0) {
       setActiveAnchor(null)
       return
     }
+
     function onScroll() {
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(updateActive)
+      rafRef.current = requestAnimationFrame(() => updateActive(anchors))
     }
+
     window.addEventListener("scroll", onScroll, { passive: true })
-    updateActive()
+    updateActive(anchors)
+
     return () => {
       window.removeEventListener("scroll", onScroll)
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
     }
   }, [pathname, updateActive])
 
-  // Auto-expand the day whose subsection is active
+  // Auto-expand the Module 3 day whose subsection just became active
   useEffect(() => {
     if (!activeAnchor) return
     const m3 = nav.find((s) => s.label === "Module 3: The Program")
@@ -202,7 +252,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
   }
 
   const gold = "#c9a96e"
-  const dim = "#888888"
+  const dim  = "#888888"
 
   return (
     <>
@@ -245,10 +295,8 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
           .sidebar-nav-scroll { overflow-y: auto; scrollbar-width: thin; }
           .sidebar-nav-scroll::-webkit-scrollbar { width: 4px; }
           .sidebar-nav-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; }
-          .sb-item { transition: color 0.15s; }
           .sb-item:hover { color: #c9a96e !important; }
-          .sb-sub { transition: color 0.15s; }
-          .sb-sub:hover { color: #c9a96e !important; }
+          .sb-sub:hover  { color: #c9a96e !important; }
         `}</style>
 
         {/* My Progress pill */}
@@ -261,7 +309,9 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
               alignItems: "center",
               justifyContent: "space-between",
               padding: "0.6rem 0.75rem",
-              background: pathname === "/training-foundations/tracker" ? "rgba(201,169,110,0.12)" : "rgba(201,169,110,0.06)",
+              background: pathname === "/training-foundations/tracker"
+                ? "rgba(201,169,110,0.12)"
+                : "rgba(201,169,110,0.06)",
               border: "1px solid rgba(201,169,110,0.3)",
               textDecoration: "none",
               fontFamily: "var(--font-montserrat), sans-serif",
@@ -300,7 +350,6 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                     padding: "0.75rem 1.25rem",
                     cursor: "pointer",
                     userSelect: "none",
-                    marginBottom: "0.1rem",
                   }}
                 >
                   <span
@@ -335,15 +384,10 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                 {isOpen_ && (
                   <div style={{ marginBottom: "0.25rem" }}>
                     {section.items.map((item) => {
-                      const hasSubs = !!item.subsections?.length
+                      const hasSubs    = !!item.subsections?.length
                       const dayExpanded = expandedDays.has(item.href)
-
-                      // Active state: for items with subsections, use scroll anchor; otherwise use pathname
-                      const subsActive = hasSubs && item.subsections!.some((s) => s.anchor === activeAnchor)
-                      const pathActive = !hasSubs && baseMatch(pathname, item.href)
-                      const itemActive = hasSubs ? subsActive : pathActive
-
-                      const dayDone = ready && item.dayKey
+                      const itemActive  = isItemActive(item, pathname, activeAnchor)
+                      const dayDone     = ready && item.dayKey
                         ? !!getSessionFor(currentPosition.round, currentPosition.week, item.dayKey)
                         : false
 
@@ -371,17 +415,16 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                                 textDecoration: "none",
                                 lineHeight: 1.4,
                                 fontFamily: "var(--font-montserrat), sans-serif",
+                                transition: "color 0.15s",
                               }}
                             >
                               {item.label}
                             </Link>
 
-                            {/* Done dot for non-expandable items */}
                             {dayDone && !hasSubs && (
                               <span style={{ color: gold, fontSize: "0.45rem", paddingRight: "1rem", flexShrink: 0 }}>●</span>
                             )}
 
-                            {/* Expand arrow for day items with subsections */}
                             {hasSubs && (
                               <button
                                 onClick={(e) => toggleDay(item.href, e)}
@@ -396,7 +439,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                                   display: "flex",
                                   alignItems: "center",
                                   flexShrink: 0,
-                                  transition: "color 0.15s",
+                                  transition: "color 0.15s, transform 0.2s",
                                   transform: dayExpanded ? "rotate(90deg)" : "none",
                                   transformOrigin: "center",
                                   fontFamily: "sans-serif",
@@ -445,7 +488,7 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                 )}
 
                 {i < nav.length - 1 && (
-                  <div style={{ height: 1, background: "#2a2a2a", margin: "0.5rem 1.25rem 0.5rem", opacity: 0.35 }} />
+                  <div style={{ height: 1, background: "#2a2a2a", margin: "0.5rem 1.25rem", opacity: 0.35 }} />
                 )}
               </div>
             )
