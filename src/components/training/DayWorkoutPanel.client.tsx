@@ -10,7 +10,6 @@ const cream = "#f0e6d3"
 const muted = "#888"
 const cardBg = "#161616"
 const border = "#2a2a2a"
-const inputBg = "#1e1e1e"
 
 type DayKey = "a" | "b" | "c"
 
@@ -27,104 +26,43 @@ interface SetRowProps {
 }
 
 function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove, canRemove }: SetRowProps) {
-  const inp: React.CSSProperties = {
-    background: inputBg,
-    border: `1px solid ${border}`,
-    borderRadius: 4,
-    color: cream,
-    fontFamily: "var(--font-montserrat), sans-serif",
-    fontSize: "16px",
-    padding: "6px 8px",
-    width: 56,
-    textAlign: "center",
-  }
-
-  const stepBtn: React.CSSProperties = {
-    background: "#252525",
-    border: "none",
-    color: muted,
-    cursor: "pointer",
-    fontSize: "0.75rem",
-    width: 28,
-    height: 30,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 3,
-    flexShrink: 0,
-  }
-
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
-      <span
-        style={{
-          fontSize: "0.6rem",
-          color: muted,
-          width: 20,
-          fontFamily: "var(--font-montserrat), sans-serif",
-          letterSpacing: "0.05em",
-          flexShrink: 0,
-        }}
-      >
-        S{index + 1}
-      </span>
+    <div className="sr-row">
+      <span className="sr-label">S{index + 1}</span>
 
       {distanceOrTime ? (
-        <>
-          <input
-            type="text"
-            value={set.distanceTime ?? ""}
-            placeholder="e.g. 30m"
-            onChange={(e) => {
-              const v = e.target.value
-              onChange({ ...set, distanceTime: v, confirmed: v.trim() !== "" })
-            }}
-            style={{ ...inp, width: 68 }}
-          />
-          <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
-            dist/time
-          </span>
-        </>
+        <input
+          type="text"
+          value={set.distanceTime ?? ""}
+          placeholder="e.g. 30m"
+          onChange={(e) => {
+            const v = e.target.value
+            onChange({ ...set, distanceTime: v, confirmed: v.trim() !== "" })
+          }}
+          className="sr-inp sr-inp-wide"
+        />
       ) : (
-        <>
-          <input
-            type="number"
-            min={0}
-            value={set.reps || ""}
-            placeholder="reps"
-            onChange={(e) => {
-              const reps = Number(e.target.value)
-              onChange({ ...set, reps, confirmed: reps > 0 })
-            }}
-            style={inp}
-          />
-          <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
-            reps
-          </span>
-        </>
+        <input
+          type="number"
+          min={0}
+          value={set.reps || ""}
+          placeholder="reps"
+          onChange={(e) => {
+            const reps = Number(e.target.value)
+            onChange({ ...set, reps, confirmed: reps > 0 })
+          }}
+          className="sr-inp"
+        />
       )}
 
       {bodyweightOnly ? (
-        <span
-          style={{
-            fontSize: "0.6rem",
-            background: "#2a2a2a",
-            color: muted,
-            padding: "3px 8px",
-            borderRadius: 3,
-            fontFamily: "var(--font-montserrat), sans-serif",
-          }}
-        >
-          BW
-        </span>
+        <span className="sr-unit">BW</span>
       ) : (
         <>
           <button
+            className="sr-step"
             onClick={() => onChange({ ...set, weight: Math.max(0, (set.weight ?? 0) - WEIGHT_STEP), confirmed: false })}
-            style={stepBtn}
-          >
-            −
-          </button>
+          >−</button>
           <input
             type="number"
             min={0}
@@ -132,57 +70,26 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             value={set.weight || ""}
             placeholder="wt"
             onChange={(e) => onChange({ ...set, weight: Number(e.target.value), confirmed: false })}
-            style={inp}
+            className="sr-inp"
           />
           <button
+            className="sr-step"
             onClick={() => onChange({ ...set, weight: (set.weight ?? 0) + WEIGHT_STEP, confirmed: false })}
-            style={stepBtn}
-          >
-            +
-          </button>
-          <span style={{ fontSize: "0.6rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>
-            {set.unit}
-          </span>
+          >+</button>
+          <span className="sr-unit">{set.unit}</span>
         </>
       )}
 
-      {/* Log Set button */}
       <button
         onClick={() => onChange({ ...set, confirmed: true })}
         title={set.confirmed ? "Set logged" : "Log this set"}
-        style={{
-          background: set.confirmed ? "rgba(201,169,110,0.12)" : "none",
-          border: `1px solid ${set.confirmed ? gold : border}`,
-          color: set.confirmed ? gold : "#555",
-          cursor: "pointer",
-          fontSize: "0.55rem",
-          fontFamily: "var(--font-montserrat), sans-serif",
-          letterSpacing: "0.08em",
-          padding: "4px 8px",
-          borderRadius: 3,
-          flexShrink: 0,
-          whiteSpace: "nowrap",
-        }}
+        className={`sr-log${set.confirmed ? " sr-log--done" : ""}`}
       >
         {set.confirmed ? "✓" : "Log"}
       </button>
 
       {canRemove && (
-        <button
-          onClick={onRemove}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#555",
-            cursor: "pointer",
-            fontSize: "0.7rem",
-            padding: "0 4px",
-            lineHeight: 1,
-          }}
-          title="Remove set"
-        >
-          ✕
-        </button>
+        <button onClick={onRemove} className="sr-del" title="Remove set">✕</button>
       )}
     </div>
   )
@@ -390,6 +297,26 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
         transition: "border-color 0.2s",
       }}
     >
+      <style>{`
+        .sr-row { display:flex; align-items:center; gap:3px; margin-bottom:6px; flex-wrap:nowrap; }
+        .sr-label { font-size:0.55rem; color:#888; width:14px; flex-shrink:0; font-family:var(--font-montserrat),sans-serif; }
+        .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:36px; text-align:center; flex-shrink:0; }
+        .sr-inp-wide { width:54px; }
+        .sr-step { background:#252525; border:none; color:#888; cursor:pointer; font-size:0.7rem; width:20px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
+        .sr-unit { font-size:0.5rem; color:#888; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
+        .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:3px 5px; border-radius:3px; flex-shrink:0; white-space:nowrap; }
+        .sr-log--done { background:rgba(201,169,110,0.12); border-color:#c9a96e; color:#c9a96e; }
+        .sr-del { background:none; border:none; color:#555; cursor:pointer; font-size:0.6rem; padding:0 2px; line-height:1; flex-shrink:0; }
+        @media (min-width: 480px) {
+          .sr-row { gap:6px; }
+          .sr-label { width:22px; font-size:0.6rem; }
+          .sr-inp { width:52px; padding:6px 6px; }
+          .sr-inp-wide { width:72px; }
+          .sr-step { width:26px; height:30px; }
+          .sr-unit { font-size:0.6rem; }
+          .sr-log { font-size:0.55rem; padding:4px 8px; }
+        }
+      `}</style>
       {/* Header */}
       <div
         style={{
