@@ -13,7 +13,7 @@ const fieldStyle: React.CSSProperties = {
   border: "1px solid #2a2a2a",
   color: "#f0e6d3",
   fontFamily: "var(--font-montserrat), sans-serif",
-  fontSize: 14,
+  fontSize: 16,
   padding: "14px 16px",
   outline: "none",
   marginBottom: 16,

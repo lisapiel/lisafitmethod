@@ -1,5 +1,5 @@
 "use client"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
@@ -20,16 +20,22 @@ function PaymentForm({
   finalAmount,
   discountPct,
   onBack,
+  onApplyPromo,
 }: {
   email: string
   finalAmount: number
   discountPct: number
   onBack: () => void
+  onApplyPromo: (code: string) => Promise<{ error: string | null }>
 }) {
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
+  const [promoCode, setPromoCode] = useState("")
+  const [promoOpen, setPromoOpen] = useState(false)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [applyingPromo, setApplyingPromo] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,6 +52,18 @@ function PaymentForm({
       setError(confirmError.message ?? "Payment failed. Please try again.")
       setProcessing(false)
     }
+  }
+
+  const handleApply = async () => {
+    if (!promoCode.trim()) return
+    setApplyingPromo(true)
+    setPromoError(null)
+    const result = await onApplyPromo(promoCode.trim())
+    if (result.error) {
+      setPromoError(result.error)
+      setApplyingPromo(false)
+    }
+    // On success, parent updates clientSecret → Elements key changes → this component remounts
   }
 
   const isFree = discountPct === 100
@@ -91,9 +109,60 @@ function PaymentForm({
         </button>
       </div>
 
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 20 }}>
         <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } } }} />
       </div>
+
+      {/* Promo code — collapsible, hidden once applied */}
+      {discountPct === 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <button
+            type="button"
+            onClick={() => setPromoOpen((o) => !o)}
+            style={{ background: "none", border: "none", color: "#555", fontSize: 12, cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", padding: 0, display: "flex", alignItems: "center", gap: 6 }}
+          >
+            <span style={{ fontSize: 16, lineHeight: 1, color: promoOpen ? "#c9a96e" : "#555", fontWeight: 300 }}>{promoOpen ? "−" : "+"}</span>
+            Have a promo code?
+          </button>
+          {promoOpen && (
+            <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => { setPromoCode(e.target.value); setPromoError(null) }}
+                placeholder="Enter promo code"
+                style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                onClick={handleApply}
+                disabled={applyingPromo || !promoCode.trim()}
+                style={{
+                  background: "none",
+                  border: "1px solid rgba(201,169,110,0.4)",
+                  color: "#c9a96e",
+                  fontFamily: "var(--font-montserrat), sans-serif",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  padding: "0 16px",
+                  cursor: applyingPromo ? "not-allowed" : "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {applyingPromo ? "…" : "Apply"}
+              </button>
+            </div>
+          )}
+          {promoError && (
+            <p style={{ color: "#ff6b6b", fontSize: 12, marginTop: 8, fontFamily: "var(--font-montserrat), sans-serif" }}>
+              {promoError}
+            </p>
+          )}
+        </div>
+      )}
 
       {error && (
         <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -136,22 +205,9 @@ function PaymentForm({
 
 // ─── Email step ───────────────────────────────────────────────────────────────
 
-function EmailStep({
-  onNext,
-  promoError,
-}: {
-  onNext: (email: string, promoCode: string) => void
-  promoError: string | null
-}) {
+function EmailStep({ onNext }: { onNext: (email: string) => void }) {
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState<string | null>(null)
-  const [promoCode, setPromoCode] = useState("")
-  const [promoOpen, setPromoOpen] = useState(false)
-
-  // If a promo error comes back, open the field so they can fix it
-  useEffect(() => {
-    if (promoError) setPromoOpen(true)
-  }, [promoError])
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault()
@@ -159,7 +215,7 @@ function EmailStep({
       setEmailError("Please enter a valid email address.")
       return
     }
-    onNext(email.trim().toLowerCase(), promoCode.trim())
+    onNext(email.trim().toLowerCase())
   }
 
   return (
@@ -179,35 +235,6 @@ function EmailStep({
           {emailError}
         </p>
       )}
-
-      {/* Promo code — collapsible */}
-      <div style={{ marginBottom: 16 }}>
-        <button
-          type="button"
-          onClick={() => setPromoOpen((o) => !o)}
-          style={{ background: "none", border: "none", color: "#555", fontSize: 12, cursor: "pointer", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", padding: 0, display: "flex", alignItems: "center", gap: 6 }}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1, color: promoOpen ? "#c9a96e" : "#555", fontWeight: 300 }}>{promoOpen ? "−" : "+"}</span>
-          Have a promo code?
-        </button>
-        {promoOpen && (
-          <div style={{ marginTop: 10 }}>
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter promo code"
-              style={{ ...inputStyle, marginBottom: 0 }}
-              autoComplete="off"
-            />
-          </div>
-        )}
-        {promoError && (
-          <p style={{ color: "#ff6b6b", fontSize: 13, marginTop: 8, fontFamily: "var(--font-montserrat), sans-serif" }}>
-            {promoError}
-          </p>
-        )}
-      </div>
 
       <p style={{ fontSize: 12, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.7, marginBottom: 24 }}>
         This is the email your course access will be sent to. After payment, you&apos;ll receive a link to set your password and log in.
@@ -269,26 +296,20 @@ export function CheckoutClient() {
   const [finalAmount, setFinalAmount] = useState(4700)
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
-  const [promoError, setPromoError] = useState<string | null>(null)
 
-  const handleEmailNext = useCallback(async (submittedEmail: string, promoCode: string) => {
+  const handleEmailNext = useCallback(async (submittedEmail: string) => {
     setLoadingIntent(true)
     setIntentError(null)
-    setPromoError(null)
     setEmail(submittedEmail)
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: submittedEmail, promoCode: promoCode || undefined }),
+        body: JSON.stringify({ email: submittedEmail }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
-        if (data.error === "Invalid promo code") {
-          setPromoError("That promo code isn't valid — please check and try again.")
-        } else {
-          setIntentError("Something went wrong. Please try again.")
-        }
+        setIntentError("Something went wrong. Please try again.")
         setEmail(null)
         return
       }
@@ -302,6 +323,26 @@ export function CheckoutClient() {
       setLoadingIntent(false)
     }
   }, [])
+
+  const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
+    try {
+      const res = await fetch("/api/stripe/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email!, promoCode }),
+      })
+      const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
+      if (!res.ok) {
+        return { error: data.error === "Invalid promo code" ? "That promo code isn't valid — please check and try again." : "Something went wrong." }
+      }
+      setClientSecret(data.clientSecret!)
+      setDiscountPct(data.discountPct ?? 0)
+      setFinalAmount(data.finalAmount ?? 4700)
+      return { error: null }
+    } catch {
+      return { error: "Something went wrong." }
+    }
+  }, [email])
 
   const handleBack = useCallback(() => {
     setEmail(null)
@@ -423,8 +464,8 @@ export function CheckoutClient() {
               Preparing secure payment…
             </div>
           ) : email && clientSecret ? (
-            <Elements stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
-              <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} onBack={handleBack} />
+            <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
+              <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} onBack={handleBack} onApplyPromo={handleApplyPromo} />
             </Elements>
           ) : (
             <>
@@ -433,7 +474,7 @@ export function CheckoutClient() {
                   {intentError}
                 </p>
               )}
-              <EmailStep onNext={handleEmailNext} promoError={promoError} />
+              <EmailStep onNext={handleEmailNext} />
             </>
           )}
 

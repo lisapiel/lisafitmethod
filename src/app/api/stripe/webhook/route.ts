@@ -69,6 +69,18 @@ function welcomeEmail(email: string, tempPassword: string): string {
           <tr>
             <td style="background:#ffffff;border-radius:4px;padding:48px 44px;border-left:4px solid #c9a96e;">
 
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="width:64px;vertical-align:middle;">
+                    <img src="https://lisafitmethod.com/lisa-about-hero.jpg" alt="Lisa McPherson" width="56" height="56" style="width:56px;height:56px;border-radius:50%;object-fit:cover;display:block;" />
+                  </td>
+                  <td style="padding-left:16px;vertical-align:middle;">
+                    <p style="margin:0;font-size:14px;font-weight:600;color:#1a1a1a;">Lisa McPherson</p>
+                    <p style="margin:2px 0 0;font-size:12px;color:#888;">Certified Personal Trainer</p>
+                  </td>
+                </tr>
+              </table>
+
               <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c9a96e;">
                 Training Foundations
               </p>
