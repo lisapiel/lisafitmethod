@@ -16,7 +16,7 @@ const calloutBorder = "rgba(201,169,110,0.25)"
 
 // ── Icon system ───────────────────────────────────────────────────────────────
 
-type IconType = "zap" | "drop" | "check" | "x-circle" | "repeat" | "target" | "layers" | "sun" | "flame" | "trend" | "leaf" | "coffee" | "grain" | "check-plain" | "minus" | "bowl" | "fork" | "spin" | "recover" | "head-pain"
+type IconType = "zap" | "drop" | "check" | "x-circle" | "repeat" | "target" | "layers" | "sun" | "flame" | "trend" | "leaf" | "coffee" | "grain" | "check-plain" | "minus" | "bowl" | "fork" | "spin" | "recover" | "head-pain" | "carrot" | "wheat" | "bicep" | "dizzy-face" | "headache"
 
 function GoldIcon({ type, size = 18 }: { type: IconType; size?: number }) {
   const p = {
@@ -46,6 +46,11 @@ function GoldIcon({ type, size = 18 }: { type: IconType; size?: number }) {
     case "spin":       return <svg {...p}><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>
     case "recover":    return <svg {...p}><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4" /></svg>
     case "head-pain":  return <svg {...p}><circle cx="12" cy="9" r="5" /><line x1="10" y1="7" x2="14" y2="11" /><line x1="14" y1="7" x2="10" y2="11" /><line x1="12" y1="14" x2="12" y2="18" /><line x1="9" y1="21" x2="15" y2="21" /></svg>
+    case "carrot":     return <svg {...p}><path d="M12 22 C9.5 18 8.5 13 9 8 C9.3 6 10.5 5 12 5 C13.5 5 14.7 6 15 8 C15.5 13 14.5 18 12 22Z" /><path d="M10 6 C9 4 9.5 2 10.5 1.5" /><path d="M12 5 C12 3.5 12.5 2 13.5 2" /><path d="M14 6 C15 4 15 2.5 14.5 2" /><line x1="10" y1="11" x2="14" y2="11" /><line x1="10" y1="16" x2="14" y2="16" /></svg>
+    case "wheat":      return <svg {...p}><line x1="12" y1="22" x2="12" y2="5" /><path d="M12 19 C10 18.5 9 17 9.5 16 C10.5 15.5 12 17 12 19" /><path d="M12 19 C14 18.5 15 17 14.5 16 C13.5 15.5 12 17 12 19" /><path d="M12 15 C10 14.5 9 13 9.5 12 C10.5 11.5 12 13 12 15" /><path d="M12 15 C14 14.5 15 13 14.5 12 C13.5 11.5 12 13 12 15" /><path d="M12 11 C10 10.5 9 9 9.5 8 C10.5 7.5 12 9 12 11" /><path d="M12 11 C14 10.5 15 9 14.5 8 C13.5 7.5 12 9 12 11" /><path d="M12 7 C11 6 11 4.5 12 4 C13 4.5 13 6 12 7" /></svg>
+    case "bicep":      return <svg {...p}><path d="M7 20 C6 17 5 13 6 10 C7 7 9 6 12 6" /><path d="M12 6 C15 6 17 7 19 9" /><path d="M19 9 L20 14" /><path d="M7 20 C9 22 14 22 17 20" /><path d="M17 20 C19 19 20 17 20 14" /></svg>
+    case "dizzy-face": return <svg {...p}><circle cx="12" cy="11" r="5.5" /><path d="M1.5 10 C2 9 3 9 3.5 10 C4 11 5 11 5.5 10" /><path d="M18.5 10 C19 9 20 9 20.5 10 C21 11 22 11 22.5 10" /><circle cx="10.3" cy="9.5" r="0.8" fill={gold} stroke="none" /><circle cx="13.7" cy="9.5" r="0.8" fill={gold} stroke="none" /><path d="M10.5 13.5 C11.5 14.5 12.5 14.5 13.5 13.5" /></svg>
+    case "headache":   return <svg {...p}><circle cx="12" cy="10" r="5.5" /><line x1="6.5" y1="7.5" x2="4" y2="6" /><line x1="6.5" y1="10" x2="3.5" y2="10" /><line x1="6.5" y1="12.5" x2="4" y2="14" /><line x1="17.5" y1="7.5" x2="20" y2="6" /><line x1="17.5" y1="10" x2="20.5" y2="10" /><line x1="17.5" y1="12.5" x2="20" y2="14" /></svg>
     default:           return <svg {...p}><circle cx="12" cy="12" r="10" /></svg>
   }
 }
@@ -105,7 +110,7 @@ function ProteinCard({ name, portion, grams }: { name: string; portion: string; 
     <div style={{ background: card, border: `1px solid ${border}`, padding: "1rem 1.1rem", display: "flex", flexDirection: "column", gap: "0.3rem", height: "100%", boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
         <div style={{ width: 24, height: 24, background: "rgba(201,169,110,0.1)", border: `1px solid ${calloutBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <GoldIcon type="target" size={12} />
+          <GoldIcon type="bicep" size={12} />
         </div>
         <span style={{ fontSize: "0.72rem", fontWeight: 600, color: cream, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.03em", lineHeight: 1.3 }}>{name}</span>
       </div>
@@ -141,7 +146,7 @@ const postMeals = [
 
 const mattersItems = [
   { icon: "target" as IconType,  label: "Enough Protein" },
-  { icon: "fork" as IconType,    label: "Whole Foods Mostly" },
+  { icon: "carrot" as IconType,  label: "Whole Foods Mostly" },
   { icon: "zap" as IconType,     label: "Fueling Workouts" },
   { icon: "repeat" as IconType,  label: "Sustainable Habits" },
   { icon: "trend" as IconType,   label: "Consistency Over Time" },
@@ -154,8 +159,8 @@ const dehydrationSigns = [
   { icon: "zap" as IconType,       label: "Fatigue" },
   { icon: "minus" as IconType,     label: "Poor Performance" },
   { icon: "coffee" as IconType,    label: "Brain Fog" },
-  { icon: "head-pain" as IconType, label: "Headaches" },
-  { icon: "spin" as IconType,      label: "Dizziness" },
+  { icon: "headache" as IconType,   label: "Headaches" },
+  { icon: "dizzy-face" as IconType, label: "Dizziness" },
   { icon: "recover" as IconType,   label: "Poor Recovery" },
 ]
 
@@ -172,7 +177,7 @@ const foundationItems = [
   { icon: "zap" as IconType,    label: "Proper Fueling" },
   { icon: "drop" as IconType,   label: "Hydration" },
   { icon: "repeat" as IconType, label: "Consistency" },
-  { icon: "leaf" as IconType,   label: "Whole Foods" },
+  { icon: "carrot" as IconType, label: "Whole Foods" },
   { icon: "trend" as IconType,  label: "Training" },
 ]
 
@@ -307,7 +312,7 @@ export default function Module4Page() {
         <div className="carb-grid">
           {carbSources.map((s) => (
             <div key={s} style={{ background: card, border: `1px solid ${border}`, padding: "0.65rem 0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <GoldIcon type="bowl" size={13} />
+              <GoldIcon type="wheat" size={13} />
               <span style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>{s}</span>
             </div>
           ))}
