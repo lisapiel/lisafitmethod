@@ -7,10 +7,10 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
 
 const MODULES = [
-  { num: "01", title: "Foundation Movements", desc: "The 5 movement patterns every lifter needs before adding weight." },
-  { num: "02", title: "Core & Glute Priority", desc: "Targeted training that protects your lower back." },
-  { num: "03", title: "The 4-Week Program", desc: "Three days a week. Sets, reps, and rest — fully structured." },
-  { num: "04", title: "Nutrition Foundations", desc: "Five principles that support everything you do in the gym." },
+  { num: "01", title: "Foundation Movements", desc: "Learn the 5 movement patterns every lifter needs before adding weight, intensity, or complexity." },
+  { num: "02", title: "Core & Glute Priority", desc: "Targeted training designed to build strength while supporting your lower back and overall stability." },
+  { num: "03", title: "The 4-Week Program", desc: "A fully structured 3-day training split with sets, reps, rest times, and progression already planned for you." },
+  { num: "04", title: "Nutrition Foundations", desc: "Simple nutrition principles that support muscle growth, recovery, energy, and long-term consistency." },
 ]
 
 // ─── Payment form ─────────────────────────────────────────────────────────────
@@ -418,7 +418,14 @@ export function CheckoutClient() {
           </ul>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {["One-time payment — yours forever", "Instant access after purchase", "4 weeks · 3 days per week"].map((item) => (
+            {[
+              "Includes 50+ exercise videos with full movement breakdowns and form guidance",
+              "Built-in workout and progress tracking so you can monitor your strength over time",
+              "Lifetime access with free future updates",
+              "Designed to be repeated beyond the initial 4 weeks so you can continue building strength and confidence over time",
+              "Learn how to train properly for life, not just for 30 days",
+              "Instant access after purchase",
+            ].map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ color: "#c9a96e", fontSize: 11 }}>✓</span>
                 <span style={{ fontSize: 12, color: "#666", letterSpacing: "0.04em" }}>{item}</span>
