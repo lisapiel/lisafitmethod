@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useCourseProgress } from "./CourseProgressContext"
 
@@ -169,6 +169,7 @@ function isItemActive(item: NavItem, pathname: string, activeAnchor: string | nu
 
 export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { ready, currentPosition, getSessionFor } = useCourseProgress()
 
   // Which top-level section accordion is open
@@ -345,7 +346,14 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
               <div key={i}>
                 {/* Section header */}
                 <div
-                  onClick={() => toggleSection(i)}
+                  onClick={() => {
+                    if (section.items.length === 1) {
+                      router.push(section.items[0].href)
+                      onClose()
+                    } else {
+                      toggleSection(i)
+                    }
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -368,19 +376,21 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                   >
                     {section.label}
                   </span>
-                  <span
-                    style={{
-                      fontSize: "0.8rem",
-                      color: isOpen_ ? gold : "#444",
-                      transition: "transform 0.2s, color 0.2s",
-                      transform: isOpen_ ? "rotate(90deg)" : "none",
-                      display: "inline-block",
-                      lineHeight: 1,
-                      fontFamily: "sans-serif",
-                    }}
-                  >
-                    ›
-                  </span>
+                  {section.items.length > 1 && (
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: isOpen_ ? gold : "#444",
+                        transition: "transform 0.2s, color 0.2s",
+                        transform: isOpen_ ? "rotate(90deg)" : "none",
+                        display: "inline-block",
+                        lineHeight: 1,
+                        fontFamily: "sans-serif",
+                      }}
+                    >
+                      ›
+                    </span>
+                  )}
                 </div>
 
                 {/* Items */}
