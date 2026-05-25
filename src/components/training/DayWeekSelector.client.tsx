@@ -31,10 +31,8 @@ export default function DayWeekSelector() {
     setEditing(false)
   }
 
-  const weekLabel =
-    selectedRound === 1
-      ? `Week ${selectedWeek} of ${weeksPerRound}`
-      : `Round ${selectedRound} · Week ${selectedWeek}`
+  const totalWeek = (selectedRound - 1) * weeksPerRound + selectedWeek
+  const weekLabel = `Week ${totalWeek}`
 
   const arrowBtn = (enabled: boolean): React.CSSProperties => ({
     background: "none",

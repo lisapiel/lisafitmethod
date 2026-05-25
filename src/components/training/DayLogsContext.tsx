@@ -142,7 +142,7 @@ export function DayLogsProvider({ day, children, controlledRound, controlledWeek
       weekOptions.push({
         round: r,
         week: w,
-        label: r === 1 ? `Wk ${w}` : `R${r}·W${w}`,
+        label: `Wk ${(r - 1) * weeksPerRound + w}`,
         done: !!getSessionFor(r, w, day),
         active: r === effectiveRound && w === effectiveWeek,
       })
