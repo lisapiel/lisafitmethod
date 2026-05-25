@@ -9,23 +9,23 @@ const muted = "#888"
 const border = "#2a2a2a"
 
 const srStyles = `
-  .sr-row { display:flex; align-items:center; gap:3px; margin-bottom:6px; flex-wrap:nowrap; }
+  .sr-row { display:flex; align-items:center; gap:4px; margin-bottom:6px; flex-wrap:nowrap; }
   .sr-label { font-size:0.55rem; color:#888; width:14px; flex-shrink:0; font-family:var(--font-montserrat),sans-serif; }
-  .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:36px; text-align:center; flex-shrink:0; }
-  .sr-inp-wide { width:54px; }
-  .sr-step { background:#252525; border:none; color:#888; cursor:pointer; font-size:0.7rem; width:20px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
-  .sr-unit { font-size:0.5rem; color:#888; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
-  .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:3px 5px; border-radius:3px; flex-shrink:0; white-space:nowrap; }
+  .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:40px; text-align:center; flex-shrink:0; }
+  .sr-inp-wide { width:58px; }
+  .sr-unit { font-size:0.5rem; color:#555; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
+  .sr-bw { font-size:0.5rem; background:#222; color:#666; padding:2px 5px; border-radius:3px; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
+  .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:0 6px; border-radius:3px; flex-shrink:0; white-space:nowrap; min-height:28px; display:flex; align-items:center; }
   .sr-log--done { background:rgba(201,169,110,0.12); border-color:#c9a96e; color:#c9a96e; }
-  .sr-del { background:none; border:none; color:#555; cursor:pointer; font-size:0.6rem; padding:0 2px; line-height:1; flex-shrink:0; }
+  .sr-del { background:none; border:1px solid #333; color:#555; cursor:pointer; font-size:0.65rem; min-width:28px; min-height:28px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
   @media (min-width: 480px) {
-    .sr-row { gap:6px; }
+    .sr-row { gap:8px; }
     .sr-label { width:22px; font-size:0.6rem; }
-    .sr-inp { width:52px; padding:6px 6px; }
+    .sr-inp { width:52px; padding:6px 4px; }
     .sr-inp-wide { width:72px; }
-    .sr-step { width:26px; height:30px; }
-    .sr-unit { font-size:0.6rem; }
-    .sr-log { font-size:0.55rem; padding:4px 8px; }
+    .sr-unit { font-size:0.55rem; }
+    .sr-log { font-size:0.55rem; padding:0 10px; min-height:30px; }
+    .sr-del { min-width:30px; min-height:30px; font-size:0.7rem; }
   }
 `
 
@@ -46,7 +46,6 @@ export default function InlineExerciseTracker({
 
   const isBodyweightOnly = def.bodyweight && !def.optionalWeight
   const isDistanceTime = !!def.trackDistanceOrTime
-  const STEP = 2.5
 
   function updateSet(i: number, s: SetLog) {
     const hasValue = (s.reps != null && s.reps > 0) || (s.distanceTime != null && s.distanceTime.trim() !== "")
@@ -60,7 +59,12 @@ export default function InlineExerciseTracker({
   }
 
   function addSet() {
-    const last = sets[sets.length - 1] ?? { reps: def!.defaultReps ?? 0, weight: 0, unit: weightUnit }
+    const last = sets[sets.length - 1] ?? {
+      reps: def!.defaultReps ?? 0,
+      weight: 0,
+      unit: weightUnit,
+      distanceTime: isDistanceTime ? "" : undefined,
+    }
     updateExerciseSets(exerciseId, [...sets, { ...last, confirmed: false }])
   }
 
@@ -85,7 +89,7 @@ export default function InlineExerciseTracker({
             const label = isDistanceTime
               ? set.distanceTime || "—"
               : set.reps > 0
-              ? `${set.reps} reps${set.weight > 0 ? ` · ${set.weight}${set.unit}` : isBodyweightOnly ? " · BW" : ""}`
+              ? `${set.reps} reps${set.weight > 0 ? ` · ${set.weight} wt` : isBodyweightOnly ? " · BW" : ""}`
               : "—"
             return (
               <span
@@ -112,7 +116,7 @@ export default function InlineExerciseTracker({
   return (
     <div
       style={{
-        margin: "0 0 20px",
+        margin: "0 0 12px",
         padding: "12px 14px",
         background: "#0f0f0f",
         border: `1px solid ${border}`,
@@ -146,7 +150,7 @@ export default function InlineExerciseTracker({
                 onChange={(e) => updateSet(i, { ...set, distanceTime: e.target.value, confirmed: false })}
                 className="sr-inp sr-inp-wide"
               />
-              <span className="sr-unit">dist/time</span>
+              <span className="sr-unit">dist</span>
             </>
           ) : (
             <>
@@ -163,43 +167,18 @@ export default function InlineExerciseTracker({
           )}
 
           {isBodyweightOnly ? (
-            <span
-              style={{
-                fontSize: "0.6rem",
-                background: "#2a2a2a",
-                color: muted,
-                padding: "3px 7px",
-                borderRadius: 3,
-                fontFamily: "var(--font-montserrat), sans-serif",
-                flexShrink: 0,
-              }}
-            >
-              BW
-            </span>
+            <span className="sr-bw">BW</span>
           ) : (
             <>
-              <button
-                onClick={() => updateSet(i, { ...set, weight: Math.max(0, (set.weight ?? 0) - STEP), confirmed: false })}
-                className="sr-step"
-              >
-                −
-              </button>
               <input
                 type="number"
                 min={0}
-                step={STEP}
                 value={set.weight || ""}
-                placeholder="0"
+                placeholder="wt"
                 onChange={(e) => updateSet(i, { ...set, weight: Number(e.target.value), confirmed: false })}
                 className="sr-inp"
               />
-              <button
-                onClick={() => updateSet(i, { ...set, weight: (set.weight ?? 0) + STEP, confirmed: false })}
-                className="sr-step"
-              >
-                +
-              </button>
-              <span className="sr-unit">{set.unit}</span>
+              <span className="sr-unit">wt</span>
             </>
           )}
 
@@ -212,7 +191,7 @@ export default function InlineExerciseTracker({
           </button>
 
           {sets.length > 1 && (
-            <button onClick={() => removeSet(i)} className="sr-del">✕</button>
+            <button onClick={() => removeSet(i)} className="sr-del" title="Remove set">✕</button>
           )}
         </div>
       ))}

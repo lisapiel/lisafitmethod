@@ -22,7 +22,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function ExerciseBlock({ id, num, title, subtitle, children }: { id: string; num: string; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div id={id} style={{ marginBottom: "4rem", paddingBottom: "4rem", borderBottom: `1px solid ${border}` }}>
+    <div id={id} style={{ marginBottom: "4rem", paddingBottom: "4rem", borderBottom: `1px solid ${border}`, scrollMarginTop: "80px" }}>
       <div style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: gold, marginBottom: "0.5rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
         {num}
       </div>

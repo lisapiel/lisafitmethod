@@ -1,5 +1,5 @@
 "use client"
-import { useState, useRef, useEffect } from "react"
+import { useRef, useEffect } from "react"
 
 export default function VideoPlayer({
   src,
@@ -8,14 +8,13 @@ export default function VideoPlayer({
   src: string
   style?: React.CSSProperties
 }) {
-  const [controls, setControls] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    // React doesn't reliably apply the muted prop to the DOM node on iOS Safari.
-    // Setting it directly on the element is required for autoplay to be permitted.
+    // React doesn't reliably apply muted to the DOM node on iOS Safari —
+    // setting it directly is required for autoplay to be permitted.
     video.muted = true
     video.play().catch(() => {})
   }, [])
@@ -29,9 +28,7 @@ export default function VideoPlayer({
       loop
       playsInline
       preload="auto"
-      controls={controls}
-      onClick={() => setControls(c => !c)}
-      style={{ ...style, cursor: "pointer" }}
+      style={{ ...style, pointerEvents: "none", cursor: "default" }}
     />
   )
 }

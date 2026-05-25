@@ -22,7 +22,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function ExBlock({ id, num, title, subtitle, children }: { id: string; num: string; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div id={id} style={{ marginBottom: "4rem", paddingBottom: "4rem", borderBottom: `1px solid ${border}` }}>
+    <div id={id} style={{ marginBottom: "4rem", paddingBottom: "4rem", borderBottom: `1px solid ${border}`, scrollMarginTop: "80px" }}>
       <div style={{ fontSize: "0.65rem", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: gold, marginBottom: "0.5rem", fontFamily: "var(--font-montserrat), sans-serif" }}>{num}</div>
       <div style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.4rem, 3vw, 2rem)", fontWeight: 400, color: cream, marginBottom: "0.25rem", lineHeight: 1.2 }}>{title}</div>
       <div style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontSize: "1rem", color: gold, marginBottom: "2rem", opacity: 0.8 }}>{subtitle}</div>

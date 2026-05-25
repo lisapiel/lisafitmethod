@@ -358,12 +358,12 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
                 {/* Section header */}
                 <div
                   onClick={() => {
-                    if (section.items.length === 1) {
-                      router.push(section.items[0].href)
-                      onClose()
-                    } else {
-                      toggleSection(i)
-                    }
+                    const dest = section.items.length === 1
+                      ? section.items[0].href
+                      : baseOf(section.items[0].href)
+                    router.push(dest)
+                    setOpenSection(i)
+                    onClose()
                   }}
                   style={{
                     display: "flex",

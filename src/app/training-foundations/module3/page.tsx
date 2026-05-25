@@ -6,6 +6,137 @@ import DayWorkoutPanel, { DayStatusBadge, MarkCompleteButton } from "@/component
 import { DayLogsProvider } from "@/components/training/DayLogsContext"
 import InlineExerciseTracker from "@/components/training/InlineExerciseTracker.client"
 import DayWeekSelector from "@/components/training/DayWeekSelector.client"
+import QuickFormTips from "@/components/training/QuickFormTips.client"
+
+const TIPS: Record<string, string[]> = {
+  hip_thrust: [
+    "Drive through heels, not toes",
+    "Squeeze glutes hard at the top — hold 1 second",
+    "Ribs stay down — no lower back arch",
+    "Chin tucked, eyes forward",
+    "Shoulder blades on the bench, not your neck",
+  ],
+  rdl: [
+    "Push hips back — it's a hinge, not a squat",
+    "Keep the weight close to your legs the whole way",
+    "Stop when your lower back starts to round",
+    "Soft knee bend throughout — not stiff-legged",
+    "Feel the stretch in your hamstrings at the bottom",
+  ],
+  reverse_lunge: [
+    "Step back, not forward",
+    "Front knee tracks over toes",
+    "Back knee hovers just above the floor",
+    "Drive through your front heel to return",
+    "Chest up, torso stays tall",
+  ],
+  goblet_squat: [
+    "Chest up, elbows inside knees",
+    "Sit between your heels — not behind them",
+    "Knees track over toes — don't let them cave",
+    "Full depth without losing your lower back position",
+  ],
+  dead_bug_a: [
+    "Lower back pressed flat to floor — the whole time",
+    "Exhale as you extend",
+    "Slow and deliberate — this is not a speed exercise",
+    "Stop the rep before your back lifts",
+  ],
+  dead_bug_c: [
+    "Lower back pressed flat to floor — the whole time",
+    "Exhale as you extend",
+    "Slow and deliberate — this is not a speed exercise",
+    "Stop the rep before your back lifts",
+  ],
+  farmers_carry: [
+    "Tall spine — don't lean to one side",
+    "Shoulders back and down",
+    "Core braced the entire distance",
+    "When posture breaks, the set ends",
+    "Small, controlled steps",
+  ],
+  db_bench: [
+    "Shoulder blades set before you press — don't let them wing",
+    "Elbows at 45 degrees — not flared out wide",
+    "Wrists stacked over elbows throughout",
+    "Touch chest lightly, press with control",
+  ],
+  band_pullup: [
+    "Pull elbows toward your back pockets — not straight down",
+    "Chest leads toward the bar",
+    "Control the descent — don't drop",
+    "Shoulders stay down and packed throughout",
+  ],
+  overhead_press: [
+    "Core braced and ribs down — protect your lower back",
+    "Don't arch your back as you press",
+    "Press straight up, not forward",
+    "Full lockout at the top",
+  ],
+  chest_row: [
+    "Lower back is out of the equation — that's the point",
+    "Pull elbows back, squeeze shoulder blades at the top",
+    "Full range of motion",
+    "Hold 1 second at the top of every rep",
+  ],
+  bicep_curl: [
+    "Elbows pinned at your sides — they don't move",
+    "Don't swing the weight up — that's your back working",
+    "Control the return — slow on the way down",
+  ],
+  tricep_ext: [
+    "Keep elbows pointing forward, not flaring out",
+    "Lower slowly behind your head",
+    "Press to full extension",
+    "Upper arms stay still throughout",
+  ],
+  pallof_press: [
+    "Brace hard before you press",
+    "Resist rotation the entire time — that's the exercise",
+    "Hold 2 seconds at full extension",
+    "Hips square throughout",
+  ],
+  sl_glute_bridge: [
+    "Drive through the heel of the working leg",
+    "Squeeze glute hard at the top",
+    "Hips stay level — they should not rotate",
+    "If hips drop, that's a stability weakness to note",
+  ],
+  pushup_c: [
+    "Elbows at 45 degrees from body — not straight out",
+    "Full range — chest to floor",
+    "Shoulder blades set before lowering",
+    "Drop to knees if needed — same form rules apply",
+  ],
+  inverted_row: [
+    "Body in a straight line from head to heels",
+    "Pull chest toward the bar — not your chin",
+    "Squeeze shoulder blades at the top",
+    "Control the return completely",
+  ],
+  monster_walk: [
+    "Constant tension on the band — no slack",
+    "Slight squat position throughout",
+    "Chest up, don't lean forward",
+    "Small controlled steps — not big lunges",
+  ],
+  hip_abduction_c: [
+    "Foot flexed, toes pointing slightly down",
+    "Don't let your hips roll back as you lift",
+    "Control the return completely",
+  ],
+  copenhagen: [
+    "Squeeze inner thigh into the bench",
+    "Hips level throughout",
+    "Don't let your bottom hip drop",
+  ],
+  stir_the_pot: [
+    "Hips completely level and still — no rocking",
+    "Small controlled circles",
+    "Core fully braced throughout",
+    "Don't let your lower back sag",
+  ],
+}
 
 export const metadata: Metadata = {
   title: "Module 3: The 4-Week Program | Lisa Fit Method",
@@ -201,10 +332,13 @@ export default async function Module3Page() {
             <SubLabel>Main Workout</SubLabel>
             <ExerciseRow name="Hip Thrust" prescription="3 sets x 12 reps, 2 min rest" note="Drive through your heels, squeeze hard at the top, ribs down. Start with a barbell at a comfortable weight and progress to single leg when ready." videoIds={["Rxxd0gmzwFU", "8bSvHhnWVnE"]} s3Urls={[urlMap["m3a_hip_thrust"], urlMap["m3a_hip_thrust_var"]]} />
             <InlineExerciseTracker day="a" exerciseId="hip_thrust" />
+            <QuickFormTips tips={TIPS["hip_thrust"]} />
             <ExerciseRow name="Romanian Deadlift" prescription="3 sets x 10 reps, 2 min rest" note="Push your hips back, keep the weights close to your body, stop before your lower back rounds. Refer back to Module 2 Exercise 6." videoIds={["AyY0C8s5scU"]} s3Urls={[urlMap["m3a_rdl"]]} />
             <InlineExerciseTracker day="a" exerciseId="rdl" />
+            <QuickFormTips tips={TIPS["rdl"]} />
             <ExerciseRow name="Reverse Lunge" prescription="3 sets x 10 reps per side, 90 sec rest" note="Step back into the lunge rather than forward. Chest up, front knee tracks over toes, back knee hovers just above the floor. Drive through your front heel to return to standing." videoIds={["ysR2LxObJbo"]} s3Urls={[urlMap["m3c_rev_lunge"]]} />
             <InlineExerciseTracker day="a" exerciseId="reverse_lunge" />
+            <QuickFormTips tips={TIPS["reverse_lunge"]} />
             <ExerciseRow name="Goblet Squat" prescription="3 sets x 10 reps, 2 min rest" note="Chest up, knees tracking over toes, sit between your heels not behind them. Refer back to Module 1 Exercise 2." videoIds={["NYf82VuzrQM"]} s3Urls={[urlMap["m3a_goblet_squat"]]} />
             <InlineExerciseTracker day="a" exerciseId="goblet_squat" />
             <ExerciseRow name="Dead Bug" prescription="3 sets x 8 reps per side, 60 sec rest" note="Lower back pressed into the floor the entire time. The moment it lifts, you have gone too far. Slow this down. You can add a light dumbbell overhead if this becomes easy." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3a_dead_bug"]]} />

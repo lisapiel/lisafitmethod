@@ -13,7 +13,6 @@ const border = "#2a2a2a"
 
 type DayKey = "a" | "b" | "c"
 
-const WEIGHT_STEP = 2.5
 
 interface SetRowProps {
   set: SetLog
@@ -31,52 +30,49 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
       <span className="sr-label">S{index + 1}</span>
 
       {distanceOrTime ? (
-        <input
-          type="text"
-          value={set.distanceTime ?? ""}
-          placeholder="e.g. 30m"
-          onChange={(e) => {
-            const v = e.target.value
-            onChange({ ...set, distanceTime: v, confirmed: v.trim() !== "" })
-          }}
-          className="sr-inp sr-inp-wide"
-        />
-      ) : (
-        <input
-          type="number"
-          min={0}
-          value={set.reps || ""}
-          placeholder="reps"
-          onChange={(e) => {
-            const reps = Number(e.target.value)
-            onChange({ ...set, reps, confirmed: reps > 0 })
-          }}
-          className="sr-inp"
-        />
-      )}
-
-      {bodyweightOnly ? (
-        <span className="sr-unit">BW</span>
+        <>
+          <input
+            type="text"
+            value={set.distanceTime ?? ""}
+            placeholder="e.g. 30m"
+            onChange={(e) => {
+              const v = e.target.value
+              onChange({ ...set, distanceTime: v, confirmed: v.trim() !== "" })
+            }}
+            className="sr-inp sr-inp-wide"
+          />
+          <span className="sr-unit">dist</span>
+        </>
       ) : (
         <>
-          <button
-            className="sr-step"
-            onClick={() => onChange({ ...set, weight: Math.max(0, (set.weight ?? 0) - WEIGHT_STEP), confirmed: false })}
-          >−</button>
           <input
             type="number"
             min={0}
-            step={WEIGHT_STEP}
+            value={set.reps || ""}
+            placeholder="reps"
+            onChange={(e) => {
+              const reps = Number(e.target.value)
+              onChange({ ...set, reps, confirmed: reps > 0 })
+            }}
+            className="sr-inp"
+          />
+          <span className="sr-unit">reps</span>
+        </>
+      )}
+
+      {bodyweightOnly ? (
+        <span className="sr-bw">BW</span>
+      ) : (
+        <>
+          <input
+            type="number"
+            min={0}
             value={set.weight || ""}
             placeholder="wt"
             onChange={(e) => onChange({ ...set, weight: Number(e.target.value), confirmed: false })}
             className="sr-inp"
           />
-          <button
-            className="sr-step"
-            onClick={() => onChange({ ...set, weight: (set.weight ?? 0) + WEIGHT_STEP, confirmed: false })}
-          >+</button>
-          <span className="sr-unit">{set.unit}</span>
+          <span className="sr-unit">wt</span>
         </>
       )}
 
@@ -298,23 +294,23 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
       }}
     >
       <style>{`
-        .sr-row { display:flex; align-items:center; gap:3px; margin-bottom:6px; flex-wrap:nowrap; }
+        .sr-row { display:flex; align-items:center; gap:4px; margin-bottom:6px; flex-wrap:nowrap; }
         .sr-label { font-size:0.55rem; color:#888; width:14px; flex-shrink:0; font-family:var(--font-montserrat),sans-serif; }
-        .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:36px; text-align:center; flex-shrink:0; }
-        .sr-inp-wide { width:54px; }
-        .sr-step { background:#252525; border:none; color:#888; cursor:pointer; font-size:0.7rem; width:20px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
-        .sr-unit { font-size:0.5rem; color:#888; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
-        .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:3px 5px; border-radius:3px; flex-shrink:0; white-space:nowrap; }
+        .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:40px; text-align:center; flex-shrink:0; }
+        .sr-inp-wide { width:58px; }
+        .sr-unit { font-size:0.5rem; color:#555; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
+        .sr-bw { font-size:0.5rem; background:#222; color:#666; padding:2px 5px; border-radius:3px; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
+        .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:0 6px; border-radius:3px; flex-shrink:0; white-space:nowrap; min-height:28px; display:flex; align-items:center; }
         .sr-log--done { background:rgba(201,169,110,0.12); border-color:#c9a96e; color:#c9a96e; }
-        .sr-del { background:none; border:none; color:#555; cursor:pointer; font-size:0.6rem; padding:0 2px; line-height:1; flex-shrink:0; }
+        .sr-del { background:none; border:1px solid #333; color:#555; cursor:pointer; font-size:0.65rem; min-width:28px; min-height:28px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
         @media (min-width: 480px) {
-          .sr-row { gap:6px; }
+          .sr-row { gap:8px; }
           .sr-label { width:22px; font-size:0.6rem; }
-          .sr-inp { width:52px; padding:6px 6px; }
+          .sr-inp { width:52px; padding:6px 4px; }
           .sr-inp-wide { width:72px; }
-          .sr-step { width:26px; height:30px; }
-          .sr-unit { font-size:0.6rem; }
-          .sr-log { font-size:0.55rem; padding:4px 8px; }
+          .sr-unit { font-size:0.55rem; }
+          .sr-log { font-size:0.55rem; padding:0 10px; min-height:30px; }
+          .sr-del { min-width:30px; min-height:30px; font-size:0.7rem; }
         }
       `}</style>
       {/* Header */}
