@@ -128,16 +128,14 @@ export default async function AboutPage() {
         <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
           <div className="about-story-text">
             {[
-              "I'm originally from France and now live in Miami.",
-              "Like a lot of people, when I first started training, I focused mostly on classes, cardio, and group workouts. I was consistent, I worked hard, and I still had almost nothing to show for it. Years of effort without real progress.",
-              "About seven years ago, I started taking strength training seriously for the first time. Within months, I finally understood what had been missing: structure, progressive overload, and real programming. My body started changing in a way it never had before, and I became obsessed with understanding how fitness actually works.",
-              "But I made the mistake a lot of people make once they start seeing progress. I pushed heavier weights before building the foundation to support them. Warm-ups felt optional. Mobility work wasn't on my radar. Eventually my back gave out.",
-              "For almost a year, I lived with serious pain. That period forced me to slow down, relearn movement mechanics, and completely rethink the way I approached training.",
-              "I rebuilt everything from the ground up: movement quality, mobility, recovery, warm-ups, and programming. I became a certified personal trainer because I needed to genuinely understand what I had been missing all along.",
-              "I came back pain-free and stronger than I had ever been. And I realized a lot of people are going through the exact same thing I went through. Training hard without understanding how to build a body that can actually support it long term.",
-              "Some are already dealing with pain. Others are heading toward it without realizing it yet.",
-              "Lisa Fit Method exists to help people build strength the right way from the beginning, through movement quality, intelligent programming, and training that lasts.",
-              "Whether you're completely new to lifting or you've been winging it for years, this is the approach I wish someone had handed me from the beginning.",
+              "Like a lot of people, when I first started training, I focused mostly on classes, cardio, and random workouts. I was consistent. I worked hard. And I still had almost nothing to show for it. Years of effort without real progress.",
+              "About seven years ago, I started taking strength training seriously for the first time. That's when everything changed. Within months, I realized what had been missing all along: structure, progressive overload, and real programming. My body started changing in a way it never had before, and I became obsessed with understanding how fitness actually works.",
+              "But I also made the mistake a lot of people make once they finally start seeing progress. I pushed heavier weights before building the foundation to support them. Warm-ups felt optional. Mobility work wasn't even on my radar. Eventually, my back gave out.",
+              "For almost a year, I dealt with serious pain. That period forced me to slow down, relearn movement mechanics, and completely rethink the way I approached training.",
+              "I rebuilt everything from the ground up: movement quality, mobility, recovery, warm-ups, and programming. I became a certified personal trainer because I genuinely needed to understand what I had been missing all along.",
+              "I came back pain-free, stronger than before, and with a completely different perspective on fitness.",
+              "That's why Lisa Fit Method exists: to help people build strength the right way from the beginning through movement quality, intelligent programming, and training that actually lasts.",
+              "Whether you're completely new to lifting or you've been winging it for years, this is the approach I wish someone had handed me from the start.",
             ].map((para, i) => (
               <p key={i} style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.4, color: "#6b6560", marginBottom: 20 }}>
                 {para}
