@@ -119,11 +119,50 @@ export default async function Module3Page() {
       <style>{`@media (max-width: 768px) { .course-body { padding: 2rem 1rem 6rem !important; } }`}</style>
 
       <SectionLabel>Module 3</SectionLabel>
-      <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1rem" }}>
+      <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1.25rem" }}>
         The 4-Week Program
       </h2>
-      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.5, maxWidth: 700, marginBottom: "2rem" }}>
-        Everything in Modules 1 and 2 was knowledge. This is where you apply it. The program runs 3 days per week with at least one rest day between sessions. Each session takes between 45 and 60 minutes including warm-up and cool-down. Those are not optional. They are part of the workout.
+
+      <p style={{ fontSize: "0.95rem", color: cream, lineHeight: 1.55, marginBottom: "1rem", fontStyle: "italic" }}>
+        Everything in Modules 1 and 2 was preparation. Now it&apos;s time to apply it.
+      </p>
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.6, marginBottom: "0.85rem" }}>
+        This program is built around the exact principles you just learned: movement quality, controlled progression, proper recovery, and building strength with intention instead of just chasing exhaustion.
+      </p>
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.6, marginBottom: "1.75rem" }}>
+        The program runs 3 days per week with at least one rest day between sessions. Each workout takes roughly 45 to 60 minutes including your warm-up and cooldown. Those are not optional. They are part of the program.
+      </p>
+
+      {/* Program structure card */}
+      <div style={{ marginBottom: "1.75rem" }}>
+        <div style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "0.75rem" }}>
+          Program Structure
+        </div>
+        <div style={{ background: cardBg, border: `1px solid ${border}` }}>
+          {[
+            { day: "Day A", name: "Lower Body Strength",  desc: "Glutes, legs, stability, and foundational strength" },
+            { day: "Day B", name: "Upper Body Strength",   desc: "Pressing, pulling, posture, and shoulder stability" },
+            { day: "Day C", name: "Integration & Core",    desc: "Full-body control, core stability, and movement integration" },
+          ].map(({ day, name, desc }, i, arr) => (
+            <div key={day} style={{ display: "flex", alignItems: "stretch", borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none" }}>
+              <div style={{ width: 3, background: gold, flexShrink: 0 }} />
+              <div style={{ padding: "0.9rem 1.25rem", width: 68, flexShrink: 0, display: "flex", alignItems: "center", borderRight: `1px solid ${border}` }}>
+                <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", color: gold, textTransform: "uppercase", fontFamily: "var(--font-montserrat), sans-serif" }}>{day}</span>
+              </div>
+              <div style={{ padding: "0.9rem 1.25rem", flex: 1 }}>
+                <div style={{ fontSize: "0.82rem", color: cream, fontWeight: 400, marginBottom: "0.2rem" }}>{name}</div>
+                <div style={{ fontSize: "0.7rem", color: "#888", lineHeight: 1.35 }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p style={{ fontSize: "0.9rem", color: "#888", lineHeight: 1.6, marginBottom: "0.6rem" }}>
+        The goal is not to destroy yourself every session. The goal is to move well, progress consistently, recover properly, and build a body that gets stronger over time.
+      </p>
+      <p style={{ fontSize: "0.9rem", color: cream, lineHeight: 1.55, marginBottom: "2rem", fontStyle: "italic" }}>
+        Now let&apos;s get started.
       </p>
 
       <div style={{ padding: "1.5rem 2rem", background: cardBg, border: `1px solid ${border}`, marginBottom: "2rem" }}>
@@ -237,7 +276,7 @@ export default async function Module3Page() {
       </DayBlock>
 
       {/* ── DAY C ──────────────────────────────────────────────── */}
-      <DayBlock id="dayc" day="Day C" title="Movement Quality & Integration">
+      <DayBlock id="dayc" day="Day C" title="Integration & Core">
         <p style={{ fontSize: "0.85rem", color: "#888", lineHeight: 1.45, marginBottom: "2rem" }}>
           This day has a different feel to it. The loading is lighter, the focus is on movement quality, single leg stability, posture, and tying everything you have been building together. Think of it as the day you reinforce the patterns rather than push the intensity.
         </p>
