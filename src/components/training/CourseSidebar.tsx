@@ -59,7 +59,7 @@ const nav: NavSection[] = [
     label: "Module 3: The Program",
     items: [
       {
-        href: "/training-foundations/module3",
+        href: "/training-foundations/module3#daya",
         label: "Day A: Lower Body",
         dayKey: "a",
         subsections: [
@@ -185,6 +185,11 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
   const [openSection, setOpenSection] = useState<number | null>(() =>
     currentSectionIdx >= 0 ? currentSectionIdx : null
   )
+
+  // Keep the open accordion in sync as the user navigates between pages
+  useEffect(() => {
+    setOpenSection(currentSectionIdx >= 0 ? currentSectionIdx : null)
+  }, [currentSectionIdx])
 
   // Which Module 3 day items have their subsections expanded
   const [expandedDays, setExpandedDays] = useState<Set<string>>(() => new Set())

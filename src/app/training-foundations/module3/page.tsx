@@ -74,7 +74,7 @@ function Superset({ tag, note, children }: { tag: string; note: string; children
 
 function DayBlock({ id, day, title, children }: { id: string; day: string; title: string; children: React.ReactNode }) {
   return (
-    <div id={id} style={{ background: cardBg, border: `1px solid ${border}`, marginBottom: "2.5rem", overflow: "hidden" }}>
+    <div id={id} style={{ background: cardBg, border: `1px solid ${border}`, marginBottom: "2.5rem", overflow: "hidden", scrollMarginTop: "80px" }}>
       <div style={{ padding: "1.5rem 2rem", borderBottom: `1px solid ${border}`, display: "flex", alignItems: "baseline", gap: "1rem" }}>
         <div style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, fontFamily: "var(--font-montserrat), sans-serif" }}>{day}</div>
         <div style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.4rem", fontWeight: 400, color: cream }}>{title}</div>
