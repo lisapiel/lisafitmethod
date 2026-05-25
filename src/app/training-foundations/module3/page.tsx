@@ -24,9 +24,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function SubLabel({ children }: { children: React.ReactNode }) {
+function SubLabel({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <div style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "#888", marginBottom: "1.5rem", paddingBottom: "0.5rem", borderBottom: `1px solid ${border}`, fontFamily: "var(--font-montserrat), sans-serif" }}>
+    <div id={id} style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "#888", marginBottom: "1.5rem", paddingBottom: "0.5rem", borderBottom: `1px solid ${border}`, fontFamily: "var(--font-montserrat), sans-serif", scrollMarginTop: "80px" }}>
       {children}
     </div>
   )
@@ -144,7 +144,7 @@ export default async function Module3Page() {
       {/* ── DAY A ──────────────────────────────────────────────── */}
       <DayBlock id="daya" day="Day A" title="Lower Body Strength">
 
-        <SubLabel>Warm-Up — 10 minutes</SubLabel>
+        <SubLabel id="daya-warmup">Warm-Up — 10 minutes</SubLabel>
         <WarmupItem name="90/90 Hip Stretch" note="8 to 10 reps per side, alternating. Breathe into it, do not force the range." videoId="VbjfMt1C_y8" s3Url={urlMap["m3a_wu_9090_hip"]} />
         <WarmupItem name="Cat-Cow" note="10 reps. Full range, inhale to extend, exhale to round." videoId="SboCzGvi8RE" s3Url={urlMap["m3a_wu_cat_cow"]} />
         <WarmupItem name="World's Greatest Stretch" note="5 reps per side. Slow and controlled." videoId="FYWN63ij0bE" s3Url={urlMap["m3a_wu_worlds_stretch"]} />
@@ -156,7 +156,7 @@ export default async function Module3Page() {
         <DayStatusBadge day="a" />
 
         <DayLogsProvider day="a">
-          <div id="daya-tracker">
+          <div id="daya-tracker" style={{ scrollMarginTop: "80px" }}>
             <DayWeekSelector />
 
             <SubLabel>Main Workout</SubLabel>
@@ -173,7 +173,7 @@ export default async function Module3Page() {
             <ExerciseRow name="Farmer's Carry" prescription="2 sets x 20 to 30 meters, 90 sec rest" note="Tall spine, shoulders back and down, core braced throughout. The moment your posture breaks, the set is over." videoIds={["vJIu3hgUYlg"]} s3Urls={[urlMap["m3a_farmers_carry"]]} />
             <InlineExerciseTracker day="a" exerciseId="farmers_carry" />
 
-            <SubLabel>Cool-Down — 5 minutes</SubLabel>
+            <SubLabel id="daya-cooldown">Cool-Down — 5 minutes</SubLabel>
             <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. These tighten up on lower body days and contribute directly to lower back discomfort if left unaddressed." videoId="cfqgjN8b2vg" s3Url={urlMap["m3a_cd_hip_flexor"]} />
             <WarmupItem name="90/90 Hamstring Stretch" note="60 seconds per side. Do not force the range, breathe into it." videoId="4vIoROvmLQM" s3Url={urlMap["m3a_cd_hamstring"]} />
             <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. You just worked your glutes hard, they need this." videoId="5QdSahBkG20" s3Url={urlMap["m3a_cd_figure4"]} />
@@ -188,7 +188,7 @@ export default async function Module3Page() {
       {/* ── DAY B ──────────────────────────────────────────────── */}
       <DayBlock id="dayb" day="Day B" title="Upper Body Strength">
 
-        <SubLabel>Warm-Up — 10 minutes</SubLabel>
+        <SubLabel id="dayb-warmup">Warm-Up — 10 minutes</SubLabel>
         <WarmupItem name="Cat-Cow" note="10 reps. Full range, inhale to extend, exhale to round." videoId="SboCzGvi8RE" s3Url={urlMap["m3b_wu_cat_cow"]} />
         <WarmupItem name="Thoracic Rotation" note="8 reps per side. Upper back mobility makes a real difference in how your shoulders feel during pressing movements." videoId="VYMF16KVAw8" s3Url={urlMap["m3b_wu_thoracic_rot"]} />
         <WarmupItem name="World's Greatest Stretch" note="5 reps per side. Slow and controlled. Opens the hips and thoracic spine together." videoId="FYWN63ij0bE" s3Url={urlMap["m3b_wu_worlds_stretch"]} />
@@ -199,7 +199,7 @@ export default async function Module3Page() {
         <DayStatusBadge day="b" />
 
         <DayLogsProvider day="b">
-          <div id="dayb-tracker">
+          <div id="dayb-tracker" style={{ scrollMarginTop: "80px" }}>
             <DayWeekSelector />
 
             <SubLabel>Main Workout</SubLabel>
@@ -220,7 +220,7 @@ export default async function Module3Page() {
             <ExerciseRow name="Pallof Press" prescription="3 sets x 10 reps per side, 60 sec rest" note="Brace hard before you press, resist the rotation the entire time, hold 2 seconds at full extension." videoIds={["lae10X6yOII"]} s3Urls={[urlMap["m3b_pallof_press"]]} />
             <InlineExerciseTracker day="b" exerciseId="pallof_press" />
 
-            <SubLabel>Cool-Down — 5 minutes</SubLabel>
+            <SubLabel id="dayb-cooldown">Cool-Down — 5 minutes</SubLabel>
             <WarmupItem name="Open Book Stretch" note="60 seconds per side. A thoracic rotation stretch that releases the upper back and chest after all the pressing and pulling." videoId="YJ92IS_RuRY" s3Url={urlMap["m3b_cd_open_book"]} />
             <WarmupItem name="Band Lat Stretch" note="60 seconds per side. Grab the band attached to something stable, shift your hips away and feel the entire side of your back release." videoId="lQuimKNJRWU" s3Url={urlMap["m3b_cd_band_lat"]} />
             <WarmupItem name="Thread the Needle Stretch" note="60 seconds per side. Gets deeper into the thoracic rotation and releases tension through the upper back and shoulders." videoId="GJGSah1mNWw" s3Url={urlMap["m3b_cd_thread_needle"]} />
@@ -238,7 +238,7 @@ export default async function Module3Page() {
           This day has a different feel to it. The loading is lighter, the focus is on movement quality, single leg stability, posture, and tying everything you have been building together. Think of it as the day you reinforce the patterns rather than push the intensity.
         </p>
 
-        <SubLabel>Warm-Up — 10 minutes</SubLabel>
+        <SubLabel id="dayc-warmup">Warm-Up — 10 minutes</SubLabel>
         <WarmupItem name="90/90 Hip Stretch" note="8 to 10 reps per side, alternating." videoId="VbjfMt1C_y8" s3Url={urlMap["m3c_wu_9090_hip"]} />
         <WarmupItem name="Cat-Cow" note="10 reps. Full range." videoId="SboCzGvi8RE" s3Url={urlMap["m3c_wu_cat_cow"]} />
         <WarmupItem name="Thoracic Rotation" note="8 reps per side." videoId="VYMF16KVAw8" s3Url={urlMap["m3c_wu_thoracic_rot"]} />
@@ -250,7 +250,7 @@ export default async function Module3Page() {
         <DayStatusBadge day="c" />
 
         <DayLogsProvider day="c">
-          <div id="dayc-tracker">
+          <div id="dayc-tracker" style={{ scrollMarginTop: "80px" }}>
             <DayWeekSelector />
 
             <SubLabel>Main Workout</SubLabel>
@@ -283,7 +283,7 @@ export default async function Module3Page() {
             <ExerciseRow name="Stability Ball Stir-the-Pot" prescription="2 sets x 8 circles each direction, 60 sec rest" note="Place your forearms on the stability ball and assume a plank position. Make small controlled circles with your forearms. Keep your hips level and your lower back neutral throughout." videoIds={["WaOewOUic3c"]} s3Urls={[urlMap["m3c_stir_pot"]]} />
             <InlineExerciseTracker day="c" exerciseId="stir_the_pot" />
 
-            <SubLabel>Cool-Down — 5 minutes</SubLabel>
+            <SubLabel id="dayc-cooldown">Cool-Down — 5 minutes</SubLabel>
             <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. Single leg work and lunges tighten the hip flexors. This one is non-negotiable after Day C." videoId="cfqgjN8b2vg" s3Url={urlMap["m3c_cd_hip_flexor"]} />
             <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. Your glutes have worked hard today." videoId="5QdSahBkG20" s3Url={urlMap["m3c_cd_figure4"]} />
             <WarmupItem name="Lying Spinal Twist" note="60 seconds per side. Releases the lower back and hips after all the single leg and stability work." videoId="3miActosoI8" s3Url={urlMap["m3c_cd_spinal_twist"]} />
