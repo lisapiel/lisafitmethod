@@ -203,8 +203,9 @@ export async function POST(request: NextRequest) {
       try {
         await provisionUser(email)
       } catch (error) {
-        console.error("User provisioning failed:", error)
-        return NextResponse.json({ error: "Account setup failed" }, { status: 500 })
+        const detail = error instanceof Error ? error.message : String(error)
+        console.error("User provisioning failed:", detail)
+        return NextResponse.json({ error: "Account setup failed", detail }, { status: 500 })
       }
     }
   }
