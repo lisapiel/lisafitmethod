@@ -302,7 +302,7 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
         .sr-bw { font-size:0.5rem; background:#222; color:#666; padding:2px 5px; border-radius:3px; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
         .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.5rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:0 6px; border-radius:3px; flex-shrink:0; white-space:nowrap; min-height:28px; display:flex; align-items:center; }
         .sr-log--done { background:rgba(201,169,110,0.12); border-color:#c9a96e; color:#c9a96e; }
-        .sr-del { background:none; border:1px solid #333; color:#555; cursor:pointer; font-size:0.65rem; min-width:28px; min-height:28px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; }
+        .sr-del { background:none; border:1px solid #333; color:#555; cursor:pointer; font-size:0.65rem; min-width:28px; min-height:28px; display:flex; align-items:center; justify-content:center; border-radius:3px; flex-shrink:0; margin-left:6px; }
         @media (min-width: 480px) {
           .sr-row { gap:8px; }
           .sr-label { width:22px; font-size:0.6rem; }
@@ -310,7 +310,7 @@ export default function DayWorkoutPanel({ day }: { day: DayKey }) {
           .sr-inp-wide { width:72px; }
           .sr-unit { font-size:0.55rem; }
           .sr-log { font-size:0.55rem; padding:0 10px; min-height:30px; }
-          .sr-del { min-width:30px; min-height:30px; font-size:0.7rem; }
+          .sr-del { min-width:30px; min-height:30px; font-size:0.7rem; margin-left:8px; }
         }
       `}</style>
       {/* Header */}
