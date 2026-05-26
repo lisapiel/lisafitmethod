@@ -22,7 +22,7 @@ export default function TrainingFoundationsLayout({ children }: { children: Reac
         style={{
           display: "flex",
           flexDirection: "column",
-          height: "100vh",
+          height: "100dvh",
           overflow: "hidden",
           background: "#0a0a0a",
           color: "#f0e6d3",

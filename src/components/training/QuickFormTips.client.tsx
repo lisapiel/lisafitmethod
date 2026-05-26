@@ -10,7 +10,7 @@ export default function QuickFormTips({ tips }: { tips: string[] }) {
   if (!tips || tips.length === 0) return null
 
   return (
-    <div style={{ margin: "-8px 0 20px" }}>
+    <div style={{ marginTop: "-8px", paddingBottom: "1.5rem", marginBottom: "1.25rem", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
       <button
         onClick={() => setOpen(!open)}
         style={{

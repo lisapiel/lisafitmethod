@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Playfair_Display, DM_Sans, Cormorant_Garamond, Montserrat } from "next/font/google"
 import Script from "next/script"
 import { AmplifyProvider } from "@/components/AmplifyProvider"
@@ -32,6 +32,11 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
   display: "swap",
 })
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+}
 
 export const metadata: Metadata = {
   title: {

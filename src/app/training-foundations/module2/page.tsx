@@ -60,7 +60,7 @@ export default async function Module2Page() {
         Weak glutes and a poorly trained core are two of the most common and most overlooked causes of lower back pain in people who exercise regularly. I know this because they were my problem. Work through them in order. The first four are corrective and foundational. The last four are builders. Don&apos;t skip ahead.
       </p>
 
-      <ExBlock id="e1" num="Exercise 1" title="Dead Bug" subtitle="the safest core exercise you're not doing">
+      <ExBlock id="e1" num="Exercise 1" title="Dead Bug" subtitle="The safest core exercise you're not doing">
         <VideoEmbed videoId="tDG5Ln8XUo8" title="Dead Bug" s3Url={urlMap["m2_dead_bug"]} />
         <CB heading="What it trains"><P>Anti-extension core stability. It teaches your spine to stay neutral while your limbs move, which is exactly what happens during every compound lift you do.</P></CB>
         <CB heading="Why it's in here"><P>This was one of the first exercises I was given during my back pain recovery and it humbled me immediately. It looks easy. It is not easy when done correctly. Most people rush through it and miss the point entirely. Slow it down and you will feel exactly where your core is and isn&apos;t working.</P></CB>
@@ -68,7 +68,7 @@ export default async function Module2Page() {
         <CB heading="Sets and reps"><P>3 sets of 8 per side. Slow and controlled. This is not a cardio exercise.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e2" num="Exercise 2" title="Bird Dog" subtitle="spinal stability from the ground up">
+      <ExBlock id="e2" num="Exercise 2" title="Bird Dog" subtitle="Spinal stability from the ground up">
         <VideoEmbed videoId="Mr73_KR-fS8" title="Bird Dog" s3Url={urlMap["m2_bird_dog"]} />
         <CB heading="What it trains"><P>Anti-rotation core stability and glute activation at the same time. Your core has to work to prevent your hips from rotating while your limbs extend, which directly translates to spinal stability during every standing exercise you do.</P></CB>
         <CB heading="Why it's in here"><P>The bird dog looks simple and gets dismissed because of it. Most people who skip it are the same people who complain about lower back tightness after every session. This movement teaches your body to extend the hip without compensating through the lower back.</P></CB>
@@ -77,7 +77,7 @@ export default async function Module2Page() {
         <CB heading="Sets and reps"><P>3 sets of 10 per side. Hold each rep at the top for a full 2 seconds before returning.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e3" num="Exercise 3" title="Glute Bridge" subtitle="activating the muscle that protects your spine">
+      <ExBlock id="e3" num="Exercise 3" title="Glute Bridge" subtitle="Activating the muscle that protects your spine">
         <VideoEmbed videoId="0mn6xjwzCvs" title="Glute Bridge" s3Url={urlMap["m2_glute_bridge"]} />
         <CB heading="What it trains"><P>Glute max activation and hip extension. This exercise teaches your body to actually use your glutes as the primary mover rather than defaulting to your lower back and hamstrings, which is a compensation pattern more common than most people realize.</P></CB>
         <CB heading="Why it's in here"><P>Most people&apos;s glutes are underactive. Even when they think they&apos;re using them, their lower back and hamstrings are doing the majority of the work. This is sometimes called gluteal amnesia and it is a direct contributor to lower back pain. The glute bridge is the most accessible way to start reestablishing that connection.</P></CB>
@@ -86,7 +86,7 @@ export default async function Module2Page() {
         <CB heading="Sets and reps"><P>3 sets of 12 to 15 reps.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e4" num="Exercise 4" title="Glute Medius Training" subtitle="the work most programs ignore">
+      <ExBlock id="e4" num="Exercise 4" title="Glute Medius Training" subtitle="The work most programs ignore">
         <CB heading="What it trains"><P>The glute medius is the side of the glute responsible for stabilizing your pelvis during walking, running, squatting, and lunging. Weakness here shows up as knee caving during squats, hip pain, and lower back instability.</P></CB>
         <CB heading="Why it's in here"><P>I was training this muscle, or at least I thought I was. What I was missing is that machine based isolation work doesn&apos;t translate the same way as functional movement patterns. Your glute medius needs to work while your body is moving, stabilizing, and under tension in real positions.</P></CB>
         <CB heading="How to do it"><P>All three exercises below train the same muscle from slightly different angles. Do them as a circuit, going through all three back to back with minimal rest, then repeating for 3 rounds.</P></CB>
@@ -105,7 +105,7 @@ export default async function Module2Page() {
         <CB heading="Circuit"><P>3 rounds, 12 to 15 reps per side on the abduction, 20 steps each direction on the walks. Rest 30 to 45 seconds between rounds.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e5" num="Exercise 5" title="Hip Thrust" subtitle="the primary glute builder">
+      <ExBlock id="e5" num="Exercise 5" title="Hip Thrust" subtitle="The primary glute builder">
         <VideoEmbed videoId="Rxxd0gmzwFU" title="Hip Thrust" s3Url={urlMap["m2_hip_thrust"]} />
         <VideoEmbed videoId="8bSvHhnWVnE" title="Hip Thrust variation" s3Url={urlMap["m2_hip_thrust_var"]} />
         <CB heading="What it trains"><P>Glute max through a full range of hip extension. This is the most effective exercise for building glute strength and size and it belongs in almost every program regardless of your goal.</P></CB>
@@ -115,7 +115,7 @@ export default async function Module2Page() {
         <CB heading="Sets and reps"><P>3 sets of 10 to 12 reps. Add load when you can complete all reps with clean form and the top position feels fully controlled.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e6" num="Exercise 6" title="Romanian Deadlift" subtitle="building the posterior chain that keeps your back healthy">
+      <ExBlock id="e6" num="Exercise 6" title="Romanian Deadlift" subtitle="Building the posterior chain that keeps your back healthy">
         <VideoEmbed videoId="AyY0C8s5scU" title="Romanian Deadlift" s3Url={urlMap["m2_rdl"]} />
         <CB heading="What it trains"><P>The hamstrings, glutes, and lower back working together as a unit under load. This is your primary posterior chain builder in this program and one of the most valuable exercises you can learn early in your training.</P></CB>
         <CB heading="Why it's in here"><P>You learned the hip hinge pattern in Module 1. The Romanian deadlift is where you put that pattern to work with load. Get the pattern right first, then add the weight.</P></CB>
@@ -124,7 +124,7 @@ export default async function Module2Page() {
         <CB heading="Sets and reps"><P>3 sets of 10 reps. Prioritize form over weight on this one every single time.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e7" num="Exercise 7" title="Pallof Press" subtitle="anti-rotation core strength">
+      <ExBlock id="e7" num="Exercise 7" title="Pallof Press" subtitle="Anti-rotation core strength">
         <VideoEmbed videoId="lae10X6yOII" title="Pallof Press" s3Url={urlMap["m2_pallof_press"]} />
         <CB heading="What it trains"><P>Your core&apos;s ability to resist rotational force. The Pallof press trains it in a standing position, which is much closer to how your core actually needs to function during real movements.</P></CB>
         <CB heading="Why it's in here"><P>Most core exercises train your abs to flex or your back to extend. The Pallof press does neither. It challenges your entire core to resist being pulled sideways. It is also one of the safest core exercises you can do because there is no spinal flexion involved at all.</P></CB>
@@ -133,7 +133,7 @@ export default async function Module2Page() {
         <CB heading="Sets and reps"><P>3 sets of 10 per side. Hold each rep at full extension for a full 2 seconds before returning.</P></CB>
       </ExBlock>
 
-      <ExBlock id="e8" num="Exercise 8" title="Farmer's Carry" subtitle="full body stability you can build anywhere">
+      <ExBlock id="e8" num="Exercise 8" title="Farmer's Carry" subtitle="Full body stability you can build anywhere">
         <VideoEmbed videoId="vJIu3hgUYlg" title="Farmer's Carry" s3Url={urlMap["m2_farmers_carry"]} />
         <CB heading="What it trains"><P>Core bracing, grip strength, shoulder stability, glute activation, and postural endurance all at the same time. The farmer&apos;s carry trains your entire body to work together under load while you move, which is something no machine or isolated exercise can replicate.</P></CB>
         <CB heading="Why it's in here"><P>Carries are one of the most overlooked tools in beginner programming. The farmer&apos;s carry exposes postural weaknesses immediately. The moment your shoulders round, your core loses tension, or your gait gets uneven, the exercise is telling you something worth paying attention to.</P></CB>

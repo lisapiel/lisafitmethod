@@ -165,8 +165,8 @@ function SubLabel({ children, id }: { children: React.ReactNode; id?: string }) 
 
 function WarmupItem({ name, note, videoId, s3Url }: { name: string; note: string; videoId?: string; s3Url?: string }) {
   return (
-    <>
-      <div style={{ display: "flex", gap: "1rem", padding: "0.75rem 0", borderBottom: `1px solid rgba(255,255,255,0.04)`, alignItems: "flex-start" }}>
+    <div style={{ paddingBottom: "0.75rem", marginBottom: "0.75rem", borderBottom: `1px solid rgba(255,255,255,0.05)` }}>
+      <div style={{ display: "flex", gap: "1rem", padding: "0.75rem 0", alignItems: "flex-start" }}>
         <div style={{ width: 6, height: 6, borderRadius: "50%", background: gold, marginTop: "0.55rem", flexShrink: 0, opacity: 0.6 }} />
         <div>
           <div style={{ fontSize: "0.85rem", color: cream, fontWeight: 400 }}>{name}</div>
@@ -174,14 +174,14 @@ function WarmupItem({ name, note, videoId, s3Url }: { name: string; note: string
         </div>
       </div>
       {videoId && <VideoEmbed videoId={videoId} title={name} s3Url={s3Url} />}
-    </>
+    </div>
   )
 }
 
 function ExerciseRow({ name, prescription, note, videoIds, s3Urls }: { name: string; prescription: string; note: string; videoIds?: string[]; s3Urls?: (string | undefined)[] }) {
   return (
     <>
-      <div style={{ padding: "1.25rem 0", borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
+      <div style={{ padding: "1.25rem 0 0.75rem" }}>
         <div style={{ fontSize: "0.9rem", color: cream, fontWeight: 400, marginBottom: "0.25rem" }}>{name}</div>
         <div style={{ fontSize: "0.75rem", color: gold, marginBottom: "0.25rem" }}>{prescription}</div>
         <div style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.3 }}>{note}</div>
@@ -350,10 +350,13 @@ export default async function Module3Page() {
             <QuickFormTips tips={TIPS["farmers_carry"]} />
 
             <SubLabel id="daya-cooldown">Cool-Down — 5 minutes</SubLabel>
-            <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. These tighten up on lower body days and contribute directly to lower back discomfort if left unaddressed." videoId="cfqgjN8b2vg" s3Url={urlMap["m3a_cd_hip_flexor"]} />
-            <WarmupItem name="90/90 Hamstring Stretch" note="60 seconds per side. Do not force the range, breathe into it." videoId="4vIoROvmLQM" s3Url={urlMap["m3a_cd_hamstring"]} />
-            <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. You just worked your glutes hard, they need this." videoId="5QdSahBkG20" s3Url={urlMap["m3a_cd_figure4"]} />
-            <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3a_cd_childs_pose"]} />
+            <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
+              Cooldowns are not about forcing flexibility. Hold each stretch for around 30 seconds, breathe slowly, and only move into a range that feels comfortable. The video shows the movement, but your range may look different, and that is completely fine. Stretching should feel controlled, not painful.
+            </p>
+            <WarmupItem name="Kneeling Hip Flexor Stretch" note="30 seconds per side. These tighten up on lower body days and contribute directly to lower back discomfort if left unaddressed." videoId="cfqgjN8b2vg" s3Url={urlMap["m3a_cd_hip_flexor"]} />
+            <WarmupItem name="90/90 Hamstring Stretch" note="30 seconds per side. Do not force the range, breathe into it." videoId="4vIoROvmLQM" s3Url={urlMap["m3a_cd_hamstring"]} />
+            <WarmupItem name="Figure 4 Stretch" note="30 seconds per side. You just worked your glutes hard, they need this." videoId="5QdSahBkG20" s3Url={urlMap["m3a_cd_figure4"]} />
+            <WarmupItem name="Child's Pose" note="30 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3a_cd_childs_pose"]} />
 
             <MarkCompleteButton />
             <div id="daya-log" style={{ scrollMarginTop: "80px" }}>
@@ -406,9 +409,12 @@ export default async function Module3Page() {
             <QuickFormTips tips={TIPS["pallof_press"]} />
 
             <SubLabel id="dayb-cooldown">Cool-Down — 5 minutes</SubLabel>
-            <WarmupItem name="Open Book Stretch" note="60 seconds per side. A thoracic rotation stretch that releases the upper back and chest after all the pressing and pulling." videoId="YJ92IS_RuRY" s3Url={urlMap["m3b_cd_open_book"]} />
-            <WarmupItem name="Band Lat Stretch" note="60 seconds per side. Grab the band attached to something stable, shift your hips away and feel the entire side of your back release." videoId="lQuimKNJRWU" s3Url={urlMap["m3b_cd_band_lat"]} />
-            <WarmupItem name="Thread the Needle Stretch" note="60 seconds per side. Gets deeper into the thoracic rotation and releases tension through the upper back and shoulders." videoId="GJGSah1mNWw" s3Url={urlMap["m3b_cd_thread_needle"]} />
+            <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
+              Cooldowns are not about forcing flexibility. Hold each stretch for around 30 seconds, breathe slowly, and only move into a range that feels comfortable. The video shows the movement, but your range may look different, and that is completely fine. Stretching should feel controlled, not painful.
+            </p>
+            <WarmupItem name="Open Book Stretch" note="30 seconds per side. A thoracic rotation stretch that releases the upper back and chest after all the pressing and pulling." videoId="YJ92IS_RuRY" s3Url={urlMap["m3b_cd_open_book"]} />
+            <WarmupItem name="Band Lat Stretch" note="30 seconds per side. Grab the band attached to something stable, shift your hips away and feel the entire side of your back release." videoId="lQuimKNJRWU" s3Url={urlMap["m3b_cd_band_lat"]} />
+            <WarmupItem name="Thread the Needle Stretch" note="30 seconds per side. Gets deeper into the thoracic rotation and releases tension through the upper back and shoulders." videoId="GJGSah1mNWw" s3Url={urlMap["m3b_cd_thread_needle"]} />
             <WarmupItem name="Triceps Stretch" note="30 seconds per side. You just worked your triceps directly, give them a proper stretch before you leave." videoId="44rhonVBVRU" s3Url={urlMap["m3b_cd_triceps"]} />
 
             <MarkCompleteButton />
@@ -480,10 +486,13 @@ export default async function Module3Page() {
             <QuickFormTips tips={TIPS["stir_the_pot"]} />
 
             <SubLabel id="dayc-cooldown">Cool-Down — 5 minutes</SubLabel>
-            <WarmupItem name="Kneeling Hip Flexor Stretch" note="60 seconds per side. Single leg work and lunges tighten the hip flexors. This one is non-negotiable after Day C." videoId="cfqgjN8b2vg" s3Url={urlMap["m3c_cd_hip_flexor"]} />
-            <WarmupItem name="Figure 4 Stretch" note="60 seconds per side. Your glutes have worked hard today." videoId="5QdSahBkG20" s3Url={urlMap["m3c_cd_figure4"]} />
-            <WarmupItem name="Lying Spinal Twist" note="60 seconds per side. Releases the lower back and hips after all the single leg and stability work." videoId="3miActosoI8" s3Url={urlMap["m3c_cd_spinal_twist"]} />
-            <WarmupItem name="Child's Pose" note="60 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3c_cd_childs_pose"]} />
+            <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
+              Cooldowns are not about forcing flexibility. Hold each stretch for around 30 seconds, breathe slowly, and only move into a range that feels comfortable. The video shows the movement, but your range may look different, and that is completely fine. Stretching should feel controlled, not painful.
+            </p>
+            <WarmupItem name="Kneeling Hip Flexor Stretch" note="30 seconds per side. Single leg work and lunges tighten the hip flexors. This one is non-negotiable after Day C." videoId="cfqgjN8b2vg" s3Url={urlMap["m3c_cd_hip_flexor"]} />
+            <WarmupItem name="Figure 4 Stretch" note="30 seconds per side. Your glutes have worked hard today." videoId="5QdSahBkG20" s3Url={urlMap["m3c_cd_figure4"]} />
+            <WarmupItem name="Lying Spinal Twist" note="30 seconds per side. Releases the lower back and hips after all the single leg and stability work." videoId="3miActosoI8" s3Url={urlMap["m3c_cd_spinal_twist"]} />
+            <WarmupItem name="Child's Pose" note="30 seconds. Decompress the spine, breathe deeply, let everything release." videoId="NWUojZcToTE" s3Url={urlMap["m3c_cd_childs_pose"]} />
 
             <MarkCompleteButton />
             <div id="dayc-log" style={{ scrollMarginTop: "80px" }}>

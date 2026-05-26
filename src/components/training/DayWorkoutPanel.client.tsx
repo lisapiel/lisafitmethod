@@ -37,7 +37,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             placeholder="e.g. 30m"
             onChange={(e) => {
               const v = e.target.value
-              onChange({ ...set, distanceTime: v, confirmed: v.trim() !== "" })
+              onChange({ ...set, distanceTime: v, confirmed: false })
             }}
             className="sr-inp sr-inp-wide"
           />
@@ -52,7 +52,7 @@ function SetRow({ set, index, bodyweightOnly, distanceOrTime, onChange, onRemove
             placeholder="reps"
             onChange={(e) => {
               const reps = Number(e.target.value)
-              onChange({ ...set, reps, confirmed: reps > 0 })
+              onChange({ ...set, reps, confirmed: false })
             }}
             className="sr-inp"
           />

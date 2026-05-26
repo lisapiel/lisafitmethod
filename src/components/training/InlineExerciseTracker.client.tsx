@@ -48,9 +48,8 @@ export default function InlineExerciseTracker({
   const isDistanceTime = !!def.trackDistanceOrTime
 
   function updateSet(i: number, s: SetLog) {
-    const hasValue = (s.reps != null && s.reps > 0) || (s.distanceTime != null && s.distanceTime.trim() !== "")
     const next = [...sets]
-    next[i] = hasValue ? { ...s, confirmed: true } : s
+    next[i] = s
     updateExerciseSets(exerciseId, next)
   }
 
