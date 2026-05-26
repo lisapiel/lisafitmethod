@@ -46,8 +46,6 @@ export async function POST(request: NextRequest) {
         Permanent: true,
       })
     )
-    await markAuthTokenUsed(token)
-    return NextResponse.json({ email: data.email })
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     if (msg.includes("Password did not conform")) {
@@ -55,4 +53,13 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: "Failed to set password. Please try again." }, { status: 500 })
   }
+
+  // Mark token used after password is successfully set — non-fatal if this fails
+  try {
+    await markAuthTokenUsed(token)
+  } catch {
+    console.error("Failed to mark auth token used:", token)
+  }
+
+  return NextResponse.json({ email: data.email })
 }
