@@ -251,10 +251,6 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
     }
   }, [activeAnchor])
 
-  function toggleSection(i: number) {
-    setOpenSection((prev) => (prev === i ? null : i))
-  }
-
   function toggleDay(href: string, e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
