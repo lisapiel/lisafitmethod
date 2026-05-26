@@ -203,6 +203,10 @@ function Superset({ tag, note, children }: { tag: string; note: string; children
   )
 }
 
+function ExerciseDivider() {
+  return <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: "1.5rem", marginTop: "0.5rem" }} />
+}
+
 function DayBlock({ id, day, title, children }: { id: string; day: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} style={{ background: cardBg, border: `1px solid ${border}`, marginBottom: "2.5rem", overflow: "hidden", scrollMarginTop: "80px" }}>
@@ -331,23 +335,29 @@ export default async function Module3Page() {
 
             <SubLabel>Main Workout</SubLabel>
             <ExerciseRow name="Hip Thrust" prescription="3 sets x 12 reps, 2 min rest" note="Drive through your heels, squeeze hard at the top, ribs down. Start with a barbell at a comfortable weight and progress to single leg when ready." videoIds={["Rxxd0gmzwFU", "8bSvHhnWVnE"]} s3Urls={[urlMap["m3a_hip_thrust"], urlMap["m3a_hip_thrust_var"]]} />
-            <InlineExerciseTracker day="a" exerciseId="hip_thrust" />
             <QuickFormTips tips={TIPS["hip_thrust"]} />
+            <InlineExerciseTracker day="a" exerciseId="hip_thrust" />
+            <ExerciseDivider />
             <ExerciseRow name="Romanian Deadlift" prescription="3 sets x 10 reps, 2 min rest" note="Push your hips back, keep the weights close to your body, stop before your lower back rounds. Refer back to Module 2 Exercise 6." videoIds={["AyY0C8s5scU"]} s3Urls={[urlMap["m3a_rdl"]]} />
-            <InlineExerciseTracker day="a" exerciseId="rdl" />
             <QuickFormTips tips={TIPS["rdl"]} />
+            <InlineExerciseTracker day="a" exerciseId="rdl" />
+            <ExerciseDivider />
             <ExerciseRow name="Reverse Lunge" prescription="3 sets x 10 reps per side, 90 sec rest" note="Step back into the lunge rather than forward. Chest up, front knee tracks over toes, back knee hovers just above the floor. Drive through your front heel to return to standing." videoIds={["ysR2LxObJbo"]} s3Urls={[urlMap["m3c_rev_lunge"]]} />
-            <InlineExerciseTracker day="a" exerciseId="reverse_lunge" />
             <QuickFormTips tips={TIPS["reverse_lunge"]} />
+            <InlineExerciseTracker day="a" exerciseId="reverse_lunge" />
+            <ExerciseDivider />
             <ExerciseRow name="Goblet Squat" prescription="3 sets x 10 reps, 2 min rest" note="Chest up, knees tracking over toes, sit between your heels not behind them. Refer back to Module 1 Exercise 2." videoIds={["NYf82VuzrQM"]} s3Urls={[urlMap["m3a_goblet_squat"]]} />
-            <InlineExerciseTracker day="a" exerciseId="goblet_squat" />
             <QuickFormTips tips={TIPS["goblet_squat"]} />
+            <InlineExerciseTracker day="a" exerciseId="goblet_squat" />
+            <ExerciseDivider />
             <ExerciseRow name="Dead Bug" prescription="3 sets x 8 reps per side, 60 sec rest" note="Lower back pressed into the floor the entire time. The moment it lifts, you have gone too far. Slow this down. You can add a light dumbbell overhead if this becomes easy." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3a_dead_bug"]]} />
-            <InlineExerciseTracker day="a" exerciseId="dead_bug_a" />
             <QuickFormTips tips={TIPS["dead_bug_a"]} />
+            <InlineExerciseTracker day="a" exerciseId="dead_bug_a" />
+            <ExerciseDivider />
             <ExerciseRow name="Farmer's Carry" prescription="2 sets x 20 to 30 meters, 90 sec rest" note="Tall spine, shoulders back and down, core braced throughout. The moment your posture breaks, the set is over." videoIds={["vJIu3hgUYlg"]} s3Urls={[urlMap["m3a_farmers_carry"]]} />
-            <InlineExerciseTracker day="a" exerciseId="farmers_carry" />
             <QuickFormTips tips={TIPS["farmers_carry"]} />
+            <InlineExerciseTracker day="a" exerciseId="farmers_carry" />
+            <ExerciseDivider />
 
             <SubLabel id="daya-cooldown">Cool-Down — 5 minutes</SubLabel>
             <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
@@ -385,28 +395,35 @@ export default async function Module3Page() {
 
             <SubLabel>Main Workout</SubLabel>
             <ExerciseRow name="Dumbbell Bench Press or Push-Up" prescription="3 sets x 10 reps, 90 sec rest" note="Elbows at 45 degrees, shoulder blades set before you press, wrist stacked over elbow throughout. Refer back to Module 1 Exercise 3." videoIds={["vZTUnLTRkOg", "oZmBz-BN7ZY"]} s3Urls={[urlMap["m3b_db_bench"], urlMap["m3b_pushup"]]} />
-            <InlineExerciseTracker day="b" exerciseId="db_bench" />
             <QuickFormTips tips={TIPS["db_bench"]} />
+            <InlineExerciseTracker day="b" exerciseId="db_bench" />
+            <ExerciseDivider />
             <ExerciseRow name="Band Assisted Pull-Up or Lat Pulldown" prescription="3 sets x 8 reps, 90 sec rest" note="Loop the band around the bar and place your knees or feet in it. Pull your elbows down toward your back pockets, chest leads toward the bar, control the descent. Work toward doing it without the band." videoIds={["H-RxZVrZH2I"]} s3Urls={[urlMap["m3b_band_pullup"]]} />
-            <InlineExerciseTracker day="b" exerciseId="band_pullup" />
             <QuickFormTips tips={TIPS["band_pullup"]} />
+            <InlineExerciseTracker day="b" exerciseId="band_pullup" />
+            <ExerciseDivider />
             <ExerciseRow name="Overhead Press" prescription="3 sets x 10 reps, 90 sec rest" note="Core braced throughout, ribs down, do not let your lower back arch as you press overhead. Press the weight up and slightly back." videoIds={["H8-O20oL3yc"]} s3Urls={[urlMap["m3b_ohp"]]} />
-            <InlineExerciseTracker day="b" exerciseId="overhead_press" />
             <QuickFormTips tips={TIPS["overhead_press"]} />
+            <InlineExerciseTracker day="b" exerciseId="overhead_press" />
+            <ExerciseDivider />
             <ExerciseRow name="Chest Supported Row" prescription="3 sets x 12 reps, 90 sec rest" note="Because you are supported against the bench your lower back is completely out of the equation. No cheating the rep with momentum. Squeeze fully at the top of every rep and control the return." videoIds={["eKT-r-SV4x0"]} s3Urls={[urlMap["m3b_chest_row"]]} />
-            <InlineExerciseTracker day="b" exerciseId="chest_row" />
             <QuickFormTips tips={TIPS["chest_row"]} />
+            <InlineExerciseTracker day="b" exerciseId="chest_row" />
+            <ExerciseDivider />
             <Superset tag="Superset: Arms" note="No rest between the two exercises. Rest 60 seconds after both are done. 3 rounds.">
               <ExerciseRow name="Dumbbell Curl" prescription="10 to 12 reps" note="Keep your elbows pinned at your sides, control the return, do not swing the weight up." videoIds={["rPcp_rfWLRU"]} s3Urls={[urlMap["m3b_db_curl"]]} />
-              <InlineExerciseTracker day="b" exerciseId="bicep_curl" />
               <QuickFormTips tips={TIPS["bicep_curl"]} />
+              <InlineExerciseTracker day="b" exerciseId="bicep_curl" />
+              <ExerciseDivider />
               <ExerciseRow name="Overhead Tricep Extension" prescription="10 to 12 reps" note="Keep your elbows pointing forward and close to your head, lower the weight slowly behind you, press back up to full extension." videoIds={["uht9IRmLvcQ"]} s3Urls={[urlMap["m3b_tri_extension"]]} />
-              <InlineExerciseTracker day="b" exerciseId="tricep_ext" />
               <QuickFormTips tips={TIPS["tricep_ext"]} />
+              <InlineExerciseTracker day="b" exerciseId="tricep_ext" />
             </Superset>
+            <ExerciseDivider />
             <ExerciseRow name="Pallof Press" prescription="3 sets x 10 reps per side, 60 sec rest" note="Brace hard before you press, resist the rotation the entire time, hold 2 seconds at full extension." videoIds={["lae10X6yOII"]} s3Urls={[urlMap["m3b_pallof_press"]]} />
-            <InlineExerciseTracker day="b" exerciseId="pallof_press" />
             <QuickFormTips tips={TIPS["pallof_press"]} />
+            <InlineExerciseTracker day="b" exerciseId="pallof_press" />
+            <ExerciseDivider />
 
             <SubLabel id="dayb-cooldown">Cool-Down — 5 minutes</SubLabel>
             <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
@@ -448,42 +465,51 @@ export default async function Module3Page() {
 
             <SubLabel>Main Workout</SubLabel>
             <ExerciseRow name="Single Leg Glute Bridge" prescription="3 sets x 10 reps per side, 60 sec rest" note="Drive through your heel, squeeze the glute hard at the top, and keep your hips level throughout. If your hips drop to one side that is a stability weakness worth noting and working on." videoIds={["95b9yp9kfEg"]} s3Urls={[urlMap["m3c_sl_glute_bridge"]]} />
-            <InlineExerciseTracker day="c" exerciseId="sl_glute_bridge" />
             <QuickFormTips tips={TIPS["sl_glute_bridge"]} />
+            <InlineExerciseTracker day="c" exerciseId="sl_glute_bridge" />
+            <ExerciseDivider />
             <ExerciseRow name="Reverse Lunge" prescription="3 sets x 10 reps per side, 90 sec rest" note="Step back into the lunge rather than forward. Chest up, front knee tracks over toes, back knee hovers just above the floor. Drive through your front heel to return to standing." videoIds={["ysR2LxObJbo"]} s3Urls={[urlMap["m3c_rev_lunge"]]} />
-            <InlineExerciseTracker day="c" exerciseId="reverse_lunge" />
             <QuickFormTips tips={TIPS["reverse_lunge"]} />
+            <InlineExerciseTracker day="c" exerciseId="reverse_lunge" />
+            <ExerciseDivider />
 
             <Superset tag="Superset" note="No rest between the two exercises. Rest 90 seconds after both are done. 3 rounds.">
               <ExerciseRow name="Push-Up" prescription="10 reps" note="Elbows at 45 degrees, shoulder blades set before you lower, full range of motion. Drop to your knees if needed. Same form rules apply." videoIds={["oZmBz-BN7ZY"]} s3Urls={[urlMap["m3c_pushup"]]} />
-              <InlineExerciseTracker day="c" exerciseId="pushup_c" />
               <QuickFormTips tips={TIPS["pushup_c"]} />
+              <InlineExerciseTracker day="c" exerciseId="pushup_c" />
+              <ExerciseDivider />
               <ExerciseRow name="Inverted Row" prescription="10 reps" note="Set the bar at roughly hip height. Hang underneath it with straight arms, body in a straight line. Pull your chest toward the bar, squeeze at the top, lower with control." videoIds={["BKEfa9ixLuc"]} s3Urls={[urlMap["m3c_inv_row"]]} />
-              <InlineExerciseTracker day="c" exerciseId="inverted_row" />
               <QuickFormTips tips={TIPS["inverted_row"]} />
+              <InlineExerciseTracker day="c" exerciseId="inverted_row" />
             </Superset>
+            <ExerciseDivider />
 
             <Superset tag="Glute Medius Superset" note="No rest between the two exercises. Rest 45 seconds after both are done. 3 rounds.">
               <ExerciseRow name="Monster Walk" prescription="20 steps forward, 20 steps backward" note="Slight squat position, chest up, core braced, constant tension on the band." videoIds={["cR8WIVDloo4"]} s3Urls={[urlMap["m3c_band_monster_walk"]]} />
-              <InlineExerciseTracker day="c" exerciseId="monster_walk" />
               <QuickFormTips tips={TIPS["monster_walk"]} />
+              <InlineExerciseTracker day="c" exerciseId="monster_walk" />
+              <ExerciseDivider />
               <ExerciseRow name="Side Lying Hip Abduction" prescription="12 to 15 reps per side" note="Foot flexed, toes pointing slightly down, control the return completely." videoIds={["efiJbMV-ZaE"]} s3Urls={[urlMap["m3c_hip_abduction"]]} />
-              <InlineExerciseTracker day="c" exerciseId="hip_abduction_c" />
               <QuickFormTips tips={TIPS["hip_abduction_c"]} />
+              <InlineExerciseTracker day="c" exerciseId="hip_abduction_c" />
             </Superset>
+            <ExerciseDivider />
 
             <Superset tag="Superset" note="No rest between the two exercises. Rest 60 seconds after both are done. 2 rounds.">
               <ExerciseRow name="Dead Bug" prescription="8 reps per side" note="Lower back pressed into the floor the entire time. Slow and controlled, stop before your lower back lifts. Add a light dumbbell overhead if this becomes easy." videoIds={["tDG5Ln8XUo8"]} s3Urls={[urlMap["m3c_dead_bug"]]} />
-              <InlineExerciseTracker day="c" exerciseId="dead_bug_c" />
               <QuickFormTips tips={TIPS["dead_bug_c"]} />
+              <InlineExerciseTracker day="c" exerciseId="dead_bug_c" />
+              <ExerciseDivider />
               <ExerciseRow name="Copenhagen Plank" prescription="20 to 30 seconds per side" note="Place your bottom knee on a bench or chair, top leg straight. Squeeze your inner thigh into the bench and keep your hips level throughout." videoIds={["i1Ll-EnhYhQ"]} s3Urls={[urlMap["m3c_copenhagen"]]} />
-              <InlineExerciseTracker day="c" exerciseId="copenhagen" />
               <QuickFormTips tips={TIPS["copenhagen"]} />
+              <InlineExerciseTracker day="c" exerciseId="copenhagen" />
             </Superset>
+            <ExerciseDivider />
 
             <ExerciseRow name="Stability Ball Stir-the-Pot" prescription="2 sets x 8 circles each direction, 60 sec rest" note="Place your forearms on the stability ball and assume a plank position. Make small controlled circles with your forearms. Keep your hips level and your lower back neutral throughout." videoIds={["WaOewOUic3c"]} s3Urls={[urlMap["m3c_stir_pot"]]} />
-            <InlineExerciseTracker day="c" exerciseId="stir_the_pot" />
             <QuickFormTips tips={TIPS["stir_the_pot"]} />
+            <InlineExerciseTracker day="c" exerciseId="stir_the_pot" />
+            <ExerciseDivider />
 
             <SubLabel id="dayc-cooldown">Cool-Down — 5 minutes</SubLabel>
             <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
