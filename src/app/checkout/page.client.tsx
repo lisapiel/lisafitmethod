@@ -327,6 +327,9 @@ export function CheckoutClient() {
   const [finalAmount, setFinalAmount] = useState(4700)
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
+  const [includesTracker, setIncludesTracker] = useState(false)
+
+  const paymentStarted = !!clientSecret
 
   const handleEmailNext = useCallback((submittedEmail: string) => {
     setEmail(submittedEmail)
@@ -342,7 +345,7 @@ export function CheckoutClient() {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, includesTracker }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -353,7 +356,7 @@ export function CheckoutClient() {
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? 4700)
+      setFinalAmount(data.finalAmount ?? (includesTracker ? 6400 : 4700))
     } catch {
       setIntentError("Something went wrong. Please try again.")
       setEmail(null)
@@ -361,14 +364,14 @@ export function CheckoutClient() {
     } finally {
       setLoadingIntent(false)
     }
-  }, [email])
+  }, [email, includesTracker])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email!, promoCode }),
+        body: JSON.stringify({ email: email!, promoCode, includesTracker }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -376,20 +379,20 @@ export function CheckoutClient() {
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? 4700)
+      setFinalAmount(data.finalAmount ?? (includesTracker ? 6400 : 4700))
       return { error: null }
     } catch {
       return { error: "Something went wrong." }
     }
-  }, [email])
+  }, [email, includesTracker])
 
   const handleBack = useCallback(() => {
     setEmail(null)
     setConfirmed(false)
     setClientSecret(null)
     setDiscountPct(0)
-    setFinalAmount(4700)
-  }, [])
+    setFinalAmount(includesTracker ? 6400 : 4700)
+  }, [includesTracker])
 
   const stripeAppearance = {
     theme: "night" as const,
@@ -453,10 +456,18 @@ export function CheckoutClient() {
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "28px 0", paddingBottom: 28, borderBottom: "1px solid #1a1a1a" }}>
             <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>$97</span>
-            <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$47</span>
-            <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
-              Limited Time
+            <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>
+              {includesTracker ? "$64" : "$47"}
             </span>
+            {includesTracker ? (
+              <span style={{ fontSize: 10, color: "#666", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                course + tracker
+              </span>
+            ) : (
+              <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
+                Limited Time
+              </span>
+            )}
           </div>
 
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "#555", marginBottom: 20 }}>
@@ -491,6 +502,50 @@ export function CheckoutClient() {
               </div>
             ))}
           </div>
+
+          {/* Order bump */}
+          <label
+            style={{
+              display: "block",
+              marginTop: 28,
+              border: includesTracker ? "1px solid rgba(201,169,110,0.5)" : "1px solid #2a2a2a",
+              background: includesTracker ? "rgba(201,169,110,0.06)" : "#111111",
+              padding: "20px 20px",
+              cursor: paymentStarted ? "default" : "pointer",
+              transition: "border-color 0.2s, background 0.2s",
+            }}
+          >
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <input
+                type="checkbox"
+                checked={includesTracker}
+                disabled={paymentStarted}
+                onChange={(e) => setIncludesTracker(e.target.checked)}
+                style={{ marginTop: 2, accentColor: "#c9a96e", width: 16, height: 16, flexShrink: 0, cursor: paymentStarted ? "default" : "pointer" }}
+              />
+              <div>
+                <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+                  Add the Lifetime Workout Tracker — +$17
+                </p>
+                <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
+                  Build your own workout days, track any exercise, and keep going forever — even after the program ends. Log unlimited weeks and see your previous numbers so you always know what to beat. Works like an app on your phone.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  {[
+                    "Name your own workout days — Push, Pull, Leg Day, whatever works for you",
+                    "Track weight + reps, reps only, or duration per exercise",
+                    "See last week's numbers inline so progressive overload is built in",
+                    "Unlimited weeks, yours forever, even after the course ends",
+                  ].map((f) => (
+                    <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>
+                      <span style={{ fontSize: 11, color: "#666", lineHeight: 1.5 }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </label>
         </div>
 
         {/* RIGHT — Payment form */}

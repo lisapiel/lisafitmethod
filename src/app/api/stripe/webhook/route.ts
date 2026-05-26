@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
-import { generateAuthToken, storeAuthToken } from "@/lib/authTokens"
+import { generateAuthToken, storeAuthToken, grantTrackerAccess } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -142,6 +142,56 @@ function welcomeEmail(email: string, setPasswordUrl: string): string {
 </html>`
 }
 
+async function sendTrackerConfirmationEmail(email: string) {
+  const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+  await resend.emails.send({
+    from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    to: email,
+    subject: "Your Lifetime Workout Tracker is ready!",
+    html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background-color:#f0ebe4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ebe4;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;letter-spacing:0.04em;">
+            Lisa <span style="color:#c9a96e;">Fit Method</span>
+          </span>
+        </td></tr>
+        <tr><td style="background:#ffffff;border-radius:4px;padding:48px 44px;border-left:4px solid #c9a96e;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c9a96e;">
+            My Workout Tracker
+          </p>
+          <h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
+            Your tracker is ready.
+          </h1>
+          <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            It's yours forever. Log in to your Lisa Fit Method account and head to My Workout Tracker to start building your program.
+          </p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+            <tr><td style="background:#c9a96e;border-radius:2px;">
+              <a href="https://lisafitmethod.com/my-tracker" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+                Open My Tracker →
+              </a>
+            </td></tr>
+          </table>
+          <p style="margin:0;font-size:15px;color:#1a1a1a;line-height:1.7;">
+            <span style="font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#c9a96e;">Lisa</span>
+          </p>
+        </td></tr>
+        <tr><td align="center" style="padding-top:28px;">
+          <p style="margin:0;font-size:11px;color:#aaa;letter-spacing:0.04em;">Lisa Fit Method &middot; lisafitmethod.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  })
+}
+
 async function provisionUser(email: string) {
   const cognito = makeCognito()
   const tempPassword = generateTempPassword()
@@ -196,13 +246,25 @@ export async function POST(request: NextRequest) {
   if (event.type === "payment_intent.succeeded") {
     const intent = event.data.object as Stripe.PaymentIntent
     const email = intent.metadata?.customerEmail
+    const product = intent.metadata?.product
+    const includesTracker = intent.metadata?.includesTracker === "true"
 
     if (email) {
       try {
-        await provisionUser(email)
+        if (product === "tracker") {
+          // Standalone tracker purchase by an existing member
+          await grantTrackerAccess(email)
+          await sendTrackerConfirmationEmail(email)
+        } else {
+          // Course purchase (new buyer)
+          await provisionUser(email)
+          if (includesTracker) {
+            await grantTrackerAccess(email)
+          }
+        }
       } catch (error) {
         const detail = error instanceof Error ? error.message : String(error)
-        console.error("User provisioning failed:", detail)
+        console.error("Purchase fulfillment failed:", detail)
         return NextResponse.json({ error: "Account setup failed", detail }, { status: 500 })
       }
     }

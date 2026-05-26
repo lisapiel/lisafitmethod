@@ -67,3 +67,25 @@ export async function markAuthTokenUsed(token: string): Promise<void> {
     })
   )
 }
+
+export async function grantTrackerAccess(email: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `tracker_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString() },
+    })
+  )
+}
+
+export async function hasTrackerAccess(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `tracker_access_${email.toLowerCase()}` } })
+    )
+    return !!result.Item
+  } catch {
+    return false
+  }
+}

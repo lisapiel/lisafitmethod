@@ -1,0 +1,18 @@
+{
+  "name": "Lisa Fit Method Tracker",
+  "short_name": "LFM Tracker",
+  "description": "Build your own workout tracker. Use it forever.",
+  "start_url": "/my-tracker",
+  "scope": "/my-tracker",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/tracker-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

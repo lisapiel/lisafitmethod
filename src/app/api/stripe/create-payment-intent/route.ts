@@ -5,6 +5,7 @@ import { getPromoCodes } from "@/lib/promoCodes"
 export const dynamic = "force-dynamic"
 
 const BASE_PRICE_CENTS = 4700
+const TRACKER_PRICE_CENTS = 1700
 const MIN_CHARGE_CENTS = 50
 
 async function applyPromo(code: string): Promise<{ valid: boolean; discountPct: number; finalAmount: number }> {
@@ -19,14 +20,18 @@ async function applyPromo(code: string): Promise<{ valid: boolean; discountPct: 
 export async function POST(request: NextRequest) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
-    const { email, promoCode } = await request.json() as { email: string; promoCode?: string }
+    const { email, promoCode, includesTracker } = await request.json() as {
+      email: string
+      promoCode?: string
+      includesTracker?: boolean
+    }
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 })
     }
 
     let discountPct = 0
-    let finalAmount = BASE_PRICE_CENTS
+    let courseAmount = BASE_PRICE_CENTS
 
     if (promoCode?.trim()) {
       const result = await applyPromo(promoCode)
@@ -34,13 +39,20 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid promo code" }, { status: 400 })
       }
       discountPct = result.discountPct
-      finalAmount = result.finalAmount
+      courseAmount = result.finalAmount
     }
+
+    const finalAmount = courseAmount + (includesTracker ? TRACKER_PRICE_CENTS : 0)
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: finalAmount,
       currency: "usd",
-      metadata: { customerEmail: email, promoCode: promoCode ?? "", discountPct: String(discountPct) },
+      metadata: {
+        customerEmail: email,
+        promoCode: promoCode ?? "",
+        discountPct: String(discountPct),
+        includesTracker: includesTracker ? "true" : "false",
+      },
       automatic_payment_methods: { enabled: true },
     })
 
