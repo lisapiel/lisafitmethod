@@ -62,7 +62,7 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
     <div style={{ margin: "1.5rem 0", background: "#000", overflow: "hidden", position: "relative" }}>
       {s3Url ? (
         <>
-          <div style={{ position: "relative", aspectRatio: "16/9", background: "#0a0a0a" }}>
+          <div style={{ position: "relative", background: "#0a0a0a", minHeight: ready ? undefined : 120 }}>
             <video
               ref={videoRef}
               src={s3Url}
@@ -74,12 +74,9 @@ export default function VideoEmbed({ videoId, title, s3Url }: VideoEmbedProps) {
               controls={controlsVisible}
               onLoadedData={() => setReady(true)}
               style={{
-                position: "absolute",
-                inset: 0,
                 width: "100%",
-                height: "100%",
+                height: "auto",
                 display: "block",
-                objectFit: "contain",
                 opacity: ready ? 1 : 0,
                 transition: "opacity 0.3s ease",
               }}
