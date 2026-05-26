@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useCourseProgress } from "./CourseProgressContext"
 import { WorkoutSession, getSessionsForRound } from "@/lib/courseProgress"
 import { WORKOUT_DAYS } from "@/lib/workoutData"
+import { TrackerUpsellBanner } from "./TrackerUpsellBanner"
 
 const gold = "#c9a96e"
 const cream = "#f0e6d3"
@@ -366,6 +367,8 @@ export default function ProgressTracker() {
 
           {/* History */}
           <SessionHistory />
+
+          <TrackerUpsellBanner />
         </>
       )}
     </div>
