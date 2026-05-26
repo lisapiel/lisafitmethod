@@ -3,6 +3,7 @@ import { useState, useCallback } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
+import { COURSE_PRICE_CENTS, COURSE_WITH_TRACKER_PRICE_CENTS, COURSE_PRICE_DISPLAY, COURSE_WITH_TRACKER_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY } from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
 
@@ -324,7 +325,7 @@ export function CheckoutClient() {
   const [confirmed, setConfirmed] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [discountPct, setDiscountPct] = useState(0)
-  const [finalAmount, setFinalAmount] = useState(4700)
+  const [finalAmount, setFinalAmount] = useState(COURSE_PRICE_CENTS)
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
   const [includesTracker, setIncludesTracker] = useState(false)
@@ -356,7 +357,7 @@ export function CheckoutClient() {
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (includesTracker ? 6400 : 4700))
+      setFinalAmount(data.finalAmount ?? (includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : COURSE_PRICE_CENTS))
     } catch {
       setIntentError("Something went wrong. Please try again.")
       setEmail(null)
@@ -379,7 +380,7 @@ export function CheckoutClient() {
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (includesTracker ? 6400 : 4700))
+      setFinalAmount(data.finalAmount ?? (includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : COURSE_PRICE_CENTS))
       return { error: null }
     } catch {
       return { error: "Something went wrong." }
@@ -391,7 +392,7 @@ export function CheckoutClient() {
     setConfirmed(false)
     setClientSecret(null)
     setDiscountPct(0)
-    setFinalAmount(includesTracker ? 6400 : 4700)
+    setFinalAmount(includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : COURSE_PRICE_CENTS)
   }, [includesTracker])
 
   const stripeAppearance = {
@@ -455,9 +456,9 @@ export function CheckoutClient() {
           </h1>
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "28px 0", paddingBottom: 28, borderBottom: "1px solid #1a1a1a" }}>
-            <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>$97</span>
+            <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
             <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>
-              {includesTracker ? "$64" : "$47"}
+              {includesTracker ? COURSE_WITH_TRACKER_PRICE_DISPLAY : COURSE_PRICE_DISPLAY}
             </span>
             {includesTracker ? (
               <span style={{ fontSize: 10, color: "#666", fontFamily: "var(--font-montserrat), sans-serif" }}>

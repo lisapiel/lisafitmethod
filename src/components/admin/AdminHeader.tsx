@@ -23,6 +23,7 @@ export default function AdminHeader() {
     { href: "/admin/design", label: "Design" },
     { href: "/admin/blog", label: "Blog" },
     { href: "/admin/promo-codes", label: "Promo Codes" },
+    { href: "/admin/leads", label: "Leads" },
   ]
 
   return (

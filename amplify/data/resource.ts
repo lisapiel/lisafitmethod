@@ -1,6 +1,15 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend"
 
 const schema = a.schema({
+  Lead: a
+    .model({
+      email: a.string().required(),
+      source: a.string(),
+    })
+    .authorization((allow) => [
+      allow.publicApiKey().to(["create"]),
+      allow.authenticated().to(["read", "delete"]),
+    ]),
   ContactSubmission: a
     .model({
       name: a.string().required(),
