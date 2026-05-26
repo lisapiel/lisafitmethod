@@ -207,6 +207,19 @@ function ExerciseDivider() {
   return <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: "1.5rem", marginTop: "0.5rem" }} />
 }
 
+function BeginnerNote() {
+  return (
+    <div style={{ background: "rgba(201,169,110,0.05)", border: "1px solid rgba(201,169,110,0.2)", borderLeft: "3px solid rgba(201,169,110,0.4)", padding: "1.25rem 1.5rem", marginBottom: "2.5rem" }}>
+      <div style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "0.75rem" }}>
+        Beginner Note
+      </div>
+      <p style={{ fontSize: "0.85rem", color: "#888", lineHeight: 1.65, margin: 0 }}>
+        You do not need to use weight right away or match my exact depth or range of motion in the videos. Focus first on understanding the movement, controlling your body, and using proper form. Move within a range that feels safe for you. You should feel muscle effort and activation, but you should not feel sharp pain, joint pain, pulling, or anything that feels wrong. Do not force depth, speed, or heavier weight before your body is ready.
+      </p>
+    </div>
+  )
+}
+
 function DayBlock({ id, day, title, children }: { id: string; day: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} style={{ background: cardBg, border: `1px solid ${border}`, marginBottom: "2.5rem", overflow: "hidden", scrollMarginTop: "80px" }}>
@@ -315,6 +328,8 @@ export default async function Module3Page() {
         </p>
       </div>
 
+      <BeginnerNote />
+
       {/* ── DAY A ──────────────────────────────────────────────── */}
       <DayBlock id="daya" day="Day A" title="Lower Body Strength">
 
@@ -325,7 +340,7 @@ export default async function Module3Page() {
         <WarmupItem name="Glute Bridge (activation)" note="1 set of 15 reps. Squeeze at the top. Wake the glutes up, not to fatigue them." videoId="0mn6xjwzCvs" s3Url={urlMap["m3a_wu_glute_bridge"]} />
         <WarmupItem name="Lateral Band Walk (activation)" note="1 set of 15 steps each direction. Light band, activation only." videoId="4yr4bFNYX9w" s3Url={urlMap["m3a_wu_lat_band_walk"]} />
         <WarmupItem name="Leg Swing Front to Back" note="10 reps per side. Hold something for balance, keep it controlled." videoId="8BgLrTI2SO4" s3Url={urlMap["m3a_wu_leg_swing_fb"]} />
-        <WarmupItem name="Lateral Lunge" note="8 reps per side. Slow and controlled, sit into the hip, keep the working knee tracking over the toes." videoId="EVKyneKe5w8" s3Url={urlMap["m3a_wu_lateral_lunge"]} />
+        <WarmupItem name="Lateral Lunge" note="8 reps per side. Slow and controlled, sit into the hip, keep the working knee tracking over the toes. Only go as low as you can control. You do not need to match the depth in the video." videoId="EVKyneKe5w8" s3Url={urlMap["m3a_wu_lateral_lunge"]} />
 
         <DayStatusBadge day="a" />
 
