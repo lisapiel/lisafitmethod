@@ -240,9 +240,39 @@ function EmailStep({ onNext }: { onNext: (email: string) => void }) {
         This is the email your course access will be sent to. After payment, you&apos;ll receive a link to set your password and log in.
       </p>
       <button type="submit" style={ctaButtonStyle}>
-        Continue to Payment →
+        Continue →
       </button>
     </form>
+  )
+}
+
+// ─── Email confirm step ───────────────────────────────────────────────────────
+
+function EmailConfirmStep({ email, onConfirm, onChange }: { email: string; onConfirm: () => void; onChange: () => void }) {
+  return (
+    <div>
+      <p style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", marginBottom: 12 }}>
+        Your course access will be sent to:
+      </p>
+      <div style={{ border: "1px solid rgba(201,169,110,0.4)", padding: "14px 16px", marginBottom: 24, background: "rgba(201,169,110,0.05)" }}>
+        <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: 15, color: "#f0e6d3", letterSpacing: "0.02em" }}>
+          {email}
+        </span>
+      </div>
+      <p style={{ fontSize: 12, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.7, marginBottom: 28 }}>
+        Make sure this is correct — your login link will be sent here after payment.
+      </p>
+      <button type="button" onClick={onConfirm} style={{ ...ctaButtonStyle, marginBottom: 12 }}>
+        That&apos;s correct, continue to payment →
+      </button>
+      <button
+        type="button"
+        onClick={onChange}
+        style={{ display: "block", width: "100%", background: "none", border: "none", color: "#555", fontFamily: "var(--font-montserrat), sans-serif", fontSize: 12, letterSpacing: "0.08em", cursor: "pointer", padding: "8px 0", textAlign: "center" }}
+      >
+        ← Change email
+      </button>
+    </div>
   )
 }
 
@@ -291,26 +321,34 @@ const ctaButtonStyle: React.CSSProperties = {
 
 export function CheckoutClient() {
   const [email, setEmail] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [discountPct, setDiscountPct] = useState(0)
   const [finalAmount, setFinalAmount] = useState(4700)
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
 
-  const handleEmailNext = useCallback(async (submittedEmail: string) => {
+  const handleEmailNext = useCallback((submittedEmail: string) => {
+    setEmail(submittedEmail)
+    setConfirmed(false)
+  }, [])
+
+  const handleConfirm = useCallback(async () => {
+    if (!email) return
+    setConfirmed(true)
     setLoadingIntent(true)
     setIntentError(null)
-    setEmail(submittedEmail)
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: submittedEmail }),
+        body: JSON.stringify({ email }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
         setIntentError("Something went wrong. Please try again.")
         setEmail(null)
+        setConfirmed(false)
         return
       }
       setClientSecret(data.clientSecret!)
@@ -319,10 +357,11 @@ export function CheckoutClient() {
     } catch {
       setIntentError("Something went wrong. Please try again.")
       setEmail(null)
+      setConfirmed(false)
     } finally {
       setLoadingIntent(false)
     }
-  }, [])
+  }, [email])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     try {
@@ -346,6 +385,7 @@ export function CheckoutClient() {
 
   const handleBack = useCallback(() => {
     setEmail(null)
+    setConfirmed(false)
     setClientSecret(null)
     setDiscountPct(0)
     setFinalAmount(4700)
@@ -463,10 +503,12 @@ export function CheckoutClient() {
             <div style={{ padding: "48px 0", textAlign: "center", color: "#555", fontSize: 13, letterSpacing: "0.1em" }}>
               Preparing secure payment…
             </div>
-          ) : email && clientSecret ? (
+          ) : email && confirmed && clientSecret ? (
             <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
               <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} onBack={handleBack} onApplyPromo={handleApplyPromo} />
             </Elements>
+          ) : email && !confirmed ? (
+            <EmailConfirmStep email={email} onConfirm={handleConfirm} onChange={handleBack} />
           ) : (
             <>
               {intentError && (

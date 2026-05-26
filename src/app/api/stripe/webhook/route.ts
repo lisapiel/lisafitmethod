@@ -3,11 +3,11 @@ import Stripe from "stripe"
 import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
-  AdminSetUserPasswordCommand,
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
+import { generateAuthToken, storeAuthToken } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -44,7 +44,7 @@ function generateTempPassword(): string {
   return chars.join("")
 }
 
-function welcomeEmail(email: string, tempPassword: string): string {
+function welcomeEmail(email: string, setPasswordUrl: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,30 +88,23 @@ function welcomeEmail(email: string, tempPassword: string): string {
                 Your course is ready.
               </h1>
 
-              <p style="margin:0 0 24px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-                Really excited for you to get started on this.
+              <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                Really excited for you to get started on this. Click below to set your password and get instant access.
               </p>
 
-              <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
                 <tr>
                   <td style="background:#c9a96e;border-radius:2px;">
-                    <a href="https://lisafitmethod.com/login" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
-                      Access Training Foundations
+                    <a href="${setPasswordUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+                      Set Your Password →
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f5f1;border:1px solid #e8e0d6;border-radius:2px;margin-bottom:32px;">
-                <tr>
-                  <td style="padding:20px 24px;">
-                    <p style="margin:0 0 12px;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#888;">Your login details</p>
-                    <p style="margin:0 0 6px;font-size:13px;color:#4a4a4a;"><strong style="color:#1a1a1a;">Email:</strong> ${email}</p>
-                    <p style="margin:0;font-size:13px;color:#4a4a4a;"><strong style="color:#1a1a1a;">Temporary password:</strong> ${tempPassword}</p>
-                    <p style="margin:8px 0 0;font-size:11px;color:#999;">You'll be prompted to set a new password on first login.</p>
-                  </td>
-                </tr>
-              </table>
+              <p style="margin:0 0 32px;font-size:12px;color:#999;">
+                This link expires in 48 hours. Your email address is: <strong style="color:#888;">${email}</strong>
+              </p>
 
               <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
                 Start with the Introduction before jumping into the modules. Watch every video — the foundation knowledge is what everything else is built on.
@@ -167,27 +160,20 @@ async function provisionUser(email: string) {
       })
     )
   } catch (error) {
-    if (error instanceof UsernameExistsException) {
-      // Already purchased — reset their temp password and resend the email
-      await cognito.send(
-        new AdminSetUserPasswordCommand({
-          UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-          Username: email,
-          Password: tempPassword,
-          Permanent: false,
-        })
-      )
-    } else {
-      throw error
-    }
+    if (!(error instanceof UsernameExistsException)) throw error
+    // Already purchased — account exists, just send a new set-password link
   }
+
+  const token = generateAuthToken()
+  await storeAuthToken(token, email, "setup")
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
 
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     to: email,
     subject: "Your Training Foundations course is ready!",
-    html: welcomeEmail(email, tempPassword),
+    html: welcomeEmail(email, setPasswordUrl),
   })
 }
 

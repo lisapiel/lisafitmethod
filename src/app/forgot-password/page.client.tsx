@@ -1,10 +1,8 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { resetPassword, confirmResetPassword } from "aws-amplify/auth"
 
-type Step = "email" | "code"
+type Step = "email" | "sent"
 
 const fieldStyle: React.CSSProperties = {
   display: "block",
@@ -13,7 +11,7 @@ const fieldStyle: React.CSSProperties = {
   border: "1px solid #2a2a2a",
   color: "#f0e6d3",
   fontFamily: "var(--font-montserrat), sans-serif",
-  fontSize: 14,
+  fontSize: 16,
   padding: "14px 16px",
   outline: "none",
   marginBottom: 16,
@@ -47,52 +45,28 @@ const submitStyle: React.CSSProperties = {
 }
 
 export function ForgotPasswordClient() {
-  const router = useRouter()
   const [step, setStep] = useState<Step>("email")
   const [email, setEmail] = useState("")
-  const [code, setCode] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleRequestCode = async (e: React.FormEvent) => {
+  const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
     try {
-      await resetPassword({ username: email.trim().toLowerCase() })
-      setStep("code")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send code.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleConfirmReset = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-
-    if (newPassword !== confirmPassword) {
-      setError("Passwords don't match.")
-      return
-    }
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters.")
-      return
-    }
-
-    setLoading(true)
-    try {
-      await confirmResetPassword({
-        username: email.trim().toLowerCase(),
-        confirmationCode: code.trim(),
-        newPassword,
+      const res = await fetch("/api/auth/request-password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
-      router.push("/login")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reset password.")
+      if (!res.ok) {
+        setError("Something went wrong. Please try again.")
+        return
+      }
+      setStep("sent")
+    } catch {
+      setError("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -110,54 +84,31 @@ export function ForgotPasswordClient() {
       fontFamily: "var(--font-montserrat), sans-serif",
     }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 48 }}>
-        <span style={{
-          fontFamily: "var(--font-cormorant), serif",
-          fontSize: 24,
-          fontWeight: 600,
-          color: "#f0e6d3",
-        }}>
+        <span style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 24, fontWeight: 600, color: "#f0e6d3" }}>
           Lisa <span style={{ color: "#c9a96e" }}>Fit Method</span>
         </span>
       </Link>
 
-      <div style={{
-        width: "100%",
-        maxWidth: 420,
-        background: "#111",
-        border: "1px solid #1a1a1a",
-        padding: "48px 40px",
-      }}>
+      <div style={{ width: "100%", maxWidth: 420, background: "#111", border: "1px solid #1a1a1a", padding: "48px 40px" }}>
+
         {step === "email" && (
           <>
-            <p style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#c9a96e",
-              marginBottom: 8,
-            }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "#c9a96e", marginBottom: 8 }}>
               Password Reset
             </p>
-            <h1 style={{
-              fontFamily: "var(--font-cormorant), serif",
-              fontSize: 28,
-              fontWeight: 400,
-              color: "#f0e6d3",
-              marginBottom: 12,
-            }}>
+            <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 28, fontWeight: 400, color: "#f0e6d3", marginBottom: 12 }}>
               Forgot your password?
             </h1>
             <p style={{ fontSize: 13, color: "#666", lineHeight: 1.7, marginBottom: 32 }}>
-              Enter your email and we&apos;ll send you a code to reset your password.
+              Enter your email and we&apos;ll send you a link to set a new password.
             </p>
 
-            <form onSubmit={handleRequestCode}>
+            <form onSubmit={handleRequestReset}>
               <label style={labelStyle}>Email Address</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setError(null) }}
                 required
                 autoComplete="email"
                 style={fieldStyle}
@@ -167,8 +118,8 @@ export function ForgotPasswordClient() {
                 <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16 }}>{error}</p>
               )}
 
-              <button type="submit" disabled={loading} style={submitStyle}>
-                {loading ? "Sending…" : "Send Reset Code →"}
+              <button type="submit" disabled={loading} style={{ ...submitStyle, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+                {loading ? "Sending…" : "Send Reset Link →"}
               </button>
             </form>
 
@@ -180,88 +131,29 @@ export function ForgotPasswordClient() {
           </>
         )}
 
-        {step === "code" && (
+        {step === "sent" && (
           <>
-            <p style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#c9a96e",
-              marginBottom: 8,
-            }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "#c9a96e", marginBottom: 8 }}>
               Check Your Email
             </p>
-            <h1 style={{
-              fontFamily: "var(--font-cormorant), serif",
-              fontSize: 28,
-              fontWeight: 400,
-              color: "#f0e6d3",
-              marginBottom: 12,
-            }}>
-              Enter your code
+            <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 28, fontWeight: 400, color: "#f0e6d3", marginBottom: 12 }}>
+              Link on its way
             </h1>
-            <p style={{ fontSize: 13, color: "#666", lineHeight: 1.7, marginBottom: 32 }}>
-              We sent a reset code to <strong style={{ color: "#888" }}>{email}</strong>. Enter it below with your new password.
+            <p style={{ fontSize: 13, color: "#666", lineHeight: 1.7, marginBottom: 8 }}>
+              If <strong style={{ color: "#888" }}>{email}</strong> has an account, you&apos;ll receive a password reset link shortly.
             </p>
-
-            <form onSubmit={handleConfirmReset}>
-              <label style={labelStyle}>Reset Code</label>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                required
-                autoComplete="one-time-code"
-                placeholder="000000"
-                style={{ ...fieldStyle, letterSpacing: "0.2em", textAlign: "center" }}
-              />
-              <label style={labelStyle}>New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                style={fieldStyle}
-              />
-              <label style={labelStyle}>Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                style={fieldStyle}
-              />
-
-              {error && (
-                <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16 }}>{error}</p>
-              )}
-
-              <button type="submit" disabled={loading} style={submitStyle}>
-                {loading ? "Saving…" : "Set New Password →"}
-              </button>
-            </form>
-
-            <div style={{ marginTop: 24, textAlign: "center" }}>
-              <button
-                type="button"
-                onClick={() => setStep("email")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#555",
-                  fontSize: 12,
-                  cursor: "pointer",
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                }}
-              >
-                ← Use a different email
-              </button>
-            </div>
+            <p style={{ fontSize: 13, color: "#555", lineHeight: 1.7, marginBottom: 32 }}>
+              The link expires in 48 hours. Check your spam folder if you don&apos;t see it within a minute.
+            </p>
+            <Link
+              href="/login"
+              style={{ display: "block", textAlign: "center", fontSize: 12, color: "#555", textDecoration: "none", letterSpacing: "0.05em" }}
+            >
+              ← Back to login
+            </Link>
           </>
         )}
+
       </div>
     </main>
   )
