@@ -2,13 +2,26 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 
 const HIDDEN_PREFIXES = ["/admin", "/training-foundations"]
 
 export default function SiteHeader() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [coursesOpen, setCoursesOpen] = useState(false)
+  const coursesRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!coursesOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (coursesRef.current && !coursesRef.current.contains(e.target as Node)) {
+        setCoursesOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [coursesOpen])
 
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null
 
@@ -115,31 +128,37 @@ export default function SiteHeader() {
           color: rgba(240, 230, 211, 0.75);
           text-decoration: none;
         }
-        .nav-courses-wrap { position: relative; }
-        .nav-courses-label {
+        .nav-courses-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .nav-courses-btn {
           font-family: var(--font-dm-sans), sans-serif;
           font-size: 11px;
           font-weight: 500;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: rgba(240, 230, 211, 0.65);
-          cursor: default;
-          user-select: none;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
           transition: color 0.2s;
+          line-height: 1;
         }
-        .nav-courses-wrap:hover .nav-courses-label { color: #c8a97e; }
+        .nav-courses-btn:hover, .nav-courses-btn.open { color: #c8a97e; }
         .nav-courses-dropdown {
-          display: none;
           position: absolute;
-          top: calc(100% + 18px);
+          top: 100%;
           left: -16px;
+          margin-top: 16px;
           background: rgba(10, 10, 10, 0.98);
           border: 1px solid rgba(255,255,255,0.08);
           padding: 6px 0;
-          min-width: 210px;
+          min-width: 220px;
           z-index: 200;
         }
-        .nav-courses-wrap:hover .nav-courses-dropdown { display: block; }
         .nav-courses-dropdown a {
           display: block;
           padding: 10px 18px;
@@ -172,7 +191,6 @@ export default function SiteHeader() {
           letter-spacing: 0.25em;
           text-transform: uppercase;
           color: rgba(240, 230, 211, 0.3);
-          margin-bottom: 10px;
         }
         .mobile-sub-link {
           font-family: var(--font-dm-sans), sans-serif;
@@ -202,14 +220,24 @@ export default function SiteHeader() {
           {navLinks.map((l) => {
             if (l.href === "/courses") {
               return (
-                <div key={l.href} className="nav-courses-wrap">
-                  <span className="nav-courses-label">Courses</span>
-                  <div className="nav-courses-dropdown">
-                    <Link href="/courses">Courses &amp; Programs</Link>
-                    <Link href="/free-guide">
-                      Free Foundation Guide <span className="nav-free-badge">Free</span>
-                    </Link>
-                  </div>
+                <div key={l.href} ref={coursesRef} className="nav-courses-wrap">
+                  <button
+                    className={`nav-courses-btn${coursesOpen ? " open" : ""}`}
+                    onClick={() => setCoursesOpen((o) => !o)}
+                    aria-expanded={coursesOpen}
+                  >
+                    Courses
+                  </button>
+                  {coursesOpen && (
+                    <div className="nav-courses-dropdown">
+                      <Link href="/courses" onClick={() => setCoursesOpen(false)}>
+                        Courses &amp; Programs
+                      </Link>
+                      <Link href="/free-guide" onClick={() => setCoursesOpen(false)}>
+                        Free Foundation Guide <span className="nav-free-badge">Free</span>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )
             }
