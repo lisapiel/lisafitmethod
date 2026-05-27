@@ -216,10 +216,16 @@ export function TrackerCheckoutClient() {
             <em>Use it forever.</em>
           </h1>
 
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "24px 0", paddingBottom: 24, borderBottom: "1px solid #1a1a1a" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "24px 0 12px", paddingBottom: 0 }}>
             <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$17</span>
             <span style={{ fontSize: 12, color: "#666" }}>one-time · lifetime access</span>
           </div>
+          <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 0, paddingBottom: 24, borderBottom: "1px solid #1a1a1a" }}>
+            Lifetime access refers to the lifetime of the platform.{" "}
+            <Link href="/terms#lifetime-access" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
+              See terms.
+            </Link>
+          </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
             {[

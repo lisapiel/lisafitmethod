@@ -528,6 +528,13 @@ export function CheckoutClient() {
             ))}
           </div>
 
+          <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 20 }}>
+            Lifetime access refers to the lifetime of the platform.{" "}
+            <Link href="/terms#lifetime-access" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
+              See terms.
+            </Link>
+          </p>
+
           {/* Order bump */}
           <label
             style={{
