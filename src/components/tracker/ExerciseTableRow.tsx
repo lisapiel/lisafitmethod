@@ -175,13 +175,13 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
           <span style={{ fontSize: 9, color: "#3a3a3a", fontFamily: "var(--font-montserrat), sans-serif", width: 26, flexShrink: 0 }}>
             Set {i + 1}
           </span>
-          <span style={{ fontSize: "0.65rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif", flex: 1 }}>
+          <span style={{ fontSize: "0.65rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif" }}>
             {exercise.type === "weight_reps" && `${s.weight ?? ""} ${s.unit ?? weightUnit}  ·  ${s.reps ?? ""} reps`}
             {exercise.type === "reps_only" && `${s.reps ?? ""} reps`}
             {exercise.type === "time" && `${s.minutes ?? 0}:${String(s.seconds ?? 0).padStart(2, "0")}`}
             {exercise.type === "weight_time" && `${s.weight ?? ""} ${s.unit ?? weightUnit}  ·  ${s.minutes ?? 0}:${String(s.seconds ?? 0).padStart(2, "0")}`}
           </span>
-          <span style={{ color: gold, fontSize: "0.7rem" }}>✓</span>
+          <span style={{ color: gold, fontSize: "0.7rem", marginLeft: 6 }}>✓</span>
           <button
             onClick={() => handleRemoveLogged(i)}
             style={{ background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: "1rem", padding: "0 2px", lineHeight: 1 }}

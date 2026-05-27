@@ -1,6 +1,9 @@
 "use client"
+import { useState } from "react"
 import { useTracker } from "./TrackerContext"
 import { SetLog, TrackerWeek } from "@/lib/trackerStorage"
+
+type SortMode = "recent" | "name" | "weight"
 
 const gold = "#c9a96e"
 const cream = "#f0e6d3"
@@ -49,6 +52,8 @@ function weekIsActive(week: TrackerWeek): boolean {
 
 export function ProgressTab() {
   const { data } = useTracker()
+  const [filter, setFilter] = useState("")
+  const [sort, setSort] = useState<SortMode>("recent")
 
   // Sets logged (all time)
   const totalSets = data.weeks.reduce(
@@ -97,7 +102,20 @@ export function ProgressTab() {
 
   const allExercises = data.days.flatMap((d) => d.exercises)
   const uniqueExercises = [...new Map(allExercises.map((e) => [e.id, e])).values()]
-  const exercisesWithData = uniqueExercises.filter((e) => (allSetsById[e.id] ?? []).length > 0)
+
+  const exercisesWithData = uniqueExercises
+    .filter((e) => (allSetsById[e.id] ?? []).length > 0)
+    .filter((e) => !filter.trim() || e.name.toLowerCase().includes(filter.toLowerCase()))
+    .sort((a, b) => {
+      if (sort === "name") return a.name.localeCompare(b.name)
+      if (sort === "weight") {
+        return getScore(allSetsById[b.id] ?? [], b.type) - getScore(allSetsById[a.id] ?? [], a.type)
+      }
+      // "recent": sort by the highest week index that has data for this exercise
+      const lastWeekA = setsPerExercisePerWeek.reduce((last, byEx, wi) => byEx[a.id]?.length ? wi : last, -1)
+      const lastWeekB = setsPerExercisePerWeek.reduce((last, byEx, wi) => byEx[b.id]?.length ? wi : last, -1)
+      return lastWeekB - lastWeekA
+    })
 
   return (
     <div style={{ padding: "24px 16px 48px" }}>
@@ -157,9 +175,52 @@ export function ProgressTab() {
         </p>
       ) : (
         <>
-          <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: muted, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: 12 }}>
-            By Exercise
-          </p>
+          {/* Filter + sort controls */}
+          <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <input
+              type="text"
+              placeholder="Search exercises..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              style={{
+                flex: "1 1 140px",
+                background: "#0d0d0d",
+                border: `1px solid ${border}`,
+                color: cream,
+                fontFamily: "var(--font-montserrat), sans-serif",
+                fontSize: 12,
+                padding: "8px 10px",
+                outline: "none",
+                minWidth: 0,
+              }}
+            />
+            <div style={{ display: "flex", gap: 0, flexShrink: 0 }}>
+              {(["recent", "name", "weight"] as SortMode[]).map((mode) => {
+                const labels: Record<SortMode, string> = { recent: "Recent", name: "A–Z", weight: "Heaviest" }
+                const active = sort === mode
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setSort(mode)}
+                    style={{
+                      background: active ? "#1e1e1e" : "none",
+                      border: `1px solid ${active ? "#2a2a2a" : border}`,
+                      borderLeft: mode === "recent" ? undefined : "none",
+                      color: active ? cream : "#3a3a3a",
+                      fontFamily: "var(--font-montserrat), sans-serif",
+                      fontSize: 9,
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "8px 10px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {labels[mode]}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
           <div style={{ border: `1px solid ${border}`, background: "#0d0d0d" }}>
             {exercisesWithData.map((exercise, i) => {
               const allSets = allSetsById[exercise.id] ?? []
