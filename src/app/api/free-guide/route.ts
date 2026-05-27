@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     await saveLead(email, source)
 
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: "Lisa Fit Method <onboarding@resend.dev>",
+    const { error: resendError } = await resend.emails.send({
+      from: "Lisa Fit Method <hello@lisafitmethod.com>",
       to: email,
       subject: "Your free guide is right here",
       html: `
@@ -60,6 +60,11 @@ export async function POST(req: Request) {
         </div>
       `,
     })
+
+    if (resendError) {
+      console.error("[FreeGuide] Resend error:", resendError)
+      return NextResponse.json({ error: "Failed to send email" }, { status: 500 })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
