@@ -557,17 +557,18 @@ export function CheckoutClient() {
               />
               <div>
                 <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                  Add the Lifetime Workout Tracker — +$17
+                  Add the Lifetime Workout Tracker +$17
                 </p>
                 <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
-                  Build your own workout days, track any exercise, and keep going forever — even after the program ends. Log unlimited weeks and see your previous numbers so you always know what to beat. Works like an app on your phone.
+                  Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat. Works like an app directly on your phone.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                   {[
-                    "Name your own workout days — Push, Pull, Leg Day, whatever works for you",
-                    "Track weight + reps, reps only, or duration per exercise",
-                    "See last week's numbers inline so progressive overload is built in",
-                    "Unlimited weeks, yours forever, even after the course ends",
+                    "Create your own workout days: Push, Pull, Legs, Glutes, Upper/Lower, or however you like to train",
+                    "Track weight + reps, reps only, or timed exercises for any movement",
+                    "See your previous numbers directly inside each workout so progressive overload becomes automatic",
+                    "Save unlimited workouts and training weeks with lifetime access",
+                    "Built to grow with you after the 4-week program is over",
                   ].map((f) => (
                     <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                       <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>

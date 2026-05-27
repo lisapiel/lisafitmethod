@@ -417,7 +417,7 @@ export default async function HomePage() {
             Get Instant Access
           </Link>
           <p style={{ marginTop: 20, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access.</strong> No subscription. Keep the program, the videos, and the tracking system for life.
+            One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>No subscription.</strong> Keep the program, the videos, and the tracking system with no recurring fees, ever.
           </p>
         </div>
       </section>
