@@ -115,6 +115,76 @@ export default function SiteHeader() {
           color: rgba(240, 230, 211, 0.75);
           text-decoration: none;
         }
+        .nav-courses-wrap { position: relative; }
+        .nav-courses-label {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 11px;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(240, 230, 211, 0.65);
+          cursor: default;
+          user-select: none;
+          transition: color 0.2s;
+        }
+        .nav-courses-wrap:hover .nav-courses-label { color: #c8a97e; }
+        .nav-courses-dropdown {
+          display: none;
+          position: absolute;
+          top: calc(100% + 18px);
+          left: -16px;
+          background: rgba(10, 10, 10, 0.98);
+          border: 1px solid rgba(255,255,255,0.08);
+          padding: 6px 0;
+          min-width: 210px;
+          z-index: 200;
+        }
+        .nav-courses-wrap:hover .nav-courses-dropdown { display: block; }
+        .nav-courses-dropdown a {
+          display: block;
+          padding: 10px 18px;
+          font-size: 11px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(240, 230, 211, 0.7) !important;
+          text-decoration: none;
+          white-space: nowrap;
+          font-family: var(--font-dm-sans), sans-serif;
+          font-weight: 500;
+          transition: color 0.2s, background 0.15s;
+        }
+        .nav-courses-dropdown a:hover { color: #c8a97e !important; background: rgba(200,169,126,0.06); }
+        .nav-free-badge {
+          margin-left: 8px;
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.12em;
+          color: #c8a97e;
+          border: 1px solid rgba(200,169,126,0.35);
+          padding: 2px 6px;
+          vertical-align: middle;
+          text-transform: uppercase;
+        }
+        .mobile-courses-label {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          color: rgba(240, 230, 211, 0.3);
+          margin-bottom: 10px;
+        }
+        .mobile-sub-link {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(240, 230, 211, 0.75);
+          text-decoration: none;
+          display: block;
+          padding-left: 12px;
+        }
         @media (max-width: 768px) {
           .site-header { padding: 0 24px; }
           .site-header-nav { display: none; }
@@ -129,9 +199,22 @@ export default function SiteHeader() {
         <Link href="/" className="site-header-wordmark">Lisa Fit Method</Link>
 
         <nav className="site-header-nav">
-          {navLinks.map((l) => (
-            <Link key={l.href} href={l.href}>{l.label}</Link>
-          ))}
+          {navLinks.map((l) => {
+            if (l.href === "/courses") {
+              return (
+                <div key={l.href} className="nav-courses-wrap">
+                  <span className="nav-courses-label">Courses</span>
+                  <div className="nav-courses-dropdown">
+                    <Link href="/courses">Courses &amp; Programs</Link>
+                    <Link href="/free-guide">
+                      Free Foundation Guide <span className="nav-free-badge">Free</span>
+                    </Link>
+                  </div>
+                </div>
+              )
+            }
+            return <Link key={l.href} href={l.href}>{l.label}</Link>
+          })}
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -149,9 +232,22 @@ export default function SiteHeader() {
       </header>
 
       <div className={`site-header-mobile-menu${menuOpen ? " open" : ""}`}>
-        {navLinks.map((l) => (
-          <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}>{l.label}</Link>
-        ))}
+        {navLinks.map((l) => {
+          if (l.href === "/courses") {
+            return (
+              <div key={l.href} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <span className="mobile-courses-label">Courses</span>
+                <Link href="/courses" className="mobile-sub-link" onClick={() => setMenuOpen(false)}>
+                  Courses &amp; Programs
+                </Link>
+                <Link href="/free-guide" className="mobile-sub-link" onClick={() => setMenuOpen(false)}>
+                  Free Foundation Guide
+                </Link>
+              </div>
+            )
+          }
+          return <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}>{l.label}</Link>
+        })}
         <Link
           href="/checkout"
           onClick={() => setMenuOpen(false)}

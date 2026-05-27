@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY } from "@/lib/pricing"
+import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
 
 const paper = "#faf8f5"
 const panel = "#f0ebe2"
@@ -74,12 +75,6 @@ const MOVEMENTS = [
       "Brace before you move, not halfway through the rep.",
     ],
   },
-]
-
-const WARMUP = [
-  { name: "Glute Bridge", note: "activation, wake the glutes up", sets: "1 x 15" },
-  { name: "Lateral Band Walk", note: "light band, activation only", sets: "1 x 15 ea" },
-  { name: "World's Greatest Stretch", note: "slow and controlled", sets: "5 ea" },
 ]
 
 const MAIN_WORKOUT = [
@@ -189,45 +184,13 @@ function ExRow({ name, note, sets }: { name: string; note: string; sets: string 
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function FreeGuideClient() {
-  const [email, setEmail] = useState("")
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "unlocked" | "error">("idle")
-  const [errorMsg, setErrorMsg] = useState("")
-  const unlocked = submitStatus === "unlocked"
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email.includes("@")) {
-      setErrorMsg("Please enter a valid email address.")
-      setSubmitStatus("error")
-      return
-    }
-    setSubmitStatus("submitting")
-    try {
-      const res = await fetch("/api/free-guide", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
-      if (res.ok) {
-        setSubmitStatus("unlocked")
-      } else {
-        const data = await res.json() as { error?: string }
-        setErrorMsg(data.error ?? "Something went wrong. Please try again.")
-        setSubmitStatus("error")
-      }
-    } catch {
-      setErrorMsg("Connection error. Please try again.")
-      setSubmitStatus("error")
-    }
-  }
+  const [unlocked, setUnlocked] = useState(false)
 
   return (
     <main style={{ background: paper, minHeight: "100vh" }}>
       <style>{`
         @media (max-width: 480px) {
           .fg-move-offset { margin-left: 0 !important; }
-          .fg-gate-form { flex-direction: column !important; }
-          .fg-gate-form input, .fg-gate-form button { width: 100% !important; flex: unset !important; }
         }
       `}</style>
 
@@ -281,74 +244,7 @@ export default function FreeGuideClient() {
         <Rule />
 
         {/* Email gate */}
-        {submitStatus === "unlocked" ? (
-          <div style={{ background: panel, borderLeft: `2px solid ${gold}`, padding: "1.5rem 1.75rem", marginBottom: "2.5rem" }}>
-            <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.1rem", color: goldDeep, marginBottom: "0.3rem" }}>
-              You are in.
-            </p>
-            <p style={{ fontFamily: dmSans, fontSize: "0.85rem", color: muted, margin: 0 }}>
-              The full guide is unlocked below. Check your inbox for a copy to keep.
-            </p>
-          </div>
-        ) : (
-          <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginBottom: "2.5rem" }}>
-            <Label>One more step</Label>
-            <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.4rem, 3.5vw, 1.75rem)", color: "#fff", fontWeight: 700, marginBottom: "0.75rem", marginTop: 0, lineHeight: 1.15 }}>
-              Enter your email to see inside the program
-            </h2>
-            <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.5rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-              Get the Day A workout breakdown, the full pitch, and a copy of this guide sent straight to your inbox.
-            </p>
-            <form onSubmit={handleSubmit} className="fg-gate-form" style={{ display: "flex", gap: "0.5rem", maxWidth: 480, flexWrap: "wrap" }}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); if (submitStatus === "error") setSubmitStatus("idle") }}
-                placeholder="your@email.com"
-                required
-                style={{
-                  flex: "1 1 200px",
-                  background: "#1a1a1a",
-                  border: `1px solid ${submitStatus === "error" ? "#884444" : "#2a2722"}`,
-                  color: "#f0ebe2",
-                  fontFamily: dmSans,
-                  fontSize: "0.9rem",
-                  padding: "0.75rem 1rem",
-                  outline: "none",
-                }}
-              />
-              <button
-                type="submit"
-                disabled={submitStatus === "submitting"}
-                style={{
-                  background: gold,
-                  color: black,
-                  border: "none",
-                  fontFamily: dmSans,
-                  fontSize: "0.72rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  padding: "0.75rem 1.5rem",
-                  cursor: submitStatus === "submitting" ? "default" : "pointer",
-                  opacity: submitStatus === "submitting" ? 0.7 : 1,
-                  flexShrink: 0,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {submitStatus === "submitting" ? "Sending..." : "Get the Guide"}
-              </button>
-            </form>
-            {submitStatus === "error" && (
-              <p style={{ fontFamily: dmSans, fontSize: "0.8rem", color: "#cc6666", marginTop: "0.5rem" }}>
-                {errorMsg}
-              </p>
-            )}
-            <p style={{ fontFamily: dmSans, fontSize: "0.68rem", color: "#555", marginTop: "0.75rem" }}>
-              No spam. Unsubscribe any time.
-            </p>
-          </div>
-        )}
+        <FreeGuideSignupForm source="free-guide-page" onSuccess={() => setUnlocked(true)} />
 
         {/* Gated content */}
         {unlocked && (
@@ -371,11 +267,10 @@ export default function FreeGuideClient() {
               <p style={{ fontSize: "0.75rem", letterSpacing: "0.12em", textTransform: "uppercase", color: gold, marginBottom: "1.5rem", fontFamily: dmSans }}>
                 Glutes · Legs · Stability · 45-60 min
               </p>
-              <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#5a544b", marginBottom: "0.75rem", fontWeight: 500, fontFamily: dmSans }}>
-                Warm-up (10 min, not optional)
+              <p style={{ fontSize: "0.87rem", color: "#6a6058", lineHeight: 1.7, marginBottom: "1.25rem", fontFamily: dmSans, fontStyle: "italic" }}>
+                Every session also comes with a full warm-up and cool-down flow built in. Videos, movement cues, and mobility work designed to keep your body moving pain-free and actually protect it long term. That part matters more than most people realize, and it is all in there.
               </p>
-              {WARMUP.map((ex) => <ExRow key={ex.name} {...ex} />)}
-              <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#5a544b", margin: "1.5rem 0 0.75rem", fontWeight: 500, fontFamily: dmSans }}>
+              <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#5a544b", margin: "0 0 0.75rem", fontWeight: 500, fontFamily: dmSans }}>
                 Main Workout
               </p>
               {MAIN_WORKOUT.map((ex) => <ExRow key={ex.name} {...ex} />)}

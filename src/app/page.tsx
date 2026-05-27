@@ -3,6 +3,7 @@ import Link from "next/link"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
+import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -417,6 +418,29 @@ export default async function HomePage() {
           </Link>
           <p style={{ marginTop: 20, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
             One-time payment. <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access.</strong> No subscription. Keep the program, the videos, and the tracking system for life.
+          </p>
+        </div>
+      </section>
+
+      {/* FREE GUIDE — soft secondary CTA */}
+      <section style={{ background: "#faf8f5", padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 80px)" }}>
+        <style>{`
+          .fg-home-inner { max-width: 560px; }
+          @media (min-width: 769px) { .fg-home-inner { max-width: 520px; } }
+        `}</style>
+        <div className="fg-home-inner">
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Not ready to commit?
+          </p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.9rem, 4vw, 2.6rem)", fontWeight: 700, color: "#0a0a0a", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 16, marginTop: 0 }}>
+            Start with the free guide.
+          </h2>
+          <p style={{ fontSize: "clamp(0.9rem, 2vw, 1rem)", color: "#6b6560", lineHeight: 1.72, marginBottom: 28, maxWidth: 460, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Get the 5 foundation movements, the exact cues I teach, and a look inside the program. Enter your email and I&apos;ll send it straight to you.
+          </p>
+          <FreeGuideSignupForm source="homepage" variant="compact" />
+          <p style={{ fontSize: 12, color: "#b5afa8", marginTop: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            No spam. Just the guide and the occasional training tip.
           </p>
         </div>
       </section>

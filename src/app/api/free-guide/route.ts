@@ -4,7 +4,7 @@ import { Resend } from "resend"
 const APPSYNC_URL = process.env.APPSYNC_URL ?? "https://kcr4zqjknjerveglimvj5ogi2m.appsync-api.us-east-2.amazonaws.com/graphql"
 const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY ?? "da2-y44brrwzkncnhcjg6wxr23xnve"
 
-async function saveLead(email: string) {
+async function saveLead(email: string, source: string) {
   try {
     await fetch(APPSYNC_URL, {
       method: "POST",
@@ -13,7 +13,7 @@ async function saveLead(email: string) {
         query: `mutation Create($input: CreateLeadInput!) {
           createLead(input: $input) { id }
         }`,
-        variables: { input: { email, source: "free-guide" } },
+        variables: { input: { email, source } },
       }),
     })
   } catch (err) {
@@ -23,14 +23,15 @@ async function saveLead(email: string) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json() as { email?: string }
+    const body = await req.json() as { email?: string; source?: string }
     const email = body.email?.trim().toLowerCase()
+    const source = body.source ?? "free-guide-page"
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email required" }, { status: 400 })
     }
 
-    await saveLead(email)
+    await saveLead(email, source)
 
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
