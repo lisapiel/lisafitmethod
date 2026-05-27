@@ -49,10 +49,13 @@ export function makeId(): string {
 }
 
 function emptyData(): TrackerData {
+  const days: WorkoutDay[] = [1, 2, 3, 4].map((n, i) => ({
+    id: makeId(), name: `Day ${n}`, exercises: [], order: i,
+  }))
   return {
     version: 1,
     weightUnit: "lbs",
-    days: [],
+    days,
     weeks: [{ id: makeId(), number: 1, createdAt: new Date().toISOString(), logs: {} }],
     currentWeekIndex: 0,
   }

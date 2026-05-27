@@ -1,23 +1,17 @@
 "use client"
 import { useState } from "react"
 import { useTracker } from "./TrackerContext"
-import { TrackerHeader } from "./TrackerHeader"
-import { DaysListView } from "./DaysListView"
-import { LoggingView } from "./LoggingView"
-import { ManageDayView } from "./ManageDayView"
+import { TrackerHeader, TrackerTab } from "./TrackerHeader"
+import { WorkoutTabView } from "./WorkoutTabView"
+import { ProgressTab } from "./ProgressTab"
+import { CoursesTab } from "./CoursesTab"
 import { SettingsView } from "./SettingsView"
-import { PromoFooter } from "./PromoFooter"
 import { HomeScreenPrompt } from "./HomeScreenPrompt"
-
-export type View =
-  | { kind: "days" }
-  | { kind: "log"; dayId: string }
-  | { kind: "manage"; dayId: string }
-  | { kind: "settings" }
 
 export function TrackerApp() {
   const { ready } = useTracker()
-  const [view, setView] = useState<View>({ kind: "days" })
+  const [activeTab, setActiveTab] = useState<TrackerTab>("workout")
+  const [showSettings, setShowSettings] = useState(false)
 
   if (!ready) {
     return (
@@ -28,46 +22,27 @@ export function TrackerApp() {
     )
   }
 
-  const goBack = () => setView({ kind: "days" })
-
-  const headerTitle =
-    view.kind === "log" ? "Log Workout" :
-    view.kind === "manage" ? "Manage Day" :
-    view.kind === "settings" ? "Settings" :
-    "My Tracker"
-
-  const showBack = view.kind !== "days"
-
   return (
     <>
       <TrackerHeader
-        title={headerTitle}
-        showBack={showBack}
-        onBack={goBack}
-        onSettings={() => setView({ kind: "settings" })}
-        showSettings={view.kind === "days"}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onSettings={() => setShowSettings(true)}
       />
 
       <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" as unknown as undefined }}>
-        {view.kind === "days" && (
-          <DaysListView
-            onLog={(dayId) => setView({ kind: "log", dayId })}
-            onManage={(dayId) => setView({ kind: "manage", dayId })}
-          />
-        )}
-        {view.kind === "log" && (
-          <LoggingView dayId={view.dayId} onBack={goBack} />
-        )}
-        {view.kind === "manage" && (
-          <ManageDayView dayId={view.dayId} onBack={goBack} />
-        )}
-        {view.kind === "settings" && (
-          <SettingsView onBack={goBack} />
-        )}
+        {activeTab === "workout" && <WorkoutTabView />}
+        {activeTab === "progress" && <ProgressTab />}
+        {activeTab === "courses" && <CoursesTab />}
       </div>
 
+      {showSettings && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 50, background: "#0a0a0a", overflowY: "auto" }}>
+          <SettingsView onBack={() => setShowSettings(false)} />
+        </div>
+      )}
+
       <HomeScreenPrompt />
-      <PromoFooter />
     </>
   )
 }
