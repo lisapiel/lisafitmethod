@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb"
-import { generateGuidePDF } from "@/lib/generateGuidePDF"
 
 function makeDynamo() {
   return DynamoDBDocumentClient.from(
@@ -98,12 +97,23 @@ const emailHtml = `
 
           <!-- CTA -->
           <tr>
-            <td style="padding:8px 40px 36px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <a href="https://lisafitmethod.com/free-guide?unlocked=1"
-                 style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:14px 32px;">
-                Read the Guide Online &rarr;
-              </a>
-              <p style="margin:14px 0 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:11.5px;color:#9c9590;">The PDF with all coaching cues is attached to this email as well.</p>
+            <td style="padding:8px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="https://lisafitmethod.com/free-guide?unlocked=1"
+                       style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:13px 28px;">
+                      Read Online &rarr;
+                    </a>
+                  </td>
+                  <td>
+                    <a href="https://lisafitmethod.com/downloads/lisa-fit-method-5-foundations.pdf"
+                       style="display:inline-block;background:transparent;color:#c8a97e;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:13px 24px;border:1px solid #c8a97e;">
+                      Download PDF
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
@@ -168,29 +178,12 @@ export async function POST(req: Request) {
 
     await saveLead(email, source)
 
-    let pdfBuffer: Buffer | undefined
-    try {
-      pdfBuffer = await generateGuidePDF()
-    } catch (pdfErr) {
-      console.error("[FreeGuide] PDF generation failed (email will send without attachment):", pdfErr)
-    }
-
     const resend = new Resend(process.env.RESEND_API_KEY)
     const { error: resendError } = await resend.emails.send({
       from: "Lisa Fit Method <hello@lisafitmethod.com>",
       to: email,
       subject: "Your free guide + PDF cheat sheet",
       html: emailHtml,
-      ...(pdfBuffer
-        ? {
-            attachments: [
-              {
-                filename: "lisa-fit-method-5-foundations.pdf",
-                content: pdfBuffer,
-              },
-            ],
-          }
-        : {}),
     })
 
     if (resendError) {
