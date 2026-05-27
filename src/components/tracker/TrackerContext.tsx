@@ -1,5 +1,6 @@
 "use client"
-import { createContext, useContext, useEffect, useState, useCallback } from "react"
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react"
+import { fetchAuthSession } from "aws-amplify/auth"
 import {
   TrackerData,
   TrackerExercise,
@@ -10,6 +11,40 @@ import {
   saveTrackerData,
   makeId,
 } from "@/lib/trackerStorage"
+
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const session = await fetchAuthSession()
+    return session.tokens?.accessToken?.toString() ?? null
+  } catch {
+    return null
+  }
+}
+
+async function fetchServerTracker(token: string): Promise<TrackerData | null> {
+  try {
+    const res = await fetch("/api/training/tracker", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) return null
+    const data = await res.json() as { trackerData: TrackerData | null }
+    return data.trackerData
+  } catch {
+    return null
+  }
+}
+
+async function pushServerTracker(token: string, data: TrackerData): Promise<void> {
+  try {
+    await fetch("/api/training/tracker", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ trackerData: data }),
+    })
+  } catch {
+    // fire-and-forget — localStorage already has the save
+  }
+}
 
 interface TrackerContextValue {
   ready: boolean
@@ -45,17 +80,45 @@ export function TrackerProvider({ userId, children }: { userId: string; children
     weeks: [],
     currentWeekIndex: 0,
   })
+  const tokenRef = useRef<string | null>(null)
 
   useEffect(() => {
-    const loaded = loadTrackerData(userId)
-    setData(loaded)
-    setReady(true)
+    let cancelled = false
+    async function init() {
+      const local = loadTrackerData(userId)
+      setData(local)
+      setReady(true)
+
+      const token = await getAccessToken()
+      if (cancelled) return
+      tokenRef.current = token
+
+      if (token) {
+        const server = await fetchServerTracker(token)
+        if (cancelled) return
+        if (server) {
+          const serverWeeks = server.weeks?.length ?? 0
+          const localWeeks = local.weeks?.length ?? 0
+          if (serverWeeks >= localWeeks) {
+            setData(server)
+            saveTrackerData(userId, server)
+          } else {
+            pushServerTracker(token, local)
+          }
+        } else if (local.weeks.length > 0) {
+          pushServerTracker(token, local)
+        }
+      }
+    }
+    init()
+    return () => { cancelled = true }
   }, [userId])
 
   const persist = useCallback(
     (next: TrackerData) => {
       setData(next)
       saveTrackerData(userId, next)
+      if (tokenRef.current) pushServerTracker(tokenRef.current, next)
     },
     [userId]
   )
