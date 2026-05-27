@@ -32,12 +32,23 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #2a2a2a",
   color: "#f0e6d3",
   fontFamily: "var(--font-montserrat), sans-serif",
-  fontSize: 15,
-  padding: "7px 8px",
+  fontSize: 13,
+  padding: "6px 5px",
   textAlign: "center",
   outline: "none",
   WebkitAppearance: "none",
   MozAppearance: "textfield",
+  boxSizing: "border-box",
+  minWidth: 0,
+}
+
+const setLabelStyle: React.CSSProperties = {
+  fontSize: 9,
+  color: muted,
+  fontFamily: "var(--font-montserrat), sans-serif",
+  flexShrink: 0,
+  letterSpacing: "0.04em",
+  textTransform: "uppercase",
 }
 
 export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets, weightUnit }: ExerciseTableRowProps) {
@@ -50,6 +61,10 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
 
   const updatePending = (index: number, field: keyof PendingSet, value: string) => {
     setPendingRows(pendingRows.map((p, i) => i === index ? { ...p, [field]: value } : p))
+  }
+
+  const removePendingRow = (index: number) => {
+    setPendingRows(pendingRows.filter((_, i) => i !== index))
   }
 
   const handleLog = (rowIndex: number) => {
@@ -70,11 +85,16 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
       const s = parseInt(p.seconds) || 0
       if (!m && !s) return
       Object.assign(base, { minutes: m, seconds: s })
+    } else if (exercise.type === "weight_time") {
+      const w = parseFloat(p.weight)
+      const m = parseInt(p.minutes) || 0
+      const s = parseInt(p.seconds) || 0
+      if (!w || (!m && !s)) return
+      Object.assign(base, { weight: w, unit: weightUnit, minutes: m, seconds: s })
     }
 
     addSet(weekId, dayId, base)
-    const remaining = pendingRows.filter((_, i) => i !== rowIndex)
-    setPendingRows(remaining.length === 0 ? [emptyPending()] : remaining)
+    setPendingRows(pendingRows.filter((_, i) => i !== rowIndex))
   }
 
   const handleRemoveLogged = (setIndex: number) => {
@@ -86,15 +106,22 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
     if (exercise.type === "weight_reps") return `${s.weight ?? "?"}×${s.reps ?? "?"}`
     if (exercise.type === "reps_only") return `${s.reps ?? "?"} reps`
     if (exercise.type === "time") return `${s.minutes ?? 0}:${String(s.seconds ?? 0).padStart(2, "0")}`
+    if (exercise.type === "weight_time") return `${s.weight ?? "?"}${s.unit ?? weightUnit} · ${s.minutes ?? 0}:${String(s.seconds ?? 0).padStart(2, "0")}`
     return ""
   }
 
   const typeBadge =
     exercise.type === "weight_reps" ? "Weight + Reps" :
-    exercise.type === "reps_only" ? "Reps Only" : "Time"
+    exercise.type === "reps_only" ? "Reps Only" :
+    exercise.type === "time" ? "Time" : "Weight + Time"
 
   return (
     <div style={{ borderBottom: `1px solid ${rowBorder}`, padding: "16px 16px 12px" }}>
+      <style>{`
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      `}</style>
+
       {/* Exercise header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
@@ -144,19 +171,20 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
 
       {/* Logged sets */}
       {loggedSets.map((s, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: "0.55rem", color: "#3a3a3a", fontFamily: "var(--font-montserrat), sans-serif", width: 36, flexShrink: 0 }}>
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 9, color: "#3a3a3a", fontFamily: "var(--font-montserrat), sans-serif", width: 26, flexShrink: 0 }}>
             Set {i + 1}
           </span>
           <span style={{ fontSize: "0.65rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif", flex: 1 }}>
             {exercise.type === "weight_reps" && `${s.weight ?? ""} ${s.unit ?? weightUnit}  ·  ${s.reps ?? ""} reps`}
             {exercise.type === "reps_only" && `${s.reps ?? ""} reps`}
             {exercise.type === "time" && `${s.minutes ?? 0}:${String(s.seconds ?? 0).padStart(2, "0")}`}
+            {exercise.type === "weight_time" && `${s.weight ?? ""} ${s.unit ?? weightUnit}  ·  ${s.minutes ?? 0}:${String(s.seconds ?? 0).padStart(2, "0")}`}
           </span>
           <span style={{ color: gold, fontSize: "0.7rem" }}>✓</span>
           <button
             onClick={() => handleRemoveLogged(i)}
-            style={{ background: "none", border: "none", color: "#2a2a2a", cursor: "pointer", fontSize: "0.9rem", padding: "0 2px", lineHeight: 1 }}
+            style={{ background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: "1rem", padding: "0 2px", lineHeight: 1 }}
             aria-label="Remove set"
           >
             ×
@@ -166,8 +194,8 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
 
       {/* Pending input rows */}
       {pendingRows.map((p, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-          <span style={{ fontSize: "0.55rem", color: "#3a3a3a", fontFamily: "var(--font-montserrat), sans-serif", width: 36, flexShrink: 0 }}>
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 6, flexWrap: "nowrap" }}>
+          <span style={{ ...setLabelStyle, width: 26 }}>
             Set {loggedSets.length + i + 1}
           </span>
 
@@ -179,28 +207,33 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
                 placeholder={weightUnit}
                 value={p.weight}
                 onChange={(e) => updatePending(i, "weight", e.target.value)}
-                style={{ ...inputStyle, width: 56 }}
+                style={{ ...inputStyle, width: 58 }}
               />
+              <span style={setLabelStyle}>Weight</span>
               <input
                 type="number"
                 inputMode="numeric"
-                placeholder="reps"
+                placeholder="0"
                 value={p.reps}
                 onChange={(e) => updatePending(i, "reps", e.target.value)}
-                style={{ ...inputStyle, width: 48 }}
+                style={{ ...inputStyle, width: 50 }}
               />
+              <span style={setLabelStyle}>Reps</span>
             </>
           )}
 
           {exercise.type === "reps_only" && (
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="reps"
-              value={p.reps}
-              onChange={(e) => updatePending(i, "reps", e.target.value)}
-              style={{ ...inputStyle, width: 64 }}
-            />
+            <>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="0"
+                value={p.reps}
+                onChange={(e) => updatePending(i, "reps", e.target.value)}
+                style={{ ...inputStyle, width: 58 }}
+              />
+              <span style={setLabelStyle}>Reps</span>
+            </>
           )}
 
           {exercise.type === "time" && (
@@ -208,19 +241,51 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
               <input
                 type="number"
                 inputMode="numeric"
-                placeholder="min"
+                placeholder="0"
                 value={p.minutes}
                 onChange={(e) => updatePending(i, "minutes", e.target.value)}
-                style={{ ...inputStyle, width: 48 }}
+                style={{ ...inputStyle, width: 44 }}
               />
-              <span style={{ fontSize: "0.65rem", color: "#333" }}>:</span>
+              <span style={{ fontSize: 9, color: "#333", flexShrink: 0 }}>:</span>
               <input
                 type="number"
                 inputMode="numeric"
-                placeholder="sec"
+                placeholder="00"
                 value={p.seconds}
                 onChange={(e) => updatePending(i, "seconds", e.target.value)}
-                style={{ ...inputStyle, width: 48 }}
+                style={{ ...inputStyle, width: 44 }}
+              />
+              <span style={setLabelStyle}>Time</span>
+            </>
+          )}
+
+          {exercise.type === "weight_time" && (
+            <>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder={weightUnit}
+                value={p.weight}
+                onChange={(e) => updatePending(i, "weight", e.target.value)}
+                style={{ ...inputStyle, width: 54 }}
+              />
+              <span style={setLabelStyle}>Weight</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="0"
+                value={p.minutes}
+                onChange={(e) => updatePending(i, "minutes", e.target.value)}
+                style={{ ...inputStyle, width: 38 }}
+              />
+              <span style={{ fontSize: 9, color: "#333", flexShrink: 0 }}>:</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="00"
+                value={p.seconds}
+                onChange={(e) => updatePending(i, "seconds", e.target.value)}
+                style={{ ...inputStyle, width: 38 }}
               />
             </>
           )}
@@ -232,16 +297,33 @@ export function ExerciseTableRow({ exercise, dayId, weekId, loggedSets, prevSets
               border: "1px solid #2a2a2a",
               color: gold,
               fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: "0.55rem",
+              fontSize: 9,
               fontWeight: 700,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               cursor: "pointer",
-              padding: "7px 12px",
+              padding: "6px 8px",
               flexShrink: 0,
             }}
           >
             Log
+          </button>
+
+          <button
+            onClick={() => removePendingRow(i)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#444",
+              cursor: "pointer",
+              fontSize: "1rem",
+              padding: "0 2px",
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+            aria-label="Remove set row"
+          >
+            ×
           </button>
         </div>
       ))}

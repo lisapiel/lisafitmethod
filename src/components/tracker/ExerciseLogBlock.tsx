@@ -23,6 +23,12 @@ function formatSet(s: SetLog, type: TrackerExercise["type"], unit: string): stri
     const sec = s.seconds ?? 0
     return m > 0 ? `${m}:${String(sec).padStart(2, "0")}` : `${sec}s`
   }
+  if (type === "weight_time") {
+    const m = s.minutes ?? 0
+    const sec = s.seconds ?? 0
+    const time = m > 0 ? `${m}:${String(sec).padStart(2, "0")}` : `${sec}s`
+    return `${s.weight ?? 0} ${unit} · ${time}`
+  }
   return ""
 }
 
@@ -41,6 +47,7 @@ export function ExerciseLogBlock({
     weight_reps: "Weight + Reps",
     reps_only: "Reps Only",
     time: "Time",
+    weight_time: "Weight + Time",
   }
 
   return (

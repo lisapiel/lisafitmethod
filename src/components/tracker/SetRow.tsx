@@ -18,16 +18,17 @@ export function SetRow({ exerciseType, weightUnit, onLog }: SetRowProps) {
     if (exerciseType === "weight_reps") return !!weight && !!reps
     if (exerciseType === "reps_only") return !!reps
     if (exerciseType === "time") return !!(minutes || seconds)
+    if (exerciseType === "weight_time") return !!weight && !!(minutes || seconds)
     return false
   }
 
   const handleLog = () => {
     if (!canLog()) return
     onLog({
-      weight: exerciseType === "weight_reps" ? parseFloat(weight) : undefined,
+      weight: (exerciseType === "weight_reps" || exerciseType === "weight_time") ? parseFloat(weight) : undefined,
       reps: (exerciseType === "weight_reps" || exerciseType === "reps_only") ? parseInt(reps, 10) : undefined,
-      minutes: exerciseType === "time" ? (parseInt(minutes, 10) || 0) : undefined,
-      seconds: exerciseType === "time" ? (parseInt(seconds, 10) || 0) : undefined,
+      minutes: (exerciseType === "time" || exerciseType === "weight_time") ? (parseInt(minutes, 10) || 0) : undefined,
+      seconds: (exerciseType === "time" || exerciseType === "weight_time") ? (parseInt(seconds, 10) || 0) : undefined,
     })
     setWeight("")
     setReps("")
@@ -88,6 +89,44 @@ export function SetRow({ exerciseType, weightUnit, onLog }: SetRowProps) {
             style={inputBase}
           />
         </div>
+      )}
+
+      {exerciseType === "weight_time" && (
+        <>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 9, color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>{weightUnit}</div>
+            <input
+              type="number"
+              inputMode="decimal"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder="0"
+              style={inputBase}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 9, color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>Min</div>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              placeholder="0"
+              style={inputBase}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 9, color: "#555", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>Sec</div>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={seconds}
+              onChange={(e) => setSeconds(e.target.value)}
+              placeholder="0"
+              style={inputBase}
+            />
+          </div>
+        </>
       )}
 
       {exerciseType === "time" && (

@@ -12,6 +12,7 @@ const TYPE_LABELS: Record<TrackerExercise["type"], string> = {
   weight_reps: "Weight + Reps",
   reps_only: "Reps Only",
   time: "Time",
+  weight_time: "Weight + Time",
 }
 
 export function ExerciseRow({ exercise, onUpdate, onDelete }: ExerciseRowProps) {

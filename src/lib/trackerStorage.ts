@@ -17,7 +17,7 @@ export interface DayWorkoutLog {
 export interface TrackerExercise {
   id: string
   name: string
-  type: "weight_reps" | "reps_only" | "time"
+  type: "weight_reps" | "reps_only" | "time" | "weight_time"
   notes: string
   order: number
 }

@@ -10,6 +10,7 @@ const TYPE_OPTIONS: { value: TrackerExercise["type"]; label: string }[] = [
   { value: "weight_reps", label: "Weight + Reps" },
   { value: "reps_only", label: "Reps Only" },
   { value: "time", label: "Time" },
+  { value: "weight_time", label: "Weight + Time" },
 ]
 
 interface ExerciseTableProps {
