@@ -1,52 +1,62 @@
 type Testimonial = {
   id: string
   name: string
-  location: string
+  context: string
   tag: string
   stars: number
   quote: string
   initials: string
+  date: string
+  dateIso: string
 }
 
 const COURSE_TESTIMONIALS: Testimonial[] = [
   {
     id: "t1",
-    name: "Melissa R.",
-    location: "Chicago, IL",
+    name: "Melissa Rodriguez",
+    context: "Teacher, 31 · Chicago, IL",
     tag: "Training Foundations",
     stars: 5,
     quote: "Tried a few programs before this and quit every single one by week two. Something clicked here. The way the movements are broken down actually makes sense, and I walk into the gym now knowing what I'm doing.",
     initials: "MR",
+    date: "Feb 2025",
+    dateIso: "2025-02-01",
   },
   {
     id: "t2",
-    name: "Ryan K.",
-    location: "Austin, TX",
+    name: "Ryan Kowalski",
+    context: "Project manager, 34 · Austin, TX",
     tag: "Training Foundations",
     stars: 5,
     quote: "My lower back was always tight from sitting at a desk all day. Three weeks into this and I already feel different. The core work is harder than I expected but in a good way. Finally understand why my hips felt off for so long.",
     initials: "RK",
+    date: "Jan 2025",
+    dateIso: "2025-01-01",
   },
   {
     id: "t3",
-    name: "Sarah M.",
-    location: "New York, NY",
+    name: "Sarah Mitchell",
+    context: "Nurse, 28 · New York, NY",
     tag: "Training Foundations",
     stars: 5,
     quote: "The progress tracking inside the program is honestly what kept me from quitting. Every week the numbers went up a little and that made me want to keep going. I have done the whole thing twice now.",
     initials: "SM",
+    date: "Mar 2025",
+    dateIso: "2025-03-01",
   },
 ]
 
 const COACHING_TESTIMONIALS: Testimonial[] = [
   {
     id: "c1",
-    name: "Daniela V.",
-    location: "Miami, FL",
+    name: "Daniela Vargas",
+    context: "Interior designer, 33 · Miami, FL",
     tag: "1:1 Coaching",
     stars: 5,
     quote: "Lisa fixed my squat on the first call. I had been doing it wrong for years and had no idea. The way she builds your program around your actual schedule, not some perfect version of your week, is what makes it actually stick.",
     initials: "DV",
+    date: "Dec 2024",
+    dateIso: "2024-12-01",
   },
 ]
 
@@ -93,7 +103,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
             {t.name}
           </p>
           <p style={{ margin: 0, fontSize: 11, color: "#6b6560", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            {t.location}
+            {t.context}
           </p>
         </div>
       </div>
@@ -110,14 +120,19 @@ function TestimonialCard({ t }: { t: Testimonial }) {
       >
         &ldquo;{t.quote}&rdquo;
       </blockquote>
-      <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 6 }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" stroke="#a8895e" strokeWidth="2" />
-          <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#a8895e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-          Verified · {t.tag}
-        </span>
+      <div style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="#a8895e" strokeWidth="2" />
+            <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#a8895e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Verified · {t.tag}
+          </span>
+        </div>
+        <time dateTime={t.dateIso} style={{ fontSize: 11, color: "#b5afa8", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+          {t.date}
+        </time>
       </div>
     </article>
   )
@@ -159,11 +174,14 @@ function VideoPlaceholderCard() {
           <path d="M10 8.5l5.5 3.5-5.5 3.5V8.5z" fill="#c8a97e" />
         </svg>
       </div>
-      <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(17px, 2vw, 20px)", fontWeight: 700, fontStyle: "italic", color: "#0a0a0a", lineHeight: 1.3, marginBottom: 12 }}>
+      <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(17px, 2vw, 20px)", fontWeight: 700, fontStyle: "italic", color: "#0a0a0a", lineHeight: 1.3, marginBottom: 8 }}>
         Gino&apos;s story,<br />coming soon.
       </p>
+      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, color: "#a8895e", fontWeight: 500, letterSpacing: "0.05em", marginBottom: 12 }}>
+        Gino Ferraro · 1:1 Coaching client, 32
+      </p>
       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "#6b6560", lineHeight: 1.65, maxWidth: 320, margin: "0 0 20px" }}>
-        32 years old, 1:1 coaching client. Recording his experience on camera in his own words. Check back soon.
+        Recording his experience on camera in his own words. Check back soon.
       </p>
       <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif" }}>
         1:1 Coaching

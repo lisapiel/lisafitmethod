@@ -107,6 +107,7 @@ export default async function HomePage() {
         author: { "@type": "Person", name: r.name },
         reviewRating: { "@type": "Rating", ratingValue: String(r.stars), bestRating: "5" },
         reviewBody: r.quote,
+        datePublished: r.dateIso,
       })),
     },
     {
@@ -128,6 +129,7 @@ export default async function HomePage() {
         author: { "@type": "Person", name: r.name },
         reviewRating: { "@type": "Rating", ratingValue: String(r.stars), bestRating: "5" },
         reviewBody: r.quote,
+        datePublished: r.dateIso,
       })),
     },
   ]
