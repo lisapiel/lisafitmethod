@@ -4,6 +4,7 @@ import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
+import { TestimonialsSection, COURSE_TESTIMONIALS, COACHING_TESTIMONIALS } from "@/components/TestimonialsSection"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -20,10 +21,9 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [heroUrl, bannerUrl, testimonialsUrl, trailerUrl, settings] = await Promise.all([
+  const [heroUrl, bannerUrl, trailerUrl, settings] = await Promise.all([
     getPublishedPhotoUrl("hero"),
     getPublishedPhotoUrl("banner"),
-    getPublishedPhotoUrl("testimonials"),
     getPublishedVideoUrl("lp_trailer"),
     fetchSiteSettings(),
   ])
@@ -95,6 +95,40 @@ export default async function HomePage() {
         courseMode: "online",
         instructor: { "@type": "Person", name: "Lisa McPherson" },
       },
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: "5",
+        ratingCount: String(COURSE_TESTIMONIALS.length),
+        bestRating: "5",
+        worstRating: "1",
+      },
+      review: COURSE_TESTIMONIALS.map((r) => ({
+        "@type": "Review",
+        author: { "@type": "Person", name: r.name },
+        reviewRating: { "@type": "Rating", ratingValue: String(r.stars), bestRating: "5" },
+        reviewBody: r.quote,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: "1:1 Personal Training Coaching",
+      description: "Personalized online coaching with Lisa McPherson — custom programming, form review, and weekly check-ins tailored to your goals and schedule.",
+      provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+      url: "https://lisafitmethod.com/coaching",
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: "5",
+        ratingCount: String(COACHING_TESTIMONIALS.length),
+        bestRating: "5",
+        worstRating: "1",
+      },
+      review: COACHING_TESTIMONIALS.map((r) => ({
+        "@type": "Review",
+        author: { "@type": "Person", name: r.name },
+        reviewRating: { "@type": "Rating", ratingValue: String(r.stars), bestRating: "5" },
+        reviewBody: r.quote,
+      })),
     },
   ]
 
@@ -372,23 +406,7 @@ export default async function HomePage() {
       </section>
 
       {/* TESTIMONIALS */}
-      {testimonialsUrl && (
-        <section style={{ background: "var(--off-white)", padding: "100px 40px" }} className="testimonials-section">
-          <style>{`
-            @media (max-width: 768px) {
-              .testimonials-section { padding: 72px 20px !important; }
-            }
-          `}</style>
-          <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 20 }}>Real results</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 48 }}>
-              What people<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>are saying.</em>
-            </h2>
-            <Image src={testimonialsUrl} alt="Testimonials from Lisa Fit Method students" width={1800} height={1200} style={{ width: "100%", height: "auto", display: "block" }} />
-          </div>
-        </section>
-      )}
+      <TestimonialsSection />
 
       {/* FINAL CTA */}
       <section style={{ background: "var(--black)", padding: "140px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta-section">
