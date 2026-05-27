@@ -3,6 +3,7 @@ import Link from "next/link"
 import { getPublishedVideoUrl, getPublishedPhotoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
+import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -364,6 +365,10 @@ export default async function CoursesPage() {
         </div>
 
       </section>
+
+      {/* NOT READY TO COMMIT */}
+      <FreeGuideTeaser />
+
     </main>
     </>
   )

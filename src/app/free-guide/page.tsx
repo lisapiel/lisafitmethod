@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import FreeGuideClient from "./page.client"
 
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function FreeGuidePage() {
-  return <FreeGuideClient />
+  return (
+    <Suspense>
+      <FreeGuideClient />
+    </Suspense>
+  )
 }

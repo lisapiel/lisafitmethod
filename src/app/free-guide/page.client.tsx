@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY } from "@/lib/pricing"
 import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
@@ -184,7 +185,8 @@ function ExRow({ name, note, sets }: { name: string; note: string; sets: string 
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function FreeGuideClient() {
-  const [unlocked, setUnlocked] = useState(false)
+  const searchParams = useSearchParams()
+  const [unlocked, setUnlocked] = useState(() => searchParams.get("unlocked") === "1")
 
   return (
     <main style={{ background: paper, minHeight: "100vh" }}>
