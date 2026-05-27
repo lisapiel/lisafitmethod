@@ -11,8 +11,8 @@ const border = "#2a2a2a"
 const srStyles = `
   .sr-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:nowrap; }
   .sr-label { font-size:0.5rem; color:#888; flex-shrink:0; white-space:nowrap; font-family:var(--font-montserrat),sans-serif; }
-  .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:36px; text-align:center; flex-shrink:0; }
-  .sr-inp-wide { width:54px; }
+  .sr-inp { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:4px; color:#f0e6d3; font-family:var(--font-montserrat),sans-serif; font-size:16px; padding:4px 2px; width:44px; text-align:center; flex-shrink:0; min-width:0; }
+  .sr-inp-wide { width:58px; }
   .sr-unit { font-size:0.45rem; color:#555; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
   .sr-bw { font-size:0.5rem; background:#222; color:#666; padding:2px 5px; border-radius:3px; font-family:var(--font-montserrat),sans-serif; flex-shrink:0; }
   .sr-log { background:none; border:1px solid #2a2a2a; color:#555; cursor:pointer; font-size:0.48rem; font-family:var(--font-montserrat),sans-serif; letter-spacing:0.06em; padding:0 5px; border-radius:3px; flex-shrink:0; white-space:nowrap; min-height:28px; display:flex; align-items:center; }
@@ -21,8 +21,8 @@ const srStyles = `
   @media (min-width: 480px) {
     .sr-row { gap:8px; }
     .sr-label { font-size:0.55rem; }
-    .sr-inp { width:52px; padding:6px 4px; }
-    .sr-inp-wide { width:68px; }
+    .sr-inp { width:58px; padding:6px 4px; }
+    .sr-inp-wide { width:74px; }
     .sr-unit { font-size:0.5rem; }
     .sr-log { font-size:0.55rem; padding:0 10px; min-height:30px; }
     .sr-del { min-width:30px; min-height:30px; font-size:0.7rem; margin-left:8px; }
@@ -62,7 +62,7 @@ export default function InlineExerciseTracker({
       reps: def!.defaultReps ?? 0,
       weight: 0,
       unit: weightUnit,
-      distanceTime: isDistanceTime ? "" : undefined,
+      distanceTime: isDistanceTime ? (def!.defaultDistanceTime ?? "") : undefined,
     }
     updateExerciseSets(exerciseId, [...sets, { ...last, confirmed: false }])
   }
@@ -145,7 +145,7 @@ export default function InlineExerciseTracker({
               <input
                 type="text"
                 value={set.distanceTime ?? ""}
-                placeholder="30m"
+                placeholder={def.defaultDistanceTime ?? "30m"}
                 onChange={(e) => updateSet(i, { ...set, distanceTime: e.target.value, confirmed: false })}
                 className="sr-inp sr-inp-wide"
               />
@@ -173,7 +173,6 @@ export default function InlineExerciseTracker({
                 type="number"
                 min={0}
                 value={set.weight || ""}
-                placeholder="wt"
                 onChange={(e) => updateSet(i, { ...set, weight: Number(e.target.value), confirmed: false })}
                 className="sr-inp"
               />

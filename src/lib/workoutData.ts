@@ -7,6 +7,7 @@ export interface ExerciseDef {
   note?: string // e.g. "per side", "20–30 m"
   optionalWeight?: boolean      // bodyweight exercise that can have weight added
   trackDistanceOrTime?: boolean // show editable distance/time input instead of reps
+  defaultDistanceTime?: string  // default value for distance/time input (e.g. "30s", "20m")
 }
 
 export interface DayDef {
@@ -48,7 +49,7 @@ export const WORKOUT_DAYS: Record<"a" | "b" | "c", DayDef> = {
       { id: "monster_walk",    name: "Monster Walk",             defaultSets: 3, defaultReps: 20, bodyweight: true,  note: "steps fwd/bck" },
       { id: "hip_abduction_c", name: "Side Lying Hip Abduction", defaultSets: 3, defaultReps: 15, bodyweight: true,  note: "per side" },
       { id: "dead_bug_c",      name: "Dead Bug",                 defaultSets: 2, defaultReps: 8,  bodyweight: true,  optionalWeight: true, note: "per side" },
-      { id: "copenhagen",      name: "Copenhagen Plank",         defaultSets: 2, defaultReps: null, bodyweight: true, trackDistanceOrTime: true, note: "hold" },
+      { id: "copenhagen",      name: "Copenhagen Plank",         defaultSets: 2, defaultReps: null, bodyweight: true, trackDistanceOrTime: true, note: "hold", defaultDistanceTime: "30s" },
       { id: "stir_the_pot",    name: "Stir the Pot",             defaultSets: 2, defaultReps: 8,  bodyweight: true,  note: "each direction" },
     ],
   },
