@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         discountPct: String(discountPct),
         includesTracker: includesTracker ? "true" : "false",
       },
-      payment_method_types: ["card", "affirm", "cashapp"],
+      payment_method_types: ["card", "link", "affirm", "cashapp"],
     })
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret, discountPct, finalAmount })

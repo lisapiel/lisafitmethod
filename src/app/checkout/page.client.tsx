@@ -140,7 +140,11 @@ function PaymentForm({
       )}
 
       <div style={{ marginBottom: 20 }}>
-        <PaymentElement options={{ layout: "accordion", fields: { billingDetails: { name: "auto" } } }} />
+        <PaymentElement options={{
+          layout: { type: "accordion", defaultCollapsed: true },
+          fields: { billingDetails: { name: "auto" } },
+          wallets: { applePay: "never", googlePay: "never" },
+        }} />
       </div>
 
       {/* Promo code — collapsible, hidden once applied */}
