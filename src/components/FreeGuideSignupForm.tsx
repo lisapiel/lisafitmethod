@@ -14,10 +14,11 @@ const line = "#ddd8cf"
 interface FreeGuideSignupFormProps {
   source: string
   variant?: "compact"
+  formOnly?: boolean
   onSuccess?: () => void
 }
 
-export function FreeGuideSignupForm({ source, variant, onSuccess }: FreeGuideSignupFormProps) {
+export function FreeGuideSignupForm({ source, variant, formOnly, onSuccess }: FreeGuideSignupFormProps) {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle")
   const [errorMsg, setErrorMsg] = useState("")
@@ -119,6 +120,73 @@ export function FreeGuideSignupForm({ source, variant, onSuccess }: FreeGuideSig
             </p>
           )}
         </form>
+      </>
+    )
+  }
+
+  // ── formOnly — parent provides the container; just render the form row ──────
+  if (formOnly) {
+    if (status === "done") return null
+    return (
+      <>
+        <style>{`
+          .fgsf-gate { display: flex; gap: 0.5rem; max-width: 480px; flex-wrap: wrap; }
+          @media (max-width: 480px) {
+            .fgsf-gate { flex-direction: column; }
+            .fgsf-gate input, .fgsf-gate button { width: 100%; }
+          }
+        `}</style>
+        <form onSubmit={handleSubmit} noValidate className="fgsf-gate">
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle") }}
+            placeholder="your@email.com"
+            style={{
+              flex: "1 1 200px",
+              background: "#1a1a1a",
+              border: `1px solid ${status === "error" ? "#884444" : "#2a2722"}`,
+              color: "#f0ebe2",
+              fontFamily: dmSans,
+              fontSize: "0.9rem",
+              padding: "0.75rem 1rem",
+              outline: "none",
+              minHeight: 48,
+            }}
+          />
+          <button
+            type="submit"
+            disabled={status === "submitting"}
+            style={{
+              background: gold,
+              color: black,
+              border: "none",
+              fontFamily: dmSans,
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              padding: "0.75rem 1.5rem",
+              cursor: status === "submitting" ? "default" : "pointer",
+              opacity: status === "submitting" ? 0.7 : 1,
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              minHeight: 48,
+            }}
+          >
+            {status === "submitting" ? "Sending..." : "Get the Guide"}
+          </button>
+        </form>
+        {status === "error" && (
+          <p style={{ fontFamily: dmSans, fontSize: "0.8rem", color: "#cc6666", marginTop: "0.5rem" }}>
+            {errorMsg}
+          </p>
+        )}
+        <p style={{ fontFamily: dmSans, fontSize: "0.68rem", color: "#555", marginTop: "0.75rem" }}>
+          No spam. Unsubscribe any time.
+        </p>
       </>
     )
   }

@@ -184,24 +184,17 @@ export default function SiteHeader() {
           vertical-align: middle;
           text-transform: uppercase;
         }
-        .mobile-courses-label {
-          font-family: var(--font-dm-sans), sans-serif;
-          font-size: 10px;
-          font-weight: 600;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          color: rgba(240, 230, 211, 0.3);
-        }
         .mobile-sub-link {
           font-family: var(--font-dm-sans), sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.18em;
+          font-size: 10px;
+          font-weight: 400;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: rgba(240, 230, 211, 0.75);
+          color: rgba(240, 230, 211, 0.4);
           text-decoration: none;
           display: block;
-          padding-left: 12px;
+          padding-left: 14px;
+          border-left: 1px solid rgba(255,255,255,0.08);
         }
         @media (max-width: 768px) {
           .site-header { padding: 0 24px; }
@@ -263,11 +256,8 @@ export default function SiteHeader() {
         {navLinks.map((l) => {
           if (l.href === "/courses") {
             return (
-              <div key={l.href} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <span className="mobile-courses-label">Courses</span>
-                <Link href="/courses" className="mobile-sub-link" onClick={() => setMenuOpen(false)}>
-                  Courses &amp; Programs
-                </Link>
+              <div key={l.href} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <Link href="/courses" onClick={() => setMenuOpen(false)}>Courses</Link>
                 <Link href="/free-guide" className="mobile-sub-link" onClick={() => setMenuOpen(false)}>
                   Free Foundation Guide
                 </Link>

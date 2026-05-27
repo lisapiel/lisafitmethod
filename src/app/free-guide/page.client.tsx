@@ -196,59 +196,109 @@ export default function FreeGuideClient() {
 
       <div style={{ maxWidth: 780, margin: "0 auto", padding: "clamp(36px, 6vw, 64px) clamp(20px, 5vw, 40px) 80px" }}>
 
-        {/* Header */}
-        <Label>Free Preview · Training Foundations</Label>
-        <h1 style={{ fontFamily: playfair, fontSize: "clamp(2rem, 5.5vw, 3.1rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: black, fontWeight: 700, marginBottom: "1.2rem", marginTop: 0 }}>
-          The 5 movements <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>every strong body is built on</em>
-        </h1>
-        <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 600, marginBottom: 0, lineHeight: 1.72, fontFamily: dmSans }}>
-          This is a real piece of my course, not a watered down freebie. Inside you get the five foundation movements with the exact cues I teach, plus a look at one full day of the actual 4-week program.{" "}
-          <strong style={{ color: ink }}>Read it, practice the movements, and you will already be ahead of most people in the gym.</strong>
-        </p>
-
-        <Rule />
-
-        {/* Story */}
-        <div style={{ background: panel, padding: "clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 4vw, 2.25rem)", marginBottom: "0.5rem", borderLeft: `2px solid ${gold}` }}>
-          <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
-            I started in fitness classes. Cardio, cycling, group workouts. I showed up, I worked hard, and nothing really changed. Then I followed a real strength program and finally started building something.{" "}
-            <strong style={{ color: ink }}>So I pushed too hard, too fast.</strong> I loaded more weight before I had the foundation to support it. I rushed my warm ups. I treated mobility and recovery as optional.
-          </p>
-          <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
-            Eventually my back gave out, and I spent almost a year in serious pain. That year taught me more than all the years before it combined. I had to relearn everything properly, and I became a certified trainer because I needed to truly understand what I had been skipping.
-          </p>
-          <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.5rem", color: muted, fontFamily: dmSans }}>
-            This preview is the part I wish someone had handed me on day one. You do not need to learn the hard way. That has already been done.
-          </p>
-          <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.05rem", color: goldDeep, margin: 0 }}>
-            Lisa McPherson, CPT
-          </p>
-        </div>
-
-        <Rule />
-
-        {/* Movements */}
-        <Label>Module 1 · The Foundation</Label>
-        <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.5rem, 4vw, 1.9rem)", color: black, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.6rem", marginTop: 0, lineHeight: 1.1 }}>
-          Learn these five.{" "}
-          <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Everything else gets easier.</em>
-        </h2>
-        <p style={{ fontSize: "0.92rem", maxWidth: 600, marginBottom: "1.8rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-          These are the patterns underneath almost every effective exercise you will ever do. Master them with clean form before you add weight, and the whole gym stops feeling like guesswork. In the full course, each one comes with its own video. Here are the cues that make them click.
-        </p>
-
-        {MOVEMENTS.map((m, i) => (
-          <MovementCard key={i} num={i + 1} {...m} />
-        ))}
-
-        <Rule />
-
-        {/* Email gate */}
-        <FreeGuideSignupForm source="free-guide-page" onSuccess={() => setUnlocked(true)} />
-
-        {/* Gated content */}
-        {unlocked && (
+        {!unlocked ? (
+          /* ── Pre-email: teaser + form ── */
           <>
+            <Label>Free Guide · Training Foundations</Label>
+            <h1 style={{ fontFamily: playfair, fontSize: "clamp(2rem, 5.5vw, 3.1rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: black, fontWeight: 700, marginBottom: "1.2rem", marginTop: 0 }}>
+              The 5 movements <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>every strong body is built on</em>
+            </h1>
+            <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 580, marginBottom: "2rem", lineHeight: 1.72, fontFamily: dmSans }}>
+              This is a real piece of my course, not a watered-down freebie. The five foundation movements, the coaching cues behind them, and a look inside one full day of the program.
+            </p>
+
+            <div style={{ marginBottom: "2rem" }}>
+              {[
+                ["The 5 movement patterns", " underneath almost every effective exercise you will ever do"],
+                ["The coaching cues that fix bad form", " — the same ones I teach in the course"],
+                ["A look inside Day A", " — a real structured workout, not a teaser"],
+                ["Yours to keep", " — free, no credit card, no catch"],
+              ].map(([bold, rest], i) => (
+                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", padding: "0.55rem 0", borderBottom: i < 3 ? `1px solid ${line}` : "none" }}>
+                  <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.12rem" }}>&#8594;</span>
+                  <p style={{ fontFamily: dmSans, fontSize: "0.93rem", color: ink, margin: 0, lineHeight: 1.55 }}>
+                    <strong>{bold}</strong>{rest}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Email form */}
+            <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)" }}>
+              <p style={{ fontSize: "0.68rem", fontWeight: 500, letterSpacing: "0.3em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.75rem", fontFamily: dmSans }}>
+                Free · No credit card
+              </p>
+              <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.4rem, 3.5vw, 1.75rem)", color: "#fff", fontWeight: 700, marginBottom: "0.75rem", marginTop: 0, lineHeight: 1.15 }}>
+                Enter your email to get the guide
+              </h2>
+              <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.5rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
+                You will get the full guide instantly, plus a copy sent to your inbox so you can come back to it any time.
+              </p>
+              <FreeGuideSignupForm source="free-guide-page" onSuccess={() => setUnlocked(true)} formOnly />
+            </div>
+
+            <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#9c9590", marginTop: "3rem", textAlign: "center", fontFamily: dmSans }}>
+              Lisa McPherson, CPT · lisafitmethod.com
+            </p>
+          </>
+        ) : (
+          /* ── Post-email: full guide ── */
+          <>
+            {/* Confirmation banner */}
+            <div style={{ background: panel, borderLeft: `2px solid ${gold}`, padding: "1rem 1.5rem", marginBottom: "2.5rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <span style={{ color: gold, fontSize: "1rem", flexShrink: 0 }}>&#10003;</span>
+              <p style={{ fontFamily: dmSans, fontSize: "0.85rem", color: muted, margin: 0 }}>
+                You are in. Check your inbox for a copy to keep.
+              </p>
+            </div>
+
+            {/* Header */}
+            <Label>Free Preview · Training Foundations</Label>
+            <h1 style={{ fontFamily: playfair, fontSize: "clamp(2rem, 5.5vw, 3.1rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: black, fontWeight: 700, marginBottom: "1.2rem", marginTop: 0 }}>
+              The 5 movements <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>every strong body is built on</em>
+            </h1>
+            <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 600, marginBottom: 0, lineHeight: 1.72, fontFamily: dmSans }}>
+              This is a real piece of my course, not a watered down freebie. Inside you get the five foundation movements with the exact cues I teach, plus a look at one full day of the actual 4-week program.{" "}
+              <strong style={{ color: ink }}>Read it, practice the movements, and you will already be ahead of most people in the gym.</strong>
+            </p>
+
+            <Rule />
+
+            {/* Story */}
+            <div style={{ background: panel, padding: "clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 4vw, 2.25rem)", marginBottom: "0.5rem", borderLeft: `2px solid ${gold}` }}>
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
+                I started in fitness classes. Cardio, cycling, group workouts. I showed up, I worked hard, and nothing really changed. Then I followed a real strength program and finally started building something.{" "}
+                <strong style={{ color: ink }}>So I pushed too hard, too fast.</strong> I loaded more weight before I had the foundation to support it. I rushed my warm ups. I treated mobility and recovery as optional.
+              </p>
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
+                Eventually my back gave out, and I spent almost a year in serious pain. That year taught me more than all the years before it combined. I had to relearn everything properly, and I became a certified trainer because I needed to truly understand what I had been skipping.
+              </p>
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.5rem", color: muted, fontFamily: dmSans }}>
+                This preview is the part I wish someone had handed me on day one. You do not need to learn the hard way. That has already been done.
+              </p>
+              <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.05rem", color: goldDeep, margin: 0 }}>
+                Lisa McPherson, CPT
+              </p>
+            </div>
+
+            <Rule />
+
+            {/* Movements */}
+            <Label>Module 1 · The Foundation</Label>
+            <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.5rem, 4vw, 1.9rem)", color: black, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.6rem", marginTop: 0, lineHeight: 1.1 }}>
+              Learn these five.{" "}
+              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Everything else gets easier.</em>
+            </h2>
+            <p style={{ fontSize: "0.92rem", maxWidth: 600, marginBottom: "1.8rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
+              These are the patterns underneath almost every effective exercise you will ever do. Master them with clean form before you add weight, and the whole gym stops feeling like guesswork. In the full course, each one comes with its own video. Here are the cues that make them click.
+            </p>
+
+            {MOVEMENTS.map((m, i) => (
+              <MovementCard key={i} num={i + 1} {...m} />
+            ))}
+
+            <Rule />
+
             {/* Look inside the program */}
             <Label>A look inside the program</Label>
             <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.5rem, 4vw, 1.9rem)", color: black, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.6rem", marginTop: 0, lineHeight: 1.1 }}>
@@ -345,13 +395,13 @@ export default function FreeGuideClient() {
                 One-time payment · Lifetime access · Reuse it, track it, keep building
               </p>
             </div>
+
+            {/* Footer line */}
+            <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#9c9590", marginTop: "3rem", textAlign: "center", fontFamily: dmSans }}>
+              Lisa McPherson, CPT · lisafitmethod.com · @lisafitmethod
+            </p>
           </>
         )}
-
-        {/* Footer line */}
-        <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#9c9590", marginTop: "3rem", textAlign: "center", fontFamily: dmSans }}>
-          Lisa McPherson, CPT · lisafitmethod.com · @lisafitmethod
-        </p>
       </div>
     </main>
   )
