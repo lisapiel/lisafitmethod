@@ -1,3 +1,14 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Lisa Fit",
+  },
+}
+
 export default function MyTrackerLayout({ children }: { children: React.ReactNode }) {
   return (
     <div

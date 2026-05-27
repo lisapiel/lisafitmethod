@@ -3,7 +3,7 @@
   "short_name": "My Plan",
   "description": "Lisa Fit Method — private 90-day business dashboard.",
   "start_url": "/my-plan",
-  "scope": "/my-plan",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
