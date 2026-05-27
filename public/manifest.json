@@ -1,9 +1,9 @@
 {
-  "name": "Lisa Fit Method Tracker",
-  "short_name": "LFM Tracker",
-  "description": "Build your own workout tracker. Use it forever.",
+  "name": "Lisa Fit Method",
+  "short_name": "Lisa Fit",
+  "description": "Your workout tracker. Log sets, track progress, build your program.",
   "start_url": "/my-tracker",
-  "scope": "/my-tracker",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
