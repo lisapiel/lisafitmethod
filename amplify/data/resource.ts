@@ -26,10 +26,19 @@ const schema = a.schema({
   Purchase: a
     .model({
       email: a.string().required(),
+      name: a.string(),
       stripePaymentIntentId: a.string().required(),
       purchasedAt: a.datetime().required(),
+      promoCode: a.string(),
+      amountPaidCents: a.integer(),
+      discountPct: a.integer(),
+      includesTracker: a.boolean(),
+      source: a.string(),
     })
-    .authorization((allow) => [allow.authenticated()]),
+    .authorization((allow) => [
+      allow.publicApiKey().to(["create"]),
+      allow.authenticated().to(["read", "update", "delete"]),
+    ]),
   MediaAsset: a
     .model({
       type: a.enum(["VIDEO", "PHOTO"]),

@@ -227,6 +227,52 @@ async function provisionUser(email: string) {
   })
 }
 
+async function recordPurchase(intent: Stripe.PaymentIntent) {
+  let appsyncUrl = ""
+  let appsyncApiKey = ""
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const outputs = require("../../../../amplify_outputs.json")
+    appsyncUrl = outputs?.data?.url ?? ""
+    appsyncApiKey = outputs?.data?.api_key ?? ""
+  } catch {
+    // amplify_outputs.json not available — skip DB write
+    return
+  }
+
+  if (!appsyncUrl || !appsyncApiKey) return
+
+  const mutation = `
+    mutation CreatePurchase($input: CreatePurchaseInput!) {
+      createPurchase(input: $input) { id }
+    }
+  `
+
+  await fetch(appsyncUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": appsyncApiKey,
+    },
+    body: JSON.stringify({
+      query: mutation,
+      variables: {
+        input: {
+          email: intent.metadata?.customerEmail ?? "",
+          name: intent.metadata?.customerName ?? "",
+          stripePaymentIntentId: intent.id,
+          purchasedAt: new Date().toISOString(),
+          promoCode: intent.metadata?.promoCode ?? "",
+          amountPaidCents: intent.amount,
+          discountPct: parseInt(intent.metadata?.discountPct ?? "0", 10),
+          includesTracker: intent.metadata?.includesTracker === "true",
+          source: "checkout",
+        },
+      },
+    }),
+  })
+}
+
 export async function POST(request: NextRequest) {
   const stripe = makeStripe()
   const body = await request.text()
@@ -252,16 +298,18 @@ export async function POST(request: NextRequest) {
     if (email) {
       try {
         if (product === "tracker") {
-          // Standalone tracker purchase by an existing member
           await grantTrackerAccess(email)
           await sendTrackerConfirmationEmail(email)
         } else {
-          // Course purchase (new buyer)
           await provisionUser(email)
           if (includesTracker) {
             await grantTrackerAccess(email)
           }
         }
+        // Record purchase in DB (non-blocking — don't fail fulfillment if this errors)
+        await recordPurchase(intent).catch((err) =>
+          console.error("recordPurchase failed:", err)
+        )
       } catch (error) {
         const detail = error instanceof Error ? error.message : String(error)
         console.error("Purchase fulfillment failed:", detail)

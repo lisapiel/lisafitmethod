@@ -206,21 +206,42 @@ function PaymentForm({
 
 // ─── Email step ───────────────────────────────────────────────────────────────
 
-function EmailStep({ onNext }: { onNext: (email: string) => void }) {
+function EmailStep({ onNext }: { onNext: (email: string, name: string) => void }) {
+  const [firstName, setFirstName] = useState("")
   const [email, setEmail] = useState("")
+  const [nameError, setNameError] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!firstName.trim()) {
+      setNameError("Please enter your first name.")
+      return
+    }
     if (!email || !email.includes("@")) {
       setEmailError("Please enter a valid email address.")
       return
     }
-    onNext(email.trim().toLowerCase())
+    onNext(email.trim().toLowerCase(), firstName.trim())
   }
 
   return (
     <form onSubmit={handleContinue}>
+      <label style={labelStyle}>First Name</label>
+      <input
+        type="text"
+        value={firstName}
+        onChange={(e) => { setFirstName(e.target.value); setNameError(null) }}
+        placeholder="Your first name"
+        required
+        style={inputStyle}
+        autoComplete="given-name"
+      />
+      {nameError && (
+        <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>
+          {nameError}
+        </p>
+      )}
       <label style={labelStyle}>Email Address</label>
       <input
         type="email"
@@ -322,6 +343,7 @@ const ctaButtonStyle: React.CSSProperties = {
 
 export function CheckoutClient() {
   const [email, setEmail] = useState<string | null>(null)
+  const [name, setName] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [discountPct, setDiscountPct] = useState(0)
@@ -332,8 +354,9 @@ export function CheckoutClient() {
 
   const paymentStarted = !!clientSecret
 
-  const handleEmailNext = useCallback((submittedEmail: string) => {
+  const handleEmailNext = useCallback((submittedEmail: string, submittedName: string) => {
     setEmail(submittedEmail)
+    setName(submittedName)
     setConfirmed(false)
   }, [])
 
@@ -346,7 +369,7 @@ export function CheckoutClient() {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, includesTracker }),
+        body: JSON.stringify({ email, name, includesTracker }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -365,14 +388,14 @@ export function CheckoutClient() {
     } finally {
       setLoadingIntent(false)
     }
-  }, [email, includesTracker])
+  }, [email, name, includesTracker])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email!, promoCode, includesTracker }),
+        body: JSON.stringify({ email: email!, name: name!, promoCode, includesTracker }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -385,10 +408,11 @@ export function CheckoutClient() {
     } catch {
       return { error: "Something went wrong." }
     }
-  }, [email, includesTracker])
+  }, [email, name, includesTracker])
 
   const handleBack = useCallback(() => {
     setEmail(null)
+    setName(null)
     setConfirmed(false)
     setClientSecret(null)
     setDiscountPct(0)

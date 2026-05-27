@@ -20,8 +20,9 @@ async function applyPromo(code: string): Promise<{ valid: boolean; discountPct: 
 export async function POST(request: NextRequest) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
-    const { email, promoCode, includesTracker } = await request.json() as {
+    const { email, name, promoCode, includesTracker } = await request.json() as {
       email: string
+      name?: string
       promoCode?: string
       includesTracker?: boolean
     }
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       currency: "usd",
       metadata: {
         customerEmail: email,
+        customerName: name ?? "",
         promoCode: promoCode ?? "",
         discountPct: String(discountPct),
         includesTracker: includesTracker ? "true" : "false",
