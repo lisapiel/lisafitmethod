@@ -15,17 +15,17 @@ const COURSE_TESTIMONIALS: Testimonial[] = [
     location: "Chicago, IL",
     tag: "Training Foundations",
     stars: 5,
-    quote: "I've tried a few online programs and always quit by week two. The way the movements are explained here actually makes sense — I finally feel confident walking into the gym without second-guessing every rep.",
+    quote: "Tried a few programs before this and quit every single one by week two. Something clicked here. The way the movements are broken down actually makes sense, and I walk into the gym now knowing what I'm doing.",
     initials: "MR",
   },
   {
     id: "t2",
-    name: "Jessica T.",
+    name: "Ryan K.",
     location: "Austin, TX",
     tag: "Training Foundations",
     stars: 5,
-    quote: "I have a desk job and my back and hips were constantly tight. Three weeks in and the difference is real. The core and glute work is no joke — I had no idea how weak my foundation actually was.",
-    initials: "JT",
+    quote: "My lower back was always tight from sitting at a desk all day. Three weeks into this and I already feel different. The core work is harder than I expected but in a good way. Finally understand why my hips felt off for so long.",
+    initials: "RK",
   },
   {
     id: "t3",
@@ -33,7 +33,7 @@ const COURSE_TESTIMONIALS: Testimonial[] = [
     location: "New York, NY",
     tag: "Training Foundations",
     stars: 5,
-    quote: "The built-in progress tracking is what kept me going. Seeing the numbers climb week over week was genuinely addicting. I've been through the program twice now and still love it.",
+    quote: "The progress tracking inside the program is honestly what kept me from quitting. Every week the numbers went up a little and that made me want to keep going. I have done the whole thing twice now.",
     initials: "SM",
   },
 ]
@@ -45,7 +45,7 @@ const COACHING_TESTIMONIALS: Testimonial[] = [
     location: "Miami, FL",
     tag: "1:1 Coaching",
     stars: 5,
-    quote: "Lisa caught issues with my squat form on our very first call that I'd been doing wrong for years. The depth of her feedback and the way she programs around your actual life is something else entirely.",
+    quote: "Lisa fixed my squat on the first call. I had been doing it wrong for years and had no idea. The way she builds your program around your actual schedule, not some perfect version of your week, is what makes it actually stick.",
     initials: "DV",
   },
 ]
@@ -160,10 +160,10 @@ function VideoPlaceholderCard() {
         </svg>
       </div>
       <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(17px, 2vw, 20px)", fontWeight: 700, fontStyle: "italic", color: "#0a0a0a", lineHeight: 1.3, marginBottom: 12 }}>
-        Video testimonial<br />coming soon.
+        Gino&apos;s story,<br />coming soon.
       </p>
       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "#6b6560", lineHeight: 1.65, maxWidth: 320, margin: "0 0 20px" }}>
-        A client is recording her full story on camera — in her own words, no script.
+        32 years old, 1:1 coaching client. Recording his experience on camera in his own words. Check back soon.
       </p>
       <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif" }}>
         1:1 Coaching
