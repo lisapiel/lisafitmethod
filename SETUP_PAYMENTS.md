@@ -44,7 +44,8 @@ The payment webhook needs permission to create Cognito accounts. Create a dedica
       "Action": [
         "cognito-idp:AdminCreateUser",
         "cognito-idp:AdminGetUser",
-        "cognito-idp:AdminSetUserPassword"
+        "cognito-idp:AdminSetUserPassword",
+        "cognito-idp:ListUsers"
       ],
       "Resource": "arn:aws:cognito-idp:YOUR_REGION:*:userpool/YOUR_USER_POOL_ID"
     }
