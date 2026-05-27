@@ -249,6 +249,16 @@ export function PlanPageClient() {
   const [expandedTask, setExpandedTask] = useState<string | null>(null)
 
   useEffect(() => {
+    // Swap the site-wide manifest so "Add to Home Screen" opens /my-plan, not /my-tracker
+    const existing = document.querySelector("link[rel='manifest']")
+    if (existing) {
+      existing.setAttribute("href", "/my-plan-manifest.json")
+    }
+    const titleMeta = document.querySelector("meta[name='apple-mobile-web-app-title']")
+    if (titleMeta) {
+      titleMeta.setAttribute("content", "My Plan")
+    }
+
     const loaded = loadState()
     setState(loaded)
     setHydrated(true)
