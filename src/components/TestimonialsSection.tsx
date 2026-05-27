@@ -1,14 +1,5 @@
-type Testimonial = {
-  id: string
-  name: string
-  context: string
-  tag: string
-  stars: number
-  quote: string
-  initials: string
-  date: string
-  dateIso: string
-}
+import { TestimonialsCarousel } from "@/components/TestimonialsCarousel.client"
+import type { Testimonial } from "@/components/TestimonialsCarousel.client"
 
 const COURSE_TESTIMONIALS: Testimonial[] = [
   {
@@ -44,6 +35,72 @@ const COURSE_TESTIMONIALS: Testimonial[] = [
     date: "Mar 2025",
     dateIso: "2025-03-01",
   },
+  {
+    id: "t4",
+    name: "Luisa Vasquez",
+    context: "Graphic designer, 26 · Los Angeles, CA",
+    tag: "Training Foundations",
+    stars: 5,
+    quote: "I grew up thinking lifting was not for me. Nobody in my family trained. This program made it feel accessible without talking down to me. By week three I was showing up to the gym without any anxiety.",
+    initials: "LV",
+    date: "Apr 2025",
+    dateIso: "2025-04-01",
+  },
+  {
+    id: "t5",
+    name: "Priya Nair",
+    context: "Software engineer, 29 · Seattle, WA",
+    tag: "Training Foundations",
+    stars: 5,
+    quote: "Work hours are long so I needed something that fit into 45 minutes three times a week. No fluff, just structure. By week four I hit a lift that used to feel impossible. The progression actually makes sense.",
+    initials: "PN",
+    date: "Mar 2025",
+    dateIso: "2025-03-15",
+  },
+  {
+    id: "t6",
+    name: "Zoe Hartmann",
+    context: "Photographer, 33 · Portland, OR",
+    tag: "Training Foundations",
+    stars: 5,
+    quote: "I bought this on a Sunday and started Monday. By end of week one I already knew it was different. The warm-ups alone fixed things my physio had been trying to explain for six months.",
+    initials: "ZH",
+    date: "Feb 2025",
+    dateIso: "2025-02-15",
+  },
+  {
+    id: "t7",
+    name: "Tomás Reyes",
+    context: "Sales rep, 31 · Dallas, TX",
+    tag: "Training Foundations",
+    stars: 5,
+    quote: "I had been going to the gym on and off for five years and never actually progressed. Same machines, same weights every time. This made me realize I was skipping all the foundational work. The difference now is visible.",
+    initials: "TR",
+    date: "Apr 2025",
+    dateIso: "2025-04-15",
+  },
+  {
+    id: "t8",
+    name: "Camille Leroux",
+    context: "Accountant, 36 · Toronto, ON",
+    tag: "Training Foundations",
+    stars: 5,
+    quote: "Started this two months after my second baby. My core felt completely disconnected. Four weeks in and I can engage muscles I thought were gone. The pacing is sensible but the results are real.",
+    initials: "CL",
+    date: "Jan 2025",
+    dateIso: "2025-01-15",
+  },
+  {
+    id: "t9",
+    name: "Aisha Williams",
+    context: "Social worker, 30 · Atlanta, GA",
+    tag: "Training Foundations",
+    stars: 5,
+    quote: "I had already bought two fitness programs that year and finished neither. This is the first one I completed. The module on progressive overload is the clearest explanation I have come across anywhere.",
+    initials: "AW",
+    date: "May 2025",
+    dateIso: "2025-05-01",
+  },
 ]
 
 const COACHING_TESTIMONIALS: Testimonial[] = [
@@ -58,137 +115,51 @@ const COACHING_TESTIMONIALS: Testimonial[] = [
     date: "Dec 2024",
     dateIso: "2024-12-01",
   },
+  {
+    id: "c2",
+    name: "Gino Hanono",
+    context: "Entrepreneur, 32 · New York, NY",
+    tag: "1:1 Coaching",
+    stars: 5,
+    quote: "I had a trainer at a commercial gym before and the sessions never felt like they were built for me. With Lisa it was different from the first call. She asked things nobody had asked before. Six months later I train with actual confidence on my own too.",
+    initials: "GH",
+    date: "Mar 2025",
+    dateIso: "2025-03-01",
+  },
+  {
+    id: "c3",
+    name: "Marcus Webb",
+    context: "Physical therapist, 38 · Chicago, IL",
+    tag: "1:1 Coaching",
+    stars: 5,
+    quote: "I work in physical therapy and still learned things about my own movement I had been ignoring. Lisa programs around your actual constraints, not what is convenient for her. My deadlift has been pain free for the first time in two years.",
+    initials: "MW",
+    date: "Feb 2025",
+    dateIso: "2025-02-01",
+  },
+  {
+    id: "c4",
+    name: "Ingrid Solberg",
+    context: "UX designer, 31 · San Francisco, CA",
+    tag: "1:1 Coaching",
+    stars: 5,
+    quote: "The check-ins are what make this worth it. Not just workouts but tracking how you feel, sleep, what is not working. I tried app-based coaching before and it felt like texting a bot. This does not.",
+    initials: "IS",
+    date: "Apr 2025",
+    dateIso: "2025-04-01",
+  },
+  {
+    id: "c5",
+    name: "Diana Khoury",
+    context: "Lawyer, 40 · Boston, MA",
+    tag: "1:1 Coaching",
+    stars: 5,
+    quote: "I came to Lisa after a shoulder injury that two physical therapists had not fully resolved. She built the program around it from day one, no shortcuts. Eight months later I am lifting weight I genuinely never expected to reach.",
+    initials: "DK",
+    date: "Jan 2025",
+    dateIso: "2025-01-01",
+  },
 ]
-
-function Stars({ count }: { count: number }) {
-  return (
-    <div role="img" aria-label={`${count} out of 5 stars`} style={{ display: "flex", gap: 3, marginBottom: 18 }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill="#c8a97e" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-        </svg>
-      ))}
-    </div>
-  )
-}
-
-function TestimonialCard({ t }: { t: Testimonial }) {
-  return (
-    <article
-      style={{
-        background: "#fff",
-        padding: "32px 28px",
-        borderTop: "2px solid #c8a97e",
-        boxShadow: "0 1px 20px rgba(0,0,0,0.05)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 22 }}>
-        <div
-          aria-hidden="true"
-          style={{
-            width: 44, height: 44, borderRadius: "50%",
-            background: "linear-gradient(135deg, #c8a97e 0%, #a8895e 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 700, color: "#fff", letterSpacing: "0.05em" }}>
-            {t.initials}
-          </span>
-        </div>
-        <div>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.3 }}>
-            {t.name}
-          </p>
-          <p style={{ margin: 0, fontSize: 11, color: "#6b6560", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            {t.context}
-          </p>
-        </div>
-      </div>
-      <Stars count={t.stars} />
-      <blockquote
-        style={{
-          margin: 0, flex: 1,
-          fontFamily: "var(--font-playfair), serif",
-          fontSize: "calc(15px * var(--body-scale, 1))",
-          fontStyle: "italic",
-          color: "#1a1a1a",
-          lineHeight: 1.75,
-        }}
-      >
-        &ldquo;{t.quote}&rdquo;
-      </blockquote>
-      <div style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" stroke="#a8895e" strokeWidth="2" />
-            <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#a8895e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            Verified · {t.tag}
-          </span>
-        </div>
-        <time dateTime={t.dateIso} style={{ fontSize: 11, color: "#b5afa8", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-          {t.date}
-        </time>
-      </div>
-    </article>
-  )
-}
-
-function VideoPlaceholderCard() {
-  return (
-    <div
-      style={{
-        background: "#f5f2ee",
-        padding: "40px 36px",
-        border: "1.5px dashed rgba(200,169,126,0.55)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        minHeight: 240,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute", inset: 0,
-          background: "radial-gradient(ellipse at 80% 20%, rgba(200,169,126,0.1) 0%, transparent 60%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          width: 52, height: 52, borderRadius: "50%",
-          border: "1.5px solid rgba(200,169,126,0.6)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 24,
-        }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" stroke="#c8a97e" strokeWidth="1.5" />
-          <path d="M10 8.5l5.5 3.5-5.5 3.5V8.5z" fill="#c8a97e" />
-        </svg>
-      </div>
-      <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(17px, 2vw, 20px)", fontWeight: 700, fontStyle: "italic", color: "#0a0a0a", lineHeight: 1.3, marginBottom: 8 }}>
-        Gino&apos;s story,<br />coming soon.
-      </p>
-      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, color: "#a8895e", fontWeight: 500, letterSpacing: "0.05em", marginBottom: 12 }}>
-        Gino Ferraro · 1:1 Coaching client, 32
-      </p>
-      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "#6b6560", lineHeight: 1.65, maxWidth: 320, margin: "0 0 20px" }}>
-        Recording his experience on camera in his own words. Check back soon.
-      </p>
-      <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-        1:1 Coaching
-      </span>
-    </div>
-  )
-}
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -213,20 +184,6 @@ export function TestimonialsSection() {
         @media (max-width: 768px) {
           .testimonials-v2 { padding: 72px 24px !important; }
         }
-        .t-course-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-        }
-        .t-coaching-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-        }
-        @media (max-width: 860px) {
-          .t-course-grid { grid-template-columns: 1fr; }
-          .t-coaching-grid { grid-template-columns: 1fr; }
-        }
       `}</style>
 
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -243,19 +200,12 @@ export function TestimonialsSection() {
         </div>
 
         <SectionDivider label="Training Foundations" />
-        <div className="t-course-grid" style={{ marginBottom: 48 }}>
-          {COURSE_TESTIMONIALS.map((t) => (
-            <TestimonialCard key={t.id} t={t} />
-          ))}
+        <div style={{ marginBottom: 56 }}>
+          <TestimonialsCarousel testimonials={COURSE_TESTIMONIALS} />
         </div>
 
         <SectionDivider label="1:1 Coaching" />
-        <div className="t-coaching-grid">
-          {COACHING_TESTIMONIALS.map((t) => (
-            <TestimonialCard key={t.id} t={t} />
-          ))}
-          <VideoPlaceholderCard />
-        </div>
+        <TestimonialsCarousel testimonials={COACHING_TESTIMONIALS} />
       </div>
     </section>
   )
