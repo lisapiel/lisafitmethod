@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb"
+import { generateGuidePDF } from "@/lib/generateGuidePDF"
 
 function makeDynamo() {
   return DynamoDBDocumentClient.from(
@@ -32,6 +33,129 @@ async function saveLead(email: string, source: string) {
   }
 }
 
+const emailHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f5f2ee;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f2ee;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background:#faf8f5;">
+
+          <!-- Gold top bar -->
+          <tr><td style="background:#c8a97e;height:4px;font-size:0;line-height:0;">&nbsp;</td></tr>
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:36px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 24px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:#c8a97e;">Lisa Fit Method</p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:28px;font-weight:700;color:#0a0a0a;line-height:1.2;letter-spacing:-0.3px;">Your 5 Foundation Movements are inside.</h1>
+              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:15px;line-height:1.75;color:#6b6560;">Hi — I'm glad you're here. Below is a link to read the full free guide online, plus a PDF cheat sheet of all five movement patterns attached to this email so you can keep it handy.</p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <div style="border-top:1px solid #e8e0d5;"></div>
+            </td>
+          </tr>
+
+          <!-- What's inside -->
+          <tr>
+            <td style="padding:28px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 14px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#0a0a0a;">What's in the guide</p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;">01</span>Goblet Squat — knee dominant
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;">02</span>Romanian Deadlift — hip hinge
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;">03</span>Dumbbell Row — horizontal pull
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;">04</span>Push-Up / DB Press — horizontal push
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;">05</span>Pallof Press — core / anti-rotation
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding:8px 40px 36px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <a href="https://lisafitmethod.com/free-guide?unlocked=1"
+                 style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:14px 32px;">
+                Read the Guide Online &rarr;
+              </a>
+              <p style="margin:14px 0 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:11.5px;color:#9c9590;">The PDF with all coaching cues is attached to this email as well.</p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <div style="border-top:1px solid #e8e0d5;"></div>
+            </td>
+          </tr>
+
+          <!-- Personal note -->
+          <tr>
+            <td style="padding:28px 40px 36px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 16px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;line-height:1.75;color:#6b6560;">
+                If you want to go further, the full <strong style="color:#1a1a1a;">4-Week Training Foundations</strong> course walks you through exactly how to build these patterns into a real program — with every set, every rep, and every coaching cue laid out for you.
+              </p>
+              <p style="margin:0 0 8px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
+                It's <strong style="color:#1a1a1a;">$47</strong> right now (regular price $97). One payment, lifetime access.
+              </p>
+              <a href="https://lisafitmethod.com/courses"
+                 style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">
+                See the full course →
+              </a>
+            </td>
+          </tr>
+
+          <!-- Signature -->
+          <tr>
+            <td style="padding:0 40px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 2px;font-family:Georgia,serif;font-size:15px;font-style:italic;color:#c8a97e;">Lisa McPherson, CPT</p>
+              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#bbb4ae;">Lisa Fit Method</p>
+            </td>
+          </tr>
+
+          <!-- Footer bar -->
+          <tr>
+            <td style="background:#f0ebe3;padding:16px 40px;border:1px solid #e8e0d5;">
+              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;color:#bbb4ae;line-height:1.6;">
+                You received this because you requested the free guide at lisafitmethod.com.<br>
+                Questions? Reply to this email — it goes straight to me.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+
 export async function POST(req: Request) {
   try {
     const body = await req.json() as { email?: string; source?: string }
@@ -44,21 +168,29 @@ export async function POST(req: Request) {
 
     await saveLead(email, source)
 
+    let pdfBuffer: Buffer | undefined
+    try {
+      pdfBuffer = await generateGuidePDF()
+    } catch (pdfErr) {
+      console.error("[FreeGuide] PDF generation failed (email will send without attachment):", pdfErr)
+    }
+
     const resend = new Resend(process.env.RESEND_API_KEY)
     const { error: resendError } = await resend.emails.send({
       from: "Lisa Fit Method <hello@lisafitmethod.com>",
       to: email,
-      subject: "Your free guide is right here",
-      html: `
-        <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a; background: #faf8f5;">
-          <p style="font-size: 11px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: #a8895e; margin-bottom: 28px; font-family: Helvetica Neue, Arial, sans-serif;">Lisa Fit Method</p>
-          <h1 style="font-family: Georgia, serif; font-size: 26px; font-weight: 700; margin-bottom: 16px; line-height: 1.2; color: #0a0a0a;">Your free preview is ready</h1>
-          <p style="font-size: 15px; line-height: 1.72; margin-bottom: 24px; color: #6b6560; font-family: Helvetica Neue, Arial, sans-serif;">The five foundation movements, exact coaching cues, and a real look inside Day A of the 4-week program are all waiting for you:</p>
-          <a href="https://lisafitmethod.com/free-guide?unlocked=1" style="display: inline-block; background: #c8a97e; color: #0a0a0a; text-decoration: none; font-family: Helvetica Neue, Arial, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; padding: 14px 28px; margin-bottom: 32px;">Read the Free Guide</a>
-          <p style="font-size: 13px; line-height: 1.7; color: #9c9590; margin-bottom: 8px; font-family: Helvetica Neue, Arial, sans-serif;">When you are ready to go further, the full 4-week Training Foundations course is $47 right now ($97 regular). One payment, lifetime access.</p>
-          <p style="font-size: 15px; font-family: Georgia, serif; font-style: italic; color: #a8895e; margin-top: 28px;">Lisa McPherson, CPT</p>
-        </div>
-      `,
+      subject: "Your free guide + PDF cheat sheet",
+      html: emailHtml,
+      ...(pdfBuffer
+        ? {
+            attachments: [
+              {
+                filename: "lisa-fit-method-5-foundations.pdf",
+                content: pdfBuffer,
+              },
+            ],
+          }
+        : {}),
     })
 
     if (resendError) {
