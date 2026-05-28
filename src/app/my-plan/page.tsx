@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { PlanPageClient } from "./page.client"
+import PlanPageClient from "./page.client"
 
 export const dynamic = "force-dynamic"
 
