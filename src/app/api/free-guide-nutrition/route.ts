@@ -68,27 +68,27 @@ const emailHtml = `
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">01</span>Calorie Deficit &mdash; the only mechanism for fat loss
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">01</span>Calorie Deficit : the only mechanism for fat loss
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">02</span>Protein &mdash; the lever that controls body composition
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">02</span>Protein : the lever that controls body composition
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">03</span>Build Muscle &mdash; the real metabolism shortcut
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">03</span>Build Muscle : the real metabolism shortcut
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">04</span>Daily Movement &mdash; the hidden calorie variable
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">04</span>Daily Movement : the hidden calorie variable
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">05</span>Sleep &mdash; the hormone controller
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">05</span>Sleep : the hormone controller
                   </td>
                 </tr>
               </table>

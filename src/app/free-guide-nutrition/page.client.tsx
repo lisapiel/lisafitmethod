@@ -210,6 +210,11 @@ export default function NutritionGuideClient() {
   const searchParams = useSearchParams()
   const [unlocked, setUnlocked] = useState(() => searchParams.get("unlocked") === "1")
 
+  function handleSuccess() {
+    setUnlocked(true)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
     <main style={{ background: paper, minHeight: "100vh" }}>
       <div style={{ maxWidth: 780, margin: "0 auto", padding: "clamp(36px, 6vw, 64px) clamp(20px, 5vw, 40px) 80px" }}>
@@ -256,7 +261,7 @@ export default function NutritionGuideClient() {
               <FreeGuideSignupForm
                 source="free-guide-nutrition"
                 apiEndpoint="/api/free-guide-nutrition"
-                onSuccess={() => setUnlocked(true)}
+                onSuccess={handleSuccess}
                 formOnly
               />
             </div>
