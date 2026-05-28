@@ -212,16 +212,16 @@ export function TrackerCheckoutClient() {
             My Workout Tracker
           </p>
           <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 400, color: "#f0e6d3", lineHeight: 1.2, marginBottom: 8 }}>
-            Build your program.<br />
-            <em>Use it at your own pace.</em>
+            Skip the $15/mo app.<br />
+            <em>Own yours for $17. Forever.</em>
           </h1>
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "24px 0 12px", paddingBottom: 0 }}>
             <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$17</span>
-            <span style={{ fontSize: 12, color: "#666" }}>one-time · no subscription</span>
+            <span style={{ fontSize: 12, color: "#666" }}>one-time · no subscription · ever</span>
           </div>
           <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 0, paddingBottom: 24, borderBottom: "1px solid #1a1a1a" }}>
-            Access continues for as long as the platform operates.{" "}
+            Add it to your phone home screen and it opens like a native app.{" "}
             <Link href="/terms#access-policy" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
               See terms.
             </Link>
@@ -229,11 +229,11 @@ export function TrackerCheckoutClient() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
             {[
-              { heading: "Any workout, any exercise", body: "Name your own days and add any exercise you want. Push, pull, leg day — whatever works for your training." },
-              { heading: "Track what matters", body: "Per exercise, choose: weight + reps, reps only, or time. Only see the fields that matter." },
-              { heading: "Progressive overload built in", body: "See last week's numbers inline while you log. Always know what you need to beat." },
-              { heading: "Unlimited weeks, no subscription", body: "Add as many weeks as you want. Your data stays on your device, even after the course ends." },
-              { heading: "Works like an app on your phone", body: "Add it to your home screen for one-tap access during any workout." },
+              { heading: "Installs to your home screen like an app", body: "Add it from your browser and it opens full-screen, no browser bar. One tap, you’re in the gym." },
+              { heading: "Works for any workout — not just this program", body: "Build completely custom days with any exercises you want. Push day, pull day, leg day — anything." },
+              { heading: "Progressive overload built in", body: "Last week’s numbers show right next to where you log. You always know exactly what to beat." },
+              { heading: "Log sets, reps, and weight in seconds", body: "Per exercise, choose: weight + reps, reps only, or time. No clutter, just the fields you actually need." },
+              { heading: "Your history lives on your device", body: "Unlimited weeks, never resets. Keep using it years after the course ends." },
             ].map((item) => (
               <div key={item.heading} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <span style={{ color: "#c9a96e", fontSize: 11, marginTop: 2, flexShrink: 0 }}>✓</span>
@@ -245,8 +245,8 @@ export function TrackerCheckoutClient() {
             ))}
           </div>
 
-          <p style={{ fontSize: 11, color: "#333", lineHeight: 1.7 }}>
-            Already have the course? This tracker works alongside it — or completely independently. It&apos;s yours to keep.
+          <p style={{ fontSize: 11, color: "#444", lineHeight: 1.7, padding: "16px 0", borderTop: "1px solid #1a1a1a" }}>
+            Most people pay $10–20/month for a workout tracking app. This is $17 once. It works for this program, the next one, and every program after that.
           </p>
         </div>
 

@@ -141,10 +141,10 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     upsells.push({
       id: "tracker",
       label: "Progress Tracker",
-      desc: "Keep progressing after 4 weeks. Buy once, no subscription.",
+      desc: "Build any workout, log every lift, beat last week's numbers. Installs like an app on your home screen. Buy once — no subscription, ever.",
       price: TRACKER_PRICE_DISPLAY,
       regularPrice: TRACKER_PRICE_DISPLAY,
-      href: "/checkout?member=1#tracker",
+      href: "/tracker-checkout",
     })
   }
 

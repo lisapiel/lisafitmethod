@@ -71,10 +71,10 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
     upsells.push({
       product: "tracker",
       label: "Progress Tracker",
-      headline: "Keep progressing after 4 weeks",
-      desc: "Build your own workout days, log every lift, and always know the number you're trying to beat. Buy once, no subscription.",
+      headline: "Your workout app, built in",
+      desc: "Build any program, log every lift, beat last week's numbers. Installs to your home screen. No subscription — ever.",
       baseCents: TRACKER_PRICE_CENTS,
-      href: "/checkout?member=1#tracker",
+      href: "/tracker-checkout",
     })
   }
 

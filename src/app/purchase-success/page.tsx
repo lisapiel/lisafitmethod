@@ -20,13 +20,12 @@ function getUpsells(product: string): UpsellProduct[] {
   if (product === "training") {
     return [
       {
-        label: "Masterclass — Monthly Programming",
-        headline: "Keep training after 4 weeks",
-        desc: "New 3-day workout block every month. 361 exercise videos. Monthly Q&A with Lisa. Built-in progress tracking. From $16.42/mo.",
-        price: "From $197/yr",
-        regularPrice: "",
-        href: "/masterclass-info",
-        isBundle: false,
+        label: "Progress Tracker",
+        headline: "Your workout app — $17 once",
+        desc: "Build any program, log every lift, beat last week's numbers. Adds to your home screen like an app. No subscription, ever.",
+        price: "$17",
+        regularPrice: "$17",
+        href: "/tracker-checkout",
       },
       {
         label: "Nutrition Foundations",
@@ -54,11 +53,11 @@ function getUpsells(product: string): UpsellProduct[] {
     return [
       {
         label: "Progress Tracker",
-        headline: "Keep going after 4 weeks",
-        desc: "Build your own workout days, log every lift, and always know the number you're trying to beat. Lifetime access.",
-        price: "$27",
-        regularPrice: "$27",
-        href: "/checkout?member=1#tracker",
+        headline: "Your built-in workout app",
+        desc: "Build any workout — not just this program. Log every lift, beat last week's numbers, add it to your home screen. No subscription, ever.",
+        price: "$17",
+        regularPrice: "$17",
+        href: "/tracker-checkout",
       },
     ]
   }
