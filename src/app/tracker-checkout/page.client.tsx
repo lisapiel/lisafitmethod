@@ -99,6 +99,7 @@ function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
           options={{
             buttonTheme: { applePay: "white", googlePay: "white" },
             buttonType: { applePay: "buy", googlePay: "buy" },
+            paymentMethods: { link: "never", amazonPay: "never" },
             layout: { maxColumns: 2, maxRows: 1, overflow: "never" },
           }}
           onReady={({ availablePaymentMethods }) => setExpressReady(!!availablePaymentMethods)}
