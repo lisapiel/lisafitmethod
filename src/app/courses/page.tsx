@@ -517,6 +517,15 @@ export default async function CoursesPage() {
                 Buy Now
               </Link>
             </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+              <Link href="/masterclass-info" style={{ color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>
+                Masterclass
+              </Link>
+              <span style={{ fontSize: 13, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>From $16/mo · monthly programming + 361 videos</span>
+              <Link href="/masterclass-info" style={{ display: "inline-block", border: `1px solid ${accent}`, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "10px 20px" }}>
+                Learn More
+              </Link>
+            </div>
             <div style={{ background: "#1a1208", padding: "20px 28px", width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16, borderTop: `1px solid rgba(200,169,126,0.2)` }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 4, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle — Best Value</p>

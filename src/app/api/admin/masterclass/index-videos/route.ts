@@ -10,7 +10,7 @@ const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 const BUCKET = "amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov"
 const REGION = "us-east-2"
 const PREFIX = "masterclass-videos/"
-export const CF_BASE = "https://d3r7fyatqfe18c.cloudfront.net"
+const CF_BASE = "https://d3r7fyatqfe18c.cloudfront.net"
 
 function slugFromKey(key: string): string {
   const filename = key.replace(PREFIX, "").replace(/\.[^.]+$/, "")
