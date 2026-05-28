@@ -3,15 +3,26 @@ import { useState, useCallback } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, ExpressCheckoutElement, useStripe, useElements } from "@stripe/react-stripe-js"
-import { COURSE_PRICE_CENTS, COURSE_WITH_TRACKER_PRICE_CENTS, COURSE_PRICE_DISPLAY, COURSE_WITH_TRACKER_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY } from "@/lib/pricing"
+import {
+  COURSE_PRICE_CENTS, COURSE_WITH_TRACKER_PRICE_CENTS, COURSE_PRICE_DISPLAY,
+  COURSE_WITH_TRACKER_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
+  NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
+} from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
 
-const MODULES = [
+const TRAINING_MODULES = [
   { num: "01", title: "Foundation Movements", desc: "Learn the 5 movement patterns every lifter needs before adding weight, intensity, or complexity." },
   { num: "02", title: "Core & Glute Priority", desc: "Targeted training designed to build strength while supporting your lower back and overall stability." },
   { num: "03", title: "The 4-Week Program", desc: "A fully structured 3-day training split with sets, reps, rest times, and progression already planned for you." },
   { num: "04", title: "Nutrition Foundations", desc: "Simple nutrition principles that support muscle growth, recovery, energy, and long-term consistency." },
+]
+
+const NUTRITION_MODULES = [
+  { num: "01", title: "Understanding Your Body", desc: "Interactive TDEE/BMR calculator. Know exactly how many calories you need on training days and rest days." },
+  { num: "02", title: "Your Nutrition Blueprint", desc: "Protein, carbs, and fats explained clearly. Build a plate that supports your goals without obsessing over every bite." },
+  { num: "03", title: "Your 4-Week Meal Plan", desc: "A personalised meal plan built around your calorie target, with real verified recipes and grocery lists for each week." },
+  { num: "04", title: "Making It Stick", desc: "Eating out, social situations, troubleshooting, supplements, and how to keep going when life gets in the way." },
 ]
 
 // ─── Payment form ─────────────────────────────────────────────────────────────
@@ -374,13 +385,19 @@ const ctaButtonStyle: React.CSSProperties = {
 
 // ─── Root component ───────────────────────────────────────────────────────────
 
-export function CheckoutClient() {
+export function CheckoutClient({ product = "training" }: { product?: "training" | "nutrition" }) {
+  const isNutrition = product === "nutrition"
+  const MODULES = isNutrition ? NUTRITION_MODULES : TRAINING_MODULES
+  const BASE_PRICE = isNutrition ? NUTRITION_COURSE_PRICE_CENTS : COURSE_PRICE_CENTS
+  const PRICE_DISPLAY = isNutrition ? NUTRITION_COURSE_PRICE_DISPLAY : COURSE_PRICE_DISPLAY
+  const REGULAR_PRICE_DISPLAY = isNutrition ? NUTRITION_COURSE_REGULAR_PRICE_DISPLAY : COURSE_REGULAR_PRICE_DISPLAY
+
   const [email, setEmail] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [discountPct, setDiscountPct] = useState(0)
-  const [finalAmount, setFinalAmount] = useState(COURSE_PRICE_CENTS)
+  const [finalAmount, setFinalAmount] = useState(BASE_PRICE)
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
   const [includesTracker, setIncludesTracker] = useState(false)
@@ -402,7 +419,7 @@ export function CheckoutClient() {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, includesTracker }),
+        body: JSON.stringify({ email, name, includesTracker, product }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -413,7 +430,7 @@ export function CheckoutClient() {
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : COURSE_PRICE_CENTS))
+      setFinalAmount(data.finalAmount ?? (!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE))
     } catch {
       setIntentError("Something went wrong. Please try again.")
       setEmail(null)
@@ -421,14 +438,14 @@ export function CheckoutClient() {
     } finally {
       setLoadingIntent(false)
     }
-  }, [email, name, includesTracker])
+  }, [email, name, includesTracker, product, isNutrition, BASE_PRICE])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email!, name: name!, promoCode, includesTracker }),
+        body: JSON.stringify({ email: email!, name: name!, promoCode, includesTracker, product }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -436,12 +453,12 @@ export function CheckoutClient() {
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : COURSE_PRICE_CENTS))
+      setFinalAmount(data.finalAmount ?? (!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE))
       return { error: null }
     } catch {
       return { error: "Something went wrong." }
     }
-  }, [email, name, includesTracker])
+  }, [email, name, includesTracker, product, isNutrition, BASE_PRICE])
 
   const handleBack = useCallback(() => {
     setEmail(null)
@@ -449,8 +466,8 @@ export function CheckoutClient() {
     setConfirmed(false)
     setClientSecret(null)
     setDiscountPct(0)
-    setFinalAmount(includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : COURSE_PRICE_CENTS)
-  }, [includesTracker])
+    setFinalAmount(!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE)
+  }, [includesTracker, isNutrition, BASE_PRICE])
 
   const stripeAppearance = {
     theme: "night" as const,
@@ -505,25 +522,24 @@ export function CheckoutClient() {
         {/* LEFT — Course summary */}
         <div className="checkout-left" style={{ padding: "60px 48px 60px 40px", borderRight: "1px solid #1a1a1a" }}>
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "#c9a96e", marginBottom: 8 }}>
-            Training Foundations
+            {isNutrition ? "Nutrition Foundations" : "Training Foundations"}
           </p>
           <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 400, color: "#f0e6d3", lineHeight: 1.2, marginBottom: 8 }}>
-            Build the foundation.<br />
-            <em>Train for life.</em>
+            {isNutrition ? <>Eat with purpose.<br /><em>Build the body you want.</em></> : <>Build the foundation.<br /><em>Train for life.</em></>}
           </h1>
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "28px 0", paddingBottom: 28, borderBottom: "1px solid #1a1a1a" }}>
-            <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
+            <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>{REGULAR_PRICE_DISPLAY}</span>
             <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>
-              {includesTracker ? COURSE_WITH_TRACKER_PRICE_DISPLAY : COURSE_PRICE_DISPLAY}
+              {!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_DISPLAY : PRICE_DISPLAY}
             </span>
-            {includesTracker ? (
+            {!isNutrition && includesTracker ? (
               <span style={{ fontSize: 10, color: "#666", fontFamily: "var(--font-montserrat), sans-serif" }}>
                 course + tracker
               </span>
             ) : (
               <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
-                Limited Time
+                Intro Price
               </span>
             )}
           </div>
@@ -546,14 +562,21 @@ export function CheckoutClient() {
           </ul>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
+            {(isNutrition ? [
+              "Interactive TDEE calculator personalises your calorie and macro targets",
+              "4-week meal plan built around your numbers, with real recipes from verified sources",
+              "Weekly grocery lists and meal prep guides",
+              "Science-backed content with research references throughout",
+              "Lifetime access with free future updates",
+              "Instant access after purchase",
+            ] : [
               "Includes 50+ exercise videos with full movement breakdowns and form guidance",
               "Built-in workout and progress tracking so you can monitor your strength over time",
               "Lifetime access with free future updates",
               "Designed to be repeated beyond the initial 4 weeks so you can continue building strength and confidence over time",
               "Learn how to train properly for life, not just for 30 days",
               "Instant access after purchase",
-            ].map((item) => (
+            ]).map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ color: "#c9a96e", fontSize: 11 }}>✓</span>
                 <span style={{ fontSize: 12, color: "#666", letterSpacing: "0.04em" }}>{item}</span>
@@ -561,57 +584,58 @@ export function CheckoutClient() {
             ))}
           </div>
 
-          <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 20, marginTop: 20 }}>
             Lifetime access refers to the lifetime of the platform.{" "}
             <Link href="/terms#lifetime-access" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
               See terms.
             </Link>
           </p>
 
-          {/* Order bump */}
-          <label
-            style={{
-              display: "block",
-              marginTop: 28,
-              border: includesTracker ? "1px solid rgba(201,169,110,0.5)" : "1px solid #2a2a2a",
-              background: includesTracker ? "rgba(201,169,110,0.06)" : "#111111",
-              padding: "20px 20px",
-              cursor: paymentStarted ? "default" : "pointer",
-              transition: "border-color 0.2s, background 0.2s",
-            }}
-          >
-            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-              <input
-                type="checkbox"
-                checked={includesTracker}
-                disabled={paymentStarted}
-                onChange={(e) => setIncludesTracker(e.target.checked)}
-                style={{ marginTop: 2, accentColor: "#c9a96e", width: 16, height: 16, flexShrink: 0, cursor: paymentStarted ? "default" : "pointer" }}
-              />
-              <div>
-                <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                  Add the Lifetime Workout Tracker +$17
-                </p>
-                <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
-                  Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat. Works like an app directly on your phone.
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                  {[
-                    "Create your own workout days: Push, Pull, Legs, Glutes, Upper/Lower, or however you like to train",
-                    "Track weight + reps, reps only, or timed exercises for any movement",
-                    "See your previous numbers directly inside each workout so progressive overload becomes automatic",
-                    "Save unlimited workouts and training weeks with lifetime access",
-                    "Built to grow with you after the 4-week program is over",
-                  ].map((f) => (
-                    <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                      <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>
-                      <span style={{ fontSize: 11, color: "#666", lineHeight: 1.5 }}>{f}</span>
-                    </div>
-                  ))}
+          {/* Order bump — training only */}
+          {!isNutrition && (
+            <label
+              style={{
+                display: "block",
+                marginTop: 8,
+                border: includesTracker ? "1px solid rgba(201,169,110,0.5)" : "1px solid #2a2a2a",
+                background: includesTracker ? "rgba(201,169,110,0.06)" : "#111111",
+                padding: "20px 20px",
+                cursor: paymentStarted ? "default" : "pointer",
+                transition: "border-color 0.2s, background 0.2s",
+              }}
+            >
+              <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <input
+                  type="checkbox"
+                  checked={includesTracker}
+                  disabled={paymentStarted}
+                  onChange={(e) => setIncludesTracker(e.target.checked)}
+                  style={{ marginTop: 2, accentColor: "#c9a96e", width: 16, height: 16, flexShrink: 0, cursor: paymentStarted ? "default" : "pointer" }}
+                />
+                <div>
+                  <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+                    Add the Lifetime Workout Tracker +$17
+                  </p>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
+                    Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    {[
+                      "Create your own workout days: Push, Pull, Legs, Glutes, Upper/Lower, or however you like to train",
+                      "Track weight + reps, reps only, or timed exercises for any movement",
+                      "See your previous numbers directly inside each workout so progressive overload becomes automatic",
+                      "Save unlimited workouts and training weeks with lifetime access",
+                    ].map((f) => (
+                      <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                        <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>
+                        <span style={{ fontSize: 11, color: "#666", lineHeight: 1.5 }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </label>
+            </label>
+          )}
         </div>
 
         {/* RIGHT — Payment form */}

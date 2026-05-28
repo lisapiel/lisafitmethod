@@ -89,3 +89,25 @@ export async function hasTrackerAccess(email: string): Promise<boolean> {
     return false
   }
 }
+
+export async function grantNutritionAccess(email: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `nutrition_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString() },
+    })
+  )
+}
+
+export async function hasNutritionAccess(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `nutrition_access_${email.toLowerCase()}` } })
+    )
+    return !!result.Item
+  } catch {
+    return false
+  }
+}
