@@ -113,17 +113,18 @@ export default async function CoursesPage() {
           --heading-scale: ${hs};
           --body-scale: ${bs};
         }
-        .courses-divider { width: 40px; height: 1px; background: rgba(200,169,126,0.4); margin-bottom: 32px; }
+        .courses-divider-dark { width: 40px; height: 1px; background: rgba(200,169,126,0.4); margin-bottom: 32px; }
+        .courses-divider-light { width: 40px; height: 1px; background: rgba(168,137,94,0.35); margin-bottom: 32px; }
 
         /* Video */
         .courses-video-band { width: 100%; height: 62vh; min-height: 320px; overflow: hidden; background: #111; }
         @media (max-width: 768px) { .courses-video-band { height: 56vw; min-height: 220px; } }
 
-        /* Intro */
+        /* Intro (LIGHT) */
         .courses-intro { padding: 100px 80px 80px; max-width: 860px; margin: 0 auto; text-align: center; }
         @media (max-width: 768px) { .courses-intro { padding: 72px 28px 60px; } }
 
-        /* Course section */
+        /* Course section (DARK) */
         .course-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); }
         .course-section-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 80px; align-items: start; }
         .course-cta-col { position: sticky; top: 96px; }
@@ -133,51 +134,53 @@ export default async function CoursesPage() {
           .course-cta-col { position: static; }
         }
 
-        /* Price display */
+        /* Price display (dark sections) */
         .price-block { margin-bottom: 28px; }
         .price-main { font-size: 52px; font-weight: 700; color: ${accent}; line-height: 1; font-family: var(--font-dm-sans), sans-serif; }
         .price-was { font-size: 13px; color: rgba(245,242,238,0.3); text-decoration: line-through; font-family: var(--font-dm-sans), sans-serif; display: inline; margin-left: 4px; }
         .price-note { font-size: 11px; color: rgba(245,242,238,0.35); font-family: var(--font-dm-sans), sans-serif; margin-top: 8px; line-height: 1.6; letter-spacing: 0.04em; }
 
-        /* CTA button */
+        /* CTA buttons */
         .cta-primary { display: block; background: ${accent}; color: #0a0a0a; font-family: var(--font-dm-sans), sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none; padding: 18px 28px; text-align: center; }
-        .cta-ghost { display: inline-block; color: rgba(245,242,238,0.4); font-family: var(--font-dm-sans), sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 8px 0; }
-        .cta-ghost:hover { color: ${accent}; }
+        .cta-ghost-dark { display: inline-block; color: rgba(245,242,238,0.4); font-family: var(--font-dm-sans), sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 8px 0; }
+        .cta-ghost-dark:hover { color: ${accent}; }
+        .cta-ghost-light { display: inline-block; color: rgba(26,26,26,0.4); font-family: var(--font-dm-sans), sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 8px 0; }
+        .cta-ghost-light:hover { color: ${accent}; }
 
-        /* Modules */
+        /* Modules grid (dark) */
         .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.04); margin-top: 48px; }
         .module-card { background: #0a0a0a; padding: 36px 32px; }
         @media (max-width: 600px) { .modules-grid { grid-template-columns: 1fr; } .module-card { padding: 28px 0; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.06); } }
 
-        /* Bundle */
-        .bundle-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); }
+        /* Bundle (LIGHT) */
+        .bundle-section { padding: 100px 80px; border-top: 1px solid rgba(0,0,0,0.07); }
         .bundle-inner { max-width: 800px; margin: 0 auto; }
         @media (max-width: 768px) { .bundle-section { padding: 72px 28px; } }
 
-        /* Tracker */
+        /* Tracker (DARK) */
         .tracker-section { padding: 80px 80px; border-top: 1px solid rgba(255,255,255,0.06); }
         .tracker-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; }
         @media (max-width: 768px) { .tracker-section { padding: 60px 28px; } .tracker-inner { grid-template-columns: 1fr; gap: 28px; } }
 
-        /* FAQ */
+        /* FAQ (DARK) */
         .faq-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); background: #0d0d0d; }
         .faq-inner { max-width: 700px; margin: 0 auto; }
         @media (max-width: 768px) { .faq-section { padding: 72px 28px; } }
 
-        /* Testimonials */
-        .testimonials-section { padding: 100px 40px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; }
+        /* Testimonials (LIGHT) */
+        .testimonials-section { padding: 100px 40px; border-top: 1px solid rgba(0,0,0,0.07); text-align: center; }
         @media (max-width: 768px) { .testimonials-section { padding: 72px 24px; } }
 
-        /* For-section */
-        .for-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); background: #0d0d0d; }
+        /* Is This For Me (LIGHT) */
+        .for-section { padding: 100px 80px; border-top: 1px solid rgba(0,0,0,0.07); background: #f5f2ee; }
         @media (max-width: 768px) { .for-section { padding: 72px 28px; } }
 
-        /* Final CTA */
+        /* Final CTA (DARK) */
         .final-cta { padding: 120px 80px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; position: relative; overflow: hidden; }
         @media (max-width: 768px) { .final-cta { padding: 80px 28px; } }
       `}</style>
 
-      {/* VIDEO */}
+      {/* VIDEO — dark */}
       {trailerUrl && (
         <section style={{ background: "#000" }}>
           <div className="courses-video-band">
@@ -186,14 +189,14 @@ export default async function CoursesPage() {
         </section>
       )}
 
-      {/* INTRO */}
-      <section style={{ background: "#0a0a0a" }}>
+      {/* INTRO — LIGHT */}
+      <section style={{ background: "#faf8f5" }}>
         <div className="courses-intro">
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>Courses</p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 4vw, 54px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 24 }}>
+          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 4vw, 54px) * ${hs})`, fontWeight: 900, color: "#1a1a1a", lineHeight: 1.1, marginBottom: 24 }}>
             Two courses.<br /><em style={{ fontStyle: "italic", color: accent }}>One complete foundation.</em>
           </h1>
-          <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.7, maxWidth: 580, margin: "0 auto 48px" }}>
+          <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(26,26,26,0.5)", lineHeight: 1.7, maxWidth: 580, margin: "0 auto 48px" }}>
             Structured fitness and nutrition systems built for real life. Learn how to move well, train consistently, and eat in a way that supports your goals without obsessing over every detail.
           </p>
           <div style={{ display: "flex", gap: 32, justifyContent: "center", flexWrap: "wrap" }}>
@@ -202,7 +205,7 @@ export default async function CoursesPage() {
               { label: "Nutrition Foundations", href: "#nutrition" },
               { label: "Bundle", href: "#bundle" },
             ].map(({ label, href }) => (
-              <a key={href} href={href} style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(245,242,238,0.35)", textDecoration: "none", borderBottom: `1px solid rgba(200,169,126,0.3)`, paddingBottom: 2, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              <a key={href} href={href} style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(26,26,26,0.45)", textDecoration: "none", borderBottom: `1px solid rgba(168,137,94,0.35)`, paddingBottom: 2, fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 {label}
               </a>
             ))}
@@ -210,10 +213,9 @@ export default async function CoursesPage() {
         </div>
       </section>
 
-      {/* TRAINING FOUNDATIONS */}
+      {/* TRAINING FOUNDATIONS — DARK */}
       <section id="training" className="course-section" style={{ background: "#0a0a0a" }}>
         <div className="course-section-inner">
-          {/* Content */}
           <div>
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Training Foundations</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 52px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 24 }}>
@@ -223,7 +225,7 @@ export default async function CoursesPage() {
               {t.coursesHeroSubtext}
             </p>
 
-            <div className="courses-divider" />
+            <div className="courses-divider-dark" />
 
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(245,242,238,0.3)", marginBottom: 32 }}>What&apos;s inside</p>
 
@@ -245,7 +247,6 @@ export default async function CoursesPage() {
             </div>
           </div>
 
-          {/* Price + CTA */}
           <div className="course-cta-col">
             <div style={{ background: "#111", padding: "36px 32px", borderTop: `2px solid ${accent}` }}>
               <div className="price-block">
@@ -275,11 +276,11 @@ export default async function CoursesPage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* TESTIMONIALS — LIGHT */}
       {testimonialsUrl && (
-        <section className="testimonials-section" style={{ background: "#0d0d0d" }}>
-          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(200,169,126,0.6)", marginBottom: 16 }}>Real results</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(26px, 2.5vw, 36px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, marginBottom: 48 }}>
+        <section className="testimonials-section" style={{ background: "#f5f2ee" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(168,137,94,0.9)", marginBottom: 16 }}>Real results</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(26px, 2.5vw, 36px) * ${hs})`, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2, marginBottom: 48 }}>
             What people <em style={{ fontStyle: "italic", color: accent }}>are saying.</em>
           </h2>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -288,10 +289,9 @@ export default async function CoursesPage() {
         </section>
       )}
 
-      {/* NUTRITION FOUNDATIONS */}
+      {/* NUTRITION FOUNDATIONS — DARK */}
       <section id="nutrition" className="course-section" style={{ background: "#0a0a0a" }}>
         <div className="course-section-inner">
-          {/* Content */}
           <div>
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Nutrition Foundations</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 52px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 24 }}>
@@ -301,7 +301,7 @@ export default async function CoursesPage() {
               A 4-week nutrition course with a personalised TDEE calculator, a structured meal plan built around your calorie target, science-backed education, and real recipes from verified sources.
             </p>
 
-            <div className="courses-divider" />
+            <div className="courses-divider-dark" />
 
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(245,242,238,0.3)", marginBottom: 32 }}>What&apos;s inside</p>
 
@@ -330,7 +330,6 @@ export default async function CoursesPage() {
             </div>
           </div>
 
-          {/* Price + CTA */}
           <div className="course-cta-col">
             <div style={{ background: "#111", padding: "36px 32px", borderTop: `2px solid ${accent}` }}>
               <div className="price-block">
@@ -342,49 +341,49 @@ export default async function CoursesPage() {
               </div>
               <Link href="/checkout?product=nutrition" className="cta-primary">Get Instant Access</Link>
               <div style={{ marginTop: 16, textAlign: "center" }}>
-                <Link href="/nutrition" className="cta-ghost">Full course details →</Link>
+                <Link href="/nutrition" className="cta-ghost-dark">Full course details →</Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* BUNDLE */}
-      <section id="bundle" className="bundle-section" style={{ background: "#0d0d0d" }}>
+      {/* BUNDLE — LIGHT */}
+      <section id="bundle" className="bundle-section" style={{ background: "#faf8f5" }}>
         <div className="bundle-inner">
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Complete Foundations System</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 44px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 20 }}>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 44px) * ${hs})`, fontWeight: 900, color: "#1a1a1a", lineHeight: 1.1, marginBottom: 20 }}>
             Get both courses together.
           </h2>
-          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.7, marginBottom: 48, maxWidth: 560 }}>
+          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(26,26,26,0.5)", lineHeight: 1.7, marginBottom: 48, maxWidth: 560 }}>
             Training and nutrition are two sides of the same system. When you have both, you know how to train and how to eat to support it. Most people who take one eventually come back for the other.
           </p>
 
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 40, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 32 }}>
+          <div style={{ borderTop: "1px solid rgba(0,0,0,0.09)", paddingTop: 40, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 32 }}>
             <div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                 {["Training Foundations", "Nutrition Foundations"].map((name) => (
                   <div key={name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: accent, fontSize: 11 }}>✓</span>
-                    <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(245,242,238,0.6)" }}>{name}</span>
+                    <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(26,26,26,0.65)" }}>{name}</span>
                   </div>
                 ))}
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 48, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
-                <span style={{ fontSize: 13, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", textDecoration: "line-through" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
-                <span style={{ fontSize: 11, color: "rgba(200,169,126,0.6)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.05em" }}>save {BUNDLE_SAVINGS_DISPLAY}</span>
+                <span style={{ fontSize: 13, color: "rgba(26,26,26,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", textDecoration: "line-through" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
+                <span style={{ fontSize: 11, color: "rgba(168,137,94,0.8)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.05em" }}>save {BUNDLE_SAVINGS_DISPLAY}</span>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 200 }}>
               <Link href="/checkout?product=bundle" className="cta-primary">Get Both Courses</Link>
-              <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.5, textAlign: "center" }}>One-time payment · No subscription</p>
+              <p style={{ fontSize: 11, color: "rgba(26,26,26,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.5, textAlign: "center" }}>One-time payment · No subscription</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* TRACKER ADD-ON */}
+      {/* TRACKER ADD-ON — DARK */}
       <section className="tracker-section" style={{ background: "#0a0a0a" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <div style={{ marginBottom: 48 }}>
@@ -419,11 +418,11 @@ export default async function CoursesPage() {
         </div>
       </section>
 
-      {/* IS THIS FOR ME? */}
+      {/* IS THIS FOR ME? — LIGHT */}
       <section className="for-section">
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
-          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 20 }}>Is this for me?</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 40 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(168,137,94,0.85)", marginBottom: 20 }}>Is this for me?</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.1, marginBottom: 40 }}>
             You&apos;re in the right place <em style={{ fontStyle: "italic", color: accent }}>if you&apos;re serious.</em>
           </h2>
           <div>
@@ -435,7 +434,7 @@ export default async function CoursesPage() {
               "You're ready to train consistently and actually build strength",
               "You want nutrition guidance that isn't obsessive or exhausting",
             ].map((item) => (
-              <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "16px 0", borderBottom: "1px solid rgba(255,255,255,0.05)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5 }}>
+              <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "16px 0", borderBottom: "1px solid rgba(0,0,0,0.07)", fontSize: `calc(14px * ${bs})`, color: "rgba(26,26,26,0.6)", lineHeight: 1.5 }}>
                 <span style={{ color: accent, flexShrink: 0, marginTop: 2, fontSize: 12 }}>✓</span>
                 {item}
               </div>
@@ -444,7 +443,7 @@ export default async function CoursesPage() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ — DARK */}
       <section className="faq-section">
         <div className="faq-inner">
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 20 }}>Common questions</p>
@@ -469,7 +468,7 @@ export default async function CoursesPage() {
         </div>
       </section>
 
-      {/* FINAL CTA */}
+      {/* FINAL CTA — DARK */}
       <section className="final-cta" style={{ background: "#0a0a0a" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 600, height: 600, background: "radial-gradient(circle, rgba(200,169,126,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto" }}>
