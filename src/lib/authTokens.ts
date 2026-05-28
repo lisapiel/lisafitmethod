@@ -111,3 +111,74 @@ export async function hasNutritionAccess(email: string): Promise<boolean> {
     return false
   }
 }
+
+export interface MasterclassAccess {
+  active: boolean
+  stripeSubscriptionId: string
+  plan: "monthly" | "6month" | "annual"
+  currentPeriodEnd: string
+}
+
+export async function grantMasterclassAccess(
+  email: string,
+  stripeSubscriptionId: string,
+  plan: "monthly" | "6month" | "annual",
+  currentPeriodEnd: string
+): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: {
+        userId: `masterclass_access_${email.toLowerCase()}`,
+        active: true,
+        stripeSubscriptionId,
+        plan,
+        currentPeriodEnd,
+        grantedAt: new Date().toISOString(),
+      },
+    })
+  )
+}
+
+export async function renewMasterclassAccess(
+  email: string,
+  currentPeriodEnd: string
+): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `masterclass_access_${email.toLowerCase()}` },
+      UpdateExpression: "SET active = :true, currentPeriodEnd = :end",
+      ExpressionAttributeValues: { ":true": true, ":end": currentPeriodEnd },
+    })
+  )
+}
+
+export async function revokeMasterclassAccess(email: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `masterclass_access_${email.toLowerCase()}` },
+      UpdateExpression: "SET active = :false",
+      ExpressionAttributeValues: { ":false": false },
+    })
+  )
+}
+
+export async function hasMasterclassAccess(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `masterclass_access_${email.toLowerCase()}` } })
+    )
+    if (!result.Item) return false
+    const access = result.Item as MasterclassAccess & { userId: string }
+    if (!access.active) return false
+    return new Date(access.currentPeriodEnd) > new Date()
+  } catch {
+    return false
+  }
+}

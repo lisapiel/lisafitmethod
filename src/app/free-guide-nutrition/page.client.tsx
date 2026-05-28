@@ -3,7 +3,12 @@
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY } from "@/lib/pricing"
+import {
+  COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
+  NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
+  BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
+  FOUNDING_DATE,
+} from "@/lib/pricing"
 import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
 
 const paper = "#faf8f5"
@@ -122,15 +127,6 @@ export const PRINCIPLES = [
     ref: "Spiegel et al. 2004 (Ann Intern Med, University of Chicago): sleep restriction significantly increases hunger and appetite for calorie-dense food.",
     practical: "7-9 hours. Not a wellness trend. A hormonal requirement.",
   },
-]
-
-const FEATURES: [string, string][] = [
-  ["50+ exercise videos", " so your form is never a guess"],
-  ["The full 4-week program", ", three days a week, structured with sets, reps, rest, warmups and cooldowns"],
-  ["Built-in tracking you keep for life", ", log every set and watch your numbers climb week over week"],
-  ["Progressive overload built in", ", so you always know your next step without guessing"],
-  ["Nutrition foundations module", " built on the principles above, no calorie obsession"],
-  ["Works at home with dumbbells and bands", ", and scales straight into the gym"],
 ]
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -364,56 +360,72 @@ export default function NutritionGuideClient() {
               <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>The course is the structured how.</em>
             </h2>
             <p style={{ fontSize: "0.93rem", marginBottom: "1rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-              Knowing these five principles puts you ahead of most people. But knowledge is not a program. The missing piece is structure: a resistance training plan that builds the muscle at the center of all of this, with progressive overload that makes it actually work over time.
+              Knowing these five principles puts you ahead of most people. But knowledge alone is not a system. What gets results is having the right meal plan, personalized to your body, built around real food and structured habits.
             </p>
-            <p style={{ fontSize: "0.93rem", marginBottom: "1rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-              That is the 4-week Training Foundations program. Three days a week. Less than the cost of a single session with a trainer:
-            </p>
-            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 0.25rem" }}>
-              {FEATURES.map(([bold, rest], i) => (
-                <li key={i} style={{ fontSize: "0.93rem", padding: "0.55rem 0 0.55rem 2rem", position: "relative", borderBottom: `1px solid ${line}`, color: ink, fontFamily: dmSans, lineHeight: 1.55 }}>
-                  <span style={{ position: "absolute", left: 0, color: goldDeep, fontWeight: 500, fontSize: "1rem", lineHeight: "1.4rem" }}>&#8594;</span>
-                  <strong>{bold}</strong>{rest}
-                </li>
-              ))}
-            </ul>
 
-            <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginTop: "1.75rem" }}>
+            {/* Nutrition Foundations — primary CTA */}
+            <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginTop: "1.25rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: gold, marginBottom: "0.75rem", marginTop: 0 }}>
+                Nutrition Foundations
+              </p>
               <div style={{ display: "flex", alignItems: "baseline", gap: "0.875rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-                <span style={{ color: "#5a544b", textDecoration: "line-through", fontFamily: playfair, fontSize: "1.5rem" }}>
-                  {COURSE_REGULAR_PRICE_DISPLAY}
-                </span>
-                <span style={{ color: "#fff", fontFamily: playfair, fontSize: "clamp(2rem, 5vw, 2.9rem)", fontWeight: 700, lineHeight: 1 }}>
-                  {COURSE_PRICE_DISPLAY}
-                </span>
-                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>
-                  Limited Time
-                </span>
+                <span style={{ color: "#5a544b", textDecoration: "line-through", fontFamily: playfair, fontSize: "1.5rem" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ color: "#fff", fontFamily: playfair, fontSize: "clamp(2rem, 5vw, 2.9rem)", fontWeight: 700, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>Founding Price</span>
               </div>
               <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.4rem, 3.5vw, 1.7rem)", fontWeight: 700, margin: "1.1rem 0 0.75rem", color: "#fff", letterSpacing: "-0.01em" }}>
-                You know the why.{" "}
-                <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>Get the how.</em>
+                Eat right.{" "}
+                <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>A 4-week course built for people who train.</em>
               </h3>
               <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                One payment, lifetime access. The program, the videos, the tracker, and the nutrition module. All built on the science above. The price returns to {COURSE_REGULAR_PRICE_DISPLAY} soon.
+                Personalized TDEE calculator, a meal plan that adapts to your calorie target, 9 verified recipes with source attribution, and science-backed education. Founding member pricing until {FOUNDING_DATE}.
               </p>
-              <Link
-                href="/checkout"
-                style={{
-                  display: "block", background: gold, color: black, textAlign: "center",
-                  fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase",
-                  padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400,
-                }}
-              >
-                Get Instant Access
+              <Link href="/nutrition" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400 }}>
+                Get Nutrition Foundations
               </Link>
               <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans }}>
-                One-time payment - Lifetime access - Use it, reuse it, keep building
+                One-time payment · Lifetime access · Yours forever
               </p>
             </div>
 
+            {/* Training Foundations secondary CTA */}
+            <div style={{ border: `1px solid ${line}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginTop: "1.5rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.6rem", marginTop: 0 }}>
+                Also available: Training Foundations
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, lineHeight: 1.65, marginBottom: "0.75rem" }}>
+                The 4-week strength training program that puts the nutrition to work. Five foundational movements, 50+ exercise videos, built-in workout tracking, and progressive overload from week one.
+              </p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: playfair, fontSize: "1.6rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
+              </div>
+              <Link href="/courses" style={{ display: "inline-block", color: goldDeep, fontFamily: dmSans, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", border: `1px solid ${goldDeep}`, padding: "0.7rem 1.5rem" }}>
+                Explore Training Foundations
+              </Link>
+            </div>
+
+            {/* Bundle CTA */}
+            <div style={{ background: black, padding: "clamp(1.5rem, 4vw, 2rem)", marginTop: "1rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: gold, marginBottom: "0.6rem", marginTop: 0 }}>
+                Best Value: Foundations Bundle
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: "#b3ab9c", lineHeight: 1.65, marginBottom: "0.75rem" }}>
+                Both courses together. Eat right, train right, and have everything in one place. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately.
+              </p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: playfair, fontSize: "1.8rem", fontWeight: 700, color: gold, lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: "#555", textDecoration: "line-through" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", color: "#0a0a0a", background: gold, padding: "3px 8px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Save {BUNDLE_SAVINGS_DISPLAY}</span>
+              </div>
+              <Link href="/checkout?product=bundle" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400 }}>
+                Get Both Courses
+              </Link>
+            </div>
+
             <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#9c9590", marginTop: "3rem", textAlign: "center", fontFamily: dmSans }}>
-              Lisa McPherson, CPT - lisafitmethod.com - @lisafitmethod
+              Lisa McPherson, CPT · lisafitmethod.com · @lisafitmethod
             </p>
           </>
         )}
