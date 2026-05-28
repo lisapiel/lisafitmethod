@@ -2,8 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut } from "aws-amplify/auth"
-import { useRouter } from "next/navigation"
+import MemberNav from "@/components/MemberNav.client"
 
 const NAV = [
   { label: "Introduction", href: "/nutrition-foundations" },
@@ -19,12 +18,6 @@ const dim = "#888888"
 
 export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
-  const router = useRouter()
-
-  async function handleSignOut() {
-    await signOut()
-    router.push("/")
-  }
 
   return (
     <>
@@ -61,7 +54,6 @@ export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean;
               z-index: 150;
               transform: translateX(-100%);
               width: 280px !important;
-              padding-top: 3.5rem;
             }
           }
           .sidebar-nav-scroll { overflow-y: auto; scrollbar-width: thin; }
@@ -70,32 +62,25 @@ export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean;
           .nb-item:hover { color: #c9a96e !important; }
         `}</style>
 
-        <div style={{ flexShrink: 0, padding: "1rem 1.25rem 0.75rem" }}>
-          <Link
-            href="/nutrition-foundations"
-            onClick={onClose}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0.6rem 0.75rem",
-              background: "rgba(201,169,110,0.06)",
-              border: "1px solid rgba(201,169,110,0.3)",
-              textDecoration: "none",
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: "0.6rem",
-              fontWeight: 700,
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: gold,
-            }}
-          >
-            Nutrition Foundations
-          </Link>
-        </div>
-        <div style={{ height: 1, background: "#2a2a2a", margin: "0 1.25rem 0.5rem", opacity: 0.4, flexShrink: 0 }} />
+        {/* Member nav — account, courses, add-ons, sign out */}
+        <MemberNav currentCourse="nutrition" onClose={onClose} />
 
-        <div className="sidebar-nav-scroll" style={{ flex: 1, padding: "0.5rem 0 1.5rem" }}>
+        {/* Course label */}
+        <div style={{ flexShrink: 0, padding: "0.75rem 1.25rem 0.5rem" }}>
+          <p style={{
+            fontSize: "0.48rem",
+            fontWeight: 700,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "#2e2e2e",
+            fontFamily: "var(--font-montserrat), sans-serif",
+          }}>
+            Nutrition Foundations
+          </p>
+        </div>
+
+        {/* Module nav */}
+        <div className="sidebar-nav-scroll" style={{ flex: 1, padding: "0 0 1.5rem" }}>
           {NAV.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -106,7 +91,7 @@ export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean;
                 className="nb-item"
                 style={{
                   display: "block",
-                  padding: "0.7rem 1.25rem",
+                  padding: "0.65rem 1.25rem",
                   fontSize: "0.7rem",
                   color: isActive ? gold : dim,
                   textDecoration: "none",
@@ -121,25 +106,6 @@ export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean;
               </Link>
             )
           })}
-        </div>
-
-        <div style={{ flexShrink: 0, padding: "0.75rem 1.25rem", borderTop: "1px solid #2a2a2a" }}>
-          <button
-            onClick={handleSignOut}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#555",
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: "0.6rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              padding: 0,
-            }}
-          >
-            Sign Out
-          </button>
         </div>
       </nav>
     </>

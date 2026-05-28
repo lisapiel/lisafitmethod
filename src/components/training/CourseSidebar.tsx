@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useCourseProgress } from "./CourseProgressContext"
+import MemberNav from "@/components/MemberNav.client"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -310,8 +311,11 @@ export default function CourseSidebar({ isOpen, onClose }: { isOpen: boolean; on
           .sb-sub:hover  { color: #c9a96e !important; }
         `}</style>
 
+        {/* Member nav — account, courses, add-ons, sign out */}
+        <MemberNav currentCourse="training" onClose={onClose} />
+
         {/* My Progress pill */}
-        <div style={{ flexShrink: 0, padding: "1rem 1.25rem 0.75rem" }}>
+        <div style={{ flexShrink: 0, padding: "0.75rem 1.25rem 0.6rem" }}>
           <Link
             href="/training-foundations/tracker"
             onClick={onClose}

@@ -1,30 +1,22 @@
 "use client"
 
 import Link from "next/link"
-import { signOut } from "aws-amplify/auth"
-import { useRouter } from "next/navigation"
 import { useCourseProgress } from "./CourseProgressContext"
-import CourseSwitcher from "@/components/CourseSwitcher.client"
 
 interface CourseHeaderProps {
   onMenuToggle: () => void
 }
 
 export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
-  const router = useRouter()
   const { ready, currentPosition } = useCourseProgress()
-
-  async function handleSignOut() {
-    await signOut()
-    router.push("/")
-  }
 
   return (
     <header
       className="course-header-bar"
       style={{
         borderBottom: "1px solid #2a2a2a",
-        padding: "1rem 1.5rem",
+        padding: "0 1.5rem",
+        height: 52,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -34,90 +26,71 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
         flexShrink: 0,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .mobile-menu-btn { display: flex !important; }
+          .header-progress-badge { display: none !important; }
+          .course-header-bar {
+            position: fixed !important;
+            top: 0; left: 0; right: 0; z-index: 200;
+          }
+        }
+      `}</style>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
         <button
           onClick={onMenuToggle}
           className="mobile-menu-btn"
           style={{
             display: "none",
+            alignItems: "center",
+            justifyContent: "center",
             background: "none",
             border: "1px solid #2a2a2a",
             color: "#f0e6d3",
-            padding: "0.5rem 0.75rem",
-            fontSize: "0.65rem",
-            fontWeight: 500,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
+            width: 36,
+            height: 36,
             cursor: "pointer",
-            fontFamily: "var(--font-montserrat), sans-serif",
+            flexShrink: 0,
           }}
+          aria-label="Open menu"
         >
-          ☰ Menu
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+            <rect y="0" width="14" height="1.5" fill="currentColor"/>
+            <rect y="4.25" width="14" height="1.5" fill="currentColor"/>
+            <rect y="8.5" width="14" height="1.5" fill="currentColor"/>
+          </svg>
         </button>
-        <style>{`
-          @media (max-width: 768px) {
-            .mobile-menu-btn { display: block !important; }
-            .course-switcher-wrap { display: none !important; }
-            .header-progress-badge { display: none !important; }
-            .course-header-bar {
-              position: fixed !important;
-              top: 0;
-              left: 0;
-              right: 0;
-              z-index: 200;
-            }
-          }
-        `}</style>
-        <div
-          style={{
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <span style={{
             fontFamily: "var(--font-cormorant), serif",
-            fontSize: "0.9rem",
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: "#c9a96e",
-          }}
-        >
-          Lisa Fit Method
-        </div>
+            fontSize: "1rem",
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            color: "#f0e6d3",
+          }}>
+            Lisa <span style={{ color: "#c9a96e" }}>Fit Method</span>
+          </span>
+        </Link>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        <div className="course-switcher-wrap">
-          <CourseSwitcher currentCourse="training" />
-        </div>
-        {ready && currentPosition.totalSessions > 0 && (
-          <Link
-            href="/training-foundations/tracker"
-            style={{
-              fontSize: "0.6rem",
-              letterSpacing: "0.1em",
-              color: "#c9a96e",
-              textDecoration: "none",
-              fontFamily: "var(--font-montserrat), sans-serif",
-              padding: "0.3rem 0.6rem",
-              border: "1px solid rgba(201,169,110,0.3)",
-            }}
-            className="header-progress-badge"
-          >
-            W{currentPosition.week} · {currentPosition.totalSessions} sessions
-          </Link>
-        )}
-        <button
-          onClick={handleSignOut}
+
+      {ready && currentPosition.totalSessions > 0 && (
+        <Link
+          href="/training-foundations/tracker"
+          className="header-progress-badge"
           style={{
-            background: "none",
-            border: "none",
-            color: "#555",
-            fontSize: "0.65rem",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            cursor: "pointer",
+            fontSize: "0.55rem",
+            letterSpacing: "0.12em",
+            color: "#c9a96e",
+            textDecoration: "none",
             fontFamily: "var(--font-montserrat), sans-serif",
-            padding: 0,
+            padding: "0.3rem 0.65rem",
+            border: "1px solid rgba(201,169,110,0.25)",
           }}
         >
-          Sign Out
-        </button>
-      </div>
+          W{currentPosition.week} · {currentPosition.totalSessions} sessions
+        </Link>
+      )}
     </header>
   )
 }
