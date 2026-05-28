@@ -10,7 +10,7 @@ import { Resend } from "resend"
 import { randomBytes } from "crypto"
 import {
   generateAuthToken, storeAuthToken,
-  grantTrackerAccess, grantNutritionAccess,
+  grantTrainingAccess, grantTrackerAccess, grantNutritionAccess,
   grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
 } from "@/lib/authTokens"
 
@@ -421,6 +421,8 @@ async function provisionUser(email: string) {
     if (!(error instanceof UsernameExistsException)) throw error
     // Already purchased — account exists, just send a new set-password link
   }
+
+  await grantTrainingAccess(email)
 
   const token = generateAuthToken()
   await storeAuthToken(token, email, "setup")
