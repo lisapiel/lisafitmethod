@@ -86,6 +86,8 @@ export const PRINCIPLES = [
     tagline: "The only mechanism for fat loss",
     body: "Fat loss has one mechanism: consuming less energy than you burn. Not a specific food, not a specific timing, not a targeted exercise. Everything that works does so because it creates a deficit. Your body pulls energy from stored fat when it needs more than you give it, and it does this everywhere at once. You cannot direct where it comes from.",
     ref: "Hall et al. 2012 (Am J Clin Nutr): fat loss was equivalent across all diet types when total calories were matched.",
+    stat: "300–500 kcal/day",
+    statLabel: "The deficit sweet spot — enough to lose fat consistently, not enough to lose muscle.",
     practical: "A 300-500 kcal/day deficit is the sweet spot. Enough to lose fat, moderate enough to hold onto muscle.",
   },
   {
@@ -95,6 +97,8 @@ export const PRINCIPLES = [
     tagline: "The lever that controls body composition",
     body: "In a deficit, your body pulls from fat and muscle. Protein is what tells it to protect the muscle. It also has a 20-35% thermic effect, meaning your body burns roughly a quarter of its own calories just digesting it (compared to 5-10% for carbs, almost nothing for fat). Getting enough protein is one of the few things that works in multiple directions at once.",
     ref: "Morton et al. 2018 (Br J Sports Med): meta-analysis of 49 studies found 1.6-2.2 g/kg (0.7-1 g/lb) optimizes muscle retention and growth.",
+    stat: "0.7–1g per lb",
+    statLabel: "The daily protein target that protects muscle and supports fat loss at the same time.",
     practical: "Target 0.7-1 g per lb of bodyweight (1.6-2.2 g/kg). A 140 lb (65 kg) person needs 98-140 g/day.",
     courseHook: false,
   },
@@ -105,6 +109,8 @@ export const PRINCIPLES = [
     tagline: "The closest thing to a real shortcut",
     body: "1 lb of muscle burns roughly 6 kcal/day at rest. 1 lb of fat burns about 2. Every pound of muscle you build raises your resting metabolism permanently. It compounds over time, and it doesn't switch off. More muscle means more calories burned all day, every day, without doing anything extra. This is the long game most people skip because they're chasing short-term weight loss instead.",
     ref: "Srikanthan and Karlamangla (Am J Med, 2014): higher muscle mass was inversely linked to all-cause mortality over 10-16 years. Muscle is the organ of longevity.",
+    stat: "6 kcal vs 2 kcal/lb",
+    statLabel: "Muscle burns 3× more calories at rest than fat. Every pound you build raises your baseline permanently.",
     practical: "",
     courseHook: true,
   },
@@ -115,6 +121,8 @@ export const PRINCIPLES = [
     tagline: "The hidden calorie variable nobody talks about",
     body: "NEAT (Non-Exercise Activity Thermogenesis) is everything you burn outside the gym: walking, standing, taking stairs. It varies by up to 2,000 kcal/day between people of similar size and similar workout habits. One full gym session can be cancelled out by sitting the rest of the day. Your steps matter more than most people realize.",
     ref: "Levine et al. 2005 (Science, Mayo Clinic): NEAT accounts for 15-50% of total daily energy expenditure and varies by up to 2,000 kcal/day between individuals.",
+    stat: "2,000 kcal/day",
+    statLabel: "How much NEAT output can differ between people of similar size and similar workout habits.",
     practical: "8,000-10,000 steps/day is a solid daily target. Walk after meals. Take the stairs. It adds up fast.",
   },
   {
@@ -124,6 +132,8 @@ export const PRINCIPLES = [
     tagline: "The hormone controller you are probably ignoring",
     body: "Sleeping 4 hours raises ghrelin (the hunger hormone) by 28% and drops leptin (the fullness hormone) by 18%. That's a 24% spike in next-day hunger you can't willpower your way through. Poor sleep doesn't just make you tired. It changes your hormones and stacks the deck against every good choice you try to make the next day.",
     ref: "Spiegel et al. 2004 (Ann Intern Med, University of Chicago): sleep restriction significantly increases hunger and appetite for calorie-dense food.",
+    stat: "+28% ghrelin",
+    statLabel: "What one night at 4 hours does to your hunger hormone. You cannot willpower through that.",
     practical: "7-9 hours. Not a wellness trend. A hormonal requirement.",
   },
 ]
@@ -142,13 +152,15 @@ function Rule() {
   return <div style={{ height: 1, background: line, margin: "2.5rem 0" }} />
 }
 
-function PrincipleCard({ num, category, name, tagline, body, ref: reference, practical, courseHook, icon }: {
+function PrincipleCard({ num, category, name, tagline, body, ref: reference, stat, statLabel, practical, courseHook, icon }: {
   num: number
   category: string
   name: string
   tagline: string
   body: string
   ref: string
+  stat?: string
+  statLabel?: string
   practical: string
   courseHook?: boolean
   icon: React.ReactNode
@@ -177,8 +189,14 @@ function PrincipleCard({ num, category, name, tagline, body, ref: reference, pra
       <p style={{ fontSize: "0.76rem", color: muted, fontStyle: "italic", margin: "0.6rem 0 0", lineHeight: 1.55, fontFamily: dmSans }}>
         {reference}
       </p>
+      {stat && statLabel && (
+        <div style={{ background: panel, borderLeft: `2px solid ${gold}`, padding: "0.75rem 1.1rem", marginTop: "0.75rem", display: "flex", gap: "1.25rem", alignItems: "center" }}>
+          <p style={{ fontFamily: playfair, fontSize: "1.35rem", fontWeight: 700, color: goldDeep, margin: 0, flexShrink: 0, lineHeight: 1.1 }}>{stat}</p>
+          <p style={{ fontFamily: dmSans, fontSize: "0.8rem", color: muted, margin: 0, lineHeight: 1.55 }}>{statLabel}</p>
+        </div>
+      )}
       {practical && (
-        <div style={{ marginTop: "0.6rem", display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
+        <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
           <span style={{ color: goldDeep, fontSize: "0.85rem", flexShrink: 0 }}>-&gt;</span>
           <p style={{ fontSize: "0.87rem", color: ink, margin: 0, lineHeight: 1.6, fontFamily: dmSans }}>
             {practical}
@@ -319,7 +337,7 @@ export default function NutritionGuideClient() {
             {/* Equation */}
             <Label>Putting it together</Label>
             <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.5rem, 4vw, 1.9rem)", color: black, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.6rem", marginTop: 0, lineHeight: 1.1 }}>
-              There is no sixth thing.
+              Every approach that works uses all five.
             </h2>
             <p style={{ fontSize: "0.92rem", color: muted, lineHeight: 1.7, fontFamily: dmSans, marginBottom: "1.5rem", maxWidth: 600 }}>
               Every sustainable body transformation runs on these five variables. You don&apos;t need all five to be perfect. But you do need all five in the frame.
@@ -338,7 +356,7 @@ export default function NutritionGuideClient() {
               ].map((item, i) => (
                 <div key={i}>
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.875rem 0" }}>
-                    <span style={{ fontFamily: dmSans, fontWeight: 700, fontSize: "0.7rem", color: goldDeep, letterSpacing: "0.05em", width: 28, flexShrink: 0 }}>{item.num}</span>
+                    <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: "1.6rem", color: goldDeep, width: 44, flexShrink: 0, lineHeight: 1, opacity: 0.85 }}>{item.num}</span>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontFamily: playfair, fontSize: "1.05rem", color: "#fff", margin: 0, fontWeight: 600 }}>{item.label}</p>
                       <p style={{ fontFamily: dmSans, fontSize: "0.65rem", color: muted, margin: 0, textTransform: "uppercase", letterSpacing: "0.12em" }}>{item.sub}</p>
