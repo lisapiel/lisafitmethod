@@ -156,7 +156,7 @@ function PaymentForm({
 
       <div style={{ marginBottom: 20 }}>
         <PaymentElement options={{
-          layout: { type: "accordion", defaultCollapsed: true },
+          layout: "tabs",
           fields: { billingDetails: { name: "auto" } },
           wallets: { applePay: "never", googlePay: "never" },
         }} />
