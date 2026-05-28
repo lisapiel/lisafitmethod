@@ -12,7 +12,6 @@ import {
   BUNDLE_PRICE_DISPLAY,
   BUNDLE_INDIVIDUAL_TOTAL_DISPLAY,
   BUNDLE_SAVINGS_DISPLAY,
-  FOUNDING_DATE,
 } from "@/lib/pricing"
 import type { Metadata } from "next"
 
@@ -462,7 +461,7 @@ export default async function HomePage() {
               <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
               <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}.</p>
+            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <Link href="/nutrition" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
                 Explore the Course
@@ -547,7 +546,7 @@ export default async function HomePage() {
             <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
             <span style={{ fontSize: 72, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
           </div>
-          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>Regular {COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}</p>
+          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>Regular {COURSE_REGULAR_PRICE_DISPLAY}. Founding member price.</p>
           <Link href="/checkout" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px" }}>
             Get Instant Access
           </Link>

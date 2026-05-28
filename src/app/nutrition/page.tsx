@@ -6,7 +6,6 @@ import {
   BUNDLE_PRICE_DISPLAY,
   BUNDLE_INDIVIDUAL_TOTAL_DISPLAY,
   BUNDLE_SAVINGS_DISPLAY,
-  FOUNDING_DATE,
 } from "@/lib/pricing"
 import type { Metadata } from "next"
 
@@ -161,7 +160,7 @@ export default async function NutritionPage() {
               <span style={{ fontSize: 56, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
               <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4, marginBottom: 16 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}</p>
+            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4, marginBottom: 16 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
             <Link href="/checkout?product=nutrition" style={{ display: "block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 32px", textAlign: "center", marginBottom: 14 }}>
               Get Instant Access
             </Link>
@@ -328,7 +327,7 @@ export default async function NutritionPage() {
             <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
             <span style={{ fontSize: 64, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
           </div>
-          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}</p>
+          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Founding member price.</p>
           <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px", marginBottom: 16 }}>
             Get Instant Access
           </Link>

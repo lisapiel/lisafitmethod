@@ -7,7 +7,6 @@ import {
   COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
   BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
-  FOUNDING_DATE,
 } from "@/lib/pricing"
 import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
 
@@ -378,7 +377,7 @@ export default function NutritionGuideClient() {
                 <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>A 4-week course built for people who train.</em>
               </h3>
               <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                Personalized TDEE calculator, a meal plan that adapts to your calorie target, 9 verified recipes with source attribution, and science-backed education. Founding member pricing until {FOUNDING_DATE}.
+                Personalized TDEE calculator, a meal plan that adapts to your calorie target, 9 verified recipes with source attribution, and science-backed education. Founding member pricing — limited time.
               </p>
               <Link href="/nutrition" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400 }}>
                 Get Nutrition Foundations

@@ -8,7 +8,6 @@ import {
   COURSE_WITH_TRACKER_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
   BUNDLE_PRICE_CENTS, BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
-  FOUNDING_DATE,
 } from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
@@ -552,7 +551,7 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
           </div>
           {!isBundle && (
             <p style={{ fontSize: 11, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 20, marginTop: -16 }}>
-              Founding member pricing. Regular price {REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}.
+              Founding member pricing. Regular price {REGULAR_PRICE_DISPLAY}.
             </p>
           )}
 

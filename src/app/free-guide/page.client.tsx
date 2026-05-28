@@ -7,7 +7,6 @@ import {
   COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
   BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
-  FOUNDING_DATE,
 } from "@/lib/pricing"
 import { FreeGuideSignupForm } from "@/components/FreeGuideSignupForm"
 
@@ -429,7 +428,7 @@ export default function FreeGuideClient() {
                 <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>Start building.</em>
               </h3>
               <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                One payment, lifetime access. Keep the videos, the program, and the tracker for good. Run it once, then run it again heavier. Founding member pricing until {FOUNDING_DATE}.
+                One payment, lifetime access. Keep the videos, the program, and the tracker for good. Run it once, then run it again heavier. Founding member pricing — limited time.
               </p>
               <Link
                 href="/checkout"

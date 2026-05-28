@@ -10,7 +10,6 @@ const MUTED = "#6b6560"
 const BORDER = "#ddd8d0"
 const BLACK = "#0a0a0a"
 const DARK = "#0d0b08"
-const FOUNDING_DATE = "December 1, 2026"
 
 const styles = StyleSheet.create({
   page: {
@@ -553,7 +552,7 @@ function NutritionGuidePDF() {
         { style: upsellStyles.upsellHeader },
         createElement(Text, { style: upsellStyles.upsellBrand }, "Lisa Fit Method"),
         createElement(Text, { style: upsellStyles.upsellHeadline }, "Ready to go further?"),
-        createElement(Text, { style: upsellStyles.upsellSub }, "Founding member pricing. Regular prices take effect " + FOUNDING_DATE + ".")
+        createElement(Text, { style: upsellStyles.upsellSub }, "Founding member pricing. Limited time.")
       ),
       // Nutrition Foundations (primary for nutrition guide readers)
       createElement(
@@ -569,7 +568,7 @@ function NutritionGuidePDF() {
           createElement(Text, { style: upsellStyles.bigPrice }, "$77"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
         ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $127 from " + FOUNDING_DATE + ". One-time payment, lifetime access."),
+        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $127. One-time payment, lifetime access."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/nutrition")
       ),
       // Training Foundations
@@ -586,7 +585,7 @@ function NutritionGuidePDF() {
           createElement(Text, { style: upsellStyles.bigPrice }, "$97"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
         ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $147 from " + FOUNDING_DATE + ". One-time payment, lifetime access."),
+        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $147. One-time payment, lifetime access."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/courses")
       ),
       // Bundle

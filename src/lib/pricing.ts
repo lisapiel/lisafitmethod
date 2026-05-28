@@ -1,5 +1,3 @@
-// Founding member pricing — regular prices take effect December 1, 2026
-export const FOUNDING_DATE = "December 1, 2026"
 
 export const COURSE_PRICE_CENTS = 9700
 export const COURSE_WITH_TRACKER_PRICE_CENTS = 11400 // 9700 + 1700
