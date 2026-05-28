@@ -3,7 +3,7 @@ import Stripe from "stripe"
 
 export const dynamic = "force-dynamic"
 
-const TRACKER_PRICE_CENTS = 1700
+const TRACKER_PRICE_CENTS = 2700
 
 export async function POST(request: NextRequest) {
   try {

@@ -364,11 +364,16 @@ export default async function HomePage() {
         <style>{`
           @media (max-width: 768px) {
             .preview-section { padding: 72px 28px !important; }
-            .preview-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+            .preview-grid { display: flex !important; flex-direction: column; gap: 0 !important; }
+            .preview-text { order: 1; margin-bottom: 36px; }
+            .preview-modules { order: 2; margin-bottom: 36px; }
+            .preview-cta-mobile { order: 3; display: block !important; }
+            .preview-cta-desktop { display: none !important; }
           }
+          @media (min-width: 769px) { .preview-cta-mobile { display: none !important; } }
         `}</style>
-        <div className="preview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center", maxWidth: 1100, margin: "0 auto" }}>
-          <div>
+        <div className="preview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start", maxWidth: 1100, margin: "0 auto" }}>
+          <div className="preview-text">
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>Training Foundations</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 28 }}>
               Four modules.<br />
@@ -387,24 +392,29 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 20 }}>
-              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
-              <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-              <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
+            {/* Desktop CTA — hidden on mobile */}
+            <div className="preview-cta-desktop">
+              <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 20 }}>
+                <span style={{ fontSize: 16, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
+                <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
+              </div>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
+                <Link href="/checkout" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
+                  Get Instant Access
+                </Link>
+                <Link href="/courses" style={{ display: "inline-block", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 0" }}>
+                  Explore the Course →
+                </Link>
+              </div>
+              <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
+                Includes 50+ exercise videos, built-in workout and progress tracking, full warm-ups and cool-downs, progression guidance, and lifetime access so you can keep using the program beyond the first four weeks.
+              </p>
             </div>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
-              <Link href="/checkout" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
-                Get Instant Access
-              </Link>
-              <Link href="/courses" style={{ display: "inline-block", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 0" }}>
-                Explore the Course →
-              </Link>
-            </div>
-            <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
-              Includes 50+ exercise videos, built-in workout and progress tracking, full warm-ups and cool-downs, progression guidance, and lifetime access so you can keep using the program beyond the first four weeks.
-            </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+
+          {/* Module cards */}
+          <div className="preview-modules" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {["Foundation\nMovements", "Core &\nGlute Priority", "The 4-Week\nProgram", "Nutrition\nFoundations"].map((label, i) => (
               <div key={label} style={{ background: "#141414", padding: "36px 32px", borderTop: "2px solid rgba(200,169,126,0.4)" }}>
                 <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>0{i + 1}</p>
@@ -412,16 +422,42 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* Mobile-only CTA — appears after module cards on small screens */}
+          <div className="preview-cta-mobile" style={{ display: "none" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
+              <span style={{ fontSize: 40, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
+              <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <Link href="/checkout" style={{ display: "block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px", textAlign: "center" }}>
+                Get Instant Access
+              </Link>
+              <Link href="/courses" style={{ display: "block", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "12px 0", textAlign: "center" }}>
+                Explore the Course →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* NUTRITION FOUNDATIONS TEASER */}
       <section style={{ background: "#111111", padding: "100px 80px" }} className="nutrition-teaser">
         <style>{`
-          @media (max-width: 768px) { .nutrition-teaser { padding: 72px 28px !important; } .nutrition-teaser-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }
+          @media (max-width: 768px) {
+            .nutrition-teaser { padding: 72px 28px !important; }
+            .nutrition-teaser-grid { display: flex !important; flex-direction: column; gap: 0 !important; }
+            .nutrition-text { order: 1; margin-bottom: 36px; }
+            .nutrition-cards { order: 2; margin-bottom: 36px; }
+            .nutrition-cta-mobile { order: 3; display: block !important; }
+            .nutrition-cta-desktop { display: none !important; }
+          }
+          @media (min-width: 769px) { .nutrition-cta-mobile { display: none !important; } }
         `}</style>
-        <div className="nutrition-teaser-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+        <div className="nutrition-teaser-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "start" }}>
+          {/* Module cards — left on desktop, middle on mobile */}
+          <div className="nutrition-cards" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {[
               { label: "TDEE Calculator", sub: "Personalized to your stats" },
               { label: "4-Week Meal Plan", sub: "Scales to your calorie target" },
@@ -434,7 +470,9 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-          <div>
+
+          {/* Text — right on desktop, first on mobile */}
+          <div className="nutrition-text">
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>New Course</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 46px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 20 }}>
               Nutrition Foundations.<br />
@@ -456,18 +494,38 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
+            {/* Desktop CTA — hidden on mobile */}
+            <div className="nutrition-cta-desktop">
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
+              </div>
+              <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
+              <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                <Link href="/nutrition" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
+                  Explore the Course
+                </Link>
+                <Link href="/checkout?product=nutrition" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.4)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 24px" }}>
+                  Get Instant Access — {NUTRITION_COURSE_PRICE_DISPLAY}
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile-only CTA — appears after module cards on small screens */}
+          <div className="nutrition-cta-mobile" style={{ display: "none" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
               <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
-              <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+              <span style={{ fontSize: 40, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
               <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <Link href="/nutrition" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
-                Explore the Course
-              </Link>
-              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.4)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 24px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <Link href="/checkout?product=nutrition" style={{ display: "block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px", textAlign: "center" }}>
                 Get Instant Access — {NUTRITION_COURSE_PRICE_DISPLAY}
+              </Link>
+              <Link href="/nutrition" style={{ display: "block", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "12px 0", textAlign: "center" }}>
+                Explore the Course →
               </Link>
             </div>
           </div>

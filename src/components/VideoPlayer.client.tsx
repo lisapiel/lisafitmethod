@@ -13,11 +13,42 @@ export default function VideoPlayer({
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    // React doesn't reliably apply muted to the DOM node on iOS Safari —
-    // setting it directly is required for autoplay to be permitted.
+
+    // iOS Safari requires muted to be set directly on the DOM node (not just the attribute)
     video.muted = true
-    video.play().catch(() => {})
-  }, [])
+    // defaultMuted ensures muted state survives re-renders
+    video.defaultMuted = true
+
+    const attemptPlay = () => {
+      video.play().catch(() => {})
+    }
+
+    // Try immediately, and again whenever the browser has enough data
+    attemptPlay()
+    video.addEventListener("loadeddata", attemptPlay)
+    video.addEventListener("canplay", attemptPlay)
+
+    // Intersection Observer: re-trigger play when the video scrolls into view
+    // (handles cases where the video is off-screen during initial load)
+    let observer: IntersectionObserver | null = null
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) attemptPlay()
+          })
+        },
+        { threshold: 0.1 }
+      )
+      observer.observe(video)
+    }
+
+    return () => {
+      video.removeEventListener("loadeddata", attemptPlay)
+      video.removeEventListener("canplay", attemptPlay)
+      observer?.disconnect()
+    }
+  }, [src])
 
   return (
     <video

@@ -33,7 +33,7 @@ function getUpsells(product: string): UpsellProduct[] {
         headline: "Pair it with the right nutrition",
         desc: "4-week nutrition course with personalized TDEE calculator, meal plan, and real verified recipes.",
         price: "$77",
-        regularPrice: "$127",
+        regularPrice: "$137",
         href: "/checkout?product=nutrition&member=1",
       },
     ]
@@ -45,7 +45,7 @@ function getUpsells(product: string): UpsellProduct[] {
         headline: "Put the nutrition to work",
         desc: "4-week beginner strength program. Five foundational movements, progressive overload, built-in workout tracking.",
         price: "$97",
-        regularPrice: "$147",
+        regularPrice: "$167",
         href: "/checkout?member=1",
       },
     ]
