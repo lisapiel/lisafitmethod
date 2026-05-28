@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import NutritionDisclaimer from "@/components/nutrition/NutritionDisclaimer"
 import RecipeCard from "@/components/nutrition/RecipeCard"
 import MealPlanDay, { type DayPlan } from "@/components/nutrition/MealPlanDay"
 import { RECIPES } from "@/lib/nutritionRecipes"
@@ -13,8 +12,6 @@ const cream = "#f0e6d3"
 const muted = "#b0a090"
 const dark = "#161616"
 const border = "#2a2a2a"
-
-const BASE_CALORIES = 1800
 
 // 4-week plan using the verified recipe set
 // Weeks 1+2: habit-building with consistent, simple meals
@@ -52,6 +49,21 @@ const GROCERY_LIST_W34 = [
   { category: "Pantry & Extras", items: ["Tzatziki sauce", "Oregano (dried)", "Honey (small jar)", "Low-sodium soy sauce", "Coconut aminos", "Fresh lemons (4)", "Marinara sauce (1 jar)", "Parmesan", "Almond flour", "Berries", "Rolled oats (if running low)"] },
 ]
 
+// Average base kcal/day for each plan block (sum of recipes, not a target)
+const AVG_BASE_W12 = Math.round(
+  WEEK_1_2.reduce((sum, d) => sum + d.breakfast.calories + d.lunch.calories + d.dinner.calories + d.snack.calories, 0) / WEEK_1_2.length
+)
+const AVG_BASE_W34 = Math.round(
+  WEEK_3_4.reduce((sum, d) => sum + d.breakfast.calories + d.lunch.calories + d.dinner.calories + d.snack.calories, 0) / WEEK_3_4.length
+)
+
+interface NutritionProfile {
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
+}
+
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.75rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -64,9 +76,18 @@ function Divider() {
   return <div style={{ height: 1, background: border, margin: "2.5rem 0" }} />
 }
 
-function GroceryList({ list }: { list: typeof GROCERY_LIST_W12 }) {
+function GroceryList({ list, scalePct }: { list: typeof GROCERY_LIST_W12; scalePct?: number }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {scalePct !== undefined && Math.abs(scalePct - 100) > 5 && (
+        <div style={{ background: "rgba(201,169,110,0.07)", border: `1px solid rgba(201,169,110,0.2)`, padding: "0.6rem 1rem", marginBottom: 4 }}>
+          <p style={{ fontSize: "0.68rem", color: goldDeep, margin: 0, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.5 }}>
+            {scalePct > 100
+              ? `Your target is higher than the base plan. Scale quantities up by approximately ${scalePct - 100}%.`
+              : `Your target is lower than the base plan. Scale quantities down by approximately ${100 - scalePct}%.`}
+          </p>
+        </div>
+      )}
       {list.map((section) => (
         <div key={section.category} style={{ background: dark, border: `1px solid ${border}`, padding: "1rem 1.25rem" }}>
           <p style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, marginBottom: "0.6rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -87,7 +108,7 @@ function GroceryList({ list }: { list: typeof GROCERY_LIST_W12 }) {
 }
 
 export default function Module3Client() {
-  const [calorieTarget, setCalorieTarget] = useState<number | null>(null)
+  const [profile, setProfile] = useState<NutritionProfile | null>(null)
   const [activeWeek, setActiveWeek] = useState<1 | 2 | 3 | 4>(1)
   const [showRecipes, setShowRecipes] = useState(false)
   const [showGrocery, setShowGrocery] = useState(false)
@@ -96,16 +117,24 @@ export default function Module3Client() {
     try {
       const stored = localStorage.getItem("lfm_nutrition_profile")
       if (stored) {
-        const profile = JSON.parse(stored) as { calories: number }
-        if (profile.calories > 0) setCalorieTarget(profile.calories)
+        const p = JSON.parse(stored) as Partial<NutritionProfile>
+        if (p.calories && p.calories > 0) {
+          setProfile({ calories: p.calories, protein: p.protein ?? 0, carbs: p.carbs ?? 0, fat: p.fat ?? 0 })
+        }
       }
     } catch {
       // localStorage not available
     }
   }, [])
 
-  const scaleFactor = calorieTarget ? calorieTarget / BASE_CALORIES : 1
   const currentPlan = activeWeek <= 2 ? WEEK_1_2 : WEEK_3_4
+  const avgBase = activeWeek <= 2 ? AVG_BASE_W12 : AVG_BASE_W34
+
+  // Scale factor for recipe cards: based on average daily total for the current plan block
+  const recipeScaleFactor = profile ? profile.calories / avgBase : 1
+
+  // Grocery scale percentage relative to base plan
+  const groceryScalePct = profile ? Math.round((profile.calories / avgBase) * 100) : undefined
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", padding: "3rem 2.5rem 6rem" }} className="mod-body">
@@ -113,41 +142,51 @@ export default function Module3Client() {
         @media (max-width: 768px) { .mod-body { padding: 2rem 1rem 6rem !important; } }
       `}</style>
 
-      <NutritionDisclaimer />
-
       <Label>Module 3 · Meal Planning</Label>
       <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4.5vw, 2.6rem)", fontWeight: 300, color: cream, lineHeight: 1.15, marginBottom: "1.25rem", marginTop: 0 }}>
         Your 4-Week Meal Plan<br />
         <em style={{ color: gold }}>Built around your numbers.</em>
       </h1>
 
-      {/* Calorie personaliser banner */}
-      {calorieTarget ? (
-        <div style={{ background: "rgba(201,169,110,0.08)", border: `1px solid ${gold}`, padding: "0.875rem 1.25rem", marginBottom: "1.75rem", display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-          <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0 }}>✓</span>
-          <div>
-            <p style={{ fontSize: "0.72rem", fontWeight: 600, color: gold, marginBottom: "0.2rem", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
-              Personalised for your target: {calorieTarget} kcal/day
-            </p>
-            <p style={{ fontSize: "0.7rem", color: muted, margin: 0, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.5 }}>
-              Portions in the daily plan and recipe cards have been adjusted from the base recipe to match your calorie target. The scale factor applied is {Math.round(scaleFactor * 100)}% of base.
+      {/* Personalisation banner */}
+      {profile ? (
+        <div style={{ background: "rgba(201,169,110,0.06)", border: `1px solid ${gold}`, padding: "1.1rem 1.25rem", marginBottom: "1.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
+            <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0 }}>✓</span>
+            <p style={{ fontSize: "0.72rem", fontWeight: 600, color: gold, margin: 0, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.06em" }}>
+              Personalized to your target: {profile.calories} kcal/day
             </p>
           </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginBottom: "0.75rem" }}>
+            {[
+              { label: "Protein target", value: `${profile.protein}g` },
+              { label: "Carbs target", value: `${profile.carbs}g` },
+              { label: "Fat target", value: `${profile.fat}g` },
+            ].map((m) => (
+              <div key={m.label} style={{ background: "rgba(0,0,0,0.3)", padding: "0.5rem 0.75rem", border: `1px solid rgba(201,169,110,0.15)` }}>
+                <p style={{ fontSize: "0.5rem", color: "#666", fontFamily: "var(--font-montserrat), sans-serif", margin: "0 0 0.15rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>{m.label}</p>
+                <p style={{ fontSize: "0.88rem", fontFamily: "var(--font-cormorant), serif", color: cream, margin: 0, lineHeight: 1 }}>{m.value}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: "0.68rem", color: "#888", margin: 0, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.55 }}>
+            Each day&apos;s portions are scaled to match your {profile.calories} kcal target. Macros are approximated within a practical real-world range based on recipe composition.
+          </p>
         </div>
       ) : (
         <div style={{ background: dark, border: `1px solid ${border}`, borderLeft: `3px solid ${goldDeep}`, padding: "0.875rem 1.25rem", marginBottom: "1.75rem" }}>
           <p style={{ fontSize: "0.72rem", color: "#666", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.5, margin: 0 }}>
-            <strong style={{ color: muted }}>Profile not set.</strong> This plan is showing portions for a base of {BASE_CALORIES} kcal/day.{" "}
+            <strong style={{ color: muted }}>Profile not set.</strong> This plan is showing unscaled base portions.{" "}
             <Link href="/nutrition-foundations/module1" style={{ color: gold, textDecoration: "none" }}>
               Complete the calculator in Module 1 →
             </Link>{" "}
-            to personalise your portions.
+            to personalize your portions and daily totals.
           </p>
         </div>
       )}
 
       <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.72, marginBottom: "2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-        All recipes in this plan come from verified, well-reviewed sources — linked directly so you can check them yourself. Macros are calculated from the actual ingredients. Nothing is invented. The plan follows a simple structure: Weeks 1–2 build the habit with consistent meals; Weeks 3–4 introduce variety while keeping the same framework.
+        All recipes in this plan come from verified, well-reviewed sources — linked directly so you can check them yourself. Macros are calculated from the actual ingredients. Nothing is invented. The plan follows a simple structure: Weeks 1&ndash;2 build the habit with consistent meals; Weeks 3&ndash;4 introduce variety while keeping the same framework.
       </p>
 
       <Divider />
@@ -156,11 +195,11 @@ export default function Module3Client() {
       <Label>How portions work</Label>
       <div style={{ background: dark, border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
         <p style={{ fontSize: "0.82rem", color: muted, lineHeight: 1.65, margin: 0, fontFamily: "var(--font-montserrat), sans-serif" }}>
-          The base plan is designed for <strong style={{ color: cream }}>{BASE_CALORIES} kcal/day</strong>. If you saved your profile in Module 1, portions in the daily view and recipe cards are automatically scaled to your target. The scaling adjusts the quantity of each food proportionally — so the meal structure stays the same, you just eat more or less of each component.
+          Each day&apos;s meals are scaled so the daily total matches your saved calorie target from Module 1. The recipe structure stays the same; portions increase or decrease proportionally. Daily macro totals are shown for each day in the plan below.
         </p>
-        {calorieTarget && calorieTarget !== BASE_CALORIES && (
+        {!profile && (
           <p style={{ fontSize: "0.78rem", color: goldDeep, margin: "0.75rem 0 0", fontFamily: "var(--font-montserrat), sans-serif" }}>
-            Your target ({calorieTarget} kcal) is {calorieTarget > BASE_CALORIES ? "above" : "below"} the base plan ({BASE_CALORIES} kcal). Each meal and recipe shows adjusted quantities.
+            Save your profile in Module 1 to activate personalized portions.
           </p>
         )}
       </div>
@@ -196,20 +235,20 @@ export default function Module3Client() {
       {activeWeek <= 2 ? (
         <div style={{ background: "rgba(201,169,110,0.04)", border: `1px solid ${border}`, padding: "0.75rem 1.25rem", marginBottom: "1rem" }}>
           <p style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", margin: 0, lineHeight: 1.5 }}>
-            <strong style={{ color: cream }}>Weeks 1–2: Build the habit.</strong> Consistent meals across both weeks. The repetition is intentional — your brain builds a grocery routine, you get faster at prep, and you learn your numbers without having to think.
+            <strong style={{ color: cream }}>Weeks 1&ndash;2: Build the habit.</strong> Consistent meals across both weeks. The repetition is intentional — your brain builds a grocery routine, you get faster at prep, and you learn your numbers without having to think.
           </p>
         </div>
       ) : (
         <div style={{ background: "rgba(201,169,110,0.04)", border: `1px solid ${border}`, padding: "0.75rem 1.25rem", marginBottom: "1rem" }}>
           <p style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", margin: 0, lineHeight: 1.5 }}>
-            <strong style={{ color: cream }}>Weeks 3–4: Add variety.</strong> Same recipes, different rotation. The framework is established — now you can mix things up without losing the structure. Review how your body responded in Weeks 1–2 and adjust if needed.
+            <strong style={{ color: cream }}>Weeks 3&ndash;4: Add variety.</strong> Same recipes, different rotation. The framework is established — now you can mix things up without losing the structure. Review how your body responded in Weeks 1&ndash;2 and adjust if needed.
           </p>
         </div>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {currentPlan.map((day) => (
-          <MealPlanDay key={day.day} plan={day} scaleFactor={scaleFactor} />
+          <MealPlanDay key={day.day} plan={day} calorieTarget={profile?.calories} />
         ))}
       </div>
 
@@ -246,7 +285,7 @@ export default function Module3Client() {
         {showRecipes && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
             {Object.values(RECIPES).map((recipe) => (
-              <RecipeCard key={recipe.name} recipe={recipe} scaleFactor={scaleFactor} />
+              <RecipeCard key={recipe.name} recipe={recipe} scaleFactor={recipeScaleFactor} />
             ))}
           </div>
         )}
@@ -283,15 +322,15 @@ export default function Module3Client() {
           <div style={{ marginTop: 8 }}>
             <div style={{ marginBottom: "1.25rem" }}>
               <p style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.75rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-                Weeks 1 & 2
+                Weeks 1 &amp; 2
               </p>
-              <GroceryList list={GROCERY_LIST_W12} />
+              <GroceryList list={GROCERY_LIST_W12} scalePct={groceryScalePct} />
             </div>
             <div>
               <p style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.75rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-                Weeks 3 & 4
+                Weeks 3 &amp; 4
               </p>
-              <GroceryList list={GROCERY_LIST_W34} />
+              <GroceryList list={GROCERY_LIST_W34} scalePct={groceryScalePct} />
             </div>
           </div>
         )}
@@ -352,7 +391,7 @@ export default function Module3Client() {
 
       <Divider />
 
-      {/* Legal footer */}
+      {/* Recipe attribution */}
       <div style={{ background: dark, border: `1px solid ${border}`, borderLeft: `3px solid #333`, padding: "1rem 1.25rem" }}>
         <p style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#555", marginBottom: "0.35rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
           Recipe attribution
