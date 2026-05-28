@@ -1,362 +1,322 @@
 # Lisa Fit Method — 90-Day Plan to $15K/Month
-_Strategy updated May 2026 — pricing revised after outside review + competitor research_
+_Strategy updated May 2026 — pricing recalibrated for launch-phase reality_
 
 ---
 
 ## The Honest Picture First
 
-$15K/month in 90 days from a standing start is aggressive. Based on industry benchmarks and updated pricing:
+$15K/month in 90 days from a standing start is aggressive. With realistic, launch-appropriate pricing:
 
-- **Month 1:** $5,000–$6,500 (founding coaching clients + repriced courses)
-- **Month 2:** $11,000–$14,000 (challenge launch + full coaching roster + passive sales)
-- **Month 3:** $15,000–$18,000 (system firing on all cylinders)
+- **Month 1:** $4,500–$5,500 (founding coaching clients + repriced courses)
+- **Month 2:** $10,000–$12,000 (challenge launch + full coaching roster + passive sales)
+- **Month 3:** $14,000–$17,000 (system firing on all cylinders)
 
-$15K is achievable in Month 3 if coaching fills to 6 clients and you run at least one paid challenge. The math works. It requires execution, not luck.
+$15K is achievable in Month 3 if coaching fills to 6 clients and you run at least one paid challenge. It is very tight without the challenge — run it.
 
-The plan accounts for your two travel blocks (Philippines + France) — those are content opportunities, not gaps.
+**On pricing:** The prices below are deliberately lower than what you'll charge in 6 months. This is intentional. High prices require either a large warm audience or 20+ strong testimonials. You're building both from zero. Penetration pricing gets you clients, clients get you results, results get you testimonials, testimonials get you higher prices. This is the sequence — don't skip steps.
+
+The plan accounts for your two travel blocks (Philippines + France) — content opportunities, not gaps.
 
 ---
 
 ## The Revenue Model: Three Income Streams
 
-**The core principle:** Coaching pays the bills now. Courses pay the bills later. You build both simultaneously.
+**The core principle:** Coaching pays the bills now. Courses pay the bills later. Build both simultaneously.
 
 ### Stream 1 — 1:1 Coaching (Active Income, High Ticket)
-**Goal:** 6 clients by Month 2 → $5,000–$7,200/month depending on tier mix
+**Goal:** 6 clients by Month 2 → $2,400–$4,200/month depending on tier mix
 
-This is your bridge to $15K while your course audience grows. Every coaching client also becomes a testimonial machine. Cap is 6 — genuine scarcity, not marketing language.
+Every coaching client is a testimonial machine. Cap at 6 is genuine scarcity — you are not running a volume business, you are running a precision one.
 
 ### Stream 2 — Courses + Bundles (Passive Income)
 **Goal:** 50–70 sales/month by Month 3 → $5,000–$7,000/month
 
-Training Foundations is repriced to $97. A second course launches in Month 3. Bundles increase average order value.
+Training Foundations at $97. Starter Bundle at $147. Level 2 and Complete System in Month 3.
 
 ### Stream 3 — Paid Challenge (Recurring Launch)
 **Goal:** One challenge per quarter, 40–50 signups → $3,880–$4,850 per cohort
 
-Challenges are the highest-growth product in fitness. They create community, generate testimonials, and convert participants to coaching clients at 14% rate. Run one in Month 2 and one in Month 3.
+Challenges create community, generate testimonials, and convert participants to coaching clients at 14%. Run one in Month 2 and one in Month 3. The challenge is the primary coaching pipeline — it matters more than content for filling spots.
 
 ---
 
 ## Revenue Math by Month
 
-### Month 1 Target: $5,000–$6,500
+### Month 1 Target: $4,500–$5,500
 
 | Source | Units | Price | Revenue |
 |---|---|---|---|
-| 1:1 Coaching — Founding Rate | 3 clients | $600/mo | $1,800 |
+| 1:1 Coaching — Founding Rate (3-month prepay) | 3 clients | $350/mo | $1,050 |
 | Training Foundations (repriced) | 25 sales | $97 | $2,425 |
 | Starter Bundle (TF + Nutrition PDF) | 8 sales | $147 | $1,176 |
-| **Total** | | | **~$5,400** |
+| **Total** | | | **~$4,651** |
 
-### Month 2 Target: $11,000–$14,000
+_Note: Founding clients pay $350/month. If any pay 3 months upfront ($1,050 per client), Month 1 cash is $3,150 from coaching alone — but recurring monthly still counts as $350/month each._
+
+### Month 2 Target: $10,000–$12,000
 
 | Source | Units | Price | Revenue |
 |---|---|---|---|
-| 1:1 Coaching — Founding clients | 3 clients | $600/mo | $1,800 |
-| 1:1 Coaching — Regular (1 Foundation + 2 Premium) | 3 clients | avg $1,067/mo | $3,200 |
+| 1:1 Coaching — Founding (3 clients) | 3 clients | $350/mo | $1,050 |
+| 1:1 Coaching — Launch pricing (mix of tiers) | 3 clients | avg $550/mo | $1,650 |
 | Training Foundations + bundle | 35 sales | avg $105 | $3,675 |
 | Paid Challenge Cohort 1 | 45 signups | $97 | $4,365 |
-| **Total** | | | **~$13,040** |
+| **Total** | | | **~$10,740** |
 
-_Note: 6 coaching clients at cap by end of Month 2. Cohort revenue puts Month 2 solidly over $13K._
-
-### Month 3 Target: $15,000–$18,000
+### Month 3 Target: $14,000–$17,000
 
 | Source | Units | Price | Revenue |
 |---|---|---|---|
-| 1:1 Coaching — Founding (still in 3-month window) | 3 clients | $600/mo | $1,800 |
-| 1:1 Coaching — Regular (1 Foundation + 2 Premium) | 3 clients | avg $1,067/mo | $3,200 |
+| 1:1 Coaching — Founding (still in 3-month window) | 3 clients | $350/mo | $1,050 |
+| 1:1 Coaching — Regular (1 Foundation + 1 Premium + 1 Elite) | 3 clients | avg $800/mo | $2,400 |
 | Training Foundations + bundles | 50 sales | avg $110 | $5,500 |
 | Level 2: Training Progression | 20 sales | $97 | $1,940 |
 | Paid Challenge Cohort 2 | 40 signups | $97 | $3,880 |
-| **Total** | | | **~$16,320** |
+| **Total** | | | **~$14,770** |
 
-_Note: Month 3 without Challenge Cohort 2 = ~$12,440 — the challenge is load-bearing for Month 3. Running it is non-negotiable if $15K is the target._
+_Month 3 without Challenge Cohort 2 = ~$10,890. The challenge is non-negotiable if $15K is the target._
 
 ---
 
-## The Offer Stack — What You're Selling and Why
+## The Pricing Logic: Retainer Model + Anchoring
 
-### The Pricing Logic: Anchoring + Decoy Effect
+### Why Prepay = Lower Monthly Rate
 
-This is deliberate psychology backed by behavioral economics research.
+Clients who pay 3 months upfront are 40% less likely to quit. They follow through, get better results, become better testimonials. The discount is not charity — it's you incentivizing the behavior that produces the best outcomes for both of you.
 
-**Anchoring:** The first price a buyer sees sets their reference point. If they see $2,000 first, $1,200 feels like a substantial discount, and $800 feels almost accessible. Without an anchor, $800 feels expensive. With a $2,000 anchor, $800 feels like a deal.
+Structure every tier with a month-to-month option and a prepay option:
+- **Month-to-month:** Higher per-month rate, no commitment, easy to start
+- **3-month prepay:** ~10% lower per month
+- **6-month prepay:** ~20% lower per month (Premium and Elite tiers only)
 
-**Decoy effect:** In three-tier pricing, the majority of buyers gravitate toward the middle option. The low tier makes them feel like they're not getting enough. The high tier feels extravagant. The middle feels like the smart choice. Research consistently shows 50–70% of buyers choose the middle tier when three options are well-framed.
+### The Anchoring Architecture
 
-**In practice:**
-- The $2,000 tier exists to be bought occasionally — but primarily to make $1,200 feel like the obvious smart choice
-- The $800 tier exists to capture people who want in but find $1,200 a stretch
-- Most buyers will land on $1,200, which is exactly where you want them
+Show tiers in descending price order on the page — **Elite first, Foundation last.** Always. The first number seen sets the mental anchor. When someone sees $1,200/month first, $600/month feels reasonable. Without the anchor, $600/month feels expensive.
 
-Build these in order. Each one is a natural next step from the last.
+---
+
+## The Offer Stack — What You're Selling
+
+Build in this order. Each is a natural next step from the one before.
 
 ---
 
 ### Offer 1: Training Foundations — $97 (reprice immediately)
 
-**Current price:** $47
-**New price:** $97
-**Why:** Competitors charge $30–$50 for programs with less depth. Your program includes movement education, coaching cues, exercise library, AND tracking — that's worth $97. The $47 price was underselling the product.
+**What you get:** 4-week structured strength program built for beginner and returning women. Includes an exercise video library with detailed coaching cues for every movement, a progressive training template (you follow it week by week — no guesswork), movement quality education in each module, and a built-in tracking system. One-time purchase, lifetime access, no subscription.
 
-**Framing:** "One-time. No subscription. Lifetime access. $97."
+**Why $97 (raised from $47):** Competitors charge $30–$50 for templates with no education layer. This program includes the WHY behind every movement, not just the WHAT. That's worth $97.
 
 ---
 
 ### Offer 2: Starter Bundle — $147 (build in Week 2)
 
-**Contents:**
-- Training Foundations ($97 value)
-- Nutrition Foundations PDF guide ($47 value — a standalone 10–15 page PDF using the principles from Module 4)
+**What you get:**
+- Training Foundations ($97 value) — the full 4-week program
+- Nutrition Foundations PDF ($47 value) — a 10–15 page standalone guide covering the eating principles from Module 4: how much to eat to support training, protein targets, pre/post workout nutrition, what to do when life isn't perfect. Not a meal plan — a framework you can apply to your real life.
 
-**How to build the PDF in 2 hours:** Take the Module 4 content already in your course, expand each principle into 2–3 paragraphs, add a simple meal example for each, export as PDF. This is not a new course — it's the text version of what you already teach.
-
-**Framing:** "Everything you need to train AND eat to build your foundation. $147, one time."
+**Why bundle it:** Training without nutrition awareness produces slower results. Selling these together gives buyers the complete foundation, improves their results, and improves their testimonials.
 
 ---
 
 ### Offer 3: 1:1 Coaching — Three Tiers (launch Week 2)
 
-**Show tiers in this order on your page: Elite → Premium → Foundation.**
-Always lead with the most expensive. The anchor must be the first thing they read.
+All coaching includes a **1-hour onboarding call** in week one: Lisa reviews your history, current capacity, equipment, schedule, injury background, and goals before writing a single line of programming. No templates. No "fill out this form and get a cookie-cutter plan."
 
 ---
 
-#### ELITE INTENSIVE — $2,000/month
-_1 spot. 6-month minimum._
+#### ELITE INTENSIVE — $1,200/month
+_6-month minimum. 1 spot. Application required._
 
-> **4 × 60-min coaching calls/month (weekly)**
-> Weekly deep-dive: program review, form analysis, goal recalibration. Not a check-in — a full session.
->
-> **Biweekly program updates**
-> Your program is rebuilt every two weeks based on performance data, not on a calendar schedule.
->
-> **Same-day Voxer voice messaging**
-> Voice notes, not text. Response same business day, not 24 hours.
->
-> **Full lifestyle design**
-> Training + nutrition + sleep + stress + cycle syncing, all integrated into one system.
->
-> **Unlimited form check video reviews**
-> Submit any lift any time. Feedback within 24 hours, every time.
->
-> **Custom warm-up and mobility protocol**
-> Built for your history, your injury patterns, your specific weaknesses.
->
-> **Private Notion workspace**
-> Your full roadmap, session notes, program history, and progress data — all in one place.
->
-> **Training Foundations course included**
->
-> This tier is designed for one person at a time. The level of access and responsiveness is genuinely different. It's not a luxury upgrade — it's a different product.
+**This is for you if:** You want the most intensive, personal coaching available. You want weekly accountability, not bi-weekly. You want Lisa to know your training as well as you do.
 
----
+**What you get:**
 
-#### SMART TRAINING PREMIUM — $1,200/month ← Most popular
-_2 spots. 6-month minimum._
+**4 × 60-minute weekly coaching calls**
+One call per week. Not check-ins — full sessions. Each call covers: form video review, what changed in the last week, programming adjustments for the week ahead, any questions or blockers.
 
-> **2 × 45-min coaching calls/month**
-> Session 1: Form review — submit lift videos, we watch and correct together.
-> Session 2: Programming check-in — review progress, adjust plan, set next 4 weeks.
->
-> **Custom monthly training program**
-> Built around your goals, schedule, equipment, and current capacity. Updated every month as you progress.
->
-> **Weekly async progress check-in with detailed feedback**
-> Submit a short update each week. Written feedback within 24 hours.
->
-> **Priority messaging access (Mon–Fri)**
-> Text messaging. Same business day response.
->
-> **Nutrition guidance**
-> Macro targets, eating principles, cycle syncing basics — integrated with your training.
->
-> **Training Foundations course included**
+**Biweekly program rebuilds**
+Your program is updated every two weeks based on what's actually happening in your training — not on a calendar schedule. If you hit a plateau, stall, or breakthrough, the program reflects it that week.
+
+**Same-day Voxer voice messaging**
+Voice notes back and forth via Voxer, same business day. Not text, not 24-hour email. You can describe what something felt like, and Lisa can respond with a voice note explaining what to adjust.
+
+**Full lifestyle integration**
+Training + nutrition + sleep + stress + menstrual cycle syncing, all treated as one system. Most coaches only touch training. This tier addresses all the variables that determine whether training actually works.
+
+**Unlimited form check video reviews**
+Submit any lift any time. You get detailed video feedback within 24 hours, every time, no limit.
+
+**Custom warm-up and mobility protocol**
+Designed specifically for your injury history and movement weaknesses — not a generic warmup copied from YouTube.
+
+**Private Notion workspace**
+Your full coaching history, program, session notes, and progress data in one private workspace. You can see exactly what Lisa sees.
+
+**Training Foundations course included**
+
+**Price:** $1,200/month, 6-month commitment only → $7,200 total
 
 ---
 
-#### SMART TRAINING FOUNDATION — $800/month
-_3 spots. 3-month minimum, then month-to-month._
+#### SMART TRAINING PREMIUM — $700/month (or $650/month prepaid 6 months)
+_Minimum: 3 months at $700. Or commit to 6 months: $650/month ($3,900 total)._
+_2 spots. Application required._
 
-> **2 × 45-min coaching calls/month**
->
-> **Custom monthly training program**
->
-> **Weekly async progress check-in**
-> Submit weekly update. Written feedback within 24–48 hours.
->
-> **Messaging access (Mon–Fri)**
-> Response within 24 hours on weekdays.
->
-> **Training Foundations course included**
+**This is for you if:** You want custom programming and coaching calls, AND you want nutrition guidance and faster turnaround on your questions than the Foundation tier provides.
+
+**What you get:**
+
+**2 × 45-minute coaching calls per month**
+Session 1 (Week 1): Form review. You submit videos of your main lifts before the call. You watch and correct together — Lisa explains what to change and why, not just that something is off.
+Session 2 (Week 3): Programming check-in. Review what you lifted, what felt hard, what felt easy. Adjust the plan for the next four weeks.
+
+**Custom monthly training program**
+Written fresh each month based on your actual performance data from the previous month. Not a template with your name on it — a program built around how you specifically responded to the last phase.
+
+**Weekly check-in form + detailed written response within 24 hours**
+Every week you submit: what you trained, how it felt, anything that didn't go to plan. Lisa responds with specific feedback on each point — not a generic "good work."
+
+**Priority messaging Mon–Fri (same business day response)**
+Questions between sessions answered same business day. If something hurts, you don't wait for the next call.
+
+**Nutrition guidance**
+Macro targets based on your training load, eating principles for fueling strength work, cycle syncing basics (how your energy and performance shift through the month and how to train with it).
+
+**Training Foundations course included**
+
+**Price:** $700/month (3-month min) or $650/month (6-month prepay → $3,900 total)
 
 ---
 
-### Founding Client Offer — $600/month (time-limited, 3 spots only)
+#### SMART TRAINING FOUNDATION — $500/month (or $450/month prepaid 3 months)
+_Month-to-month: $500. Or commit to 3 months prepaid: $450/month ($1,350 total, saves $150)._
+_3 spots. Application required._
 
-**For the first 3 coaching clients only.**
+**This is for you if:** You want a real custom program and coaching calls without the added nutrition layer or premium response times. You want structure, you want accountability, and you're ready to commit.
 
-> $600/month for the first 3 months, in exchange for:
-> — A detailed written testimonial (submitted at 30, 60, and 90 days)
-> — Content rights: Lisa can use your story, quotes, and progress photos in marketing
->
-> After 3 months, you continue at the Foundation rate ($800/month, month-to-month). Your rate is never raised further without 30 days' notice.
->
-> This offer closes in 30 days.
+**What you get:**
 
-**Why this exists:**
-- You don't yet have public testimonials. The founding offer gets you 3 case studies fast.
-- $600/month is still a legitimate price — this is not a discount for discount's sake.
-- The testimonial requirement filters for serious, committed clients.
-- The content rights are commercially valuable — a strong transformation story is worth more than the $200/month discount.
+**2 × 45-minute coaching calls per month**
+Same structure as Premium: Session 1 for form review, Session 2 for programming check-in. You come to every call with your lift videos ready. This is where technique problems get found and fixed before they become injuries.
 
-**Frame it this way:** "I'm opening coaching to 3 founding clients who want in at the founding rate in exchange for being part of building this with me. After these 3 spots, coaching goes to $800/month minimum."
+**Custom monthly training program**
+Built around your schedule (how many days you can train), your equipment (what you actually have access to), your injury history, and your current capacity. Updated every month as you progress.
+
+**Weekly check-in form + written response within 48 hours**
+Submit a short weekly update. Get specific written feedback on what to keep, what to change, and what to pay attention to in the coming week.
+
+**Messaging access Mon–Fri (24-hour response)**
+Direct message access. Questions, concerns, something didn't feel right — message and you'll hear back within one business day.
+
+**Training Foundations course included**
+Every coaching client starts with the full program so you and Lisa are building from the same foundation from day one.
+
+**Price:** $500/month (no commitment) or $450/month prepaid 3 months ($1,350 total)
+
+---
+
+### Founding Client Offer — $350/month, 3-month prepay ($1,050 total)
+_First 3 clients only. Closes in 30 days._
+
+**For the first 3 coaching clients only**, in exchange for:
+- A written testimonial at 30, 60, and 90 days (describing your experience, what changed, and what you'd tell someone considering it)
+- Content rights: Lisa can use your story, quotes, and with permission, photos in marketing materials
+
+You receive the full Foundation tier coaching experience — 2 calls/month, custom program, weekly check-in, messaging access, course included — at the founding rate.
+
+After 3 months, you continue at the Foundation rate ($500/month or $450 prepaid). The founding rate never applies again after these 3 spots close.
+
+**Why this exists:** Lisa is launching coaching and building her case study library. Founding clients are partners in that build, not just customers. The $350 price reflects that partnership — and locks in a real relationship with the kind of client who wants to invest in their results.
+
+**How to frame it:** "I'm taking 3 founding clients who want to be part of building this. You get premium coaching at the founding rate. I get your story. It closes in 30 days."
 
 ---
 
 ### Offer 4: Paid Challenge — "4-Week Foundation Reset" at $97 (launch Month 2)
 
-**What it is:** A live cohort version of Training Foundations with added accountability.
+**What it is:** A live cohort version of Training Foundations with built-in accountability, community, and a defined start and end date.
 
-**What's included:**
-- The Training Foundations program (same content)
-- Private group (WhatsApp or Circle.so) for the cohort
-- Weekly live Q&A (30 minutes, every Sunday)
-- Daily accountability check-ins within the group
-- Challenge badge/completion certificate
+**What you get:**
+- The full Training Foundations program (same content as the course)
+- A private group (WhatsApp or Circle.so) with everyone in the cohort for the 4 weeks
+- Weekly live Q&A with Lisa (30 minutes every Sunday — submit questions in advance)
+- Daily accountability check-ins in the group (Lisa posts the prompt, you respond)
+- Challenge completion certificate at the end
 
-**Why this works:**
-- Same content as the course, but community and accountability justify the $97 price
-- Completion rate for timed challenges: 52–68% (vs. 11% for untimed courses)
-- Challenge completers convert to coaching at 14% rate — that's 6 new coaching leads from 45 participants
-- Creates urgency (cohort starts on X date — enroll now)
+**Why this sells:** People don't fail fitness programs because they don't know what to do. They fail because there's no structure, no accountability, and no date. A challenge solves all three. The $97 price is also low enough that the decision is easy.
 
-**How to run it without burning out:**
-- Content is already built (Training Foundations)
-- Live Q&As: 30 minutes once a week = 2 hours of your time for the entire month
-- Daily prompts: 5 minutes each, group energy runs itself
-
-**Projected revenue per cohort at 45 signups:** $4,365
-**Coaching leads from completers (14% of 45):** ~6 potential new clients
+**Why this works for you:** The content is already built. The live Q&As are 30 minutes once a week — 2 hours total across the month. The daily prompts are 5 minutes each. The group runs itself. You run it once, collect 40–50 testimonials simultaneously, and convert 14% of completers to coaching.
 
 ---
 
-### Offer 5: Level 2 Course — "Training Progression" at $97 (launch Month 3)
+### Offer 5: Level 2 Course — "Training Progression" at $97 (Month 3)
 
-**What it is:** The logical next step after Training Foundations. 4-week program for people who've completed the foundations.
-
-**Content:**
-- Module 1: How to read your own progress (deload, plateau, reset)
-- Module 2: Intermediate movement patterns (RDL variations, split squats, pulling strength)
-- Module 3: The 8-week programming cycle (extend beyond 4 weeks with your own numbers)
-- Module 4: Recovery, sleep, and the non-training work that determines results
-
-**Build time:** 2 filming days, same as Training Foundations.
-
-**Bundle with Training Foundations:**
-- "Complete Foundations System": Training Foundations + Training Progression = $197 (saves $47 vs. separately)
+The natural next step for people who've completed Training Foundations. Same format, same price, next level. Details in the Phase 3 calendar below.
 
 ---
 
-## The Coaching Page: What to Update
+## How to Get Clients Without a Following
 
-1. **Show tiers in order:** Elite ($2,000) → Premium ($1,200) → Foundation ($800) — never alphabetical or price-ascending. Anchor first.
-2. **Show the founding offer** as a prominent banner above the tiers. Time-limited language creates urgency.
-3. **Show the cap explicitly:** "Maximum 6 clients total — X spots remaining." Real scarcity is more compelling than fake scarcity.
-4. **List the 5 offer elements** for each tier as a visual list. Brevity wins.
-5. **Keep the application form** — it filters for serious clients and adds perceived exclusivity.
-6. **Add testimonials** as soon as founding clients give them (30-day mark). Even one strong testimonial removes the #1 objection.
+This is the most important section if you're starting from zero followers. The social media strategy builds the business long-term. These tactics fill coaching spots now.
 
----
+### Priority Order for First 6 Clients
 
-## The Content Engine: Filming 1–2 Days, Posting Every Day
+**1. Warm outreach — first 2 weeks, highest close rate (30–50%)**
 
-### The Core Principle: Make content on your terms, not the algorithm's
+Everyone you know who has seen you train, heard about your program, or expressed interest in getting in shape. Former coworkers, gym friends, people in your building, friends of friends. The message is not a pitch — it's an activation:
 
-You film 2 days a week. You batch 5–8 videos per session. You schedule them to post across the week. You never scramble for content.
+> "I'm launching 1:1 coaching and taking 3 founding clients at a reduced rate. It's not for everyone — it's for women who are serious about building real strength and are done guessing at the gym. Do you know anyone who might be a fit? Or if it's you, I'd love to tell you more."
 
-### Your 6 Content Buckets
+You are asking for referrals first, not selling. That changes the energy entirely. One warm outreach campaign to 20–30 people often produces 3–5 serious conversations.
 
-Rotate through these. Every piece of content fits into one of them. When you sit down to plan a filming day, pick 1–2 videos from each bucket.
+**2. Course buyers — personal outreach as soon as they buy**
 
-| Bucket | What It Is | Example | Template |
-|---|---|---|---|
-| 1. Education | Teaches one principle | "Why progressive overload is the only thing that matters" | B — Education Unlock |
-| 2. Story | Your personal narrative | Back injury story, engineering pivot, France story | D — Comeback Arc |
-| 3. Direct | Sells the program | "4 weeks, $97, here's what you get" | E — Specific Claim |
-| 4. Credibility | Engineering/CPT angle | "I built this like an engineer, not an influencer" | C — Credibility Contrast |
-| 5. Trending | Stitch/duet/trending audio | React to fitness misinformation, use viral sound | A — Frustration Pivot |
-| 6. Social Proof | Client wins, challenge results | Screenshot a client win, describe a breakthrough | A or D |
+Every person who purchases Training Foundations is a warm coaching lead. They've already voted with money that they trust you and want what you teach. Industry data puts course-buyer-to-coaching conversion at 20–50% with personal outreach (vs. less than 5% with a broadcast email).
 
-### Filming Day Structure (2 hours per filming day)
+The sequence:
+- Wait 2–3 weeks after they buy (let them start the program)
+- Send a personal message: "How's the program going? Anything you want to talk through?" — not a pitch
+- That conversation will reveal whether coaching is the next step
+- If it is, offer the founding rate or the Foundation tier depending on timing
 
-**30 min prep:** Shower, clothes, setup lighting/phone, review your 5–8 video scripts. Scripts = bullet points only, never read word for word.
+Do NOT send a mass "upgrade now" email. Personal message only. This takes 5 minutes per person and converts dramatically better.
 
-**60 min filming:** 5–8 videos. Each one takes 5–10 minutes to film 2–3 takes. You won't use every take. Move fast — a slightly imperfect video that's done beats a perfect one you're still shooting.
+**3. Reddit community building — 4–6 weeks to see results**
 
-**30 min cleanup:** Review takes, delete obviously bad ones, label files clearly (1_two-year-nothing, 2_engineer-carousel, etc.)
+Reddit (r/xxfitness, r/fitness) has strict anti-self-promotion rules. You cannot post "hire me." The strategy that works: answer questions thoroughly and specifically over 4–6 weeks. Your engineering + CPT background gives you genuine authority on biomechanics, injury prevention, and programming questions that most commenters cannot answer at that level.
 
-Editing: 1–2 hours on the evening of filming day or the next morning. Tools: CapCut (free, powerful, auto-captions). You're not color-grading — you're trimming, captioning, and adding a hook text overlay.
+What this looks like:
+- Spend 20 minutes a day searching r/xxfitness for questions about injury, form, programming confusion, or training structure
+- Write thorough, specific answers (not "go see a PT" or "do this program")
+- After 6 weeks and 50+ helpful comments, your post history becomes a soft credential
+- Add your website link to your Reddit bio (no DMs — that gets accounts banned)
+- Inbound inquiries come from people who see your answers, check your profile, find your site
 
-### What to Post Where
+This is a slow burn but produces deeply qualified leads — people who found you because of your expertise, not your follower count.
 
-| Platform | Daily Post | Format Priority |
-|---|---|---|
-| TikTok | 1–2x/day | Short talking-head (15–60 sec), trending sounds |
-| Instagram Reels | 1x/day | Same video as TikTok (remove watermark) |
-| Instagram Carousels | 3x/week | Education content (6–10 slides, high save rate) |
-| Instagram Stories | 3–5x/day | Simple: tips, polls, "swipe up," program reminders |
-| Reddit (r/xxfitness) | 1–2x/week | Education posts, no pitch (builds discovery) |
+**4. Facebook fitness groups — 3–4 weeks to convert**
 
-**The cross-post rule:** Every TikTok video → Instagram Reel (same day, remove TikTok watermark using CapCut export without watermark). This doubles distribution with zero extra work.
+Join groups where your exact target client already exists: women's fitness groups, injury recovery groups, "returning to the gym after [X]" groups. Not "fitness coach networking" groups full of coaches.
 
-### Posting Schedule by Day
+The approach:
+- Engage genuinely for 2–3 weeks before anything resembling a promotion
+- Answer questions, share your own injury comeback story where relevant
+- In groups that allow value posts: share a framework or insight with no call-to-action
+- Inbound inquiries come from people who read your posts, see your profile, check your bio link
 
-| Day | TikTok | Instagram Reel | Instagram Carousel | Stories |
-|---|---|---|---|---|
-| Monday | Post Video 1 | Post Video 1 | — | 3–5 stories |
-| Tuesday | Post Video 2 | Post Video 2 | Post Carousel 1 | 3–5 stories |
-| Wednesday | Post Video 3 | Post Video 3 | — | 3–5 stories |
-| Thursday | Post Video 4 | Post Video 4 | Post Carousel 2 | 3–5 stories |
-| Friday | Post Video 5 | Post Video 5 | Post Carousel 3 | 3–5 stories |
-| Saturday | Post Video 6 | Post Video 6 | — | 2–3 stories |
-| Sunday | Rest or reshare | Rest or reshare | — | 1–2 stories |
+**5. Paid ads — after 5+ testimonials, not before**
 
-**2 Filming Days = Monday + Thursday (film the week ahead the day before it starts).**
+Paid ads require a proven offer, a tested conversion funnel, and social proof to be cost-effective. Without testimonials and a known close rate, you will spend $500–$2,000 learning things that warm outreach teaches you for free. Hold ads until founding clients deliver their testimonials (Month 4). Then test a small Facebook/Instagram ad budget ($5–$10/day) driving to the coaching application page.
 
----
+### What Substitutes for Social Proof Right Now
 
-## Travel Content Plan
-
-### Philippines (2 Weeks)
-
-This is not a gap — it's a content opportunity. The "training from anywhere" angle reinforces your brand ("smart training, built to last" = works everywhere).
-
-**Content angles:**
-- "How I train when I don't have a gym" (bodyweight foundations workout)
-- "The 5 movements that work with zero equipment" (hotel room demonstration)
-- "Why your program should still work when your life gets complicated" (talking head, Template B)
-- "Training while traveling: the principles I never skip" (direct, education-forward)
-- "This is what training looks like in the Philippines" (lifestyle, relatable, share-worthy)
-
-**What NOT to do:** Don't apologize for not being in a gym. Your positioning is "training that fits your life, not the other way around." Travel content proves this claim.
-
-**Batch before you go:** Film 2 full filming days the week before you leave. That's 10–16 videos scheduled across the 2 weeks you're away. You film maybe 3–5 from Philippines for local color, but you're not scrambling.
-
-### France (2 Weeks)
-
-France is a lifestyle content goldmine. European context + strength training = distinctive visual brand.
-
-**Content angles:**
-- "Training in France: what I noticed about how Europeans move" (cultural observation, shareable)
-- "I was in the gym 3x/week in Paris. Here's how the French think about fitness" (relatable, conversational)
-- "Outdoor workout in [location]" (visual content, travel feel)
-- "How I eat in France without undoing my training" (nutrition angle — ties to Module 4)
-- Talking-head content from parks, cafes, interesting backgrounds — lifestyle + education
-
-**Same principle:** Batch before you go. Shoot 5–8 local videos while there for authenticity. Don't treat it as a content crisis.
+You don't have 50 Instagram testimonials, but you do have:
+- **Your own physique** — visible, concrete proof of your methodology working on you
+- **CPT credentials + engineering degrees** — state these plainly and specifically, not modestly
+- **Your injury comeback story** — this is social proof of a different kind: it proves you understand the problem your clients have. Someone who rebuilt their body after injury is more credible to the injured/returning client than a coach who's never been hurt.
+- **The testimonials already on your website** — use these everywhere. Screenshot them. Mention them by name in content.
+- **The detail of your offer** — coaches who describe their services vaguely charge less and get less. The detailed tier descriptions above (specifically what happens in each call, exactly how programs are built, response time commitments) signal professionalism and seriousness that substitutes for volume of social proof.
 
 ---
 
@@ -367,107 +327,101 @@ France is a lifestyle content goldmine. European context + strength training = d
 **Primary goal:** Infrastructure in place + first 3 founding coaching clients + reprice everything
 
 **Week 1 (Days 1–7) — The Setup Week**
-- [ ] Raise Training Foundations price from $47 to $97
-- [ ] Update coaching page: add all 3 tiers in order (Elite → Premium → Foundation), add founding offer banner with 30-day timer, add cap ("6 clients max — 3 founding spots open")
-- [ ] Write Nutrition Foundations PDF (2 hours — use Module 4 content)
+- [ ] Raise Training Foundations from $47 to $97
+- [ ] Update coaching page: show all 3 tiers in descending order (Elite → Premium → Foundation), add founding offer banner with 30-day timer, add cap ("6 clients max — 3 founding spots open now")
+- [ ] Write Nutrition Foundations PDF (2 hours — expand Module 4 content)
 - [ ] Create Starter Bundle product page ($147)
-- [ ] Update bio on Instagram + TikTok: "Strength training foundations for women → link"
-- [ ] Update Linktree/link-in-bio: Free guide → Course ($97) → Bundle ($147) → Coaching application
+- [ ] Update Instagram + TikTok bio: "Strength training foundations for women → link"
+- [ ] Update Linktree: Free guide → Course ($97) → Bundle ($147) → Coaching application
 - [ ] Film Filming Day 1 (3–4 videos from VIRAL_CONTENT.md)
-- [ ] Send Piece 10 (Testimonial Request email) to anyone who's ever purchased or been coached informally
+- [ ] Send Piece 10 (Testimonial Request) to anyone who's purchased or been coached
 
 **Week 2 (Days 8–14) — First Push**
-- [ ] Post 1–2 pieces of content per day (start with Piece 9 on Reddit, Piece 3 on Instagram)
-- [ ] DM 10–15 people who have engaged with past posts: "I'm opening 3 founding coaching spots at $600/month — 30 days only"
+- [ ] Send warm outreach messages to 20–30 people in your personal network
+- [ ] Post 1–2 pieces of content per day (Piece 9 on Reddit first, Piece 3 on Instagram)
 - [ ] Film Filming Day 2 (3–4 more videos)
-- [ ] Goal: 2 founding coaching clients signed by end of Week 2
+- [ ] Personally message anyone who's bought the course: "How's it going?"
+- [ ] Goal: 2 founding coaching clients signed
 
 **Week 3 (Days 15–21) — Momentum**
 - [ ] Post Piece 1 (Two-Year Nothing) on TikTok — first viral attempt
 - [ ] Post Piece 7 (Industry Wants You Confused) on Instagram
-- [ ] Engage with r/xxfitness daily (comment on threads, add value, don't pitch)
-- [ ] Film Filming Day 3 (new batch)
-- [ ] Goal: 3 founding coaching clients at $600/month (founding spots closed)
+- [ ] Start Reddit presence: answer questions in r/xxfitness daily
+- [ ] Film Filming Day 3
+- [ ] Goal: 3 founding coaching clients at $350/month (founding spots closed)
 
 **Week 4 (Days 22–30) — Close Phase 1**
 - [ ] Announce the challenge ("4-Week Foundation Reset opens in 2 weeks — join waitlist")
-- [ ] Post Piece 2 (Nobody Tells Beginners — YouTube or long Reel)
-- [ ] Post Piece 4 (Back Gave Out) — deepest story piece; time for when you have some audience
+- [ ] Post Piece 2 (Nobody Tells Beginners)
+- [ ] Post Piece 4 (Back Gave Out) — your deepest story piece
 - [ ] Film Filming Day 4 + pre-film Philippines content if leaving soon
-- [ ] Goal: 3 founding clients confirmed, $5,000+ revenue
+- [ ] Goal: 3 founding clients confirmed, $4,500+ revenue
 
 ---
 
 ### Phase 2: Launch (Days 31–60)
 
-**Primary goal:** Run the paid challenge, grow coaching to 6 clients (3 founding + 3 regular), hit $13K
+**Primary goal:** Run the paid challenge, fill coaching to 6 clients, hit $10K
 
-**Week 5 (Days 31–37) — Challenge Waitlist + New Coaching Push**
-- [ ] Founding offer officially closed — announce regular coaching pricing (Elite $2,000 / Premium $1,200 / Foundation $800)
-- [ ] Post challenge announcement content daily: what it is, what's included, who it's for
-- [ ] Use Template E (Specific Claim): "4 weeks. Daily accountability. Private group. Weekly Q&A. $97."
+**Week 5 (Days 31–37) — Challenge Waitlist + Regular Coaching**
+- [ ] Founding offer officially closed — announce regular coaching pricing (Elite → Premium → Foundation)
+- [ ] Post challenge announcement content daily
+- [ ] Use Template E for challenge: "4 weeks. Daily accountability. Private group. Weekly Q&A. $97."
 - [ ] Add challenge waitlist to email opt-in + Linktree
+- [ ] First 30-day testimonials from founding clients arrive — post them immediately
 - [ ] Target: 30 challenge waitlist signups + 1–2 new regular coaching clients
 
 **Week 6 (Days 38–44) — Cart Open**
 - [ ] Challenge cart opens: email waitlist + post daily countdown
-- [ ] Use Template A (Frustration Pivot) for challenge promo: "If you've started and stopped 3 times, this is for you"
-- [ ] Direct message anyone who commented "interested" to prior posts
-- [ ] Close cart at 45–50 signups OR end of Week 6 (whichever comes first)
-- [ ] Goal: $4,365 from challenge alone + 2 new regular coaching clients (5 total)
+- [ ] DM anyone who commented "interested" on prior posts
+- [ ] Close cart at 45–50 signups or end of Week 6
+- [ ] Goal: $4,365 from challenge + 2 new regular clients (5 total, closing in on cap)
 
-**Week 7 (Days 45–51) — Challenge Running + Philippines**
-_Note: If Philippines overlaps here, you've pre-filmed content. Run the challenge async._
-- [ ] Challenge is live: post daily prompt in group (5 minutes/day), weekly Q&A (30 min/week)
-- [ ] Post Philippines content: training anywhere, bodyweight foundations
-- [ ] Engage with challenge participants daily — this is where testimonials come from
+**Week 7 (Days 45–51) — Challenge Running**
+- [ ] Challenge live: 5 min/day for daily prompt, 30 min/week for Q&A
+- [ ] Philippines content posting from pre-filmed batch
+- [ ] Engage with challenge participants every day — their wins are your testimonials
 
-**Week 8 (Days 52–60) — Challenge Closes + Upsell**
+**Week 8 (Days 52–60) — Challenge Closes + Coaching Upsell**
 - [ ] Challenge week 4: announce coaching spots for challenge completers
-- [ ] Email/DM to all completers: "You finished. Here's what's next."
+- [ ] Personal message to all completers: "You finished. Here's what's next."
 - [ ] Fill remaining coaching spot(s) to reach 6-client cap
-- [ ] Collect testimonials from founding clients (their 30-day mark — use Piece 10 template)
-- [ ] Goal: 6 coaching clients at cap + challenge revenue = $13,000+ Month 2
+- [ ] Collect 60-day testimonials from founding clients
+- [ ] Goal: 6 coaching clients at cap, $10,000+ Month 2
 
 ---
 
 ### Phase 3: Scale (Days 61–90)
 
-**Primary goal:** $15K+ revenue, 10K+ followers, Level 2 course live
+**Primary goal:** $15K revenue, 10K+ followers, Level 2 course live
 
-**Week 9 (Days 61–67) — France Content + Level 2 Build**
-_Note: If France overlaps here, film lifestyle content + start outlining Level 2_
-- [ ] Start building Level 2 course (outline in first week)
-- [ ] Post France content: training abroad, lifestyle, educational talking-head from European locations
-- [ ] Post testimonial carousel from founding clients (30-day testimonials)
-- [ ] Add first testimonials to coaching page
-- [ ] Goal: 6 coaching clients confirmed ($5,000 coaching MRR)
+**Week 9 (Days 61–67) — France + Level 2 Build**
+- [ ] Start Level 2 outline
+- [ ] Post France lifestyle + education content
+- [ ] Post testimonial carousel from founding clients
+- [ ] Update coaching page with new testimonials — add them as they arrive
 
-**Week 10 (Days 68–74) — Level 2 Film + Second Challenge Prep**
-- [ ] Film Level 2 course (2 days of filming)
-- [ ] Announce second challenge cohort ("Cohort 2 opens in 2 weeks")
-- [ ] Post Piece 6 (Why Random Workouts Don't Work) — SEO article live on blog
-- [ ] Begin Cohort 2 waitlist building
+**Week 10 (Days 68–74) — Level 2 Film + Challenge 2 Prep**
+- [ ] Film Level 2 course (2 filming days)
+- [ ] Announce second challenge cohort
+- [ ] Post Piece 6 (Why Random Workouts Don't Work) — SEO blog article
 
-**Week 11 (Days 75–81) — Launch Level 2 + Cohort 2**
+**Week 11 (Days 75–81) — Level 2 Launch + Cohort 2**
 - [ ] Level 2 "Training Progression" goes live at $97
 - [ ] "Complete Foundations System" bundle live at $197
-- [ ] Cohort 2 cart open: $97, target 40 signups
-- [ ] Post combination content: "You did Training Foundations. Here's where you go next."
+- [ ] Cohort 2 cart open: target 40 signups
+- [ ] Post: "You did Training Foundations. Here's what comes next."
 
-**Week 12 (Days 82–90) — Full System Running**
+**Week 12 (Days 82–90) — Full System**
 - [ ] 6 coaching clients active
 - [ ] Challenge Cohort 2 running
 - [ ] Level 2 + bundles generating passive sales
 - [ ] Review all numbers against $15K target
-- [ ] Plan Month 4: first YouTube video, potential coaching price increase (founding clients converting), consider group program
-- [ ] Goal: $15,000–$18,000 in Month 3
+- [ ] Plan Month 4: raise prices (founding clients have given testimonials), test first paid ads ($5/day), consider first YouTube video
 
 ---
 
 ## Instagram + TikTok Growth: What's Realistic
-
-Based on benchmarks for new fitness creators posting consistently:
 
 | Timeline | Realistic Followers |
 |---|---|
@@ -475,111 +429,61 @@ Based on benchmarks for new fitness creators posting consistently:
 | End of Month 2 | 2,000–5,000 (TikTok) / 1,500–3,000 (Instagram) |
 | End of Month 3 | 5,000–15,000 (TikTok) / 3,000–8,000 (Instagram) |
 
-**The honest note:** Growing to 15K in 90 days is possible on TikTok if one or two videos go viral. Organic Instagram growth is slower. The strategy: use TikTok as your growth platform, use Instagram as your conversion platform.
+Use TikTok as your growth platform, Instagram as your conversion platform. A single viral TikTok can add 1,000–5,000 followers overnight. You don't need 15K followers to make $15K/month — you need ~500–1,000 engaged followers to fill 6 coaching spots and run a challenge.
 
 **What drives growth:**
-1. Posting 1–2x/day consistently (most important variable)
+1. Posting 1–2x/day consistently
 2. One education hook that resonates → viral share
-3. Engaging with comments within the first 60 minutes of posting
-4. Trending audio on at least 30% of your videos
-
-**The key insight:** $15K/month does NOT require 15K followers. You need ~500–1,000 engaged followers to fill 6 coaching spots and run a successful challenge. Every follower beyond that is additional passive sales capacity.
+3. Engaging with comments in the first 60 minutes after posting
+4. Trending audio on at least 30% of videos
 
 ---
 
 ## The Weekly Rhythm
 
-This is sustainable. ~10–12 hours per week during build phase, dropping to 6–8 hours as systems settle.
+~10–12 hours per week during build phase. Drops to 6–8 as systems settle.
 
-### Monday (30 min)
-- Review last week's numbers (followers, sales, coaching clients, DMs)
-- Schedule the week's posts in advance
-- One admin task (email list, course platform, coaching client notes)
-
-### Tuesday (2–3 hours — Filming Day 1)
-- Film 5–8 videos (1 hour)
-- Basic CapCut edit + captions (1–2 hours)
-- Schedule for the week
-
-### Wednesday (30 min)
-- Engage with comments on all platforms (15 min)
-- Post one educational Story
-- Respond to coaching client check-ins
-
-### Thursday (1–2 hours — Filming Day 2 or Light Day)
-- Option A: Second filming day (5–8 more videos)
-- Option B: Film one or two carousel concepts, write captions
-- Coaching client check-ins (async)
-
-### Friday (30 min)
-- Weekly coaching check-ins (respond to all outstanding messages)
-- Email list: one weekly email (education + soft CTA)
-- Check numbers for the week
-
-### Saturday–Sunday (Optional)
-- Respond to comments
-- Pre-film next week's batch if you had a lighter Tuesday
-- No pressure. If you want a real weekend, take it.
-
-**Total active work time: 6–8 hours/week sustainable, 10–12 hours during launch weeks**
+### Monday (30 min) — Review + plan
+### Tuesday (2–3 hours) — Filming Day 1: 5–8 videos, edit, schedule
+### Wednesday (30 min) — Engage with comments, coaching check-ins
+### Thursday (1–2 hours) — Filming Day 2 or carousel creation, coaching check-ins
+### Friday (30 min) — Coaching responses, weekly email to list, review numbers
 
 ---
 
-## The Email List: Your Most Valuable Asset
+## The Email List
 
-Your free guide is already collecting emails. This is your direct line to buyers regardless of algorithm changes.
+**Weekly email structure (every Friday, 5–10 min):**
+- Subject line: something that teaches or surprises
+- Body: 3–4 short paragraphs of education
+- CTA: one thing only (course, coaching, challenge — whichever is current)
 
-**Weekly email structure (every Friday, 5–10 minutes to write):**
-
-> Subject line: [Teaching something from Template B or A]
-> Body: 3–4 short paragraphs of education content (one insight, explained clearly)
-> CTA: One thing — either "the course is here" or "coaching spots are open" or "challenge opens Monday"
-
-**Email funnel for new subscribers:**
-1. Email 1 (immediate): Free guide delivery + "What to expect from me"
+**Nurture sequence for new subscribers:**
+1. Email 1 (immediate): Free guide + "What to expect from me"
 2. Email 2 (Day 3): One education piece ("The one principle that changes everything")
-3. Email 3 (Day 5): Lisa's story (compressed Comeback Arc)
+3. Email 3 (Day 5): Lisa's story — compressed Comeback Arc
 4. Email 4 (Day 7): Course offer — "Training Foundations: $97, one time"
-5. Ongoing: Weekly email, one teaching + one CTA
-
-**At 500 email subscribers, a single launch email typically generates 2–5% purchase rate = 10–25 sales = $970–$2,425 from one email.**
+5. Ongoing: Weekly email, teaching + CTA
 
 ---
 
 ## The Daily Task System
 
-When you come back 5 days/week, here's the rhythm:
+**You tell me:** what you posted, numbers (followers, DMs, sales), coaching client updates, what you're filming.
 
-**You tell me:**
-- What you posted
-- What your numbers look like (followers, DMs, sales)
-- What's happening with coaching clients
-- What you're filming next
-
-**I give you:**
-- One focused task for the day (filming script, outreach message, email copy, coaching page copy, etc.)
-- The priority — what moves the needle most that week
-- Any copy you need written (email, caption, script)
+**I give you:** one focused task for the day, the priority for the week, any copy you need written.
 
 ---
 
 ## First 7 Days: Immediate Actions
 
-Do these before anything else. They don't require content or followers.
-
-1. **Raise Training Foundations to $97** — 10 minutes on your course platform. This alone increases revenue on every sale.
-
-2. **Update the coaching page** — Three tiers in descending order (Elite $2,000 → Premium $1,200 → Foundation $800). Add founding offer banner ($600/month, 3 spots, 30 days). Add cap ("6 clients maximum").
-
-3. **Create the Starter Bundle** — Write the Nutrition PDF (2 hours), create product page at $147.
-
-4. **Update your bio + Linktree** — Free guide → Course ($97) → Bundle ($147) → Coaching Application. Everything in that order.
-
-5. **Send the Testimonial Request email** (Piece 10 from VIRAL_CONTENT.md) to anyone who's ever bought or been coached informally.
-
-6. **Post the Reddit education piece** (Piece 9 from VIRAL_CONTENT.md) — builds credibility before you ask for anything.
-
-7. **DM 10 people** who have liked or commented on your posts: "I'm opening 3 founding coaching spots at $600/month for 3 months — closes in 30 days." Personal, direct, honest.
+1. **Raise Training Foundations to $97** — 10 minutes. Every future sale earns more from this moment.
+2. **Update the coaching page** — Three tiers descending (Elite $1,200 → Premium $700 → Foundation $500). Add founding offer banner ($350/month, 3 spots, 30 days). Add cap.
+3. **Create the Starter Bundle** — Write the Nutrition PDF (2 hours, Module 4 expanded), create product page at $147.
+4. **Update bio + Linktree** — Free guide → $97 course → $147 bundle → Coaching application.
+5. **Send the Testimonial Request email** (Piece 10 from VIRAL_CONTENT.md) to everyone who's purchased or been coached.
+6. **Post the Reddit education piece** (Piece 9) — builds credibility before you ask for anything.
+7. **Send warm outreach to 20–30 people** — not a pitch, an activation. Ask if they know anyone who might be a fit for founding coaching.
 
 ---
 
@@ -591,63 +495,56 @@ Do these before anything else. They don't require content or followers.
 | Starter Bundle (TF + Nutrition PDF) | $147 | Built in Week 2 |
 | Complete Foundations System (TF + Level 2) | $197 | Available Month 3 |
 | Level 2: Training Progression | $97 | Available Month 3 |
-| 4-Week Foundation Reset Challenge | $97 | Per cohort; runs quarterly |
-| 1:1 Coaching — Founding Rate | $600/month | First 3 clients, 3-month min, 30-day window only |
-| 1:1 Coaching — Foundation | $800/month | 3-month min, then month-to-month; 3 spots |
-| 1:1 Coaching — Premium | $1,200/month | 6-month min; 2 spots |
-| 1:1 Coaching — Elite Intensive | $2,000/month | 6-month min; 1 spot |
+| 4-Week Foundation Reset Challenge | $97 | Per cohort; quarterly |
+| 1:1 Coaching — Founding Rate | $350/mo ($1,050 prepaid) | First 3 clients, 30-day window |
+| 1:1 Coaching — Foundation | $500/mo or $450/mo (3-month prepay) | 3 spots |
+| 1:1 Coaching — Premium | $700/mo or $650/mo (6-month prepay) | 2 spots |
+| 1:1 Coaching — Elite | $1,200/mo (6-month min only) | 1 spot — anchor tier |
 | Free Guide | Free | Lead magnet; email capture |
 
 ---
 
 ## Month 4+ Trajectory
 
-Once founding clients finish their 3-month commitment (Month 4), they either churn (you have their testimonials) or convert to regular pricing ($800/month):
-
-- **Best case Month 4:** 6 clients at avg $1,000/month = $6,000 coaching MRR
-- **Courses + passive:** $5,000–$7,000 depending on catalog growth
-- **Challenge Cohort 3:** Another $4,000+
-- **Month 4 potential: $15,000–$17,000 with a more passive split**
-
-After Month 4:
-- **YouTube:** Start monthly long-form videos (Piece 4 is your first script — already written). Slower burn but drives course sales for years.
-- **Brand partnerships:** At 10K–15K followers with high engagement, fitness equipment, supplement-adjacent, or app brands will approach. $150–$600 per sponsored post.
-- **Group program:** Scaled version of coaching (8–15 people, less access, $200–$300/month) — Month 4–5 territory.
-- **Coaching price increase:** Once you have 10+ testimonials and 10K+ followers, waitlist pressure lets you raise prices on new clients. Existing clients stay at their rate.
+Once founding clients finish their 3-month commitment:
+- **Raise prices.** You now have 3 documented testimonials with real results. The Foundation rate can move from $500 to $600–$700. Premium from $700 to $900. Elite from $1,200 to $1,500.
+- **Start paid ads.** $5–$10/day Facebook/Instagram ad driving to coaching application. Test with the founding client testimonials as creative.
+- **YouTube.** Monthly long-form video. Piece 4 (Comeback Arc script) is already written — film it.
+- **Group program** (Month 4–5). Scaled version of coaching: 8–12 people, less 1:1 access, $200–$250/month. This is how you scale past the 6-client coaching cap.
+- **Brand partnerships.** At 10K+ followers with high engagement: $150–$500/sponsored post from fitness equipment, supplement-adjacent, or app brands.
 
 ---
 
-## What Could Go Wrong (And How to Handle It)
+## What Could Go Wrong
 
-**"Nobody buys at $97"**
-Wait 2 weeks before judging. Run a single email to your list explaining the reprice and why. If conversions stay low after 30 days, A/B test with a "launch discount" at $77 to existing email subscribers only.
-
-**"I can't fill the founding spots"**
-The founding offer needs to be communicated directly — not just posted. DM people personally. If you've reached 10 people and none are interested, the issue is the message, not the offer. Come back to the daily task system and we'll rewrite the pitch.
+**"Nobody signs up for founding coaching at $350"**
+The founding offer needs warm outreach, not cold posting. DM people personally. If 15 people have been messaged and none are interested, bring the outreach message here — we'll rewrite it.
 
 **"I can't fill regular coaching spots after founding closes"**
-The challenge is the primary coaching pipeline. If the challenge runs successfully, 14% of completers convert. That's 6 clients from 45 challenge participants. Do not skip the challenge.
+The challenge is your primary pipeline. 14% of 45 challenge completers = 6 coaching leads. Run the challenge and convert from it. If coaching is still empty at end of Month 2, activate the Facebook group strategy.
 
 **"The challenge doesn't sell"**
-If signups are below 20 at cart close, cancel and refund. Run it internally first with 5–10 people at a discount in exchange for case studies. You need social proof before selling to cold audiences.
+Below 20 signups at cart close: cancel and refund. Reposition for Cohort 2 with more audience and social proof. Run it internally first with 5–10 people free in exchange for case studies.
 
-**"I'm burned out from the travel blocks"**
-You've pre-filmed. You've scheduled. Travel months are the months you post from a queue. Coaching clients get their async check-ins as usual. Calls can be moved one week if needed — with 2-week notice. The income doesn't stop because you traveled.
+**"Course sales stall at $97"**
+Run a single email to your list explaining why $97 is the right price. Wait 30 days before reacting. If it continues, test $77 as a limited-time offer to email subscribers only.
+
+**"I'm burned out from travel"**
+You've pre-filmed. Coaching clients get their async check-ins and calls as normal (calls can move one week with advance notice). Travel months are queue months, not scramble months.
 
 ---
 
 ## The One Number That Matters Each Week
 
-Every week, track one thing above all else: **coaching MRR** — total monthly value of active coaching contracts.
+**Coaching MRR** — the monthly recurring value of active coaching contracts.
 
-- 3 founding × $600 = $1,800 → target for end of Week 3
-- 3 founding + 3 regular → $1,800 + ($800–$1,200 avg × 3) = $4,800–$5,400 → target for end of Month 2
-- 6 clients at capacity → $5,000–$7,200/month depending on tier mix → Month 3
+Week 3 target: $1,050 (3 founding clients)
+End of Month 2 target: $2,700–$3,000 (6 clients, mix of tiers)
+End of Month 3 target: $3,000–$3,450 (6 clients, founding still active)
+Month 4+ target: $3,600–$4,200 (founding graduated, some on higher tiers or replacements)
 
-Everything else (followers, views, course sales) is either lagging or leading. Coaching MRR tells you immediately whether the business is building. If it stalls, that's the week you run a direct outreach campaign or revisit the founding offer framing.
-
-Course sales are a bonus. Challenges are a launch. Coaching MRR is the foundation.
+Everything else — followers, views, course sales — is either lagging or leading. Coaching MRR is the real-time signal. If it's not growing week over week, that week's priority is direct outreach, not content.
 
 ---
 
-_This plan was built from competitive research, 20+ viral content analyses, 2025–2026 fitness creator revenue benchmarks, and behavioral pricing research. All numbers are grounded in industry data. The path to $15K is real — the variable is execution speed._
+_This plan is built from competitive research, behavioral pricing data, and 2025–2026 fitness creator benchmarks. Pricing is calibrated for launch-phase reality, not aspirational ceiling. The path to $15K is achievable — the sequence matters: clients → results → testimonials → higher prices → repeat._
