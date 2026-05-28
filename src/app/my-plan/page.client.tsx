@@ -1,124 +1,7 @@
 "use client"
-import { useEffect, useState, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type Platform = "tiktok" | "instagram" | "reddit"
-type Tab = "home" | "film" | "post" | "stats" | "sales" | "clients" | "tasks" | "ads"
-type CoachingTier = "founding" | "foundation" | "premium" | "elite"
-type PostStatus = "scheduled" | "posted" | "skipped"
-type PostRating = "fire" | "check" | "neutral" | "miss"
-
-interface Task {
-  id: string
-  week: number
-  phase: 1 | 2 | 3
-  category: "setup" | "content" | "outreach" | "coaching" | "launch" | "analytics" | "build"
-  text: string
-}
-
-interface RevenueMonth {
-  coaching: number
-  courses: number
-  memberships: number
-  affiliates: number
-}
-
-interface Client {
-  id: string
-  name: string
-  startDate: string
-  nextCall: string
-  tier: CoachingTier
-  monthlyFee: number
-  paymentType: "monthly" | "3month-prepay" | "6month-prepay"
-  status: "active" | "paused" | "completed"
-  notes: string
-  testimonialReceived: boolean
-  testimonialDue30?: string
-  testimonialDue60?: string
-  testimonialDue90?: string
-}
-
-interface Metrics {
-  tiktokFollowers: number
-  tiktokViews: number
-  igFollowers: number
-  igReach: number
-  emailSubscribers: number
-  websiteVisits: number
-}
-
-interface PostOverride {
-  episodeId?: string
-  platform?: Platform
-  notes?: string
-}
-
-interface PostPerformance {
-  postId: string
-  postedDate: string
-  platform: Platform
-  views: number
-  likes: number
-  comments: number
-  rating: PostRating
-  notes: string
-}
-
-interface SaleEntry {
-  id: string
-  date: string
-  product: string
-  amount: number
-  month: 1 | 2 | 3
-  notes: string
-}
-
-interface AdCampaign {
-  id: string
-  platform: Platform
-  startDate: string
-  budget: number
-  spent: number
-  impressions: number
-  clicks: number
-  conversions: number
-  notes: string
-}
-
-interface PlanState {
-  version: 2
-  startDate: string | null
-  completedTasks: Record<string, boolean>
-  revenue: { m1: RevenueMonth; m2: RevenueMonth; m3: RevenueMonth }
-  clients: Client[]
-  metrics: Metrics
-  filmedBatches: Record<number, boolean>
-  postOverrides: Record<string, PostOverride>
-  postStatuses: Record<string, PostStatus>
-  performance: PostPerformance[]
-  sales: SaleEntry[]
-  adCampaigns: AdCampaign[]
-}
-
-interface PlanStateV1 {
-  startDate: string | null
-  completedTasks: Record<string, boolean>
-  revenue: { m1: RevenueMonth; m2: RevenueMonth; m3: RevenueMonth }
-  clients: Array<{
-    id: string
-    name: string
-    startDate: string
-    nextCall: string
-    monthlyFee: number
-    status: "active" | "paused" | "completed"
-    notes: string
-  }>
-  metrics: Metrics
-}
-
-// ─── Design tokens ────────────────────────────────────────────────────────────
+// ─── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
   bg: "#0a0a0a",
@@ -134,652 +17,103 @@ const C = {
   blue: "#7bb3c9",
 } as const
 
-const F = {
-  heading: "'Cormorant Garamond', Georgia, serif",
-  body: "'Montserrat', 'DM Sans', sans-serif",
-} as const
+const FONT_SERIF = "var(--font-cormorant), 'Cormorant Garamond', serif"
+const FONT_SANS = "var(--font-montserrat), 'Montserrat', sans-serif"
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
-const MONTH_TARGETS = { m1: 4651, m2: 10740, m3: 14770 }
-const MAX_CLIENTS = 6
-const CLIENT_TIERS: Record<CoachingTier, number> = {
-  founding: 350,
-  foundation: 500,
-  premium: 700,
-  elite: 1200,
-}
-
-const PRODUCTS = [
-  { label: "Founding Coaching ($350/mo)", value: "coaching-founding" },
-  { label: "Foundation Coaching ($500/mo)", value: "coaching-foundation" },
-  { label: "Premium Coaching ($700/mo)", value: "coaching-premium" },
-  { label: "Elite Coaching ($1,200/mo)", value: "coaching-elite" },
-  { label: "Training Foundations ($97)", value: "course-training" },
-  { label: "Nutrition Foundations ($97)", value: "course-nutrition" },
-  { label: "Method Bundle ($147)", value: "course-bundle" },
-  { label: "Monthly Membership ($29)", value: "membership" },
-  { label: "Affiliate Commission", value: "affiliate" },
-]
-
-const BIO_LINES = [
-  "Certified personal trainer helping women 35+ build lean muscle",
-  "3-month coaching program | online",
-  "🔗 lisafitmethod.com",
-]
-
-const TABS: Array<{ id: Tab; icon: string; label: string }> = [
-  { id: "home", icon: "◈", label: "Home" },
-  { id: "film", icon: "◉", label: "Film" },
-  { id: "post", icon: "▷", label: "Post" },
-  { id: "stats", icon: "▲", label: "Stats" },
-  { id: "sales", icon: "$", label: "Sales" },
-  { id: "clients", icon: "⊕", label: "Clients" },
-  { id: "tasks", icon: "☑", label: "Tasks" },
-  { id: "ads", icon: "✦", label: "Ads" },
-]
-
-const CATEGORY_COLORS: Record<Task["category"], string> = {
-  setup: C.blue,
-  content: C.gold,
-  outreach: C.green,
-  coaching: C.cream,
-  launch: C.goldLight,
-  analytics: C.mutedLight,
-  build: C.error,
-}
-
-const CATEGORY_LABELS: Record<Task["category"], string> = {
-  setup: "Setup",
-  content: "Content",
-  outreach: "Outreach",
-  coaching: "Coaching",
-  launch: "Launch",
-  analytics: "Analytics",
-  build: "Build",
-}
-
-// ─── Tasks ────────────────────────────────────────────────────────────────────
-
-const TASKS: Task[] = [
-  // Phase 1 — Week 1
-  { id: "p1w1_1", week: 1, phase: 1, category: "setup", text: "Set start date and pin this dashboard" },
-  { id: "p1w1_2", week: 1, phase: 1, category: "setup", text: "Update coaching page: add tiered pricing ($350–$1,200) + 6-spot cap" },
-  { id: "p1w1_3", week: 1, phase: 1, category: "setup", text: "Write your bio (use BIO_LINES above as template)" },
-  { id: "p1w1_4", week: 1, phase: 1, category: "content", text: "Film Batch 1: 10 videos (intro + authority hooks)" },
-  { id: "p1w1_5", week: 1, phase: 1, category: "setup", text: "Set up TikTok and Instagram business accounts" },
-  // Phase 1 — Week 2
-  { id: "p1w2_1", week: 2, phase: 1, category: "content", text: "Film Batch 2: 10 videos (pain-point hooks)" },
-  { id: "p1w2_2", week: 2, phase: 1, category: "setup", text: "Create lead magnet (free workout PDF or checklist)" },
-  { id: "p1w2_3", week: 2, phase: 1, category: "outreach", text: "DM 20 target accounts on TikTok/IG (genuine comments first)" },
-  { id: "p1w2_4", week: 2, phase: 1, category: "analytics", text: "Set up email list (ConvertKit or Beehiiv free tier)" },
-  // Phase 1 — Week 3
-  { id: "p1w3_1", week: 3, phase: 1, category: "content", text: "Film Batch 3: 10 videos (transformation stories)" },
-  { id: "p1w3_2", week: 3, phase: 1, category: "outreach", text: "Post lead magnet promo — collect first 10 emails" },
-  { id: "p1w3_3", week: 3, phase: 1, category: "coaching", text: "Finalize coaching intake form and onboarding sequence" },
-  { id: "p1w3_4", week: 3, phase: 1, category: "outreach", text: "DM 20 more target accounts" },
-  // Phase 1 — Week 4
-  { id: "p1w4_1", week: 4, phase: 1, category: "content", text: "Film Batch 4: 10 videos (method explainers)" },
-  { id: "p1w4_2", week: 4, phase: 1, category: "launch", text: "Soft launch coaching: 2 founding spots at $350/mo" },
-  { id: "p1w4_3", week: 4, phase: 1, category: "outreach", text: "Post 'I have 2 spots open' story + DMs to warm leads" },
-  { id: "p1w4_4", week: 4, phase: 1, category: "analytics", text: "Review Month 1 content metrics — note top 3 performers" },
-  // Phase 2 — Week 5
-  { id: "p2w5_1", week: 5, phase: 2, category: "content", text: "Film Batch 5: 10 videos (objection busters)" },
-  { id: "p2w5_2", week: 5, phase: 2, category: "coaching", text: "Onboard founding clients — first check-in calls" },
-  { id: "p2w5_3", week: 5, phase: 2, category: "outreach", text: "DM 30 target accounts (scale outreach)" },
-  { id: "p2w5_4", week: 5, phase: 2, category: "build", text: "Launch Training Foundations course ($97)" },
-  // Phase 2 — Week 6
-  { id: "p2w6_1", week: 6, phase: 2, category: "content", text: "Film Batch 6: 10 videos (client results / social proof)" },
-  { id: "p2w6_2", week: 6, phase: 2, category: "launch", text: "Open 2 more coaching spots (foundation tier $500/mo)" },
-  { id: "p2w6_3", week: 6, phase: 2, category: "outreach", text: "Email list nurture sequence — 3 emails this week" },
-  { id: "p2w6_4", week: 6, phase: 2, category: "analytics", text: "Check TikTok analytics: identify best posting times" },
-  // Phase 2 — Week 7
-  { id: "p2w7_1", week: 7, phase: 2, category: "content", text: "Film Batch 7: 10 videos (myth-busting series)" },
-  { id: "p2w7_2", week: 7, phase: 2, category: "coaching", text: "30-day check-ins with founding clients" },
-  { id: "p2w7_3", week: 7, phase: 2, category: "build", text: "Launch Nutrition Foundations course ($97)" },
-  { id: "p2w7_4", week: 7, phase: 2, category: "outreach", text: "Collab outreach: pitch 5 complementary creators" },
-  // Phase 2 — Week 8
-  { id: "p2w8_1", week: 8, phase: 2, category: "content", text: "Film Batch 8: 10 videos (day-in-the-life / behind scenes)" },
-  { id: "p2w8_2", week: 8, phase: 2, category: "launch", text: "Bundle offer: Training + Nutrition for $147" },
-  { id: "p2w8_3", week: 8, phase: 2, category: "analytics", text: "Review Month 2 metrics — adjust content mix" },
-  { id: "p2w8_4", week: 8, phase: 2, category: "outreach", text: "Request first testimonials from founding clients" },
-  // Phase 3 — Week 9
-  { id: "p3w9_1", week: 9, phase: 3, category: "content", text: "Film Batch 9: 10 videos (premium positioning)" },
-  { id: "p3w9_2", week: 9, phase: 3, category: "launch", text: "Open premium spot ($700/mo) — one client max" },
-  { id: "p3w9_3", week: 9, phase: 3, category: "outreach", text: "Post testimonial content from early clients" },
-  { id: "p3w9_4", week: 9, phase: 3, category: "build", text: "Set up membership ($29/mo) for past clients" },
-  // Phase 3 — Week 10
-  { id: "p3w10_1", week: 10, phase: 3, category: "content", text: "Film Batch 10: 10 videos (income / lifestyle / authority)" },
-  { id: "p3w10_2", week: 10, phase: 3, category: "coaching", text: "60-day check-ins with original clients" },
-  { id: "p3w10_3", week: 10, phase: 3, category: "outreach", text: "DM 40 accounts — target higher-engagement profiles" },
-  { id: "p3w10_4", week: 10, phase: 3, category: "analytics", text: "Audit email list: segment buyers vs non-buyers" },
-  // Phase 3 — Week 11
-  { id: "p3w11_1", week: 11, phase: 3, category: "content", text: "Film Batch 11: 10 videos (3-month results / celebration)" },
-  { id: "p3w11_2", week: 11, phase: 3, category: "launch", text: "Introduce elite tier ($1,200/mo) — 1 spot" },
-  { id: "p3w11_3", week: 11, phase: 3, category: "build", text: "Plan Month 4+ ad campaign (budget $500/mo)" },
-  { id: "p3w11_4", week: 11, phase: 3, category: "outreach", text: "Affiliate setup: apply to 2 relevant programs" },
-  // Phase 3 — Week 12
-  { id: "p3w12_1", week: 12, phase: 3, category: "analytics", text: "Full 90-day audit: revenue, content, conversion rates" },
-  { id: "p3w12_2", week: 12, phase: 3, category: "coaching", text: "Hit 4–6 coaching clients active (capacity reached)" },
-  { id: "p3w12_3", week: 12, phase: 3, category: "content", text: "Film Batch 12: 10 videos (Month 4 pipeline)" },
-  { id: "p3w12_4", week: 12, phase: 3, category: "build", text: "Document systems: SOPs for content, coaching, sales" },
-  // Phase 3 — Week 13
-  { id: "p3w13_1", week: 13, phase: 3, category: "analytics", text: "Export all 90-day data for quarterly review" },
-  { id: "p3w13_2", week: 13, phase: 3, category: "build", text: "Plan Q2 strategy based on 90-day learnings" },
-  { id: "p3w13_3", week: 13, phase: 3, category: "coaching", text: "Renew or graduate existing coaching clients" },
-  { id: "p3w13_4", week: 13, phase: 3, category: "launch", text: "Announce Month 4 coaching spots publicly" },
-]
-
-// ─── Episodes ─────────────────────────────────────────────────────────────────
+type EpisodeFormat = "talking-head" | "gym-footage" | "b-roll-demo" | "do-with-me" | "voiceover" | "text-broll"
+type EpisodeStatus = "idea" | "filmed" | "edited" | "posted"
+type CoachingTier = "founding" | "foundation" | "premium" | "elite"
+type Tab = "home" | "ideas" | "edit" | "calendar" | "stats" | "sales"
 
 interface Episode {
   id: string
+  seriesId: string
   title: string
   hook: string
-  platform: Platform[]
-  category: string
-  batch: number
+  format: EpisodeFormat
+  targetLength: string
+  filmingNote: string
+  captionIdea: string
+  cta?: string
+  tags: string[]
 }
 
-const EPISODES: Episode[] = [
-  // Batch 1 — Intro + Authority
-  { id: "e001", batch: 1, platform: ["tiktok", "instagram"], category: "authority", title: "Who I am and why I coach women 35+", hook: "I'm a certified trainer who only works with women over 35 — here's why" },
-  { id: "e002", batch: 1, platform: ["tiktok", "instagram"], category: "authority", title: "My own fitness journey after 35", hook: "At 37 I was the weakest I'd ever been. Here's what changed everything" },
-  { id: "e003", batch: 1, platform: ["tiktok"], category: "authority", title: "Why most programs fail women over 35", hook: "The #1 reason fitness programs don't work for women over 35" },
-  { id: "e004", batch: 1, platform: ["tiktok", "instagram"], category: "authority", title: "The 3 things I wish I knew at 35", hook: "3 things I wish someone told me about fitness in my 30s" },
-  { id: "e005", batch: 1, platform: ["tiktok"], category: "method", title: "What is the Lisa Fit Method", hook: "My method in 60 seconds — lean muscle, less stress, sustainable" },
-  { id: "e006", batch: 1, platform: ["instagram"], category: "authority", title: "My certifications and background", hook: "Here's why you should (or shouldn't) trust me as your trainer" },
-  { id: "e007", batch: 1, platform: ["tiktok", "instagram"], category: "method", title: "The difference between my method and HIIT", hook: "Stop doing HIIT if you're over 35 — here's what to do instead" },
-  { id: "e008", batch: 1, platform: ["tiktok"], category: "authority", title: "A day in my life as an online trainer", hook: "What my day actually looks like as an online fitness coach" },
-  { id: "e009", batch: 1, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client result: Sarah lost 12 lbs in 8 weeks", hook: "My client Sarah is 42 and lost 12 pounds in 8 weeks — this is how" },
-  { id: "e010", batch: 1, platform: ["tiktok"], category: "method", title: "The 3-phase training system explained", hook: "My 3-phase system is why my clients see results in 30 days" },
-  // Batch 2 — Pain-point hooks
-  { id: "e011", batch: 2, platform: ["tiktok", "instagram"], category: "pain", title: "You're not lazy — your program is wrong", hook: "If you're not seeing results it's not because you're lazy" },
-  { id: "e012", batch: 2, platform: ["tiktok"], category: "pain", title: "Why you're always tired after workouts", hook: "If your workouts leave you exhausted, you're training wrong for your age" },
-  { id: "e013", batch: 2, platform: ["tiktok", "instagram"], category: "pain", title: "The scale isn't moving — here's why", hook: "The scale hasn't moved in 3 weeks and it's not your fault" },
-  { id: "e014", batch: 2, platform: ["tiktok"], category: "pain", title: "Hormones and weight gain after 35", hook: "Your hormones are working against you — here's how to fight back" },
-  { id: "e015", batch: 2, platform: ["tiktok", "instagram"], category: "pain", title: "You're doing too much cardio", hook: "More cardio is making you softer, not leaner — especially over 35" },
-  { id: "e016", batch: 2, platform: ["tiktok"], category: "pain", title: "Why you're not sleeping well", hook: "Bad sleep is destroying your fitness results and it starts with your training" },
-  { id: "e017", batch: 2, platform: ["instagram"], category: "pain", title: "The comparison trap on social media", hook: "Stop comparing your body to 25-year-old fitness influencers" },
-  { id: "e018", batch: 2, platform: ["tiktok", "instagram"], category: "pain", title: "Injuries that keep coming back", hook: "If you keep re-injuring the same spot, this is why" },
-  { id: "e019", batch: 2, platform: ["tiktok"], category: "pain", title: "You're under-eating protein", hook: "You're probably eating half the protein you actually need" },
-  { id: "e020", batch: 2, platform: ["tiktok", "instagram"], category: "pain", title: "Why dieting makes it worse", hook: "Every diet you've tried has made it harder to lose weight — here's the science" },
-  // Batch 3 — Transformation stories
-  { id: "e021", batch: 3, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client: Jennifer, 44, gained strength not bulk", hook: "Jennifer was terrified of weights at 44 — 3 months later she's a different person" },
-  { id: "e022", batch: 3, platform: ["tiktok"], category: "social-proof", title: "Client: Michelle, 38, first pull-up at 38", hook: "Michelle did her first pull-up at 38 and cried on the call" },
-  { id: "e023", batch: 3, platform: ["tiktok", "instagram"], category: "social-proof", title: "Before and after — not what you think", hook: "Her 'before and after' isn't about weight — it's about confidence" },
-  { id: "e024", batch: 3, platform: ["tiktok"], category: "social-proof", title: "Client: Karen, stopped yo-yo dieting", hook: "Karen has lost and regained 30 pounds 4 times — until now" },
-  { id: "e025", batch: 3, platform: ["instagram"], category: "social-proof", title: "What my clients say after 30 days", hook: "What my clients say after their first 30 days — in their own words" },
-  { id: "e026", batch: 3, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client: Maria, 50, strongest she's ever been", hook: "Maria is 50 and she's the strongest she's ever been in her life" },
-  { id: "e027", batch: 3, platform: ["tiktok"], category: "social-proof", title: "The fastest transformation I've seen", hook: "This is the fastest result I've seen in 10 years of coaching" },
-  { id: "e028", batch: 3, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client: Dawn, trained through menopause", hook: "Dawn started with me during menopause and here's what happened" },
-  { id: "e029", batch: 3, platform: ["tiktok"], category: "social-proof", title: "What changes first — always", hook: "The first thing that changes in my program is always the same thing" },
-  { id: "e030", batch: 3, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client who almost quit after week 2", hook: "She almost quit after 2 weeks. I'm so glad she didn't." },
-  // Batch 4 — Method explainers
-  { id: "e031", batch: 4, platform: ["tiktok", "instagram"], category: "method", title: "Progressive overload explained simply", hook: "Progressive overload is the only thing that actually works — here's how to use it" },
-  { id: "e032", batch: 4, platform: ["tiktok"], category: "method", title: "Why compound lifts beat isolation", hook: "Stop doing bicep curls. Do this instead." },
-  { id: "e033", batch: 4, platform: ["tiktok", "instagram"], category: "method", title: "How many days per week to train", hook: "How many days a week should you work out? The answer might surprise you" },
-  { id: "e034", batch: 4, platform: ["tiktok"], category: "method", title: "Protein timing — does it matter?", hook: "Everyone argues about protein timing. Here's what the science actually says" },
-  { id: "e035", batch: 4, platform: ["instagram"], category: "method", title: "Rest days are part of the program", hook: "Your rest days are just as important as your training days — here's why" },
-  { id: "e036", batch: 4, platform: ["tiktok", "instagram"], category: "method", title: "What a perfect training week looks like", hook: "This is exactly what my clients' training week looks like" },
-  { id: "e037", batch: 4, platform: ["tiktok"], category: "method", title: "How to structure a workout", hook: "A perfectly structured 45-minute workout for women over 35" },
-  { id: "e038", batch: 4, platform: ["tiktok", "instagram"], category: "method", title: "Warm-up vs. activation — the difference", hook: "Most people warm up wrong. This is what you should actually be doing." },
-  { id: "e039", batch: 4, platform: ["tiktok"], category: "method", title: "The 80/20 rule for nutrition", hook: "You don't need a perfect diet. You need this." },
-  { id: "e040", batch: 4, platform: ["tiktok", "instagram"], category: "method", title: "Why I don't count calories with clients", hook: "I never make my clients count calories — and they still lose body fat" },
-  // Batch 5 — Objection busters
-  { id: "e041", batch: 5, platform: ["tiktok", "instagram"], category: "objection", title: "I don't have time to work out", hook: "You don't have time to work out? Let me show you what 30 minutes can do" },
-  { id: "e042", batch: 5, platform: ["tiktok"], category: "objection", title: "I've tried everything and nothing works", hook: "If you've tried everything and nothing worked, you haven't tried this" },
-  { id: "e043", batch: 5, platform: ["tiktok", "instagram"], category: "objection", title: "I can't afford a personal trainer", hook: "Can't afford a trainer? Here's how to get coached for less than a gym membership" },
-  { id: "e044", batch: 5, platform: ["tiktok"], category: "objection", title: "I'm too out of shape to start", hook: "You think you're too out of shape to hire a trainer — that's backwards" },
-  { id: "e045", batch: 5, platform: ["instagram"], category: "objection", title: "Online coaching isn't real coaching", hook: "Online coaching is fake? My clients would strongly disagree" },
-  { id: "e046", batch: 5, platform: ["tiktok", "instagram"], category: "objection", title: "I'll start after the holidays", hook: "I'll start after the holidays. I've heard this 100 times. Here's what happens." },
-  { id: "e047", batch: 5, platform: ["tiktok"], category: "objection", title: "I don't want to get bulky", hook: "You're afraid of getting bulky. Here's the truth about women and muscle." },
-  { id: "e048", batch: 5, platform: ["tiktok", "instagram"], category: "objection", title: "I'll just follow YouTube videos", hook: "YouTube workouts are free. Here's why they're costing you results." },
-  { id: "e049", batch: 5, platform: ["tiktok"], category: "objection", title: "I have a bad knee / back / shoulder", hook: "You have a bad knee? That's actually why you need a trainer, not a reason to avoid one" },
-  { id: "e050", batch: 5, platform: ["tiktok", "instagram"], category: "objection", title: "I need to lose weight before I start lifting", hook: "Lose weight before you start lifting? That's not how this works." },
-  // Batch 6 — Social proof / client results
-  { id: "e051", batch: 6, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client results at 30 days — numbers", hook: "Here are the actual numbers from my clients at 30 days" },
-  { id: "e052", batch: 6, platform: ["tiktok"], category: "social-proof", title: "The question clients ask most at week 4", hook: "At week 4 every single client asks me the same question" },
-  { id: "e053", batch: 6, platform: ["tiktok", "instagram"], category: "social-proof", title: "What changes when you get strong", hook: "Getting strong changes things I never expected — my clients say the same" },
-  { id: "e054", batch: 6, platform: ["tiktok"], category: "social-proof", title: "Client text message reaction", hook: "My client texted me this at 6am and I screenshot it immediately" },
-  { id: "e055", batch: 6, platform: ["instagram"], category: "social-proof", title: "Client: retired at 58, started lifting", hook: "She retired at 58 and decided to get in the best shape of her life" },
-  { id: "e056", batch: 6, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client: first time wearing shorts in 10 years", hook: "She hasn't worn shorts in 10 years. Last week she bought 3 pairs." },
-  { id: "e057", batch: 6, platform: ["tiktok"], category: "social-proof", title: "The DM that made me cry", hook: "I got a DM last month that made me cry at my desk" },
-  { id: "e058", batch: 6, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client who trained through chemo", hook: "She trained with me through chemotherapy and here's what she said" },
-  { id: "e059", batch: 6, platform: ["tiktok"], category: "social-proof", title: "Client: 40-lb body recomp", hook: "She didn't lose 40 pounds — she traded 40 pounds of fat for muscle" },
-  { id: "e060", batch: 6, platform: ["tiktok", "instagram"], category: "social-proof", title: "What my clients have in common", hook: "All my successful clients have one thing in common — it's not what you think" },
-  // Batch 7 — Myth-busting
-  { id: "e061", batch: 7, platform: ["tiktok", "instagram"], category: "education", title: "Myth: cardio is the best fat loss tool", hook: "Cardio is not the best way to lose fat — and the science is clear" },
-  { id: "e062", batch: 7, platform: ["tiktok"], category: "education", title: "Myth: you need to eat less to lose weight", hook: "Eating less is destroying your metabolism — eat more of this instead" },
-  { id: "e063", batch: 7, platform: ["tiktok", "instagram"], category: "education", title: "Myth: women should train differently than men", hook: "Women don't need a special program — they need a smart one" },
-  { id: "e064", batch: 7, platform: ["tiktok"], category: "education", title: "Myth: soreness means a good workout", hook: "If you're not sore you're not working hard? Total myth." },
-  { id: "e065", batch: 7, platform: ["instagram"], category: "education", title: "Myth: fasted cardio burns more fat", hook: "Fasted cardio for fat loss — myth or fact? Here's the research." },
-  { id: "e066", batch: 7, platform: ["tiktok", "instagram"], category: "education", title: "Myth: supplements are necessary", hook: "The supplement industry profits from your confusion — here's what you actually need" },
-  { id: "e067", batch: 7, platform: ["tiktok"], category: "education", title: "Myth: age is the reason you're out of shape", hook: "Your age is not the reason you're out of shape — here's what is" },
-  { id: "e068", batch: 7, platform: ["tiktok", "instagram"], category: "education", title: "Myth: you need to sweat a lot", hook: "Sweating is not a sign of a good workout — stop chasing sweat" },
-  { id: "e069", batch: 7, platform: ["tiktok"], category: "education", title: "Myth: protein makes you bulky", hook: "Protein will not make you bulky — the opposite is true" },
-  { id: "e070", batch: 7, platform: ["tiktok", "instagram"], category: "education", title: "Myth: you can out-train a bad diet", hook: "You cannot out-train a bad diet — but here's what you can do" },
-  // Batch 8 — Behind the scenes / day in the life
-  { id: "e071", batch: 8, platform: ["tiktok", "instagram"], category: "lifestyle", title: "How I structure my coaching calls", hook: "Here's exactly what happens in one of my coaching calls" },
-  { id: "e072", batch: 8, platform: ["tiktok"], category: "lifestyle", title: "My morning routine as a coach", hook: "My morning routine isn't glamorous — but it sets me up for everything" },
-  { id: "e073", batch: 8, platform: ["tiktok", "instagram"], category: "lifestyle", title: "How I film 10 videos in one afternoon", hook: "I film 10 TikToks in one afternoon — here's exactly how I do it" },
-  { id: "e074", batch: 8, platform: ["tiktok"], category: "lifestyle", title: "The hardest part of online coaching", hook: "The hardest part of being an online trainer isn't the training" },
-  { id: "e075", batch: 8, platform: ["instagram"], category: "lifestyle", title: "My home gym setup for $800", hook: "My entire home gym cost $800 — here's every piece of equipment" },
-  { id: "e076", batch: 8, platform: ["tiktok", "instagram"], category: "lifestyle", title: "What I eat in a day (trainer edition)", hook: "What I actually eat in a day — no smoothie bowls, no nonsense" },
-  { id: "e077", batch: 8, platform: ["tiktok"], category: "lifestyle", title: "How I handle client cancellations", hook: "A client canceled on me last minute — here's how I handled it professionally" },
-  { id: "e078", batch: 8, platform: ["tiktok", "instagram"], category: "lifestyle", title: "Running a business from my kitchen table", hook: "I run a $10k/month coaching business from my kitchen table" },
-  { id: "e079", batch: 8, platform: ["tiktok"], category: "lifestyle", title: "Why I quit my corporate job for this", hook: "I left a six-figure corporate job to do this — here's if I regret it" },
-  { id: "e080", batch: 8, platform: ["tiktok", "instagram"], category: "lifestyle", title: "My biggest coaching mistake", hook: "The biggest mistake I made as a new coach and what I learned" },
-  // Batch 9 — Premium positioning
-  { id: "e081", batch: 9, platform: ["tiktok", "instagram"], category: "authority", title: "Why I charge premium rates", hook: "I charge more than most trainers. Here's exactly why and why it's worth it." },
-  { id: "e082", batch: 9, platform: ["tiktok"], category: "authority", title: "What $500/month coaching actually gets you", hook: "What does $500 a month coaching actually include? Let me break it down." },
-  { id: "e083", batch: 9, platform: ["tiktok", "instagram"], category: "authority", title: "The difference between cheap and premium coaching", hook: "I've seen what cheap coaching looks like — here's the difference in outcomes" },
-  { id: "e084", batch: 9, platform: ["tiktok"], category: "authority", title: "Why I only take 6 clients at a time", hook: "I only take 6 clients at a time — here's why that's good for you" },
-  { id: "e085", batch: 9, platform: ["instagram"], category: "authority", title: "My results speak for themselves", hook: "I could tell you about my credentials or I could just show you results" },
-  { id: "e086", batch: 9, platform: ["tiktok", "instagram"], category: "authority", title: "Who is not a good fit for my program", hook: "Not everyone is a good fit for my coaching — here's who I won't work with" },
-  { id: "e087", batch: 9, platform: ["tiktok"], category: "authority", title: "The ROI of investing in your health", hook: "What's the ROI of investing $500 in your health? Let me show you." },
-  { id: "e088", batch: 9, platform: ["tiktok", "instagram"], category: "authority", title: "Why you should interview your trainer", hook: "Before you hire any trainer, ask them these 5 questions" },
-  { id: "e089", batch: 9, platform: ["tiktok"], category: "authority", title: "My client selection process", hook: "I turn down clients — here's how I decide who I work with" },
-  { id: "e090", batch: 9, platform: ["tiktok", "instagram"], category: "authority", title: "What accountability actually means in coaching", hook: "Accountability in coaching isn't what you think it is" },
-  // Batch 10 — Income / lifestyle / authority
-  { id: "e091", batch: 10, platform: ["tiktok", "instagram"], category: "lifestyle", title: "How I built a $10k/month fitness business", hook: "How I went from $0 to $10k/month as a fitness coach in 90 days" },
-  { id: "e092", batch: 10, platform: ["tiktok"], category: "lifestyle", title: "Trainers: stop trading time for money", hook: "If you're a trainer trading hours for dollars, watch this" },
-  { id: "e093", batch: 10, platform: ["tiktok", "instagram"], category: "lifestyle", title: "The moment I realized I could do this online", hook: "There was a specific moment when I knew online coaching could work — here it is" },
-  { id: "e094", batch: 10, platform: ["tiktok"], category: "lifestyle", title: "What nobody tells you about fitness business", hook: "What nobody tells you about starting a fitness business online" },
-  { id: "e095", batch: 10, platform: ["instagram"], category: "lifestyle", title: "My revenue streams explained", hook: "Here are all the ways I make money as a fitness coach — broken down simply" },
-  { id: "e096", batch: 10, platform: ["tiktok", "instagram"], category: "lifestyle", title: "Freedom is the product I actually sell", hook: "I don't sell fitness. I sell freedom. Here's what I mean." },
-  { id: "e097", batch: 10, platform: ["tiktok"], category: "lifestyle", title: "What I do when I have no motivation", hook: "Even coaches lose motivation — here's what I do when that happens" },
-  { id: "e098", batch: 10, platform: ["tiktok", "instagram"], category: "lifestyle", title: "Work-life balance as an online coach", hook: "Work-life balance as an online fitness coach — the honest truth" },
-  { id: "e099", batch: 10, platform: ["tiktok"], category: "lifestyle", title: "My biggest income month and what caused it", hook: "My biggest revenue month as a coach — here's exactly what I did differently" },
-  { id: "e100", batch: 10, platform: ["tiktok", "instagram"], category: "lifestyle", title: "What I would do differently if starting over", hook: "If I were starting my fitness coaching business over, here's what I'd change" },
-  // Batch 11 — 3-month results / celebration
-  { id: "e101", batch: 11, platform: ["tiktok", "instagram"], category: "social-proof", title: "90-day client results roundup", hook: "90 days of coaching results — here's every client's transformation" },
-  { id: "e102", batch: 11, platform: ["tiktok"], category: "social-proof", title: "The 90-day moment that changed everything", hook: "At exactly 90 days something shifts — every single client experiences this" },
-  { id: "e103", batch: 11, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client: finished first 5K after coaching", hook: "She couldn't walk up stairs without pain. She just finished a 5K." },
-  { id: "e104", batch: 11, platform: ["tiktok"], category: "social-proof", title: "What clients say they wish they knew sooner", hook: "I asked my clients: what do you wish you'd started sooner? Here's what they said." },
-  { id: "e105", batch: 11, platform: ["instagram"], category: "social-proof", title: "The measurable changes at 90 days", hook: "Here are the exact measurements my clients see at 90 days" },
-  { id: "e106", batch: 11, platform: ["tiktok", "instagram"], category: "social-proof", title: "This is why I do what I do", hook: "This is the reason I do this work — and it has nothing to do with money" },
-  { id: "e107", batch: 11, platform: ["tiktok"], category: "social-proof", title: "Client: reconnected with her body at 47", hook: "She said she felt disconnected from her body for 10 years — not anymore" },
-  { id: "e108", batch: 11, platform: ["tiktok", "instagram"], category: "social-proof", title: "Client who trained through a divorce", hook: "She went through a divorce during our program and the gym saved her" },
-  { id: "e109", batch: 11, platform: ["tiktok"], category: "social-proof", title: "What my own 90-day check-in showed", hook: "I do a 90-day check-in on myself too — here's what I found" },
-  { id: "e110", batch: 11, platform: ["tiktok", "instagram"], category: "social-proof", title: "Celebrating wins — big and small", hook: "We celebrate every win in my program — here's why the small ones matter most" },
-  // Batch 12 — Month 4 pipeline
-  { id: "e111", batch: 12, platform: ["tiktok", "instagram"], category: "method", title: "What changes in Month 4 of training", hook: "Month 4 is when everything clicks — here's what to expect" },
-  { id: "e112", batch: 12, platform: ["tiktok"], category: "method", title: "Advanced progressive overload techniques", hook: "You've mastered the basics — here's how to keep progressing after 90 days" },
-  { id: "e113", batch: 12, platform: ["tiktok", "instagram"], category: "method", title: "How to maintain results long-term", hook: "Getting results is hard. Keeping them doesn't have to be." },
-  { id: "e114", batch: 12, platform: ["tiktok"], category: "method", title: "When to increase workout intensity", hook: "How do you know when it's time to make your workouts harder?" },
-  { id: "e115", batch: 12, platform: ["instagram"], category: "method", title: "Seasonal training adjustments", hook: "Your training should change with the seasons — here's how and why" },
-  { id: "e116", batch: 12, platform: ["tiktok", "instagram"], category: "method", title: "Periodization explained for real people", hook: "Periodization sounds complicated. Here's what it actually means for you." },
-  { id: "e117", batch: 12, platform: ["tiktok"], category: "method", title: "Deload weeks — why they matter", hook: "A deload week feels like giving up. It's actually the opposite." },
-  { id: "e118", batch: 12, platform: ["tiktok", "instagram"], category: "method", title: "Nutrition in maintenance mode", hook: "You've hit your goal. Now what? Here's how to eat in maintenance." },
-  { id: "e119", batch: 12, platform: ["tiktok"], category: "method", title: "Tracking progress without the scale", hook: "Throw out your scale — here are 5 better ways to track progress" },
-  { id: "e120", batch: 12, platform: ["tiktok", "instagram"], category: "method", title: "Building a training habit that sticks", hook: "Most people quit after 60 days. Here's how to make fitness stick forever." },
-  // Batch 13 — Reddit / educational deep dives
-  { id: "e121", batch: 13, platform: ["reddit"], category: "education", title: "Comprehensive guide: lifting for women 35+", hook: "Everything women over 35 need to know about starting a lifting program" },
-  { id: "e122", batch: 13, platform: ["reddit"], category: "education", title: "Hormone changes and exercise after 35", hook: "How hormonal changes affect your training after 35 — and what to do about it" },
-  { id: "e123", batch: 13, platform: ["reddit"], category: "education", title: "Online coaching: how to choose the right coach", hook: "How to evaluate an online fitness coach before spending any money" },
-  { id: "e124", batch: 13, platform: ["reddit"], category: "education", title: "Protein intake for women: the complete guide", hook: "How much protein do women actually need? Here's the evidence-based answer" },
-  { id: "e125", batch: 13, platform: ["reddit"], category: "education", title: "Sleep and fat loss: the connection explained", hook: "Why poor sleep is sabotaging your fat loss — and how to fix it" },
-  { id: "e126", batch: 13, platform: ["reddit"], category: "education", title: "Strength training myths debunked", hook: "10 strength training myths that are keeping women from results" },
-  { id: "e127", batch: 13, platform: ["reddit"], category: "education", title: "How to create a home gym on any budget", hook: "Home gym setups for every budget — from $0 to $2,000" },
-  { id: "e128", batch: 13, platform: ["reddit"], category: "education", title: "Understanding RPE and effort in training", hook: "RPE (Rate of Perceived Exertion) explained for everyday people" },
-  { id: "e129", batch: 13, platform: ["reddit"], category: "education", title: "Cardio vs. strength: which should you prioritize?", hook: "Cardio vs. strength training — the definitive answer for women over 35" },
-  { id: "e130", batch: 13, platform: ["reddit"], category: "education", title: "Building consistency: psychology of habit formation", hook: "Why you keep starting and stopping fitness programs — the psychology behind it" },
-  // Batch 14 — Extra authority / seasonal
-  { id: "e131", batch: 14, platform: ["tiktok", "instagram"], category: "authority", title: "What I learned from 1,000 hours of coaching", hook: "After 1,000 hours coaching women, here's the pattern I can't ignore" },
-  { id: "e132", batch: 14, platform: ["tiktok"], category: "authority", title: "The client I almost gave up on", hook: "There was one client I almost let go. I'm so glad I didn't." },
-  { id: "e133", batch: 14, platform: ["tiktok", "instagram"], category: "authority", title: "Why I don't post workout videos", hook: "I'm a fitness coach and I almost never post workout videos — here's why" },
-  { id: "e134", batch: 14, platform: ["tiktok"], category: "authority", title: "The accountability system that actually works", hook: "I've tried every accountability system. This is the only one that works." },
-  { id: "e135", batch: 14, platform: ["instagram"], category: "authority", title: "My coaching philosophy in 5 principles", hook: "My entire coaching philosophy comes down to 5 things" },
-  { id: "e136", batch: 14, platform: ["tiktok", "instagram"], category: "authority", title: "Why most coaches fail their clients", hook: "Most fitness coaches fail their clients — here's how I make sure I don't" },
-  { id: "e137", batch: 14, platform: ["tiktok"], category: "authority", title: "The hardest conversation I had with a client", hook: "The hardest conversation I've ever had with a client — and what came from it" },
-  { id: "e138", batch: 14, platform: ["tiktok", "instagram"], category: "authority", title: "What success looks like after 90 days", hook: "Success at 90 days doesn't look like a magazine cover — here's what it actually looks like" },
-  { id: "e139", batch: 14, platform: ["tiktok"], category: "authority", title: "My promise to every client", hook: "Here's my promise to every woman who works with me" },
-]
-
-// ─── Filming batches ──────────────────────────────────────────────────────────
-
-interface FilmingBatch {
-  batch: number
-  week: number
-  theme: string
-  episodeIds: string[]
-}
-
-const FILMING_BATCHES: FilmingBatch[] = [
-  { batch: 1, week: 1, theme: "Intro + Authority", episodeIds: ["e001","e002","e003","e004","e005","e006","e007","e008","e009","e010"] },
-  { batch: 2, week: 2, theme: "Pain-point hooks", episodeIds: ["e011","e012","e013","e014","e015","e016","e017","e018","e019","e020"] },
-  { batch: 3, week: 3, theme: "Transformation stories", episodeIds: ["e021","e022","e023","e024","e025","e026","e027","e028","e029","e030"] },
-  { batch: 4, week: 4, theme: "Method explainers", episodeIds: ["e031","e032","e033","e034","e035","e036","e037","e038","e039","e040"] },
-  { batch: 5, week: 5, theme: "Objection busters", episodeIds: ["e041","e042","e043","e044","e045","e046","e047","e048","e049","e050"] },
-  { batch: 6, week: 6, theme: "Social proof / client results", episodeIds: ["e051","e052","e053","e054","e055","e056","e057","e058","e059","e060"] },
-  { batch: 7, week: 7, theme: "Myth-busting", episodeIds: ["e061","e062","e063","e064","e065","e066","e067","e068","e069","e070"] },
-  { batch: 8, week: 8, theme: "Behind the scenes / day in the life", episodeIds: ["e071","e072","e073","e074","e075","e076","e077","e078","e079","e080"] },
-  { batch: 9, week: 9, theme: "Premium positioning", episodeIds: ["e081","e082","e083","e084","e085","e086","e087","e088","e089","e090"] },
-  { batch: 10, week: 10, theme: "Income / lifestyle / authority", episodeIds: ["e091","e092","e093","e094","e095","e096","e097","e098","e099","e100"] },
-  { batch: 11, week: 11, theme: "3-month results / celebration", episodeIds: ["e101","e102","e103","e104","e105","e106","e107","e108","e109","e110"] },
-  { batch: 12, week: 12, theme: "Month 4 pipeline", episodeIds: ["e111","e112","e113","e114","e115","e116","e117","e118","e119","e120"] },
-  { batch: 13, week: 13, theme: "Reddit / educational deep dives", episodeIds: ["e121","e122","e123","e124","e125","e126","e127","e128","e129","e130"] },
-  { batch: 14, week: 13, theme: "Extra authority / seasonal", episodeIds: ["e131","e132","e133","e134","e135","e136","e137","e138","e139"] },
-]
-
-// ─── Scheduled posts ──────────────────────────────────────────────────────────
-
-interface ScheduledPost {
+interface Series {
   id: string
-  day: number
-  platform: Platform
+  name: string
+  description: string
+  color: string
+}
+
+interface PostedEntry {
+  id: string
   episodeId: string
-  timeSlot: string
+  postedDate: string
+  starRating?: 1 | 2 | 3 | 4 | 5
+  views?: number
+  likes?: number
+  comments?: number
+  saves?: number
+  note?: string
 }
 
-const SCHEDULED_POSTS: ScheduledPost[] = [
-  // Day 1
-  { id: "sp001", day: 1, platform: "tiktok", episodeId: "e001", timeSlot: "7:00 AM" },
-  { id: "sp002", day: 1, platform: "instagram", episodeId: "e002", timeSlot: "12:00 PM" },
-  // Day 2
-  { id: "sp003", day: 2, platform: "tiktok", episodeId: "e003", timeSlot: "7:00 AM" },
-  { id: "sp004", day: 2, platform: "instagram", episodeId: "e004", timeSlot: "6:00 PM" },
-  // Day 3
-  { id: "sp005", day: 3, platform: "tiktok", episodeId: "e005", timeSlot: "7:00 AM" },
-  { id: "sp006", day: 3, platform: "instagram", episodeId: "e006", timeSlot: "12:00 PM" },
-  // Day 4
-  { id: "sp007", day: 4, platform: "tiktok", episodeId: "e007", timeSlot: "7:00 AM" },
-  // Day 5
-  { id: "sp008", day: 5, platform: "tiktok", episodeId: "e008", timeSlot: "7:00 AM" },
-  { id: "sp009", day: 5, platform: "instagram", episodeId: "e009", timeSlot: "12:00 PM" },
-  // Day 6
-  { id: "sp010", day: 6, platform: "tiktok", episodeId: "e010", timeSlot: "7:00 AM" },
-  // Day 7
-  { id: "sp011", day: 7, platform: "instagram", episodeId: "e001", timeSlot: "11:00 AM" },
-  // Day 8
-  { id: "sp012", day: 8, platform: "tiktok", episodeId: "e011", timeSlot: "7:00 AM" },
-  { id: "sp013", day: 8, platform: "instagram", episodeId: "e012", timeSlot: "6:00 PM" },
-  // Day 9
-  { id: "sp014", day: 9, platform: "tiktok", episodeId: "e013", timeSlot: "7:00 AM" },
-  // Day 10
-  { id: "sp015", day: 10, platform: "tiktok", episodeId: "e014", timeSlot: "7:00 AM" },
-  { id: "sp016", day: 10, platform: "instagram", episodeId: "e015", timeSlot: "12:00 PM" },
-  // Day 11
-  { id: "sp017", day: 11, platform: "tiktok", episodeId: "e016", timeSlot: "7:00 AM" },
-  // Day 12
-  { id: "sp018", day: 12, platform: "tiktok", episodeId: "e017", timeSlot: "7:00 AM" },
-  { id: "sp019", day: 12, platform: "instagram", episodeId: "e018", timeSlot: "6:00 PM" },
-  // Day 13
-  { id: "sp020", day: 13, platform: "tiktok", episodeId: "e019", timeSlot: "7:00 AM" },
-  // Day 14
-  { id: "sp021", day: 14, platform: "tiktok", episodeId: "e020", timeSlot: "7:00 AM" },
-  { id: "sp022", day: 14, platform: "instagram", episodeId: "e011", timeSlot: "11:00 AM" },
-  // Day 15
-  { id: "sp023", day: 15, platform: "tiktok", episodeId: "e021", timeSlot: "7:00 AM" },
-  { id: "sp024", day: 15, platform: "instagram", episodeId: "e022", timeSlot: "12:00 PM" },
-  // Day 16
-  { id: "sp025", day: 16, platform: "tiktok", episodeId: "e023", timeSlot: "7:00 AM" },
-  // Day 17
-  { id: "sp026", day: 17, platform: "tiktok", episodeId: "e024", timeSlot: "7:00 AM" },
-  { id: "sp027", day: 17, platform: "instagram", episodeId: "e025", timeSlot: "6:00 PM" },
-  // Day 18
-  { id: "sp028", day: 18, platform: "tiktok", episodeId: "e026", timeSlot: "7:00 AM" },
-  // Day 19
-  { id: "sp029", day: 19, platform: "tiktok", episodeId: "e027", timeSlot: "7:00 AM" },
-  { id: "sp030", day: 19, platform: "instagram", episodeId: "e028", timeSlot: "12:00 PM" },
-  // Day 20
-  { id: "sp031", day: 20, platform: "tiktok", episodeId: "e029", timeSlot: "7:00 AM" },
-  // Day 21
-  { id: "sp032", day: 21, platform: "tiktok", episodeId: "e030", timeSlot: "7:00 AM" },
-  { id: "sp033", day: 21, platform: "instagram", episodeId: "e021", timeSlot: "11:00 AM" },
-  // Day 22
-  { id: "sp034", day: 22, platform: "tiktok", episodeId: "e031", timeSlot: "7:00 AM" },
-  { id: "sp035", day: 22, platform: "instagram", episodeId: "e032", timeSlot: "12:00 PM" },
-  // Day 23
-  { id: "sp036", day: 23, platform: "tiktok", episodeId: "e033", timeSlot: "7:00 AM" },
-  // Day 24
-  { id: "sp037", day: 24, platform: "tiktok", episodeId: "e034", timeSlot: "7:00 AM" },
-  { id: "sp038", day: 24, platform: "instagram", episodeId: "e035", timeSlot: "6:00 PM" },
-  // Day 25
-  { id: "sp039", day: 25, platform: "tiktok", episodeId: "e036", timeSlot: "7:00 AM" },
-  // Day 26
-  { id: "sp040", day: 26, platform: "tiktok", episodeId: "e037", timeSlot: "7:00 AM" },
-  { id: "sp041", day: 26, platform: "instagram", episodeId: "e038", timeSlot: "12:00 PM" },
-  // Day 27
-  { id: "sp042", day: 27, platform: "tiktok", episodeId: "e039", timeSlot: "7:00 AM" },
-  // Day 28
-  { id: "sp043", day: 28, platform: "tiktok", episodeId: "e040", timeSlot: "7:00 AM" },
-  { id: "sp044", day: 28, platform: "instagram", episodeId: "e031", timeSlot: "11:00 AM" },
-  // Day 29
-  { id: "sp045", day: 29, platform: "tiktok", episodeId: "e041", timeSlot: "7:00 AM" },
-  { id: "sp046", day: 29, platform: "instagram", episodeId: "e042", timeSlot: "12:00 PM" },
-  // Day 30
-  { id: "sp047", day: 30, platform: "tiktok", episodeId: "e043", timeSlot: "7:00 AM" },
-  { id: "sp048", day: 30, platform: "reddit", episodeId: "e121", timeSlot: "10:00 AM" },
-  // Day 31
-  { id: "sp049", day: 31, platform: "tiktok", episodeId: "e044", timeSlot: "7:00 AM" },
-  { id: "sp050", day: 31, platform: "instagram", episodeId: "e045", timeSlot: "6:00 PM" },
-  // Day 32
-  { id: "sp051", day: 32, platform: "tiktok", episodeId: "e046", timeSlot: "7:00 AM" },
-  // Day 33
-  { id: "sp052", day: 33, platform: "tiktok", episodeId: "e047", timeSlot: "7:00 AM" },
-  { id: "sp053", day: 33, platform: "instagram", episodeId: "e048", timeSlot: "12:00 PM" },
-  // Day 34
-  { id: "sp054", day: 34, platform: "tiktok", episodeId: "e049", timeSlot: "7:00 AM" },
-  // Day 35
-  { id: "sp055", day: 35, platform: "tiktok", episodeId: "e050", timeSlot: "7:00 AM" },
-  { id: "sp056", day: 35, platform: "instagram", episodeId: "e041", timeSlot: "11:00 AM" },
-  // Day 36
-  { id: "sp057", day: 36, platform: "tiktok", episodeId: "e051", timeSlot: "7:00 AM" },
-  { id: "sp058", day: 36, platform: "instagram", episodeId: "e052", timeSlot: "6:00 PM" },
-  // Day 37
-  { id: "sp059", day: 37, platform: "tiktok", episodeId: "e053", timeSlot: "7:00 AM" },
-  // Day 38
-  { id: "sp060", day: 38, platform: "tiktok", episodeId: "e054", timeSlot: "7:00 AM" },
-  { id: "sp061", day: 38, platform: "instagram", episodeId: "e055", timeSlot: "12:00 PM" },
-  // Day 39
-  { id: "sp062", day: 39, platform: "tiktok", episodeId: "e056", timeSlot: "7:00 AM" },
-  // Day 40
-  { id: "sp063", day: 40, platform: "tiktok", episodeId: "e057", timeSlot: "7:00 AM" },
-  { id: "sp064", day: 40, platform: "reddit", episodeId: "e122", timeSlot: "10:00 AM" },
-  { id: "sp065", day: 40, platform: "instagram", episodeId: "e058", timeSlot: "6:00 PM" },
-  // Day 41
-  { id: "sp066", day: 41, platform: "tiktok", episodeId: "e059", timeSlot: "7:00 AM" },
-  // Day 42
-  { id: "sp067", day: 42, platform: "tiktok", episodeId: "e060", timeSlot: "7:00 AM" },
-  { id: "sp068", day: 42, platform: "instagram", episodeId: "e051", timeSlot: "11:00 AM" },
-  // Day 43
-  { id: "sp069", day: 43, platform: "tiktok", episodeId: "e061", timeSlot: "7:00 AM" },
-  { id: "sp070", day: 43, platform: "instagram", episodeId: "e062", timeSlot: "12:00 PM" },
-  // Day 44
-  { id: "sp071", day: 44, platform: "tiktok", episodeId: "e063", timeSlot: "7:00 AM" },
-  // Day 45
-  { id: "sp072", day: 45, platform: "tiktok", episodeId: "e064", timeSlot: "7:00 AM" },
-  { id: "sp073", day: 45, platform: "instagram", episodeId: "e065", timeSlot: "6:00 PM" },
-  // Day 46
-  { id: "sp074", day: 46, platform: "tiktok", episodeId: "e066", timeSlot: "7:00 AM" },
-  // Day 47
-  { id: "sp075", day: 47, platform: "tiktok", episodeId: "e067", timeSlot: "7:00 AM" },
-  { id: "sp076", day: 47, platform: "instagram", episodeId: "e068", timeSlot: "12:00 PM" },
-  // Day 48
-  { id: "sp077", day: 48, platform: "tiktok", episodeId: "e069", timeSlot: "7:00 AM" },
-  // Day 49
-  { id: "sp078", day: 49, platform: "tiktok", episodeId: "e070", timeSlot: "7:00 AM" },
-  { id: "sp079", day: 49, platform: "instagram", episodeId: "e061", timeSlot: "11:00 AM" },
-  // Day 50
-  { id: "sp080", day: 50, platform: "tiktok", episodeId: "e071", timeSlot: "7:00 AM" },
-  { id: "sp081", day: 50, platform: "reddit", episodeId: "e123", timeSlot: "10:00 AM" },
-  { id: "sp082", day: 50, platform: "instagram", episodeId: "e072", timeSlot: "6:00 PM" },
-  // Day 51
-  { id: "sp083", day: 51, platform: "tiktok", episodeId: "e073", timeSlot: "7:00 AM" },
-  // Day 52
-  { id: "sp084", day: 52, platform: "tiktok", episodeId: "e074", timeSlot: "7:00 AM" },
-  { id: "sp085", day: 52, platform: "instagram", episodeId: "e075", timeSlot: "12:00 PM" },
-  // Day 53
-  { id: "sp086", day: 53, platform: "tiktok", episodeId: "e076", timeSlot: "7:00 AM" },
-  // Day 54
-  { id: "sp087", day: 54, platform: "tiktok", episodeId: "e077", timeSlot: "7:00 AM" },
-  { id: "sp088", day: 54, platform: "instagram", episodeId: "e078", timeSlot: "6:00 PM" },
-  // Day 55
-  { id: "sp089", day: 55, platform: "tiktok", episodeId: "e079", timeSlot: "7:00 AM" },
-  // Day 56
-  { id: "sp090", day: 56, platform: "tiktok", episodeId: "e080", timeSlot: "7:00 AM" },
-  { id: "sp091", day: 56, platform: "instagram", episodeId: "e071", timeSlot: "11:00 AM" },
-  // Day 57
-  { id: "sp092", day: 57, platform: "tiktok", episodeId: "e081", timeSlot: "7:00 AM" },
-  { id: "sp093", day: 57, platform: "instagram", episodeId: "e082", timeSlot: "12:00 PM" },
-  // Day 58
-  { id: "sp094", day: 58, platform: "tiktok", episodeId: "e083", timeSlot: "7:00 AM" },
-  // Day 59
-  { id: "sp095", day: 59, platform: "tiktok", episodeId: "e084", timeSlot: "7:00 AM" },
-  { id: "sp096", day: 59, platform: "instagram", episodeId: "e085", timeSlot: "6:00 PM" },
-  // Day 60
-  { id: "sp097", day: 60, platform: "tiktok", episodeId: "e086", timeSlot: "7:00 AM" },
-  { id: "sp098", day: 60, platform: "reddit", episodeId: "e124", timeSlot: "10:00 AM" },
-  // Day 61
-  { id: "sp099", day: 61, platform: "tiktok", episodeId: "e087", timeSlot: "7:00 AM" },
-  { id: "sp100", day: 61, platform: "instagram", episodeId: "e088", timeSlot: "12:00 PM" },
-  // Day 62
-  { id: "sp101", day: 62, platform: "tiktok", episodeId: "e089", timeSlot: "7:00 AM" },
-  // Day 63
-  { id: "sp102", day: 63, platform: "tiktok", episodeId: "e090", timeSlot: "7:00 AM" },
-  { id: "sp103", day: 63, platform: "instagram", episodeId: "e081", timeSlot: "11:00 AM" },
-  // Day 64
-  { id: "sp104", day: 64, platform: "tiktok", episodeId: "e091", timeSlot: "7:00 AM" },
-  { id: "sp105", day: 64, platform: "instagram", episodeId: "e092", timeSlot: "6:00 PM" },
-  // Day 65
-  { id: "sp106", day: 65, platform: "tiktok", episodeId: "e093", timeSlot: "7:00 AM" },
-  // Day 66
-  { id: "sp107", day: 66, platform: "tiktok", episodeId: "e094", timeSlot: "7:00 AM" },
-  { id: "sp108", day: 66, platform: "instagram", episodeId: "e095", timeSlot: "12:00 PM" },
-  // Day 67
-  { id: "sp109", day: 67, platform: "tiktok", episodeId: "e096", timeSlot: "7:00 AM" },
-  // Day 68
-  { id: "sp110", day: 68, platform: "tiktok", episodeId: "e097", timeSlot: "7:00 AM" },
-  { id: "sp111", day: 68, platform: "instagram", episodeId: "e098", timeSlot: "6:00 PM" },
-  // Day 69
-  { id: "sp112", day: 69, platform: "tiktok", episodeId: "e099", timeSlot: "7:00 AM" },
-  // Day 70
-  { id: "sp113", day: 70, platform: "tiktok", episodeId: "e100", timeSlot: "7:00 AM" },
-  { id: "sp114", day: 70, platform: "reddit", episodeId: "e125", timeSlot: "10:00 AM" },
-  { id: "sp115", day: 70, platform: "instagram", episodeId: "e091", timeSlot: "11:00 AM" },
-  // Day 71
-  { id: "sp116", day: 71, platform: "tiktok", episodeId: "e101", timeSlot: "7:00 AM" },
-  { id: "sp117", day: 71, platform: "instagram", episodeId: "e102", timeSlot: "12:00 PM" },
-  // Day 72
-  { id: "sp118", day: 72, platform: "tiktok", episodeId: "e103", timeSlot: "7:00 AM" },
-  // Day 73
-  { id: "sp119", day: 73, platform: "tiktok", episodeId: "e104", timeSlot: "7:00 AM" },
-  { id: "sp120", day: 73, platform: "instagram", episodeId: "e105", timeSlot: "6:00 PM" },
-  // Day 74
-  { id: "sp121", day: 74, platform: "tiktok", episodeId: "e106", timeSlot: "7:00 AM" },
-  // Day 75
-  { id: "sp122", day: 75, platform: "tiktok", episodeId: "e107", timeSlot: "7:00 AM" },
-  { id: "sp123", day: 75, platform: "instagram", episodeId: "e108", timeSlot: "12:00 PM" },
-  // Day 76
-  { id: "sp124", day: 76, platform: "tiktok", episodeId: "e109", timeSlot: "7:00 AM" },
-  // Day 77
-  { id: "sp125", day: 77, platform: "tiktok", episodeId: "e110", timeSlot: "7:00 AM" },
-  { id: "sp126", day: 77, platform: "instagram", episodeId: "e101", timeSlot: "11:00 AM" },
-  // Day 78
-  { id: "sp127", day: 78, platform: "tiktok", episodeId: "e111", timeSlot: "7:00 AM" },
-  { id: "sp128", day: 78, platform: "instagram", episodeId: "e112", timeSlot: "6:00 PM" },
-  // Day 79
-  { id: "sp129", day: 79, platform: "tiktok", episodeId: "e113", timeSlot: "7:00 AM" },
-  // Day 80
-  { id: "sp130", day: 80, platform: "tiktok", episodeId: "e114", timeSlot: "7:00 AM" },
-  { id: "sp131", day: 80, platform: "reddit", episodeId: "e126", timeSlot: "10:00 AM" },
-  { id: "sp132", day: 80, platform: "instagram", episodeId: "e115", timeSlot: "12:00 PM" },
-  // Day 81
-  { id: "sp133", day: 81, platform: "tiktok", episodeId: "e116", timeSlot: "7:00 AM" },
-  // Day 82
-  { id: "sp134", day: 82, platform: "tiktok", episodeId: "e117", timeSlot: "7:00 AM" },
-  { id: "sp135", day: 82, platform: "instagram", episodeId: "e118", timeSlot: "6:00 PM" },
-  // Day 83
-  { id: "sp136", day: 83, platform: "tiktok", episodeId: "e119", timeSlot: "7:00 AM" },
-  // Day 84
-  { id: "sp137", day: 84, platform: "tiktok", episodeId: "e120", timeSlot: "7:00 AM" },
-  { id: "sp138", day: 84, platform: "instagram", episodeId: "e111", timeSlot: "11:00 AM" },
-  // Day 85
-  { id: "sp139", day: 85, platform: "tiktok", episodeId: "e131", timeSlot: "7:00 AM" },
-  { id: "sp140", day: 85, platform: "instagram", episodeId: "e132", timeSlot: "12:00 PM" },
-  // Day 86
-  { id: "sp141", day: 86, platform: "tiktok", episodeId: "e133", timeSlot: "7:00 AM" },
-  // Day 87
-  { id: "sp142", day: 87, platform: "tiktok", episodeId: "e134", timeSlot: "7:00 AM" },
-  { id: "sp143", day: 87, platform: "instagram", episodeId: "e135", timeSlot: "6:00 PM" },
-  // Day 88
-  { id: "sp144", day: 88, platform: "tiktok", episodeId: "e136", timeSlot: "7:00 AM" },
-  // Day 89
-  { id: "sp145", day: 89, platform: "tiktok", episodeId: "e137", timeSlot: "7:00 AM" },
-  { id: "sp146", day: 89, platform: "instagram", episodeId: "e138", timeSlot: "12:00 PM" },
-  // Day 90
-  { id: "sp147", day: 90, platform: "tiktok", episodeId: "e139", timeSlot: "7:00 AM" },
-  { id: "sp148", day: 90, platform: "reddit", episodeId: "e130", timeSlot: "10:00 AM" },
-  { id: "sp149", day: 90, platform: "instagram", episodeId: "e131", timeSlot: "6:00 PM" },
-]
-
-// ─── Module-level Maps ────────────────────────────────────────────────────────
-
-const EPISODE_MAP = new Map(EPISODES.map(e => [e.id, e]))
-const POST_MAP = new Map(SCHEDULED_POSTS.map(p => [p.id, p]))
-
-// ─── Storage helpers ──────────────────────────────────────────────────────────
-
-function defaultRevenue(): RevenueMonth {
-  return { coaching: 0, courses: 0, memberships: 0, affiliates: 0 }
+interface WeeklySales {
+  id: string
+  weekOf: string
+  amount: number
+  note?: string
 }
 
-function defaultMetrics(): Metrics {
-  return { tiktokFollowers: 0, tiktokViews: 0, igFollowers: 0, igReach: 0, emailSubscribers: 0, websiteVisits: 0 }
+interface Client {
+  id: string
+  name: string
+  startDate: string
+  nextCall: string
+  tier: CoachingTier
+  monthlyFee: number
+  status: "active" | "paused" | "completed"
+  notes: string
 }
+
+interface PlanState {
+  version: 3
+  startDate: string | null
+  episodeStatuses: Record<string, EpisodeStatus>
+  postedEntries: PostedEntry[]
+  weeklySales: WeeklySales[]
+  clients: Client[]
+  completedTasks: Record<string, boolean>
+}
+
+// ─── State helpers ─────────────────────────────────────────────────────────────
 
 function defaultState(): PlanState {
   return {
-    version: 2,
+    version: 3,
     startDate: null,
-    completedTasks: {},
-    revenue: { m1: defaultRevenue(), m2: defaultRevenue(), m3: defaultRevenue() },
+    episodeStatuses: {},
+    postedEntries: [],
+    weeklySales: [],
     clients: [],
-    metrics: defaultMetrics(),
-    filmedBatches: {},
-    postOverrides: {},
-    postStatuses: {},
-    performance: [],
-    sales: [],
-    adCampaigns: [],
-  }
-}
-
-function migrateV1(v1: PlanStateV1): PlanState {
-  return {
-    ...defaultState(),
-    startDate: v1.startDate,
-    completedTasks: v1.completedTasks ?? {},
-    revenue: v1.revenue ?? { m1: defaultRevenue(), m2: defaultRevenue(), m3: defaultRevenue() },
-    clients: (v1.clients ?? []).map(c => ({
-      id: c.id,
-      name: c.name,
-      startDate: c.startDate,
-      nextCall: c.nextCall,
-      tier: "foundation" as CoachingTier,
-      monthlyFee: c.monthlyFee,
-      paymentType: "monthly" as const,
-      status: c.status,
-      notes: c.notes,
-      testimonialReceived: false,
-    })),
-    metrics: v1.metrics ?? defaultMetrics(),
+    completedTasks: {},
   }
 }
 
 function loadState(): PlanState {
+  if (typeof window === "undefined") return defaultState()
   try {
-    const v2raw = localStorage.getItem("lfm_plan_v2")
-    if (v2raw) {
-      const parsed = JSON.parse(v2raw) as PlanState
-      if (parsed.version === 2) return parsed
-    }
-    const v1raw = localStorage.getItem("lfm_plan_v1")
-    if (v1raw) {
-      const v1parsed = JSON.parse(v1raw) as PlanStateV1
-      return migrateV1(v1parsed)
+    const raw = localStorage.getItem("lfm_plan_v3")
+    if (raw) return JSON.parse(raw) as PlanState
+    const v2 = localStorage.getItem("lfm_plan_v2")
+    if (v2) {
+      const old = JSON.parse(v2) as Record<string, unknown>
+      const migrated = defaultState()
+      migrated.startDate = (old.startDate as string | null) ?? null
+      migrated.clients = (old.clients as Client[] | undefined) ?? []
+      migrated.completedTasks = (old.completedTasks as Record<string, boolean> | undefined) ?? {}
+      return migrated
     }
   } catch {
     // ignore parse errors
@@ -787,1389 +121,1793 @@ function loadState(): PlanState {
   return defaultState()
 }
 
-function saveState(state: PlanState): void {
+function saveState(s: PlanState): void {
   try {
-    localStorage.setItem("lfm_plan_v2", JSON.stringify(state))
+    localStorage.setItem("lfm_plan_v3", JSON.stringify(s))
   } catch {
     // ignore storage errors
   }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getMonthFromDay(day: number): 1 | 2 | 3 {
-  return day <= 30 ? 1 : day <= 60 ? 2 : 3
-}
-
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().split("T")[0]
-}
-
-function computedSalesTotal(sales: SaleEntry[], month: 1 | 2 | 3): number {
-  return sales.filter(s => s.month === month).reduce((acc, s) => acc + s.amount, 0)
-}
-
-function getPostsForDay(day: number): ScheduledPost[] {
-  return SCHEDULED_POSTS.filter(p => p.day === day)
-}
-
-
-function getContentStreak(postStatuses: Record<string, PostStatus>, startDate: string | null): number {
-  if (!startDate) return 0
-  const start = new Date(startDate)
-  const today = new Date()
-  const totalDays = Math.floor((today.getTime() - start.getTime()) / 86400000)
-  let streak = 0
-  for (let i = totalDays; i >= 0; i--) {
-    const dayPosts = getPostsForDay(i + 1)
-    if (dayPosts.length === 0) continue
-    const anyPosted = dayPosts.some(p => postStatuses[p.id] === "posted")
-    if (anyPosted) streak++
-    else break
-  }
-  return streak
-}
+// ─── Utility helpers ───────────────────────────────────────────────────────────
 
 function getCurrentDay(startDate: string | null): number {
   if (!startDate) return 0
   const start = new Date(startDate)
-  const today = new Date()
-  return Math.floor((today.getTime() - start.getTime()) / 86400000) + 1
+  const now = new Date()
+  const diff = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+  return Math.max(1, diff + 1)
 }
 
-function getCurrentWeek(startDate: string | null): number {
-  const day = getCurrentDay(startDate)
-  return Math.max(1, Math.min(13, Math.ceil(day / 7)))
+function getMondayOf(d: Date): string {
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const mon = new Date(d)
+  mon.setDate(d.getDate() + diff)
+  return mon.toISOString().slice(0, 10)
 }
 
 function formatDate(iso: string): string {
-  if (!iso) return ""
-  const [y, m, d] = iso.split("-")
-  return `${m}/${d}/${y}`
+  const d = new Date(iso + "T12:00:00")
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
 
-function platformEmoji(platform: Platform): string {
-  if (platform === "tiktok") return "TT"
-  if (platform === "instagram") return "IG"
-  return "RD"
+function formatDateLong(iso: string): string {
+  const d = new Date(iso + "T12:00:00")
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
 }
 
-function platformColor(platform: Platform): string {
-  if (platform === "tiktok") return C.gold
-  if (platform === "instagram") return C.blue
-  return C.green
+function getNextAvailableDate(postedEntries: PostedEntry[]): string {
+  const usedDates = new Set(postedEntries.map(p => p.postedDate))
+  const today = new Date()
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today)
+    d.setDate(today.getDate() + i)
+    const iso = d.toISOString().slice(0, 10)
+    if (!usedDates.has(iso)) return iso
+  }
+  return today.toISOString().slice(0, 10)
 }
 
-function ratingLabel(rating: PostRating): string {
-  if (rating === "fire") return "🔥 Fire"
-  if (rating === "check") return "✓ Good"
-  if (rating === "neutral") return "— OK"
-  return "✗ Miss"
-}
-
-function totalRevenue(rev: RevenueMonth): number {
-  return rev.coaching + rev.courses + rev.memberships + rev.affiliates
-}
-
-function clientMonthlyTotal(clients: Client[]): number {
-  return clients.filter(c => c.status === "active").reduce((acc, c) => acc + c.monthlyFee, 0)
-}
-
-function uid(): string {
+function generateId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
 
-// ─── Shared UI components ─────────────────────────────────────────────────────
+function formatCurrency(n: number): string {
+  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+}
 
-function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+// ─── Series data ───────────────────────────────────────────────────────────────
+
+const SERIES: Series[] = [
+  { id: "wish-i-knew",  name: "Wish I Knew Before",       description: "Honest lessons from years of training — the stuff nobody told you at the start.", color: "#c9a96e" },
+  { id: "do-this",      name: "Do This, Not That",         description: "Side-by-side form corrections and exercise swaps. Save-worthy demo content.", color: "#9ec9a9" },
+  { id: "gym-musts",    name: "Gym-Goer Must-Knows",       description: "The unwritten rules, tips, and truths every lifter should know.", color: "#7bb3c9" },
+  { id: "harsh-truths", name: "Harsh Truths",              description: "Unpopular opinions delivered calmly. These get shared.", color: "#c97e7e" },
+  { id: "gatekeep",     name: "Things I Won’t Gatekeep", description: "Generous sharing — your best finds, tools, and hacks.", color: "#b09ec9" },
+  { id: "pullup-prog",  name: "Pull-Up Progression",       description: "5-part series. Film all 5 before posting Part 1.", color: "#c9a96e" },
+  { id: "glutes-core",  name: "Glutes & Core",             description: "Do-with-me workouts and technique breakdowns.", color: "#9ec9a9" },
+  { id: "fat-loss",     name: "Fat Loss + Lifting",        description: "The intersection of nutrition and strength training — high search intent.", color: "#7bb3c9" },
+  { id: "never-do",     name: "Things I’d Never Do",  description: "As a trainer, these are the things you won't catch me doing.", color: "#c97e7e" },
+  { id: "personality",  name: "Personality Track",         description: "Relatable, shareable, builds following. 2-3 per week alongside series content.", color: "#e8c98a" },
+  { id: "origin",       name: "Origin & Brand",            description: "Who you are, why you're here, what makes your content different.", color: "#f0e6d3" },
+  { id: "progression",  name: "Progression Series",        description: "Multi-part movement progressions. Pin Part 1 immediately.", color: "#9ec9a9" },
+  { id: "deadlift",     name: "Deadlift From Scratch",     description: "4-part series. Film all 4 before posting Part 1.", color: "#c9a96e" },
+]
+
+const SERIES_MAP = new Map(SERIES.map(s => [s.id, s]))
+
+// ─── Episodes data ─────────────────────────────────────────────────────────────
+
+const EPISODES: Episode[] = [
+  // ── Wish I Knew Before ──────────────────────────────────────────────────────
+  {
+    id: "wik1", seriesId: "wish-i-knew",
+    title: "Wish I knew this before I started lifting",
+    hook: "I spent 2 years training hard and barely changed. Here’s what was actually wrong.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Sit or stand against a neutral background. Speak directly to camera. No equipment needed — this is a personal story format.",
+    captionIdea: "Two years of hard training and almost nothing to show for it. Turns out I was making the same handful of form mistakes on repeat without realizing it. If you’re putting in the work and not seeing results, your technique is almost always the first place to look. Here’s what I wish someone had pointed out to me earlier.",
+    tags: ["wish-i-knew", "talking-head", "form", "beginners", "mindset"],
+  },
+  {
+    id: "wik2", seriesId: "wish-i-knew",
+    title: "I trained 5x a week for 2 years and didn’t grow",
+    hook: "Training more isn’t the same as training better. I learned this the hard way.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Talking-head setup, relaxed and conversational. Can use gym as background if available, or a clean indoor space.",
+    captionIdea: "Five days a week, every week, for two years. I was committed. But I was confusing volume with intensity, and my body just didn’t respond. The turning point was pulling back to three focused sessions and actually pushing hard during each one. More sessions doesn’t mean more progress — it usually means less recovery.",
+    cta: "Comment PROGRAM if you want to know what I do now.",
+    tags: ["wish-i-knew", "talking-head", "volume", "recovery", "training-frequency"],
+  },
+  {
+    id: "wik3", seriesId: "wish-i-knew",
+    title: "What I’d tell my past self about the gym",
+    hook: "If I could go back, I wouldn’t train harder. I’d train smarter.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Reflective tone, direct to camera. Natural light preferred. Keep it conversational, not scripted.",
+    captionIdea: "Past me was so fixated on doing more — more sets, more days, more intensity. The actual lesson took years to land: consistency beats intensity, and smart beats hard. If you’re early in your training, the gift you can give yourself is learning this sooner than I did.",
+    tags: ["wish-i-knew", "talking-head", "mindset", "smarter-training", "sustainability"],
+  },
+  {
+    id: "wik4", seriesId: "wish-i-knew",
+    title: "The supplement I wasted $2000 on",
+    hook: "I spent a lot of money figuring out what actually matters. Spoiler: it wasn’t fancy supplements.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Casual, honest tone. Can hold up a supplement container as a prop if helpful. Direct to camera.",
+    captionIdea: "Pre-workouts, BCAAs, fat burners, recovery powders — I tried all of it. The honest answer is that almost none of it moved the needle compared to the basics: protein, sleep, and actually showing up. Save your money and spend it on food or a good program instead.",
+    tags: ["wish-i-knew", "talking-head", "supplements", "nutrition", "money"],
+  },
+  {
+    id: "wik5", seriesId: "wish-i-knew",
+    title: "I used to skip leg day — here’s what happened",
+    hook: "Skipping legs didn’t just slow my lower body progress. It held back everything.",
+    format: "gym-footage", targetLength: "45-75s",
+    filmingNote: "Film yourself doing a leg exercise (squat, leg press, or RDL) with good form. Use this as b-roll while talking over it, or cut between talking and the footage.",
+    captionIdea: "I used to justify skipping legs constantly. What I didn’t realize is that big compound leg movements drive a systemic training response — more muscle activation, more hormonal response. When I finally committed to legs, my upper body started responding better too. The legs aren’t optional if you want real progress.",
+    tags: ["wish-i-knew", "gym-footage", "legs", "compound-lifts", "progress"],
+  },
+  {
+    id: "wik6", seriesId: "wish-i-knew",
+    title: "Wish I knew: rest days aren’t optional",
+    hook: "Rest days aren’t laziness. They’re where the actual progress happens.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Clean background, relaxed posture. This is a mindset reframe — keep the energy calm and educational.",
+    captionIdea: "Training breaks down muscle tissue. Rest is when it rebuilds stronger. I used to feel guilty on rest days like I was falling behind. Now I treat them as part of the program — because they are. If you’re always sore, always tired, and not progressing, more training isn’t the answer.",
+    tags: ["wish-i-knew", "talking-head", "recovery", "rest-days", "overtraining"],
+  },
+  {
+    id: "wik7", seriesId: "wish-i-knew",
+    title: "Wish I knew this about protein",
+    hook: "Most people lifting are eating half the protein they actually need. I was one of them.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Direct to camera, can hold up a food item as visual. Conversational and practical tone.",
+    captionIdea: "For years I thought I was eating enough protein because I had a chicken breast with dinner. That’s nowhere near what the research actually supports for people who train. Getting your protein right is the single highest-leverage nutrition change you can make. Everything else is secondary.",
+    cta: "Comment PROTEIN for the breakdown I use.",
+    tags: ["wish-i-knew", "talking-head", "protein", "nutrition", "muscle-building"],
+  },
+
+  // ── Do This, Not That ────────────────────────────────────────────────────────
+  {
+    id: "dt1", seriesId: "do-this",
+    title: "Stop doing crunches like this",
+    hook: "Crunches aren’t bad. You’re just doing them wrong.",
+    format: "b-roll-demo", targetLength: "45-60s",
+    filmingNote: "Film side-by-side: first the common mistake (yanking neck, barely moving), then the correct version (slow, controlled, full range). Use a mat on the floor. Lay camera on a tripod or lean against a wall for a side angle.",
+    captionIdea: "Crunches get a bad reputation, but the movement itself isn’t the problem — the execution usually is. Most people are just rocking their head and calling it a rep. When you slow it down and actually let your abs do the work, it’s a completely different exercise. Try the corrected version and feel the difference.",
+    tags: ["do-this", "b-roll-demo", "abs", "form-correction", "core"],
+  },
+  {
+    id: "dt2", seriesId: "do-this",
+    title: "Squat form: the fix no one mentions",
+    hook: "Your squat isn’t the problem. Your setup is.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from a front angle and a side angle if possible. Show foot width and toe angle adjustment. Use a moderate weight so form is clearly visible.",
+    captionIdea: "Before anyone talks about depth or knees, the most common squat issue is foot position. Too narrow, toes pointing forward — and your body has nowhere to go. Widen your stance, let your toes angle out slightly, and you’ll feel the difference immediately. It’s not your mobility. It’s your setup.",
+    tags: ["do-this", "gym-footage", "squat", "form-correction", "lower-body"],
+  },
+  {
+    id: "dt3", seriesId: "do-this",
+    title: "Deadlift mistake I see every day",
+    hook: "This one deadlift fix changed how my back felt after every session.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from the side. Show the bar drifting away from the body on the way up (wrong), then the bar staying close to the legs throughout (correct). Use a light-to-moderate weight so the movement is visible.",
+    captionIdea: "The bar path in a deadlift should be as close to vertical as possible, right along your legs. The moment it drifts forward, your lower back takes on load it wasn’t meant to. This one fix — keeping the bar dragging up your shins — is what separates a deadlift that hurts from one that builds.",
+    tags: ["do-this", "gym-footage", "deadlift", "form-correction", "back"],
+  },
+  {
+    id: "dt4", seriesId: "do-this",
+    title: "Glute bridge vs hip thrust — which one?",
+    hook: "These aren’t the same exercise. Here’s when to use each one.",
+    format: "b-roll-demo", targetLength: "45-60s",
+    filmingNote: "Demo both movements side by side or cut between them. Show glute bridge on the floor, hip thrust with back against bench. Clear lighting so the hip position is visible.",
+    captionIdea: "A glute bridge and a hip thrust look similar but they load the glutes differently. The hip thrust gives you a bigger range of motion and lets you load heavier — it’s the main event. The bridge is a great activation drill or a starting point if you’re building up. Both have a place; they just serve different purposes.",
+    tags: ["do-this", "b-roll-demo", "glutes", "hip-thrust", "lower-body"],
+  },
+  {
+    id: "dt5", seriesId: "do-this",
+    title: "You’re doing rows wrong (probably)",
+    hook: "Most people are rowing with their arms. Here’s how to actually use your back.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from the side doing a cable or dumbbell row. Show the wrong version (elbows flaring, no scapular retraction), then the correct version (elbows tucking, shoulder blades squeezing at the top).",
+    captionIdea: "If your biceps are doing all the work in a row, you’re missing the entire point of the exercise. The cue that changed everything for me: think about driving your elbow toward your back pocket, not just pulling it backward. That shift engages the lats and rhomboids the way they’re supposed to work.",
+    tags: ["do-this", "gym-footage", "rows", "back", "form-correction"],
+  },
+  {
+    id: "dt6", seriesId: "do-this",
+    title: "Stop training abs every day",
+    hook: "Your abs need rest too. Overtraining them is keeping you stuck.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Quick, direct talking-head. Short and punchy — under 40 seconds. Confident delivery.",
+    captionIdea: "Abs are a muscle. Muscles need recovery. Training them every day doesn’t speed up results — it just prevents them from adapting properly. Two to three focused core sessions per week, done well, will do more than daily ab circuits done halfheartedly.",
+    tags: ["do-this", "talking-head", "abs", "core", "recovery"],
+  },
+  {
+    id: "dt7", seriesId: "do-this",
+    title: "The push-up fix nobody talks about",
+    hook: "You’re not bad at push-ups. Your setup is wrong.",
+    format: "b-roll-demo", targetLength: "45-60s",
+    filmingNote: "Film from the side. Show shoulder position: wrong version with elbows flaring at 90 degrees, correct version with elbows at 45-degree angle. Also show hand placement relative to chest.",
+    captionIdea: "Push-ups aren’t just an upper chest exercise — they’re a full-body movement when done correctly. The most common setup error is flaring the elbows straight out, which puts enormous stress on the shoulder joint. Bring them in to about 45 degrees and suddenly push-ups feel completely different. Harder, yes — but right.",
+    tags: ["do-this", "b-roll-demo", "push-ups", "form-correction", "upper-body"],
+  },
+
+  // ── Gym-Goer Must-Knows ──────────────────────────────────────────────────────
+  {
+    id: "gm1", seriesId: "gym-musts",
+    title: "Things every gym-goer should know but no one says",
+    hook: "Things every gym-goer should know but nobody actually says.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Casual, confident talking-head. This works as a list format — have 3-4 quick points ready. Can film at gym or at home.",
+    captionIdea: "There’s a whole set of unwritten gym rules that nobody actually explains when you’re starting out. Re-rack your weights. Wipe equipment down. Don’t give unsolicited advice. Don’t hover near someone’s station. Basic stuff — but knowing it makes the whole experience less intimidating from day one.",
+    tags: ["gym-musts", "talking-head", "gym-culture", "etiquette", "beginners"],
+  },
+  {
+    id: "gm2", seriesId: "gym-musts",
+    title: "The warmup that changed my training",
+    hook: "I stopped skipping warmups. Here’s what I actually do now.",
+    format: "gym-footage", targetLength: "45-75s",
+    filmingNote: "Film a quick walkthrough of your actual warmup routine: hip circles, banded glute activation, light cardio, maybe a few bodyweight squats. Keep it moving — 5 minutes of footage edited down to 60 seconds.",
+    captionIdea: "I used to walk in and go straight to the bar. My joints hated me for it. A proper warmup isn’t just raising your heart rate — it’s activating the muscles you’re about to use so they fire correctly. Since I started doing this consistently, my lifts feel better from the first rep instead of the fifth set.",
+    tags: ["gym-musts", "gym-footage", "warmup", "activation", "injury-prevention"],
+  },
+  {
+    id: "gm3", seriesId: "gym-musts",
+    title: "You’ll only get this if you’ve lifted for 2+ years",
+    hook: "You’ll only understand this if you’ve been lifting for at least a couple of years.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Reflective, knowing tone. This is for intermediate lifters who will recognize themselves in what you describe. Nod to the experience of plateaus, ego, and the long game.",
+    captionIdea: "At some point you stop chasing soreness and start chasing performance. You stop needing to max out every session and start appreciating a good controlled rep. Plateaus stop being discouraging and start being information. If you’ve been at this long enough, you know exactly what I mean.",
+    tags: ["gym-musts", "talking-head", "intermediate", "mindset", "long-game"],
+  },
+  {
+    id: "gm4", seriesId: "gym-musts",
+    title: "If you’re new to lifting, watch this",
+    hook: "If you’re just getting started in the gym, this is the video I wish existed.",
+    format: "talking-head", targetLength: "60-90s",
+    filmingNote: "Warm, welcoming tone. Cover 3-4 beginner fundamentals: pick a program and stick with it, prioritize form over weight, track your lifts, eat enough protein. Direct to camera.",
+    captionIdea: "Starting out in the gym is overwhelming because there’s too much information and most of it is contradicting itself. Here’s the short version: pick one program and commit to it for at least 8 weeks. Learn the main lifts well before adding weight. Eat more protein than you think you need. That’s most of it.",
+    cta: "Comment STARTER for the beginner program I’d recommend.",
+    tags: ["gym-musts", "talking-head", "beginners", "fundamentals", "program"],
+  },
+  {
+    id: "gm5", seriesId: "gym-musts",
+    title: "Things about gym culture nobody tells you",
+    hook: "Things people in the gym won’t tell you, but you’ll figure out eventually.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Light, relatable tone. Good opportunity for some humor. List format works well here.",
+    captionIdea: "Gym culture has its own language and norms that nobody explicitly explains. Yes, it’s fine to work in with someone. No, you don’t need to talk to anyone. The regulars aren’t judging you — they’re too busy thinking about their own training. The gym is actually one of the least judgmental places you’ll find, once you realize everyone’s in their own world.",
+    tags: ["gym-musts", "talking-head", "gym-culture", "anxiety", "relatable"],
+  },
+  {
+    id: "gm6", seriesId: "gym-musts",
+    title: "The gym mistake that’s costing you results",
+    hook: "Switching programs every 3 weeks is why you’re not progressing.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Direct, slightly provocative tone. This is a gentle call-out that most people watching will recognize in themselves.",
+    captionIdea: "Program hopping is one of the most common things I see — and it’s one of the most progress-killing habits in training. Every time you switch, you reset the adaptation process. You never get to the phase where a program actually delivers results. Pick something reasonable, commit to it for 8-12 weeks, and only then evaluate if it’s working.",
+    tags: ["gym-musts", "talking-head", "program-hopping", "consistency", "progress"],
+  },
+
+  // ── Harsh Truths ─────────────────────────────────────────────────────────────
+  {
+    id: "ht1", seriesId: "harsh-truths",
+    title: "Harsh truth: you don’t need more workouts",
+    hook: "Harsh truth: adding more workouts is probably making things worse.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Quick, punchy delivery. Under 40 seconds. Confident and direct. Clean background.",
+    captionIdea: "More sessions don’t automatically mean more progress. Your body adapts during recovery, not during training. If you’re doing five days a week and spinning your wheels, try three focused sessions with proper recovery between them. Results improve when effort is focused, not just frequent.",
+    tags: ["harsh-truths", "talking-head", "overtraining", "recovery", "volume"],
+  },
+  {
+    id: "ht2", seriesId: "harsh-truths",
+    title: "Harsh truth about ‘toning’",
+    hook: "Harsh truth: toning doesn’t exist. Here’s what’s actually happening.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Confident, slightly challenging tone. Short and educational. Under 40 seconds.",
+    captionIdea: "There is no such thing as toning a muscle. You can build muscle, or you can lose fat, or both at once — but you can’t tighten or firm existing tissue. What people are describing when they say toned is usually low body fat with visible muscle underneath. That’s built through strength training and eating well.",
+    tags: ["harsh-truths", "talking-head", "toning", "muscle-building", "fat-loss"],
+  },
+  {
+    id: "ht3", seriesId: "harsh-truths",
+    title: "Harsh truth: form > weight",
+    hook: "Harsh truth: the weight you’re lifting doesn’t matter as much as you think.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Direct and confident. Can reference a nearby barbell or plate as a visual prop if at gym.",
+    captionIdea: "The number on the bar is just a number. What creates the adaptation is tension on the right muscle through the right range of motion. Ego lifting with poor form doesn’t build the muscle you think it does — it just increases injury risk. Drop the weight, nail the movement, then build up from there.",
+    tags: ["harsh-truths", "talking-head", "form", "ego-lifting", "technique"],
+  },
+  {
+    id: "ht4", seriesId: "harsh-truths",
+    title: "Harsh truth: you don’t need a perfect plan",
+    hook: "Harsh truth: waiting for the perfect program is just procrastination.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Warm but direct. This one lands best with a slight smile — it’s a gentle nudge, not a lecture.",
+    captionIdea: "The best program is the one you actually do. I see people spend months researching, comparing, and optimizing before they ever pick up a weight. A solid, boring, consistent program beats a perfect program you never start. Start now, adjust as you go.",
+    tags: ["harsh-truths", "talking-head", "overthinking", "consistency", "just-start"],
+  },
+  {
+    id: "ht5", seriesId: "harsh-truths",
+    title: "Harsh truth about cardio",
+    hook: "Harsh truth: cardio alone won’t change your body composition.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Quick, factual delivery. Short and punchy. Under 40 seconds.",
+    captionIdea: "Cardio is great for cardiovascular health and it burns calories in the moment. But without resistance training, it does very little to change how your body looks. Building muscle raises your resting metabolic rate — cardio doesn’t. If body composition is the goal, lifting needs to be the foundation.",
+    tags: ["harsh-truths", "talking-head", "cardio", "body-composition", "lifting"],
+  },
+  {
+    id: "ht6", seriesId: "harsh-truths",
+    title: "Harsh truth: most fitness advice is noise",
+    hook: "90% of fitness content is either overstated, outdated, or selling you something.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Confident positioning content. Direct to camera, minimal background distraction.",
+    captionIdea: "The fitness industry is extremely good at making simple things complicated so you’ll keep buying solutions. The fundamentals haven’t changed in decades: train consistently, eat mostly whole foods with enough protein, sleep well, manage stress. Everything else is noise layered on top of that foundation.",
+    tags: ["harsh-truths", "talking-head", "fitness-industry", "fundamentals", "positioning"],
+  },
+
+  // ── Things I Won’t Gatekeep ──────────────────────────────────────────────────
+  {
+    id: "gk1", seriesId: "gatekeep",
+    title: "Things I wanna gatekeep but I won’t",
+    hook: "Things I wanna gatekeep but I won’t.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Fun, generous energy. List-format works great here — share 3-4 things. Conversational and warm.",
+    captionIdea: "There are a handful of things I’ve learned about food and training that genuinely changed my approach, and I keep almost not sharing them because they feel like an edge. But here we are. High-protein Greek yogurt as a base for sauces. Tempo training for hypertrophy. Walking after meals for blood sugar. These are the things I wish I’d known sooner.",
+    tags: ["gatekeep", "talking-head", "tips", "protein", "training-hacks"],
+  },
+  {
+    id: "gk2", seriesId: "gatekeep",
+    title: "The recovery hack no trainer talks about",
+    hook: "The recovery upgrade most people completely overlook.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Casual, sharing tone. Can be filmed anywhere comfortable. Keep it conversational.",
+    captionIdea: "Sleep and protein timing doesn’t get enough attention compared to supplements and gadgets. Getting enough protein in the evening — not just throughout the day — supports overnight muscle protein synthesis. Pair that with consistent sleep timing and you’ll feel the difference in your training within a couple of weeks.",
+    tags: ["gatekeep", "talking-head", "recovery", "sleep", "protein-timing"],
+  },
+  {
+    id: "gk3", seriesId: "gatekeep",
+    title: "How to find the best gym for you",
+    hook: "How to find the best gym for you — the criteria that actually matter.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Can film at a gym or at home. Practical, helpful tone. Give a short checklist of what to look for.",
+    captionIdea: "The best gym is the one you’ll actually go to consistently. That sounds obvious, but people pick gyms based on equipment and price without considering proximity, atmosphere, and hours. If it takes 30 minutes to get there, you’ll find reasons not to go. Convenience beats features almost every time.",
+    tags: ["gatekeep", "talking-head", "gym-selection", "tips", "consistency"],
+  },
+  {
+    id: "gk4", seriesId: "gatekeep",
+    title: "The cheapest thing that changed my training",
+    hook: "The cheapest training upgrade I’d recommend to anyone.",
+    format: "b-roll-demo", targetLength: "45-60s",
+    filmingNote: "Show resistance bands in use: lateral band walks, banded hip thrusts, or pull-apart exercises. Film at gym or on a clean floor surface. Keep the movement clear and visible.",
+    captionIdea: "Resistance bands are genuinely underrated. I use them for glute activation before lower body sessions, shoulder health work before pressing, and as a way to add resistance to bodyweight moves. A good set costs next to nothing and takes up almost no space. If you’re not using them, you’re leaving easy gains on the table.",
+    tags: ["gatekeep", "b-roll-demo", "resistance-bands", "activation", "equipment"],
+  },
+  {
+    id: "gk5", seriesId: "gatekeep",
+    title: "My favorite finisher for cardio haters",
+    hook: "My favorite conditioning finisher — especially if you hate cardio.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film yourself doing a kettlebell swing circuit or sled push as a finisher at the end of a session. Show 2-3 sets. Keep the camera steady — this is demonstration footage.",
+    captionIdea: "If you hate traditional cardio but know you need conditioning work, finishers are the answer. Five minutes of kettlebell swings or a couple of sled pushes at the end of your session does more for your conditioning than 20 minutes on the elliptical — and it’s actually interesting. This is my go-to.",
+    cta: "Comment FINISHER for the exact circuit I use.",
+    tags: ["gatekeep", "gym-footage", "conditioning", "kettlebell", "cardio-alternative"],
+  },
+  {
+    id: "gk6", seriesId: "gatekeep",
+    title: "The tool I actually use for recovery",
+    hook: "The one recovery tool I actually use consistently and why.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Honest product review style — can hold up the item or just describe it plainly. No exaggeration needed.",
+    captionIdea: "I’ve tried most of the recovery tools that get hyped and most of them collect dust after a few weeks. The one I come back to consistently is simple: a foam roller for thoracic mobility and a lacrosse ball for the hips. Not glamorous, but it actually moves the needle on how I feel the next training day.",
+    tags: ["gatekeep", "talking-head", "recovery-tools", "foam-rolling", "mobility"],
+  },
+
+  // ── Pull-Up Progression ──────────────────────────────────────────────────────
+  {
+    id: "pp1", seriesId: "pullup-prog",
+    title: "If you want your first pull-up, listen up [Part 1/5]",
+    hook: "If you want your first pull-up, here’s exactly how to get there.",
+    format: "gym-footage", targetLength: "60-90s",
+    filmingNote: "Film at a pull-up bar. Overview video — introduce the 5-step progression on screen or verbally. Show yourself hanging from the bar to establish context. Film all 5 parts before posting Part 1.",
+    captionIdea: "A lot of people give up on pull-ups because they try them directly without building the prerequisite strength first. This series covers the exact 5-step progression that actually works. We’re starting with the full overview today, and over the next four videos we’ll go step by step. Save this series.",
+    cta: "Comment PULLUP for the full progression guide.",
+    tags: ["pullup-prog", "gym-footage", "pull-ups", "upper-body", "progression"],
+  },
+  {
+    id: "pp2", seriesId: "pullup-prog",
+    title: "Step 1: Inverted rows [Part 2/5]",
+    hook: "Part 2: The foundation exercise most people skip.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Set up a barbell in a squat rack at hip height. Film from the side showing the inverted row movement — body straight, pulling chest to bar. Show both easier (feet closer) and harder (feet forward) variations.",
+    captionIdea: "Before you can pull your body up, you need to be able to row your body weight horizontally. Inverted rows build the exact muscles used in a pull-up — lats, rhomboids, biceps — in a way that scales to your current strength. This is where the progression starts and where most people skip straight past.",
+    tags: ["pullup-prog", "gym-footage", "inverted-rows", "back", "pull-up-progression"],
+  },
+  {
+    id: "pp3", seriesId: "pullup-prog",
+    title: "Step 2: Dead hangs [Part 3/5]",
+    hook: "Part 3: This is where your grip strength actually comes from.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film hanging from a pull-up bar with feet off the ground, shoulders engaged (not passive). Show the difference between a dead hang with shrugged shoulders (wrong) and one with depressed and packed shoulders (right).",
+    captionIdea: "Grip and shoulder stability are two of the biggest limiters for people working toward pull-ups. Dead hangs build both. Aim to work up to a 30-second hang with your shoulders actively engaged — not just passively hanging. This is one of those exercises that looks like nothing but changes everything.",
+    tags: ["pullup-prog", "gym-footage", "dead-hangs", "grip-strength", "pull-up-progression"],
+  },
+  {
+    id: "pp4", seriesId: "pullup-prog",
+    title: "Step 3: Scapular pull-ups [Part 4/5]",
+    hook: "Part 4: The missing link no one talks about.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from a slight front angle. Show the scapular pull-up: arms straight, elevate and depress the shoulder blades without bending the elbows. The movement range is small but visible.",
+    captionIdea: "Most people skip this step and it’s the most important one for learning how to initiate a pull-up correctly. A scapular pull-up trains the bottom of the movement — the part where you engage before you even start pulling. Without this, pull-ups tend to feel like all arm and no back.",
+    tags: ["pullup-prog", "gym-footage", "scapular-pull-ups", "shoulder-blades", "pull-up-progression"],
+  },
+  {
+    id: "pp5", seriesId: "pullup-prog",
+    title: "Step 4+5: Negatives and band-assisted [Part 5/5]",
+    hook: "Part 5: The last two steps before you get your first rep.",
+    format: "gym-footage", targetLength: "60-75s",
+    filmingNote: "Film two movements: (1) a slow eccentric/negative from the top position, lowering as slowly as possible; (2) a band-assisted pull-up showing the band looped over the bar under your foot. Show both clearly.",
+    captionIdea: "Negatives and band-assisted reps are the final bridge to your first unassisted pull-up. Negatives build the eccentric strength you need and teach your body the full range of motion. Assisted reps let you practice the full movement pattern while you build up the remaining strength. Put all five steps together consistently and the pull-up comes.",
+    tags: ["pullup-prog", "gym-footage", "negatives", "band-assisted", "pull-up-progression"],
+  },
+
+  // ── Glutes & Core ────────────────────────────────────────────────────────────
+  {
+    id: "gc1", seriesId: "glutes-core",
+    title: "The glute workout I do every week",
+    hook: "Follow along — this is the glute session I come back to every week.",
+    format: "do-with-me", targetLength: "60-90s",
+    filmingNote: "Film a condensed version of your go-to glute session: hip thrust, RDL, and a banded exercise. Show each movement clearly, ideally with reps and sets on screen or voiced over. Good lighting for seeing the movement.",
+    captionIdea: "This is the glute session I program for myself and come back to consistently. Hip thrusts for load and range of motion, RDLs for the hamstring-glute tie-in, and a banded exercise for the abductors. If you want a starting point for your glute training, this is it.",
+    cta: "Comment GLUTES for my workout template.",
+    tags: ["glutes-core", "do-with-me", "glutes", "workout", "lower-body"],
+  },
+  {
+    id: "gc2", seriesId: "glutes-core",
+    title: "Best glute exercise nobody does",
+    hook: "The glute exercise with the best ROI — and almost nobody programs it.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Demonstrate the B-stance hip thrust clearly from the side. Show the setup (one foot flat, one on heel), and the asymmetrical loading. Film a few slow reps so the range of motion is visible.",
+    captionIdea: "The B-stance hip thrust is one of my favorite unilateral exercises for the glutes. You load one side more than the other without the balance demands of a single-leg version. It’s a perfect way to address imbalances and increase time under tension without needing significantly heavier weight.",
+    tags: ["glutes-core", "gym-footage", "b-stance-hip-thrust", "glutes", "unilateral"],
+  },
+  {
+    id: "gc3", seriesId: "glutes-core",
+    title: "Why your glutes aren’t growing",
+    hook: "If your glutes aren’t responding, it’s usually one of three things.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Educational talking-head. Can list the three reasons on screen as text overlays or just deliver them verbally. Direct, helpful tone.",
+    captionIdea: "Three things I see most often when glute training isn’t working: not enough range of motion on the hip thrust, no mind-muscle connection because the weight is too heavy, or simply not enough volume for this muscle group. The glutes respond well to higher rep ranges and full range of motion more than they respond to just loading heavier.",
+    tags: ["glutes-core", "talking-head", "glutes", "muscle-growth", "troubleshooting"],
+  },
+  {
+    id: "gc4", seriesId: "glutes-core",
+    title: "Glute activation that actually works",
+    hook: "The 3-minute glute activation that changed how my hip thrusts feel.",
+    format: "b-roll-demo", targetLength: "45-60s",
+    filmingNote: "Film 3 activation exercises in sequence: lateral band walks, clamshells, and glute bridges. Show 8-10 reps of each. Film from an angle that clearly shows the glute engagement.",
+    captionIdea: "Most people go straight into heavy compound work without activating the target muscle first. For glutes especially, a 3-minute activation sequence makes a real difference in how well you feel them working during the main lifts. These three movements done with a light band before your session will change your hip thrusts.",
+    tags: ["glutes-core", "b-roll-demo", "glute-activation", "warmup", "lower-body"],
+  },
+  {
+    id: "gc5", seriesId: "glutes-core",
+    title: "Heavy vs high reps for glutes",
+    hook: "The heavy vs high rep debate for glutes — here’s the actual answer.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Informational talking-head. Can use split screen or text overlays to show the two approaches. Educational and direct.",
+    captionIdea: "The glutes respond well to both heavy loading and higher rep work — and the research supports using both. Heavy hip thrusts and RDLs for strength and maximum muscle fiber recruitment, higher rep ranges for time under tension and metabolic stress. Doing only one or the other is leaving results behind.",
+    tags: ["glutes-core", "talking-head", "glutes", "rep-ranges", "hypertrophy"],
+  },
+  {
+    id: "gc6", seriesId: "glutes-core",
+    title: "The abs workout that actually works",
+    hook: "Follow along — this is the core routine I actually use.",
+    format: "do-with-me", targetLength: "60-90s",
+    filmingNote: "Film a do-with-me core routine on a mat: dead bug, hollow hold or hollow rock, cable crunch or weighted crunch, plank variation. Show each exercise with clear form and timing.",
+    captionIdea: "This is the core routine I actually use — not the standard crunch circuit, but a combination of anti-extension, anti-rotation, and direct ab work. It takes about 10-12 minutes and it’s harder than it looks. Follow along and adjust the reps to your level.",
+    tags: ["glutes-core", "do-with-me", "abs", "core", "workout"],
+  },
+  {
+    id: "gc7", seriesId: "glutes-core",
+    title: "Stop doing sit-ups, do this instead",
+    hook: "Stop doing sit-ups. This works better and doesn’t wreck your neck.",
+    format: "b-roll-demo", targetLength: "45-60s",
+    filmingNote: "Side-by-side or cut between: show sit-up with hip flexor dominance and neck strain (wrong), then cable crunch or slow weighted crunch with actual ab contraction (right). Film from the side for clear visibility.",
+    captionIdea: "Sit-ups aren’t useless, but they’re one of the least efficient ways to train the abs — and they tend to create more hip flexor work and neck strain than actual core engagement. A slow, controlled weighted crunch at a cable machine does more for your abs in fewer reps than a hundred sit-ups on the floor.",
+    tags: ["glutes-core", "b-roll-demo", "sit-ups", "abs", "form-correction"],
+  },
+  {
+    id: "gc8", seriesId: "glutes-core",
+    title: "Core vs abs — they’re not the same",
+    hook: "Your abs and your core are not the same thing. Here’s why it matters.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Educational talking-head. Can draw a rough diagram or use hand gestures to illustrate the full core musculature vs just the rectus abdominis.",
+    captionIdea: "The abs are one visible muscle on the front. The core is a system of muscles — including the obliques, transverse abdominis, erector spinae, and pelvic floor — that work together to stabilize your spine. Training only crunches trains one piece of a much larger system. Strong abs plus a weak core is a recipe for back problems.",
+    tags: ["glutes-core", "talking-head", "core", "abs", "anatomy"],
+  },
+
+  // ── Fat Loss + Lifting ────────────────────────────────────────────────────────
+  {
+    id: "fl1", seriesId: "fat-loss",
+    title: "How to lose fat and gain muscle — the real answer",
+    hook: "How to actually lose fat and build muscle at the same time.",
+    format: "talking-head", targetLength: "60-90s",
+    filmingNote: "Informational talking-head. This is a nuanced topic — keep the delivery clear and break it into 2-3 key points. Avoid oversimplifying while keeping it accessible.",
+    captionIdea: "Body recomposition — losing fat while building muscle simultaneously — is possible, especially if you’re newer to training or returning after a break. The conditions that make it most likely: a slight calorie deficit or maintenance calories, high protein intake, and progressive resistance training. It’s slower than doing one at a time, but it’s real.",
+    tags: ["fat-loss", "talking-head", "body-recomposition", "muscle-building", "nutrition"],
+  },
+  {
+    id: "fl2", seriesId: "fat-loss",
+    title: "What I eat on a training day",
+    hook: "What I actually eat on a heavy training day — no tracking apps, no perfection.",
+    format: "voiceover", targetLength: "45-75s",
+    filmingNote: "Film food preparation or meals throughout the day — breakfast, pre/post workout snack, dinner. Voiceover explains the reasoning behind the choices. Natural kitchen lighting, casual feel.",
+    captionIdea: "On a heavy training day my focus is on getting protein in at every meal and enough carbohydrates to fuel the session. That looks like eggs in the morning, something with Greek yogurt or protein mid-day, and a solid protein source with rice at dinner. No apps, no measuring — just familiar meals I know hit the rough targets.",
+    tags: ["fat-loss", "voiceover", "nutrition", "training-day", "food"],
+  },
+  {
+    id: "fl3", seriesId: "fat-loss",
+    title: "Stop counting calories like this",
+    hook: "If calorie tracking isn’t working for you, it’s probably one of these mistakes.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Direct educational content. Can list the common mistakes on screen or verbally. Keep it empathetic, not lecturing.",
+    captionIdea: "Calorie tracking works — but most people make the same handful of mistakes that undermine it: not tracking everything, underestimating portions, not accounting for cooking oils and sauces, or not adjusting over time as metabolism adapts. The tool isn’t the problem. The application is.",
+    tags: ["fat-loss", "talking-head", "calorie-tracking", "nutrition", "mistakes"],
+  },
+  {
+    id: "fl4", seriesId: "fat-loss",
+    title: "The protein rule that changed everything",
+    hook: "The simple protein rule that made tracking way less complicated for me.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Practical, conversational tone. Share the per-meal target rule and why it works. Can use fingers to count meals as a visual.",
+    captionIdea: "Instead of tracking my total daily protein obsessively, I aim for a solid protein source at every meal — roughly 30-40 grams each time. If I hit three to four meals a day, I’m in a good range without needing to log anything. Simple rules are more sustainable than precise tracking for most people.",
+    tags: ["fat-loss", "talking-head", "protein", "nutrition-hack", "simplicity"],
+  },
+  {
+    id: "fl5", seriesId: "fat-loss",
+    title: "Best foods for lifting",
+    hook: "The five foods I’d put in anyone’s diet who lifts regularly.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "List format — five foods, quick explanation of each. Can hold up items or film in a kitchen setting. Practical and accessible.",
+    captionIdea: "If you’re lifting consistently, these five foods should be staples: Greek yogurt for fast high-quality protein, eggs for a complete amino acid profile, rice for easy digestible carbs around training, salmon for protein plus omega-3s, and spinach for micronutrients with almost no calories. Not complicated — just effective.",
+    tags: ["fat-loss", "talking-head", "nutrition", "food-choices", "protein"],
+  },
+  {
+    id: "fl6", seriesId: "fat-loss",
+    title: "Why the scale goes up when you start lifting",
+    hook: "If the scale went up after you started lifting, this is why — and it’s not bad.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Reassuring, educational tone. This video will resonate with a lot of people who feel discouraged. Address it directly and clearly.",
+    captionIdea: "When you start a lifting program, the scale often goes up in the first few weeks. This happens because your muscles are retaining water as they adapt, and you might be eating more protein than before. Neither of these things means fat gain. Body composition improvements take 4-8 weeks to appear and the scale will not tell you the full story.",
+    tags: ["fat-loss", "talking-head", "scale", "water-retention", "beginners"],
+  },
+
+  // ── Things I’d Never Do ──────────────────────────────────────────────────────
+  {
+    id: "nd1", seriesId: "never-do",
+    title: "Things I’d never do as a personal trainer",
+    hook: "Things I would never do — and I’m a personal trainer.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Confident, slightly provocative positioning. List format works well — 3-5 clear examples. Keep delivery calm and factual, not preachy.",
+    captionIdea: "As a trainer, there are certain things I’d never recommend regardless of what’s trending: cardio-only programs for people who want to change their body composition, extreme calorie restriction, cutting entire food groups without a medical reason, and skipping the basics in favor of trendy movements. These approaches feel productive in the short term and cause problems in the medium to long term.",
+    tags: ["never-do", "talking-head", "trainer-perspective", "cardio", "fad-diets"],
+  },
+  {
+    id: "nd2", seriesId: "never-do",
+    title: "Never say this to someone who lifts",
+    hook: "Things you should never say to someone who lifts.",
+    format: "talking-head", targetLength: "under 40s",
+    filmingNote: "Light, relatable energy — this can be a little humorous. Quick list format. Under 40 seconds.",
+    captionIdea: "A short list of things lifters have heard too many times: “You’re going to get too bulky.” “Isn’t that bad for your joints?” “You look the same to me.” “Shouldn’t you be doing more cardio?” If you know, you know.",
+    tags: ["never-do", "talking-head", "relatable", "gym-culture", "humor"],
+  },
+  {
+    id: "nd3", seriesId: "never-do",
+    title: "Programs I’d never put a beginner on",
+    hook: "As a trainer, these are the programs I’d never hand to a beginner.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Educational, direct tone. Name 3-4 program types with brief explanation of why they’re problematic for beginners.",
+    captionIdea: "Advanced bro splits, six-days-a-week powerlifting programs, and AMRAP circuit workouts designed for trained athletes are not appropriate starting points. Beginners need frequency, simplicity, and enough recovery to actually adapt. The best beginner programs are often the boring ones — and they work precisely because of that.",
+    tags: ["never-do", "talking-head", "programs", "beginners", "trainer-advice"],
+  },
+  {
+    id: "nd4", seriesId: "never-do",
+    title: "Diets I’d never recommend to a client",
+    hook: "The diets I’d never recommend, and what I’d suggest instead.",
+    format: "talking-head", targetLength: "45-75s",
+    filmingNote: "Balanced, professional tone. Name specific diets and explain the concern clearly without being dismissive of people who’ve tried them.",
+    captionIdea: "Extremely low calorie diets, juice cleanses, and anything that eliminates entire macronutrient groups without a clinical reason — these are the things I would never recommend. Not because they don’t create short-term results, but because the long-term metabolic and psychological consequences are well documented. The alternative is less exciting but it actually works.",
+    tags: ["never-do", "talking-head", "fad-diets", "nutrition", "trainer-advice"],
+  },
+
+  // ── Personality Track ────────────────────────────────────────────────────────
+  {
+    id: "p1", seriesId: "personality",
+    title: "Being an introvert at the gym",
+    hook: "Being an introvert at the gym...",
+    format: "text-broll", targetLength: "under 30s",
+    filmingNote: "Film b-roll of yourself in the gym with headphones on, focused, not making eye contact. Use text overlays to tell the story. Relatable and low-key.",
+    captionIdea: "The gym is genuinely one of my favorite places to be because nobody expects you to talk. Headphones in, world out. It’s an introvert’s paradise dressed up as a fitness facility.",
+    tags: ["personality", "text-broll", "introvert", "relatable", "gym-life"],
+  },
+  {
+    id: "p2", seriesId: "personality",
+    title: "When you finally stop caring that people are watching",
+    hook: "The moment you stop caring what people think at the gym.",
+    format: "text-broll", targetLength: "under 30s",
+    filmingNote: "B-roll of you training confidently — heavy lift, focused face. Text overlay to narrate the shift. No need to look at the camera.",
+    captionIdea: "There’s a specific moment in your training journey when you realize no one in the gym is actually watching you — and even if they were, it doesn’t matter. That shift is hard to describe but you’ll know when it happens. Everything gets easier after that.",
+    tags: ["personality", "text-broll", "confidence", "gym-anxiety", "mindset"],
+  },
+  {
+    id: "p3", seriesId: "personality",
+    title: "What I was thinking my first month in the gym",
+    hook: "What was actually going through my head my first month in the gym.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Vulnerable, slightly humorous tone. Quick talking-head, under 30 seconds. This should feel honest and relatable.",
+    captionIdea: "First month thoughts: Does everyone know what they’re doing except me? Am I using this machine wrong? Someone’s going to say something. Am I in someone’s way? Turns out everyone felt this way at the start. The only way out is through.",
+    tags: ["personality", "talking-head", "vulnerability", "beginners", "relatable"],
+  },
+  {
+    id: "p4", seriesId: "personality",
+    title: "Most people don’t need more workouts. They need consistency.",
+    hook: "Unpopular opinion: most people don’t need a better program. They need to stop changing programs.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Strong opinion delivery — confident, direct. Under 30 seconds. No hedging.",
+    captionIdea: "The fitness industry sells novelty because novelty is more interesting than the truth. The truth is that any solid program, followed consistently for 12 weeks, will produce results. The program isn’t the variable. Consistency is.",
+    tags: ["personality", "talking-head", "consistency", "strong-opinion", "programs"],
+  },
+  {
+    id: "p5", seriesId: "personality",
+    title: "Classes aren’t strength training. They’re cardio with weights.",
+    hook: "I’ll say it: fitness classes aren’t strength training. They’re cardio with weights.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Hot take delivery — calm but clear. Short and punchy. This will get a reaction.",
+    captionIdea: "If the weight you’re using for a class exercise is light enough to do 30 reps in 45 seconds, you’re doing cardio. That’s fine — cardio is valuable. But it’s not the same stimulus as progressive resistance training. Both have a place, but knowing what you’re actually doing helps you train with a purpose.",
+    tags: ["personality", "talking-head", "hot-take", "fitness-classes", "strength-training"],
+  },
+  {
+    id: "p6", seriesId: "personality",
+    title: "What exercise took you the longest to actually feel?",
+    hook: "What exercise took you the longest to actually feel? Drop it below.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Community engagement prompt — warm, curious tone. Share your own answer first (e.g., lat pulldowns). End with the question.",
+    captionIdea: "Mine was lat pulldowns. I did them for two years before I actually felt my lats working instead of my arms. The day the mind-muscle connection clicked was a turning point. What was yours?",
+    tags: ["personality", "talking-head", "community", "mind-muscle-connection", "engagement"],
+  },
+  {
+    id: "p7", seriesId: "personality",
+    title: "What gym myth did you believe for too long?",
+    hook: "What gym myth did you believe for way too long? I’ll go first.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Community engagement format — share your own myth first, then invite others. Fun, self-aware energy.",
+    captionIdea: "I’ll go first: I believed that you had to feel sore to have had a good workout. Trained that way for years and it taught me almost nothing useful about actual progress. Drop yours below — I genuinely want to know.",
+    tags: ["personality", "talking-head", "community", "gym-myths", "engagement"],
+  },
+  {
+    id: "p8", seriesId: "personality",
+    title: "Why I stopped chasing aesthetics",
+    hook: "The point where I stopped training to look a certain way — and what changed when I did.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Vulnerable, honest tone. This is a genuine personal share. Keep it concise and real.",
+    captionIdea: "At some point the goal shifted from wanting to look a certain way to wanting to be strong and capable. The training didn’t change much, but the relationship with it changed completely. Progress stopped feeling conditional and started feeling like something I was doing for myself regardless of outcomes.",
+    tags: ["personality", "talking-head", "vulnerability", "aesthetics", "mindset"],
+  },
+  {
+    id: "p9", seriesId: "personality",
+    title: "The scale lies. Here’s what to track instead.",
+    hook: "The scale is the worst way to measure your progress. Here’s what I track instead.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Direct and practical. Quick list of alternatives: strength numbers, how clothes fit, energy levels, sleep quality. Under 30 seconds.",
+    captionIdea: "Weight on the scale is one data point — and it’s affected by water, food timing, hormones, and muscle gain. It tells you almost nothing about what you actually care about. I track my lifts, how I feel in my clothes, and my energy levels. Those numbers tell a much more accurate story.",
+    tags: ["personality", "talking-head", "scale", "progress-tracking", "strong-opinion"],
+  },
+  {
+    id: "p10", seriesId: "personality",
+    title: "If you’re sore every single workout, you’re not recovering.",
+    hook: "If you’re sore every single time you train, that’s not a good sign.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Direct, informative. Short and punchy. Reframe soreness as a warning sign rather than a goal.",
+    captionIdea: "Constant soreness means your body never fully recovers between sessions. You’re always in a state of repair rather than adaptation. Some soreness when you try something new is normal. Chronic soreness from your regular sessions means something needs to change — more sleep, more food, or less volume.",
+    tags: ["personality", "talking-head", "soreness", "recovery", "strong-opinion"],
+  },
+  {
+    id: "p11", seriesId: "personality",
+    title: "Things I still feel after years of lifting",
+    hook: "Things I still feel after years of lifting.",
+    format: "text-broll", targetLength: "under 30s",
+    filmingNote: "B-roll of training. Text overlays for each point — keep them short and relatable. Honest and human.",
+    captionIdea: "Nervous before a new max attempt. Satisfied after a really good set. Annoyed when my usual machine is taken. Proud in a quiet way when something clicks. The feelings don’t go away — you just get more comfortable having them.",
+    tags: ["personality", "text-broll", "relatable", "feelings", "long-term-lifting"],
+  },
+  {
+    id: "p12", seriesId: "personality",
+    title: "What makes you finally take training seriously?",
+    hook: "What made you finally take training seriously? I’m curious.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Community engagement prompt. Share your own turning point first, then invite the audience to share theirs.",
+    captionIdea: "For me it was a specific moment of realizing how much better I felt when I was consistent versus when I wasn’t. Not aesthetics — just energy, mood, sleep. What was it for you? I’m genuinely curious.",
+    tags: ["personality", "talking-head", "community", "motivation", "engagement"],
+  },
+  {
+    id: "p13", seriesId: "personality",
+    title: "The hardest part of being a personal trainer",
+    hook: "The part of being a personal trainer no one really talks about.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Vulnerable, honest tone. This is a genuine share about the emotional side of coaching work.",
+    captionIdea: "The hardest part isn’t the programming or the marketing. It’s seeing someone who really wants to change and watching them get in their own way — and knowing you can give them every tool but you can’t do the work for them. Caring about outcomes you don’t fully control is the job.",
+    tags: ["personality", "talking-head", "trainer-life", "vulnerability", "coaching"],
+  },
+  {
+    id: "p14", seriesId: "personality",
+    title: "Why I actually started training — the real version",
+    hook: "Why I actually started training — not the polished version.",
+    format: "talking-head", targetLength: "under 30s",
+    filmingNote: "Origin story energy — raw and honest. Not the elevator pitch version. This is the unedited truth.",
+    captionIdea: "The real version isn’t a clean story about health and empowerment. It was more complicated than that. And I think that’s true for most people — the reasons we start are rarely the reasons we stay. But the staying is what matters.",
+    tags: ["personality", "talking-head", "origin", "vulnerability", "motivation"],
+  },
+
+  // ── Origin & Brand ────────────────────────────────────────────────────────────
+  {
+    id: "ori1", seriesId: "origin",
+    title: "Why I started this",
+    hook: "Why I started Lisa Fit Method — the short version.",
+    format: "talking-head", targetLength: "45-60s",
+    filmingNote: "Clean setup, direct to camera. This is your elevator pitch version — polished but genuine. 45-60 seconds.",
+    captionIdea: "The short version: I spent years learning what actually works in the gym, watching people follow advice that wasn’t right for them, and eventually realized I had something worth sharing. Lisa Fit Method is where that goes — honest, practical content from someone who’s been doing this long enough to know what matters.",
+    tags: ["origin", "talking-head", "brand", "why-i-started", "introduction"],
+  },
+  {
+    id: "ori2", seriesId: "origin",
+    title: "The longer backstory",
+    hook: "The longer version of how I got here.",
+    format: "talking-head", targetLength: "60-90s",
+    filmingNote: "More conversational and personal than ori1. This is where you go deeper. Can be slightly less polished — authenticity matters here.",
+    captionIdea: "The longer version involves a lot more trial and error, more time training without really knowing what I was doing, and eventually finding the approach that actually worked. That process is the reason I care about cutting through the noise — I know what it costs to figure things out the hard way.",
+    tags: ["origin", "talking-head", "backstory", "vulnerability", "brand"],
+  },
+  {
+    id: "ori3", seriesId: "origin",
+    title: "Fun fact: I’m actually pretty introverted",
+    hook: "Fun fact: I’m actually pretty introverted — so posting fitness content is genuinely terrifying.",
+    format: "talking-head", targetLength: "45-60s",
+    filmingNote: "Light, self-aware, slightly vulnerable. This builds connection. Keep the energy honest and a little wry.",
+    captionIdea: "Creating content as an introvert is its own challenge. Every post is a small act of overcoming the instinct to stay quiet. I do it because the information is genuinely useful and because I wish someone had been sharing it when I was figuring things out. That’s the only reason I’m here.",
+    tags: ["origin", "talking-head", "introvert", "vulnerability", "brand"],
+  },
+  {
+    id: "ori4", seriesId: "origin",
+    title: "What makes my content different",
+    hook: "The fitness industry got way too complicated. Here’s what you won’t find on my page.",
+    format: "talking-head", targetLength: "45-60s",
+    filmingNote: "Positioning content — confident and clear. This is your differentiator video. Know your three or four things and deliver them with conviction.",
+    captionIdea: "No gender-specific programs that assume you need a special approach just because of who you are. No supplement recommendations with affiliate codes. No before and after photos as the primary measure of success. Just evidence-based content from someone who trains, studies, and cares about getting this right.",
+    tags: ["origin", "talking-head", "positioning", "brand", "differentiation"],
+  },
+
+  // ── Progression Series ────────────────────────────────────────────────────────
+  {
+    id: "pr_push1", seriesId: "progression",
+    title: "Push-Up Progression: where most people start wrong [Part 1/3]",
+    hook: "If you struggle with push-ups, this is where to start — and it’s not where you think.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from the side. Introduce the progression and explain why most people jump to full push-ups before they’ve built the prerequisite strength. Show the incline push-up as the starting point.",
+    captionIdea: "Most people try full push-ups, struggle, decide they’re just bad at push-ups, and stop. The issue isn’t strength — it’s that they skipped the entry points. This series builds the push-up from the ground up. Start here and do not skip ahead.",
+    tags: ["progression", "gym-footage", "push-ups", "upper-body", "beginners"],
+  },
+  {
+    id: "pr_push2", seriesId: "progression",
+    title: "Push-Up Progression: the bridge exercise [Part 2/3]",
+    hook: "Part 2: The exercise that bridges the gap between incline and full push-ups.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from the side demonstrating a slow eccentric push-up (lowering slowly, pushing up from knees if needed). Show a 3-4 second lowering phase clearly.",
+    captionIdea: "The slow eccentric push-up builds more strength than the regular version because it increases time under tension. Lower yourself over 3-4 seconds, reset, and go again. This is the bridge between incline push-ups and the full movement. Build up to 3 sets of 8 before moving to Part 3.",
+    tags: ["progression", "gym-footage", "push-ups", "eccentric", "upper-body"],
+  },
+  {
+    id: "pr_push3", seriesId: "progression",
+    title: "Push-Up Progression: your first full rep [Part 3/3]",
+    hook: "Part 3: How to do your first full push-up — and how to keep improving from there.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film a full push-up from the side with attention to body position: hands under shoulders, body straight, full range. Then show a band-assisted variation as an option. End with a progression note.",
+    captionIdea: "Once you can do a slow eccentric and feel stable in the position, the full rep follows. Focus on keeping your body in a straight line and reaching full depth. From here, the goal is volume and consistency. Add a rep each week and you’ll have sets of 10 before you realize it.",
+    tags: ["progression", "gym-footage", "push-ups", "first-rep", "upper-body"],
+  },
+  {
+    id: "pr_ht1", seriesId: "progression",
+    title: "Hip Thrust Progression: the starting point [Part 1/3]",
+    hook: "Never done a hip thrust before? This is where to start.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film a glute bridge on the floor — no equipment needed. Show the movement clearly from the side. Explain that this builds the foundational position before moving to the bench.",
+    captionIdea: "The hip thrust is one of the best glute exercises available, but it has a specific setup that takes some getting used to. Before you load a barbell, start with the floor version. Glute bridges teach you the hip hinge, the posterior pelvic tilt at the top, and the mind-muscle connection you need to make the loaded version work.",
+    tags: ["progression", "gym-footage", "hip-thrust", "glutes", "beginners"],
+  },
+  {
+    id: "pr_ht2", seriesId: "progression",
+    title: "Hip Thrust Progression: adding load [Part 2/3]",
+    hook: "Part 2: How to move from bodyweight to loaded hip thrusts.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film with a plate or light barbell on the hips. Show the setup: back against bench, feet planted, bar across hip crease, pad if available. Side angle for clear visibility of the movement.",
+    captionIdea: "Moving from floor to bench and adding load changes the exercise significantly. The range of motion increases and the glutes have to work harder at the top. Start light — a plate or empty bar — and focus on feeling the glutes doing the work rather than just moving the weight. The mechanics matter more than the load at this stage.",
+    tags: ["progression", "gym-footage", "hip-thrust", "glutes", "loading"],
+  },
+  {
+    id: "pr_ht3", seriesId: "progression",
+    title: "Hip Thrust Progression: barbell work [Part 3/3]",
+    hook: "Part 3: Getting to your working weight and what to focus on from here.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film with a proper working weight — barbell with plates. Show the setup sequence, the movement, and the top position (full hip extension, glutes squeezed). Include a note about progressive overload.",
+    captionIdea: "Once the movement pattern is solid, the hip thrust becomes one of the most loadable exercises in your lower body program. Progressive overload from here is straightforward: add small increments each week or add a rep. The glutes are a strong muscle group and they respond well to being challenged consistently over time.",
+    cta: "Comment GLUTES for my full lower body program.",
+    tags: ["progression", "gym-footage", "hip-thrust", "barbell", "glutes"],
+  },
+
+  // ── Deadlift From Scratch ─────────────────────────────────────────────────────
+  {
+    id: "dl1", seriesId: "deadlift",
+    title: "Deadlift From Scratch: the hip hinge [Part 1/4]",
+    hook: "If you’ve never deadlifted before, this is where to start.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film from the side demonstrating the hip hinge pattern: hands on hips, pushing hips back while hinging forward, keeping the spine neutral. Can use a wall to teach the hinge (stand a foot from a wall and hinge hips back to touch it). Film all 4 parts before posting.",
+    captionIdea: "Before you touch a barbell for a deadlift, you need to understand the hip hinge. It’s the foundational movement pattern — and most people either don’t have it or don’t know how to access it under load. Spend a few sessions just drilling the hinge with no weight until it feels natural. This is what everything builds on.",
+    tags: ["deadlift", "gym-footage", "hip-hinge", "movement-pattern", "beginners"],
+  },
+  {
+    id: "dl2", seriesId: "deadlift",
+    title: "Deadlift From Scratch: the setup [Part 2/4]",
+    hook: "Part 2: The setup is 80% of a good deadlift.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film the deadlift setup in detail from the side: bar over mid-foot, hip-width stance, hinge down to the bar, engage lats before lifting. Show common errors (bar too far forward, rounding before the pull) and corrections.",
+    captionIdea: "A good deadlift is mostly determined before the bar leaves the ground. Bar over mid-foot, hip-width stance, hinge to grip, then create tension through the whole body before you pull. If the setup is wrong, the pull will be wrong. Walk through this checklist every single rep until it becomes automatic.",
+    tags: ["deadlift", "gym-footage", "setup", "form", "technique"],
+  },
+  {
+    id: "dl3", seriesId: "deadlift",
+    title: "Deadlift From Scratch: adding weight [Part 3/4]",
+    hook: "Part 3: How to add weight without losing your form.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Film multiple sets with progressively heavier weight, showing that form stays consistent as load increases. Side angle. Include a note about when to stop adding weight.",
+    captionIdea: "Adding weight to the deadlift is straightforward when the pattern is ingrained: small increments, full focus on the setup, and stop adding load the moment form breaks down. The weight will come. What matters in the early months is training the nervous system and building the movement habit with integrity.",
+    tags: ["deadlift", "gym-footage", "progressive-overload", "form", "weight-progression"],
+  },
+  {
+    id: "dl4", seriesId: "deadlift",
+    title: "Deadlift From Scratch: where to go from here [Part 4/4]",
+    hook: "Part 4: You can deadlift. Here’s how to keep improving.",
+    format: "gym-footage", targetLength: "45-60s",
+    filmingNote: "Summary video — can include text overlays for the progression plan. Show a confident working-weight deadlift. End with a practical next-step recommendation.",
+    captionIdea: "Once the setup is solid and you can lift with good form consistently, the deadlift becomes one of the most productive exercises in your program. From here: pick a rep range (3-5 for strength, 6-8 for hypertrophy), add weight or reps each session, and film yourself occasionally to check that form holds up as load increases.",
+    cta: "Comment DEADLIFT for the progression program I use.",
+    tags: ["deadlift", "gym-footage", "progression", "long-term", "next-steps"],
+  },
+]
+
+const EPISODE_MAP = new Map(EPISODES.map(e => [e.id, e]))
+
+// ─── Format metadata ───────────────────────────────────────────────────────────
+
+const FORMAT_LABELS: Record<EpisodeFormat, string> = {
+  "talking-head": "Talking Head",
+  "gym-footage":  "Gym Footage",
+  "b-roll-demo":  "B-Roll Demo",
+  "do-with-me":   "Do With Me",
+  "voiceover":    "Voiceover",
+  "text-broll":   "Text + B-Roll",
+}
+
+const FORMAT_COLORS: Record<EpisodeFormat, string> = {
+  "talking-head": "#c9a96e",
+  "gym-footage":  "#9ec9a9",
+  "b-roll-demo":  "#7bb3c9",
+  "do-with-me":   "#b09ec9",
+  "voiceover":    "#888888",
+  "text-broll":   "#e8c98a",
+}
+
+const STATUS_LABELS: Record<EpisodeStatus, string> = {
+  idea:   "IDEA",
+  filmed: "FILMED",
+  edited: "EDITED",
+  posted: "POSTED",
+}
+
+const STATUS_COLORS: Record<EpisodeStatus, string> = {
+  idea:   C.muted,
+  filmed: C.blue,
+  edited: C.green,
+  posted: C.gold,
+}
+
+// ─── Tabs config ───────────────────────────────────────────────────────────────
+
+const TABS: Array<{ id: Tab; icon: string; label: string }> = [
+  { id: "home",     icon: "🏠", label: "Home" },
+  { id: "ideas",    icon: "💡", label: "Ideas" },
+  { id: "edit",     icon: "✂️",  label: "Edit" },
+  { id: "calendar", icon: "📅", label: "Calendar" },
+  { id: "stats",    icon: "📊", label: "Stats" },
+  { id: "sales",    icon: "💰", label: "Sales" },
+]
+
+// ─── Main component ────────────────────────────────────────────────────────────
+
+function PlanPageClient() {
+  const [state, setState] = useState<PlanState>(defaultState)
+  const [loaded, setLoaded] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>("home")
+
+  useEffect(() => {
+    const existing = document.querySelector('link[rel="manifest"]')
+    if (existing) existing.setAttribute("href", "/my-plan-manifest.json")
+    else {
+      const link = document.createElement("link")
+      link.rel = "manifest"
+      link.href = "/my-plan-manifest.json"
+      document.head.appendChild(link)
+    }
+  }, [])
+
+  useEffect(() => {
+    setState(loadState())
+    setLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (loaded) saveState(state)
+  }, [state, loaded])
+
+  const update = useCallback((fn: (draft: PlanState) => PlanState) => {
+    setState(prev => fn({ ...prev }))
+  }, [])
+
+  if (!loaded) {
+    return (
+      <div style={{ background: C.bg, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontFamily: FONT_SERIF, color: C.muted, fontSize: 16 }}>Loading...</span>
+      </div>
+    )
+  }
+
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px", ...style }}>
-      {children}
+    <div style={{ background: C.bg, minHeight: "100dvh", maxWidth: 480, margin: "0 auto", position: "relative", display: "flex", flexDirection: "column" }}>
+      <header style={{
+        position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)",
+        width: "100%", maxWidth: 480, height: 52, zIndex: 100,
+        background: C.bg, borderBottom: `1px solid ${C.border}`,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 16px", boxSizing: "border-box",
+      }}>
+        <span style={{ fontFamily: FONT_SERIF, fontSize: 15, color: C.gold, letterSpacing: "0.1em", fontWeight: 600 }}>
+          LISA FIT METHOD
+        </span>
+        {state.startDate ? (
+          <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.mutedLight }}>
+            Day {getCurrentDay(state.startDate)}
+          </span>
+        ) : (
+          <button
+            onClick={() => setActiveTab("home")}
+            style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.gold, background: "transparent", border: "none", cursor: "pointer", padding: 0 }}
+          >
+            Set start date
+          </button>
+        )}
+      </header>
+
+      <nav style={{
+        position: "fixed", top: 52, left: "50%", transform: "translateX(-50%)",
+        width: "100%", maxWidth: 480, height: 44, zIndex: 99,
+        background: C.bg, borderBottom: `1px solid ${C.border}`,
+        display: "flex", alignItems: "stretch", overflowX: "auto",
+        scrollbarWidth: "none",
+      }}>
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              flex: "0 0 auto", padding: "0 14px",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1,
+              background: "transparent", border: "none", cursor: "pointer",
+              borderBottom: activeTab === tab.id ? `2px solid ${C.gold}` : "2px solid transparent",
+              color: activeTab === tab.id ? C.gold : C.muted,
+            }}
+          >
+            <span style={{ fontSize: 14, lineHeight: 1 }}>{tab.icon}</span>
+            <span style={{ fontFamily: FONT_SANS, fontSize: 9, letterSpacing: "0.06em", lineHeight: 1 }}>{tab.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      <main style={{ marginTop: 96, flex: 1, overflowY: "auto", paddingBottom: 32 }}>
+        {activeTab === "home"     && <HomeTab state={state} update={update} />}
+        {activeTab === "ideas"    && <IdeasTab state={state} update={update} />}
+        {activeTab === "edit"     && <EditTab state={state} update={update} switchToCalendar={() => setActiveTab("calendar")} />}
+        {activeTab === "calendar" && <CalendarTab state={state} update={update} />}
+        {activeTab === "stats"    && <StatsTab state={state} update={update} />}
+        {activeTab === "sales"    && <SalesTab state={state} update={update} />}
+      </main>
     </div>
   )
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: F.heading, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase", color: C.gold, marginBottom: 14 }}>
-      {children}
-    </p>
-  )
-}
+// ─── Home Tab ─────────────────────────────────────────────────────────────────
 
-function StatRow({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "6px 0", borderBottom: `1px solid ${C.border}` }}>
-      <span style={{ fontFamily: F.body, fontSize: 13, color: C.mutedLight }}>{label}</span>
-      <span style={{ fontFamily: F.heading, fontSize: 20, color: color ?? C.cream }}>
-        {value}
-        {sub && <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>{sub}</span>}
-      </span>
-    </div>
-  )
-}
-
-function ProgressBar({ value, max, color }: { value: number; max: number; color?: string }) {
-  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0
-  return (
-    <div style={{ height: 4, background: C.border, borderRadius: 2, overflow: "hidden" }}>
-      <div style={{ height: "100%", width: `${pct}%`, background: color ?? C.gold, borderRadius: 2, transition: "width 0.4s" }} />
-    </div>
-  )
-}
-
-function PillBadge({ label, color }: { label: string; color: string }) {
-  return (
-    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, fontSize: 10, fontFamily: F.body, background: color + "22", color, border: `1px solid ${color}44`, letterSpacing: "0.06em" }}>
-      {label}
-    </span>
-  )
-}
-
-function GoldBtn({ children, onClick, small }: { children: React.ReactNode; onClick: () => void; small?: boolean }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        background: C.gold,
-        color: C.bg,
-        border: "none",
-        borderRadius: 8,
-        padding: small ? "6px 14px" : "10px 20px",
-        fontFamily: F.body,
-        fontSize: small ? 12 : 13,
-        fontWeight: 600,
-        cursor: "pointer",
-        letterSpacing: "0.04em",
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function GhostBtn({ children, onClick, small }: { children: React.ReactNode; onClick: () => void; small?: boolean }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        background: "transparent",
-        color: C.mutedLight,
-        border: `1px solid ${C.border}`,
-        borderRadius: 8,
-        padding: small ? "6px 12px" : "8px 16px",
-        fontFamily: F.body,
-        fontSize: small ? 11 : 13,
-        cursor: "pointer",
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Input({ value, onChange, placeholder, type }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
-  return (
-    <input
-      type={type ?? "text"}
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-      style={{
-        width: "100%",
-        background: C.bg,
-        border: `1px solid ${C.border}`,
-        borderRadius: 8,
-        padding: "9px 12px",
-        fontFamily: F.body,
-        fontSize: 13,
-        color: C.cream,
-        outline: "none",
-        boxSizing: "border-box",
-      }}
-    />
-  )
-}
-
-function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) {
-  return (
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      style={{
-        width: "100%",
-        background: C.bg,
-        border: `1px solid ${C.border}`,
-        borderRadius: 8,
-        padding: "9px 12px",
-        fontFamily: F.body,
-        fontSize: 13,
-        color: C.cream,
-        outline: "none",
-        cursor: "pointer",
-      }}
-    >
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
-  )
-}
-
-// ─── Tab: Home ────────────────────────────────────────────────────────────────
-
-function HomeTab({ state, onSetStart }: { state: PlanState; onSetStart: (d: string) => void }) {
-  const currentDay = getCurrentDay(state.startDate)
-  const currentWeek = getCurrentWeek(state.startDate)
-  const streak = getContentStreak(state.postStatuses, state.startDate)
-  const phase = currentDay <= 30 ? 1 : currentDay <= 60 ? 2 : 3
-  const activeClients = state.clients.filter(c => c.status === "active").length
-  const monthlyRecurring = clientMonthlyTotal(state.clients)
+function HomeTab({ state, update }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void }) {
   const [dateInput, setDateInput] = useState("")
 
-  const m1Rev = totalRevenue(state.revenue.m1)
-  const m2Rev = totalRevenue(state.revenue.m2)
-  const m3Rev = totalRevenue(state.revenue.m3)
+  const currentDay = getCurrentDay(state.startDate)
+  const currentWeek = currentDay > 0 ? Math.ceil(currentDay / 7) : 1
 
-  const todayPosts = currentDay > 0 ? getPostsForDay(currentDay) : []
-  const todayPosted = todayPosts.filter(p => state.postStatuses[p.id] === "posted").length
+  const totalEpisodes = EPISODES.length
+  const statusCounts = EPISODES.reduce<Record<EpisodeStatus, number>>(
+    (acc, ep) => {
+      const s: EpisodeStatus = state.episodeStatuses[ep.id] ?? "idea"
+      acc[s] = (acc[s] ?? 0) + 1
+      return acc
+    },
+    { idea: 0, filmed: 0, edited: 0, posted: 0 }
+  )
+  const filmedCount = statusCounts.filmed + statusCounts.edited + statusCounts.posted
+  const readyCount = statusCounts.edited
+  const postedCount = state.postedEntries.length
 
-  function handleStart() {
-    if (dateInput) onSetStart(dateInput)
-  }
+  const nextToFilm = EPISODES.filter(e => (state.episodeStatuses[e.id] ?? "idea") === "idea").slice(0, 3)
+  const readyToPost = EPISODES.filter(e => state.episodeStatuses[e.id] === "edited")
+
+  const thisWeekMonday = getMondayOf(new Date())
+  const weekRevenue = state.weeklySales
+    .filter(ws => ws.weekOf === thisWeekMonday)
+    .reduce((sum, ws) => sum + ws.amount, 0)
 
   if (!state.startDate) {
     return (
       <div style={{ padding: "32px 16px" }}>
-        <Card>
-          <p style={{ fontFamily: F.heading, fontSize: 26, color: C.cream, marginBottom: 8 }}>Welcome to Your 90-Day Plan</p>
-          <p style={{ fontFamily: F.body, fontSize: 13, color: C.muted, marginBottom: 24, lineHeight: 1.6 }}>
-            Set your start date to activate your content calendar, filming schedule, and daily posting plan.
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px 20px" }}>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 24, color: C.cream, margin: "0 0 8px 0" }}>When did you start?</p>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted, margin: "0 0 24px 0", lineHeight: 1.6 }}>
+            Set your start date to activate your content dashboard.
           </p>
           <div style={{ display: "flex", gap: 10 }}>
-            <Input type="date" value={dateInput} onChange={setDateInput} placeholder="Start date" />
-            <GoldBtn onClick={handleStart}>Start</GoldBtn>
+            <input
+              type="date"
+              value={dateInput}
+              onChange={e => setDateInput(e.target.value)}
+              style={{ flex: 1, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontFamily: FONT_SANS, fontSize: 13, color: C.cream, outline: "none", boxSizing: "border-box" }}
+            />
+            <button
+              onClick={() => { if (dateInput) update(d => ({ ...d, startDate: dateInput })) }}
+              style={{ background: C.gold, color: C.bg, border: "none", borderRadius: 8, padding: "9px 20px", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+            >
+              Set Date
+            </button>
           </div>
-        </Card>
+        </div>
       </div>
     )
   }
 
   return (
     <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Header */}
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <div>
-            <p style={{ fontFamily: F.heading, fontSize: 28, color: C.cream }}>Day {currentDay}</p>
-            <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted }}>Week {currentWeek} · Phase {phase}</p>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <p style={{ fontFamily: F.heading, fontSize: 22, color: C.gold }}>{streak}</p>
-            <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>day streak</p>
-          </div>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px" }}>
+        <p style={{ fontFamily: FONT_SERIF, fontSize: 28, color: C.cream, margin: "0 0 4px 0" }}>Day {currentDay} of 90</p>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.muted, margin: 0 }}>Week {currentWeek}</p>
+        <div style={{ marginTop: 12, height: 4, background: C.border, borderRadius: 2, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${Math.min(100, (currentDay / 90) * 100)}%`, background: C.gold, borderRadius: 2 }} />
         </div>
-        <ProgressBar value={currentDay} max={90} />
-        <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 6 }}>
-          Started {formatDate(state.startDate)} · {Math.max(0, 90 - currentDay)} days remaining
-        </p>
-      </Card>
+      </div>
 
-      {/* Today's posts */}
-      {todayPosts.length > 0 && (
-        <Card>
-          <SectionTitle>Today — Day {currentDay}</SectionTitle>
-          {todayPosts.map(p => {
-            const ep = EPISODE_MAP.get(p.episodeId)
-            const status = state.postStatuses[p.id]
-            return (
-              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
-                <PillBadge label={platformEmoji(p.platform)} color={platformColor(p.platform)} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: F.body, fontSize: 12, color: C.cream }}>{ep?.title ?? p.episodeId}</p>
-                  <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>{p.timeSlot}</p>
-                </div>
-                {status === "posted" && <PillBadge label="Posted" color={C.green} />}
-                {status === "skipped" && <PillBadge label="Skipped" color={C.error} />}
-                {!status && <PillBadge label="Scheduled" color={C.muted} />}
-              </div>
-            )
-          })}
-          <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 8 }}>
-            {todayPosted}/{todayPosts.length} posted today
-          </p>
-        </Card>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8 }}>
+        {([
+          { label: "Ideas",  value: totalEpisodes,  color: C.muted },
+          { label: "Filmed", value: filmedCount,    color: C.blue },
+          { label: "Ready",  value: readyCount,     color: C.green },
+          { label: "Posted", value: postedCount,    color: C.gold },
+        ] as const).map(chip => (
+          <div key={chip.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 8px", textAlign: "center" }}>
+            <p style={{ fontFamily: FONT_SERIF, fontSize: 22, color: chip.color, margin: "0 0 2px 0" }}>{chip.value}</p>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted, margin: 0 }}>{chip.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {nextToFilm.length > 0 && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px" }}>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.gold, margin: "0 0 12px 0" }}>Next to Film</p>
+          {nextToFilm.map(ep => (
+            <div key={ep.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ display: "inline-block", padding: "2px 7px", borderRadius: 999, fontSize: 10, fontFamily: FONT_SANS, background: FORMAT_COLORS[ep.format] + "22", color: FORMAT_COLORS[ep.format], border: `1px solid ${FORMAT_COLORS[ep.format]}44` }}>
+                {FORMAT_LABELS[ep.format]}
+              </span>
+              <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.cream, margin: 0, flex: 1 }}>{ep.title}</p>
+            </div>
+          ))}
+        </div>
       )}
 
-      {/* Revenue snapshot */}
-      <Card>
-        <SectionTitle>Revenue Snapshot</SectionTitle>
-        <StatRow label="Month 1" value={`$${m1Rev.toLocaleString()}`} sub={`/ $${MONTH_TARGETS.m1.toLocaleString()}`} color={m1Rev >= MONTH_TARGETS.m1 ? C.green : C.cream} />
-        <StatRow label="Month 2" value={`$${m2Rev.toLocaleString()}`} sub={`/ $${MONTH_TARGETS.m2.toLocaleString()}`} color={m2Rev >= MONTH_TARGETS.m2 ? C.green : C.cream} />
-        <StatRow label="Month 3" value={`$${m3Rev.toLocaleString()}`} sub={`/ $${MONTH_TARGETS.m3.toLocaleString()}`} color={m3Rev >= MONTH_TARGETS.m3 ? C.green : C.cream} />
-        <div style={{ marginTop: 12 }}>
-          <ProgressBar value={m1Rev + m2Rev + m3Rev} max={MONTH_TARGETS.m1 + MONTH_TARGETS.m2 + MONTH_TARGETS.m3} />
-          <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 4 }}>
-            90-day total: ${(m1Rev + m2Rev + m3Rev).toLocaleString()} / ${(MONTH_TARGETS.m1 + MONTH_TARGETS.m2 + MONTH_TARGETS.m3).toLocaleString()}
+      {readyToPost.length > 0 && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px" }}>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.green, margin: "0 0 12px 0" }}>
+            Ready to Post ({readyToPost.length})
           </p>
+          {readyToPost.slice(0, 2).map(ep => (
+            <p key={ep.id} style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.cream, margin: "0 0 6px 0" }}>{ep.title}</p>
+          ))}
+          {readyToPost.length > 2 && (
+            <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: 0 }}>+{readyToPost.length - 2} more</p>
+          )}
         </div>
-      </Card>
+      )}
 
-      {/* Clients */}
-      <Card>
-        <SectionTitle>Coaching</SectionTitle>
-        <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
-          <div style={{ flex: 1, textAlign: "center" }}>
-            <p style={{ fontFamily: F.heading, fontSize: 32, color: C.gold }}>{activeClients}</p>
-            <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>active clients</p>
-          </div>
-          <div style={{ flex: 1, textAlign: "center" }}>
-            <p style={{ fontFamily: F.heading, fontSize: 32, color: C.cream }}>{MAX_CLIENTS - activeClients}</p>
-            <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>spots open</p>
-          </div>
-          <div style={{ flex: 1, textAlign: "center" }}>
-            <p style={{ fontFamily: F.heading, fontSize: 32, color: C.green }}>${monthlyRecurring.toLocaleString()}</p>
-            <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>MRR</p>
-          </div>
-        </div>
-        <ProgressBar value={activeClients} max={MAX_CLIENTS} color={C.green} />
-      </Card>
-
-      {/* Bio lines */}
-      <Card>
-        <SectionTitle>Bio Template</SectionTitle>
-        {BIO_LINES.map((line, i) => (
-          <p key={i} style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight, lineHeight: 1.8 }}>{line}</p>
-        ))}
-      </Card>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px" }}>
+        <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.goldLight, margin: "0 0 8px 0" }}>This Week</p>
+        <p style={{ fontFamily: FONT_SERIF, fontSize: 28, color: weekRevenue > 0 ? C.gold : C.muted, margin: 0 }}>
+          {weekRevenue > 0 ? formatCurrency(weekRevenue) : "$0"}
+        </p>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: "4px 0 0 0" }}>Week of {formatDate(thisWeekMonday)}</p>
+      </div>
     </div>
   )
 }
 
-// ─── Tab: Film ────────────────────────────────────────────────────────────────
+// ─── Ideas Tab ────────────────────────────────────────────────────────────────
 
-function FilmTab({ state, onToggleBatch }: { state: PlanState; onToggleBatch: (batch: number) => void }) {
-  const currentWeek = getCurrentWeek(state.startDate)
+function IdeasTab({ state, update }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void }) {
+  const [activeFilter, setActiveFilter] = useState("all")
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const seriesFilters = SERIES.map(s => ({ id: s.id, label: s.name }))
+  const formatFilters: Array<{ id: string; label: string }> = [
+    { id: "fmt-talking-head", label: "Talking Head" },
+    { id: "fmt-gym-footage",  label: "Gym Footage" },
+    { id: "fmt-b-roll-demo",  label: "B-Roll Demo" },
+    { id: "fmt-do-with-me",   label: "Do With Me" },
+    { id: "fmt-voiceover",    label: "Voiceover" },
+    { id: "fmt-text-broll",   label: "Text + B-Roll" },
+  ]
+  const allFilters = [{ id: "all", label: "All" }, ...seriesFilters, ...formatFilters]
+
+  const filtered = EPISODES.filter(ep => {
+    if (activeFilter === "all") return true
+    if (activeFilter.startsWith("fmt-")) {
+      const fmt = activeFilter.slice(4) as EpisodeFormat
+      return ep.format === fmt
+    }
+    return ep.seriesId === activeFilter
+  })
+
+  function getStatus(id: string): EpisodeStatus {
+    return state.episodeStatuses[id] ?? "idea"
+  }
+
+  function setStatus(id: string, s: EpisodeStatus) {
+    update(d => ({ ...d, episodeStatuses: { ...d.episodeStatuses, [id]: s } }))
+  }
 
   return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <Card>
-        <SectionTitle>Filming Schedule</SectionTitle>
-        <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted, marginBottom: 12 }}>Film 10 videos per batch, one batch per week. Check off when done.</p>
-      </Card>
+    <div style={{ padding: "12px 16px" }}>
+      <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", marginBottom: 16, paddingBottom: 4 }}>
+        {allFilters.map(f => {
+          const isActive = activeFilter === f.id
+          return (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id)}
+              style={{
+                flex: "0 0 auto", padding: "6px 12px", borderRadius: 999,
+                fontFamily: FONT_SANS, fontSize: 11, cursor: "pointer",
+                background: "transparent",
+                border: isActive ? `1px solid ${C.gold}` : `1px solid ${C.border}`,
+                color: isActive ? C.gold : C.muted,
+                letterSpacing: "0.04em",
+              }}
+            >
+              {f.label}
+            </button>
+          )
+        })}
+      </div>
 
-      {FILMING_BATCHES.map(fb => {
-        const done = !!state.filmedBatches[fb.batch]
-        const isCurrent = fb.week === currentWeek
-        const isPast = fb.week < currentWeek
-        return (
-          <Card key={fb.batch} style={{ opacity: isPast && !done ? 0.6 : 1, borderColor: isCurrent ? C.gold + "66" : C.border }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <p style={{ fontFamily: F.heading, fontSize: 18, color: done ? C.green : C.cream }}>
-                    Batch {fb.batch}
-                  </p>
-                  {isCurrent && <PillBadge label="This Week" color={C.gold} />}
-                  {done && <PillBadge label="Filmed" color={C.green} />}
-                </div>
-                <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted }}>Week {fb.week} · {fb.theme}</p>
-              </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {filtered.map(ep => {
+          const status = getStatus(ep.id)
+          const series = SERIES_MAP.get(ep.seriesId)
+          const isExpanded = expandedId === ep.id
+
+          return (
+            <div key={ep.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
               <button
-                onClick={() => onToggleBatch(fb.batch)}
-                style={{
-                  width: 28, height: 28, borderRadius: 6, border: `2px solid ${done ? C.green : C.border}`,
-                  background: done ? C.green + "22" : "transparent", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: done ? C.green : C.muted, fontSize: 14,
-                }}
+                onClick={() => setExpandedId(isExpanded ? null : ep.id)}
+                style={{ width: "100%", background: "transparent", border: "none", cursor: "pointer", padding: "12px 14px", textAlign: "left" }}
               >
-                {done ? "✓" : ""}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                  <span style={{ display: "inline-block", padding: "2px 7px", borderRadius: 999, fontSize: 10, fontFamily: FONT_SANS, background: FORMAT_COLORS[ep.format] + "22", color: FORMAT_COLORS[ep.format], border: `1px solid ${FORMAT_COLORS[ep.format]}44` }}>
+                    {FORMAT_LABELS[ep.format]}
+                  </span>
+                  <span style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted }}>{series?.name ?? ep.seriesId}</span>
+                  <span style={{ marginLeft: "auto", display: "inline-block", padding: "2px 7px", borderRadius: 999, fontSize: 10, fontFamily: FONT_SANS, background: STATUS_COLORS[status] + "22", color: STATUS_COLORS[status], border: `1px solid ${STATUS_COLORS[status]}44` }}>
+                    {STATUS_LABELS[status]}
+                  </span>
+                </div>
+                <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.cream, fontWeight: 600, margin: "0 0 4px 0" }}>{ep.title}</p>
+                <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.muted, margin: 0, overflow: "hidden", whiteSpace: isExpanded ? "normal" : "nowrap", textOverflow: isExpanded ? "clip" : "ellipsis" }}>
+                  {ep.hook}
+                </p>
               </button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {fb.episodeIds.map(eid => {
-                const ep = EPISODE_MAP.get(eid)
-                if (!ep) return null
-                return (
-                  <div key={eid} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "4px 0" }}>
-                    <span style={{ fontFamily: F.body, fontSize: 11, color: C.muted, minWidth: 32 }}>{eid}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight }}>{ep.title}</p>
-                      <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, fontStyle: "italic" }}>&quot;{ep.hook}&quot;</p>
+
+              {isExpanded && (
+                <div style={{ padding: "0 14px 14px 14px", borderTop: `1px solid ${C.border}` }}>
+                  <div style={{ paddingTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 4px 0" }}>Hook</p>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.cream, margin: 0, lineHeight: 1.5 }}>{ep.hook}</p>
                     </div>
+                    <div>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 4px 0" }}>Filming Note</p>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.mutedLight, margin: 0, lineHeight: 1.6 }}>{ep.filmingNote}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 4px 0" }}>Caption Idea</p>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.mutedLight, margin: 0, lineHeight: 1.6 }}>{ep.captionIdea}</p>
+                    </div>
+                    {ep.cta && (
+                      <div>
+                        <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 4px 0" }}>CTA</p>
+                        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.cream, margin: 0 }}>{ep.cta}</p>
+                      </div>
+                    )}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {ep.tags.map(tag => (
+                        <span key={tag} style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted, background: C.border + "99", padding: "2px 8px", borderRadius: 999 }}>#{tag}</span>
+                      ))}
+                    </div>
+                    <div style={{ paddingTop: 4 }}>
+                      {status === "idea" && (
+                        <button onClick={() => setStatus(ep.id, "filmed")} style={{ background: C.gold, color: C.bg, border: "none", borderRadius: 8, padding: "9px 18px", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                          Mark as Filmed {"→"}
+                        </button>
+                      )}
+                      {status === "filmed" && (
+                        <button onClick={() => setStatus(ep.id, "edited")} style={{ background: C.blue, color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                          Mark as Edited {"✓"}
+                        </button>
+                      )}
+                      {status === "edited" && (
+                        <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.green, padding: "9px 0", display: "inline-block" }}>Ready to Post {"✓"}</span>
+                      )}
+                      {status === "posted" && (
+                        <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.gold, padding: "9px 0", display: "inline-block" }}>Posted {"✓"}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Edit Tab ─────────────────────────────────────────────────────────────────
+
+interface EpCardProps {
+  ep: Episode
+  action: React.ReactNode
+}
+
+function EpCard({ ep, action }: EpCardProps) {
+  const series = SERIES_MAP.get(ep.seriesId)
+  return (
+    <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ display: "inline-block", padding: "2px 7px", borderRadius: 999, fontSize: 10, fontFamily: FONT_SANS, background: FORMAT_COLORS[ep.format] + "22", color: FORMAT_COLORS[ep.format], border: `1px solid ${FORMAT_COLORS[ep.format]}44` }}>
+          {FORMAT_LABELS[ep.format]}
+        </span>
+        <span style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted }}>{series?.name ?? ep.seriesId}</span>
+      </div>
+      <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.cream, fontWeight: 600, margin: 0 }}>{ep.title}</p>
+      <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.muted, margin: 0, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{ep.hook}</p>
+      <div style={{ paddingTop: 4 }}>{action}</div>
+    </div>
+  )
+}
+
+function EditTab({ state, update, switchToCalendar }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void; switchToCalendar: () => void }) {
+  const filmed = EPISODES.filter(e => state.episodeStatuses[e.id] === "filmed")
+  const ready  = EPISODES.filter(e => state.episodeStatuses[e.id] === "edited")
+
+  function markEdited(id: string) {
+    update(d => ({ ...d, episodeStatuses: { ...d.episodeStatuses, [id]: "edited" } }))
+  }
+
+  if (filmed.length === 0 && ready.length === 0) {
+    return (
+      <div style={{ padding: "32px 16px", textAlign: "center" }}>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted, lineHeight: 1.6 }}>
+          Nothing in edit yet. Go to Ideas and mark episodes as filmed.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ padding: "16px" }}>
+      {filmed.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.blue, margin: "0 0 12px 0" }}>Filmed — needs editing ({filmed.length})</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {filmed.map(ep => (
+              <EpCard
+                key={ep.id}
+                ep={ep}
+                action={
+                  <button onClick={() => markEdited(ep.id)} style={{ background: C.blue, color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                    Mark as Edited / Ready {"✓"}
+                  </button>
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {ready.length > 0 && (
+        <div>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.green, margin: "0 0 12px 0" }}>Ready to post ({ready.length})</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {ready.map(ep => (
+              <EpCard
+                key={ep.id}
+                ep={ep}
+                action={
+                  <button onClick={switchToCalendar} style={{ background: "transparent", color: C.gold, border: `1px solid ${C.gold}44`, borderRadius: 8, padding: "8px 16px", fontFamily: FONT_SANS, fontSize: 12, cursor: "pointer" }}>
+                    Schedule in Calendar {"→"}
+                  </button>
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Calendar Tab ─────────────────────────────────────────────────────────────
+
+function CalendarTab({ state, update }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void }) {
+  const [pickDateFor, setPickDateFor] = useState<string | null>(null)
+  const [customDate, setCustomDate] = useState("")
+
+  const readyEpisodes = EPISODES.filter(e => state.episodeStatuses[e.id] === "edited")
+
+  function scheduleEpisode(episodeId: string, date: string) {
+    const entry: PostedEntry = { id: generateId(), episodeId, postedDate: date }
+    update(d => ({
+      ...d,
+      episodeStatuses: { ...d.episodeStatuses, [episodeId]: "posted" },
+      postedEntries: [...d.postedEntries, entry],
+    }))
+    setPickDateFor(null)
+    setCustomDate("")
+  }
+
+  const entriesByMonth: Record<string, PostedEntry[]> = {}
+  state.postedEntries.forEach(pe => {
+    const mk = pe.postedDate.slice(0, 7)
+    if (!entriesByMonth[mk]) entriesByMonth[mk] = []
+    entriesByMonth[mk].push(pe)
+  })
+  const monthKeys = Object.keys(entriesByMonth).sort().reverse()
+
+  function getMonthLabel(key: string): string {
+    const d = new Date(key + "-01T12:00:00")
+    return d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  }
+
+  function setRating(entryId: string, rating: 1 | 2 | 3 | 4 | 5) {
+    update(d => ({
+      ...d,
+      postedEntries: d.postedEntries.map(pe => pe.id === entryId ? { ...pe, starRating: rating } : pe),
+    }))
+  }
+
+  return (
+    <div style={{ padding: "16px" }}>
+      {readyEpisodes.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.green, margin: "0 0 12px 0" }}>Ready Queue</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {readyEpisodes.map((ep, i) => {
+              const tempEntries = [...state.postedEntries]
+              for (let j = 0; j < i; j++) {
+                tempEntries.push({ id: "tmp" + j, episodeId: readyEpisodes[j].id, postedDate: getNextAvailableDate(tempEntries) })
+              }
+              const suggestedDate = getNextAvailableDate(tempEntries)
+              const series = SERIES_MAP.get(ep.seriesId)
+
+              return (
+                <div key={ep.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
+                  <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.cream, fontWeight: 600, margin: "0 0 4px 0" }}>{ep.title}</p>
+                  <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: "0 0 10px 0" }}>{series?.name ?? ep.seriesId}</p>
+                  {pickDateFor === ep.id ? (
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <input
+                        type="date"
+                        value={customDate}
+                        onChange={e => setCustomDate(e.target.value)}
+                        style={{ flex: 1, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 10px", fontFamily: FONT_SANS, fontSize: 12, color: C.cream, outline: "none" }}
+                      />
+                      <button onClick={() => { if (customDate) scheduleEpisode(ep.id, customDate) }} style={{ background: C.green, color: C.bg, border: "none", borderRadius: 8, padding: "7px 14px", fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                        Set
+                      </button>
+                      <button onClick={() => setPickDateFor(null)} style={{ background: "transparent", color: C.muted, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 10px", fontFamily: FONT_SANS, fontSize: 12, cursor: "pointer" }}>
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => scheduleEpisode(ep.id, suggestedDate)} style={{ background: C.gold, color: C.bg, border: "none", borderRadius: 8, padding: "8px 14px", fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                        Schedule for {formatDate(suggestedDate)}
+                      </button>
+                      <button onClick={() => { setPickDateFor(ep.id); setCustomDate(suggestedDate) }} style={{ background: "transparent", color: C.mutedLight, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 12px", fontFamily: FONT_SANS, fontSize: 12, cursor: "pointer" }}>
+                        Pick a Date
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.gold, margin: "0 0 12px 0" }}>Posted</p>
+      {monthKeys.length === 0 ? (
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted }}>Nothing posted yet.</p>
+      ) : (
+        monthKeys.map(mk => (
+          <div key={mk} style={{ marginBottom: 20 }}>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.mutedLight, margin: "0 0 8px 0", letterSpacing: "0.06em" }}>{getMonthLabel(mk)}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[...entriesByMonth[mk]].sort((a, b) => b.postedDate.localeCompare(a.postedDate)).map(pe => {
+                const ep = EPISODE_MAP.get(pe.episodeId)
+                const series = ep ? SERIES_MAP.get(ep.seriesId) : null
+                return (
+                  <div key={pe.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                      <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.mutedLight, margin: 0, fontWeight: 600 }}>{formatDateLong(pe.postedDate)}</p>
+                      {ep && (
+                        <span style={{ display: "inline-block", padding: "2px 7px", borderRadius: 999, fontSize: 10, fontFamily: FONT_SANS, background: FORMAT_COLORS[ep.format] + "22", color: FORMAT_COLORS[ep.format], border: `1px solid ${FORMAT_COLORS[ep.format]}44` }}>
+                          {FORMAT_LABELS[ep.format]}
+                        </span>
+                      )}
+                    </div>
+                    {ep && <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.cream, fontWeight: 600, margin: "0 0 2px 0" }}>{ep.title}</p>}
+                    {series && <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: "0 0 8px 0" }}>{series.name}</p>}
                     <div style={{ display: "flex", gap: 4 }}>
-                      {ep.platform.map(pl => (
-                        <PillBadge key={pl} label={platformEmoji(pl)} color={platformColor(pl)} />
+                      {([1, 2, 3, 4, 5] as const).map(star => (
+                        <button key={star} onClick={() => setRating(pe.id, star)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 16, padding: "2px 1px", color: (pe.starRating ?? 0) >= star ? C.gold : C.border }}>
+                          {"★"}
+                        </button>
                       ))}
                     </div>
                   </div>
                 )
               })}
             </div>
-          </Card>
-        )
-      })}
-    </div>
-  )
-}
-
-// ─── Tab: Post ────────────────────────────────────────────────────────────────
-
-function PostTab({ state, onToggleStatus, onLogPerformance }: {
-  state: PlanState
-  onToggleStatus: (postId: string) => void
-  onLogPerformance: (perf: PostPerformance) => void
-}) {
-  const currentDay = getCurrentDay(state.startDate)
-  const [selectedDay, setSelectedDay] = useState<number>(Math.max(1, currentDay))
-  const [showPerfForm, setShowPerfForm] = useState<string | null>(null)
-  const [perfForm, setPerfForm] = useState({ views: "", likes: "", comments: "", rating: "check" as PostRating, notes: "" })
-
-  const dayPosts = getPostsForDay(selectedDay)
-
-  function cycleDays(dir: 1 | -1) {
-    setSelectedDay(d => Math.max(1, Math.min(90, d + dir)))
-  }
-
-  function submitPerf(postId: string) {
-    const p = POST_MAP.get(postId)
-    if (!p) return
-    onLogPerformance({
-      postId,
-      postedDate: state.startDate ? addDays(state.startDate, selectedDay - 1) : "",
-      platform: p.platform,
-      views: parseInt(perfForm.views) || 0,
-      likes: parseInt(perfForm.likes) || 0,
-      comments: parseInt(perfForm.comments) || 0,
-      rating: perfForm.rating,
-      notes: perfForm.notes,
-    })
-    setShowPerfForm(null)
-    setPerfForm({ views: "", likes: "", comments: "", rating: "check", notes: "" })
-  }
-
-  return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Day selector */}
-      <Card>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <GhostBtn onClick={() => cycleDays(-1)} small>◀</GhostBtn>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontFamily: F.heading, fontSize: 22, color: C.cream }}>Day {selectedDay}</p>
-            <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>
-              {dayPosts.length} post{dayPosts.length !== 1 ? "s" : ""} scheduled
-            </p>
           </div>
-          <GhostBtn onClick={() => cycleDays(1)} small>▶</GhostBtn>
-        </div>
-        <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 10, flexWrap: "wrap" }}>
-          {[1, 7, 14, 21, 28, 30, 60, 90].map(d => (
-            <button key={d} onClick={() => setSelectedDay(d)} style={{
-              padding: "4px 8px", fontSize: 11, fontFamily: F.body,
-              background: selectedDay === d ? C.gold : "transparent",
-              color: selectedDay === d ? C.bg : C.muted,
-              border: `1px solid ${selectedDay === d ? C.gold : C.border}`,
-              borderRadius: 6, cursor: "pointer",
-            }}>
-              {d}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Posts for selected day */}
-      {dayPosts.length === 0 ? (
-        <Card><p style={{ fontFamily: F.body, fontSize: 13, color: C.muted, textAlign: "center" }}>No posts scheduled for Day {selectedDay}</p></Card>
-      ) : (
-        dayPosts.map(p => {
-          const ep = EPISODE_MAP.get(p.episodeId)
-          const status = state.postStatuses[p.id]
-          const perfEntry = state.performance.find(pf => pf.postId === p.id)
-          return (
-            <Card key={p.id}>
-              <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                <PillBadge label={platformEmoji(p.platform)} color={platformColor(p.platform)} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: F.body, fontSize: 13, color: C.cream }}>{ep?.title ?? p.episodeId}</p>
-                  <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, fontStyle: "italic", marginTop: 2 }}>&quot;{ep?.hook}&quot;</p>
-                  <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 4 }}>{p.timeSlot}</p>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <button
-                  onClick={() => onToggleStatus(p.id)}
-                  style={{
-                    flex: 1, padding: "8px 0", borderRadius: 8, cursor: "pointer", fontFamily: F.body, fontSize: 12,
-                    background: status === "posted" ? C.green + "22" : status === "skipped" ? C.error + "22" : C.border + "44",
-                    color: status === "posted" ? C.green : status === "skipped" ? C.error : C.mutedLight,
-                    border: `1px solid ${status === "posted" ? C.green + "66" : status === "skipped" ? C.error + "66" : C.border}`,
-                  }}
-                >
-                  {status === "posted" ? "✓ Posted" : status === "skipped" ? "✗ Skipped" : "· Scheduled"}
-                </button>
-                {status === "posted" && !perfEntry && (
-                  <GhostBtn small onClick={() => setShowPerfForm(p.id)}>Log Stats</GhostBtn>
-                )}
-                {perfEntry && (
-                  <PillBadge label={ratingLabel(perfEntry.rating)} color={perfEntry.rating === "fire" ? C.gold : perfEntry.rating === "check" ? C.green : perfEntry.rating === "neutral" ? C.mutedLight : C.error} />
-                )}
-              </div>
-
-              {perfEntry && (
-                <div style={{ display: "flex", gap: 16, marginTop: 10, padding: "8px 0", borderTop: `1px solid ${C.border}` }}>
-                  <StatRow label="Views" value={perfEntry.views.toLocaleString()} />
-                  <StatRow label="Likes" value={perfEntry.likes.toLocaleString()} />
-                  <StatRow label="Comments" value={perfEntry.comments.toLocaleString()} />
-                </div>
-              )}
-
-              {showPerfForm === p.id && (
-                <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8, padding: "12px", background: C.bg, borderRadius: 8 }}>
-                  <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted }}>Log performance</p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                    <Input value={perfForm.views} onChange={v => setPerfForm(f => ({ ...f, views: v }))} placeholder="Views" />
-                    <Input value={perfForm.likes} onChange={v => setPerfForm(f => ({ ...f, likes: v }))} placeholder="Likes" />
-                    <Input value={perfForm.comments} onChange={v => setPerfForm(f => ({ ...f, comments: v }))} placeholder="Comments" />
-                  </div>
-                  <Select
-                    value={perfForm.rating}
-                    onChange={v => setPerfForm(f => ({ ...f, rating: v as PostRating }))}
-                    options={[
-                      { label: "🔥 Fire", value: "fire" },
-                      { label: "✓ Good", value: "check" },
-                      { label: "— OK", value: "neutral" },
-                      { label: "✗ Miss", value: "miss" },
-                    ]}
-                  />
-                  <Input value={perfForm.notes} onChange={v => setPerfForm(f => ({ ...f, notes: v }))} placeholder="Notes (optional)" />
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <GoldBtn small onClick={() => submitPerf(p.id)}>Save</GoldBtn>
-                    <GhostBtn small onClick={() => setShowPerfForm(null)}>Cancel</GhostBtn>
-                  </div>
-                </div>
-              )}
-            </Card>
-          )
-        })
+        ))
       )}
     </div>
   )
 }
 
-// ─── Tab: Stats ───────────────────────────────────────────────────────────────
+// ─── Stats Tab ────────────────────────────────────────────────────────────────
 
-function StatsTab({ state, onUpdateMetrics }: { state: PlanState; onUpdateMetrics: (m: Metrics) => void }) {
-  const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<Metrics>(state.metrics)
+interface MetricEdit {
+  views: string
+  likes: string
+  comments: string
+  saves: string
+  note: string
+}
 
-  const postedCount = Object.values(state.postStatuses).filter(s => s === "posted").length
-  const skippedCount = Object.values(state.postStatuses).filter(s => s === "skipped").length
-  const totalScheduled = SCHEDULED_POSTS.length
-  const engagementTotal = state.performance.reduce((acc, p) => acc + p.views + p.likes + p.comments, 0)
-  const fireCount = state.performance.filter(p => p.rating === "fire").length
-  const missCount = state.performance.filter(p => p.rating === "miss").length
+function StatsTab({ state, update }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editMetrics, setEditMetrics] = useState<Record<string, MetricEdit>>({})
 
-  function save() {
-    onUpdateMetrics(form)
-    setEditing(false)
+  const sortedEntries = [...state.postedEntries].sort((a, b) => b.postedDate.localeCompare(a.postedDate))
+  const ratedEntries = sortedEntries.filter(pe => pe.starRating)
+  const avgRating = ratedEntries.length > 0
+    ? (ratedEntries.reduce((sum, pe) => sum + (pe.starRating ?? 0), 0) / ratedEntries.length).toFixed(1)
+    : null
+  const bestEntry = ratedEntries.length > 0
+    ? ratedEntries.reduce((best, pe) => (pe.starRating ?? 0) > (best.starRating ?? 0) ? pe : best)
+    : null
+  const bestEpisode = bestEntry ? EPISODE_MAP.get(bestEntry.episodeId) : null
+
+  function getMetricsEdit(id: string): MetricEdit {
+    const entry = state.postedEntries.find(pe => pe.id === id)
+    if (!entry) return { views: "", likes: "", comments: "", saves: "", note: "" }
+    return {
+      views:    entry.views?.toString() ?? "",
+      likes:    entry.likes?.toString() ?? "",
+      comments: entry.comments?.toString() ?? "",
+      saves:    entry.saves?.toString() ?? "",
+      note:     entry.note ?? "",
+    }
+  }
+
+  function initEdit(id: string) {
+    setEditMetrics(prev => prev[id] ? prev : { ...prev, [id]: getMetricsEdit(id) })
+    setExpandedId(id)
+  }
+
+  function saveMetrics(id: string) {
+    const m = editMetrics[id]
+    if (!m) return
+    update(d => ({
+      ...d,
+      postedEntries: d.postedEntries.map(pe =>
+        pe.id !== id ? pe : {
+          ...pe,
+          views:    m.views    ? parseInt(m.views)    : undefined,
+          likes:    m.likes    ? parseInt(m.likes)    : undefined,
+          comments: m.comments ? parseInt(m.comments) : undefined,
+          saves:    m.saves    ? parseInt(m.saves)    : undefined,
+          note:     m.note || undefined,
+        }
+      ),
+    }))
+  }
+
+  function setRating(entryId: string, rating: 1 | 2 | 3 | 4 | 5) {
+    update(d => ({
+      ...d,
+      postedEntries: d.postedEntries.map(pe => pe.id === entryId ? { ...pe, starRating: rating } : pe),
+    }))
+  }
+
+  function updateEditField(id: string, field: keyof MetricEdit, val: string) {
+    setEditMetrics(prev => ({ ...prev, [id]: { ...(prev[id] ?? getMetricsEdit(id)), [field]: val } }))
+  }
+
+  if (sortedEntries.length === 0) {
+    return (
+      <div style={{ padding: "32px 16px", textAlign: "center" }}>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted, lineHeight: 1.6 }}>
+          Start posting and come back here to rate your content.
+        </p>
+      </div>
+    )
   }
 
   return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Content stats */}
-      <Card>
-        <SectionTitle>Content Performance</SectionTitle>
-        <StatRow label="Total posts" value={totalScheduled} />
-        <StatRow label="Posted" value={postedCount} color={C.green} />
-        <StatRow label="Skipped" value={skippedCount} color={C.error} />
-        <StatRow label="Total engagement" value={engagementTotal.toLocaleString()} color={C.gold} />
-        <StatRow label="Fire posts" value={fireCount} color={C.goldLight} />
-        <StatRow label="Missed posts" value={missCount} color={C.error} />
-        <div style={{ marginTop: 12 }}>
-          <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginBottom: 4 }}>Content completion</p>
-          <ProgressBar value={postedCount} max={totalScheduled} />
-        </div>
-      </Card>
-
-      {/* Platform metrics */}
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <SectionTitle>Platform Metrics</SectionTitle>
-          {!editing ? (
-            <GhostBtn small onClick={() => { setForm(state.metrics); setEditing(true) }}>Edit</GhostBtn>
-          ) : (
-            <div style={{ display: "flex", gap: 8 }}>
-              <GoldBtn small onClick={save}>Save</GoldBtn>
-              <GhostBtn small onClick={() => setEditing(false)}>Cancel</GhostBtn>
+    <div style={{ padding: "16px" }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+        <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <p style={{ fontFamily: FONT_SERIF, fontSize: 24, color: C.gold, margin: "0 0 2px 0" }}>{sortedEntries.length}</p>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted, margin: 0 }}>Posted</p>
+          </div>
+          {avgRating && (
+            <div style={{ textAlign: "center", flex: 1 }}>
+              <p style={{ fontFamily: FONT_SERIF, fontSize: 24, color: C.gold, margin: "0 0 2px 0" }}>{avgRating}{"★"}</p>
+              <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted, margin: 0 }}>Avg Rating</p>
+            </div>
+          )}
+          {bestEpisode && (
+            <div style={{ flex: 2 }}>
+              <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted, margin: "0 0 2px 0" }}>Best</p>
+              <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.cream, margin: 0, lineHeight: 1.3 }}>{bestEpisode.title}</p>
             </div>
           )}
         </div>
+      </div>
 
-        {editing ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {(
-              [
-                { key: "tiktokFollowers", label: "TikTok Followers" },
-                { key: "tiktokViews", label: "TikTok Views" },
-                { key: "igFollowers", label: "IG Followers" },
-                { key: "igReach", label: "IG Reach" },
-                { key: "emailSubscribers", label: "Email Subscribers" },
-                { key: "websiteVisits", label: "Website Visits" },
-              ] as const
-            ).map(({ key, label }) => (
-              <div key={key}>
-                <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginBottom: 4 }}>{label}</p>
-                <Input
-                  type="number"
-                  value={String(form[key])}
-                  onChange={v => setForm(f => ({ ...f, [key]: parseInt(v) || 0 }))}
-                  placeholder={label}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            <StatRow label="TikTok Followers" value={state.metrics.tiktokFollowers.toLocaleString()} />
-            <StatRow label="TikTok Views" value={state.metrics.tiktokViews.toLocaleString()} />
-            <StatRow label="IG Followers" value={state.metrics.igFollowers.toLocaleString()} />
-            <StatRow label="IG Reach" value={state.metrics.igReach.toLocaleString()} />
-            <StatRow label="Email Subscribers" value={state.metrics.emailSubscribers.toLocaleString()} />
-            <StatRow label="Website Visits" value={state.metrics.websiteVisits.toLocaleString()} />
-          </>
-        )}
-      </Card>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {sortedEntries.map(pe => {
+          const ep = EPISODE_MAP.get(pe.episodeId)
+          const series = ep ? SERIES_MAP.get(ep.seriesId) : null
+          const isExpanded = expandedId === pe.id
+          const em = editMetrics[pe.id] ?? getMetricsEdit(pe.id)
 
-      {/* Top posts */}
-      {state.performance.length > 0 && (
-        <Card>
-          <SectionTitle>Top Posts by Views</SectionTitle>
-          {[...state.performance]
-            .sort((a, b) => b.views - a.views)
-            .slice(0, 5)
-            .map(perf => {
-              const post = POST_MAP.get(perf.postId)
-              const ep = post ? EPISODE_MAP.get(post.episodeId) : undefined
-              return (
-                <div key={perf.postId} style={{ padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: F.body, fontSize: 12, color: C.cream }}>{ep?.title ?? perf.postId}</p>
-                      <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>{perf.postedDate}</p>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <p style={{ fontFamily: F.heading, fontSize: 16, color: C.gold }}>{perf.views.toLocaleString()}</p>
-                      <p style={{ fontFamily: F.body, fontSize: 10, color: C.muted }}>views</p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-        </Card>
-      )}
-    </div>
-  )
-}
-
-// ─── Tab: Sales ───────────────────────────────────────────────────────────────
-
-function SalesTab({ state, onAddSale, onDeleteSale }: {
-  state: PlanState
-  onAddSale: (sale: SaleEntry) => void
-  onDeleteSale: (id: string) => void
-}) {
-  const currentDay = getCurrentDay(state.startDate)
-  const currentMonth = getMonthFromDay(Math.max(1, currentDay))
-
-  const [form, setForm] = useState({ product: PRODUCTS[0].value, amount: "", notes: "", month: String(currentMonth) as "1" | "2" | "3" })
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-
-  const m1Total = computedSalesTotal(state.sales, 1)
-  const m2Total = computedSalesTotal(state.sales, 2)
-  const m3Total = computedSalesTotal(state.sales, 3)
-
-  function addSale() {
-    const amt = parseFloat(form.amount)
-    if (!amt || amt <= 0) return
-    onAddSale({
-      id: uid(),
-      date: new Date().toISOString().split("T")[0],
-      product: form.product,
-      amount: amt,
-      month: parseInt(form.month) as 1 | 2 | 3,
-      notes: form.notes,
-    })
-    setForm(f => ({ ...f, amount: "", notes: "" }))
-  }
-
-  return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Targets */}
-      <Card>
-        <SectionTitle>Revenue Targets</SectionTitle>
-        {([1, 2, 3] as const).map(m => {
-          const total = m === 1 ? m1Total : m === 2 ? m2Total : m3Total
-          const target = m === 1 ? MONTH_TARGETS.m1 : m === 2 ? MONTH_TARGETS.m2 : MONTH_TARGETS.m3
           return (
-            <div key={m} style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight }}>Month {m}</span>
-                <span style={{ fontFamily: F.heading, fontSize: 16, color: total >= target ? C.green : C.cream }}>
-                  ${total.toLocaleString()} / ${target.toLocaleString()}
-                </span>
-              </div>
-              <ProgressBar value={total} max={target} color={total >= target ? C.green : C.gold} />
+            <div key={pe.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
+              <button
+                onClick={() => isExpanded ? setExpandedId(null) : initEdit(pe.id)}
+                style={{ width: "100%", background: "transparent", border: "none", cursor: "pointer", padding: "12px 14px", textAlign: "left" }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.mutedLight, margin: "0 0 3px 0" }}>{formatDateLong(pe.postedDate)}</p>
+                    {ep && <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.cream, fontWeight: 600, margin: "0 0 2px 0" }}>{ep.title}</p>}
+                    {series && <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: 0 }}>{series.name}</p>}
+                  </div>
+                  {ep && (
+                    <span style={{ display: "inline-block", padding: "2px 7px", borderRadius: 999, fontSize: 10, fontFamily: FONT_SANS, background: FORMAT_COLORS[ep.format] + "22", color: FORMAT_COLORS[ep.format], border: `1px solid ${FORMAT_COLORS[ep.format]}44`, marginLeft: 8 }}>
+                      {FORMAT_LABELS[ep.format]}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
+                  {([1, 2, 3, 4, 5] as const).map(star => (
+                    <span key={star} style={{ fontSize: 16, color: (pe.starRating ?? 0) >= star ? C.gold : C.border }}>{"★"}</span>
+                  ))}
+                </div>
+              </button>
+
+              {isExpanded && (
+                <div style={{ padding: "0 14px 14px 14px", borderTop: `1px solid ${C.border}` }}>
+                  <div style={{ display: "flex", gap: 4, padding: "12px 0 10px 0" }}>
+                    {([1, 2, 3, 4, 5] as const).map(star => (
+                      <button key={star} onClick={() => setRating(pe.id, star)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 22, padding: "2px 2px", color: (pe.starRating ?? 0) >= star ? C.gold : C.border }}>
+                        {"★"}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                    {(["views", "likes", "comments", "saves"] as const).map(field => (
+                      <div key={field}>
+                        <p style={{ fontFamily: FONT_SANS, fontSize: 10, color: C.muted, margin: "0 0 3px 0", textTransform: "capitalize" }}>{field}</p>
+                        <input
+                          type="number"
+                          value={em[field]}
+                          onChange={e => updateEditField(pe.id, field, e.target.value)}
+                          placeholder="0"
+                          style={{ width: "100%", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: "7px 10px", fontFamily: FONT_SANS, fontSize: 12, color: C.cream, outline: "none", boxSizing: "border-box" }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <textarea
+                    value={em.note}
+                    onChange={e => updateEditField(pe.id, "note", e.target.value)}
+                    placeholder="Notes..."
+                    rows={2}
+                    style={{ width: "100%", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: "8px 10px", fontFamily: FONT_SANS, fontSize: 12, color: C.cream, outline: "none", resize: "none", boxSizing: "border-box", marginBottom: 8 }}
+                  />
+                  <button onClick={() => saveMetrics(pe.id)} style={{ background: C.gold, color: C.bg, border: "none", borderRadius: 8, padding: "8px 18px", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                    Save Metrics
+                  </button>
+                </div>
+              )}
             </div>
           )
         })}
-      </Card>
-
-      {/* Add sale */}
-      <Card>
-        <SectionTitle>Log a Sale</SectionTitle>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <Select value={form.product} onChange={v => setForm(f => ({ ...f, product: v }))} options={PRODUCTS} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <Input type="number" value={form.amount} onChange={v => setForm(f => ({ ...f, amount: v }))} placeholder="Amount ($)" />
-            <Select
-              value={form.month}
-              onChange={v => setForm(f => ({ ...f, month: v as "1" | "2" | "3" }))}
-              options={[
-                { label: "Month 1", value: "1" },
-                { label: "Month 2", value: "2" },
-                { label: "Month 3", value: "3" },
-              ]}
-            />
-          </div>
-          <Input value={form.notes} onChange={v => setForm(f => ({ ...f, notes: v }))} placeholder="Notes (optional)" />
-          <GoldBtn onClick={addSale}>Add Sale</GoldBtn>
-        </div>
-      </Card>
-
-      {/* Sales log */}
-      {state.sales.length > 0 && (
-        <Card>
-          <SectionTitle>Sales Log</SectionTitle>
-          {[...state.sales].reverse().map(sale => (
-            <div key={sale.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: F.body, fontSize: 12, color: C.cream }}>{sale.product}</p>
-                <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>{sale.date} · Month {sale.month}</p>
-                {sale.notes && <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, fontStyle: "italic" }}>{sale.notes}</p>}
-              </div>
-              <p style={{ fontFamily: F.heading, fontSize: 18, color: C.gold }}>${sale.amount.toLocaleString()}</p>
-              {confirmDelete === sale.id ? (
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => { onDeleteSale(sale.id); setConfirmDelete(null) }} style={{ background: C.error + "22", color: C.error, border: `1px solid ${C.error}44`, borderRadius: 6, padding: "4px 8px", fontSize: 11, cursor: "pointer", fontFamily: F.body }}>Delete</button>
-                  <GhostBtn small onClick={() => setConfirmDelete(null)}>Cancel</GhostBtn>
-                </div>
-              ) : (
-                <button onClick={() => setConfirmDelete(sale.id)} style={{ background: "transparent", border: "none", color: C.muted, cursor: "pointer", fontSize: 14 }}>×</button>
-              )}
-            </div>
-          ))}
-        </Card>
-      )}
-    </div>
-  )
-}
-
-// ─── Tab: Clients ─────────────────────────────────────────────────────────────
-
-function ClientsTab({ state, onAddClient, onUpdateClient, onDeleteClient }: {
-  state: PlanState
-  onAddClient: (c: Client) => void
-  onUpdateClient: (c: Client) => void
-  onDeleteClient: (id: string) => void
-}) {
-  const [showAdd, setShowAdd] = useState(false)
-  const [editId, setEditId] = useState<string | null>(null)
-  const [form, setForm] = useState({
-    name: "", startDate: "", nextCall: "",
-    tier: "foundation" as CoachingTier,
-    paymentType: "monthly" as Client["paymentType"],
-    status: "active" as Client["status"],
-    notes: "", testimonialReceived: false,
-  })
-
-  const activeClients = state.clients.filter(c => c.status === "active")
-  const canAdd = state.clients.filter(c => c.status === "active").length < MAX_CLIENTS
-
-  function resetForm() {
-    setForm({ name: "", startDate: "", nextCall: "", tier: "foundation", paymentType: "monthly", status: "active", notes: "", testimonialReceived: false })
-  }
-
-  function startAdd() {
-    resetForm()
-    setEditId(null)
-    setShowAdd(true)
-  }
-
-  function startEdit(c: Client) {
-    setForm({ name: c.name, startDate: c.startDate, nextCall: c.nextCall, tier: c.tier, paymentType: c.paymentType, status: c.status, notes: c.notes, testimonialReceived: c.testimonialReceived })
-    setEditId(c.id)
-    setShowAdd(true)
-  }
-
-  function saveClient() {
-    if (!form.name.trim()) return
-    const fee = CLIENT_TIERS[form.tier]
-    const t30 = form.startDate ? addDays(form.startDate, 30) : ""
-    const t60 = form.startDate ? addDays(form.startDate, 60) : ""
-    const t90 = form.startDate ? addDays(form.startDate, 90) : ""
-    if (editId) {
-      const existing = state.clients.find(c => c.id === editId)
-      if (!existing) return
-      onUpdateClient({ ...existing, ...form, monthlyFee: fee, testimonialDue30: t30, testimonialDue60: t60, testimonialDue90: t90 })
-    } else {
-      onAddClient({ id: uid(), ...form, monthlyFee: fee, testimonialDue30: t30, testimonialDue60: t60, testimonialDue90: t90 })
-    }
-    setShowAdd(false)
-    setEditId(null)
-    resetForm()
-  }
-
-  return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Capacity bar */}
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <div>
-            <p style={{ fontFamily: F.heading, fontSize: 22, color: C.cream }}>{activeClients.length} / {MAX_CLIENTS} clients</p>
-            <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted }}>
-              ${clientMonthlyTotal(state.clients).toLocaleString()}/mo MRR
-            </p>
-          </div>
-          {canAdd && <GoldBtn onClick={startAdd} small>+ Add Client</GoldBtn>}
-          {!canAdd && <PillBadge label="Full" color={C.error} />}
-        </div>
-        <ProgressBar value={activeClients.length} max={MAX_CLIENTS} color={activeClients.length >= MAX_CLIENTS ? C.error : C.green} />
-        <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-          {(["founding", "foundation", "premium", "elite"] as CoachingTier[]).map(tier => (
-            <div key={tier} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <PillBadge label={`${tier} $${CLIENT_TIERS[tier]}`} color={tier === "elite" ? C.goldLight : tier === "premium" ? C.gold : tier === "foundation" ? C.blue : C.green} />
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Add / edit form */}
-      {showAdd && (
-        <Card style={{ borderColor: C.gold + "44" }}>
-          <SectionTitle>{editId ? "Edit Client" : "New Client"}</SectionTitle>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Input value={form.name} onChange={v => setForm(f => ({ ...f, name: v }))} placeholder="Client name" />
-            <Select
-              value={form.tier}
-              onChange={v => setForm(f => ({ ...f, tier: v as CoachingTier }))}
-              options={[
-                { label: "Founding — $350/mo", value: "founding" },
-                { label: "Foundation — $500/mo", value: "foundation" },
-                { label: "Premium — $700/mo", value: "premium" },
-                { label: "Elite — $1,200/mo", value: "elite" },
-              ]}
-            />
-            <Select
-              value={form.paymentType}
-              onChange={v => setForm(f => ({ ...f, paymentType: v as Client["paymentType"] }))}
-              options={[
-                { label: "Monthly", value: "monthly" },
-                { label: "3-Month Prepay", value: "3month-prepay" },
-                { label: "6-Month Prepay", value: "6month-prepay" },
-              ]}
-            />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div>
-                <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginBottom: 4 }}>Start date</p>
-                <Input type="date" value={form.startDate} onChange={v => setForm(f => ({ ...f, startDate: v }))} />
-              </div>
-              <div>
-                <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginBottom: 4 }}>Next call</p>
-                <Input type="date" value={form.nextCall} onChange={v => setForm(f => ({ ...f, nextCall: v }))} />
-              </div>
-            </div>
-            <Select
-              value={form.status}
-              onChange={v => setForm(f => ({ ...f, status: v as Client["status"] }))}
-              options={[
-                { label: "Active", value: "active" },
-                { label: "Paused", value: "paused" },
-                { label: "Completed", value: "completed" },
-              ]}
-            />
-            <Input value={form.notes} onChange={v => setForm(f => ({ ...f, notes: v }))} placeholder="Notes" />
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={form.testimonialReceived}
-                onChange={e => setForm(f => ({ ...f, testimonialReceived: e.target.checked }))}
-              />
-              <span style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight }}>Testimonial received</span>
-            </label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <GoldBtn onClick={saveClient}>{editId ? "Update" : "Add"}</GoldBtn>
-              <GhostBtn onClick={() => { setShowAdd(false); setEditId(null) }}>Cancel</GhostBtn>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Client list */}
-      {state.clients.length === 0 && !showAdd && (
-        <Card>
-          <p style={{ fontFamily: F.body, fontSize: 13, color: C.muted, textAlign: "center" }}>No clients yet. Add your first client above.</p>
-        </Card>
-      )}
-
-      {state.clients.map(c => {
-        const tierColor = c.tier === "elite" ? C.goldLight : c.tier === "premium" ? C.gold : c.tier === "foundation" ? C.blue : C.green
-        return (
-          <Card key={c.id} style={{ opacity: c.status !== "active" ? 0.7 : 1 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-              <div>
-                <p style={{ fontFamily: F.heading, fontSize: 20, color: C.cream }}>{c.name}</p>
-                <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
-                  <PillBadge label={c.tier} color={tierColor} />
-                  <PillBadge label={`$${c.monthlyFee}/mo`} color={C.gold} />
-                  <PillBadge label={c.status} color={c.status === "active" ? C.green : c.status === "paused" ? C.mutedLight : C.error} />
-                </div>
-              </div>
-              <GhostBtn small onClick={() => startEdit(c)}>Edit</GhostBtn>
-            </div>
-
-            <div style={{ display: "flex", gap: 20, marginBottom: 8 }}>
-              {c.startDate && (
-                <div>
-                  <p style={{ fontFamily: F.body, fontSize: 10, color: C.muted }}>Started</p>
-                  <p style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight }}>{formatDate(c.startDate)}</p>
-                </div>
-              )}
-              {c.nextCall && (
-                <div>
-                  <p style={{ fontFamily: F.body, fontSize: 10, color: C.muted }}>Next call</p>
-                  <p style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight }}>{formatDate(c.nextCall)}</p>
-                </div>
-              )}
-              {c.paymentType && (
-                <div>
-                  <p style={{ fontFamily: F.body, fontSize: 10, color: C.muted }}>Payment</p>
-                  <p style={{ fontFamily: F.body, fontSize: 12, color: C.mutedLight }}>{c.paymentType}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Testimonial tracking */}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-              {c.testimonialDue30 && (
-                <div style={{ fontSize: 11, fontFamily: F.body, color: C.muted }}>30d due: {formatDate(c.testimonialDue30)}</div>
-              )}
-              {c.testimonialDue60 && (
-                <div style={{ fontSize: 11, fontFamily: F.body, color: C.muted }}>60d due: {formatDate(c.testimonialDue60)}</div>
-              )}
-              {c.testimonialDue90 && (
-                <div style={{ fontSize: 11, fontFamily: F.body, color: C.muted }}>90d due: {formatDate(c.testimonialDue90)}</div>
-              )}
-            </div>
-
-            {c.testimonialReceived && <PillBadge label="Testimonial received" color={C.green} />}
-
-            {c.notes && (
-              <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontStyle: "italic", marginTop: 8 }}>{c.notes}</p>
-            )}
-
-            <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "flex-end" }}>
-              <button
-                onClick={() => onDeleteClient(c.id)}
-                style={{ background: "transparent", border: "none", color: C.error + "88", fontSize: 11, fontFamily: F.body, cursor: "pointer" }}
-              >
-                Remove
-              </button>
-            </div>
-          </Card>
-        )
-      })}
-    </div>
-  )
-}
-
-// ─── Tab: Tasks ───────────────────────────────────────────────────────────────
-
-function TasksTab({ state, onToggleTask }: { state: PlanState; onToggleTask: (id: string) => void }) {
-  const currentWeek = getCurrentWeek(state.startDate)
-  const [filterPhase, setFilterPhase] = useState<0 | 1 | 2 | 3>(0)
-  const [filterCat, setFilterCat] = useState<Task["category"] | "all">("all")
-
-  const filtered = TASKS.filter(t => {
-    if (filterPhase !== 0 && t.phase !== filterPhase) return false
-    if (filterCat !== "all" && t.category !== filterCat) return false
-    return true
-  })
-
-  const completedCount = TASKS.filter(t => state.completedTasks[t.id]).length
-
-  return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Progress */}
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-          <p style={{ fontFamily: F.body, fontSize: 13, color: C.mutedLight }}>{completedCount} / {TASKS.length} tasks complete</p>
-          <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted }}>Week {currentWeek}</p>
-        </div>
-        <ProgressBar value={completedCount} max={TASKS.length} />
-      </Card>
-
-      {/* Filters */}
-      <Card>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {([0, 1, 2, 3] as const).map(p => (
-            <button key={p} onClick={() => setFilterPhase(p)} style={{
-              padding: "4px 10px", borderRadius: 6, fontSize: 11, fontFamily: F.body, cursor: "pointer",
-              background: filterPhase === p ? C.gold : "transparent",
-              color: filterPhase === p ? C.bg : C.muted,
-              border: `1px solid ${filterPhase === p ? C.gold : C.border}`,
-            }}>
-              {p === 0 ? "All" : `Phase ${p}`}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-          <button onClick={() => setFilterCat("all")} style={{
-            padding: "4px 10px", borderRadius: 6, fontSize: 11, fontFamily: F.body, cursor: "pointer",
-            background: filterCat === "all" ? C.gold : "transparent",
-            color: filterCat === "all" ? C.bg : C.muted,
-            border: `1px solid ${filterCat === "all" ? C.gold : C.border}`,
-          }}>
-            All
-          </button>
-          {(Object.keys(CATEGORY_LABELS) as Task["category"][]).map(cat => (
-            <button key={cat} onClick={() => setFilterCat(cat)} style={{
-              padding: "4px 10px", borderRadius: 6, fontSize: 11, fontFamily: F.body, cursor: "pointer",
-              background: filterCat === cat ? CATEGORY_COLORS[cat] : "transparent",
-              color: filterCat === cat ? C.bg : C.muted,
-              border: `1px solid ${filterCat === cat ? CATEGORY_COLORS[cat] : C.border}`,
-            }}>
-              {CATEGORY_LABELS[cat]}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Task list */}
-      {(() => {
-        const byWeek = filtered.reduce<Record<number, Task[]>>((acc, t) => {
-          if (!acc[t.week]) acc[t.week] = []
-          acc[t.week].push(t)
-          return acc
-        }, {})
-
-        return Object.entries(byWeek)
-          .sort(([a], [b]) => parseInt(a) - parseInt(b))
-          .map(([week, tasks]) => (
-            <Card key={week}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                <p style={{ fontFamily: F.heading, fontSize: 17, color: parseInt(week) === currentWeek ? C.gold : C.cream }}>
-                  Week {week}
-                  {parseInt(week) === currentWeek && <span style={{ fontFamily: F.body, fontSize: 11, color: C.gold, marginLeft: 8 }}>← current</span>}
-                </p>
-                <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>
-                  {tasks.filter(t => state.completedTasks[t.id]).length}/{tasks.length}
-                </p>
-              </div>
-              {tasks.map(t => {
-                const done = !!state.completedTasks[t.id]
-                return (
-                  <div key={t.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.border}` }}>
-                    <button
-                      onClick={() => onToggleTask(t.id)}
-                      style={{
-                        width: 20, height: 20, borderRadius: 4, flexShrink: 0, marginTop: 1,
-                        border: `2px solid ${done ? CATEGORY_COLORS[t.category] : C.border}`,
-                        background: done ? CATEGORY_COLORS[t.category] + "33" : "transparent",
-                        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                        color: done ? CATEGORY_COLORS[t.category] : C.muted, fontSize: 11,
-                      }}
-                    >
-                      {done ? "✓" : ""}
-                    </button>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: F.body, fontSize: 13, color: done ? C.muted : C.cream, textDecoration: done ? "line-through" : "none", lineHeight: 1.4 }}>
-                        {t.text}
-                      </p>
-                      <PillBadge label={CATEGORY_LABELS[t.category]} color={CATEGORY_COLORS[t.category]} />
-                    </div>
-                  </div>
-                )
-              })}
-            </Card>
-          ))
-      })()}
-    </div>
-  )
-}
-
-// ─── Tab: Ads ─────────────────────────────────────────────────────────────────
-
-function AdsTab({ state, currentDay, onAddCampaign, onUpdateCampaign }: {
-  state: PlanState
-  currentDay: number
-  onAddCampaign: (c: AdCampaign) => void
-  onUpdateCampaign: (c: AdCampaign) => void
-}) {
-  const [showAdd, setShowAdd] = useState(false)
-  const [form, setForm] = useState({
-    platform: "tiktok" as Platform, startDate: "", budget: "", spent: "",
-    impressions: "", clicks: "", conversions: "", notes: "",
-  })
-
-  if (currentDay < 91) {
-    return (
-      <div style={{ padding: "32px 16px" }}>
-        <Card style={{ textAlign: "center" }}>
-          <p style={{ fontFamily: F.heading, fontSize: 28, color: C.gold, marginBottom: 12 }}>✦</p>
-          <p style={{ fontFamily: F.heading, fontSize: 22, color: C.cream, marginBottom: 8 }}>Ads unlock in Month 4</p>
-          <p style={{ fontFamily: F.body, fontSize: 13, color: C.muted, lineHeight: 1.7, marginBottom: 16 }}>
-            After your founding clients deliver testimonials, you&apos;ll have social proof to make paid ads profitable.
-            Focus on organic growth and coaching delivery for now.
-          </p>
-          <div style={{ background: C.bg, borderRadius: 8, padding: "12px 16px", display: "inline-block" }}>
-            <p style={{ fontFamily: F.heading, fontSize: 20, color: C.gold }}>Day {currentDay} of 90</p>
-            <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>{Math.max(0, 91 - currentDay)} days until Ads unlock</p>
-          </div>
-        </Card>
       </div>
-    )
-  }
-
-  function addCampaign() {
-    const budget = parseFloat(form.budget)
-    if (!budget) return
-    onAddCampaign({
-      id: uid(),
-      platform: form.platform,
-      startDate: form.startDate,
-      budget,
-      spent: parseFloat(form.spent) || 0,
-      impressions: parseInt(form.impressions) || 0,
-      clicks: parseInt(form.clicks) || 0,
-      conversions: parseInt(form.conversions) || 0,
-      notes: form.notes,
-    })
-    setForm({ platform: "tiktok", startDate: "", budget: "", spent: "", impressions: "", clicks: "", conversions: "", notes: "" })
-    setShowAdd(false)
-  }
-
-  const totalSpent = state.adCampaigns.reduce((acc, c) => acc + c.spent, 0)
-  const totalConversions = state.adCampaigns.reduce((acc, c) => acc + c.conversions, 0)
-
-  return (
-    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <SectionTitle>Ad Campaigns</SectionTitle>
-          <GoldBtn small onClick={() => setShowAdd(s => !s)}>+ Campaign</GoldBtn>
-        </div>
-        <StatRow label="Total spent" value={`$${totalSpent.toLocaleString()}`} />
-        <StatRow label="Total conversions" value={totalConversions} />
-        {totalSpent > 0 && totalConversions > 0 && (
-          <StatRow label="Cost per conversion" value={`$${(totalSpent / totalConversions).toFixed(2)}`} color={C.gold} />
-        )}
-      </Card>
-
-      {showAdd && (
-        <Card style={{ borderColor: C.gold + "44" }}>
-          <SectionTitle>New Campaign</SectionTitle>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Select
-              value={form.platform}
-              onChange={v => setForm(f => ({ ...f, platform: v as Platform }))}
-              options={[
-                { label: "TikTok Ads", value: "tiktok" },
-                { label: "Instagram Ads", value: "instagram" },
-              ]}
-            />
-            <div>
-              <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginBottom: 4 }}>Start date</p>
-              <Input type="date" value={form.startDate} onChange={v => setForm(f => ({ ...f, startDate: v }))} />
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <Input type="number" value={form.budget} onChange={v => setForm(f => ({ ...f, budget: v }))} placeholder="Budget ($)" />
-              <Input type="number" value={form.spent} onChange={v => setForm(f => ({ ...f, spent: v }))} placeholder="Spent ($)" />
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-              <Input type="number" value={form.impressions} onChange={v => setForm(f => ({ ...f, impressions: v }))} placeholder="Impressions" />
-              <Input type="number" value={form.clicks} onChange={v => setForm(f => ({ ...f, clicks: v }))} placeholder="Clicks" />
-              <Input type="number" value={form.conversions} onChange={v => setForm(f => ({ ...f, conversions: v }))} placeholder="Conversions" />
-            </div>
-            <Input value={form.notes} onChange={v => setForm(f => ({ ...f, notes: v }))} placeholder="Notes" />
-            <div style={{ display: "flex", gap: 8 }}>
-              <GoldBtn onClick={addCampaign}>Add Campaign</GoldBtn>
-              <GhostBtn onClick={() => setShowAdd(false)}>Cancel</GhostBtn>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {state.adCampaigns.map(campaign => (
-        <Card key={campaign.id}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-            <div>
-              <PillBadge label={platformEmoji(campaign.platform)} color={platformColor(campaign.platform)} />
-              <p style={{ fontFamily: F.body, fontSize: 12, color: C.muted, marginTop: 4 }}>{campaign.startDate}</p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{ fontFamily: F.heading, fontSize: 20, color: C.cream }}>${campaign.spent.toLocaleString()}</p>
-              <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>of ${campaign.budget.toLocaleString()} budget</p>
-            </div>
-          </div>
-          <ProgressBar value={campaign.spent} max={campaign.budget} color={campaign.spent > campaign.budget ? C.error : C.gold} />
-          <div style={{ display: "flex", gap: 20, marginTop: 10 }}>
-            <StatRow label="Impressions" value={campaign.impressions.toLocaleString()} />
-            <StatRow label="Clicks" value={campaign.clicks.toLocaleString()} />
-            <StatRow label="Conversions" value={campaign.conversions} />
-          </div>
-          {campaign.notes && <p style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 8, fontStyle: "italic" }}>{campaign.notes}</p>}
-          <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-end" }}>
-            <GhostBtn small onClick={() => {
-              const updated: AdCampaign = { ...campaign, spent: campaign.spent }
-              onUpdateCampaign(updated)
-            }}>Update</GhostBtn>
-          </div>
-        </Card>
-      ))}
     </div>
   )
 }
 
-// ─── Root component ───────────────────────────────────────────────────────────
+// ─── Sales Tab ────────────────────────────────────────────────────────────────
 
-export default function PlanPageClient() {
-  const [state, setState] = useState<PlanState>(defaultState)
-  const [tab, setTab] = useState<Tab>("home")
-  const [hydrated, setHydrated] = useState(false)
+function SalesTab({ state, update }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void }) {
+  const thisWeekMonday = getMondayOf(new Date())
+  const [amount, setAmount] = useState("")
+  const [note, setNote] = useState("")
+  const [editId, setEditId] = useState<string | null>(null)
+
+  const existingThisWeek = state.weeklySales.find(ws => ws.weekOf === thisWeekMonday)
 
   useEffect(() => {
-    setState(loadState())
-    setHydrated(true)
-  }, [])
+    if (existingThisWeek) {
+      setAmount(existingThisWeek.amount.toString())
+      setNote(existingThisWeek.note ?? "")
+      setEditId(existingThisWeek.id)
+    } else {
+      setAmount("")
+      setNote("")
+      setEditId(null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingThisWeek?.id])
 
-  const persist = useCallback((next: PlanState) => {
-    setState(next)
-    saveState(next)
-  }, [])
-
-  // ── Handlers ────────────────────────────────────────────────────────────────
-
-  const handleSetStart = useCallback((d: string) => {
-    persist({ ...state, startDate: d })
-  }, [state, persist])
-
-  const handleToggleTask = useCallback((id: string) => {
-    persist({ ...state, completedTasks: { ...state.completedTasks, [id]: !state.completedTasks[id] } })
-  }, [state, persist])
-
-  const handleToggleBatch = useCallback((batch: number) => {
-    persist({ ...state, filmedBatches: { ...state.filmedBatches, [batch]: !state.filmedBatches[batch] } })
-  }, [state, persist])
-
-  const handleTogglePostStatus = useCallback((postId: string) => {
-    const current = state.postStatuses[postId]
-    const next: PostStatus = current === "scheduled" || !current ? "posted" : current === "posted" ? "skipped" : "scheduled"
-    persist({ ...state, postStatuses: { ...state.postStatuses, [postId]: next } })
-  }, [state, persist])
-
-  const handleLogPerformance = useCallback((perf: PostPerformance) => {
-    const existing = state.performance.filter(p => p.postId !== perf.postId)
-    persist({ ...state, performance: [...existing, perf] })
-  }, [state, persist])
-
-  const handleUpdateMetrics = useCallback((m: Metrics) => {
-    persist({ ...state, metrics: m })
-  }, [state, persist])
-
-  const handleAddSale = useCallback((sale: SaleEntry) => {
-    persist({ ...state, sales: [...state.sales, sale] })
-  }, [state, persist])
-
-  const handleDeleteSale = useCallback((id: string) => {
-    persist({ ...state, sales: state.sales.filter(s => s.id !== id) })
-  }, [state, persist])
-
-  const handleAddClient = useCallback((c: Client) => {
-    persist({ ...state, clients: [...state.clients, c] })
-  }, [state, persist])
-
-  const handleUpdateClient = useCallback((c: Client) => {
-    persist({ ...state, clients: state.clients.map(x => x.id === c.id ? c : x) })
-  }, [state, persist])
-
-  const handleDeleteClient = useCallback((id: string) => {
-    persist({ ...state, clients: state.clients.filter(c => c.id !== id) })
-  }, [state, persist])
-
-  const handleAddCampaign = useCallback((c: AdCampaign) => {
-    persist({ ...state, adCampaigns: [...state.adCampaigns, c] })
-  }, [state, persist])
-
-  const handleUpdateCampaign = useCallback((c: AdCampaign) => {
-    persist({ ...state, adCampaigns: state.adCampaigns.map(x => x.id === c.id ? c : x) })
-  }, [state, persist])
-
-  if (!hydrated) {
-    return (
-      <div style={{ minHeight: "100dvh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: F.heading, fontSize: 18, color: C.muted }}>Loading…</p>
-      </div>
-    )
+  function saveEntry() {
+    const amt = parseFloat(amount)
+    if (isNaN(amt)) return
+    if (editId) {
+      update(d => ({
+        ...d,
+        weeklySales: d.weeklySales.map(ws => ws.id === editId ? { ...ws, amount: amt, note: note || undefined } : ws),
+      }))
+    } else {
+      const entry: WeeklySales = { id: generateId(), weekOf: thisWeekMonday, amount: amt, note: note || undefined }
+      update(d => ({ ...d, weeklySales: [...d.weeklySales, entry] }))
+    }
   }
 
-  const currentDay = getCurrentDay(state.startDate)
+  const byMonth: Record<string, WeeklySales[]> = {}
+  state.weeklySales.forEach(ws => {
+    const mk = ws.weekOf.slice(0, 7)
+    if (!byMonth[mk]) byMonth[mk] = []
+    byMonth[mk].push(ws)
+  })
+  const monthKeys = Object.keys(byMonth).sort().reverse()
+
+  function getMonthTotal(mk: string): number {
+    return (byMonth[mk] ?? []).reduce((sum, ws) => sum + ws.amount, 0)
+  }
+
+  function getMonthNumber(mk: string): string {
+    if (!state.startDate) {
+      const d = new Date(mk + "-01T12:00:00")
+      return d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    }
+    const start = new Date(state.startDate + "T12:00:00")
+    const entryDate = new Date(mk + "-01T12:00:00")
+    const monthsDiff = (entryDate.getFullYear() - start.getFullYear()) * 12 + (entryDate.getMonth() - start.getMonth())
+    const num = monthsDiff + 1
+    if (num >= 1 && num <= 3) return `Month ${num}`
+    const d = new Date(mk + "-01T12:00:00")
+    return d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  }
 
   return (
-    <div style={{ minHeight: "100dvh", background: C.bg, display: "flex", flexDirection: "column", maxWidth: 640, margin: "0 auto" }}>
-      {/* Top nav */}
-      <div style={{ borderBottom: `1px solid ${C.border}`, flexShrink: 0, overflowX: "auto", scrollbarWidth: "none", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"] }}>
-        <div style={{ display: "flex", minWidth: "max-content" }}>
-          {TABS.map(({ id, icon, label }) => {
-            const active = tab === id
-            return (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 3,
-                  padding: "12px 18px",
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: active ? `2px solid ${C.gold}` : "2px solid transparent",
-                  color: active ? C.gold : C.muted,
-                  cursor: "pointer",
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ fontSize: 16 }}>{icon}</span>
-                <span style={{ fontFamily: F.body, fontSize: 10, letterSpacing: "0.08em" }}>{label}</span>
-              </button>
-            )
-          })}
+    <div style={{ padding: "16px" }}>
+      {!state.startDate && (
+        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.muted, marginBottom: 16 }}>
+          Set your start date in Home to track months.
+        </p>
+      )}
+
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px", marginBottom: 20 }}>
+        <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", color: C.gold, margin: "0 0 12px 0" }}>
+          {existingThisWeek ? "Edit This Week" : "Log This Week"}
+        </p>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: "0 0 12px 0" }}>Week of {formatDate(thisWeekMonday)}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <input
+            type="number"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            placeholder="Revenue amount ($)"
+            style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontFamily: FONT_SANS, fontSize: 13, color: C.cream, outline: "none", boxSizing: "border-box" }}
+          />
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Notes (optional)"
+            rows={2}
+            style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontFamily: FONT_SANS, fontSize: 13, color: C.cream, outline: "none", resize: "none", boxSizing: "border-box" }}
+          />
+          <button
+            onClick={saveEntry}
+            style={{ background: C.gold, color: C.bg, border: "none", borderRadius: 8, padding: "10px 20px", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, cursor: "pointer", alignSelf: "flex-start" }}
+          >
+            Save
+          </button>
         </div>
       </div>
 
-      {/* Tab content */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        {tab === "home" && <HomeTab state={state} onSetStart={handleSetStart} />}
-        {tab === "film" && <FilmTab state={state} onToggleBatch={handleToggleBatch} />}
-        {tab === "post" && <PostTab state={state} onToggleStatus={handleTogglePostStatus} onLogPerformance={handleLogPerformance} />}
-        {tab === "stats" && <StatsTab state={state} onUpdateMetrics={handleUpdateMetrics} />}
-        {tab === "sales" && <SalesTab state={state} onAddSale={handleAddSale} onDeleteSale={handleDeleteSale} />}
-        {tab === "clients" && <ClientsTab state={state} onAddClient={handleAddClient} onUpdateClient={handleUpdateClient} onDeleteClient={handleDeleteClient} />}
-        {tab === "tasks" && <TasksTab state={state} onToggleTask={handleToggleTask} />}
-        {tab === "ads" && <AdsTab state={state} currentDay={currentDay} onAddCampaign={handleAddCampaign} onUpdateCampaign={handleUpdateCampaign} />}
-      </div>
+      {monthKeys.map(mk => (
+        <div key={mk} style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+            <p style={{ fontFamily: FONT_SERIF, fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", color: C.gold, margin: 0 }}>{getMonthNumber(mk)}</p>
+            <p style={{ fontFamily: FONT_SERIF, fontSize: 20, color: C.cream, margin: 0 }}>{formatCurrency(getMonthTotal(mk))}</p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {[...byMonth[mk]].sort((a, b) => b.weekOf.localeCompare(a.weekOf)).map(ws => (
+              <div key={ws.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: C.mutedLight, margin: "0 0 2px 0" }}>Week of {formatDate(ws.weekOf)}</p>
+                  {ws.note && <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.muted, margin: 0 }}>{ws.note}</p>}
+                </div>
+                <p style={{ fontFamily: FONT_SERIF, fontSize: 18, color: C.cream, margin: 0 }}>{formatCurrency(ws.amount)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {monthKeys.length === 0 && (
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted }}>No sales logged yet. Log your first week above.</p>
+      )}
     </div>
   )
 }
+
+export default PlanPageClient
