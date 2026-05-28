@@ -407,6 +407,64 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* NUTRITION FOUNDATIONS TEASER */}
+      <section style={{ background: "#111111", padding: "100px 80px" }} className="nutrition-teaser">
+        <style>{`
+          @media (max-width: 768px) { .nutrition-teaser { padding: 72px 28px !important; } .nutrition-teaser-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }
+        `}</style>
+        <div className="nutrition-teaser-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            {[
+              { label: "TDEE Calculator", sub: "Personalized to your stats" },
+              { label: "4-Week Meal Plan", sub: "Scales to your calorie target" },
+              { label: "Macro Education", sub: "With research citations" },
+              { label: "Eating Out Guide", sub: "Real-world strategies" },
+            ].map((item) => (
+              <div key={item.label} style={{ background: "#161616", padding: "28px 24px", borderTop: "2px solid rgba(201,169,110,0.35)" }}>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, fontWeight: 600, color: "#f5f2ee", lineHeight: 1.3, marginBottom: 6 }}>{item.label}</p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, color: "rgba(245,242,238,0.35)", lineHeight: 1.4 }}>{item.sub}</p>
+              </div>
+            ))}
+          </div>
+          <div>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>New Course</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 46px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 20 }}>
+              Nutrition Foundations.<br />
+              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match your training.</em>
+            </h2>
+            <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.6, marginBottom: 28 }}>
+              A 4-week nutrition course for people who train. Learn how to calculate your real calorie needs, build a meal plan that adapts to your goals, and develop habits that hold up outside the gym — without obsessing over food.
+            </p>
+            <ul style={{ listStyle: "none", marginBottom: 36 }}>
+              {[
+                "Interactive calorie and macro calculator",
+                "4-week meal plan with verified, attributed recipes",
+                "Science-backed education — no bro-science",
+                "Eating out, supplements, and troubleshooting guides",
+              ].map((item) => (
+                <li key={item} style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: "1px solid rgba(245,242,238,0.05)", fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.5 }}>
+                  <span style={{ color: "var(--accent)", flexShrink: 0 }}>→</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$127</span>
+              <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$67</span>
+              <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Intro Price</span>
+            </div>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
+                Get Instant Access
+              </Link>
+              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", color: "rgba(245,242,238,0.4)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 400, textDecoration: "none", padding: "16px 0" }}>
+                One-time payment · Lifetime access
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TESTIMONIALS */}
       <TestimonialsSection />
 

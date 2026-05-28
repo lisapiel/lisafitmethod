@@ -338,6 +338,59 @@ export default async function CoursesPage() {
         </div>
       </section>
 
+      {/* NUTRITION FOUNDATIONS CALLOUT */}
+      <section style={{ background: "#111111", padding: "100px 80px", borderTop: "1px solid #1a1a1a" }} className="nutrition-callout">
+        <style>{`
+          @media (max-width: 768px) { .nutrition-callout { padding: 72px 28px !important; } .nutrition-callout-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }
+        `}</style>
+        <div className="nutrition-callout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
+          <div>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 16 }}>Also from Lisa Fit Method</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3vw, 44px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.15, marginBottom: 20 }}>
+              Pair it with<br /><em style={{ fontStyle: "italic", color: accent }}>Nutrition Foundations.</em>
+            </h2>
+            <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.6, marginBottom: 28 }}>
+              Training alone only gets you part of the way. Nutrition Foundations is a 4-week paid course that builds the eating habits to match — with a personalized TDEE calculator, a structured meal plan that adapts to your calorie target, science-backed education, and real recipes from verified sources.
+            </p>
+            <ul style={{ listStyle: "none", marginBottom: 36 }}>
+              {[
+                "Interactive TDEE calculator — personalized to your stats and goal",
+                "4-week meal plan with real, attributed recipes",
+                "Macro education, eating-out guide, and supplement evidence",
+                "Written by a CPT with full research citations throughout",
+              ].map((item) => (
+                <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5 }}>
+                  <span style={{ color: accent, flexShrink: 0 }}>→</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$127</span>
+              <span style={{ fontSize: 44, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$67</span>
+              <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Intro Price</span>
+            </div>
+            <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 40px" }}>
+              Get Nutrition Foundations →
+            </Link>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            {[
+              { num: "01", title: "Understanding Your Body", desc: "BMR, TDEE, and your personalized calorie target" },
+              { num: "02", title: "Your Nutrition Blueprint", desc: "Protein, carbs, fats, hydration, and plate building" },
+              { num: "03", title: "4-Week Meal Plan", desc: "Recipes, portions, and grocery lists — scaled to you" },
+              { num: "04", title: "Making It Stick", desc: "Eating out, troubleshooting, supplements, and recovery" },
+            ].map((mod) => (
+              <div key={mod.num} style={{ background: "#161616", padding: "32px 28px", position: "relative", borderTop: `2px solid rgba(201,169,110,0.4)` }}>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.5)", marginBottom: 12 }}>{mod.num}</p>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 16, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.3, marginBottom: 8 }}>{mod.title}</p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, color: "rgba(245,242,238,0.35)", lineHeight: 1.5 }}>{mod.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FINAL CTA */}
       <section style={{ background: "#0a0a0a", padding: "120px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta">
         <style>{`
