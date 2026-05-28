@@ -47,10 +47,10 @@ const emailHtml = `
 
           <!-- Header -->
           <tr>
-            <td style="padding:36px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <p style="margin:0 0 24px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:#c8a97e;">Lisa Fit Method</p>
-              <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:28px;font-weight:700;color:#0a0a0a;line-height:1.2;letter-spacing:-0.3px;">Your nutrition guide is inside.</h1>
-              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:15px;line-height:1.75;color:#6b6560;">Hi — I&rsquo;m glad you&rsquo;re here. Below is a link to read the full guide online. Five science-backed principles, real references, no fluff.</p>
+            <td style="padding:36px 40px 0;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 20px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:#c8a97e;">Lisa Fit Method</p>
+              <h1 style="margin:0 0 14px;font-family:Georgia,serif;font-size:26px;font-weight:700;color:#0a0a0a;line-height:1.2;letter-spacing:-0.3px;">Your nutrition guide is ready.</h1>
+              <p style="margin:0 0 28px;font-family:Helvetica Neue,Arial,sans-serif;font-size:14px;line-height:1.75;color:#6b6560;">Hi, glad you&rsquo;re here. You can read the full guide online or download the PDF to keep. Either way, it&rsquo;s all there.</p>
             </td>
           </tr>
 
@@ -63,45 +63,57 @@ const emailHtml = `
 
           <!-- What's inside -->
           <tr>
-            <td style="padding:28px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <p style="margin:0 0 14px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#0a0a0a;">What&apos;s in the guide</p>
+            <td style="padding:24px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 12px;font-family:Helvetica Neue,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#0a0a0a;">What&rsquo;s in the guide</p>
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                  <td style="padding:7px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;border-bottom:1px solid #ede8e0;">
-                    <span style="color:#c8a97e;margin-right:10px;">01</span>Calorie Deficit &mdash; the only mechanism for fat loss
+                  <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">01</span>Calorie Deficit &mdash; the only mechanism for fat loss
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:7px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;border-bottom:1px solid #ede8e0;">
-                    <span style="color:#c8a97e;margin-right:10px;">02</span>Protein &mdash; the lever that controls body composition
+                  <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">02</span>Protein &mdash; the lever that controls body composition
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:7px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;border-bottom:1px solid #ede8e0;">
-                    <span style="color:#c8a97e;margin-right:10px;">03</span>Muscle &mdash; the closest thing to a real metabolism shortcut
+                  <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">03</span>Build Muscle &mdash; the real metabolism shortcut
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:7px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;border-bottom:1px solid #ede8e0;">
-                    <span style="color:#c8a97e;margin-right:10px;">04</span>NEAT &mdash; the hidden calorie variable most people ignore
+                  <td style="padding:6px 0;border-bottom:1px solid #ede8e0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">04</span>Daily Movement &mdash; the hidden calorie variable
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:7px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;">05</span>Sleep &mdash; the hormone controller that decides your hunger
+                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#1a1a1a;line-height:1.5;">
+                    <span style="color:#c8a97e;margin-right:10px;font-weight:600;">05</span>Sleep &mdash; the hormone controller
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- CTA -->
+          <!-- CTA buttons -->
           <tr>
             <td style="padding:8px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <a href="https://lisafitmethod.com/free-guide-nutrition?unlocked=1"
-                 style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:13px 28px;">
-                Read the Full Guide &rarr;
-              </a>
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="https://lisafitmethod.com/free-guide-nutrition?unlocked=1"
+                       style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:13px 28px;">
+                      Read Online &rarr;
+                    </a>
+                  </td>
+                  <td>
+                    <a href="https://lisafitmethod.com/api/nutrition-guide-pdf"
+                       style="display:inline-block;background:transparent;color:#c8a97e;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:13px 24px;border:1px solid #c8a97e;">
+                      Download PDF
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
@@ -114,15 +126,15 @@ const emailHtml = `
 
           <!-- Personal note -->
           <tr>
-            <td style="padding:28px 40px 36px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <p style="margin:0 0 16px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;line-height:1.75;color:#6b6560;">
-                If you want to put all of this into practice, the <strong style="color:#1a1a1a;">4-Week Training Foundations</strong> course is the structured program built on these exact principles &mdash; progressive resistance training, nutrition guidance, and tracking built in.
+            <td style="padding:24px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 14px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;line-height:1.75;color:#6b6560;">
+                If you want to put all of this into practice, the <strong style="color:#1a1a1a;">4-Week Training Foundations</strong> program is the structured plan built on these exact principles. Progressive resistance training, nutrition guidance, and built-in tracking.
               </p>
-              <p style="margin:0 0 8px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
-                It&rsquo;s <strong style="color:#1a1a1a;">$47</strong> right now (regular price $97). One payment, lifetime access.
+              <p style="margin:0 0 10px;font-family:Helvetica Neue,Arial,sans-serif;font-size:12px;color:#9c9590;">
+                <strong style="color:#1a1a1a;">$47</strong> right now (regular $97). One payment, lifetime access.
               </p>
               <a href="https://lisafitmethod.com/courses"
-                 style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">
+                 style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;letter-spacing:0.05em;">
                 See the full program &rarr;
               </a>
             </td>
@@ -130,18 +142,20 @@ const emailHtml = `
 
           <!-- Signature -->
           <tr>
-            <td style="padding:0 40px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <p style="margin:0 0 2px;font-family:Georgia,serif;font-size:15px;font-style:italic;color:#c8a97e;">Lisa McPherson, CPT</p>
-              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#bbb4ae;">Lisa Fit Method</p>
+            <td style="padding:0 40px 36px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <div style="border-top:1px solid #e8e0d5;padding-top:20px;">
+                <p style="margin:0 0 2px;font-family:Georgia,serif;font-size:15px;font-style:italic;color:#c8a97e;">Lisa McPherson, CPT</p>
+                <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#bbb4ae;">Lisa Fit Method</p>
+              </div>
             </td>
           </tr>
 
-          <!-- Footer bar -->
+          <!-- Footer -->
           <tr>
             <td style="background:#f0ebe3;padding:16px 40px;border:1px solid #e8e0d5;">
               <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;color:#bbb4ae;line-height:1.6;">
                 You received this because you requested the free nutrition guide at lisafitmethod.com.<br>
-                Questions? Reply to this email &mdash; it goes straight to me.
+                Questions? Reply directly to this email.
               </p>
             </td>
           </tr>
