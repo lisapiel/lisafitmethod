@@ -13,12 +13,13 @@ const line = "#ddd8cf"
 
 interface FreeGuideSignupFormProps {
   source: string
+  apiEndpoint?: string
   variant?: "compact"
   formOnly?: boolean
   onSuccess?: () => void
 }
 
-export function FreeGuideSignupForm({ source, variant, formOnly, onSuccess }: FreeGuideSignupFormProps) {
+export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", variant, formOnly, onSuccess }: FreeGuideSignupFormProps) {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle")
   const [errorMsg, setErrorMsg] = useState("")
@@ -33,7 +34,7 @@ export function FreeGuideSignupForm({ source, variant, formOnly, onSuccess }: Fr
     }
     setStatus("submitting")
     try {
-      const res = await fetch("/api/free-guide", {
+      const res = await fetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmed, source }),
