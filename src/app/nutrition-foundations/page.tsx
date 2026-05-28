@@ -13,10 +13,10 @@ const dark = "#161616"
 const border = "#2a2a2a"
 
 const MODULES = [
-  { num: "01", href: "/nutrition-foundations/module1", title: "Understanding Your Body", desc: "Calculate your BMR and TDEE. Know exactly how many calories you need — on training days and rest days." },
-  { num: "02", href: "/nutrition-foundations/module2", title: "Your Nutrition Blueprint", desc: "Protein, carbs, and fats explained clearly. Build a plate that supports your goals without obsessing over every gram." },
-  { num: "03", href: "/nutrition-foundations/module3", title: "Your 4-Week Meal Plan", desc: "A personalised meal plan built around your calorie target. Real verified recipes, weekly grocery lists, and meal prep guides." },
-  { num: "04", href: "/nutrition-foundations/module4", title: "Making It Stick", desc: "Eating out, social situations, supplements, troubleshooting plateaus, and how to keep going when life gets in the way." },
+  { num: "01", href: "/nutrition-foundations/module1", title: "Understanding Your Body", desc: "Calculate your BMR and TDEE so you understand how many calories your body actually needs on both training and rest days." },
+  { num: "02", href: "/nutrition-foundations/module2", title: "Your Nutrition Blueprint", desc: "Learn how protein, carbohydrates, and fats work together to support muscle growth, recovery, energy, and fat loss without obsessing over perfection." },
+  { num: "03", href: "/nutrition-foundations/module3", title: "Your 4-Week Meal Plan", desc: "A personalized meal plan built around your calorie target, including verified recipes, grocery lists, meal prep guidance, and portion adjustments based on your needs." },
+  { num: "04", href: "/nutrition-foundations/module4", title: "Making It Stick", desc: "Learn how to handle eating out, social events, cravings, supplements, plateaus, travel, and real life without constantly starting over." },
 ]
 
 export default function NutritionIntroPage() {
@@ -30,20 +30,28 @@ export default function NutritionIntroPage() {
         Introduction
       </p>
       <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1.5rem" }}>
-        Nutrition is not complicated.<br /><em style={{ color: gold }}>The industry makes it complicated.</em>
+        Nutrition is not complicated.<br /><em style={{ color: gold }}>The industry makes it seem complicated.</em>
       </h1>
 
       <div style={{ marginBottom: "2rem" }}>
         <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.65 }}>
-          I&apos;m a Certified Personal Trainer, not a dietitian. But I&apos;ve spent years researching what the actual science says about nutrition and body composition — and stripping away everything the industry adds to make it confusing.
+          Most of the confusion comes from people trying to sell shortcuts, extremes, or rules that sound more impressive than the actual fundamentals.
         </p>
         <br />
         <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.65 }}>
-          This course gives you the real mechanism. How your body uses energy, what your numbers actually mean, and a 4-week meal plan built specifically around your calorie needs — not a generic plan, yours.
+          I&apos;m a Certified Personal Trainer, not a dietitian. But after years of struggling to understand why some approaches worked and others didn&apos;t, I went back to the research and focused on the actual mechanisms behind fat loss, muscle growth, energy balance, and long-term body composition.
         </p>
         <br />
         <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.65 }}>
-          The recipes in the meal plan come from verified, well-reviewed sources. I&apos;ve linked every one so you can check them yourself. The macros are calculated from the actual ingredients. Nothing is invented.
+          This course is built to simplify all of that. You&apos;ll learn how your body actually uses energy, how to calculate the numbers that matter for your goals, and how to structure nutrition in a way that is realistic, sustainable, and effective long term.
+        </p>
+        <br />
+        <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.65 }}>
+          Inside, you&apos;ll find a 4-week meal plan built around your personal calorie needs, not a generic template copied onto everyone. The recipes come from verified, well-reviewed sources, and every recipe is linked so you can check the originals yourself. The macros are calculated from the actual ingredients used. Nothing is guessed or invented.
+        </p>
+        <br />
+        <p style={{ fontSize: "0.9rem", color: muted, lineHeight: 1.65 }}>
+          The goal is not to make you obsessed with tracking every calorie forever. The goal is to help you finally understand what works, why it works, and how to build habits you can realistically maintain.
         </p>
         <br />
         <p style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontSize: "1.1rem", color: cream }}>
@@ -57,7 +65,7 @@ export default function NutritionIntroPage() {
           Important notice
         </p>
         <p style={{ fontSize: "0.78rem", color: "#888", lineHeight: 1.6, margin: 0, fontFamily: "var(--font-montserrat), sans-serif" }}>
-          Lisa McPherson is a Certified Personal Trainer (CPT), not a Registered Dietitian or licensed medical professional. This course provides general nutrition education to support fitness and performance goals — it is not medical nutrition therapy and does not replace advice from a healthcare provider. Always consult your physician before starting a new nutrition plan, especially if you have a medical condition, take medications, or have a history of eating disorders. Individual results vary.
+          Lisa McPherson is a Certified Personal Trainer (CPT), not a Registered Dietitian or licensed medical professional. This course provides general nutrition education designed to support fitness, performance, and body composition goals. It is not medical nutrition therapy and should not replace advice from a qualified healthcare provider. Always consult your physician before making major dietary changes, especially if you have a medical condition, take medications, are pregnant, or have a history of disordered eating or eating disorders. Individual results will vary based on consistency, activity level, sleep, stress, genetics, medical history, and overall lifestyle factors.
         </p>
       </div>
 
@@ -94,10 +102,10 @@ export default function NutritionIntroPage() {
         </p>
         <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.6rem", margin: 0, padding: 0 }}>
           {[
-            "Start with Module 1 and fill in the TDEE calculator — your meal plan in Module 3 is built around your results",
-            "Read Module 2 before opening the meal plan so you understand what you're doing and why",
-            "Module 3 shows your personalised portions — save your profile in Module 1 first",
-            "Module 4 is the one most people skip — don't",
+            "Start with Module 1 and complete the TDEE calculator first. Your meal plan in Module 3 is built around those results.",
+            "Read Module 2 before jumping into the meal plan so you understand the reasoning behind the structure.",
+            "Save your profile in Module 1 before using Module 3 so your personalized portions calculate correctly.",
+            "Most people focus only on the meal plan and skip Module 4. Don't. Sustainability is what actually creates long-term results.",
           ].map((item) => (
             <li key={item} style={{ fontSize: "0.82rem", color: muted, lineHeight: 1.45, paddingLeft: "1.25rem", position: "relative" }}>
               <span style={{ position: "absolute", left: 0, color: gold, opacity: 0.6, fontSize: "0.75rem" }}>›</span>

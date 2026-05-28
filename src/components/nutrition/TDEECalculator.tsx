@@ -18,7 +18,7 @@ const ACTIVITY_LEVELS = [
   {
     value: 1.375,
     label: "Lightly Active",
-    desc: "Training 2–3x/week + a desk job. 5,000–7,500 steps/day. Most people overestimate here — if you sit most of the day, this is probably you.",
+    desc: "Training 2–3x/week + a desk job. 5,000–7,500 steps/day. Most people overestimate here. If you sit most of the day, this is probably you.",
   },
   {
     value: 1.55,
@@ -341,7 +341,7 @@ export default function TDEECalculator() {
               Your Results — {selectedGoal?.label}
             </p>
             <p style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.5, margin: 0 }}>
-              Based on the Mifflin-St Jeor equation. Individual variation is ±10% — use this as a starting point and adjust after 2–3 weeks if progress stalls.
+              Based on the Mifflin-St Jeor equation. These numbers are estimates, not absolutes. Use them as a starting point and adjust based on your progress over the next 2&ndash;3 weeks.
             </p>
           </div>
 
