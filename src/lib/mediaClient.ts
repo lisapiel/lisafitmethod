@@ -51,3 +51,52 @@ export async function getPublishedVideoUrl(slot: string): Promise<string | null>
   const items = await fetchPublishedAssets("VIDEO")
   return items.find((i) => i.assignedTo === slot)?.url ?? null
 }
+
+// ─── Exercise Video (Masterclass) ─────────────────────────────────────────────
+
+export type ExerciseVideoItem = {
+  slug: string
+  name: string
+  url: string
+  s3Key: string
+  durationSeconds: number | null
+  muscleGroups: string | null
+  equipment: string | null
+  tags: string | null
+  isPublished: boolean
+}
+
+async function fetchExerciseVideos(filter?: string): Promise<ExerciseVideoItem[]> {
+  if (!APPSYNC_URL || !APPSYNC_API_KEY) return []
+  try {
+    const filterArg = filter ? `(filter: ${filter})` : ""
+    const res = await fetch(APPSYNC_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": APPSYNC_API_KEY,
+      },
+      body: JSON.stringify({
+        query: `query {
+          listExerciseVideos${filterArg} {
+            items { slug name url s3Key durationSeconds muscleGroups equipment tags isPublished }
+          }
+        }`,
+      }),
+      next: { revalidate: 60 },
+    })
+    const json = await res.json() as { data?: { listExerciseVideos?: { items?: ExerciseVideoItem[] } } }
+    return json.data?.listExerciseVideos?.items ?? []
+  } catch {
+    return []
+  }
+}
+
+export async function getExerciseVideo(slug: string): Promise<ExerciseVideoItem | null> {
+  const items = await fetchExerciseVideos(`{ slug: { eq: "${slug}" } }`)
+  return items[0] ?? null
+}
+
+export async function listPublishedExerciseVideos(): Promise<ExerciseVideoItem[]> {
+  return fetchExerciseVideos(`{ isPublished: { eq: true } }`)
+}
