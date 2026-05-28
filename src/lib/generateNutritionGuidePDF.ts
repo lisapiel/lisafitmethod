@@ -252,7 +252,7 @@ const PRINCIPLES_PDF = [
     category: "Energy Balance",
     name: "Calorie Deficit",
     tagline: "The only mechanism for fat loss",
-    body: "Fat loss has one mechanism: consuming less energy than you burn. Not a specific food, not a specific timing, not a targeted exercise. Everything that works does so because it creates a deficit. Your body pulls energy from stored fat when it needs more than you give it, and it does this everywhere at once. You cannot direct where it comes from.",
+    body: "Fat loss has one mechanism: consuming less energy than you burn. No specific food, supplement, or workout bypasses this principle. Every effective fat loss approach works because it creates a calorie deficit — and your body accesses stored fat from everywhere at once. You cannot spot-reduce.",
     ref: "Hall et al. 2012 (Am J Clin Nutr): fat loss was equivalent across all diet types when total calories were matched.",
     stat: "300-500 kcal/day",
     statLabel: "The deficit sweet spot — enough to lose fat consistently, not enough to lose muscle.",
@@ -264,7 +264,7 @@ const PRINCIPLES_PDF = [
     category: "Macronutrient Strategy",
     name: "Protein",
     tagline: "The lever that controls body composition",
-    body: "In a deficit, your body pulls from fat and muscle. Protein is what tells it to protect the muscle. It also has a 20-35% thermic effect, meaning your body burns roughly a quarter of its own calories just digesting it (compared to 5-10% for carbs, almost nothing for fat). Getting enough protein is one of the few things that works in multiple directions at once.",
+    body: "In a deficit, your body pulls from fat and muscle. Protein is what tells it to protect the muscle. It also requires significantly more energy to digest than carbs or fat, meaning your body burns more calories just processing it. Getting enough protein is one of the few levers that works in multiple directions at once.",
     ref: "Morton et al. 2018 (Br J Sports Med): meta-analysis of 49 studies found 1.6-2.2 g/kg (0.7-1 g/lb) optimizes muscle retention and growth.",
     stat: "0.7-1g per lb",
     statLabel: "The daily protein target that protects muscle and supports fat loss at the same time.",
@@ -276,10 +276,10 @@ const PRINCIPLES_PDF = [
     category: "Muscle and Metabolism",
     name: "Build Muscle",
     tagline: "The closest thing to a real shortcut",
-    body: "1 lb of muscle burns roughly 6 kcal/day at rest. 1 lb of fat burns about 2. Every pound of muscle you build raises your resting metabolism permanently. It compounds over time, and it doesn't switch off. More muscle means more calories burned all day, every day, without doing anything extra. This is the long game most people skip.",
+    body: "Muscle tissue is more metabolically active than fat tissue — building it gradually increases resting energy expenditure over time. But the bigger picture goes beyond the calorie equation: more muscle means better body composition, improved insulin sensitivity, greater functional strength, and results that hold long-term. This is the long game most people skip.",
     ref: "Srikanthan and Karlamangla (Am J Med, 2014): higher muscle mass was inversely linked to all-cause mortality over 10-16 years. Muscle is the organ of longevity.",
-    stat: "6 kcal vs 2 kcal/lb",
-    statLabel: "Muscle burns 3x more calories at rest than fat. Every pound you build raises your baseline permanently.",
+    stat: "~6 vs ~2 kcal/lb",
+    statLabel: "Research estimate — the compounding benefit is body composition, strength, insulin sensitivity, and results built to last.",
     practical: "",
     courseHook: true,
   },
@@ -523,7 +523,7 @@ function NutritionGuidePDF() {
         View,
         { style: styles.header },
         createElement(Text, { style: styles.brandLabel }, "Lisa Fit Method"),
-        createElement(Text, { style: styles.title }, "Stop searching for shortcuts."),
+        createElement(Text, { style: styles.title }, "Stop chasing fat burners, detoxes, and \"secret\" tricks."),
         createElement(Text, { style: styles.subtitle }, "5 science-backed nutrition principles - Lisa McPherson, CPT")
       ),
 
@@ -535,8 +535,8 @@ function NutritionGuidePDF() {
       createElement(
         View,
         { style: styles.storyBox },
-        createElement(Text, { style: styles.storyText }, "Every week, people search for how to lose belly fat fast. Fat burners. Detox teas. The targeted ab workout. None of it works because fat loss doesn't work that way. You can't pull fat from just one place. Your body accesses stored energy from everywhere when it needs more than you give it."),
-        createElement(Text, { style: styles.storyText }, "I'm an engineer. I needed the mechanism, not the marketing. So I went to the research. What I found is simpler than the industry wants it to seem, and more powerful than any shortcut they're selling."),
+        createElement(Text, { style: styles.storyText }, "I spent years following plans that promised results and didn't deliver. Fat burners. Endless cardio. Detox cleanses. Tracking calories without ever understanding why nothing was working. Eventually I stopped looking for shortcuts and went back to the actual research."),
+        createElement(Text, { style: styles.storyText }, "I'm an engineer. I needed the mechanism, not the marketing. What I found was simpler than the fitness industry makes it seem, and more effective than most of the shortcuts being sold online."),
         createElement(Text, { style: styles.storySig }, "Lisa McPherson, CPT")
       ),
 
@@ -648,7 +648,7 @@ function NutritionGuidePDF() {
         createElement(Text, { style: upsellStyles.upsellBrand }, "Lisa Fit Method"),
         createElement(Text, { style: upsellStyles.upsellHeadline }, "You now know what works. Here's how to do it.")
       ),
-      createElement(Text, { style: upsellStyles.transitionPara }, "This guide gave you the framework. What it can't give you is the structure — the exact meal plan dialed to your calorie target, the week-by-week training progression, the coaching cues for every movement, the habits built in the right order. That's what the courses are for."),
+      createElement(Text, { style: upsellStyles.transitionPara }, "Information is not the same thing as implementation. Knowing the principles is important. Applying them consistently is where most people struggle. That's why I built the courses — to turn the science into a step-by-step system you can actually follow without overthinking every workout, meal, or calorie target."),
 
       // Bundle — hero (top, largest)
       createElement(

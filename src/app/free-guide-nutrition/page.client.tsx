@@ -84,7 +84,7 @@ export const PRINCIPLES = [
     category: "Energy Balance",
     name: "Calorie Deficit",
     tagline: "The only mechanism for fat loss",
-    body: "Fat loss has one mechanism: consuming less energy than you burn. Not a specific food, not a specific timing, not a targeted exercise. Everything that works does so because it creates a deficit. Your body pulls energy from stored fat when it needs more than you give it, and it does this everywhere at once. You cannot direct where it comes from.",
+    body: "Fat loss has one mechanism: consuming less energy than you burn. No specific food, supplement, or workout bypasses this principle. Every effective fat loss approach works because it creates a calorie deficit — and your body accesses stored fat from everywhere at once. You cannot spot-reduce.",
     ref: "Hall et al. 2012 (Am J Clin Nutr): fat loss was equivalent across all diet types when total calories were matched.",
     stat: "300–500 kcal/day",
     statLabel: "The deficit sweet spot — enough to lose fat consistently, not enough to lose muscle.",
@@ -95,7 +95,7 @@ export const PRINCIPLES = [
     category: "Macronutrient Strategy",
     name: "Protein",
     tagline: "The lever that controls body composition",
-    body: "In a deficit, your body pulls from fat and muscle. Protein is what tells it to protect the muscle. It also has a 20-35% thermic effect, meaning your body burns roughly a quarter of its own calories just digesting it (compared to 5-10% for carbs, almost nothing for fat). Getting enough protein is one of the few things that works in multiple directions at once.",
+    body: "In a deficit, your body pulls from fat and muscle. Protein is what tells it to protect the muscle. It also requires significantly more energy to digest than carbs or fat, meaning your body burns more calories just processing it. Getting enough protein is one of the few levers that works in multiple directions at once.",
     ref: "Morton et al. 2018 (Br J Sports Med): meta-analysis of 49 studies found 1.6-2.2 g/kg (0.7-1 g/lb) optimizes muscle retention and growth.",
     stat: "0.7–1g per lb",
     statLabel: "The daily protein target that protects muscle and supports fat loss at the same time.",
@@ -107,10 +107,10 @@ export const PRINCIPLES = [
     category: "Muscle and Metabolism",
     name: "Build Muscle",
     tagline: "The closest thing to a real shortcut",
-    body: "1 lb of muscle burns roughly 6 kcal/day at rest. 1 lb of fat burns about 2. Every pound of muscle you build raises your resting metabolism permanently. It compounds over time, and it doesn't switch off. More muscle means more calories burned all day, every day, without doing anything extra. This is the long game most people skip because they're chasing short-term weight loss instead.",
+    body: "Muscle tissue is more metabolically active than fat tissue — building it gradually increases resting energy expenditure over time. But the bigger picture goes beyond the calorie equation: more muscle means better body composition, improved insulin sensitivity, greater functional strength, and results that hold long-term. This is the long game most people skip because they're chasing short-term weight loss instead.",
     ref: "Srikanthan and Karlamangla (Am J Med, 2014): higher muscle mass was inversely linked to all-cause mortality over 10-16 years. Muscle is the organ of longevity.",
-    stat: "6 kcal vs 2 kcal/lb",
-    statLabel: "Muscle burns 3× more calories at rest than fat. Every pound you build raises your baseline permanently.",
+    stat: "~6 vs ~2 kcal/lb",
+    statLabel: "Research estimate — the compounding benefit is body composition, strength, insulin sensitivity, and results built to last.",
     practical: "",
     courseHook: true,
   },
@@ -237,8 +237,8 @@ export default function NutritionGuideClient() {
           <>
             <Label>Free Guide - Nutrition</Label>
             <h1 style={{ fontFamily: playfair, fontSize: "clamp(2rem, 5.5vw, 3.1rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: black, fontWeight: 700, marginBottom: "1.2rem", marginTop: 0 }}>
-              Stop searching for shortcuts.{" "}
-              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here is what actually works.</em>
+              Stop chasing fat burners, detoxes, and &quot;secret&quot; tricks.{" "}
+              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here&apos;s what actually drives fat loss, muscle growth, and long-term body composition.</em>
             </h1>
             <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 580, marginBottom: "2rem", lineHeight: 1.72, fontFamily: dmSans }}>
               Five science-backed principles behind every real body transformation. Written by an engineer who needed the mechanism, not the marketing.
@@ -295,8 +295,8 @@ export default function NutritionGuideClient() {
 
             <Label>Free Guide - Nutrition</Label>
             <h1 style={{ fontFamily: playfair, fontSize: "clamp(2rem, 5.5vw, 3.1rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: black, fontWeight: 700, marginBottom: "1.2rem", marginTop: 0 }}>
-              Stop searching for shortcuts.{" "}
-              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here is what actually works.</em>
+              Stop chasing fat burners, detoxes, and &quot;secret&quot; tricks.{" "}
+              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here&apos;s what actually drives fat loss, muscle growth, and long-term body composition.</em>
             </h1>
             <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 600, marginBottom: 0, lineHeight: 1.72, fontFamily: dmSans }}>
               Five principles. Real references. No supplements to buy, no protocol to follow.{" "}
@@ -307,10 +307,10 @@ export default function NutritionGuideClient() {
 
             <div style={{ background: panel, padding: "clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 4vw, 2.25rem)", marginBottom: "0.5rem", borderLeft: `2px solid ${gold}` }}>
               <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
-                Every week, people search for how to lose belly fat fast. Fat burners. Detox teas. The targeted ab workout. None of it works because fat loss doesn&apos;t work that way. You can&apos;t pull fat from just one place. Your body accesses stored energy from everywhere when it needs more than you give it.
+                I spent years following plans that promised results and didn&apos;t deliver. Fat burners. Endless cardio. Detox cleanses. Tracking calories without ever understanding why nothing was working. Eventually I stopped looking for shortcuts and went back to the actual research.
               </p>
               <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.5rem", color: muted, fontFamily: dmSans }}>
-                I&apos;m an engineer. I needed the mechanism, not the marketing. So I went to the research. What I found is simpler than the industry wants it to seem, and more powerful than any shortcut they&apos;re selling.
+                I&apos;m an engineer. I needed the mechanism, not the marketing. What I found was simpler than the fitness industry makes it seem, and more effective than most of the shortcuts being sold online.
               </p>
               <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.05rem", color: goldDeep, margin: 0 }}>
                 Lisa McPherson, CPT
@@ -380,7 +380,7 @@ export default function NutritionGuideClient() {
               <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here&apos;s how to do it.</em>
             </h2>
             <p style={{ fontSize: "0.93rem", marginBottom: "1.75rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-              This guide gave you the framework. What it can&apos;t give you is the structure — the exact meal plan dialed to your calorie target, the week-by-week training progression, the coaching cues for every movement, the habits built in the right order. That&apos;s what the courses are for.
+              Information is not the same thing as implementation. Knowing the principles is important. Applying them consistently is where most people struggle. That&apos;s why I built the courses — to turn the science into a step-by-step system you can actually follow without overthinking every workout, meal, or calorie target.
             </p>
 
             {/* Bundle — hero */}
