@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { getPromoCodes } from "@/lib/promoCodes"
-import { NUTRITION_COURSE_PRICE_CENTS } from "@/lib/pricing"
+import { NUTRITION_COURSE_PRICE_CENTS, BUNDLE_PRICE_CENTS } from "@/lib/pricing"
 
 export const dynamic = "force-dynamic"
 
-const TRAINING_BASE_PRICE_CENTS = 4700
+const TRAINING_BASE_PRICE_CENTS = 9700
 const TRACKER_PRICE_CENTS = 1700
 const MIN_CHARGE_CENTS = 50
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       name?: string
       promoCode?: string
       includesTracker?: boolean
-      product?: "training" | "nutrition"
+      product?: "training" | "nutrition" | "bundle"
     }
 
     if (!email || !email.includes("@")) {
@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
     }
 
     const isNutrition = product === "nutrition"
-    const basePrice = isNutrition ? NUTRITION_COURSE_PRICE_CENTS : TRAINING_BASE_PRICE_CENTS
+    const isBundle = product === "bundle"
+    const basePrice = isBundle ? BUNDLE_PRICE_CENTS : isNutrition ? NUTRITION_COURSE_PRICE_CENTS : TRAINING_BASE_PRICE_CENTS
 
     let discountPct = 0
     let courseAmount = basePrice
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       courseAmount = result.finalAmount
     }
 
-    const finalAmount = courseAmount + (!isNutrition && includesTracker ? TRACKER_PRICE_CENTS : 0)
+    const finalAmount = courseAmount + (!isNutrition && !isBundle && includesTracker ? TRACKER_PRICE_CENTS : 0)
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: finalAmount,
@@ -58,8 +59,8 @@ export async function POST(request: NextRequest) {
         customerName: name ?? "",
         promoCode: promoCode ?? "",
         discountPct: String(discountPct),
-        includesTracker: (!isNutrition && includesTracker) ? "true" : "false",
-        product: isNutrition ? "nutrition" : "training",
+        includesTracker: (!isNutrition && !isBundle && includesTracker) ? "true" : "false",
+        product: isBundle ? "bundle" : isNutrition ? "nutrition" : "training",
       },
       payment_method_types: ["card", "link", "affirm", "cashapp"],
     })

@@ -91,7 +91,7 @@ export const DEFAULTS: SiteSettings = {
     homeFinalHeadline: "Learn the foundations once. Use them forever.",
     homeFinalSubtext:
       "Get structured workouts, guided exercise instruction, built-in workout tracking, and the progression system most beginners are never taught. Run the program once, repeat it stronger, and keep building from your own numbers.",
-    coursePrice: "47",
+    coursePrice: "97",
     aboutHeroHeadline: "Spent years burning calories without building strength or the body I wanted. Then I found structure.",
     aboutHeroSubtext:
       "Double master's in engineering. Certified personal trainer. Years of trial and error, injury, rebuilding, and relearning what actually matters in strength training. My background taught me to think in systems and structure, which completely changed the way I approach fitness. Now I help people build strong, aesthetic bodies through movement quality, intelligent programming, and training that lasts.",

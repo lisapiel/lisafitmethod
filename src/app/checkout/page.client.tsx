@@ -7,6 +7,8 @@ import {
   COURSE_PRICE_CENTS, COURSE_WITH_TRACKER_PRICE_CENTS, COURSE_PRICE_DISPLAY,
   COURSE_WITH_TRACKER_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
+  BUNDLE_PRICE_CENTS, BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
+  FOUNDING_DATE,
 } from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
@@ -385,12 +387,13 @@ const ctaButtonStyle: React.CSSProperties = {
 
 // ─── Root component ───────────────────────────────────────────────────────────
 
-export function CheckoutClient({ product = "training" }: { product?: "training" | "nutrition" }) {
+export function CheckoutClient({ product = "training" }: { product?: "training" | "nutrition" | "bundle" }) {
   const isNutrition = product === "nutrition"
-  const MODULES = isNutrition ? NUTRITION_MODULES : TRAINING_MODULES
-  const BASE_PRICE = isNutrition ? NUTRITION_COURSE_PRICE_CENTS : COURSE_PRICE_CENTS
-  const PRICE_DISPLAY = isNutrition ? NUTRITION_COURSE_PRICE_DISPLAY : COURSE_PRICE_DISPLAY
-  const REGULAR_PRICE_DISPLAY = isNutrition ? NUTRITION_COURSE_REGULAR_PRICE_DISPLAY : COURSE_REGULAR_PRICE_DISPLAY
+  const isBundle = product === "bundle"
+  const MODULES = isNutrition ? NUTRITION_MODULES : isBundle ? [...TRAINING_MODULES, ...NUTRITION_MODULES] : TRAINING_MODULES
+  const BASE_PRICE = isBundle ? BUNDLE_PRICE_CENTS : isNutrition ? NUTRITION_COURSE_PRICE_CENTS : COURSE_PRICE_CENTS
+  const PRICE_DISPLAY = isBundle ? BUNDLE_PRICE_DISPLAY : isNutrition ? NUTRITION_COURSE_PRICE_DISPLAY : COURSE_PRICE_DISPLAY
+  const REGULAR_PRICE_DISPLAY = isBundle ? BUNDLE_INDIVIDUAL_TOTAL_DISPLAY : isNutrition ? NUTRITION_COURSE_REGULAR_PRICE_DISPLAY : COURSE_REGULAR_PRICE_DISPLAY
 
   const [email, setEmail] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
@@ -430,7 +433,7 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE))
+      setFinalAmount(data.finalAmount ?? (!isNutrition && !isBundle && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE))
     } catch {
       setIntentError("Something went wrong. Please try again.")
       setEmail(null)
@@ -438,7 +441,7 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
     } finally {
       setLoadingIntent(false)
     }
-  }, [email, name, includesTracker, product, isNutrition, BASE_PRICE])
+  }, [email, name, includesTracker, product, isNutrition, isBundle, BASE_PRICE])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     try {
@@ -453,12 +456,12 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE))
+      setFinalAmount(data.finalAmount ?? (!isNutrition && !isBundle && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE))
       return { error: null }
     } catch {
       return { error: "Something went wrong." }
     }
-  }, [email, name, includesTracker, product, isNutrition, BASE_PRICE])
+  }, [email, name, includesTracker, product, isNutrition, isBundle, BASE_PRICE])
 
   const handleBack = useCallback(() => {
     setEmail(null)
@@ -466,8 +469,8 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
     setConfirmed(false)
     setClientSecret(null)
     setDiscountPct(0)
-    setFinalAmount(!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE)
-  }, [includesTracker, isNutrition, BASE_PRICE])
+    setFinalAmount(!isNutrition && !isBundle && includesTracker ? COURSE_WITH_TRACKER_PRICE_CENTS : BASE_PRICE)
+  }, [includesTracker, isNutrition, isBundle, BASE_PRICE])
 
   const stripeAppearance = {
     theme: "night" as const,
@@ -522,27 +525,36 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
         {/* LEFT — Course summary */}
         <div className="checkout-left" style={{ padding: "60px 48px 60px 40px", borderRight: "1px solid #1a1a1a" }}>
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "#c9a96e", marginBottom: 8 }}>
-            {isNutrition ? "Nutrition Foundations" : "Training Foundations"}
+            {isBundle ? "Foundations Bundle" : isNutrition ? "Nutrition Foundations" : "Training Foundations"}
           </p>
           <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 400, color: "#f0e6d3", lineHeight: 1.2, marginBottom: 8 }}>
-            {isNutrition ? <>Eat with purpose.<br /><em>Build the body you want.</em></> : <>Build the foundation.<br /><em>Train for life.</em></>}
+            {isBundle ? <>Train and eat right.<br /><em>Both courses, one price.</em></> : isNutrition ? <>Eat with purpose.<br /><em>Build the body you want.</em></> : <>Build the foundation.<br /><em>Train for life.</em></>}
           </h1>
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "28px 0", paddingBottom: 28, borderBottom: "1px solid #1a1a1a" }}>
             <span style={{ fontSize: 14, color: "#444", textDecoration: "line-through" }}>{REGULAR_PRICE_DISPLAY}</span>
             <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>
-              {!isNutrition && includesTracker ? COURSE_WITH_TRACKER_PRICE_DISPLAY : PRICE_DISPLAY}
+              {!isNutrition && !isBundle && includesTracker ? COURSE_WITH_TRACKER_PRICE_DISPLAY : PRICE_DISPLAY}
             </span>
-            {!isNutrition && includesTracker ? (
+            {!isNutrition && !isBundle && includesTracker ? (
               <span style={{ fontSize: 10, color: "#666", fontFamily: "var(--font-montserrat), sans-serif" }}>
                 course + tracker
               </span>
+            ) : isBundle ? (
+              <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
+                Save {BUNDLE_SAVINGS_DISPLAY}
+              </span>
             ) : (
               <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
-                Intro Price
+                Founding Price
               </span>
             )}
           </div>
+          {!isBundle && (
+            <p style={{ fontSize: 11, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 20, marginTop: -16 }}>
+              Founding member pricing. Regular price {REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}.
+            </p>
+          )}
 
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "#555", marginBottom: 20 }}>
             What&apos;s included
@@ -562,7 +574,14 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
           </ul>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {(isNutrition ? [
+            {(isBundle ? [
+              "Training Foundations: 50+ exercise videos, full movement breakdowns, built-in workout tracking",
+              "Nutrition Foundations: personalized TDEE calculator, 4-week meal plan, real verified recipes",
+              "Science-backed education in both courses with research citations throughout",
+              "Lifetime access to both courses with free future updates",
+              `Save ${BUNDLE_SAVINGS_DISPLAY} vs buying individually ($${(NUTRITION_COURSE_PRICE_CENTS + COURSE_PRICE_CENTS) / 100} individual total)`,
+              "Instant access to both courses after purchase",
+            ] : isNutrition ? [
               "Interactive TDEE calculator personalises your calorie and macro targets",
               "4-week meal plan built around your numbers, with real recipes from verified sources",
               "Weekly grocery lists and meal prep guides",
@@ -591,8 +610,8 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
             </Link>
           </p>
 
-          {/* Order bump — training only */}
-          {!isNutrition && (
+          {/* Order bump — training only (not for bundle or nutrition) */}
+          {!isNutrition && !isBundle && (
             <label
               style={{
                 display: "block",

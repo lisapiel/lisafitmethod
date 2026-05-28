@@ -506,6 +506,9 @@ export async function POST(request: NextRequest) {
           await sendTrackerConfirmationEmail(email)
         } else if (product === "nutrition") {
           await provisionNutritionUser(email)
+        } else if (product === "bundle") {
+          await provisionUser(email)
+          await provisionNutritionUser(email)
         } else {
           await provisionUser(email)
           if (includesTracker) {
