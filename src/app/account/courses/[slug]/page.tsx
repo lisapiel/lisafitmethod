@@ -7,9 +7,9 @@ const gold = "#c9a96e"
 interface ProductInfo {
   name: string
   tagline: string
-  fullPrice: string
-  memberPrice: string
-  saving: string | null
+  regularPrice: string   // original/regular retail price (crossed out first)
+  salePrice: string      // current public promotional price (crossed out second)
+  memberPrice: string    // 10% off salePrice, what the member pays
   includes: string[]
   checkoutHref: string
   backHref: string
@@ -20,9 +20,9 @@ const PRODUCTS: Record<string, ProductInfo> = {
   training: {
     name: "Training Foundations",
     tagline: "4-Week Beginner Strength Program",
-    fullPrice: "$97",
+    regularPrice: "$167",
+    salePrice: "$97",
     memberPrice: "$87",
-    saving: "Save $10",
     includes: [
       "5 foundational movement patterns — hip hinge, squat, push, pull, brace & carry",
       "4-week progressive training program — 3 days per week",
@@ -38,9 +38,9 @@ const PRODUCTS: Record<string, ProductInfo> = {
   nutrition: {
     name: "Nutrition Foundations",
     tagline: "4-Week Nutrition Course",
-    fullPrice: "$77",
+    regularPrice: "$137",
+    salePrice: "$77",
     memberPrice: "$69",
-    saving: "Save $8",
     includes: [
       "TDEE calculator — personalized to your stats and activity level",
       "4-week flexible meal plan framework",
@@ -55,10 +55,10 @@ const PRODUCTS: Record<string, ProductInfo> = {
   },
   tracker: {
     name: "Progress Tracker",
-    tagline: "Lifetime Workout Tracking",
-    fullPrice: "$27",
+    tagline: "Lifetime Workout Tracking — Add-On",
+    regularPrice: "$27",
+    salePrice: "$27",
     memberPrice: "$27",
-    saving: null,
     includes: [
       "Build completely custom workout days — any program, not just Foundations",
       "Log every set, rep, and weight lifted",
@@ -84,8 +84,6 @@ export default async function CoursesUpgradePage({ params }: { params: Promise<{
   const { slug } = await params
   const product = PRODUCTS[slug]
   if (!product) notFound()
-
-  const isTracker = slug === "tracker"
 
   return (
     <main style={{
@@ -131,7 +129,7 @@ export default async function CoursesUpgradePage({ params }: { params: Promise<{
 
         {/* Product header */}
         <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: gold, marginBottom: 10 }}>
-          {isTracker ? "Add-On" : "Course"}
+          Add to Your Account
         </p>
         <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 5vw, 2.6rem)", fontWeight: 300, color: "#f0e6d3", lineHeight: 1.15, marginBottom: 8 }}>
           {product.name}
@@ -166,22 +164,28 @@ export default async function CoursesUpgradePage({ params }: { params: Promise<{
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <p style={{ fontSize: "0.52rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#444", marginBottom: 6 }}>
-                Member Price
+              <p style={{ fontSize: "0.52rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#444", marginBottom: 8 }}>
+                {product.memberPrice !== product.salePrice ? "Your Member Price" : "Price"}
               </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <span style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2.2rem", fontWeight: 300, color: gold }}>
-                  {product.memberPrice}
-                </span>
-                {product.saving && (
-                  <span style={{ fontSize: "0.6rem", color: gold, fontWeight: 600, opacity: 0.7 }}>
-                    {product.saving}
+              {/* Price chain: regular → sale → member */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                {product.regularPrice !== product.salePrice && (
+                  <span style={{ fontSize: "0.7rem", color: "#333", textDecoration: "line-through", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                    {product.regularPrice}
+                  </span>
+                )}
+                {product.memberPrice !== product.salePrice && (
+                  <span style={{ fontSize: "0.7rem", color: "#444", textDecoration: "line-through", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                    {product.salePrice}
                   </span>
                 )}
               </div>
-              {product.fullPrice !== product.memberPrice && (
-                <p style={{ fontSize: "0.6rem", color: "#333", textDecoration: "line-through", marginTop: 2 }}>
-                  Regular {product.fullPrice}
+              <span style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2.4rem", fontWeight: 300, color: gold, lineHeight: 1 }}>
+                {product.memberPrice}
+              </span>
+              {product.memberPrice !== product.salePrice && (
+                <p style={{ fontSize: "0.58rem", color: "rgba(201,169,110,0.5)", marginTop: 4, letterSpacing: "0.06em" }}>
+                  10% member discount applied
                 </p>
               )}
             </div>
@@ -197,15 +201,15 @@ export default async function CoursesUpgradePage({ params }: { params: Promise<{
                 fontWeight: 700,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                padding: "0.8rem 1.75rem",
+                padding: "0.85rem 1.75rem",
                 whiteSpace: "nowrap",
               }}
             >
-              Get Access →
+              Get Instant Access →
             </Link>
           </div>
           <p style={{ fontSize: "0.6rem", color: "#333", marginTop: 14, lineHeight: 1.6 }}>
-            Member discount applied automatically. One-time payment. Lifetime access.
+            One-time payment. Lifetime access. No subscription.
           </p>
         </div>
 

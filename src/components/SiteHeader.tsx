@@ -4,7 +4,20 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useState } from "react"
 
-const HIDDEN_PREFIXES = ["/admin", "/training-foundations"]
+const HIDDEN_PREFIXES = [
+  "/admin",
+  "/training-foundations",
+  "/nutrition-foundations",
+  "/masterclass",
+  "/my-tracker",
+  "/my-plan",
+  "/account",
+  "/login",
+  "/forgot-password",
+  "/set-password",
+  "/purchase-success",
+  "/tracker-checkout",
+]
 
 export default function SiteHeader() {
   const pathname = usePathname()

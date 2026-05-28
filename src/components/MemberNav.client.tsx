@@ -28,14 +28,14 @@ const COURSES: CourseEntry[] = [
     label: "Training Foundations",
     href: "/training-foundations",
     upgradeHref: "/account/courses/training",
-    memberPrice: "$87",
+    memberPrice: "$97",
   },
   {
     id: "nutrition",
     label: "Nutrition Foundations",
     href: "/nutrition-foundations",
     upgradeHref: "/account/courses/nutrition",
-    memberPrice: "$69",
+    memberPrice: "$77",
   },
 ]
 

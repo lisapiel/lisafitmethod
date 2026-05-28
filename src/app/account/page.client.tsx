@@ -261,9 +261,9 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
             <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 4 }}>
               {owned.length > 0 ? "Add to Your Account" : "Get Started"}
             </p>
-            {owned.length > 0 && (
-              <p style={{ fontSize: "0.7rem", color: "#555", marginBottom: 16 }}>10% member discount applied automatically.</p>
-            )}
+            <p style={{ fontSize: "0.7rem", color: "#555", marginBottom: 16 }}>
+              {owned.length > 0 ? "10% member discount applied automatically." : "Member pricing applied at checkout."}
+            </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: owned.length > 0 ? 0 : 16 }}>
               {upsells.map((u) => (
                 <div
