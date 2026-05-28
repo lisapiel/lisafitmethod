@@ -73,17 +73,19 @@ const PRODUCTS: Record<string, ProductInfo> = {
   },
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const product = PRODUCTS[params.slug]
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const product = PRODUCTS[slug]
   if (!product) return { title: "Not Found" }
   return { title: `${product.name} — Lisa Fit Method` }
 }
 
-export default function CoursesUpgradePage({ params }: { params: { slug: string } }) {
-  const product = PRODUCTS[params.slug]
+export default async function CoursesUpgradePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const product = PRODUCTS[slug]
   if (!product) notFound()
 
-  const isTracker = params.slug === "tracker"
+  const isTracker = slug === "tracker"
 
   return (
     <main style={{
