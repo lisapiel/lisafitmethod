@@ -208,9 +208,9 @@ function Page1() {
 function Page2() {
   return createElement(Page, { size: "A4", style: s.dayPage },
     createElement(View, { style: s.dayHeader },
-      createElement(Text, { style: s.dayBrand }, "Lisa Fit Method — A Look Inside the Program"),
+      createElement(Text, { style: s.dayBrand }, "Lisa Fit Method — A Real Day from the Program"),
       createElement(Text, { style: s.dayTitle }, "Day A: Lower Body Strength"),
-      createElement(Text, { style: s.dayMeta }, "Glutes · Legs · Core  |  45–60 min  |  3 days/week program")
+      createElement(Text, { style: s.dayMeta }, "Glutes · Legs · Core  |  45–60 min  |  This is a preview")
     ),
 
     // Warmup
@@ -243,22 +243,23 @@ function Page2() {
       )
     ),
 
-    // Days B and C teaser
-    createElement(View, { style: s.teaserRow },
+    // Course preview teaser
+    createElement(View, { style: { marginTop: 12, backgroundColor: "#0d0d0d", padding: "9 12" } },
+      createElement(Text, { style: { fontSize: 5.5, letterSpacing: 2, color: GOLD_DEEP, textTransform: "uppercase", fontFamily: "Helvetica-Bold", marginBottom: 7 } }, "In the full course you also get"),
       ...[
-        { day: "Day B", name: "Upper Body Strength", meta: "Pressing · Pulling · Posture" },
-        { day: "Day C", name: "Integration & Core",  meta: "Stability · Movement Quality" },
-      ].map((d) =>
-        createElement(View, { style: s.teaserCard, key: d.day },
-          createElement(Text, { style: s.teaserDay }, d.day),
-          createElement(Text, { style: s.teaserName }, d.name),
-          createElement(Text, { style: s.teaserMeta }, d.meta),
-          createElement(Text, { style: s.teaserLock }, "Full course only")
+        "Video coaching for every single exercise",
+        "Cues and education so you understand what you're doing and why",
+        "Built-in set tracker to hit progressive overload every week",
+        "Full program structure — rest, progressions, and all sessions mapped out",
+      ].map((item, i) =>
+        createElement(View, { key: i, style: { flexDirection: "row", alignItems: "flex-start", marginBottom: 4 } },
+          createElement(Text, { style: { fontSize: 7, color: GOLD, marginRight: 5 } }, ">"),
+          createElement(Text, { style: { fontSize: 7, color: "#aaa", lineHeight: 1.4, flex: 1 } }, item)
         )
       )
     ),
 
-    createElement(View, { style: { marginTop: 16, backgroundColor: "#0d0d0d", padding: "9 12" } },
+    createElement(View, { style: { marginTop: 8, backgroundColor: "#0d0d0d", padding: "9 12" } },
       createElement(Text, { style: { fontSize: 7.5, color: GOLD } }, "Get the full program at lisafitmethod.com/courses"),
       createElement(Text, { style: { fontSize: 7, color: "#3a3530", marginTop: 3 } }, "50+ videos · 4-week program · built-in tracker · lifetime access")
     ),

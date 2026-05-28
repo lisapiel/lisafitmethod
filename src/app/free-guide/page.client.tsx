@@ -315,11 +315,11 @@ export default function FreeGuideClient() {
             {/* Day A */}
             <Label>A look inside the program</Label>
             <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.5rem, 4vw, 1.9rem)", color: black, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.6rem", marginTop: 0, lineHeight: 1.1 }}>
-              This is one real day.{" "}
-              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>There are twelve.</em>
+              A real day from the program.{" "}
+              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>This is what it looks like.</em>
             </h2>
             <p style={{ fontSize: "0.92rem", maxWidth: 600, marginBottom: "1.5rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-              The 4-week program runs three days a week. Every session starts with a warmup and ends with a cooldown — they are part of the program, not optional. Here is what Day A actually looks like, start to finish.
+              The program runs three days a week. Every session starts with a warmup and ends with a cooldown — they are part of the program, not optional. Here is what one day actually looks like, start to finish.
             </p>
 
             <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginBottom: "0.5rem" }}>
@@ -361,25 +361,26 @@ export default function FreeGuideClient() {
               </div>
 
               <p style={{ fontSize: "0.82rem", color: "#5a544b", marginTop: "1.5rem", fontStyle: "italic", lineHeight: 1.65, fontFamily: dmSans }}>
-                Every exercise has a video, rest times, and a spot to log your sets. Days B and C, and the full progression for weeks 3 and 4 are all waiting inside.
+                This is a preview. In the full course, every exercise comes with a video, coaching cues, rest times, and a spot to log your sets.
               </p>
             </div>
 
-            {/* Days B and C teaser */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "0.5rem" }}>
-              {[
-                { day: "Day B", title: "Upper Body Strength", meta: "Pressing · Pulling · Posture" },
-                { day: "Day C", title: "Integration & Core", meta: "Stability · Movement Quality" },
-              ].map((d) => (
-                <div key={d.day} style={{ background: "#111", border: "1px solid #1e1b17", padding: "1.25rem 1.5rem", position: "relative", overflow: "hidden" }}>
-                  <p style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.35rem" }}>{d.day}</p>
-                  <p style={{ fontFamily: playfair, fontSize: "1.05rem", color: "#f0e6d3", margin: "0 0 0.25rem" }}>{d.title}</p>
-                  <p style={{ fontFamily: dmSans, fontSize: "0.7rem", color: "#5a544b", margin: 0 }}>{d.meta}</p>
-                  <div style={{ position: "absolute", top: 0, right: 0, background: "rgba(200,169,126,0.08)", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                    <span style={{ fontFamily: dmSans, fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3a3530" }}>Full course only</span>
-                  </div>
-                </div>
-              ))}
+            {/* Course preview teaser */}
+            <div style={{ background: "#111", border: "1px solid #1e1b17", padding: "1.25rem 1.5rem", marginBottom: "0.5rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.5rem" }}>In the full course you also get</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {[
+                  "Video coaching for every single exercise",
+                  "Cues and education so you actually understand what you're doing and why",
+                  "Built-in set tracker to log your progress and hit progressive overload every week",
+                  "Full program structure — warm-ups, cooldowns, rest, and progressions all mapped out",
+                ].map((item, i) => (
+                  <li key={i} style={{ display: "flex", gap: "0.6rem", padding: "0.38rem 0", borderBottom: i < 3 ? "1px solid #1e1b17" : "none" }}>
+                    <span style={{ color: gold, fontSize: "0.75rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
+                    <p style={{ fontFamily: dmSans, fontSize: "0.82rem", color: "#ccc", margin: 0, lineHeight: 1.5 }}>{item}</p>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <Rule />
