@@ -13,6 +13,7 @@ export function PromoCodesClient() {
   const [loadError, setLoadError] = useState(false)
   const [newCode, setNewCode] = useState("")
   const [newDiscount, setNewDiscount] = useState<string>("100")
+  const [newProduct, setNewProduct] = useState<"training" | "nutrition" | "all">("all")
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -35,11 +36,12 @@ export function PromoCodesClient() {
     setError(null)
     const pct = parseInt(newDiscount, 10)
     startTransition(async () => {
-      const result = await addPromoCode(newCode, pct)
+      const result = await addPromoCode(newCode, pct, newProduct)
       if (result.error) { setError(result.error); return }
-      setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: { discountPct: pct, active: true } }))
+      setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: { discountPct: pct, active: true, product: newProduct } }))
       setNewCode("")
       setNewDiscount("100")
+      setNewProduct("all")
     })
   }
 
@@ -77,8 +79,8 @@ export function PromoCodesClient() {
       {/* Code list */}
       <div style={{ background: "#161616", border: `1px solid ${border}`, marginBottom: "2rem" }}>
         {/* Header row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 150px 90px 220px", gap: "1rem", padding: "0.75rem 1.5rem", borderBottom: `1px solid ${border}` }}>
-          {["Code", "Discount", "Status", ""].map((h) => (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 130px 120px 90px 220px", gap: "1rem", padding: "0.75rem 1.5rem", borderBottom: `1px solid ${border}` }}>
+          {["Code", "Discount", "Product", "Status", ""].map((h) => (
             <span key={h} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555" }}>{h}</span>
           ))}
         </div>
@@ -102,10 +104,13 @@ export function PromoCodesClient() {
         )}
 
         {entries.map(([code, entry]) => (
-          <div key={code} style={{ display: "grid", gridTemplateColumns: "1fr 150px 90px 220px", gap: "1rem", padding: "1rem 1.5rem", borderBottom: `1px solid ${border}`, alignItems: "center", opacity: entry.active ? 1 : 0.55 }}>
+          <div key={code} style={{ display: "grid", gridTemplateColumns: "1fr 130px 120px 90px 220px", gap: "1rem", padding: "1rem 1.5rem", borderBottom: `1px solid ${border}`, alignItems: "center", opacity: entry.active ? 1 : 0.55 }}>
             <span style={{ ...mono, color: "#f0e6d3" }}>{code}</span>
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: entry.discountPct === 100 ? gold : "#f0e6d3" }}>
               {entry.discountPct === 100 ? "Free (100% off)" : `${entry.discountPct}% off`}
+            </span>
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#888" }}>
+              {entry.product === "training" ? "Training" : entry.product === "nutrition" ? "Nutrition" : "All"}
             </span>
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", color: entry.active ? "#6dbf7e" : "#888" }}>
               {entry.active ? "Active" : "Inactive"}
@@ -169,6 +174,21 @@ export function PromoCodesClient() {
               required
               style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", padding: "0.65rem 0.9rem", outline: "none", boxSizing: "border-box" as const }}
             />
+          </div>
+
+          <div style={{ flex: "0 0 140px" }}>
+            <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#888", marginBottom: "0.5rem" }}>
+              Applies To
+            </label>
+            <select
+              value={newProduct}
+              onChange={(e) => setNewProduct(e.target.value as "training" | "nutrition" | "all")}
+              style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", padding: "0.65rem 0.9rem", outline: "none", boxSizing: "border-box" as const, cursor: "pointer" }}
+            >
+              <option value="all">All products</option>
+              <option value="training">Training only</option>
+              <option value="nutrition">Nutrition only</option>
+            </select>
           </div>
 
           <button

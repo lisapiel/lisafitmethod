@@ -7,6 +7,7 @@ const PROMO_KEY = "__promo_codes__"
 export interface PromoCodeEntry {
   discountPct: number
   active: boolean
+  product: "training" | "nutrition" | "all"
 }
 
 export type PromoCodes = Record<string, PromoCodeEntry>

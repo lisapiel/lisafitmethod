@@ -6,14 +6,26 @@ import { NUTRITION_COURSE_PRICE_CENTS, BUNDLE_PRICE_CENTS } from "@/lib/pricing"
 export const dynamic = "force-dynamic"
 
 const TRAINING_BASE_PRICE_CENTS = 9700
-const TRACKER_PRICE_CENTS = 1700
+const TRACKER_PRICE_CENTS = 2700
 const MIN_CHARGE_CENTS = 50
 
-async function applyPromo(code: string, basePrice: number): Promise<{ valid: boolean; discountPct: number; finalAmount: number }> {
+async function applyPromo(
+  code: string,
+  basePrice: number,
+  productType: "training" | "nutrition" | "bundle"
+): Promise<{ valid: boolean; discountPct: number; finalAmount: number }> {
   const codes = await getPromoCodes()
   const normalized = code.trim().toUpperCase()
   const entry = codes[normalized]
   if (!entry || !entry.active) return { valid: false, discountPct: 0, finalAmount: basePrice }
+  // Check product scope: "all" codes apply everywhere; product-specific codes must match
+  const scope = entry.product ?? "all"
+  if (scope !== "all") {
+    const matches =
+      (scope === "training" && (productType === "training" || productType === "bundle")) ||
+      (scope === "nutrition" && (productType === "nutrition" || productType === "bundle"))
+    if (!matches) return { valid: false, discountPct: 0, finalAmount: basePrice }
+  }
   const discounted = Math.round(basePrice * (1 - entry.discountPct / 100))
   return { valid: true, discountPct: entry.discountPct, finalAmount: Math.max(discounted, MIN_CHARGE_CENTS) }
 }
@@ -41,7 +53,7 @@ export async function POST(request: NextRequest) {
     let courseAmount = basePrice
 
     if (promoCode?.trim()) {
-      const result = await applyPromo(promoCode, basePrice)
+      const result = await applyPromo(promoCode, basePrice, isBundle ? "bundle" : isNutrition ? "nutrition" : "training")
       if (!result.valid) {
         return NextResponse.json({ error: "Invalid promo code" }, { status: 400 })
       }
