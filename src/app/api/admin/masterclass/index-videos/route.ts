@@ -33,9 +33,8 @@ export type S3VideoItem = {
 }
 
 export async function GET() {
-  const cookieStore = await cookies()
   const email = await runWithAmplifyServerContext({
-    nextServerContext: { cookies: () => cookieStore },
+    nextServerContext: { cookies },
     operation: async (contextSpec): Promise<string | null> => {
       try {
         const session = await fetchAuthSession(contextSpec)

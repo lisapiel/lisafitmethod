@@ -18,12 +18,14 @@ export default function AdminHeader() {
 
   const navItems = [
     { href: "/admin", label: "Dashboard" },
+    { href: "/admin/customers", label: "Customers" },
     { href: "/admin/videos", label: "Videos" },
     { href: "/admin/photos", label: "Photos" },
     { href: "/admin/design", label: "Design" },
     { href: "/admin/blog", label: "Blog" },
     { href: "/admin/promo-codes", label: "Promo Codes" },
     { href: "/admin/leads", label: "Leads" },
+    { href: "/admin/masterclass", label: "Masterclass" },
   ]
 
   return (
