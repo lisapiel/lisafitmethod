@@ -36,26 +36,40 @@ export function PromoCodesClient() {
     setError(null)
     const pct = parseInt(newDiscount, 10)
     startTransition(async () => {
-      const result = await addPromoCode(newCode, pct, newProduct)
-      if (result.error) { setError(result.error); return }
-      setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: { discountPct: pct, active: true, product: newProduct } }))
-      setNewCode("")
-      setNewDiscount("100")
-      setNewProduct("all")
+      try {
+        const result = await addPromoCode(newCode, pct, newProduct)
+        if (result?.error) { setError(result.error); return }
+        setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: { discountPct: pct, active: true, product: newProduct } }))
+        setNewCode("")
+        setNewDiscount("100")
+        setNewProduct("all")
+      } catch {
+        setError("Something went wrong. Please try again.")
+      }
     })
   }
 
   function handleDelete(code: string) {
     startTransition(async () => {
-      await deletePromoCode(code)
-      setCodes((prev) => { const next = { ...prev }; delete next[code]; return next })
+      try {
+        const result = await deletePromoCode(code)
+        if (result?.error) return
+        setCodes((prev) => { const next = { ...prev }; delete next[code]; return next })
+      } catch {
+        // silently ignore UI stays consistent
+      }
     })
   }
 
   function handleToggle(code: string, active: boolean) {
     startTransition(async () => {
-      await togglePromoCode(code, active)
-      setCodes((prev) => ({ ...prev, [code]: { ...prev[code], active } }))
+      try {
+        const result = await togglePromoCode(code, active)
+        if (result?.error) return
+        setCodes((prev) => ({ ...prev, [code]: { ...prev[code], active } }))
+      } catch {
+        // silently ignore
+      }
     })
   }
 
