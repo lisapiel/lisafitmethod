@@ -210,7 +210,7 @@ export default function AccountDropdown({ onNavigate }: { onNavigate?: () => voi
                     </svg>
                     <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "rgba(240,230,211,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{course.label}</span>
                   </div>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, color: gold, flexShrink: 0 }}>{course.price} →</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, flexShrink: 0 }}>→</span>
                 </Link>
               ))}
               {showTrackerUpsell && (
@@ -227,7 +227,7 @@ export default function AccountDropdown({ onNavigate }: { onNavigate?: () => voi
                     </svg>
                     <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "rgba(240,230,211,0.8)" }}>Progress Tracker</span>
                   </div>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, color: gold, flexShrink: 0 }}>$27 →</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, flexShrink: 0 }}>→</span>
                 </Link>
               )}
             </div>
