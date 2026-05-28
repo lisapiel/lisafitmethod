@@ -386,7 +386,7 @@ const ctaButtonStyle: React.CSSProperties = {
 
 // ─── Root component ───────────────────────────────────────────────────────────
 
-export function CheckoutClient({ product = "training" }: { product?: "training" | "nutrition" | "bundle" }) {
+export function CheckoutClient({ product = "training", memberDiscount = false }: { product?: "training" | "nutrition" | "bundle"; memberDiscount?: boolean }) {
   const isNutrition = product === "nutrition"
   const isBundle = product === "bundle"
   const MODULES = isNutrition ? NUTRITION_MODULES : isBundle ? [...TRAINING_MODULES, ...NUTRITION_MODULES] : TRAINING_MODULES
@@ -421,7 +421,7 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, includesTracker, product }),
+        body: JSON.stringify({ email, name, includesTracker, product, memberDiscount }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -440,14 +440,14 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
     } finally {
       setLoadingIntent(false)
     }
-  }, [email, name, includesTracker, product, isNutrition, isBundle, BASE_PRICE])
+  }, [email, name, includesTracker, product, memberDiscount, isNutrition, isBundle, BASE_PRICE])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email!, name: name!, promoCode, includesTracker, product }),
+        body: JSON.stringify({ email: email!, name: name!, promoCode, includesTracker, product, memberDiscount }),
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
@@ -460,7 +460,7 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
     } catch {
       return { error: "Something went wrong." }
     }
-  }, [email, name, includesTracker, product, isNutrition, isBundle, BASE_PRICE])
+  }, [email, name, includesTracker, product, memberDiscount, isNutrition, isBundle, BASE_PRICE])
 
   const handleBack = useCallback(() => {
     setEmail(null)
@@ -538,6 +538,10 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
             {!isNutrition && !isBundle && includesTracker ? (
               <span style={{ fontSize: 10, color: "#666", fontFamily: "var(--font-montserrat), sans-serif" }}>
                 course + tracker
+              </span>
+            ) : memberDiscount ? (
+              <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
+                Member Price
               </span>
             ) : isBundle ? (
               <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.35)", padding: "4px 10px" }}>
@@ -632,7 +636,7 @@ export function CheckoutClient({ product = "training" }: { product?: "training" 
                 />
                 <div>
                   <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                    Add the Lifetime Workout Tracker +$17
+                    Add the Lifetime Workout Tracker +$27
                   </p>
                   <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
                     Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat.
