@@ -353,74 +353,123 @@ export default function NutritionGuideClient() {
 
             <Rule />
 
-            <Label>Here&apos;s the honest part</Label>
+            <Label>Here&apos;s what you do next</Label>
             <h2 style={{ fontFamily: playfair, fontSize: "clamp(1.4rem, 3.5vw, 1.8rem)", color: black, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.8rem", marginTop: 0, lineHeight: 1.12 }}>
-              You have the science.{" "}
-              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>The course is the structured how.</em>
+              You now know what works.{" "}
+              <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here&apos;s how to do it.</em>
             </h2>
-            <p style={{ fontSize: "0.93rem", marginBottom: "1rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-              Knowing these five principles puts you ahead of most people. But knowledge alone is not a system. What gets results is having the right meal plan, personalized to your body, built around real food and structured habits.
+            <p style={{ fontSize: "0.93rem", marginBottom: "1.75rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
+              This guide gave you the framework. What it can&apos;t give you is the structure — the exact meal plan dialed to your calorie target, the week-by-week training progression, the coaching cues for every movement, the habits built in the right order. That&apos;s what the courses are for.
             </p>
 
-            {/* Nutrition Foundations — primary CTA */}
-            <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginTop: "1.25rem" }}>
-              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: gold, marginBottom: "0.75rem", marginTop: 0 }}>
-                Nutrition Foundations
+            {/* Bundle — hero */}
+            <div style={{ background: black, borderTop: `2px solid ${gold}`, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginBottom: "0.75rem" }}>
+              <span style={{ display: "inline-block", fontFamily: dmSans, fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "3px 10px", marginBottom: "0.75rem" }}>
+                Best Value
+              </span>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: gold, marginBottom: "0.4rem", marginTop: 0 }}>
+                Foundations Bundle
               </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.875rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-                <span style={{ color: "#5a544b", textDecoration: "line-through", fontFamily: playfair, fontSize: "1.5rem" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
-                <span style={{ color: "#fff", fontFamily: playfair, fontSize: "clamp(2rem, 5vw, 2.9rem)", fontWeight: 700, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
-                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>Founding Price</span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.875rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
+                <span style={{ color: "#5a544b", textDecoration: "line-through", fontFamily: playfair, fontSize: "1.4rem" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
+                <span style={{ color: "#fff", fontFamily: playfair, fontSize: "clamp(2rem, 5vw, 2.9rem)", fontWeight: 700, lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>Save {BUNDLE_SAVINGS_DISPLAY}</span>
               </div>
-              <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.4rem, 3.5vw, 1.7rem)", fontWeight: 700, margin: "1.1rem 0 0.75rem", color: "#fff", letterSpacing: "-0.01em" }}>
-                Eat right.{" "}
-                <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>A 4-week course built for people who train.</em>
+              <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.3rem, 3vw, 1.6rem)", fontWeight: 700, margin: "0 0 1rem", color: "#fff", letterSpacing: "-0.01em" }}>
+                Both courses together. Everything in one place.
               </h3>
-              <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                Personalized TDEE calculator, a meal plan that adapts to your calorie target, 9 verified recipes with source attribution, and science-backed education. Founding member pricing — limited time.
-              </p>
-              <Link href="/nutrition" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400 }}>
-                Get Nutrition Foundations
+              {[
+                "Everything in Nutrition Foundations + Training Foundations",
+                "Personalized TDEE calculator, meal plan, recipes, and science-backed content",
+                "4-week strength program with 50+ exercise videos and week-by-week workout tracking",
+                "One-time payment. Lifetime access to both courses.",
+              ].map((bullet, i) => (
+                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                  <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
+                  <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: "#b3ab9c", margin: 0, lineHeight: 1.6 }}>{bullet}</p>
+                </div>
+              ))}
+              <Link href="/checkout?product=bundle" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400, marginTop: "1.5rem" }}>
+                Get Both Courses
               </Link>
-              <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans }}>
+              <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans, marginBottom: 0 }}>
                 One-time payment · Lifetime access · Yours forever
               </p>
             </div>
 
-            {/* Training Foundations secondary CTA */}
-            <div style={{ border: `1px solid ${line}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginTop: "1.5rem" }}>
-              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.6rem", marginTop: 0 }}>
-                Also available: Training Foundations
+            {/* Nutrition Foundations */}
+            <div style={{ border: `1px solid ${line}`, borderLeft: `3px solid ${gold}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "0.75rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.4rem", marginTop: 0 }}>
+                Nutrition Foundations
               </p>
-              <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, lineHeight: 1.65, marginBottom: "0.75rem" }}>
-                The 4-week strength training program that puts the nutrition to work. Five foundational movements, 50+ exercise videos, built-in workout tracking, and progressive overload from week one.
-              </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: playfair, fontSize: "1.6rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{COURSE_PRICE_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: playfair, fontSize: "1.8rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
                 <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
               </div>
-              <Link href="/courses" style={{ display: "inline-block", color: goldDeep, fontFamily: dmSans, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", border: `1px solid ${goldDeep}`, padding: "0.7rem 1.5rem" }}>
-                Explore Training Foundations
+              <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.1rem, 2.5vw, 1.3rem)", fontWeight: 700, margin: "0 0 0.75rem", color: ink, letterSpacing: "-0.01em" }}>
+                The 4-week nutrition course built around your body.
+              </h3>
+              {[
+                "Personalized TDEE calculator — your exact calorie target, not a generic estimate",
+                "A meal plan built around your number, with real food you will actually eat",
+                "9 verified recipes with full macros and source attribution",
+                "Science-backed education with research citations throughout",
+              ].map((bullet, i) => (
+                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                  <span style={{ color: goldDeep, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
+                  <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, margin: 0, lineHeight: 1.6 }}>{bullet}</p>
+                </div>
+              ))}
+              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: gold, color: black, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "0.75rem 1.5rem", textDecoration: "none", fontFamily: dmSans, marginTop: "1.25rem" }}>
+                Get Nutrition Foundations
               </Link>
             </div>
 
-            {/* Bundle CTA */}
-            <div style={{ background: black, padding: "clamp(1.5rem, 4vw, 2rem)", marginTop: "1rem" }}>
-              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: gold, marginBottom: "0.6rem", marginTop: 0 }}>
-                Best Value: Foundations Bundle
+            {/* Training Foundations */}
+            <div style={{ border: `1px solid ${line}`, borderLeft: `3px solid ${line}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "1.75rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: muted, marginBottom: "0.4rem", marginTop: 0 }}>
+                Training Foundations
               </p>
-              <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: "#b3ab9c", lineHeight: 1.65, marginBottom: "0.75rem" }}>
-                Both courses together. Eat right, train right, and have everything in one place. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately.
-              </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: playfair, fontSize: "1.8rem", fontWeight: 700, color: gold, lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: "#555", textDecoration: "line-through" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", color: "#0a0a0a", background: gold, padding: "3px 8px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase" }}>Save {BUNDLE_SAVINGS_DISPLAY}</span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: playfair, fontSize: "1.8rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
               </div>
-              <Link href="/checkout?product=bundle" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400 }}>
-                Get Both Courses
+              <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.1rem, 2.5vw, 1.3rem)", fontWeight: 700, margin: "0 0 0.75rem", color: ink, letterSpacing: "-0.01em" }}>
+                The 4-week strength program that puts the nutrition to work.
+              </h3>
+              {[
+                "5 foundational movements every beginner needs to master",
+                "50+ exercise videos with coaching cues for every movement",
+                "Built-in workout tracking so you can see your progress week by week",
+                "3 structured training days per week, progressive overload from day one",
+              ].map((bullet, i) => (
+                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                  <span style={{ color: goldDeep, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
+                  <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, margin: 0, lineHeight: 1.6 }}>{bullet}</p>
+                </div>
+              ))}
+              <Link href="/checkout" style={{ display: "inline-block", color: goldDeep, fontFamily: dmSans, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", border: `1px solid ${goldDeep}`, padding: "0.7rem 1.5rem", marginTop: "1.25rem" }}>
+                Get Training Foundations
               </Link>
+            </div>
+
+            {/* Urgency note */}
+            <div style={{ borderLeft: `2px solid ${gold}`, paddingLeft: "1.25rem", marginBottom: "1.75rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.85rem", color: muted, lineHeight: 1.7, margin: 0 }}>
+                Founding member pricing ends when we hit 100 students. Regular pricing returns then. This is the cheapest these courses will ever be.
+              </p>
+            </div>
+
+            {/* Lisa's personal close */}
+            <div style={{ background: panel, padding: "clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 4vw, 2.25rem)", borderLeft: `2px solid ${gold}` }}>
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
+                I built these because everything I tried before didn&apos;t work. Years of cardio without results. Tracking calories without understanding why. Following plans that didn&apos;t fit my life. I went back to the research and built what I wish I had.
+              </p>
+              <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.05rem", color: goldDeep, margin: 0 }}>
+                — Lisa
+              </p>
             </div>
 
             <p style={{ fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#9c9590", marginTop: "3rem", textAlign: "center", fontFamily: dmSans }}>

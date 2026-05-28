@@ -184,14 +184,14 @@ const styles = StyleSheet.create({
   },
   equationBox: {
     backgroundColor: BLACK,
-    padding: "14 16",
+    padding: "18 20",
     marginBottom: 20,
   },
   equationRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingTop: 10,
+    paddingBottom: 10,
     gap: 10,
   },
   equationLabel: {
@@ -327,11 +327,11 @@ const upsellStyles = StyleSheet.create({
     marginBottom: 6,
   },
   upsellHeadline: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: "Helvetica-Bold",
     color: "#f5f2ee",
     letterSpacing: 0.3,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   upsellSub: {
     fontSize: 9,
@@ -427,6 +427,77 @@ const upsellStyles = StyleSheet.create({
     color: GOLD,
     letterSpacing: 1,
   },
+  transitionPara: {
+    fontSize: 8.5,
+    color: "rgba(245,242,238,0.45)",
+    lineHeight: 1.65,
+    marginBottom: 18,
+  },
+  bundleHeroBlock: {
+    padding: "18 20",
+    marginBottom: 10,
+    backgroundColor: "#1a1208",
+    borderTopWidth: 2,
+    borderTopColor: GOLD,
+  },
+  bestValueBadge: {
+    fontSize: 6,
+    color: INK,
+    backgroundColor: GOLD,
+    padding: "3 8",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    alignSelf: "flex-start",
+  },
+  bulletRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 6,
+    alignItems: "flex-start",
+  },
+  bulletArrow: {
+    fontSize: 8,
+    color: GOLD_DEEP,
+    fontFamily: "Helvetica-Bold",
+    width: 12,
+  },
+  bulletText: {
+    fontSize: 8,
+    color: "rgba(245,242,238,0.55)",
+    lineHeight: 1.6,
+    flex: 1,
+  },
+  urgencyBox: {
+    borderLeftWidth: 2,
+    borderLeftColor: GOLD,
+    paddingLeft: 12,
+    marginBottom: 14,
+    marginTop: 12,
+  },
+  urgencyText: {
+    fontSize: 8,
+    color: "rgba(245,242,238,0.35)",
+    lineHeight: 1.6,
+  },
+  closingBox: {
+    backgroundColor: "#12100e",
+    padding: "12 14",
+    borderLeftWidth: 2,
+    borderLeftColor: GOLD,
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  closingText: {
+    fontSize: 8.5,
+    color: "rgba(245,242,238,0.5)",
+    lineHeight: 1.65,
+    marginBottom: 8,
+  },
+  closingSig: {
+    fontSize: 9,
+    color: GOLD_DEEP,
+  },
 })
 
 function NutritionGuidePDF() {
@@ -513,13 +584,13 @@ function NutritionGuidePDF() {
       createElement(
         View,
         { style: styles.equationBox },
-        ...EQUATION_ROWS.map((row, i) =>
-          createElement(
-            View,
-            { key: i },
+        createElement(Text, { style: { fontSize: 7, color: "#5a544b", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 } }, "Five Variables. One System."),
+        ...EQUATION_ROWS.map((row, i) => {
+          const rowChildren = [
             createElement(
               View,
               { style: styles.equationRow },
+              createElement(Text, { style: { fontSize: 9, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, letterSpacing: 0.5, width: 28, flexShrink: 0, paddingTop: 2 } }, `0${i + 1}`),
               createElement(
                 View,
                 { style: { flex: 1 } },
@@ -530,9 +601,10 @@ function NutritionGuidePDF() {
                 ? createElement(Text, { style: styles.equationPlus }, "+")
                 : createElement(Text, { style: styles.equationResult }, "= Results")
             ),
-            i < 4 ? createElement(View, { style: styles.equationRowDivider }) : null
-          )
-        )
+          ]
+          if (i < 4) rowChildren.push(createElement(View, { style: styles.equationRowDivider }))
+          return createElement(View, { key: i }, ...rowChildren)
+        })
       ),
 
       // Footer
@@ -543,7 +615,7 @@ function NutritionGuidePDF() {
         createElement(Text, { style: styles.footerBrand }, "lisafitmethod.com")
       )
     ),
-    // Page 2: upsell
+    // Page 2: closing sales section
     createElement(
       Page,
       { size: "A4", style: upsellStyles.upsellPage },
@@ -551,50 +623,16 @@ function NutritionGuidePDF() {
         View,
         { style: upsellStyles.upsellHeader },
         createElement(Text, { style: upsellStyles.upsellBrand }, "Lisa Fit Method"),
-        createElement(Text, { style: upsellStyles.upsellHeadline }, "Ready to go further?"),
-        createElement(Text, { style: upsellStyles.upsellSub }, "Founding member pricing. Limited time.")
+        createElement(Text, { style: upsellStyles.upsellHeadline }, "You now know what works. Here's how to do it.")
       ),
-      // Nutrition Foundations (primary for nutrition guide readers)
+      createElement(Text, { style: upsellStyles.transitionPara }, "This guide gave you the framework. What it can't give you is the structure — the exact meal plan dialed to your calorie target, the week-by-week training progression, the coaching cues for every movement, the habits built in the right order. That's what the courses are for."),
+
+      // Bundle — hero (top, largest)
       createElement(
         View,
-        { style: upsellStyles.productBlock },
-        createElement(Text, { style: upsellStyles.productTag }, "Nutrition Foundations"),
-        createElement(Text, { style: upsellStyles.productName }, "The 4-Week Nutrition Course"),
-        createElement(Text, { style: upsellStyles.productDesc }, "Personalized TDEE calculator, a meal plan that adapts to your calorie target, real verified recipes with source attribution, and science-backed content with research citations throughout."),
-        createElement(
-          View,
-          { style: upsellStyles.priceRow },
-          createElement(Text, { style: upsellStyles.strikePrice }, "$127"),
-          createElement(Text, { style: upsellStyles.bigPrice }, "$77"),
-          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
-        ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $127. One-time payment, lifetime access."),
-        createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/nutrition")
-      ),
-      // Training Foundations
-      createElement(
-        View,
-        { style: upsellStyles.productBlock },
-        createElement(Text, { style: upsellStyles.productTag }, "Training Foundations"),
-        createElement(Text, { style: upsellStyles.productName }, "The 4-Week Strength Program"),
-        createElement(Text, { style: upsellStyles.productDesc }, "Five foundational movements, 50+ exercise videos, built-in workout tracking, and progressive overload from week one. Three structured training days per week."),
-        createElement(
-          View,
-          { style: upsellStyles.priceRow },
-          createElement(Text, { style: upsellStyles.strikePrice }, "$147"),
-          createElement(Text, { style: upsellStyles.bigPrice }, "$97"),
-          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
-        ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $147. One-time payment, lifetime access."),
-        createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/courses")
-      ),
-      // Bundle
-      createElement(
-        View,
-        { style: upsellStyles.bundleBlock },
-        createElement(Text, { style: upsellStyles.productTag }, "Foundations Bundle — Best Value"),
-        createElement(Text, { style: upsellStyles.productName }, "Both Courses Together"),
-        createElement(Text, { style: upsellStyles.productDesc }, "Nutrition Foundations + Training Foundations. $174 if bought separately."),
+        { style: upsellStyles.bundleHeroBlock },
+        createElement(Text, { style: upsellStyles.bestValueBadge }, "Best Value"),
+        createElement(Text, { style: upsellStyles.productTag }, "Foundations Bundle"),
         createElement(
           View,
           { style: upsellStyles.priceRow },
@@ -602,9 +640,96 @@ function NutritionGuidePDF() {
           createElement(Text, { style: upsellStyles.bigPrice }, "$137"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Save $37")
         ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "One-time payment, lifetime access to both courses."),
-        createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/checkout?product=bundle")
+        createElement(Text, { style: upsellStyles.productName }, "Both courses together. Everything in one place."),
+        ...[
+          "Everything in Nutrition Foundations + Training Foundations",
+          "Personalized TDEE calculator, meal plan, recipes, and science-backed content",
+          "4-week strength program with 50+ exercise videos and week-by-week workout tracking",
+          "One-time payment. Lifetime access to both courses.",
+        ].map((bullet, i) =>
+          createElement(
+            View,
+            { style: upsellStyles.bulletRow, key: `b-${i}` },
+            createElement(Text, { style: upsellStyles.bulletArrow }, "->"),
+            createElement(Text, { style: upsellStyles.bulletText }, bullet)
+          )
+        ),
+        createElement(Text, { style: { ...upsellStyles.urlText, marginTop: 8 } }, "lisafitmethod.com/checkout?product=bundle")
       ),
+
+      // Nutrition Foundations
+      createElement(
+        View,
+        { style: upsellStyles.productBlock },
+        createElement(Text, { style: upsellStyles.productTag }, "Nutrition Foundations"),
+        createElement(
+          View,
+          { style: upsellStyles.priceRow },
+          createElement(Text, { style: upsellStyles.strikePrice }, "$127"),
+          createElement(Text, { style: { ...upsellStyles.bigPrice, fontSize: 16 } }, "$77"),
+          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
+        ),
+        createElement(Text, { style: upsellStyles.productName }, "The 4-week nutrition course built around your body."),
+        ...[
+          "Personalized TDEE calculator — your exact calorie target, not a generic estimate",
+          "A meal plan built around your number, with real food you will actually eat",
+          "9 verified recipes with full macros and source attribution",
+          "Science-backed education with research citations throughout",
+        ].map((bullet, i) =>
+          createElement(
+            View,
+            { style: upsellStyles.bulletRow, key: `n-${i}` },
+            createElement(Text, { style: upsellStyles.bulletArrow }, "->"),
+            createElement(Text, { style: upsellStyles.bulletText }, bullet)
+          )
+        ),
+        createElement(Text, { style: { ...upsellStyles.urlText, marginTop: 6 } }, "lisafitmethod.com/nutrition")
+      ),
+
+      // Training Foundations
+      createElement(
+        View,
+        { style: upsellStyles.productBlock },
+        createElement(Text, { style: upsellStyles.productTag }, "Training Foundations"),
+        createElement(
+          View,
+          { style: upsellStyles.priceRow },
+          createElement(Text, { style: upsellStyles.strikePrice }, "$147"),
+          createElement(Text, { style: { ...upsellStyles.bigPrice, fontSize: 16 } }, "$97"),
+          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
+        ),
+        createElement(Text, { style: upsellStyles.productName }, "The 4-week strength program that puts the nutrition to work."),
+        ...[
+          "5 foundational movements every beginner needs to master",
+          "50+ exercise videos with coaching cues for every movement",
+          "Built-in workout tracking so you can see your progress week by week",
+          "3 structured training days per week, progressive overload from day one",
+        ].map((bullet, i) =>
+          createElement(
+            View,
+            { style: upsellStyles.bulletRow, key: `t-${i}` },
+            createElement(Text, { style: upsellStyles.bulletArrow }, "->"),
+            createElement(Text, { style: upsellStyles.bulletText }, bullet)
+          )
+        ),
+        createElement(Text, { style: { ...upsellStyles.urlText, marginTop: 6 } }, "lisafitmethod.com/courses")
+      ),
+
+      // Urgency note
+      createElement(
+        View,
+        { style: upsellStyles.urgencyBox },
+        createElement(Text, { style: upsellStyles.urgencyText }, "Founding member pricing ends when we hit 100 students. Regular pricing returns then. This is the cheapest these courses will ever be.")
+      ),
+
+      // Lisa's personal close
+      createElement(
+        View,
+        { style: upsellStyles.closingBox },
+        createElement(Text, { style: upsellStyles.closingText }, "I built these because everything I tried before didn't work. Years of cardio without results. Tracking calories without understanding why. Following plans that didn't fit my life. I went back to the research and built what I wish I had."),
+        createElement(Text, { style: upsellStyles.closingSig }, "— Lisa")
+      ),
+
       // Footer
       createElement(
         View,
