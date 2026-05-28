@@ -605,24 +605,21 @@ function NutritionGuidePDF() {
         { style: styles.equationBox, wrap: false },
         createElement(Text, { style: { fontSize: 6.5, color: "#5a544b", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 } }, "Five Variables. One System."),
         ...EQUATION_ROWS.map((row, i) => {
-          const rowChildren = [
-            createElement(
-              View,
-              { style: { flexDirection: "row", alignItems: "center", paddingTop: 8, paddingBottom: 8, gap: 10 } },
-              createElement(Text, { style: { fontSize: 10, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, width: 24, flexShrink: 0 } }, `0${i + 1}`),
-              createElement(
-                View,
-                { style: { flex: 1 } },
-                createElement(Text, { style: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#fff" } }, row.label),
-                createElement(Text, { style: { fontSize: 6, color: "#5a544b", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 1 } }, row.sub)
-              ),
-              i < 4
-                ? createElement(Text, { style: styles.equationPlus }, "+")
-                : createElement(Text, { style: styles.equationResult }, "= Results")
-            ),
-          ]
-          if (i < 4) rowChildren.push(createElement(View, { style: styles.equationRowDivider }))
-          return createElement(View, { key: i }, ...rowChildren)
+          // Flat layout — no nested View inside the flex row (avoids ghost text in @react-pdf)
+          const labelRow = createElement(
+            View,
+            { style: { flexDirection: "row", alignItems: "center", paddingTop: 8, gap: 12 } },
+            createElement(Text, { style: { fontSize: 9, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, width: 26, flexShrink: 0 } }, `0${i + 1}`),
+            createElement(Text, { style: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#fff", flex: 1 } }, row.label),
+            i < 4
+              ? createElement(Text, { style: { fontSize: 12, color: GOLD, fontFamily: "Helvetica-Bold", flexShrink: 0 } }, "+")
+              : createElement(Text, { style: { fontSize: 6.5, color: GOLD_DEEP, fontFamily: "Helvetica-Bold", letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 } }, "= Results")
+          )
+          const subRow = createElement(Text, { style: { fontSize: 6, color: "#5a544b", letterSpacing: 0.8, textTransform: "uppercase", paddingLeft: 38, paddingBottom: 8 } }, row.sub)
+          const divEl = createElement(View, { style: styles.equationRowDivider })
+          return i < 4
+            ? createElement(View, { key: i }, labelRow, subRow, divEl)
+            : createElement(View, { key: i }, labelRow, subRow)
         })
       ),
 
