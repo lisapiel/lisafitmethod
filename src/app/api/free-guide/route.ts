@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb"
+import { DynamoDBDocumentClient, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
 
 function makeDynamo() {
   return DynamoDBDocumentClient.from(
@@ -18,6 +18,16 @@ function makeDynamo() {
 async function saveLead(email: string, source: string) {
   try {
     const db = makeDynamo()
+    const existing = await db.send(new ScanCommand({
+      TableName: "lfm-leads",
+      FilterExpression: "email = :e AND #src = :s",
+      ExpressionAttributeNames: { "#src": "source" },
+      ExpressionAttributeValues: { ":e": email, ":s": source },
+    }))
+    if ((existing.Items?.length ?? 0) > 0) {
+      console.log("[FreeGuide] Duplicate lead skipped:", email, source)
+      return
+    }
     await db.send(new PutCommand({
       TableName: "lfm-leads",
       Item: {
