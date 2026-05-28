@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { getPromoCodes } from "@/lib/promoCodes"
+import { hasTrainingAccess, hasNutritionAccess } from "@/lib/authTokens"
 import { NUTRITION_COURSE_PRICE_CENTS, BUNDLE_PRICE_CENTS } from "@/lib/pricing"
 
 export const dynamic = "force-dynamic"
@@ -33,12 +34,13 @@ async function applyPromo(
 export async function POST(request: NextRequest) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
-    const { email, name, promoCode, includesTracker, product } = await request.json() as {
+    const { email, name, promoCode, includesTracker, product, memberDiscount } = await request.json() as {
       email: string
       name?: string
       promoCode?: string
       includesTracker?: boolean
       product?: "training" | "nutrition" | "bundle"
+      memberDiscount?: boolean
     }
 
     if (!email || !email.includes("@")) {
@@ -59,6 +61,13 @@ export async function POST(request: NextRequest) {
       }
       discountPct = result.discountPct
       courseAmount = result.finalAmount
+    } else if (memberDiscount) {
+      // Verify the email actually owns at least one product before granting member discount
+      const [hasTrain, hasNutr] = await Promise.all([hasTrainingAccess(email), hasNutritionAccess(email)])
+      if (hasTrain || hasNutr) {
+        discountPct = 10
+        courseAmount = Math.max(Math.round(basePrice * 0.9), MIN_CHARGE_CENTS)
+      }
     }
 
     const finalAmount = courseAmount + (!isNutrition && !isBundle && includesTracker ? TRACKER_PRICE_CENTS : 0)
@@ -71,6 +80,7 @@ export async function POST(request: NextRequest) {
         customerName: name ?? "",
         promoCode: promoCode ?? "",
         discountPct: String(discountPct),
+        memberDiscount: memberDiscount ? "true" : "false",
         includesTracker: (!isNutrition && !isBundle && includesTracker) ? "true" : "false",
         product: isBundle ? "bundle" : isNutrition ? "nutrition" : "training",
       },

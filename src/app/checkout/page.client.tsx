@@ -32,12 +32,14 @@ function PaymentForm({
   email,
   finalAmount,
   discountPct,
+  product,
   onBack,
   onApplyPromo,
 }: {
   email: string
   finalAmount: number
   discountPct: number
+  product: "training" | "nutrition" | "bundle"
   onBack: () => void
   onApplyPromo: (code: string) => Promise<{ error: string | null }>
 }) {
@@ -58,7 +60,7 @@ function PaymentForm({
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/purchase-success?email=${encodeURIComponent(email)}`,
+        return_url: `${window.location.origin}/purchase-success?email=${encodeURIComponent(email)}&product=${product}`,
       },
     })
     if (confirmError) {
@@ -672,7 +674,7 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
             </div>
           ) : email && confirmed && clientSecret ? (
             <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
-              <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} onBack={handleBack} onApplyPromo={handleApplyPromo} />
+              <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} product={product} onBack={handleBack} onApplyPromo={handleApplyPromo} />
             </Elements>
           ) : email && !confirmed ? (
             <EmailConfirmStep email={email} onConfirm={handleConfirm} onChange={handleBack} />

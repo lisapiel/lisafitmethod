@@ -202,6 +202,20 @@ export default async function CoursesPage() {
               </div>
             </div>
           </div>
+
+          {/* Tracker add-on */}
+          <div style={{ marginTop: 2 }}>
+            <div style={{ background: "#111111", padding: "28px 36px", borderTop: "1px solid #2a2a2a", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between", opacity: 0.85 }}>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 6, fontFamily: "var(--font-dm-sans), sans-serif" }}>Add-on — Progress Tracker</p>
+                <p style={{ fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.5, maxWidth: 540 }}>Lifetime workout tracker, available as an add-on with Training Foundations. Log every lift, build custom days, always know what to beat.</p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 26, fontWeight: 700, color: "rgba(201,169,110,0.7)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>+$27</span>
+                <Link href="/checkout" style={{ display: "inline-block", border: "1px solid rgba(201,169,110,0.4)", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "11px 22px", whiteSpace: "nowrap" }}>Add at Checkout</Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

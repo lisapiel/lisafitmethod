@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
+import CrossSellShelf from "@/components/CrossSellShelf.client"
 
 export const metadata: Metadata = {
   title: "Introduction — Training Foundations | Lisa Fit Method",
@@ -194,6 +195,8 @@ export default function TrainingFoundationsIntroPage() {
         >
           Start Module 1 →
         </Link>
+
+        <CrossSellShelf currentProduct="training" />
       </div>
     </>
   )

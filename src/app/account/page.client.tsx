@@ -1,0 +1,308 @@
+"use client"
+import Link from "next/link"
+import { signOut } from "aws-amplify/auth"
+import { useRouter } from "next/navigation"
+
+const gold = "#c9a96e"
+const border = "#2a2a2a"
+
+interface Props {
+  email: string
+  training: boolean
+  nutrition: boolean
+  tracker: boolean
+}
+
+interface OwnedProduct {
+  id: string
+  label: string
+  desc: string
+  href: string
+  icon: string
+}
+
+interface UpsellProduct {
+  id: string
+  label: string
+  desc: string
+  price: string
+  regularPrice: string
+  href: string
+  featured?: boolean
+}
+
+export function AccountClient({ email, training, nutrition, tracker }: Props) {
+  const router = useRouter()
+
+  async function handleSignOut() {
+    await signOut()
+    router.push("/")
+  }
+
+  const owned: OwnedProduct[] = []
+  if (training) {
+    owned.push({
+      id: "training",
+      label: "Training Foundations",
+      desc: "4-week beginner strength program — 5 movements, progressive overload, workout tracking.",
+      href: "/training-foundations",
+      icon: "TF",
+    })
+  }
+  if (nutrition) {
+    owned.push({
+      id: "nutrition",
+      label: "Nutrition Foundations",
+      desc: "4-week nutrition course — TDEE calculator, meal plan, real verified recipes.",
+      href: "/nutrition-foundations",
+      icon: "NF",
+    })
+  }
+  if (tracker) {
+    owned.push({
+      id: "tracker",
+      label: "Progress Tracker",
+      desc: "Lifetime workout tracker — build custom days, log every lift, track progress over time.",
+      href: "/my-tracker",
+      icon: "PT",
+    })
+  }
+
+  const upsells: UpsellProduct[] = []
+  if (!training && !nutrition) {
+    upsells.push({
+      id: "bundle",
+      label: "Foundations Bundle",
+      desc: "Training + Nutrition together. The complete system.",
+      price: "$137",
+      regularPrice: "$174",
+      href: "/checkout?product=bundle&member=1",
+      featured: true,
+    })
+    upsells.push({
+      id: "training",
+      label: "Training Foundations",
+      desc: "4-week beginner strength program.",
+      price: "$87",
+      regularPrice: "$97",
+      href: "/checkout?member=1",
+    })
+    upsells.push({
+      id: "nutrition",
+      label: "Nutrition Foundations",
+      desc: "4-week nutrition course.",
+      price: "$69",
+      regularPrice: "$77",
+      href: "/checkout?product=nutrition&member=1",
+    })
+  } else if (training && !nutrition) {
+    upsells.push({
+      id: "nutrition",
+      label: "Nutrition Foundations",
+      desc: "Pair training with the right nutrition. 4-week course, personalized TDEE calculator.",
+      price: "$69",
+      regularPrice: "$77",
+      href: "/checkout?product=nutrition&member=1",
+      featured: true,
+    })
+  } else if (nutrition && !training) {
+    upsells.push({
+      id: "training",
+      label: "Training Foundations",
+      desc: "Put the nutrition to work. 4-week beginner strength program.",
+      price: "$87",
+      regularPrice: "$97",
+      href: "/checkout?member=1",
+      featured: true,
+    })
+  }
+  if (training && !tracker) {
+    upsells.push({
+      id: "tracker",
+      label: "Progress Tracker",
+      desc: "Keep progressing after 4 weeks. Lifetime access.",
+      price: "$27",
+      regularPrice: "$27",
+      href: "/checkout?member=1#tracker",
+    })
+  }
+
+  return (
+    <main style={{
+      background: "#0a0a0a",
+      minHeight: "100vh",
+      fontFamily: "var(--font-montserrat), sans-serif",
+      color: "#f0e6d3",
+    }}>
+      {/* Header */}
+      <div style={{
+        borderBottom: `1px solid ${border}`,
+        padding: "0 40px",
+        height: 60,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <span style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 20, fontWeight: 600, color: "#f0e6d3" }}>
+            Lisa <span style={{ color: gold }}>Fit Method</span>
+          </span>
+        </Link>
+        <button
+          onClick={handleSignOut}
+          style={{
+            background: "none",
+            border: `1px solid ${border}`,
+            color: "#888",
+            fontFamily: "var(--font-montserrat), sans-serif",
+            fontSize: "0.6rem",
+            fontWeight: 600,
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            padding: "0.4rem 1rem",
+            cursor: "pointer",
+          }}
+        >
+          Sign Out
+        </button>
+      </div>
+
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px 80px" }}>
+
+        {/* Account label */}
+        <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "#555", marginBottom: 8 }}>My Account</p>
+        <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 300, color: "#f0e6d3", marginBottom: 4 }}>
+          Welcome back.
+        </p>
+        <p style={{ fontSize: "0.75rem", color: "#555", marginBottom: 40 }}>{email}</p>
+
+        {/* Owned courses */}
+        {owned.length > 0 ? (
+          <div style={{ marginBottom: 48 }}>
+            <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 16 }}>
+              Your Courses
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {owned.map((p) => (
+                <div
+                  key={p.id}
+                  style={{
+                    background: "#111",
+                    border: `1px solid ${border}`,
+                    borderLeft: `3px solid ${gold}`,
+                    padding: "20px 24px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 16,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 6 }}>
+                      {p.label}
+                    </p>
+                    <p style={{ fontSize: "0.75rem", color: "#888", lineHeight: 1.6 }}>{p.desc}</p>
+                  </div>
+                  <Link
+                    href={p.href}
+                    style={{
+                      display: "inline-block",
+                      background: gold,
+                      color: "#0a0a0a",
+                      fontFamily: "var(--font-montserrat), sans-serif",
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      textDecoration: "none",
+                      padding: "0.65rem 1.25rem",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Continue →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginBottom: 48, background: "#111", border: `1px solid ${border}`, padding: "28px 24px" }}>
+            <p style={{ fontSize: "0.75rem", color: "#555", lineHeight: 1.7 }}>
+              You don&apos;t have any courses yet. Browse below to get started.
+            </p>
+          </div>
+        )}
+
+        {/* Upsell shelf */}
+        {upsells.length > 0 && (
+          <div>
+            <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 4 }}>
+              {owned.length > 0 ? "Add to Your Account" : "Get Started"}
+            </p>
+            {owned.length > 0 && (
+              <p style={{ fontSize: "0.7rem", color: "#555", marginBottom: 16 }}>10% member discount applied automatically.</p>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: owned.length > 0 ? 0 : 16 }}>
+              {upsells.map((u) => (
+                <div
+                  key={u.id}
+                  style={{
+                    background: u.featured ? "#1a1208" : "#111",
+                    border: u.featured ? `1px solid rgba(201,169,110,0.3)` : `1px solid ${border}`,
+                    borderLeft: `3px solid ${gold}`,
+                    padding: "20px 24px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 16,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    {u.featured && (
+                      <span style={{ display: "inline-block", fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#0a0a0a", background: gold, padding: "2px 8px", marginBottom: 8 }}>
+                        Best Value
+                      </span>
+                    )}
+                    <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 4 }}>
+                      {u.label}
+                    </p>
+                    <p style={{ fontSize: "0.75rem", color: "#888", lineHeight: 1.6 }}>{u.desc}</p>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                    <div style={{ textAlign: "right" }}>
+                      {u.regularPrice !== u.price && (
+                        <span style={{ display: "block", fontSize: "0.7rem", color: "#444", textDecoration: "line-through" }}>{u.regularPrice}</span>
+                      )}
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "1.3rem", fontWeight: 700, color: gold }}>{u.price}</span>
+                    </div>
+                    <Link
+                      href={u.href}
+                      style={{
+                        display: "inline-block",
+                        background: u.featured ? gold : "transparent",
+                        color: u.featured ? "#0a0a0a" : gold,
+                        border: u.featured ? "none" : `1px solid rgba(201,169,110,0.5)`,
+                        fontFamily: "var(--font-montserrat), sans-serif",
+                        fontSize: "0.6rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        textDecoration: "none",
+                        padding: "0.65rem 1.25rem",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Get Access
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}

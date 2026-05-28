@@ -49,7 +49,7 @@ const submitStyle: React.CSSProperties = {
 export function LoginClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect") ?? "/training-foundations"
+  const redirect = searchParams.get("redirect") ?? "/account"
 
   const [step, setStep] = useState<Step>("credentials")
   const [email, setEmail] = useState("")

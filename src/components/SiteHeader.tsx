@@ -14,7 +14,7 @@ export default function SiteHeader() {
 
   const navLinks = [
     { href: "/about", label: "About" },
-    { href: "/courses", label: "Courses" },
+    { href: "/courses", label: "Shop All" },
     { href: "/coaching", label: "Coaching" },
     { href: "/blog", label: "Blog" },
   ]
