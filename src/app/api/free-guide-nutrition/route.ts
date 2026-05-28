@@ -80,7 +80,7 @@ const emailHtml = `
                     <a href="https://lisafitmethod.com/free-guide-nutrition?unlocked=1" style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:13px 28px;">Read Online &rarr;</a>
                   </td>
                   <td>
-                    <a href="https://lisafitmethod.com/api/nutrition-guide-pdf" style="display:inline-block;background:transparent;color:#c8a97e;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:13px 24px;border:1px solid #c8a97e;">Download PDF</a>
+                    <a href="https://lisafitmethod.com/api/nutrition-guide-pdf?v=2" style="display:inline-block;background:transparent;color:#c8a97e;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:13px 24px;border:1px solid #c8a97e;">Download PDF</a>
                   </td>
                 </tr>
               </table>
