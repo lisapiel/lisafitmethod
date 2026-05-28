@@ -6,6 +6,7 @@ import { signOut } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import NutritionSidebar from "@/components/nutrition/NutritionSidebar"
+import CourseSwitcher from "@/components/CourseSwitcher.client"
 
 function NutritionHeader({ onMenuToggle }: { onMenuToggle: () => void }) {
   const router = useRouter()
@@ -33,7 +34,13 @@ function NutritionHeader({ onMenuToggle }: { onMenuToggle: () => void }) {
       <style>{`
         @media (max-width: 768px) {
           .nutrition-mobile-btn { display: block !important; }
-          .nutrition-header-sub { display: none !important; }
+          .nutrition-switcher-wrap { display: none !important; }
+        }
+        @media (max-width: 768px) {
+          .nutrition-header-bar {
+            position: fixed !important;
+            top: 0; left: 0; right: 0; z-index: 200;
+          }
         }
       `}</style>
 
@@ -62,21 +69,10 @@ function NutritionHeader({ onMenuToggle }: { onMenuToggle: () => void }) {
             Lisa <span style={{ color: "#c9a96e" }}>Fit Method</span>
           </span>
         </Link>
-        <span
-          className="nutrition-header-sub"
-          style={{
-            fontSize: "0.6rem",
-            fontWeight: 500,
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            color: "#444",
-            fontFamily: "var(--font-montserrat), sans-serif",
-            paddingLeft: "1rem",
-            borderLeft: "1px solid #2a2a2a",
-          }}
-        >
-          Nutrition Foundations
-        </span>
+        <span style={{ width: 1, height: 16, background: "#2a2a2a", flexShrink: 0 }} className="nutrition-switcher-wrap" />
+        <div className="nutrition-switcher-wrap">
+          <CourseSwitcher currentCourse="nutrition" />
+        </div>
       </div>
 
       <button

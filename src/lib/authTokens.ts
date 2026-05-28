@@ -4,6 +4,9 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from "@
 
 const TABLE = "lfm-user-progress"
 
+// Owner account — always has access to everything, excluded from customer analytics
+export const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
+
 export interface AuthToken {
   email: string
   type: "setup" | "reset"
@@ -79,6 +82,7 @@ export async function grantTrackerAccess(email: string): Promise<void> {
 }
 
 export async function hasTrackerAccess(email: string): Promise<boolean> {
+  if (email.toLowerCase() === ADMIN_EMAIL) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -101,6 +105,7 @@ export async function grantTrainingAccess(email: string): Promise<void> {
 }
 
 export async function hasTrainingAccess(email: string): Promise<boolean> {
+  if (email.toLowerCase() === ADMIN_EMAIL) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -123,6 +128,7 @@ export async function grantNutritionAccess(email: string): Promise<void> {
 }
 
 export async function hasNutritionAccess(email: string): Promise<boolean> {
+  if (email.toLowerCase() === ADMIN_EMAIL) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -191,6 +197,7 @@ export async function revokeMasterclassAccess(email: string): Promise<void> {
 }
 
 export async function hasMasterclassAccess(email: string): Promise<boolean> {
+  if (email.toLowerCase() === ADMIN_EMAIL) return true
   try {
     const db = makeDb()
     const result = await db.send(

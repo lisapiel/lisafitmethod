@@ -4,6 +4,7 @@ import Link from "next/link"
 import { signOut } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import { useCourseProgress } from "./CourseProgressContext"
+import CourseSwitcher from "@/components/CourseSwitcher.client"
 
 interface CourseHeaderProps {
   onMenuToggle: () => void
@@ -56,7 +57,7 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
         <style>{`
           @media (max-width: 768px) {
             .mobile-menu-btn { display: block !important; }
-            .header-subtitle { display: none !important; }
+            .course-switcher-wrap { display: none !important; }
             .header-progress-badge { display: none !important; }
             .course-header-bar {
               position: fixed !important;
@@ -79,18 +80,9 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
           Lisa Fit Method
         </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-        <div
-          className="header-subtitle"
-          style={{
-            fontSize: "0.65rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "#888888",
-            fontFamily: "var(--font-montserrat), sans-serif",
-          }}
-        >
-          Training Foundations
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <div className="course-switcher-wrap">
+          <CourseSwitcher currentCourse="training" />
         </div>
         {ready && currentPosition.totalSessions > 0 && (
           <Link
