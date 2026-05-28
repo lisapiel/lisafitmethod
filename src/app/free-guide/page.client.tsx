@@ -110,10 +110,10 @@ const COOLDOWN_A = [
 
 const FEATURES: [string, string][] = [
   ["50+ exercise videos", " so your form is never a guess"],
-  ["The full 4-week program", ", three days a week, fully structured with sets, reps, rest, warm-ups and cooldowns"],
+  ["The full training program", ", three days a week, fully structured with sets, reps, rest, warm-ups and cooldowns"],
   ["Built-in tracking you keep for life", ", logging every set so you can watch your numbers climb"],
   ["Progressive overload built in", ", so you always know your next step instead of guessing"],
-  ["Core, glute, and back work", " that actually protects your spine — the part most programs skip"],
+  ["Core, glute, and back work", " that actually protects your spine, the part most programs skip"],
   ["Simple nutrition foundations", " to fuel all of it, no calorie obsession"],
   ["Works at home with dumbbells and bands", ", and scales straight into the gym"],
 ]
@@ -228,9 +228,9 @@ export default function FreeGuideClient() {
             <div style={{ marginBottom: "2rem" }}>
               {[
                 ["The 5 movement patterns", " underneath almost every effective exercise you will ever do"],
-                ["The coaching cues that fix bad form", " — the same ones I teach in the course"],
-                ["A look inside Day A", " — warmup, main workout, and cooldown"],
-                ["Yours to keep", " — free, no credit card, no catch"],
+                ["The coaching cues that fix bad form", ", the same ones I teach in the course"],
+                ["A look inside Day A", ": warmup, main workout, and cooldown"],
+                ["Yours to keep", ". Free, no credit card, no catch."],
               ].map(([bold, rest], i) => (
                 <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", padding: "0.55rem 0", borderBottom: i < 3 ? `1px solid ${line}` : "none" }}>
                   <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.12rem" }}>&#8594;</span>
@@ -275,7 +275,7 @@ export default function FreeGuideClient() {
               The 5 movements <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>every strong body is built on</em>
             </h1>
             <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 600, marginBottom: 0, lineHeight: 1.72, fontFamily: dmSans }}>
-              This is a real piece of my course, not a watered-down freebie. Inside you get the five foundation movements with the exact cues I teach, plus a look at one full day of the actual 4-week program.{" "}
+              This is a real piece of my course, not a watered-down freebie. Inside you get the five foundation movements with the exact cues I teach, plus a look inside one full day of the actual program.{" "}
               <strong style={{ color: ink }}>Read it, practice the movements, and you will already be ahead of most people in the gym.</strong>
             </p>
 
@@ -377,7 +377,7 @@ export default function FreeGuideClient() {
                   "Video coaching for every single exercise",
                   "Cues and education so you actually understand what you're doing and why",
                   "Built-in set tracker to log your progress and hit progressive overload every week",
-                  "Full program structure — warm-ups, cooldowns, rest, and progressions all mapped out",
+                  "Full program structure: warm-ups, cooldowns, rest, and progressions all mapped out",
                 ].map((item, i) => (
                   <li key={i} style={{ display: "flex", gap: "0.6rem", padding: "0.38rem 0", borderBottom: i < 3 ? "1px solid #1e1b17" : "none" }}>
                     <span style={{ color: gold, fontSize: "0.75rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
@@ -428,7 +428,7 @@ export default function FreeGuideClient() {
                 <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>Start building.</em>
               </h3>
               <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                One payment, lifetime access. Keep the videos, the program, and the tracker for good. Run it once, then run it again heavier. Founding member pricing — limited time.
+                One payment, lifetime access. Keep the videos, the program, and the tracker for good. Run it once, then run it again heavier. Founding member pricing. Limited time.
               </p>
               <Link
                 href="/checkout"

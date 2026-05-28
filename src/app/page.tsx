@@ -20,10 +20,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Lisa Fit Method — Train the Right Way",
   description:
-    "A 4-week training system for beginners and returners. Learn proper form, follow a structured program, track your progress, and finally understand what actually changes your body.",
+    "A complete strength training foundation for beginners and returners. Learn proper form, follow a structured program, track your progress, and build a body that actually lasts.",
   openGraph: {
     title: "Lisa Fit Method — Train the Right Way",
-    description: "A 4-week training system for beginners and returners. Proper movement, real structure, and a body built to last.",
+    description: "A complete strength training foundation for beginners and returners. Proper movement, real structure, and a body built to last.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -47,7 +47,7 @@ export default async function HomePage() {
       "@type": "WebSite",
       name: "Lisa Fit Method",
       url: "https://lisafitmethod.com",
-      description: "A 4-week training system for beginners and returners. Learn proper form, follow a structured program, track your progress, and build a body that lasts.",
+      description: "A complete strength training foundation for beginners and returners. Learn proper form, follow a structured program, track your progress, and build a body that lasts.",
       potentialAction: {
         "@type": "SearchAction",
         target: { "@type": "EntryPoint", urlTemplate: "https://lisafitmethod.com/blog?q={search_term_string}" },
@@ -82,7 +82,7 @@ export default async function HomePage() {
       "@context": "https://schema.org",
       "@type": "Course",
       name: "Training Foundations",
-      description: "A 4-week training system for beginners and returners. Three days a week. Built around the five foundational movement patterns, structured programming, and built-in workout tracking.",
+      description: "A complete strength training foundation for beginners and returners. Three days a week, built around five foundational movement patterns, progressive overload, and built-in workout tracking. Start with a structured 4-week program, then repeat it stronger.",
       image: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png", width: 1200, height: 800 },
       provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
       instructor: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
@@ -383,7 +383,7 @@ export default async function HomePage() {
               {[
                 "Foundation Movements: Learn the movement patterns every strong body is built on",
                 "Core & Glute Priority: Build spinal stability, stronger glutes, better posture, and a body that moves properly under load",
-                "The 4-Week Program: Fully structured workouts with sets, reps, warm-ups, mobility work, progressive overload guidance, and built-in workout tracking so you can clearly see your progress over time. Most exercises can be done with dumbbells, resistance bands, and minimal equipment if you're starting from home, while still transitioning naturally into a gym environment over time.",
+                "The Training Program: Fully structured workouts with sets, reps, warm-ups, mobility work, progressive overload guidance, and built-in workout tracking so you can clearly see your progress over time. Most exercises can be done with dumbbells, resistance bands, and minimal equipment if you're starting from home, while still transitioning naturally into a gym environment over time.",
                 "Nutrition Foundations: Simple nutrition principles for building muscle, supporting recovery, and staying lean without obsessing over food",
               ].map((item) => (
                 <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.4 }}>
@@ -415,7 +415,7 @@ export default async function HomePage() {
 
           {/* Module cards */}
           <div className="preview-modules" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            {["Foundation\nMovements", "Core &\nGlute Priority", "The 4-Week\nProgram", "Nutrition\nFoundations"].map((label, i) => (
+            {["Foundation\nMovements", "Core &\nGlute Priority", "The Training\nProgram", "Nutrition\nFoundations"].map((label, i) => (
               <div key={label} style={{ background: "#141414", padding: "36px 32px", borderTop: "2px solid rgba(200,169,126,0.4)" }}>
                 <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>0{i + 1}</p>
                 <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 17, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.3, whiteSpace: "pre-line" }}>{label}</p>
@@ -479,7 +479,7 @@ export default async function HomePage() {
               <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match your training.</em>
             </h2>
             <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.6, marginBottom: 28 }}>
-              A 4-week nutrition course for people who train. Learn how to calculate your real calorie needs, build a meal plan that adapts to your goals, and develop habits that hold up outside the gym — without obsessing over food.
+              A nutrition course for people who train. Learn how to calculate your real calorie needs, build a meal plan that adapts to your goals, and develop habits that hold up outside the gym, without obsessing over food.
             </p>
             <ul style={{ listStyle: "none", marginBottom: 36 }}>
               {[
@@ -548,12 +548,12 @@ export default async function HomePage() {
                 Train right.<br /><em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match.</em>
               </h2>
               <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.65, maxWidth: 500, marginBottom: 24 }}>
-                Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately — get both for {BUNDLE_PRICE_DISPLAY} and save {BUNDLE_SAVINGS_DISPLAY}.
+                Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately. Get both for {BUNDLE_PRICE_DISPLAY} and save {BUNDLE_SAVINGS_DISPLAY}.
               </p>
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 <div style={{ padding: "14px 20px", background: "#161616", borderLeft: "2px solid rgba(200,169,126,0.4)" }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: "var(--off-white)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 2 }}>Training Foundations</p>
-                  <p style={{ fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>4-week strength program · ${t.coursePrice} value</p>
+                  <p style={{ fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>Strength training system · ${t.coursePrice} value</p>
                 </div>
                 <div style={{ padding: "14px 20px", background: "#161616", borderLeft: "2px solid rgba(200,169,126,0.4)" }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: "var(--off-white)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 2 }}>Nutrition Foundations</p>

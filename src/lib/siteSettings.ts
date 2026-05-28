@@ -79,7 +79,7 @@ export const DEFAULTS: SiteSettings = {
   text: {
     homeHeroHeadline: "Most people don't need a harder workout.\nThey need a better foundation.",
     homeHeroSubtext:
-      "A 4-week strength training system for beginners, returners, and anyone who wants to stop guessing in the gym. Learn proper form, follow a structured program, track your workouts and progress, and finally understand how to train in a way that actually changes your body. This is not a challenge you finish and forget. It is a foundation you can repeat, progress, and build on long after the first four weeks are over. No random workouts. No ego lifting. Just smart training built to last.",
+      "A complete strength training foundation for beginners, returners, and anyone who wants to stop guessing in the gym. Learn proper form, follow a structured program, track your workouts and progress, and finally understand how to train in a way that actually changes your body. Not a challenge you finish and forget. A foundation you repeat, progress, and keep building on long after the first four weeks. No random workouts. No ego lifting. Just smart training built to last.",
     homeStoryHeadline: "I did it the hard way.\nYou don't have to.",
     homeStoryPara1:
       "I spent years training hard without actually building strength or changing my body. Everything changed when I finally discovered structure, progressive overload, and proper programming.",
@@ -117,7 +117,7 @@ export const DEFAULTS: SiteSettings = {
       "No gimmicks. No random workouts. Just intelligent training focused on movement quality, long-term progress, and building a body that actually lasts.",
     coursesHeroHeadline: "Training Foundations",
     coursesHeroSubtext:
-      "A 4-week training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your weights, reps, and progress, and finally understand what actually changes your body. No random workouts. No ego lifting. Just smart training built to last.",
+      "A complete strength training system for beginners, returners, and anyone who wants to rebuild their strength the right way. Learn proper form, follow a structured program, track your weights, reps, and progress, and finally understand what actually changes your body. No random workouts. No ego lifting. Just smart training built to last.",
     mod1Title: "Foundation Movements",
     mod1Desc:
       "Learn the movement patterns every strong body is built on before adding more weight, intensity, or complexity. This is the foundation most people skip.",

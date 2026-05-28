@@ -19,10 +19,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Training Foundations — Lisa Fit Method",
   description:
-    "A 4-week beginner strength training program. Learn the movements, build the habits, and create a foundation that lasts. One-time payment, yours forever.",
+    "A complete strength training foundation built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep training with it long term. One-time payment, lifetime access.",
   openGraph: {
     title: "Training Foundations — Lisa Fit Method",
-    description: "A 4-week beginner strength training program. $97 one-time, yours forever.",
+    description: "A complete strength training foundation. Learn proper form, follow a structured program, and keep building strength long after the first four weeks. One-time payment, yours forever.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -81,7 +81,7 @@ export default async function CoursesPage() {
     "@context": "https://schema.org",
     "@type": "Course",
     name: "Training Foundations",
-    description: "A 4-week beginner strength training program. Learn the foundational movements, build consistent habits, and create a base that supports your training for life.",
+    description: "A complete strength training foundation. Learn the five foundational movement patterns, follow a structured program, and build a base that supports your training for life. Designed to be run multiple rounds and keep progressing.",
     image: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png", width: 1200, height: 800 },
     url: "https://lisafitmethod.com/courses",
     provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
@@ -166,7 +166,7 @@ export default async function CoursesPage() {
             <div style={{ background: "#111111", padding: "40px 36px", borderTop: `3px solid ${accent}` }}>
               <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>Training Foundations</p>
               <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 12, lineHeight: 1.2 }}>Learn to move.<br /><em style={{ fontStyle: "italic" }}>Build real strength.</em></h2>
-              <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, marginBottom: 24 }}>A 4-week beginner strength training program. Five foundational movements, progressive overload, built-in workout tracking.</p>
+              <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, marginBottom: 24 }}>A complete strength training system built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep building with it long term.</p>
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
                 <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>

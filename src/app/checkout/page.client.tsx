@@ -15,7 +15,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 const TRAINING_MODULES = [
   { num: "01", title: "Foundation Movements", desc: "Learn the 5 movement patterns every lifter needs before adding weight, intensity, or complexity." },
   { num: "02", title: "Core & Glute Priority", desc: "Targeted training designed to build strength while supporting your lower back and overall stability." },
-  { num: "03", title: "The 4-Week Program", desc: "A fully structured 3-day training split with sets, reps, rest times, and progression already planned for you." },
+  { num: "03", title: "The Training Program", desc: "A fully structured 3-day training split with sets, reps, rest times, and progression already planned. Designed to be repeated and progressed, not just finished once." },
   { num: "04", title: "Nutrition Foundations", desc: "Simple nutrition principles that support muscle growth, recovery, energy, and long-term consistency." },
 ]
 
