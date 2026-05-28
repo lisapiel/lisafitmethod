@@ -11,51 +11,35 @@ import {
   BUNDLE_PRICE_DISPLAY,
   BUNDLE_INDIVIDUAL_TOTAL_DISPLAY,
   BUNDLE_SAVINGS_DISPLAY,
+  TRACKER_PRICE_DISPLAY,
 } from "@/lib/pricing"
 import type { Metadata } from "next"
 
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: "Training Foundations | Lisa Fit Method",
+  title: "Courses | Lisa Fit Method",
   description:
-    "A complete strength training foundation built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep training with it long term. One-time payment, ongoing access.",
+    "Training Foundations and Nutrition Foundations — two structured courses built to give you the movement, strength, and eating habits that actually last. One-time payment, ongoing access.",
   openGraph: {
-    title: "Training Foundations | Lisa Fit Method",
-    description: "A complete strength training foundation. Learn proper form, follow a structured program, and keep building strength long after the first four weeks. One-time payment, yours to keep.",
+    title: "Courses | Lisa Fit Method",
+    description: "Two structured courses. Training Foundations and Nutrition Foundations. One-time payment, yours to keep.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
 
-const MODULE_ITEMS = [
-  [
-    "Hip hinge: learn how to protect your back under load",
-    "Squat pattern: build strength through the hips, knees, and core",
-    "Push pattern: press safely without destroying your shoulders",
-    "Pull pattern: build posture, stability, and upper body strength",
-    "Brace & carry: understand how your core actually works",
-  ],
-  [
-    "Core stability fundamentals",
-    "Glute strength & lower body stability",
-    "Learn to load the posterior chain safely",
-    "Build a stronger core that supports heavier lifting",
-  ],
-  [
-    "3 structured training days per week",
-    "Built-in warm-ups and cool-downs",
-    "Progressive overload system included",
-    "Step-by-step exercise guidance",
-    "Workout & progress tracking built in",
-    "Designed to be repeated and progressed beyond the first 4 weeks",
-  ],
-  [
-    "Protein first",
-    "Fuel your training properly",
-    "Consistency over perfection",
-    "Hydration affects everything",
-    "Stop overcomplicating nutrition",
-  ],
+const TRAINING_MODULES = [
+  { num: "01", tag: "Module 1", title: "Foundation Movements", items: ["Hip hinge: protect your back under load", "Squat pattern: hips, knees, and core working together", "Push pattern: press safely without destroying your shoulders", "Pull pattern: build posture, stability, and upper body strength", "Brace & carry: how your core actually works"] },
+  { num: "02", tag: "Module 2", title: "Core & Glute Priority", items: ["Core stability fundamentals", "Glute strength and lower body stability", "Load the posterior chain safely", "Build a stronger core that supports heavier lifting"] },
+  { num: "03", tag: "Module 3", title: "The Training Program", items: ["3 structured training days per week", "Built-in warm-ups and cool-downs", "Progressive overload system included", "Step-by-step exercise guidance", "Workout and progress tracking built in", "Designed to be repeated and progressed"] },
+  { num: "04", tag: "Module 4", title: "Nutrition Foundations", items: ["Protein first", "Fuel your training properly", "Consistency over perfection", "Hydration affects everything", "Stop overcomplicating nutrition"] },
+]
+
+const NUTRITION_MODULES = [
+  { num: "01", title: "Understanding Your Body", desc: "BMR, TDEE, and your personalised calorie target" },
+  { num: "02", title: "Your Nutrition Blueprint", desc: "Protein, carbs, fats, hydration, and plate building" },
+  { num: "03", title: "4-Week Meal Plan", desc: "Real recipes and grocery lists, scaled to your target" },
+  { num: "04", title: "Making It Stick", desc: "Eating out, troubleshooting, supplements, and recovery" },
 ]
 
 export default async function CoursesPage() {
@@ -70,18 +54,11 @@ export default async function CoursesPage() {
   const hs = settings.typography.headingScale
   const bs = settings.typography.bodyScale
 
-  const modules = [
-    { num: "01", tag: "Module 1", title: t.mod1Title, desc: t.mod1Desc, items: MODULE_ITEMS[0] },
-    { num: "02", tag: "Module 2", title: t.mod2Title, desc: t.mod2Desc, items: MODULE_ITEMS[1] },
-    { num: "03", tag: "Module 3", title: t.mod3Title, desc: t.mod3Desc, items: MODULE_ITEMS[2] },
-    { num: "04", tag: "Module 4", title: t.mod4Title, desc: t.mod4Desc, items: MODULE_ITEMS[3] },
-  ]
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Course",
     name: "Training Foundations",
-    description: "A complete strength training foundation. Learn the five foundational movement patterns, follow a structured program, and build a base that supports your training for life. Designed to be run multiple rounds and keep progressing.",
+    description: "A complete strength training foundation. Learn the five foundational movement patterns, follow a structured program, and build a base that supports your training for life.",
     image: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png", width: 1200, height: 800 },
     url: "https://lisafitmethod.com/courses",
     provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
@@ -100,11 +77,6 @@ export default async function CoursesPage() {
       url: "https://lisafitmethod.com/checkout",
       seller: { "@type": "Organization", name: "Lisa Fit Method" },
     },
-    hasPart: modules.map((m) => ({
-      "@type": "Course",
-      name: m.title,
-      description: m.desc,
-    })),
   }
 
   const faqLd = {
@@ -116,7 +88,7 @@ export default async function CoursesPage() {
       { "@type": "Question", name: "Is this for complete beginners?", acceptedAnswer: { "@type": "Answer", text: "Yes. It's designed for people who are new to structured training or feel like they've been winging it, regardless of experience level." } },
       { "@type": "Question", name: "Can I do more than 4 weeks?", acceptedAnswer: { "@type": "Answer", text: "Absolutely. The program is designed to be run in multiple rounds. Each round you add weight and progress further. Four weeks is the foundation; most people who see real results run it 2 or 3 times." } },
       { "@type": "Question", name: "Is this a one-time payment?", acceptedAnswer: { "@type": "Answer", text: "Yes. One-time payment. No subscription." } },
-      { "@type": "Question", name: "Can men do this program?", acceptedAnswer: { "@type": "Answer", text: "Yes. The movements and principles apply to everyone. The program has no gender-specific requirements." } },
+      { "@type": "Question", name: "Can men do this program?", acceptedAnswer: { "@type": "Answer", text: "Yes. The movements and principles apply to everyone." } },
     ],
   }
 
@@ -125,7 +97,7 @@ export default async function CoursesPage() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://lisafitmethod.com" },
-      { "@type": "ListItem", position: 2, name: "Training Foundations", item: "https://lisafitmethod.com/courses" },
+      { "@type": "ListItem", position: 2, name: "Courses", item: "https://lisafitmethod.com/courses" },
     ],
   }
 
@@ -134,189 +106,181 @@ export default async function CoursesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/</g, "\\u003c") }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }} />
-    <main style={{ background: "#faf8f5", color: "#1a1a1a", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
+    <main style={{ background: "#0a0a0a", color: "#f5f2ee", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
       <style>{`
         :root {
-          --black: #0a0a0a; --off-white: #f5f2ee; --warm-white: #faf8f5;
-          --accent: ${accent}; --accent-dark: #a8895e; --text: #1a1a1a; --muted: #6b6560;
-          --heading-scale: ${hs}; --body-scale: ${bs};
+          --accent: ${accent};
+          --heading-scale: ${hs};
+          --body-scale: ${bs};
         }
+        .courses-divider { width: 40px; height: 1px; background: rgba(200,169,126,0.4); margin-bottom: 32px; }
+
+        /* Video */
+        .courses-video-band { width: 100%; height: 62vh; min-height: 320px; overflow: hidden; background: #111; }
+        @media (max-width: 768px) { .courses-video-band { height: 56vw; min-height: 220px; } }
+
+        /* Intro */
+        .courses-intro { padding: 100px 80px 80px; max-width: 860px; margin: 0 auto; text-align: center; }
+        @media (max-width: 768px) { .courses-intro { padding: 72px 28px 60px; } }
+
+        /* Course section */
+        .course-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .course-section-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 80px; align-items: start; }
+        .course-cta-col { position: sticky; top: 96px; }
+        @media (max-width: 900px) {
+          .course-section { padding: 72px 28px; }
+          .course-section-inner { grid-template-columns: 1fr; gap: 48px; }
+          .course-cta-col { position: static; }
+        }
+
+        /* Price display */
+        .price-block { margin-bottom: 28px; }
+        .price-main { font-size: 52px; font-weight: 700; color: ${accent}; line-height: 1; font-family: var(--font-dm-sans), sans-serif; }
+        .price-was { font-size: 13px; color: rgba(245,242,238,0.3); text-decoration: line-through; font-family: var(--font-dm-sans), sans-serif; display: inline; margin-left: 4px; }
+        .price-note { font-size: 11px; color: rgba(245,242,238,0.35); font-family: var(--font-dm-sans), sans-serif; margin-top: 8px; line-height: 1.6; letter-spacing: 0.04em; }
+
+        /* CTA button */
+        .cta-primary { display: block; background: ${accent}; color: #0a0a0a; font-family: var(--font-dm-sans), sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none; padding: 18px 28px; text-align: center; }
+        .cta-ghost { display: inline-block; color: rgba(245,242,238,0.4); font-family: var(--font-dm-sans), sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; padding: 8px 0; }
+        .cta-ghost:hover { color: ${accent}; }
+
+        /* Modules */
+        .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.04); margin-top: 48px; }
+        .module-card { background: #0a0a0a; padding: 36px 32px; }
+        @media (max-width: 600px) { .modules-grid { grid-template-columns: 1fr; } .module-card { padding: 28px 0; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.06); } }
+
+        /* Bundle */
+        .bundle-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .bundle-inner { max-width: 800px; margin: 0 auto; }
+        @media (max-width: 768px) { .bundle-section { padding: 72px 28px; } }
+
+        /* Tracker */
+        .tracker-section { padding: 80px 80px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .tracker-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; }
+        @media (max-width: 768px) { .tracker-section { padding: 60px 28px; } .tracker-inner { grid-template-columns: 1fr; gap: 28px; } }
+
+        /* FAQ */
+        .faq-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); background: #0d0d0d; }
+        .faq-inner { max-width: 700px; margin: 0 auto; }
+        @media (max-width: 768px) { .faq-section { padding: 72px 28px; } }
+
+        /* Testimonials */
+        .testimonials-section { padding: 100px 40px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; }
+        @media (max-width: 768px) { .testimonials-section { padding: 72px 24px; } }
+
+        /* For-section */
+        .for-section { padding: 100px 80px; border-top: 1px solid rgba(255,255,255,0.06); background: #0d0d0d; }
+        @media (max-width: 768px) { .for-section { padding: 72px 28px; } }
+
+        /* Final CTA */
+        .final-cta { padding: 120px 80px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; position: relative; overflow: hidden; }
+        @media (max-width: 768px) { .final-cta { padding: 80px 28px; } }
       `}</style>
 
-      {/* VIDEO — directly under nav, always first */}
+      {/* VIDEO */}
       {trailerUrl && (
-        <section style={{ background: "#0a0a0a" }}>
-          <style>{`
-            .courses-video-band { width: 100%; height: 62vh; min-height: 320px; overflow: hidden; background: #111; }
-            @media (max-width: 768px) { .courses-video-band { height: 56vw; min-height: 220px; } }
-          `}</style>
+        <section style={{ background: "#000" }}>
           <div className="courses-video-band">
             <VideoPlayer src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         </section>
       )}
 
-      {/* COURSES OVERVIEW — 2 cards side by side, no heading */}
-      <section style={{ background: "#0a0a0a", padding: "64px 80px", borderBottom: "1px solid #1a1a1a" }} className="programs-overview">
-        <style>{`
-          @media (max-width: 768px) { .programs-overview { padding: 48px 24px !important; } .programs-grid-2 { grid-template-columns: 1fr !important; } }
-        `}</style>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="programs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <div style={{ background: "#111111", padding: "40px 36px", borderTop: `3px solid ${accent}` }}>
-              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>Training Foundations</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 12, lineHeight: 1.2 }}>Learn to move.<br /><em style={{ fontStyle: "italic" }}>Build real strength.</em></h2>
-              <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, marginBottom: 24 }}>A complete strength training system built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep building with it long term.</p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
-                <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-                <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
-              </div>
-              <p style={{ fontSize: 10, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
-              <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
-                <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "13px 24px" }}>Get Instant Access</Link>
-                <a href="#training-detail" style={{ display: "inline-block", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, textDecoration: "none", letterSpacing: "0.12em", textTransform: "uppercase" }}>Details ↓</a>
-              </div>
-            </div>
-            <div style={{ background: "#111111", padding: "40px 36px", borderTop: `3px solid ${accent}` }}>
-              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>Nutrition Foundations</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 12, lineHeight: 1.2 }}>Eat to match<br /><em style={{ fontStyle: "italic" }}>your training.</em></h2>
-              <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, marginBottom: 24 }}>A 4-week nutrition course with a personalized TDEE calculator, a meal plan that adapts to your calorie target, and real verified recipes.</p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
-                <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
-                <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
-              </div>
-              <p style={{ fontSize: 10, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
-              <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
-                <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "13px 24px" }}>Get Instant Access</Link>
-                <Link href="/nutrition" style={{ display: "inline-block", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, textDecoration: "none", letterSpacing: "0.12em", textTransform: "uppercase" }}>Full Details →</Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Bundle row */}
-          <div style={{ marginTop: 2 }}>
-            <div style={{ background: "#1a1208", padding: "32px 36px", borderTop: `3px solid ${accent}`, display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", justifyContent: "space-between" }}>
-              <div>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle · Best Value</p>
-                <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5, maxWidth: 560 }}>Both courses together. Training Foundations + Nutrition Foundations. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately.</p>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                    <span style={{ fontSize: 14, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
-                    <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
-                    <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Save {BUNDLE_SAVINGS_DISPLAY}</span>
-                  </div>
-                </div>
-                <Link href="/checkout?product=bundle" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "13px 28px", whiteSpace: "nowrap" }}>Get Both Courses</Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Tracker add-on */}
-          <div style={{ marginTop: 2 }}>
-            <div style={{ background: "#111111", padding: "28px 36px", borderTop: "1px solid #2a2a2a", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between", opacity: 0.85 }}>
-              <div>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 6, fontFamily: "var(--font-dm-sans), sans-serif" }}>Add-on · Progress Tracker</p>
-                <p style={{ fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.5, maxWidth: 540 }}>Workout tracker, available as an add-on with Training Foundations. Log every lift, build custom days, always know what to beat.</p>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 26, fontWeight: 700, color: "rgba(201,169,110,0.7)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>+$27</span>
-                <Link href="/checkout" style={{ display: "inline-block", border: "1px solid rgba(201,169,110,0.4)", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "11px 22px", whiteSpace: "nowrap" }}>Add at Checkout</Link>
-              </div>
-            </div>
+      {/* INTRO */}
+      <section style={{ background: "#0a0a0a" }}>
+        <div className="courses-intro">
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>Courses</p>
+          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 4vw, 54px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 24 }}>
+            Two courses.<br /><em style={{ fontStyle: "italic", color: accent }}>One complete foundation.</em>
+          </h1>
+          <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.7, maxWidth: 580, margin: "0 auto 48px" }}>
+            Structured fitness and nutrition systems built for real life. Learn how to move well, train consistently, and eat in a way that supports your goals without obsessing over every detail.
+          </p>
+          <div style={{ display: "flex", gap: 32, justifyContent: "center", flexWrap: "wrap" }}>
+            {[
+              { label: "Training Foundations", href: "#training" },
+              { label: "Nutrition Foundations", href: "#nutrition" },
+              { label: "Bundle", href: "#bundle" },
+            ].map(({ label, href }) => (
+              <a key={href} href={href} style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(245,242,238,0.35)", textDecoration: "none", borderBottom: `1px solid rgba(200,169,126,0.3)`, paddingBottom: 2, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* TRAINING FOUNDATIONS DETAIL */}
-      <section id="training-detail" style={{ background: "#0a0a0a" }} className="courses-hero">
-        <style>{`
-          .courses-hero-text {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 72px 80px 80px;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 60px;
-            align-items: start;
-          }
-          .courses-hero-cta-col { min-width: 220px; }
-          @media (max-width: 768px) {
-            .courses-hero-text { grid-template-columns: 1fr; gap: 32px; padding: 48px 24px 56px; }
-          }
-        `}</style>
-        <div className="courses-hero-text">
+      {/* TRAINING FOUNDATIONS */}
+      <section id="training" className="course-section" style={{ background: "#0a0a0a" }}>
+        <div className="course-section-inner">
+          {/* Content */}
           <div>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
-              Training Foundations: Full Details
-            </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 20 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Training Foundations</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 52px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 24 }}>
               {t.coursesHeroHeadline}
-            </h1>
-            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.4 }}>
+            </h2>
+            <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
               {t.coursesHeroSubtext}
             </p>
-          </div>
-          <div className="courses-hero-cta-col">
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
-              <span style={{ fontSize: 52, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-              <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
-            </div>
-            <Link href="/checkout" style={{ display: "block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 32px", textAlign: "center" }}>
-              Get Instant Access
-            </Link>
-            <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
-              One-time payment · Buy once, access anytime<br />Built-in workout &amp; progress tracking
-            </p>
-          </div>
-        </div>
-      </section>
 
-      {/* MODULES */}
-      <section style={{ background: "#0a0a0a", padding: "0 80px 120px" }} className="modules-section">
-        <style>{`
-          @media (max-width: 768px) { .modules-section { padding: 0 28px 80px !important; } .modules-grid { grid-template-columns: 1fr !important; } }
-        `}</style>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ borderBottom: "1px solid rgba(245,242,238,0.08)", paddingBottom: 40, marginBottom: 48 }}>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 16 }}>What&apos;s inside</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3vw, 48px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.1 }}>
-              Four modules. <em style={{ fontStyle: "italic", color: accent }}>One real foundation.</em>
-            </h2>
+            <div className="courses-divider" />
+
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(245,242,238,0.3)", marginBottom: 32 }}>What&apos;s inside</p>
+
+            <div className="modules-grid">
+              {TRAINING_MODULES.map((mod) => (
+                <div key={mod.num} className="module-card">
+                  <p style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 10, fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 500 }}>{mod.tag}</p>
+                  <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(17px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 16, lineHeight: 1.3 }}>{mod.title}</p>
+                  <ul style={{ listStyle: "none" }}>
+                    {mod.items.map((item) => (
+                      <li key={item} style={{ fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.35)", padding: "4px 0 4px 14px", position: "relative", lineHeight: 1.5 }}>
+                        <span style={{ position: "absolute", left: 0, color: accent, fontSize: 10 }}>→</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="modules-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2, background: "rgba(245,242,238,0.04)" }}>
-            {modules.map((mod) => (
-              <div key={mod.num} style={{ background: "#0a0a0a", padding: "48px 40px", position: "relative" }}>
-                <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 64, fontWeight: 900, color: "rgba(200,169,126,0.1)", position: "absolute", top: 24, right: 32, lineHeight: 1 }}>
-                  {mod.num}
-                </span>
-                <p style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14 }}>{mod.tag}</p>
-                <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(24px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 14, lineHeight: 1.3 }}>{mod.title}</h3>
-                <p style={{ fontSize: `calc(14px * ${bs})`, lineHeight: 1.4, color: "rgba(245,242,238,0.45)", marginBottom: 20 }}>{mod.desc}</p>
-                <ul style={{ listStyle: "none" }}>
-                  {mod.items.map((item) => (
-                    <li key={item} style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.4)", padding: "6px 0 6px 16px", position: "relative", lineHeight: 1.5 }}>
-                      <span style={{ position: "absolute", left: 0, color: accent, fontSize: 11 }}>→</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+
+          {/* Price + CTA */}
+          <div className="course-cta-col">
+            <div style={{ background: "#111", padding: "36px 32px", borderTop: `2px solid ${accent}` }}>
+              <div className="price-block">
+                <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                  <span className="price-main">${t.coursePrice}</span>
+                  <span className="price-was">{COURSE_REGULAR_PRICE_DISPLAY}</span>
+                </div>
+                <p className="price-note">One-time payment · Founding member price<br />Built-in workout and progress tracking</p>
               </div>
-            ))}
+              <Link href="/checkout" className="cta-primary">Get Instant Access</Link>
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                {[
+                  "50+ exercise videos with coaching cues",
+                  "4-week structured program",
+                  "Progressive overload system",
+                  "Workout tracking built in",
+                  "Designed to repeat and keep progressing",
+                ].map((point) => (
+                  <div key={point} style={{ display: "flex", gap: 10, padding: "7px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 12, color: "rgba(245,242,238,0.4)", lineHeight: 1.4, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                    <span style={{ color: accent, flexShrink: 0, fontSize: 11, marginTop: 1 }}>✓</span>
+                    {point}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* TESTIMONIALS */}
       {testimonialsUrl && (
-        <section style={{ background: "#f5f2ee", padding: "100px 40px", textAlign: "center" }}>
-          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 20 }}>Real results</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 42px) * ${hs})`, fontWeight: 700, color: "#0a0a0a", lineHeight: 1.15, marginBottom: 48 }}>
-            What people <em style={{ fontStyle: "italic", color: "#a8895e" }}>are saying.</em>
+        <section className="testimonials-section" style={{ background: "#0d0d0d" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(200,169,126,0.6)", marginBottom: 16 }}>Real results</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(26px, 2.5vw, 36px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, marginBottom: 48 }}>
+            What people <em style={{ fontStyle: "italic", color: accent }}>are saying.</em>
           </h2>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
             <Image src={testimonialsUrl} alt="Testimonials from Lisa Fit Method students" width={1800} height={1200} style={{ width: "100%", height: "auto", display: "block" }} />
@@ -324,118 +288,181 @@ export default async function CoursesPage() {
         </section>
       )}
 
-      {/* WHO IT'S FOR */}
-      <section style={{ background: "#faf8f5", padding: "120px 80px" }} className="for-section">
-        <style>{`
-          @media (max-width: 768px) { .for-section { padding: 80px 28px !important; } .for-grid { grid-template-columns: 1fr !important; gap: 48px !important; } .for-right { padding-top: 0 !important; } }
-        `}</style>
-        <div className="for-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto" }}>
+      {/* NUTRITION FOUNDATIONS */}
+      <section id="nutrition" className="course-section" style={{ background: "#0a0a0a" }}>
+        <div className="course-section-inner">
+          {/* Content */}
           <div>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16 }}>Is this for me?</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 46px) * ${hs})`, fontWeight: 700, color: "#0a0a0a", lineHeight: 1.1, marginBottom: 32 }}>
-              This is for you <em style={{ fontStyle: "italic", color: "#a8895e" }}>if you&apos;re serious.</em>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Nutrition Foundations</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 52px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 24 }}>
+              Eat to match<br /><em style={{ fontStyle: "italic", color: accent }}>your training.</em>
             </h2>
-            <ul style={{ listStyle: "none" }}>
-              {[
-                "You're tired of random workouts that lead nowhere",
-                "You want structure instead of guessing",
-                "You want to understand why you're doing each movement",
-                "You've dealt with nagging pain, instability, or recurring injuries",
-                "You want a program you can continue progressing",
-                "You're ready to train consistently and actually build strength",
-              ].map((item) => (
-                <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "14px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.5 }}>
-                  <span style={{ color: "#a8895e", fontWeight: 700, flexShrink: 0 }}>✓</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="for-right" style={{ paddingTop: 80 }}>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16 }}>Want more?</p>
-            <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(26px * ${hs})`, fontWeight: 700, color: "#0a0a0a", marginBottom: 20, lineHeight: 1.2 }}>
-              Ready for a fully<br /><em style={{ fontStyle: "italic", color: "#a8895e" }}>personalized plan?</em>
-            </h3>
-            <p style={{ fontSize: `calc(15px * ${bs})`, color: "#1a1a1a", lineHeight: 1.4, marginBottom: 16 }}>
-              Training Foundations gives you the system. 1:1 coaching gives you a program fully built around your body, goals, schedule, injuries, recovery, and progress.
+            <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
+              A 4-week nutrition course with a personalised TDEE calculator, a structured meal plan built around your calorie target, science-backed education, and real recipes from verified sources.
             </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "#6b6560", lineHeight: 1.4, marginBottom: 32 }}>
-              You&apos;ll get direct feedback, personalized programming, ongoing adjustments, and real accountability every step of the way.
-            </p>
-            <Link
-              href="/coaching"
-              style={{
-                display: "inline-block",
-                border: "2px solid #a8895e",
-                color: "#a8895e",
-                fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                textDecoration: "none",
-                padding: "16px 32px",
-              }}
-            >
-              Ask about 1:1 coaching →
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* NUTRITION FOUNDATIONS CALLOUT */}
-      <section style={{ background: "#111111", padding: "100px 80px", borderTop: "1px solid #1a1a1a" }} className="nutrition-callout">
-        <style>{`
-          @media (max-width: 768px) { .nutrition-callout { padding: 72px 28px !important; } .nutrition-callout-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }
-        `}</style>
-        <div className="nutrition-callout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, maxWidth: 1100, margin: "0 auto", alignItems: "center" }}>
-          <div>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 16 }}>Also from Lisa Fit Method</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3vw, 44px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.15, marginBottom: 20 }}>
-              Pair it with<br /><em style={{ fontStyle: "italic", color: accent }}>Nutrition Foundations.</em>
-            </h2>
-            <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.6, marginBottom: 28 }}>
-              Training alone only gets you part of the way. Nutrition Foundations is a 4-week paid course that builds the eating habits to match: personalized TDEE calculator, a structured meal plan that adapts to your calorie target, science-backed education, and real recipes from verified sources.
-            </p>
-            <ul style={{ listStyle: "none", marginBottom: 36 }}>
+            <div className="courses-divider" />
+
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(245,242,238,0.3)", marginBottom: 32 }}>What&apos;s inside</p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, background: "rgba(255,255,255,0.04)" }}>
+              {NUTRITION_MODULES.map((mod) => (
+                <div key={mod.num} style={{ background: "#0a0a0a", padding: "32px 28px" }}>
+                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 10 }}>{mod.num}</p>
+                  <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(16px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 8, lineHeight: 1.3 }}>{mod.title}</p>
+                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.35)", lineHeight: 1.5 }}>{mod.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 40 }}>
               {[
-                "Interactive TDEE calculator, personalized to your stats and goal",
+                "Interactive TDEE calculator, personalised to your stats and goal",
                 "4-week meal plan with real, attributed recipes",
                 "Macro education, eating-out guide, and supplement evidence",
                 "Written by a CPT with full research citations throughout",
               ].map((item) => (
-                <li key={item} style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5 }}>
-                  <span style={{ color: accent, flexShrink: 0 }}>→</span>
+                <div key={item} style={{ display: "flex", gap: 12, padding: "11px 0", borderBottom: "1px solid rgba(255,255,255,0.05)", fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.5 }}>
+                  <span style={{ color: accent, flexShrink: 0, fontSize: 11, marginTop: 2 }}>→</span>
                   {item}
-                </li>
+                </div>
               ))}
-            </ul>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
-              <span style={{ fontSize: 44, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
-              <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
-            </div>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}. Limited time.</p>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
-              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 40px" }}>
-                Get Instant Access
-              </Link>
-              <Link href="/nutrition" style={{ display: "inline-block", color: "rgba(245,242,238,0.45)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 400, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none" }}>
-                Full course details →
-              </Link>
             </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+
+          {/* Price + CTA */}
+          <div className="course-cta-col">
+            <div style={{ background: "#111", padding: "36px 32px", borderTop: `2px solid ${accent}` }}>
+              <div className="price-block">
+                <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                  <span className="price-main">{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+                  <span className="price-was">{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
+                </div>
+                <p className="price-note">One-time payment · Founding member price<br />Ongoing access, no subscription</p>
+              </div>
+              <Link href="/checkout?product=nutrition" className="cta-primary">Get Instant Access</Link>
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <Link href="/nutrition" className="cta-ghost">Full course details →</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BUNDLE */}
+      <section id="bundle" className="bundle-section" style={{ background: "#0d0d0d" }}>
+        <div className="bundle-inner">
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Complete Foundations System</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(30px, 3.5vw, 44px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 20 }}>
+            Get both courses together.
+          </h2>
+          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.7, marginBottom: 48, maxWidth: 560 }}>
+            Training and nutrition are two sides of the same system. When you have both, you know how to train and how to eat to support it. Most people who take one eventually come back for the other.
+          </p>
+
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 40, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 32 }}>
+            <div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+                {["Training Foundations", "Nutrition Foundations"].map((name) => (
+                  <div key={name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ color: accent, fontSize: 11 }}>✓</span>
+                    <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(245,242,238,0.6)" }}>{name}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 48, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 13, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", textDecoration: "line-through" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
+                <span style={{ fontSize: 11, color: "rgba(200,169,126,0.6)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.05em" }}>save {BUNDLE_SAVINGS_DISPLAY}</span>
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 200 }}>
+              <Link href="/checkout?product=bundle" className="cta-primary">Get Both Courses</Link>
+              <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.5, textAlign: "center" }}>One-time payment · No subscription</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TRACKER ADD-ON */}
+      <section className="tracker-section" style={{ background: "#0a0a0a" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ marginBottom: 48 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 16 }}>Optional add-on</p>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 16, justifyContent: "space-between" }}>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(24px, 2.5vw, 34px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, margin: 0 }}>
+                Progress Tracker
+              </h2>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                <span style={{ fontSize: 28, fontWeight: 700, color: "rgba(200,169,126,0.7)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{TRACKER_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>once · no subscription</span>
+              </div>
+            </div>
+          </div>
+          <div className="tracker-inner">
             {[
-              { num: "01", title: "Understanding Your Body", desc: "BMR, TDEE, and your personalized calorie target" },
-              { num: "02", title: "Your Nutrition Blueprint", desc: "Protein, carbs, fats, hydration, and plate building" },
-              { num: "03", title: "4-Week Meal Plan", desc: "Recipes, portions, and grocery lists, scaled to you" },
-              { num: "04", title: "Making It Stick", desc: "Eating out, troubleshooting, supplements, and recovery" },
-            ].map((mod) => (
-              <div key={mod.num} style={{ background: "#161616", padding: "32px 28px", position: "relative", borderTop: `2px solid rgba(201,169,110,0.4)` }}>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.5)", marginBottom: 12 }}>{mod.num}</p>
-                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 16, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.3, marginBottom: 8 }}>{mod.title}</p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, color: "rgba(245,242,238,0.35)", lineHeight: 1.5 }}>{mod.desc}</p>
+              { title: "Log any workout", body: "Build completely custom workout days with any exercises you want. Not just this program — use it for everything you train." },
+              { title: "Beat last week", body: "Your previous numbers sit right next to where you log. You always know exactly what to beat. Progressive overload made automatic." },
+              { title: "Installs like an app", body: "Add it to your phone home screen from your browser. Opens full-screen, no browser bar. One tap and you&apos;re in the gym." },
+            ].map(({ title, body }) => (
+              <div key={title}>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(16px * ${hs})`, fontWeight: 700, color: "rgba(245,242,238,0.7)", marginBottom: 10 }}>{title}</p>
+                <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.3)", lineHeight: 1.6 }}
+                   dangerouslySetInnerHTML={{ __html: body }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 40, paddingTop: 32, borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center" }}>
+            <Link href="/checkout" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "12px 24px" }}>Add at Checkout</Link>
+            <Link href="/tracker-checkout" style={{ color: "rgba(200,169,126,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none" }}>Tracker only →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* IS THIS FOR ME? */}
+      <section className="for-section">
+        <div style={{ maxWidth: 700, margin: "0 auto" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 20 }}>Is this for me?</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 40 }}>
+            You&apos;re in the right place <em style={{ fontStyle: "italic", color: accent }}>if you&apos;re serious.</em>
+          </h2>
+          <div>
+            {[
+              "You want structure instead of random workouts that lead nowhere",
+              "You want to understand why you're doing each movement, not just what",
+              "You've dealt with nagging pain, instability, or recurring injuries",
+              "You want a program you can keep progressing, not just finish once",
+              "You're ready to train consistently and actually build strength",
+              "You want nutrition guidance that isn't obsessive or exhausting",
+            ].map((item) => (
+              <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "16px 0", borderBottom: "1px solid rgba(255,255,255,0.05)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5 }}>
+                <span style={{ color: accent, flexShrink: 0, marginTop: 2, fontSize: 12 }}>✓</span>
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="faq-section">
+        <div className="faq-inner">
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(200,169,126,0.5)", marginBottom: 20 }}>Common questions</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(26px, 2.8vw, 36px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, marginBottom: 48 }}>
+            What you should know.
+          </h2>
+          <div>
+            {[
+              { q: "How long is each training session?", a: "Between 45 and 60 minutes including warm-up and cool-down. Some days run a little shorter." },
+              { q: "Do I need a gym?", a: "You need access to basic equipment: dumbbells, a resistance band, and a flat bench or equivalent. A commercial gym works, but a well-equipped home gym is fine too." },
+              { q: "Is this for complete beginners?", a: "Yes. It's built for people new to structured training or who've been winging it for years. You don't need prior experience with any of the movements — everything is taught from the ground up." },
+              { q: "Can I run it more than once?", a: "That's the point. The program is designed to be repeated. Each round you add weight and progress further. Most people who see real results run it 2 or 3 times." },
+              { q: "Is it a subscription?", a: "No. One-time payment for each course. You pay once and keep ongoing access." },
+              { q: "Can men use this program?", a: "Yes. The movements and principles apply to everyone. There are no gender-specific requirements." },
+            ].map(({ q, a }) => (
+              <div key={q} style={{ padding: "24px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: `calc(13px * ${bs})`, fontWeight: 600, color: "rgba(245,242,238,0.7)", marginBottom: 10, letterSpacing: "0.03em" }}>{q}</p>
+                <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.35)", lineHeight: 1.7 }}>{a}</p>
               </div>
             ))}
           </div>
@@ -443,56 +470,39 @@ export default async function CoursesPage() {
       </section>
 
       {/* FINAL CTA */}
-      <section style={{ background: "#0a0a0a", padding: "120px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta">
-        <style>{`
-          @media (max-width: 768px) { .final-cta { padding: 80px 28px !important; } }
-        `}</style>
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 700, height: 700, background: "radial-gradient(circle, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
-        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(38px, 4.5vw, 60px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
-          {t.coursesFinalHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
-            <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
-          ))}
-        </h2>
-        <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#0a0a0a", background: accent, padding: "6px 16px", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>Founding Member Price</span>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8 }}>
-            <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
-            <span style={{ fontSize: 64, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-          </div>
-          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>Regular {COURSE_REGULAR_PRICE_DISPLAY}. Founding member price.</p>
-          <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px" }}>
-            Get Instant Access
-          </Link>
-          <p style={{ marginTop: 18, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Buy once, access anytime</strong> · Built-in workout &amp; progress tracking
+      <section className="final-cta" style={{ background: "#0a0a0a" }}>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 600, height: 600, background: "radial-gradient(circle, rgba(200,169,126,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 560, margin: "0 auto" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Ready to start?</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(34px, 4vw, 56px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 16 }}>
+            {t.coursesFinalHeadline.replace(/\\n/g, "\n").split("\n").map((line: string, i: number, arr: string[]) => (
+              <span key={i}>{line}{i < arr.length - 1 ? <br /> : null}</span>
+            ))}
+          </h2>
+          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.35)", lineHeight: 1.7, marginBottom: 48 }}>
+            One-time payment. Ongoing access. No subscription ever.
           </p>
-          <div style={{ marginTop: 40, paddingTop: 40, borderTop: "1px solid rgba(245,242,238,0.06)", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, width: "100%" }}>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>Also available</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
-              <Link href="/nutrition" style={{ color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>
-                Nutrition Foundations
-              </Link>
-              <span style={{ fontSize: 13, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_PRICE_DISPLAY} · 4-week nutrition course</span>
-              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", border: `1px solid ${accent}`, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "10px 20px" }}>
-                Buy Now
-              </Link>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 56, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
+              <span style={{ fontSize: 14, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
             </div>
-            <div style={{ background: "#1a1208", padding: "20px 28px", width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16, borderTop: `1px solid rgba(200,169,126,0.2)` }}>
-              <div>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 4, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle · Best Value</p>
-                <p style={{ fontSize: 12, color: "rgba(245,242,238,0.4)", fontFamily: "var(--font-dm-sans), sans-serif" }}>Both courses · {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} individual · Save {BUNDLE_SAVINGS_DISPLAY}</p>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 28, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif" }}>{BUNDLE_PRICE_DISPLAY}</span>
-                <Link href="/checkout?product=bundle" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "12px 24px", whiteSpace: "nowrap" }}>Get Both Courses</Link>
-              </div>
-            </div>
+            <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", padding: "20px 60px" }}>
+              Get Instant Access
+            </Link>
+            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.2)", fontFamily: "var(--font-dm-sans), sans-serif", marginTop: 4 }}>Training Foundations · Founding member price</p>
+          </div>
+          <div style={{ marginTop: 56, paddingTop: 40, borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center" }}>
+            <Link href="/checkout?product=nutrition" style={{ color: "rgba(200,169,126,0.6)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, textDecoration: "none", letterSpacing: "0.05em" }}>
+              Nutrition Foundations · {NUTRITION_COURSE_PRICE_DISPLAY} →
+            </Link>
+            <Link href="/checkout?product=bundle" style={{ color: "rgba(200,169,126,0.6)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, textDecoration: "none", letterSpacing: "0.05em" }}>
+              Both Courses · {BUNDLE_PRICE_DISPLAY} →
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* NOT READY TO COMMIT */}
       <FreeGuideTeaser />
 
     </main>
