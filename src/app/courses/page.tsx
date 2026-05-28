@@ -4,6 +4,15 @@ import { getPublishedVideoUrl, getPublishedPhotoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
+import {
+  COURSE_REGULAR_PRICE_DISPLAY,
+  NUTRITION_COURSE_PRICE_DISPLAY,
+  NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
+  BUNDLE_PRICE_DISPLAY,
+  BUNDLE_INDIVIDUAL_TOTAL_DISPLAY,
+  BUNDLE_SAVINGS_DISPLAY,
+  FOUNDING_DATE,
+} from "@/lib/pricing"
 import type { Metadata } from "next"
 
 export const revalidate = 60
@@ -14,7 +23,7 @@ export const metadata: Metadata = {
     "A 4-week beginner strength training program. Learn the movements, build the habits, and create a foundation that lasts. One-time payment, yours forever.",
   openGraph: {
     title: "Training Foundations — Lisa Fit Method",
-    description: "A 4-week beginner strength training program. $47 one-time, yours forever.",
+    description: "A 4-week beginner strength training program. $97 one-time, yours forever.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -147,11 +156,12 @@ export default async function CoursesPage() {
               <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>Training Foundations</p>
               <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 12, lineHeight: 1.2 }}>Learn to move.<br /><em style={{ fontStyle: "italic" }}>Build real strength.</em></h2>
               <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, marginBottom: 24 }}>A 4-week beginner strength training program. Five foundational movements, progressive overload, built-in workout tracking.</p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
                 <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-                <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
+                <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
               </div>
+              <p style={{ fontSize: 10, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}</p>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
                 <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "13px 24px" }}>Get Instant Access</Link>
                 <a href="#training-detail" style={{ display: "inline-block", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, textDecoration: "none", letterSpacing: "0.12em", textTransform: "uppercase" }}>Details ↓</a>
@@ -161,14 +171,35 @@ export default async function CoursesPage() {
               <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif" }}>Nutrition Foundations</p>
               <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontWeight: 700, color: "#f5f2ee", marginBottom: 12, lineHeight: 1.2 }}>Eat to match<br /><em style={{ fontStyle: "italic" }}>your training.</em></h2>
               <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, marginBottom: 24 }}>A 4-week nutrition course with a personalized TDEE calculator, a meal plan that adapts to your calorie target, and real verified recipes.</p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$127</span>
-                <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$67</span>
-                <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>New</span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 15, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
               </div>
+              <p style={{ fontSize: 10, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}</p>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
                 <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "13px 24px" }}>Get Instant Access</Link>
                 <Link href="/nutrition" style={{ display: "inline-block", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, textDecoration: "none", letterSpacing: "0.12em", textTransform: "uppercase" }}>Full Details →</Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Bundle row */}
+          <div style={{ marginTop: 2 }}>
+            <div style={{ background: "#1a1208", padding: "32px 36px", borderTop: `3px solid ${accent}`, display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle — Best Value</p>
+                <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5, maxWidth: 560 }}>Both courses together. Training Foundations + Nutrition Foundations. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately.</p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    <span style={{ fontSize: 14, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
+                    <span style={{ fontSize: 34, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
+                    <span style={{ fontSize: 9, color: "#0a0a0a", background: accent, padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Save {BUNDLE_SAVINGS_DISPLAY}</span>
+                  </div>
+                </div>
+                <Link href="/checkout?product=bundle" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "13px 28px", whiteSpace: "nowrap" }}>Get Both Courses</Link>
               </div>
             </div>
           </div>
@@ -233,9 +264,9 @@ export default async function CoursesPage() {
             </div>
             <div className="courses-hero-cta-col">
               <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
+                <span style={{ fontSize: 18, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
                 <span style={{ fontSize: 52, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
-                <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Limited Time</span>
+                <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "5px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
               </div>
               <Link href="/checkout" style={{ display: "block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 32px", textAlign: "center" }}>
                 Get Instant Access
@@ -405,11 +436,12 @@ export default async function CoursesPage() {
                 </li>
               ))}
             </ul>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$127</span>
-              <span style={{ fontSize: 44, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$67</span>
-              <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Intro Price</span>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
+              <span style={{ fontSize: 44, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+              <span style={{ fontSize: 10, color: "#0a0a0a", background: accent, padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Founding Price</span>
             </div>
+            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20, lineHeight: 1.4 }}>Regular {NUTRITION_COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}.</p>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
               <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 40px" }}>
                 Get Instant Access
@@ -449,27 +481,38 @@ export default async function CoursesPage() {
           ))}
         </h2>
         <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#0a0a0a", background: accent, padding: "6px 16px", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>Limited Time Offer</span>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 28 }}>
-            <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>$97</span>
+          <span style={{ display: "inline-block", fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#0a0a0a", background: accent, padding: "6px 16px", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>Founding Member Price</span>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8 }}>
+            <span style={{ fontSize: 20, color: "rgba(245,242,238,0.3)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
             <span style={{ fontSize: 64, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
           </div>
+          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>Regular {COURSE_REGULAR_PRICE_DISPLAY} from {FOUNDING_DATE}</p>
           <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px" }}>
             Get Instant Access
           </Link>
           <p style={{ marginTop: 18, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
             One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access</strong> · Built-in workout &amp; progress tracking
           </p>
-          <div style={{ marginTop: 40, paddingTop: 40, borderTop: "1px solid rgba(245,242,238,0.06)", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+          <div style={{ marginTop: 40, paddingTop: 40, borderTop: "1px solid rgba(245,242,238,0.06)", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, width: "100%" }}>
             <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>Also available</p>
             <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
               <Link href="/nutrition" style={{ color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>
                 Nutrition Foundations
               </Link>
-              <span style={{ fontSize: 13, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>$67 · 4-week nutrition course</span>
+              <span style={{ fontSize: 13, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_PRICE_DISPLAY} · 4-week nutrition course</span>
               <Link href="/checkout?product=nutrition" style={{ display: "inline-block", border: `1px solid ${accent}`, color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "10px 20px" }}>
                 Buy Now
               </Link>
+            </div>
+            <div style={{ background: "#1a1208", padding: "20px 28px", width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16, borderTop: `1px solid rgba(200,169,126,0.2)` }}>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 4, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle — Best Value</p>
+                <p style={{ fontSize: 12, color: "rgba(245,242,238,0.4)", fontFamily: "var(--font-dm-sans), sans-serif" }}>Both courses · {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} individual · Save {BUNDLE_SAVINGS_DISPLAY}</p>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 28, fontWeight: 700, color: accent, fontFamily: "var(--font-dm-sans), sans-serif" }}>{BUNDLE_PRICE_DISPLAY}</span>
+                <Link href="/checkout?product=bundle" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "12px 24px", whiteSpace: "nowrap" }}>Get Both Courses</Link>
+              </div>
             </div>
           </div>
         </div>

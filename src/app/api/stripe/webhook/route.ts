@@ -8,7 +8,11 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
-import { generateAuthToken, storeAuthToken, grantTrackerAccess, grantNutritionAccess } from "@/lib/authTokens"
+import {
+  generateAuthToken, storeAuthToken,
+  grantTrackerAccess, grantNutritionAccess,
+  grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
+} from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -431,6 +435,201 @@ async function provisionUser(email: string) {
   })
 }
 
+function masterclassWelcomeEmail(email: string, setPasswordUrl: string | null): string {
+  const ctaBlock = setPasswordUrl
+    ? `<table cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+        <tr>
+          <td style="background:#c9a96e;border-radius:2px;">
+            <a href="${setPasswordUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+              Set Your Password →
+            </a>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:0 0 32px;font-size:12px;color:#999;">
+        This link expires in 48 hours. Your email: <strong style="color:#888;">${email}</strong>
+      </p>`
+    : `<table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+        <tr>
+          <td style="background:#c9a96e;border-radius:2px;">
+            <a href="https://lisafitmethod.com/masterclass" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+              Open Masterclass →
+            </a>
+          </td>
+        </tr>
+      </table>`
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Welcome to Lisa Fit Method Masterclass</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0ebe4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ebe4;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;letter-spacing:0.04em;">
+                Lisa <span style="color:#c9a96e;">Fit Method</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#ffffff;border-radius:4px;padding:48px 44px;border-left:4px solid #c9a96e;">
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="width:64px;vertical-align:middle;">
+                    <img src="https://lisafitmethod.com/lisa-email.jpg" alt="Lisa McPherson" width="56" height="56" style="width:56px;height:56px;border-radius:50%;object-fit:cover;display:block;" />
+                  </td>
+                  <td style="padding-left:16px;vertical-align:middle;">
+                    <p style="margin:0;font-size:14px;font-weight:600;color:#1a1a1a;">Lisa McPherson</p>
+                    <p style="margin:2px 0 0;font-size:12px;color:#888;">Certified Personal Trainer</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c9a96e;">
+                Masterclass
+              </p>
+              <h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
+                You&apos;re in.
+              </h1>
+              <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                Welcome to Masterclass. A fresh program block drops at the start of every month — all built from real exercise videos so you know exactly what you&apos;re doing. New Q&amp;A answered monthly.
+              </p>
+              ${ctaBlock}
+              <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+                Questions? DM me on Instagram or TikTok
+                <a href="https://www.instagram.com/lisafitmethod" style="color:#c9a96e;text-decoration:none;">@lisafitmethod</a>.
+              </p>
+              <p style="margin:0;font-size:15px;color:#1a1a1a;line-height:1.7;">
+                <span style="font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#c9a96e;">Lisa</span>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="margin:0;font-size:11px;color:#aaa;letter-spacing:0.04em;">Lisa Fit Method &middot; lisafitmethod.com</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+function masterclassDunningEmail(email: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background-color:#f0ebe4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ebe4;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;letter-spacing:0.04em;">
+            Lisa <span style="color:#c9a96e;">Fit Method</span>
+          </span>
+        </td></tr>
+        <tr><td style="background:#ffffff;border-radius:4px;padding:48px 44px;border-left:4px solid #c9a96e;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c9a96e;">Masterclass</p>
+          <h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
+            Payment issue on your account
+          </h1>
+          <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            We couldn&apos;t process your Masterclass payment. Update your card to keep your access — no data is lost.
+          </p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+            <tr><td style="background:#c9a96e;border-radius:2px;">
+              <a href="https://lisafitmethod.com/masterclass/subscribe" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+                Update Payment →
+              </a>
+            </td></tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#999;">Account: ${email}</p>
+        </td></tr>
+        <tr><td align="center" style="padding-top:28px;">
+          <p style="margin:0;font-size:11px;color:#aaa;letter-spacing:0.04em;">Lisa Fit Method &middot; lisafitmethod.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+async function provisionMasterclassUser(
+  email: string,
+  stripeSubscriptionId: string,
+  plan: string,
+  currentPeriodEnd: number
+) {
+  const cognito = makeCognito()
+  const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+  const periodEndIso = new Date(currentPeriodEnd * 1000).toISOString()
+  const normalizedPlan = (plan === "monthly" || plan === "6month" || plan === "annual") ? plan : "monthly"
+
+  // Check if user already exists
+  let userExists = false
+  try {
+    await cognito.send(
+      new AdminGetUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+        Username: email,
+      })
+    )
+    userExists = true
+  } catch {
+    // User does not exist
+  }
+
+  await grantMasterclassAccess(email, stripeSubscriptionId, normalizedPlan, periodEndIso)
+
+  if (userExists) {
+    await resend.emails.send({
+      from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      to: email,
+      subject: "Welcome to Lisa Fit Method Masterclass",
+      html: masterclassWelcomeEmail(email, null),
+    })
+    return
+  }
+
+  const tempPassword = generateTempPassword()
+  try {
+    await cognito.send(
+      new AdminCreateUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+        Username: email,
+        UserAttributes: [
+          { Name: "email", Value: email },
+          { Name: "email_verified", Value: "true" },
+        ],
+        TemporaryPassword: tempPassword,
+        MessageAction: "SUPPRESS",
+      })
+    )
+  } catch (error) {
+    if (!(error instanceof UsernameExistsException)) throw error
+  }
+
+  const token = generateAuthToken()
+  await storeAuthToken(token, email, "setup")
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
+
+  await resend.emails.send({
+    from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    to: email,
+    subject: "Welcome to Lisa Fit Method Masterclass",
+    html: masterclassWelcomeEmail(email, setPasswordUrl),
+  })
+}
+
 async function recordPurchase(intent: Stripe.PaymentIntent) {
   let appsyncUrl = ""
   let appsyncApiKey = ""
@@ -493,6 +692,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
+  // ── One-time course purchases ─────────────────────────────────────────────
   if (event.type === "payment_intent.succeeded") {
     const intent = event.data.object as Stripe.PaymentIntent
     const email = intent.metadata?.customerEmail
@@ -515,7 +715,6 @@ export async function POST(request: NextRequest) {
             await grantTrackerAccess(email)
           }
         }
-        // Record purchase in DB (non-blocking — don't fail fulfillment if this errors)
         await recordPurchase(intent).catch((err) =>
           console.error("recordPurchase failed:", err)
         )
@@ -524,6 +723,67 @@ export async function POST(request: NextRequest) {
         console.error("Purchase fulfillment failed:", detail)
         return NextResponse.json({ error: "Account setup failed", detail }, { status: 500 })
       }
+    }
+  }
+
+  // ── Masterclass subscription events ──────────────────────────────────────
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as unknown as { subscription?: string; billing_reason?: string }
+    const subscriptionId = invoice.subscription
+    if (!subscriptionId) return NextResponse.json({ received: true })
+
+    const stripe = makeStripe()
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
+    if (subscription.metadata?.product !== "masterclass") return NextResponse.json({ received: true })
+
+    const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
+    const plan = subscription.metadata?.plan ?? "monthly"
+    const currentPeriodEnd = subscription.current_period_end
+
+    if (!email) return NextResponse.json({ received: true })
+
+    try {
+      if (invoice.billing_reason === "subscription_create") {
+        // First payment — provision user and grant access
+        await provisionMasterclassUser(email, subscriptionId, plan, currentPeriodEnd)
+      } else {
+        // Renewal payment — just extend access period
+        await renewMasterclassAccess(email, new Date(currentPeriodEnd * 1000).toISOString())
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error)
+      console.error("Masterclass invoice.paid failed:", detail)
+      return NextResponse.json({ error: "Masterclass provisioning failed", detail }, { status: 500 })
+    }
+  }
+
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription
+    if (subscription.metadata?.product !== "masterclass") return NextResponse.json({ received: true })
+    const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
+    if (email) {
+      await revokeMasterclassAccess(email).catch((err) =>
+        console.error("revokeMasterclassAccess failed:", err)
+      )
+    }
+  }
+
+  if (event.type === "invoice.payment_failed") {
+    const invoice = event.data.object as unknown as { subscription?: string }
+    const subscriptionId = invoice.subscription
+    if (!subscriptionId) return NextResponse.json({ received: true })
+    const stripe = makeStripe()
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    if (subscription.metadata?.product !== "masterclass") return NextResponse.json({ received: true })
+    const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
+    if (email) {
+      const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+      await resend.emails.send({
+        from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+        to: email,
+        subject: "Action needed — Masterclass payment issue",
+        html: masterclassDunningEmail(email),
+      }).catch((err) => console.error("Dunning email failed:", err))
     }
   }
 

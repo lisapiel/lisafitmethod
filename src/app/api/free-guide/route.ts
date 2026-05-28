@@ -60,7 +60,7 @@ const emailHtml = `
             <td style="padding:36px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
               <p style="margin:0 0 24px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:#c8a97e;">Lisa Fit Method</p>
               <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:28px;font-weight:700;color:#0a0a0a;line-height:1.2;letter-spacing:-0.3px;">Your 5 Foundation Movements are inside.</h1>
-              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:15px;line-height:1.75;color:#6b6560;">Hi — I'm glad you're here. Below is a link to read the full free guide online, plus a PDF cheat sheet of all five movement patterns attached to this email so you can keep it handy.</p>
+              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:15px;line-height:1.75;color:#6b6560;">Hi, glad you are here. Below is a link to read the full free guide online, plus a PDF cheat sheet of all five movement patterns you can keep handy.</p>
             </td>
           </tr>
 
@@ -74,33 +74,13 @@ const emailHtml = `
           <!-- What's inside -->
           <tr>
             <td style="padding:28px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <p style="margin:0 0 14px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#0a0a0a;">What's in the guide</p>
+              <p style="margin:0 0 14px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#0a0a0a;">What is in the guide</p>
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;">01</span>Goblet Squat — knee dominant
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;">02</span>Romanian Deadlift — hip hinge
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;">03</span>Dumbbell Row — horizontal pull
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;">04</span>Push-Up / DB Press — horizontal push
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;">
-                    <span style="color:#c8a97e;margin-right:10px;">05</span>Pallof Press — core / anti-rotation
-                  </td>
-                </tr>
+                <tr><td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;"><span style="color:#c8a97e;margin-right:10px;">01</span>Goblet Squat: knee dominant</td></tr>
+                <tr><td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;"><span style="color:#c8a97e;margin-right:10px;">02</span>Romanian Deadlift: hip hinge</td></tr>
+                <tr><td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;"><span style="color:#c8a97e;margin-right:10px;">03</span>Dumbbell Row: horizontal pull</td></tr>
+                <tr><td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;"><span style="color:#c8a97e;margin-right:10px;">04</span>Push-Up / DB Press: horizontal push</td></tr>
+                <tr><td style="padding:6px 0;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;color:#1a1a1a;line-height:1.5;"><span style="color:#c8a97e;margin-right:10px;">05</span>Pallof Press: core and anti-rotation</td></tr>
               </table>
             </td>
           </tr>
@@ -111,16 +91,10 @@ const emailHtml = `
               <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="padding-right:12px;">
-                    <a href="https://lisafitmethod.com/free-guide?unlocked=1"
-                       style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:13px 28px;">
-                      Read Online &rarr;
-                    </a>
+                    <a href="https://lisafitmethod.com/free-guide?unlocked=1" style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:13px 28px;">Read Online &rarr;</a>
                   </td>
                   <td>
-                    <a href="https://lisafitmethod.com/downloads/lisa-fit-method-5-foundations.pdf"
-                       style="display:inline-block;background:transparent;color:#c8a97e;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:13px 24px;border:1px solid #c8a97e;">
-                      Download PDF
-                    </a>
+                    <a href="https://lisafitmethod.com/downloads/lisa-fit-method-5-foundations.pdf" style="display:inline-block;background:transparent;color:#c8a97e;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:13px 24px;border:1px solid #c8a97e;">Download PDF</a>
                   </td>
                 </tr>
               </table>
@@ -128,31 +102,59 @@ const emailHtml = `
           </tr>
 
           <!-- Divider -->
+          <tr><td style="padding:0 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;"><div style="border-top:1px solid #e8e0d5;"></div></td></tr>
+
+          <!-- Course 1: Training Foundations -->
           <tr>
-            <td style="padding:0 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <div style="border-top:1px solid #e8e0d5;"></div>
+            <td style="padding:28px 40px 20px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 6px;font-family:Helvetica Neue,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Training Foundations</p>
+              <p style="margin:0 0 12px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;line-height:1.75;color:#6b6560;">
+                The full 4-week program built on these five patterns. Every set, rep, and coaching cue laid out for you, with 50+ exercise videos, built-in workout tracking, and progressive overload built in from day one.
+              </p>
+              <p style="margin:0 0 10px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
+                <strong style="color:#1a1a1a;">$97</strong> founding price (regular $147 from December 1, 2026). One payment, lifetime access.
+              </p>
+              <a href="https://lisafitmethod.com/courses" style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">See Training Foundations &rarr;</a>
             </td>
           </tr>
 
-          <!-- Personal note -->
+          <!-- Divider -->
+          <tr><td style="padding:0 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;"><div style="border-top:1px solid #e8e0d5;"></div></td></tr>
+
+          <!-- Course 2: Nutrition Foundations -->
           <tr>
-            <td style="padding:28px 40px 36px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
-              <p style="margin:0 0 16px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;line-height:1.75;color:#6b6560;">
-                If you want to go further, the full <strong style="color:#1a1a1a;">4-Week Training Foundations</strong> course walks you through exactly how to build these patterns into a real program — with every set, every rep, and every coaching cue laid out for you.
+            <td style="padding:20px 40px 20px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+              <p style="margin:0 0 6px;font-family:Helvetica Neue,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Nutrition Foundations (New)</p>
+              <p style="margin:0 0 12px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;line-height:1.75;color:#6b6560;">
+                A 4-week nutrition course to go alongside your training. Personalized TDEE calculator, a meal plan that scales to your calorie target, real verified recipes, and science-backed education from a CPT.
               </p>
-              <p style="margin:0 0 8px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
-                It's <strong style="color:#1a1a1a;">$47</strong> right now (regular price $97). One payment, lifetime access.
+              <p style="margin:0 0 10px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
+                <strong style="color:#1a1a1a;">$77</strong> founding price (regular $127 from December 1, 2026). One payment, lifetime access.
               </p>
-              <a href="https://lisafitmethod.com/courses"
-                 style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">
-                See the full course →
-              </a>
+              <a href="https://lisafitmethod.com/nutrition" style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">See Nutrition Foundations &rarr;</a>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr><td style="padding:0 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;"><div style="border-top:1px solid #e8e0d5;"></div></td></tr>
+
+          <!-- Bundle -->
+          <tr>
+            <td style="padding:20px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;background:#f8f4ef;">
+              <p style="margin:0 0 6px;font-family:Helvetica Neue,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Foundations Bundle (Best Value)</p>
+              <p style="margin:0 0 12px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13.5px;line-height:1.75;color:#6b6560;">
+                Both courses together. Train the right way and eat to match your effort. $174 if bought separately.
+              </p>
+              <p style="margin:0 0 12px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
+                <strong style="color:#1a1a1a;">$137</strong> for both. You save $37.
+              </p>
+              <a href="https://lisafitmethod.com/checkout?product=bundle" style="display:inline-block;background:#c8a97e;color:#0a0a0a;text-decoration:none;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:12px 24px;">Get Both Courses &rarr;</a>
             </td>
           </tr>
 
           <!-- Signature -->
           <tr>
-            <td style="padding:0 40px 40px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
+            <td style="padding:24px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
               <p style="margin:0 0 2px;font-family:Georgia,serif;font-size:15px;font-style:italic;color:#c8a97e;">Lisa McPherson, CPT</p>
               <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#bbb4ae;">Lisa Fit Method</p>
             </td>
@@ -163,7 +165,7 @@ const emailHtml = `
             <td style="background:#f0ebe3;padding:16px 40px;border:1px solid #e8e0d5;">
               <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;color:#bbb4ae;line-height:1.6;">
                 You received this because you requested the free guide at lisafitmethod.com.<br>
-                Questions? Reply to this email — it goes straight to me.
+                Questions? Reply to this email and it goes straight to me.
               </p>
             </td>
           </tr>
