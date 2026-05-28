@@ -453,12 +453,12 @@ export default async function HomePage() {
               <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>$67</span>
               <span style={{ fontSize: 10, color: "#0a0a0a", background: "var(--accent)", padding: "4px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Intro Price</span>
             </div>
-            <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
-                Get Instant Access
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <Link href="/nutrition" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
+                Explore the Course
               </Link>
-              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", color: "rgba(245,242,238,0.4)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 400, textDecoration: "none", padding: "16px 0" }}>
-                One-time payment · Lifetime access
+              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.4)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 24px" }}>
+                Get Instant Access — $67
               </Link>
             </div>
           </div>
