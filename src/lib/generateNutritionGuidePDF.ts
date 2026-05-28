@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   principleBlock: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   principleHeader: {
     flexDirection: "row",
@@ -131,15 +131,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   principleBody: {
-    fontSize: 8.5,
+    fontSize: 8,
     color: MUTED,
-    lineHeight: 1.65,
+    lineHeight: 1.6,
     marginBottom: 4,
   },
   principleRef: {
-    fontSize: 7.5,
+    fontSize: 7,
     color: MUTED,
-    lineHeight: 1.5,
+    lineHeight: 1.45,
     marginBottom: 4,
     fontStyle: "italic",
   },
@@ -563,9 +563,9 @@ function NutritionGuidePDF() {
           ...(p.stat && p.statLabel
             ? [createElement(
                 View,
-                { style: { backgroundColor: PANEL, borderLeftWidth: 2, borderLeftColor: GOLD, padding: "7 10", marginTop: 4, marginBottom: 4, flexDirection: "row", gap: 10, alignItems: "center" } },
-                createElement(Text, { style: { fontSize: 11, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, width: 72, flexShrink: 0 } }, p.stat),
-                createElement(Text, { style: { fontSize: 7, color: MUTED, lineHeight: 1.55, flex: 1 } }, p.statLabel)
+                { style: { backgroundColor: PANEL, borderLeftWidth: 2, borderLeftColor: GOLD, padding: "5 8", marginTop: 3, marginBottom: 3, flexDirection: "row", gap: 8, alignItems: "flex-start" } },
+                createElement(Text, { style: { fontSize: 9, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, width: 56, flexShrink: 0 } }, p.stat),
+                createElement(Text, { style: { fontSize: 6.5, color: MUTED, lineHeight: 1.5, flex: 1 } }, p.statLabel)
               )]
             : []
           ),
@@ -594,30 +594,27 @@ function NutritionGuidePDF() {
         return divider ? [block, divider] : [block]
       }),
 
-      // Equation section — wrap: false keeps it together, preventing a blank overflow page
+      // Equation section — intro flows naturally; dark box is wrap:false to prevent splitting
+      createElement(View, { style: styles.divider }),
+      createElement(Text, { style: styles.sectionLabel }, "Putting it together"),
+      createElement(Text, { style: { fontSize: 12, fontFamily: "Helvetica-Bold", color: INK, marginBottom: 4 } }, "Every approach that works uses all five."),
+      createElement(Text, { style: { fontSize: 8, color: MUTED, lineHeight: 1.6, marginBottom: 10 } }, "Every sustainable body transformation runs on these five variables. You don't need all five to be perfect. But you do need all five in the frame."),
+
       createElement(
         View,
-        { wrap: false },
-        createElement(View, { style: styles.divider }),
-        createElement(Text, { style: styles.sectionLabel }, "Putting it together"),
-        createElement(Text, { style: { fontSize: 13, fontFamily: "Helvetica-Bold", color: INK, marginBottom: 4 } }, "Every approach that works uses all five."),
-        createElement(Text, { style: { fontSize: 8.5, color: MUTED, lineHeight: 1.65, marginBottom: 10 } }, "Every sustainable body transformation runs on these five variables. You don't need all five to be perfect. But you do need all five in the frame."),
-
-        createElement(
-          View,
-          { style: styles.equationBox },
-        createElement(Text, { style: { fontSize: 7, color: "#5a544b", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 } }, "Five Variables. One System."),
+        { style: styles.equationBox, wrap: false },
+        createElement(Text, { style: { fontSize: 6.5, color: "#5a544b", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 } }, "Five Variables. One System."),
         ...EQUATION_ROWS.map((row, i) => {
           const rowChildren = [
             createElement(
               View,
-              { style: styles.equationRow },
-              createElement(Text, { style: { fontSize: 18, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, width: 38, flexShrink: 0, lineHeight: 1 } }, `0${i + 1}`),
+              { style: { flexDirection: "row", alignItems: "center", paddingTop: 8, paddingBottom: 8, gap: 10 } },
+              createElement(Text, { style: { fontSize: 10, fontFamily: "Helvetica-Bold", color: GOLD_DEEP, width: 24, flexShrink: 0 } }, `0${i + 1}`),
               createElement(
                 View,
                 { style: { flex: 1 } },
-                createElement(Text, { style: styles.equationLabel }, row.label),
-                createElement(Text, { style: styles.equationSub }, row.sub)
+                createElement(Text, { style: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#fff" } }, row.label),
+                createElement(Text, { style: { fontSize: 6, color: "#5a544b", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 1 } }, row.sub)
               ),
               i < 4
                 ? createElement(Text, { style: styles.equationPlus }, "+")
@@ -627,8 +624,7 @@ function NutritionGuidePDF() {
           if (i < 4) rowChildren.push(createElement(View, { style: styles.equationRowDivider }))
           return createElement(View, { key: i }, ...rowChildren)
         })
-        )
-      ), // end wrap: false
+      ),
 
       // Footer
       createElement(
