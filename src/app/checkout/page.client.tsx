@@ -8,6 +8,7 @@ import {
   COURSE_WITH_TRACKER_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
   BUNDLE_PRICE_CENTS, BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
+  TRACKER_PRICE_DISPLAY,
 } from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
@@ -615,47 +616,97 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
             </Link>
           </p>
 
+          {/* Bundle upgrade banner — single course only */}
+          {!isBundle && (
+            <div style={{
+              marginTop: 24,
+              padding: "16px 20px",
+              background: "rgba(201,169,110,0.04)",
+              border: "1px solid rgba(201,169,110,0.2)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+            }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 9, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 4, fontFamily: "var(--font-montserrat), sans-serif" }}>
+                  {isNutrition ? "Add Training Foundations" : "Add Nutrition Foundations"}
+                </p>
+                <p style={{ fontSize: 12, color: "#666", lineHeight: 1.5, fontFamily: "var(--font-montserrat), sans-serif" }}>
+                  {isNutrition
+                    ? `Get both courses for ${BUNDLE_PRICE_DISPLAY} — save ${BUNDLE_SAVINGS_DISPLAY} vs buying separately.`
+                    : `Pair with Nutrition Foundations. Both courses for ${BUNDLE_PRICE_DISPLAY} — save ${BUNDLE_SAVINGS_DISPLAY}.`
+                  }
+                </p>
+              </div>
+              <Link
+                href={`/checkout?product=bundle${memberDiscount ? "&member=1" : ""}`}
+                style={{
+                  display: "inline-block",
+                  background: "none",
+                  border: "1px solid rgba(201,169,110,0.45)",
+                  color: "#c9a96e",
+                  fontFamily: "var(--font-montserrat), sans-serif",
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  padding: "10px 16px",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
+              >
+                Get Bundle →
+              </Link>
+            </div>
+          )}
+
           {/* Order bump — training only (not for bundle or nutrition) */}
           {!isNutrition && !isBundle && (
             <label
               style={{
                 display: "block",
-                marginTop: 8,
-                border: includesTracker ? "1px solid rgba(201,169,110,0.5)" : "1px solid #2a2a2a",
-                background: includesTracker ? "rgba(201,169,110,0.06)" : "#111111",
+                marginTop: 16,
+                border: includesTracker ? "2px solid rgba(201,169,110,0.6)" : "1px solid rgba(201,169,110,0.25)",
+                background: includesTracker ? "rgba(201,169,110,0.08)" : "#0f0f0f",
                 padding: "20px 20px",
                 cursor: paymentStarted ? "default" : "pointer",
                 transition: "border-color 0.2s, background 0.2s",
               }}
             >
-              <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#0a0a0a", background: "#c9a96e", padding: "3px 10px", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                  Popular Add-on
+                </span>
                 <input
                   type="checkbox"
                   checked={includesTracker}
                   disabled={paymentStarted}
                   onChange={(e) => setIncludesTracker(e.target.checked)}
-                  style={{ marginTop: 2, accentColor: "#c9a96e", width: 16, height: 16, flexShrink: 0, cursor: paymentStarted ? "default" : "pointer" }}
+                  style={{ accentColor: "#c9a96e", width: 18, height: 18, flexShrink: 0, cursor: paymentStarted ? "default" : "pointer" }}
                 />
-                <div>
-                  <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                    Add the Workout Tracker +$27
-                  </p>
-                  <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
-                    Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat.
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                    {[
-                      "Create your own workout days: Push, Pull, Legs, Glutes, Upper/Lower, or however you like to train",
-                      "Track weight + reps, reps only, or timed exercises for any movement",
-                      "See your previous numbers directly inside each workout so progressive overload becomes automatic",
-                      "Save unlimited workouts and training weeks, no subscription",
-                    ].map((f) => (
-                      <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                        <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>
-                        <span style={{ fontSize: 11, color: "#666", lineHeight: 1.5 }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
+              </div>
+              <div>
+                <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 700, color: "#f0e6d3", letterSpacing: "0.08em", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                  Add the Progress Tracker — only +{TRACKER_PRICE_DISPLAY}
+                </p>
+                <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7, fontFamily: "var(--font-montserrat), sans-serif" }}>
+                  Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat. Buy once, no subscription.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  {[
+                    "Create your own workout days: Push, Pull, Legs, Glutes, Upper/Lower, or however you like to train",
+                    "Track weight + reps, reps only, or timed exercises for any movement",
+                    "See your previous numbers directly inside each workout so progressive overload becomes automatic",
+                    "Save unlimited workouts and training weeks, no subscription",
+                  ].map((f) => (
+                    <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>
+                      <span style={{ fontSize: 11, color: "#666", lineHeight: 1.5, fontFamily: "var(--font-montserrat), sans-serif" }}>{f}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </label>

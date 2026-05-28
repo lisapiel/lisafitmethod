@@ -1,6 +1,12 @@
 "use client"
 import Link from "next/link"
 import AccountDropdown from "@/components/AccountDropdown.client"
+import {
+  COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
+  NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
+  BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY,
+  TRACKER_PRICE_DISPLAY,
+} from "@/lib/pricing"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -78,26 +84,26 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
       id: "bundle",
       label: "Foundations Bundle",
       desc: "Training + Nutrition together. The complete system.",
-      price: "$137",
-      regularPrice: "$174",
-      href: "/checkout?product=bundle&member=1",
+      price: BUNDLE_PRICE_DISPLAY,
+      regularPrice: BUNDLE_INDIVIDUAL_TOTAL_DISPLAY,
+      href: "/checkout?product=bundle",
       featured: true,
     })
     upsells.push({
       id: "training",
       label: "Training Foundations",
       desc: "4-week beginner strength program.",
-      price: "$87",
-      regularPrice: "$97",
-      href: "/checkout?member=1",
+      price: COURSE_PRICE_DISPLAY,
+      regularPrice: COURSE_REGULAR_PRICE_DISPLAY,
+      href: "/checkout",
     })
     upsells.push({
       id: "nutrition",
       label: "Nutrition Foundations",
       desc: "4-week nutrition course.",
-      price: "$69",
-      regularPrice: "$77",
-      href: "/checkout?product=nutrition&member=1",
+      price: NUTRITION_COURSE_PRICE_DISPLAY,
+      regularPrice: NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
+      href: "/checkout?product=nutrition",
     })
   } else if (training && !nutrition) {
     upsells.push({
@@ -105,7 +111,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
       label: "Nutrition Foundations",
       desc: "Pair training with the right nutrition. 4-week course, personalized TDEE calculator.",
       price: "$69",
-      regularPrice: "$77",
+      regularPrice: NUTRITION_COURSE_PRICE_DISPLAY,
       href: "/checkout?product=nutrition&member=1",
       featured: true,
     })
@@ -115,7 +121,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
       label: "Training Foundations",
       desc: "Put the nutrition to work. 4-week beginner strength program.",
       price: "$87",
-      regularPrice: "$97",
+      regularPrice: COURSE_PRICE_DISPLAY,
       href: "/checkout?member=1",
       featured: true,
     })
@@ -136,8 +142,8 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
       id: "tracker",
       label: "Progress Tracker",
       desc: "Keep progressing after 4 weeks. Buy once, no subscription.",
-      price: "$27",
-      regularPrice: "$27",
+      price: TRACKER_PRICE_DISPLAY,
+      regularPrice: TRACKER_PRICE_DISPLAY,
       href: "/checkout?member=1#tracker",
     })
   }
@@ -240,7 +246,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
               {owned.length > 0 ? "Add to Your Account" : "Get Started"}
             </p>
             <p style={{ fontSize: "0.7rem", color: "#555", marginBottom: 16 }}>
-              {owned.length > 0 ? "10% member discount applied automatically." : "Member pricing applied at checkout."}
+              {owned.length > 0 ? "10% member discount applied automatically." : "Founding member pricing. Limited time."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: owned.length > 0 ? 0 : 16 }}>
               {upsells.map((u) => (

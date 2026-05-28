@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_CENTS, TRACKER_PRICE_CENTS } from "@/lib/pricing"
 
 interface MemberAccess {
   email: string | null
@@ -50,7 +51,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
       label: "Nutrition Foundations",
       headline: "Put the training to work",
       desc: "4-week nutrition course with personalized TDEE calculator, meal plan, and real recipes. One payment, ongoing access.",
-      baseCents: 7700,
+      baseCents: NUTRITION_COURSE_PRICE_CENTS,
       href: "/checkout?product=nutrition&member=1",
     })
   }
@@ -61,7 +62,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
       label: "Training Foundations",
       headline: "Pair it with a real program",
       desc: "4-week beginner strength training. Five foundational movements, progressive overload, built-in workout tracking.",
-      baseCents: 9700,
+      baseCents: COURSE_PRICE_CENTS,
       href: "/checkout?member=1",
     })
   }
@@ -72,7 +73,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
       label: "Progress Tracker",
       headline: "Keep progressing after 4 weeks",
       desc: "Build your own workout days, log every lift, and always know the number you're trying to beat. Buy once, no subscription.",
-      baseCents: 2700,
+      baseCents: TRACKER_PRICE_CENTS,
       href: "/checkout?member=1#tracker",
     })
   }
