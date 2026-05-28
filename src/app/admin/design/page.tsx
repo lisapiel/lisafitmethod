@@ -425,11 +425,11 @@ export default function DesignPage() {
         data: new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" }),
         options: { contentType: "application/json" },
       }).result
-      setToast("Saved — changes will appear on the site within 60 seconds.")
+      setToast("Saved: changes will appear on the site within 60 seconds.")
       setTimeout(() => setToast(null), 6000)
     } catch (err) {
       console.error("Save failed:", err)
-      setToast("Save failed — please try again.")
+      setToast("Save failed: please try again.")
       setTimeout(() => setToast(null), 5000)
     } finally {
       setSaving(false)
@@ -452,7 +452,7 @@ export default function DesignPage() {
       setToast("All settings reset to defaults and saved.")
       setTimeout(() => setToast(null), 6000)
     } catch {
-      setToast("Reset failed — please try again.")
+      setToast("Reset failed: please try again.")
       setTimeout(() => setToast(null), 5000)
     } finally {
       setSaving(false)
@@ -752,7 +752,7 @@ export default function DesignPage() {
             multiline
           />
           <TextField
-            label="Course price (display only — no $ sign)"
+            label="Course price (display only: no $ sign)"
             value={text.coursePrice}
             onChange={(v) => setText({ ...text, coursePrice: v })}
           />
@@ -833,34 +833,34 @@ export default function DesignPage() {
             multiline
           />
           <TextField
-            label="Credential 1 — title"
+            label="Credential 1: title"
             value={text.aboutCred1Label}
             onChange={(v) => setText({ ...text, aboutCred1Label: v })}
           />
           <TextField
-            label="Credential 1 — body"
+            label="Credential 1: body"
             value={text.aboutCred1Body}
             onChange={(v) => setText({ ...text, aboutCred1Body: v })}
             multiline
           />
           <TextField
-            label="Credential 2 — title"
+            label="Credential 2: title"
             value={text.aboutCred2Label}
             onChange={(v) => setText({ ...text, aboutCred2Label: v })}
           />
           <TextField
-            label="Credential 2 — body"
+            label="Credential 2: body"
             value={text.aboutCred2Body}
             onChange={(v) => setText({ ...text, aboutCred2Body: v })}
             multiline
           />
           <TextField
-            label="Credential 3 — title"
+            label="Credential 3: title"
             value={text.aboutCred3Label}
             onChange={(v) => setText({ ...text, aboutCred3Label: v })}
           />
           <TextField
-            label="Credential 3 — body"
+            label="Credential 3: body"
             value={text.aboutCred3Body}
             onChange={(v) => setText({ ...text, aboutCred3Body: v })}
             multiline
@@ -903,45 +903,45 @@ export default function DesignPage() {
             multiline
           />
           <TextField
-            label="Module 1 — title"
+            label="Module 1: title"
             value={text.mod1Title}
             onChange={(v) => setText({ ...text, mod1Title: v })}
           />
           <TextField
-            label="Module 1 — description"
+            label="Module 1: description"
             value={text.mod1Desc}
             onChange={(v) => setText({ ...text, mod1Desc: v })}
             multiline
           />
           <TextField
-            label="Module 2 — title"
+            label="Module 2: title"
             value={text.mod2Title}
             onChange={(v) => setText({ ...text, mod2Title: v })}
           />
           <TextField
-            label="Module 2 — description"
+            label="Module 2: description"
             value={text.mod2Desc}
             onChange={(v) => setText({ ...text, mod2Desc: v })}
             multiline
           />
           <TextField
-            label="Module 3 — title"
+            label="Module 3: title"
             value={text.mod3Title}
             onChange={(v) => setText({ ...text, mod3Title: v })}
           />
           <TextField
-            label="Module 3 — description"
+            label="Module 3: description"
             value={text.mod3Desc}
             onChange={(v) => setText({ ...text, mod3Desc: v })}
             multiline
           />
           <TextField
-            label="Module 4 — title"
+            label="Module 4: title"
             value={text.mod4Title}
             onChange={(v) => setText({ ...text, mod4Title: v })}
           />
           <TextField
-            label="Module 4 — description"
+            label="Module 4: description"
             value={text.mod4Desc}
             onChange={(v) => setText({ ...text, mod4Desc: v })}
             multiline
@@ -991,45 +991,45 @@ export default function DesignPage() {
             multiline
           />
           <TextField
-            label="Feature 1 — title"
+            label="Feature 1: title"
             value={text.coachingFeature1Title}
             onChange={(v) => setText({ ...text, coachingFeature1Title: v })}
           />
           <TextField
-            label="Feature 1 — body"
+            label="Feature 1: body"
             value={text.coachingFeature1Body}
             onChange={(v) => setText({ ...text, coachingFeature1Body: v })}
             multiline
           />
           <TextField
-            label="Feature 2 — title"
+            label="Feature 2: title"
             value={text.coachingFeature2Title}
             onChange={(v) => setText({ ...text, coachingFeature2Title: v })}
           />
           <TextField
-            label="Feature 2 — body"
+            label="Feature 2: body"
             value={text.coachingFeature2Body}
             onChange={(v) => setText({ ...text, coachingFeature2Body: v })}
             multiline
           />
           <TextField
-            label="Feature 3 — title"
+            label="Feature 3: title"
             value={text.coachingFeature3Title}
             onChange={(v) => setText({ ...text, coachingFeature3Title: v })}
           />
           <TextField
-            label="Feature 3 — body"
+            label="Feature 3: body"
             value={text.coachingFeature3Body}
             onChange={(v) => setText({ ...text, coachingFeature3Body: v })}
             multiline
           />
           <TextField
-            label="Feature 4 — title"
+            label="Feature 4: title"
             value={text.coachingFeature4Title}
             onChange={(v) => setText({ ...text, coachingFeature4Title: v })}
           />
           <TextField
-            label="Feature 4 — body"
+            label="Feature 4: body"
             value={text.coachingFeature4Body}
             onChange={(v) => setText({ ...text, coachingFeature4Body: v })}
             multiline

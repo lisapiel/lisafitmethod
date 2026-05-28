@@ -186,7 +186,7 @@ export default function Module3Client() {
       )}
 
       <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.72, marginBottom: "2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-        All recipes in this plan come from verified, well-reviewed sources — linked directly so you can check them yourself. Macros are calculated from the actual ingredients. Nothing is invented. The plan follows a simple structure: Weeks 1&ndash;2 build the habit with consistent meals; Weeks 3&ndash;4 introduce variety while keeping the same framework.
+        All recipes in this plan come from verified, well-reviewed sources, linked directly so you can check them yourself. Macros are calculated from the actual ingredients. Nothing is invented. The plan follows a simple structure: Weeks 1&ndash;2 build the habit with consistent meals; Weeks 3&ndash;4 introduce variety while keeping the same framework.
       </p>
 
       <Divider />
@@ -235,13 +235,13 @@ export default function Module3Client() {
       {activeWeek <= 2 ? (
         <div style={{ background: "rgba(201,169,110,0.04)", border: `1px solid ${border}`, padding: "0.75rem 1.25rem", marginBottom: "1rem" }}>
           <p style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", margin: 0, lineHeight: 1.5 }}>
-            <strong style={{ color: cream }}>Weeks 1&ndash;2: Build the habit.</strong> Consistent meals across both weeks. The repetition is intentional — your brain builds a grocery routine, you get faster at prep, and you learn your numbers without having to think.
+            <strong style={{ color: cream }}>Weeks 1&ndash;2: Build the habit.</strong> Consistent meals across both weeks. The repetition is intentional. Your brain builds a grocery routine, you get faster at prep, and you learn your numbers without having to think.
           </p>
         </div>
       ) : (
         <div style={{ background: "rgba(201,169,110,0.04)", border: `1px solid ${border}`, padding: "0.75rem 1.25rem", marginBottom: "1rem" }}>
           <p style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", margin: 0, lineHeight: 1.5 }}>
-            <strong style={{ color: cream }}>Weeks 3&ndash;4: Add variety.</strong> Same recipes, different rotation. The framework is established — now you can mix things up without losing the structure. Review how your body responded in Weeks 1&ndash;2 and adjust if needed.
+            <strong style={{ color: cream }}>Weeks 3&ndash;4: Add variety.</strong> Same recipes, different rotation. The framework is established. Now you can mix things up without losing the structure. Review how your body responded in Weeks 1&ndash;2 and adjust if needed.
           </p>
         </div>
       )}
@@ -360,7 +360,7 @@ export default function Module3Client() {
           {
             day: "Wednesday (20–30 min)",
             tasks: [
-              "Check what's left — restock protein if needed",
+              "Check what's left, restock protein if needed",
               "Cook fresh salmon (sheet pan, 20 min)",
               "Refill overnight oat jars for the second half of the week",
               "Restock chopped veg",
@@ -385,7 +385,7 @@ export default function Module3Client() {
 
       <div style={{ background: "#0d0d0d", border: `1px solid #1a1a1a`, padding: "1rem 1.25rem", marginBottom: "1.5rem" }}>
         <p style={{ fontSize: "0.75rem", color: "#555", margin: 0, lineHeight: 1.6, fontFamily: "var(--font-montserrat), sans-serif" }}>
-          <strong style={{ color: "#777" }}>The principle:</strong> Prepare protein in bulk — it&apos;s the most time-consuming part. Everything else assembles quickly when the protein is ready. The 90-minute Sunday session makes the rest of the week feel effortless.
+          <strong style={{ color: "#777" }}>The principle:</strong> Prepare protein in bulk. It&apos;s the most time-consuming part. Everything else assembles quickly when the protein is ready. The 90-minute Sunday session makes the rest of the week feel effortless.
         </p>
       </div>
 

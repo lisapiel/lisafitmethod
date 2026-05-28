@@ -4,7 +4,7 @@ import { getPublishedVideoUrls } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Module 1 — Foundation Movements | Lisa Fit Method",
+  title: "Module 1: Foundation Movements | Lisa Fit Method",
 }
 
 const gold = "#c9a96e"
@@ -95,10 +95,10 @@ export default async function Module1Page() {
         </ContentBlock>
         <ContentBlock heading="The cues that make it click">
           <BulletList items={[
-            '"Push the wall behind you with your hips" — this forces the hinge pattern naturally without overthinking it',
-            '"Soft bend in the knees, not a squat" — knees unlock slightly but don\'t drive forward',
-            '"Pack your shoulders" — shoulder blades slightly down and back before you move',
-            '"Bar stays close" — the weight should drag up your legs, not float away from your body',
+            '"Push the wall behind you with your hips": this forces the hinge pattern naturally without overthinking it',
+            '"Soft bend in the knees, not a squat": knees unlock slightly but don\'t drive forward',
+            '"Pack your shoulders": shoulder blades slightly down and back before you move',
+            '"Bar stays close": the weight should drag up your legs, not float away from your body',
           ]} />
         </ContentBlock>
         <ContentBlock heading="One thing to watch for">
@@ -120,13 +120,13 @@ export default async function Module1Page() {
         </ContentBlock>
         <ContentBlock heading="The cues that make it click">
           <BulletList items={[
-            '"Knees track over your second toe" — they follow the direction of your feet, they don\'t collapse inward',
-            '"Chest up, proud posture" — keeps your torso upright throughout the movement',
-            '"Sit between your heels, not behind them" — weight stays distributed across your full foot',
-            '"Spread the floor with your feet" — creates external hip rotation that keeps the knees stable and the glutes engaged',
+            '"Knees track over your second toe": they follow the direction of your feet, they don\'t collapse inward',
+            '"Chest up, proud posture": keeps your torso upright throughout the movement',
+            '"Sit between your heels, not behind them": weight stays distributed across your full foot',
+            '"Spread the floor with your feet": creates external hip rotation that keeps the knees stable and the glutes engaged',
           ]} />
         </ContentBlock>
-        <ContentBlock heading="Start here — the goblet squat">
+        <ContentBlock heading="Start here: the goblet squat">
           <Para>Hold a dumbbell or kettlebell at chest height. The counterbalance naturally pulls you into a better position, which makes it the ideal movement to learn the pattern with. Once you can do 3 sets of 10 with clean form and it feels controlled, you&apos;re ready to progress to the next variation.</Para>
         </ContentBlock>
       </ExerciseBlock>
@@ -145,11 +145,11 @@ export default async function Module1Page() {
         </ContentBlock>
         <ContentBlock heading="The cues that make it click">
           <BulletList items={[
-            '"Elbows at 45 degrees" — not tucked all the way in and not flared straight out',
-            '"Shoulder blades together and down before you press" — set this position before you lower the weight, not after',
-            '"Drive your feet into the floor" — full body tension makes the press stronger',
-            '"Control the descent" — 2 to 3 seconds on the way down, then press with intent',
-            '"Wrist over elbow" — check this before every set until it becomes automatic',
+            '"Elbows at 45 degrees": not tucked all the way in and not flared straight out',
+            '"Shoulder blades together and down before you press": set this position before you lower the weight, not after',
+            '"Drive your feet into the floor": full body tension makes the press stronger',
+            '"Control the descent": 2 to 3 seconds on the way down, then press with intent',
+            '"Wrist over elbow": check this before every set until it becomes automatic',
           ]} />
         </ContentBlock>
       </ExerciseBlock>
@@ -169,11 +169,11 @@ export default async function Module1Page() {
         </ContentBlock>
         <ContentBlock heading="The cues that make it click">
           <BulletList items={[
-            '"Pull your elbows to your back pockets" — activates the lats and stops the shrug',
-            '"Shoulders down before you pull" — set the position first, then initiate',
-            '"Squeeze at the end" — fully contract the back at the top of every rep',
-            '"Chest to the bar, not head to the bar" — the chest leads the movement',
-            '"Control the return" — lower the weight slowly, don\'t let it drop',
+            '"Pull your elbows to your back pockets": activates the lats and stops the shrug',
+            '"Shoulders down before you pull": set the position first, then initiate',
+            '"Squeeze at the end": fully contract the back at the top of every rep',
+            '"Chest to the bar, not head to the bar": the chest leads the movement',
+            '"Control the return": lower the weight slowly, don\'t let it drop',
           ]} />
         </ContentBlock>
         <ContentBlock heading="Work toward this">
@@ -194,10 +194,10 @@ export default async function Module1Page() {
         </ContentBlock>
         <ContentBlock heading="The cues that make it click">
           <BulletList items={[
-            '"360 degree brace" — breathe into your belly and create pressure all the way around your trunk. Think of it as bracing for a punch',
-            '"Ribs down" — prevents the lower back from hyperextending during standing and overhead movements',
-            '"Tall spine" — imagine a string pulling the crown of your head toward the ceiling, especially during carries',
-            '"Brace before you move" — create tension in your core before the rep begins, not halfway through it',
+            '"360 degree brace": breathe into your belly and create pressure all the way around your trunk. Think of it as bracing for a punch',
+            '"Ribs down": prevents the lower back from hyperextending during standing and overhead movements',
+            '"Tall spine": imagine a string pulling the crown of your head toward the ceiling, especially during carries',
+            '"Brace before you move": create tension in your core before the rep begins, not halfway through it',
           ]} />
         </ContentBlock>
         <ContentBlock heading="What this looks like in practice">

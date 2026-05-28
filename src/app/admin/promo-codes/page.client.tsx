@@ -87,7 +87,7 @@ export function PromoCodesClient() {
         Promo Codes
       </h1>
       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888", marginBottom: "2.5rem" }}>
-        Codes are case-insensitive. Changes take effect immediately — no rebuild needed.
+        Codes are case-insensitive. Changes take effect immediately: no rebuild needed.
       </p>
 
       {/* Code list */}

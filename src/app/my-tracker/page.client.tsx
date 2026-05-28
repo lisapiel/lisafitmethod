@@ -84,14 +84,14 @@ function TrackerUpsell() {
           Build your program.<br /><em>Use it at your own pace.</em>
         </h1>
         <p style={{ fontSize: 14, color: "#888", lineHeight: 1.8, marginBottom: 32, textAlign: "center" }}>
-          Create your own workout days, add any exercise, and log every set — week after week. See your previous numbers so you always know what to beat. Yours to keep, even after the program ends.
+          Create your own workout days, add any exercise, and log every set, week after week. See your previous numbers so you always know what to beat. Yours to keep, even after the program ends.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 36, width: "100%", maxWidth: 360 }}>
           {[
-            "Name your own workout days — Push Day, Leg Day, whatever fits you",
+            "Name your own workout days: Push Day, Leg Day, whatever fits you",
             "Track weight + reps, reps only, or duration per exercise",
-            "Progressive overload built in — see last week inline",
+            "Progressive overload built in. See last week's numbers while you log.",
             "Unlimited weeks. Works like an app on your phone.",
           ].map((f) => (
             <div key={f} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>

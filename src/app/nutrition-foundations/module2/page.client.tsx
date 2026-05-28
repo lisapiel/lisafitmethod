@@ -223,7 +223,7 @@ export default function Module2Client() {
         {[
           { portion: "~½ plate", label: "Protein source", examples: "Chicken, fish, eggs, Greek yogurt, cottage cheese, turkey" },
           { portion: "~¼ plate", label: "Carbohydrate source", examples: "Rice, oats, sweet potato, quinoa, whole grain bread" },
-          { portion: "~¼ plate", label: "Vegetables", examples: "Any non-starchy veg — fibre, volume, micronutrients" },
+          { portion: "~¼ plate", label: "Vegetables", examples: "Any non-starchy veg: fibre, volume, micronutrients" },
           { portion: "Thumb-sized", label: "Fat source", examples: "Olive oil for cooking, avocado, nuts as a topping" },
         ].map((item) => (
           <div key={item.label} style={{ display: "flex", gap: 16, padding: "0.75rem 0", borderBottom: `1px solid #1a1a1a` }}>
@@ -274,7 +274,7 @@ export default function Module2Client() {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {[
-          { tier: "Track now", desc: "Use the meal plan in Module 3 for 4 weeks. The structure does the work for you — no app required. This period builds a working mental model of portion sizes and protein content." },
+          { tier: "Track now", desc: "Use the meal plan in Module 3 for 4 weeks. The structure does the work for you, no app required. This period builds a working mental model of portion sizes and protein content." },
           { tier: "Track protein only", desc: "After 4 weeks, most people can maintain results by tracking just their protein target daily. When protein is consistently met, total calories tend to self-regulate with reasonable food choices." },
           { tier: "Stop tracking", desc: "When you have a solid sense of portions and regularly hit your protein target without thinking about it. Periodic check-ins of 1–2 weeks of tracking per quarter can keep you calibrated." },
         ].map((item, i) => (

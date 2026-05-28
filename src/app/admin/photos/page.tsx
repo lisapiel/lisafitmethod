@@ -12,7 +12,7 @@ type Asset = { assignedTo: string; url?: string | null; isPublished: boolean; ti
 
 const GROUPS: { label: string; where: string; keys: string[]; labels: Record<string, string> }[] = [
   {
-    label: "Landing Page — Home (lisafitmethod.com)",
+    label: "Landing Page: Home (lisafitmethod.com)",
     where: "These photos appear on the public home page that visitors see before buying.",
     keys: ["hero", "banner", "testimonials"],
     labels: {
@@ -23,18 +23,18 @@ const GROUPS: { label: string; where: string; keys: string[]; labels: Record<str
   },
   {
     label: "Module Covers",
-    where: "Cover photos for the training module pages inside the course (not yet wired up — coming soon).",
+    where: "Cover photos for the training module pages inside the course (not yet wired up: coming soon).",
     keys: ["module1_cover", "module2_cover", "module3_cover", "module4_cover"],
     labels: {
-      module1_cover: "Module 1 — Foundation Movements",
-      module2_cover: "Module 2 — Core & Glute Priority",
-      module3_cover: "Module 3 — The 4-Week Program",
-      module4_cover: "Module 4 — Nutrition Foundations",
+      module1_cover: "Module 1: Foundation Movements",
+      module2_cover: "Module 2: Core & Glute Priority",
+      module3_cover: "Module 3: The 4-Week Program",
+      module4_cover: "Module 4: Nutrition Foundations",
     },
   },
   {
     label: "About",
-    where: "Bio / about photo (not yet wired up — coming soon).",
+    where: "Bio / about photo (not yet wired up: coming soon).",
     keys: ["about_bio"],
     labels: {
       about_bio: "About / bio photo",

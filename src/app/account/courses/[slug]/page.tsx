@@ -24,12 +24,12 @@ const PRODUCTS: Record<string, ProductInfo> = {
     salePrice: "$97",
     memberPrice: "$87",
     includes: [
-      "5 foundational movement patterns — hip hinge, squat, push, pull, brace & carry",
-      "4-week progressive training program — 3 days per week",
+      "5 foundational movement patterns: hip hinge, squat, push, pull, brace & carry",
+      "4-week progressive training program, 3 days per week",
       "Day A / B / C structure with warm-up, main workout, and cool-down",
       "Built-in workout tracker to log every session inside the course",
       "Nutrition module: protein, fueling, hydration, and consistency principles",
-      "Buy once — revisit the program any time",
+      "Buy once, revisit the program any time",
     ],
     checkoutHref: "/checkout?member=1",
     backHref: "/nutrition-foundations",
@@ -42,12 +42,12 @@ const PRODUCTS: Record<string, ProductInfo> = {
     salePrice: "$77",
     memberPrice: "$69",
     includes: [
-      "TDEE calculator — personalized to your stats and activity level",
+      "TDEE calculator, personalized to your stats and activity level",
       "4-week flexible meal plan framework",
       "Real, verified recipes that actually match the macros",
       "Module on understanding your body's energy needs and hormones",
       "Macro tracking strategy without obsessing over every number",
-      "Buy once — revisit any module any time",
+      "Buy once, revisit any module any time",
     ],
     checkoutHref: "/checkout?product=nutrition&member=1",
     backHref: "/training-foundations",
@@ -55,17 +55,17 @@ const PRODUCTS: Record<string, ProductInfo> = {
   },
   tracker: {
     name: "Progress Tracker",
-    tagline: "Your Personal Workout App — $17 One-Time",
-    regularPrice: "$17",
-    salePrice: "$17",
-    memberPrice: "$17",
+    tagline: "Your Personal Workout App · $27 One-Time",
+    regularPrice: "$27",
+    salePrice: "$27",
+    memberPrice: "$27",
     includes: [
-      "Works for any workout — not just this program. Build any training split you want.",
+      "Works for any workout, not just this program. Build any training split you want.",
       "Log every set, rep, and weight. See last week's numbers while you log this week's.",
-      "Installs to your home screen like a native app — one tap, open in the gym.",
+      "Installs to your home screen like a native app. One tap, open in the gym.",
       "Track progress week over week with full history that never resets.",
       "Keep using it long after this course ends. No subscription, no monthly fee.",
-      "One-time payment — yours forever.",
+      "One-time payment. Yours forever.",
     ],
     checkoutHref: "/tracker-checkout",
     backHref: "/training-foundations",
@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const product = PRODUCTS[slug]
   if (!product) return { title: "Not Found" }
-  return { title: `${product.name} — Lisa Fit Method` }
+  return { title: `${product.name} | Lisa Fit Method` }
 }
 
 export default async function CoursesUpgradePage({ params }: { params: Promise<{ slug: string }> }) {

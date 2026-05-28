@@ -56,7 +56,7 @@ export default function Module4Client() {
         <em style={{ color: gold }}>The part most people skip.</em>
       </h1>
       <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.72, marginBottom: "2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-        The meal plan works on paper. Real life is where nutrition plans fall apart. This module is about what to do when you leave the controlled environment of your meal prep routine — eating out, social situations, plateaus, and the long game beyond 4 weeks.
+        The meal plan works on paper. Real life is where nutrition plans fall apart. This module is about what to do when you leave the controlled environment of your meal prep routine: eating out, social situations, plateaus, and the long game beyond 4 weeks.
       </p>
 
       <Divider />
@@ -65,7 +65,7 @@ export default function Module4Client() {
       <Label>Eating out</Label>
       <H2>Ordering strategically without being that person</H2>
       <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.72, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "1rem" }}>
-        The goal when eating out is not perfection — it&apos;s making the best choice available and accounting for it. The protein-first framework works in any restaurant.
+        The goal when eating out is not perfection. It&apos;s making the best choice available and accounting for it. The protein-first framework works in any restaurant.
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -80,11 +80,11 @@ export default function Module4Client() {
           },
           {
             cuisine: "Sushi / Japanese",
-            strategy: "Sashimi or nigiri over rolls (less rice, no fried components). Edamame is high protein. Miso soup adds sodium — account for water retention, not fat gain.",
+            strategy: "Sashimi or nigiri over rolls (less rice, no fried components). Edamame is high protein. Miso soup adds sodium, so account for water retention, not fat gain.",
           },
           {
             cuisine: "Fast food / on the go",
-            strategy: "Grilled chicken over fried. Protein bowl or salad with a protein topping over a sandwich. Skip the large fries — order a small or none. A burger without the bun cuts ~200 kcal and ~30g carbs.",
+            strategy: "Grilled chicken over fried. Protein bowl or salad with a protein topping over a sandwich. Skip the large fries, order small or none. A burger without the bun cuts ~200 kcal and ~30g carbs.",
           },
           {
             cuisine: "Steakhouse / grill",
@@ -99,7 +99,7 @@ export default function Module4Client() {
       </div>
 
       <TipBox>
-        A general eating-out rule: look for the highest protein option that fits the context, don&apos;t eat the bread basket before the meal, and don&apos;t stress about one meal. One off-plan meal does not derail progress — a week of using meals as excuses does.
+        A general eating-out rule: look for the highest protein option that fits the context, don&apos;t eat the bread basket before the meal, and don&apos;t stress about one meal. One off-plan meal does not derail progress. A week of using meals as excuses does.
       </TipBox>
 
       <Divider />
@@ -112,10 +112,10 @@ export default function Module4Client() {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: "1rem" }}>
         {[
-          { label: "Pre-eating", desc: "Have a high-protein meal or snack before a party or event where food will be unpredictable. You can still eat there — you won't arrive ravenous and make poor decisions." },
-          { label: "Alcohol", desc: "Alcohol has 7 kcal/gram. It cannot be stored as fat directly — but it's prioritised for metabolism, which means fat oxidation stops while alcohol is being processed. Light drinking (1–2 drinks) is unlikely to derail anything. Frequent heavy drinking will. Prefer spirits + soda water over beer or cocktails with sugary mixers if managing calories." },
-          { label: "Buffets and parties", desc: "Plate food once, mindfully. Protein anchors your plate. Skip the items you don't actively want — eat the ones you do. You don't have to eat everything just because it's there." },
-          { label: "The morning after", desc: "Weight may be up from sodium and alcohol water retention — not fat. Don't panic. Return to your normal eating pattern the next day. One event does not require a 'detox' or restriction phase." },
+          { label: "Pre-eating", desc: "Have a high-protein meal or snack before a party or event where food will be unpredictable. You can still eat there. You won't arrive ravenous and make poor decisions." },
+          { label: "Alcohol", desc: "Alcohol has 7 kcal/gram. It cannot be stored as fat directly, but it's prioritised for metabolism, which means fat oxidation stops while alcohol is being processed. Light drinking (1-2 drinks) is unlikely to derail anything. Frequent heavy drinking will. Prefer spirits + soda water over beer or cocktails with sugary mixers if managing calories." },
+          { label: "Buffets and parties", desc: "Plate food once, mindfully. Protein anchors your plate. Skip the items you don't actively want. Eat the ones you do. You don't have to eat everything just because it's there." },
+          { label: "The morning after", desc: "Weight may be up from sodium and alcohol water retention, not fat. Don't panic. Return to your normal eating pattern the next day. One event does not require a detox or restriction phase." },
         ].map((item) => (
           <div key={item.label} style={{ background: dark, border: `1px solid ${border}`, padding: "0.875rem 1.25rem" }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, color: cream, marginBottom: "0.35rem", fontFamily: "var(--font-montserrat), sans-serif" }}>{item.label}</p>
@@ -136,7 +136,7 @@ export default function Module4Client() {
             problem: "Scale isn't moving after 2 weeks",
             steps: [
               "Step 1: Check NEAT first. Are you moving as much as you think? Add a 20-minute walk after dinner daily for one week and reassess before touching your calories.",
-              "Step 2: Audit protein. Are you actually hitting your protein target? Under-eating protein is the most common hidden reason for slow progress — it increases hunger and reduces muscle preservation.",
+              "Step 2: Audit protein. Are you actually hitting your protein target? Under-eating protein is the most common hidden reason for slow progress. It increases hunger and reduces muscle preservation.",
               "Step 3: Reduce target by 100–150 kcal/day. Do not cut more than this at once. Give it 2 more weeks.",
               "Step 4: Check sleep. Sleep deprivation measurably increases hunger hormones and can stall fat loss independent of calories.",
             ],
@@ -144,17 +144,17 @@ export default function Module4Client() {
           {
             problem: "Losing weight too fast (more than 1.5 lb/week)",
             steps: [
-              "Add 100–150 kcal/day from a carb source — rice, oats, or fruit.",
+              "Add 100-150 kcal/day from a carb source: rice, oats, or fruit.",
               "Ensure you're hitting your protein target. Rapid weight loss with low protein = muscle loss.",
-              "Consider whether stress or illness is a factor — both can suppress appetite and inflate losses.",
+              "Consider whether stress or illness is a factor. Both can suppress appetite and inflate losses.",
             ],
           },
           {
             problem: "Constant hunger",
             steps: [
-              "Increase protein immediately — it's the most satiating macro gram-for-gram.",
+              "Increase protein immediately. It's the most satiating macro gram-for-gram.",
               "Add more volume with non-starchy veg: spinach, cucumber, broccoli, zucchini. These add fibre and volume for almost no calories.",
-              "Check if you're drinking enough water — mild dehydration is frequently mistaken for hunger.",
+              "Check if you're drinking enough water. Mild dehydration is frequently mistaken for hunger.",
               "Assess if your deficit is too aggressive. A 400 kcal deficit should be manageable; a 700+ kcal deficit often isn't.",
             ],
           },
@@ -181,7 +181,7 @@ export default function Module4Client() {
       <Label>Supplements</Label>
       <H2>What actually works (short list)</H2>
       <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.72, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "1rem" }}>
-        The supplement industry generates billions by selling products with weak or no evidence. Below are the only three with strong, consistent evidence in healthy, training individuals. Everything else — fat burners, BCAAs, pre-workout dependency, &ldquo;metabolism boosters&rdquo; — is largely marketing.
+        The supplement industry generates billions by selling products with weak or no evidence. Below are the only three with strong, consistent evidence in healthy, training individuals. Everything else (fat burners, BCAAs, pre-workout dependency, &ldquo;metabolism boosters&rdquo;) is largely marketing.
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: "1.25rem" }}>
@@ -194,7 +194,7 @@ export default function Module4Client() {
           {
             name: "Protein Powder (whey or casein)",
             dose: "As needed to hit daily protein target",
-            evidence: "Not magic — it's just food in powder form. Useful if you consistently struggle to hit protein targets through whole foods. Whey digests quickly (post-workout), casein slowly (before bed). Not required if you can hit targets with food.",
+            evidence: "Not magic. It's just food in powder form. Useful if you consistently struggle to hit protein targets through whole foods. Whey digests quickly (post-workout), casein slowly (before bed). Not required if you can hit targets with food.",
           },
           {
             name: "Vitamin D3",
@@ -213,7 +213,7 @@ export default function Module4Client() {
       </div>
 
       <ScienceBox
-        study="Lanhers et al. (2017) — Creatine"
+        study="Lanhers et al. (2017): Creatine"
         finding="A meta-analysis of 22 RCTs found creatine supplementation significantly increased upper and lower limb muscle strength compared to placebo when combined with resistance training, with effects most pronounced in younger participants."
         cite="Lanhers C et al. Creatine supplementation and upper limb strength performance: a systematic review and meta-analysis. Sports Med. 2017;47(1):163–173."
       />
@@ -230,14 +230,14 @@ export default function Module4Client() {
       <Label>Connecting everything</Label>
       <H2>Nutrition and your training program</H2>
       <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.72, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "1rem" }}>
-        Nutrition and training are not separate things — they work as a system. Each optimises the other.
+        Nutrition and training are not separate things. They work as a system. Each optimises the other.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: "1.25rem" }}>
         {[
           { time: "Pre-training (1–2 hours before)", guidance: "A moderate-carb, moderate-protein meal. Enough to fuel the session without causing GI discomfort. Example: overnight oats or rice with chicken." },
-          { time: "Post-training (within 2 hours)", guidance: "Protein is the priority — triggers muscle protein synthesis. Adding carbs here helps replenish glycogen. The 30-minute anabolic window is a myth, but eating protein-rich food within 2 hours is genuinely beneficial." },
-          { time: "Rest days", guidance: "Appetite often drops on rest days — this is normal. You can eat slightly less, but maintain your protein target. Carbs can reduce by 20–30% on rest days if you're tracking training vs rest day calories." },
-          { time: "Sleep and recovery", guidance: "7–9 hours is a nutritional variable, not just a lifestyle choice. Sleep deprivation increases ghrelin (hunger), reduces leptin (satiety), and reduces insulin sensitivity — all of which actively work against your nutrition targets." },
+          { time: "Post-training (within 2 hours)", guidance: "Protein is the priority. It triggers muscle protein synthesis. Adding carbs here helps replenish glycogen. The 30-minute anabolic window is a myth, but eating protein-rich food within 2 hours is genuinely beneficial." },
+          { time: "Rest days", guidance: "Appetite often drops on rest days. This is normal. You can eat slightly less, but maintain your protein target. Carbs can reduce by 20-30% on rest days if you're tracking training vs rest day calories." },
+          { time: "Sleep and recovery", guidance: "7-9 hours is a nutritional variable, not just a lifestyle choice. Sleep deprivation increases ghrelin (hunger), reduces leptin (satiety), and reduces insulin sensitivity, all of which actively work against your nutrition targets." },
         ].map((item) => (
           <div key={item.time} style={{ background: dark, border: `1px solid ${border}`, padding: "0.875rem 1.25rem" }}>
             <p style={{ fontSize: "0.65rem", fontWeight: 700, color: gold, marginBottom: "0.3rem", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>{item.time}</p>
@@ -255,7 +255,7 @@ export default function Module4Client() {
           The nutrition supports the training. The training builds what the nutrition preserves.
         </p>
         <p style={{ fontSize: "0.78rem", color: muted, lineHeight: 1.6, margin: "0 0 1rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-          If you haven&apos;t started the Training Foundations course, the full 4-week resistance training program is available alongside this nutrition course. Built on the same principles — structured, progressive, and designed to last.
+          If you haven&apos;t started the Training Foundations course, the full 4-week resistance training program is available alongside this nutrition course. Built on the same principles: structured, progressive, and designed to last.
         </p>
         <Link
           href="/training-foundations"
@@ -285,7 +285,7 @@ export default function Module4Client() {
           I built this course because the information that exists is either too complicated, too generic, or too motivated by selling you something. There is no supplement that replaces eating enough protein. There is no detox that improves on a calorie deficit. There is no meal timing trick that matters more than hitting your macro targets most days.
         </p>
         <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.75, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "0.75rem" }}>
-          I am a personal trainer, not a dietitian. Everything in this course is general education that I believe is accurate and helpful — but you know your own body and your own situation. If something isn&apos;t working after an honest 4-week effort, work with a registered dietitian who can look at the full picture.
+          I am a personal trainer, not a dietitian. Everything in this course is general education that I believe is accurate and helpful, but you know your own body and your own situation. If something isn&apos;t working after an honest 4-week effort, work with a registered dietitian who can look at the full picture.
         </p>
         <p style={{ fontSize: "0.88rem", color: muted, lineHeight: 1.75, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "0.5rem" }}>
           The recipes are real. The science is real. The results depend on you doing the work consistently. You now have the framework. Go use it.
@@ -303,7 +303,7 @@ export default function Module4Client() {
           Full Disclaimer
         </p>
         <p style={{ fontSize: "0.72rem", color: "#555", margin: 0, lineHeight: 1.7, fontFamily: "var(--font-montserrat), sans-serif" }}>
-          This content is for general educational purposes only. Lisa McPherson is a NASM Certified Personal Trainer — not a Registered Dietitian, licensed nutritionist, or medical professional. This course does not constitute medical nutrition therapy and does not replace advice from a qualified healthcare provider. Always consult your physician before starting a new nutrition program, especially if you have a medical condition, are pregnant or nursing, take medications, or have a history of eating disorders. Individual results vary. References to research are provided for educational context; they should not be interpreted as endorsement of specific claims or products.
+          This content is for general educational purposes only. Lisa McPherson is a NASM Certified Personal Trainer, not a Registered Dietitian, licensed nutritionist, or medical professional. This course does not constitute medical nutrition therapy and does not replace advice from a qualified healthcare provider. Always consult your physician before starting a new nutrition program, especially if you have a medical condition, are pregnant or nursing, take medications, or have a history of eating disorders. Individual results vary. References to research are provided for educational context; they should not be interpreted as endorsement of specific claims or products.
         </p>
       </div>
 

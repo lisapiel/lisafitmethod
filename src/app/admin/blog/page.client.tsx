@@ -48,14 +48,14 @@ export default function AdminBlogClient() {
   }
 
   async function handleMigrate() {
-    if (!confirm("Import all 5 existing static posts to S3? Do this once — it won't overwrite posts you've already saved to S3.")) return
+    if (!confirm("Import all 5 existing static posts to S3? Do this once: it won't overwrite posts you've already saved to S3.")) return
     setMigrating(true)
     try {
       await migrateStaticPosts()
       showToast("Static posts imported to S3.")
       await load()
     } catch {
-      showToast("Migration failed — check console.")
+      showToast("Migration failed: check console.")
     }
     setMigrating(false)
   }

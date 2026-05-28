@@ -7,12 +7,12 @@ import type { Metadata } from "next"
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: "About Lisa McPherson — Certified Personal Trainer",
+  title: "About Lisa McPherson | Certified Personal Trainer",
   description:
-    "Certified personal trainer and founder of Lisa Fit Method. Spent years in classes before finding structured strength training — learned the foundation the hard way, now here to give it to you straight.",
+    "Certified personal trainer and founder of Lisa Fit Method. Spent years in classes before finding structured strength training. Learned the foundation the hard way, now here to give it to you straight.",
   openGraph: {
-    title: "About Lisa McPherson — Certified Personal Trainer",
-    description: "Certified personal trainer and founder of Lisa Fit Method. Learned the foundation the hard way — now here to give it to you straight.",
+    title: "About Lisa McPherson | Certified Personal Trainer",
+    description: "Certified personal trainer and founder of Lisa Fit Method. Learned the foundation the hard way. Now here to give it to you straight.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -54,7 +54,7 @@ export default async function AboutPage() {
       name: "Lisa Fit Method",
       url: "https://lisafitmethod.com",
       logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png" },
-      description: "Online personal training and strength programming — built around proper movement, real structure, and a foundation that lasts.",
+      description: "Online personal training and strength programming built around proper movement, real structure, and a foundation that lasts.",
       founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
       sameAs: ["https://instagram.com/lisafitmethod"],
     },
@@ -93,7 +93,7 @@ export default async function AboutPage() {
           <div style={{ width: 230, height: 230, borderRadius: "50%", overflow: "hidden", margin: "0 auto 28px", border: "2px solid rgba(200,169,126,0.3)", flexShrink: 0 }}>
             <Image
               src="/lisa-about-hero.jpg"
-              alt="Lisa McPherson — Certified Personal Trainer"
+              alt="Lisa McPherson, Certified Personal Trainer"
               width={460}
               height={460}
               style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%" }}
@@ -156,7 +156,7 @@ export default async function AboutPage() {
             <div className="about-photo" style={{ background: "#e8e0d8", overflow: "hidden", borderRadius: 16 }}>
               <Image
                 src={photoUrl ?? "/hero.png"}
-                alt="Lisa McPherson — Certified Personal Trainer"
+                alt="Lisa McPherson, Certified Personal Trainer"
                 width={900}
                 height={1200}
                 style={{ width: "100%", height: "auto", display: "block" }}
@@ -168,7 +168,7 @@ export default async function AboutPage() {
                 &ldquo;{t.aboutQuote}&rdquo;
               </p>
               <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "#a8895e" }}>
-                — Lisa McPherson, CPT
+                Lisa McPherson, CPT
               </p>
             </div>
           </div>

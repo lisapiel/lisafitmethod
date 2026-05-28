@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const finalAmount = courseAmount + (!isNutrition && !isBundle && includesTracker ? TRACKER_PRICE_CENTS : 0)
 
     // Affirm minimum is $50 (5000 cents); Cash App minimum is $1 (100 cents)
-    const paymentMethods: string[] = ["card", "link"]
+    const paymentMethods: string[] = ["card"]
     if (finalAmount >= 5000) paymentMethods.push("affirm")
     if (finalAmount >= 100) paymentMethods.push("cashapp")
 

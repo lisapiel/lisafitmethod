@@ -4,7 +4,7 @@ import { getPublishedVideoUrls } from "@/lib/mediaClient"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Module 2 — Core & Glute Priority | Lisa Fit Method",
+  title: "Module 2: Core & Glute Priority | Lisa Fit Method",
 }
 
 const gold = "#c9a96e"

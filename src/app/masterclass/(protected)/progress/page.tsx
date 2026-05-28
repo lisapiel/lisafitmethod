@@ -87,7 +87,7 @@ export default function ProgressPage() {
         ].map(({ label, value }) => (
           <div key={label} style={{ background: "#111", border: `1px solid ${border}`, borderRadius: 2, padding: "20px 24px" }}>
             <p style={{ margin: 0, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555" }}>{label}</p>
-            <p style={{ margin: "8px 0 0", fontFamily: "var(--font-cormorant), serif", fontSize: "3rem", fontWeight: 300, color: "#f0e6d3", lineHeight: 1 }}>{loading ? "—" : value}</p>
+            <p style={{ margin: "8px 0 0", fontFamily: "var(--font-cormorant), serif", fontSize: "3rem", fontWeight: 300, color: "#f0e6d3", lineHeight: 1 }}>{loading ? "..." : value}</p>
           </div>
         ))}
       </div>

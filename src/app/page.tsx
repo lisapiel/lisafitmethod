@@ -18,11 +18,11 @@ import type { Metadata } from "next"
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: "Lisa Fit Method — Train the Right Way",
+  title: "Lisa Fit Method | Train the Right Way",
   description:
     "A complete strength training foundation for beginners and returners. Learn proper form, follow a structured program, track your progress, and build a body that actually lasts.",
   openGraph: {
-    title: "Lisa Fit Method — Train the Right Way",
+    title: "Lisa Fit Method | Train the Right Way",
     description: "A complete strength training foundation for beginners and returners. Proper movement, real structure, and a body built to last.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
@@ -61,7 +61,7 @@ export default async function HomePage() {
       url: "https://lisafitmethod.com",
       logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png" },
       image: "https://lisafitmethod.com/hero.png",
-      description: "Online personal training and strength programming — built around proper movement, real structure, and a foundation that lasts.",
+      description: "Online personal training and strength programming built around proper movement, real structure, and a foundation that lasts.",
       founder: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
       sameAs: ["https://instagram.com/lisafitmethod"],
     },
@@ -72,7 +72,7 @@ export default async function HomePage() {
       jobTitle: "Certified Personal Trainer",
       url: "https://lisafitmethod.com/about",
       image: "https://lisafitmethod.com/hero.png",
-      description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt training from scratch after a serious back injury — now helps people build strength the right way.",
+      description: "Certified personal trainer and founder of Lisa Fit Method. Rebuilt training from scratch after a serious back injury. Now helps people build strength the right way.",
       sameAs: ["https://instagram.com/lisafitmethod"],
       worksFor: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
       knowsAbout: ["Strength Training", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Core Stability"],
@@ -122,7 +122,7 @@ export default async function HomePage() {
       "@context": "https://schema.org",
       "@type": "Service",
       name: "1:1 Personal Training Coaching",
-      description: "Personalized online coaching with Lisa McPherson — custom programming, form review, and weekly check-ins tailored to your goals and schedule.",
+      description: "Personalized online coaching with Lisa McPherson: custom programming, form review, and weekly check-ins tailored to your goals and schedule.",
       provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
       url: "https://lisafitmethod.com/coaching",
       aggregateRating: {
@@ -218,7 +218,7 @@ export default async function HomePage() {
           <div className="home-hero-text">
             <div>
               <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
-                Lisa Fit Method — Training Foundations
+                Training Foundations
               </p>
               <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 20 }}>
                 {t.homeHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
@@ -251,7 +251,7 @@ export default async function HomePage() {
         ) : (
           <div className="home-hero-fallback">
             <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
-              Lisa Fit Method — Training Foundations
+              Training Foundations
             </p>
             <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 24 }}>
               {t.homeHeroHeadline.replace(/\\n/g, "\n").split("\n").map((line, i, arr) => (
@@ -293,7 +293,7 @@ export default async function HomePage() {
           <div className="home-hero-photo-wrap">
             <Image
               src={heroUrl}
-              alt="Lisa McPherson — Lisa Fit Method"
+              alt="Lisa McPherson, Lisa Fit Method"
               fill
               style={{ objectFit: "cover", objectPosition: settings.crops.hero }}
               sizes="100vw"
@@ -338,7 +338,7 @@ export default async function HomePage() {
                 {t.homeStoryQuote}
               </p>
               <cite style={{ display: "block", marginTop: 24, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontStyle: "normal", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent)" }}>
-                — Lisa McPherson, CPT
+                Lisa McPherson, CPT
               </cite>
             </div>
           </div>
@@ -485,7 +485,7 @@ export default async function HomePage() {
               {[
                 "Interactive calorie and macro calculator",
                 "4-week meal plan with verified, attributed recipes",
-                "Science-backed education — no bro-science",
+                "Science-backed education. No bro-science.",
                 "Eating out, supplements, and troubleshooting guides",
               ].map((item) => (
                 <li key={item} style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: "1px solid rgba(245,242,238,0.05)", fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.5 }}>
@@ -507,7 +507,7 @@ export default async function HomePage() {
                   Explore the Course
                 </Link>
                 <Link href="/checkout?product=nutrition" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.4)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "16px 24px" }}>
-                  Get Instant Access — {NUTRITION_COURSE_PRICE_DISPLAY}
+                  Get Instant Access · {NUTRITION_COURSE_PRICE_DISPLAY}
                 </Link>
               </div>
             </div>
@@ -522,7 +522,7 @@ export default async function HomePage() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <Link href="/checkout?product=nutrition" style={{ display: "block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px", textAlign: "center" }}>
-                Get Instant Access — {NUTRITION_COURSE_PRICE_DISPLAY}
+                Get Instant Access · {NUTRITION_COURSE_PRICE_DISPLAY}
               </Link>
               <Link href="/nutrition" style={{ display: "block", color: "rgba(245,242,238,0.5)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", padding: "12px 0", textAlign: "center" }}>
                 Explore the Course →

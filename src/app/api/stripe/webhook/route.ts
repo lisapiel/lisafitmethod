@@ -112,7 +112,7 @@ function welcomeEmail(email: string, setPasswordUrl: string): string {
               </p>
 
               <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-                Start with the Introduction before jumping into the modules. Watch every video — the foundation knowledge is what everything else is built on.
+                Start with the Introduction before jumping into the modules. Watch every video. The foundation knowledge is what everything else is built on.
               </p>
 
               <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
@@ -202,7 +202,7 @@ function nutritionWelcomeEmail(email: string, setPasswordUrl: string): string {
                 This link expires in 48 hours. Your email: <strong style="color:#888;">${email}</strong>
               </p>
               <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-                Start with Module 1 — it has the TDEE calculator that personalises your meal plan. Fill it in before you open Module 3.
+                Start with Module 1. It has the TDEE calculator that personalises your meal plan. Fill it in before you open Module 3.
               </p>
               <p style="margin:0;font-size:15px;color:#1a1a1a;line-height:1.7;">
                 <span style="font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#c9a96e;">Lisa</span>
@@ -230,7 +230,7 @@ function nutritionAccessGrantedEmail(): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Nutrition Foundations — access added</title>
+<title>Nutrition Foundations: access added</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f0ebe4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ebe4;padding:40px 20px;">
@@ -306,7 +306,7 @@ async function provisionNutritionUser(email: string) {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       to: email,
-      subject: "Nutrition Foundations — your course is ready",
+      subject: "Nutrition Foundations: your course is ready",
       html: nutritionAccessGrantedEmail(),
     })
     return
@@ -332,7 +332,7 @@ async function provisionNutritionUser(email: string) {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       to: email,
-      subject: "Nutrition Foundations — your course is ready",
+      subject: "Nutrition Foundations: your course is ready",
       html: nutritionAccessGrantedEmail(),
     })
     return
@@ -500,7 +500,7 @@ function masterclassWelcomeEmail(email: string, setPasswordUrl: string | null): 
                 You&apos;re in.
               </h1>
               <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-                Welcome to Masterclass. A fresh program block drops at the start of every month — all built from real exercise videos so you know exactly what you&apos;re doing. New Q&amp;A answered monthly.
+                Welcome to Masterclass. A fresh program block drops at the start of every month, all built from real exercise videos so you know exactly what you&apos;re doing. New Q&amp;A answered monthly.
               </p>
               ${ctaBlock}
               <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
@@ -544,7 +544,7 @@ function masterclassDunningEmail(email: string): string {
             Payment issue on your account
           </h1>
           <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-            We couldn&apos;t process your Masterclass payment. Update your card to keep your access — no data is lost.
+            We couldn&apos;t process your Masterclass payment. Update your card to keep your access. No data is lost.
           </p>
           <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
             <tr><td style="background:#c9a96e;border-radius:2px;">
@@ -783,7 +783,7 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
         from: "Lisa Fit Method <noreply@lisafitmethod.com>",
         to: email,
-        subject: "Action needed — Masterclass payment issue",
+        subject: "Action needed: Masterclass payment issue",
         html: masterclassDunningEmail(email),
       }).catch((err) => console.error("Dunning email failed:", err))
     }

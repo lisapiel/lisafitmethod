@@ -51,35 +51,35 @@ type Tab = "home" | "tasks" | "revenue" | "clients"
 
 const TASKS: Task[] = [
   // ── Phase 1 · Week 1 ──────────────────────────────────────────────────────
-  { id: "p1w1_1", week: 1, phase: 1, category: "setup", priority: "high", title: "Raise Training Foundations price to $97", note: "Do this on your course platform today — every sale from now earns $50 more" },
+  { id: "p1w1_1", week: 1, phase: 1, category: "setup", priority: "high", title: "Raise Training Foundations price to $97", note: "Do this on your course platform today: every sale from now earns $50 more" },
   { id: "p1w1_2", week: 1, phase: 1, category: "setup", priority: "high", title: "Update coaching page: add $400/month price + 15-spot cap", note: "Add the 5 offer elements (2 calls, custom program, weekly check-in, messaging, course included)" },
-  { id: "p1w1_3", week: 1, phase: 1, category: "build", priority: "high", title: "Write Nutrition Foundations PDF (2 hrs)", note: "Use Module 4 content — expand each principle to 2–3 paragraphs, add simple meal examples" },
+  { id: "p1w1_3", week: 1, phase: 1, category: "build", priority: "high", title: "Write Nutrition Foundations PDF (2 hrs)", note: "Use Module 4 content: expand each principle to 2–3 paragraphs, add simple meal examples" },
   { id: "p1w1_4", week: 1, phase: 1, category: "setup", priority: "high", title: "Create $147 Starter Bundle product page (TF + Nutrition PDF)" },
   { id: "p1w1_5", week: 1, phase: 1, category: "setup", priority: "high", title: "Update Instagram + TikTok bio", note: "Bio: 'Strength training foundations for women → link'" },
   { id: "p1w1_6", week: 1, phase: 1, category: "setup", priority: "high", title: "Update Linktree: Free guide → Course ($97) → Bundle ($147) → Coaching" },
-  { id: "p1w1_7", week: 1, phase: 1, category: "content", priority: "high", title: "Filming Day 1 — shoot 5–8 videos", note: "Use scripts from VIRAL_CONTENT.md: Piece 1 (Two-Year Nothing), Piece 8 (Engineer vs. Influencer)" },
+  { id: "p1w1_7", week: 1, phase: 1, category: "content", priority: "high", title: "Filming Day 1: shoot 5–8 videos", note: "Use scripts from VIRAL_CONTENT.md: Piece 1 (Two-Year Nothing), Piece 8 (Engineer vs. Influencer)" },
   { id: "p1w1_8", week: 1, phase: 1, category: "outreach", priority: "medium", title: "Send testimonial request email to all past buyers", note: "Use Piece 10 from VIRAL_CONTENT.md" },
 
   // ── Phase 1 · Week 2 ──────────────────────────────────────────────────────
-  { id: "p1w2_1", week: 2, phase: 1, category: "content", priority: "high", title: "Post Reddit education piece (Piece 9 — The 5 Movements)", note: "r/xxfitness — education only, no pitch in the post body" },
+  { id: "p1w2_1", week: 2, phase: 1, category: "content", priority: "high", title: "Post Reddit education piece (Piece 9: The 5 Movements)", note: "r/xxfitness: education only, no pitch in the post body" },
   { id: "p1w2_2", week: 2, phase: 1, category: "content", priority: "high", title: "Post Engineer carousel on Instagram (Piece 3)" },
-  { id: "p1w2_3", week: 2, phase: 1, category: "outreach", priority: "high", title: "DM 10–15 engaged followers about coaching spots", note: "Personal, direct: 'I'm opening 15 coaching spots this month — if you've been thinking about it, now is the time.'" },
-  { id: "p1w2_4", week: 2, phase: 1, category: "content", priority: "medium", title: "Filming Day 2 — shoot 5–8 videos", note: "Pieces 3, 7 (Industry Wants You Confused)" },
+  { id: "p1w2_3", week: 2, phase: 1, category: "outreach", priority: "high", title: "DM 10–15 engaged followers about coaching spots", note: "Personal, direct: 'I'm opening 15 coaching spots this month: if you've been thinking about it, now is the time.'" },
+  { id: "p1w2_4", week: 2, phase: 1, category: "content", priority: "medium", title: "Filming Day 2: shoot 5–8 videos", note: "Pieces 3, 7 (Industry Wants You Confused)" },
   { id: "p1w2_5", week: 2, phase: 1, category: "coaching", priority: "high", title: "Sign 2 coaching clients", note: "Target from DMs + organic interest. Send application form link." },
   { id: "p1w2_6", week: 2, phase: 1, category: "content", priority: "medium", title: "Post daily on TikTok + Instagram (1–2/day)", note: "Cross-post same video: export TikTok without watermark → Reels" },
 
   // ── Phase 1 · Week 3 ──────────────────────────────────────────────────────
-  { id: "p1w3_1", week: 3, phase: 1, category: "content", priority: "high", title: "Post 'Two-Year Nothing' on TikTok (Piece 1)", note: "Your first viral attempt — 60s talking head. Film fresh if needed." },
+  { id: "p1w3_1", week: 3, phase: 1, category: "content", priority: "high", title: "Post 'Two-Year Nothing' on TikTok (Piece 1)", note: "Your first viral attempt: 60s talking head. Film fresh if needed." },
   { id: "p1w3_2", week: 3, phase: 1, category: "content", priority: "high", title: "Post 'Industry Wants You Confused' on Instagram (Piece 7)" },
-  { id: "p1w3_3", week: 3, phase: 1, category: "outreach", priority: "medium", title: "Engage r/xxfitness daily — comment, add value, don't pitch", note: "5 minutes/day. Reply to beginner questions with genuinely helpful answers." },
-  { id: "p1w3_4", week: 3, phase: 1, category: "content", priority: "medium", title: "Filming Day 3 — shoot 5–8 videos" },
+  { id: "p1w3_3", week: 3, phase: 1, category: "outreach", priority: "medium", title: "Engage r/xxfitness daily: comment, add value, don't pitch", note: "5 minutes/day. Reply to beginner questions with genuinely helpful answers." },
+  { id: "p1w3_4", week: 3, phase: 1, category: "content", priority: "medium", title: "Filming Day 3: shoot 5–8 videos" },
   { id: "p1w3_5", week: 3, phase: 1, category: "coaching", priority: "high", title: "Hit 4–5 coaching clients total" },
 
   // ── Phase 1 · Week 4 ──────────────────────────────────────────────────────
-  { id: "p1w4_1", week: 4, phase: 1, category: "launch", priority: "high", title: "Announce challenge: '4-Week Foundation Reset opens in 2 weeks — join waitlist'" },
-  { id: "p1w4_2", week: 4, phase: 1, category: "content", priority: "high", title: "Post 'Nobody Tells Beginners' (Piece 2) — long Reel or YouTube" },
+  { id: "p1w4_1", week: 4, phase: 1, category: "launch", priority: "high", title: "Announce challenge: '4-Week Foundation Reset opens in 2 weeks: join waitlist'" },
+  { id: "p1w4_2", week: 4, phase: 1, category: "content", priority: "high", title: "Post 'Nobody Tells Beginners' (Piece 2): long Reel or YouTube" },
   { id: "p1w4_3", week: 4, phase: 1, category: "content", priority: "high", title: "Post 'The Year My Back Gave Out' (Piece 4)", note: "Your deepest story piece. Best on YouTube long-form or long caption." },
-  { id: "p1w4_4", week: 4, phase: 1, category: "content", priority: "medium", title: "Filming Day 4 + pre-film Philippines travel content", note: "Film 10+ videos if leaving soon — schedule them across your 2 travel weeks" },
+  { id: "p1w4_4", week: 4, phase: 1, category: "content", priority: "medium", title: "Filming Day 4 + pre-film Philippines travel content", note: "Film 10+ videos if leaving soon: schedule them across your 2 travel weeks" },
   { id: "p1w4_5", week: 4, phase: 1, category: "analytics", priority: "high", title: "Month 1 check: target $5,000+ revenue", note: "Coaching × 5 ($2,000) + 25 course sales ($2,425) + 8 bundles ($1,176) = ~$5,600" },
 
   // ── Phase 2 · Week 5 ──────────────────────────────────────────────────────
@@ -89,14 +89,14 @@ const TASKS: Task[] = [
   { id: "p2w5_4", week: 5, phase: 2, category: "launch", priority: "high", title: "Target 30 waitlist signups before cart opens" },
 
   // ── Phase 2 · Week 6 ──────────────────────────────────────────────────────
-  { id: "p2w6_1", week: 6, phase: 2, category: "launch", priority: "high", title: "Open challenge cart — email waitlist + daily countdown posts" },
+  { id: "p2w6_1", week: 6, phase: 2, category: "launch", priority: "high", title: "Open challenge cart: email waitlist + daily countdown posts" },
   { id: "p2w6_2", week: 6, phase: 2, category: "outreach", priority: "high", title: "DM everyone who commented 'interested' on challenge posts" },
   { id: "p2w6_3", week: 6, phase: 2, category: "launch", priority: "high", title: "Close cart at 50 signups or end of week", note: "Target: $4,850 from challenge alone" },
-  { id: "p2w6_4", week: 6, phase: 2, category: "coaching", priority: "medium", title: "Continue coaching DM outreach — push toward 10 clients total" },
+  { id: "p2w6_4", week: 6, phase: 2, category: "coaching", priority: "medium", title: "Continue coaching DM outreach: push toward 10 clients total" },
 
   // ── Phase 2 · Week 7 (Philippines) ───────────────────────────────────────
-  { id: "p2w7_1", week: 7, phase: 2, category: "content", priority: "high", title: "Post Philippines content from pre-filmed queue", note: "'Training from anywhere' — bodyweight foundations, hotel workouts" },
-  { id: "p2w7_2", week: 7, phase: 2, category: "launch", priority: "high", title: "Run challenge: post daily prompt in group (5 min/day)", note: "Keep energy high — your group runs itself if you seed it daily" },
+  { id: "p2w7_1", week: 7, phase: 2, category: "content", priority: "high", title: "Post Philippines content from pre-filmed queue", note: "'Training from anywhere': bodyweight foundations, hotel workouts" },
+  { id: "p2w7_2", week: 7, phase: 2, category: "launch", priority: "high", title: "Run challenge: post daily prompt in group (5 min/day)", note: "Keep energy high: your group runs itself if you seed it daily" },
   { id: "p2w7_3", week: 7, phase: 2, category: "launch", priority: "high", title: "Run weekly Q&A (30 min on Sunday)", note: "This is the only synchronous commitment during the challenge" },
 
   // ── Phase 2 · Week 8 ──────────────────────────────────────────────────────
@@ -112,22 +112,22 @@ const TASKS: Task[] = [
   { id: "p3w9_4", week: 9, phase: 3, category: "coaching", priority: "high", title: "Target: 12 coaching clients active (challenge upsells included)" },
 
   // ── Phase 3 · Week 10 ─────────────────────────────────────────────────────
-  { id: "p3w10_1", week: 10, phase: 3, category: "build", priority: "high", title: "Film Level 2 course (2 filming days)", note: "Same format as Training Foundations — module intro, exercise demos, coaching cues" },
+  { id: "p3w10_1", week: 10, phase: 3, category: "build", priority: "high", title: "Film Level 2 course (2 filming days)", note: "Same format as Training Foundations: module intro, exercise demos, coaching cues" },
   { id: "p3w10_2", week: 10, phase: 3, category: "launch", priority: "high", title: "Announce Cohort 2 challenge ('opens in 2 weeks')" },
-  { id: "p3w10_3", week: 10, phase: 3, category: "content", priority: "medium", title: "Publish 'Why Random Workouts Don't Work' blog post (Piece 6)", note: "Already written — just publish and share to Instagram stories" },
-  { id: "p3w10_4", week: 10, phase: 3, category: "launch", priority: "high", title: "Build Cohort 2 waitlist — target 40+ signups" },
+  { id: "p3w10_3", week: 10, phase: 3, category: "content", priority: "medium", title: "Publish 'Why Random Workouts Don't Work' blog post (Piece 6)", note: "Already written: just publish and share to Instagram stories" },
+  { id: "p3w10_4", week: 10, phase: 3, category: "launch", priority: "high", title: "Build Cohort 2 waitlist: target 40+ signups" },
 
   // ── Phase 3 · Week 11 ─────────────────────────────────────────────────────
   { id: "p3w11_1", week: 11, phase: 3, category: "launch", priority: "high", title: "Level 2 'Training Progression' goes live at $97" },
   { id: "p3w11_2", week: 11, phase: 3, category: "launch", priority: "high", title: "Create 'Complete Foundations System' bundle at $197 (TF + Level 2)" },
-  { id: "p3w11_3", week: 11, phase: 3, category: "launch", priority: "high", title: "Open Cohort 2 cart — $97, target 40 signups = $3,880" },
+  { id: "p3w11_3", week: 11, phase: 3, category: "launch", priority: "high", title: "Open Cohort 2 cart: $97, target 40 signups = $3,880" },
   { id: "p3w11_4", week: 11, phase: 3, category: "content", priority: "high", title: "Post 'What to do after Training Foundations' content", note: "Sets up Level 2 purchase and keeps existing buyers engaged" },
 
   // ── Phase 3 · Week 12 ─────────────────────────────────────────────────────
   { id: "p3w12_1", week: 12, phase: 3, category: "analytics", priority: "high", title: "Month 3 check: target $15,000+ revenue", note: "13 clients ($5,200) + upsells ($2,800) + courses ($5,000) + Level 2 ($1,940) + Cohort 2 ($3,880) = ~$18,820" },
   { id: "p3w12_2", week: 12, phase: 3, category: "coaching", priority: "high", title: "Hit 13–15 coaching clients active" },
   { id: "p3w12_3", week: 12, phase: 3, category: "build", priority: "medium", title: "Plan Month 4: first YouTube video, VA research, price increase to $500/month coaching" },
-  { id: "p3w12_4", week: 12, phase: 3, category: "content", priority: "medium", title: "Ongoing: post daily, engage comments within 60 min of posting", note: "The algorithm rewards fast engagement — don't post and disappear" },
+  { id: "p3w12_4", week: 12, phase: 3, category: "content", priority: "medium", title: "Ongoing: post daily, engage comments within 60 min of posting", note: "The algorithm rewards fast engagement: don't post and disappear" },
 ]
 
 const CATEGORY_COLORS: Record<Task["category"], string> = {
@@ -427,9 +427,9 @@ function HomeTab({
           Phase {currentPhase} · Week {currentWeek} · Month {currentMonth}
         </div>
         <div style={{ fontSize: 12, color: C.mutedLight, letterSpacing: "0.04em" }}>
-          {currentPhase === 1 ? "Foundation — Set up your offer stack + first coaching clients" :
-           currentPhase === 2 ? "Launch — Run the challenge + grow coaching to 10 clients" :
-           "Scale — Level 2 launch + hit $15K/month"}
+          {currentPhase === 1 ? "Foundation: Set up your offer stack + first coaching clients" :
+           currentPhase === 2 ? "Launch: Run the challenge + grow coaching to 10 clients" :
+           "Scale: Level 2 launch + hit $15K/month"}
         </div>
       </div>
 
@@ -603,9 +603,9 @@ function RevenueTab({
   editRevMonth: 1 | 2 | 3 | null; setEditRevMonth: (v: 1 | 2 | 3 | null) => void
 }) {
   const months: Array<{ key: "m1" | "m2" | "m3"; num: 1 | 2 | 3; target: number; label: string }> = [
-    { key: "m1", num: 1, target: 5600, label: "Month 1 — Foundation" },
-    { key: "m2", num: 2, target: 12350, label: "Month 2 — Launch" },
-    { key: "m3", num: 3, target: 18820, label: "Month 3 — Scale" },
+    { key: "m1", num: 1, target: 5600, label: "Month 1: Foundation" },
+    { key: "m2", num: 2, target: 12350, label: "Month 2: Launch" },
+    { key: "m3", num: 3, target: 18820, label: "Month 3: Scale" },
   ]
 
   function saveRevMonth(month: "m1" | "m2" | "m3", data: RevenueMonth) {
@@ -768,7 +768,7 @@ function ClientsTab({
       {state.clients.length === 0 && (
         <div style={{ padding: "48px 20px", textAlign: "center" }}>
           <div style={{ fontSize: 12, color: C.muted, marginBottom: 16 }}>No coaching clients yet.</div>
-          <div style={{ fontSize: 11, color: C.muted }}>Your first 5 clients come from direct DMs — people who have already engaged with your content.</div>
+          <div style={{ fontSize: 11, color: C.muted }}>Your first 5 clients come from direct DMs: people who have already engaged with your content.</div>
         </div>
       )}
 

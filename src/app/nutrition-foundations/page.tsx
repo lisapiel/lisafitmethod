@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import CrossSellShelf from "@/components/CrossSellShelf.client"
 
 export const metadata: Metadata = {
-  title: "Introduction — Nutrition Foundations | Lisa Fit Method",
+  title: "Introduction: Nutrition Foundations | Lisa Fit Method",
 }
 
 const gold = "#c9a96e"

@@ -12,7 +12,7 @@ const PRODUCT_LABELS: Record<CustomerRow["product"], string> = {
 }
 
 function formatDate(iso: string) {
-  if (!iso) return "—"
+  if (!iso) return "-"
   const d = new Date(iso)
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
 }

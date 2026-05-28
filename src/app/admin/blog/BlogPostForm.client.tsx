@@ -128,7 +128,7 @@ export default function BlogPostFormClient({ mode, slug }: Props) {
       showToast("Saved! Live in ~60 seconds.")
       setTimeout(() => router.push("/admin/blog"), 1500)
     } catch {
-      showToast("Save failed — try again.")
+      showToast("Save failed: try again.")
     }
     setSaving(false)
   }
@@ -282,7 +282,7 @@ export default function BlogPostFormClient({ mode, slug }: Props) {
                   type="text"
                   value={section.heading}
                   onChange={(e) => updateSection(i, "heading", e.target.value)}
-                  placeholder="Section heading (optional — leave blank for intro paragraph)"
+                  placeholder="Section heading (optional: leave blank for intro paragraph)"
                   style={{ ...inputStyle, marginBottom: 10 }}
                 />
                 <textarea

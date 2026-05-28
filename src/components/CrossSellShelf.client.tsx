@@ -72,7 +72,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
       product: "tracker",
       label: "Progress Tracker",
       headline: "Your workout app, built in",
-      desc: "Build any program, log every lift, beat last week's numbers. Installs to your home screen. No subscription — ever.",
+      desc: "Build any program, log every lift, beat last week's numbers. Installs to your home screen. No subscription, ever.",
       baseCents: TRACKER_PRICE_CENTS,
       href: "/tracker-checkout",
     })
@@ -94,7 +94,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
         color: "#555",
         marginBottom: "1.5rem",
       }}>
-        Member pricing — {MEMBER_OFF}% off for existing customers
+        Member pricing · {MEMBER_OFF}% off for existing customers
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

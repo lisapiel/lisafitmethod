@@ -16,9 +16,9 @@ export async function GET() {
   const images: { loc: string; pageUrl: string; title: string }[] = []
 
   const slotMap = [
-    { slot: "hero", url: heroUrl, pageUrl: BASE, title: "Lisa McPherson — Lisa Fit Method" },
-    { slot: "about_bio", url: aboutUrl, pageUrl: `${BASE}/about`, title: "Lisa McPherson — Certified Personal Trainer" },
-    { slot: "banner", url: bannerUrl, pageUrl: `${BASE}/courses`, title: "Training Foundations — Lisa Fit Method" },
+    { slot: "hero", url: heroUrl, pageUrl: BASE, title: "Lisa McPherson,Lisa Fit Method" },
+    { slot: "about_bio", url: aboutUrl, pageUrl: `${BASE}/about`, title: "Lisa McPherson,Certified Personal Trainer" },
+    { slot: "banner", url: bannerUrl, pageUrl: `${BASE}/courses`, title: "Training Foundations,Lisa Fit Method" },
   ]
 
   for (const { url, pageUrl, title } of slotMap) {

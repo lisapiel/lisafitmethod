@@ -24,9 +24,9 @@ interface MergedRow {
 type FilterTab = "all" | "purchasers" | "accounts" | "leads"
 
 function formatDate(d: string) {
-  if (!d) return "—"
+  if (!d) return "-"
   const dt = new Date(d)
-  if (isNaN(dt.getTime())) return "—"
+  if (isNaN(dt.getTime())) return "-"
   return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
@@ -308,14 +308,14 @@ export default function AdminLeadsPage() {
                   {row.products.length === 0 && row.hasCognitoAccount && <AccountBadge />}
                   {row.products.length === 0 && !row.hasCognitoAccount && (
                     <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.48rem", color: "#555", letterSpacing: "0.1em" }}>
-                      —
+                      -
                     </span>
                   )}
                 </div>
 
                 <div>
                   {row.leadSource ? <SourceBadge source={row.leadSource} /> : (
-                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.48rem", color: "#444" }}>—</span>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.48rem", color: "#444" }}>-</span>
                   )}
                 </div>
 

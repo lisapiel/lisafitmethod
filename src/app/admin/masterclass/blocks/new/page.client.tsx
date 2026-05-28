@@ -401,7 +401,7 @@ export default function NewBlockClient() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Block 1 — Foundation"
+            placeholder="Block 1: Foundation"
             style={{
               width: "100%",
               background: "#161616",

@@ -68,7 +68,7 @@ export default function AdminMasterclassDashboard() {
                 {card.label}
               </p>
               <p style={{ margin: "8px 0 4px", fontFamily: "var(--font-cormorant), serif", fontSize: "2.5rem", fontWeight: 300, color: "#f0e6d3", lineHeight: 1 }}>
-                {card.value ?? "—"}
+                {card.value ?? "-"}
               </p>
               <p style={{ margin: 0, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold }}>
                 {card.cta} →

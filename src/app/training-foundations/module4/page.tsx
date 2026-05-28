@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Module 4 — Nutrition Foundations | Lisa Fit Method",
+  title: "Module 4: Nutrition Foundations | Lisa Fit Method",
 }
 
 const gold = "#c9a96e"
@@ -221,7 +221,7 @@ export default function Module4Page() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 1 — PROTEIN
+          SECTION 1: PROTEIN
       ═══════════════════════════════════════════════════════════ */}
       <SectionHeading id="protein" num="Principle 1" title="Protein Is Your Priority" />
 
@@ -231,7 +231,7 @@ export default function Module4Page() {
       <Callout>A simple daily target is 0.7 to 1 gram of protein per pound of bodyweight. At 150 lbs, that is 105 to 150 grams per day. Split across 3 meals, that means roughly 35 to 50 grams per meal.</Callout>
 
       <div style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: dim, fontFamily: "var(--font-montserrat), sans-serif", marginBottom: "0.75rem" }}>
-        Protein Sources — 45g Per Meal
+        Protein Sources · 45g Per Meal
       </div>
       <div className="protein-grid" style={{ marginBottom: "1.75rem", alignItems: "stretch" }}>
         {proteinSources.map((s) => (
@@ -244,7 +244,7 @@ export default function Module4Page() {
       <SectionDivider />
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 2 — FUEL
+          SECTION 2: FUEL
       ═══════════════════════════════════════════════════════════ */}
       <SectionHeading id="fuel" num="Principle 2" title="Eat Enough To Train" />
 
@@ -347,7 +347,7 @@ export default function Module4Page() {
       <SectionDivider />
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 3 — CONSISTENCY
+          SECTION 3: CONSISTENCY
       ═══════════════════════════════════════════════════════════ */}
       <SectionHeading id="consistency" num="Principle 3" title="Consistency Beats Perfection" />
 
@@ -422,7 +422,7 @@ export default function Module4Page() {
       <SectionDivider />
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 4 — HYDRATION
+          SECTION 4: HYDRATION
       ═══════════════════════════════════════════════════════════ */}
       <SectionHeading id="hydration" num="Principle 4" title="Hydration Affects Everything" />
 
@@ -494,11 +494,11 @@ export default function Module4Page() {
       <SectionDivider />
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 5 — DON'T COMPLICATE IT
+          SECTION 5: DON'T COMPLICATE IT
       ═══════════════════════════════════════════════════════════ */}
       <SectionHeading id="basics" num="Principle 5" title="Don't Complicate It Until You've Mastered The Basics" />
 
-      <P>One of the biggest mistakes beginners make is focusing on optimization before they have even mastered the fundamentals. Meal timing, detailed macro tracking, supplements, intermittent fasting, fat burners, detoxes, carb cycling — none of those things matter much if the basics are not already in place.</P>
+      <P>One of the biggest mistakes beginners make is focusing on optimization before they have even mastered the fundamentals. Meal timing, detailed macro tracking, supplements, intermittent fasting, fat burners, detoxes, carb cycling: none of those things matter much if the basics are not already in place.</P>
 
       <Callout>Most people do not need more complexity. They need more consistency.</Callout>
 
@@ -554,11 +554,11 @@ export default function Module4Page() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <div style={{ background: border, padding: "0.6rem 1rem" }}>
-            <div style={{ fontSize: "0.6rem", color: dim, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>Advanced — later</div>
+            <div style={{ fontSize: "0.6rem", color: dim, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>Advanced · later</div>
             <div style={{ fontSize: "0.72rem", color: "#555", fontFamily: "var(--font-montserrat), sans-serif" }}>Supplements · Meal timing · Macro tracking · Advanced optimization</div>
           </div>
           <div style={{ background: "rgba(201,169,110,0.08)", border: `1px solid ${calloutBorder}`, padding: "0.75rem 1rem" }}>
-            <div style={{ fontSize: "0.6rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>Foundation — master this first</div>
+            <div style={{ fontSize: "0.6rem", color: gold, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>Foundation · master this first</div>
             <div style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif" }}>Protein · Hydration · Recovery · Consistency · Whole foods · Training</div>
           </div>
         </div>

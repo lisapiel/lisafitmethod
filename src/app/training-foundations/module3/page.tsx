@@ -508,7 +508,7 @@ export default async function Module3Page() {
       {/* ── DAY A ──────────────────────────────────────────────── */}
       <DayBlock id="daya" day="Day A" title="Lower Body Strength">
 
-        <SubLabel id="daya-warmup">Warm-Up — 10 minutes</SubLabel>
+        <SubLabel id="daya-warmup">Warm-Up · 10 minutes</SubLabel>
         <WarmupItem
           name="90/90 Hip Mobility Stretch"
           note="8-10 reps per side, alternating. Move slowly between sides and breathe into the stretch. Do not force the range of motion."
@@ -627,7 +627,7 @@ export default async function Module3Page() {
             <InlineExerciseTracker day="a" exerciseId="farmers_carry" />
             <ExerciseDivider />
 
-            <SubLabel id="daya-cooldown">Cool-Down — 5 minutes</SubLabel>
+            <SubLabel id="daya-cooldown">Cool-Down · 5 minutes</SubLabel>
             <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
               Cooldowns are not about forcing flexibility. Hold each stretch for around 30 seconds, breathe slowly, and only move into a range that feels comfortable. The video shows the movement, but your range may look different, and that is completely fine. Stretching should feel controlled, not painful.
             </p>
@@ -671,7 +671,7 @@ export default async function Module3Page() {
       {/* ── DAY B ──────────────────────────────────────────────── */}
       <DayBlock id="dayb" day="Day B" title="Upper Body Strength">
 
-        <SubLabel id="dayb-warmup">Warm-Up — 10 minutes</SubLabel>
+        <SubLabel id="dayb-warmup">Warm-Up · 10 minutes</SubLabel>
         <WarmupItem
           name="Cat-Cow"
           note="10 reps. Move slowly through the full range of motion. Inhale as you extend, exhale as you round."
@@ -795,7 +795,7 @@ export default async function Module3Page() {
             <InlineExerciseTracker day="b" exerciseId="pallof_press" />
             <ExerciseDivider />
 
-            <SubLabel id="dayb-cooldown">Cool-Down — 5 minutes</SubLabel>
+            <SubLabel id="dayb-cooldown">Cool-Down · 5 minutes</SubLabel>
             <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
               Cooldowns are not about forcing flexibility. Hold each stretch for around 30 seconds, breathe slowly, and only move into a range that feels comfortable. The video shows the movement, but your range may look different, and that is completely fine. Stretching should feel controlled, not painful.
             </p>
@@ -842,7 +842,7 @@ export default async function Module3Page() {
           This day has a different feel to it. The loading is lighter, the focus is on movement quality, single leg stability, posture, and tying everything you have been building together. Think of it as the day you reinforce the patterns rather than push the intensity.
         </p>
 
-        <SubLabel id="dayc-warmup">Warm-Up — 10 minutes</SubLabel>
+        <SubLabel id="dayc-warmup">Warm-Up · 10 minutes</SubLabel>
         <WarmupItem
           name="90/90 Hip Mobility Stretch"
           note="8-10 reps per side, alternating. Move slowly between sides and breathe into the stretch. Do not force the range of motion."
@@ -1001,7 +1001,7 @@ export default async function Module3Page() {
             <InlineExerciseTracker day="c" exerciseId="stir_the_pot" />
             <ExerciseDivider />
 
-            <SubLabel id="dayc-cooldown">Cool-Down — 5 minutes</SubLabel>
+            <SubLabel id="dayc-cooldown">Cool-Down · 5 minutes</SubLabel>
             <p style={{ fontSize: "0.82rem", color: "#666", lineHeight: 1.6, marginBottom: "1.5rem", paddingLeft: "0.75rem", borderLeft: "2px solid rgba(201,169,110,0.2)" }}>
               Cooldowns are not about forcing flexibility. Hold each stretch for around 30 seconds, breathe slowly, and only move into a range that feels comfortable. The video shows the movement, but your range may look different, and that is completely fine. Stretching should feel controlled, not painful.
             </p>

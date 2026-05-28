@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Welcome — Lisa Fit Method",
+  title: "Welcome | Lisa Fit Method",
   description: "Your purchase is complete. Check your email for access.",
 }
 
@@ -21,10 +21,10 @@ function getUpsells(product: string): UpsellProduct[] {
     return [
       {
         label: "Progress Tracker",
-        headline: "Your workout app — $17 once",
+        headline: "Your workout app. $27, one time.",
         desc: "Build any program, log every lift, beat last week's numbers. Adds to your home screen like an app. No subscription, ever.",
-        price: "$17",
-        regularPrice: "$17",
+        price: "$27",
+        regularPrice: "$27",
         href: "/tracker-checkout",
       },
       {
@@ -54,9 +54,9 @@ function getUpsells(product: string): UpsellProduct[] {
       {
         label: "Progress Tracker",
         headline: "Your built-in workout app",
-        desc: "Build any workout — not just this program. Log every lift, beat last week's numbers, add it to your home screen. No subscription, ever.",
-        price: "$17",
-        regularPrice: "$17",
+        desc: "Build any workout, not just this program. Log every lift, beat last week's numbers, add it to your home screen. No subscription, ever.",
+        price: "$27",
+        regularPrice: "$27",
         href: "/tracker-checkout",
       },
     ]
@@ -153,7 +153,7 @@ export default async function PurchaseSuccessPage({ searchParams }: { searchPara
         </p>
         <ol style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 16 }}>
           {[
-            { num: "1", text: "Check your email — you'll receive your login credentials within a few minutes." },
+            { num: "1", text: "Check your email. You'll receive your login credentials within a few minutes." },
             { num: "2", text: "Go to the login page and sign in with your email and the temporary password from the email." },
             { num: "3", text: "You'll be prompted to set a permanent password, then you're in the course." },
           ].map((step) => (

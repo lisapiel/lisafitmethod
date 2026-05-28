@@ -138,7 +138,7 @@ export default function UploadPageClient({ slot, type }: Props) {
     try {
       await makeClient().models.MediaAsset.update({ id: asset.id, isPublished: next })
       setAsset({ ...asset, isPublished: next })
-      setSuccess(next ? "Published — live on the site." : "Unpublished — hidden from the site.")
+      setSuccess(next ? "Published: live on the site." : "Unpublished: hidden from the site.")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update publish status.")
     }

@@ -68,7 +68,7 @@ export default function AskPage() {
         Ask a Question
       </h1>
       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#555", marginBottom: "2rem", lineHeight: 1.6 }}>
-        Lisa answers questions once a month. Keep it specific — training form, exercise substitutions, programming questions.
+        Lisa answers questions once a month. Keep it specific: training form, exercise substitutions, programming questions.
       </p>
 
       <form onSubmit={handleSubmit}>

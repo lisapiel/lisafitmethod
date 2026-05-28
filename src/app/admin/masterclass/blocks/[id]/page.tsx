@@ -185,7 +185,7 @@ export default function BlockEditPage({ params }: { params: Promise<{ id: string
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 180px", gap: 16, marginBottom: "2rem" }}>
         {[
-          { label: "Block Title", value: title, onChange: (v: string) => setTitle(v), placeholder: "Block 1 — Foundation", type: "text" },
+          { label: "Block Title", value: title, onChange: (v: string) => setTitle(v), placeholder: "Block 1: Foundation", type: "text" },
           { label: "Block #", value: String(blockNumber), onChange: (v: string) => setBlockNumber(Number(v)), placeholder: "", type: "number" },
           { label: "Start Date", value: startDate, onChange: (v: string) => setStartDate(v), placeholder: "", type: "date" },
         ].map(({ label, value, onChange, placeholder, type }) => (

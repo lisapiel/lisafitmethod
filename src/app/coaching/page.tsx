@@ -5,11 +5,11 @@ import { fetchSiteSettings } from "@/lib/siteSettings"
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: "Online Coaching — 1:1 with Lisa McPherson",
+  title: "Online Coaching | 1:1 with Lisa McPherson",
   description:
-    "Work directly with Lisa — a certified personal trainer who's been on both sides of training. Personalized programming, form feedback, and real accountability.",
+    "Work directly with Lisa, a certified personal trainer who's been on both sides of training. Personalized programming, form feedback, and real accountability.",
   openGraph: {
-    title: "Online Coaching — 1:1 with Lisa McPherson",
+    title: "Online Coaching | 1:1 with Lisa McPherson",
     description: "Work directly with Lisa. Personalized programming, form feedback, and real accountability.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
@@ -29,7 +29,7 @@ export default async function CoachingPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "1:1 Online Coaching — Lisa Fit Method",
+    name: "1:1 Online Coaching | Lisa Fit Method",
     description: settings.text.coachingHeroSubtext,
     url: "https://lisafitmethod.com/coaching",
     provider: {

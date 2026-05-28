@@ -21,7 +21,7 @@ function resetEmail(email: string, resetUrl: string): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Reset your password — Lisa Fit Method</title>
+<title>Reset your password | Lisa Fit Method</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f0ebe4;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ebe4;padding:40px 20px;">
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     to: email,
-    subject: "Reset your password — Lisa Fit Method",
+    subject: "Reset your password | Lisa Fit Method",
     html: resetEmail(email, resetUrl),
   })
 

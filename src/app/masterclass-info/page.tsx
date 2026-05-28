@@ -9,11 +9,11 @@ import {
 } from "@/lib/pricing"
 
 export const metadata: Metadata = {
-  title: "Masterclass — Lisa Fit Method",
+  title: "Masterclass | Lisa Fit Method",
   description:
     "Monthly programming, 361 exercise videos, and Q&A with Lisa. New block every month. Cancel anytime.",
   openGraph: {
-    title: "Masterclass — Lisa Fit Method",
+    title: "Masterclass | Lisa Fit Method",
     description: "Monthly programming, 361 exercise videos, Q&A with Lisa. From $16/month.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
@@ -50,7 +50,7 @@ const PLANS = [
 const WHAT_YOU_GET = [
   {
     heading: "New block every month",
-    body: "A fresh 3-day workout program lands on the 1st of each month. Built around progressive overload — you actually get stronger, not just tired.",
+    body: "A fresh 3-day workout program lands on the 1st of each month. Built around progressive overload. You actually get stronger, not just tired.",
   },
   {
     heading: "361 exercise videos",
@@ -73,11 +73,11 @@ const WHAT_YOU_GET = [
 const FAQ = [
   {
     q: "Do I need equipment?",
-    a: "Most programs use dumbbells, a resistance band, and a bench. Some exercises are bodyweight-only. You filter exercises by equipment when you build — or Lisa builds with your setup in mind from the start.",
+    a: "Most programs use dumbbells, a resistance band, and a bench. Some exercises are bodyweight-only. You filter exercises by equipment when you build, or Lisa builds with your setup in mind from the start.",
   },
   {
     q: "What if I'm a beginner?",
-    a: "The Masterclass assumes you know the basics. If you're starting from zero, complete Training Foundations first — it teaches the movement patterns used throughout Masterclass programming.",
+    a: "The Masterclass assumes you know the basics. If you're starting from zero, complete Training Foundations first. It teaches the movement patterns used throughout Masterclass programming.",
   },
   {
     q: "What happens when I cancel?",
@@ -85,11 +85,11 @@ const FAQ = [
   },
   {
     q: "Can I pause instead of cancel?",
-    a: "Not at the moment — it's cancel and re-subscribe when you're ready. We may add pausing later.",
+    a: "Not at the moment. It's cancel and re-subscribe when you're ready. We may add pausing later.",
   },
   {
     q: "Will the programming get repetitive?",
-    a: "No. The 361-video library gives Lisa enormous range. Each block is built fresh — different exercise selections, different loading schemes, different focuses. Members who've followed for 6+ months say it never feels like the same workout twice.",
+    a: "No. The 361-video library gives Lisa enormous range. Each block is built fresh with different exercise selections, different loading schemes, different focuses. Members who've followed for 6+ months say it never feels like the same workout twice.",
   },
 ]
 

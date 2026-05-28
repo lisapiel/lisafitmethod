@@ -105,7 +105,7 @@ function PaymentForm({
         }}>
           <span style={{ color: "#c9a96e", fontSize: 14 }}>✓</span>
           <span style={{ fontSize: 12, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.08em" }}>
-            {isFree ? "Promo code applied — free access ($0.50 processing fee)" : `Promo code applied — ${discountPct}% off`}
+            {isFree ? "Promo code applied: free access ($0.50 processing fee)" : `Promo code applied: ${discountPct}% off`}
           </span>
         </div>
       )}
@@ -238,7 +238,7 @@ function PaymentForm({
           marginBottom: 16,
         }}
       >
-        {processing ? "Processing…" : isFree ? `Complete Purchase — $0.50` : `Complete Purchase — ${displayAmount}`}
+        {processing ? "Processing…" : isFree ? `Complete Purchase · $0.50` : `Complete Purchase · ${displayAmount}`}
       </button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "#555", fontSize: 11, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em" }}>
@@ -330,7 +330,7 @@ function EmailConfirmStep({ email, onConfirm, onChange }: { email: string; onCon
         </span>
       </div>
       <p style={{ fontSize: 12, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.7, marginBottom: 28 }}>
-        Make sure this is correct — your login link will be sent here after payment.
+        Make sure this is correct. Your login link will be sent here after payment.
       </p>
       <button type="button" onClick={onConfirm} style={{ ...ctaButtonStyle, marginBottom: 12 }}>
         That&apos;s correct, continue to payment →
@@ -454,7 +454,7 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
       })
       const data = await res.json() as { clientSecret?: string; discountPct?: number; finalAmount?: number; error?: string }
       if (!res.ok) {
-        return { error: data.error === "Invalid promo code" ? "That promo code isn't valid — please check and try again." : "Something went wrong." }
+        return { error: data.error === "Invalid promo code" ? "That promo code isn't valid. Please check and try again." : "Something went wrong." }
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
@@ -635,8 +635,8 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
                 </p>
                 <p style={{ fontSize: 12, color: "#666", lineHeight: 1.5, fontFamily: "var(--font-montserrat), sans-serif" }}>
                   {isNutrition
-                    ? `Get both courses for ${BUNDLE_PRICE_DISPLAY} — save ${BUNDLE_SAVINGS_DISPLAY} vs buying separately.`
-                    : `Pair with Nutrition Foundations. Both courses for ${BUNDLE_PRICE_DISPLAY} — save ${BUNDLE_SAVINGS_DISPLAY}.`
+                    ? `Get both courses for ${BUNDLE_PRICE_DISPLAY}. Save ${BUNDLE_SAVINGS_DISPLAY} vs buying separately.`
+                    : `Pair with Nutrition Foundations. Both courses for ${BUNDLE_PRICE_DISPLAY}. Save ${BUNDLE_SAVINGS_DISPLAY}.`
                   }
                 </p>
               </div>
@@ -690,7 +690,7 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
               </div>
               <div>
                 <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 700, color: "#f0e6d3", letterSpacing: "0.08em", fontFamily: "var(--font-montserrat), sans-serif" }}>
-                  Add the Progress Tracker — only +{TRACKER_PRICE_DISPLAY}
+                  Add the Progress Tracker · only +{TRACKER_PRICE_DISPLAY}
                 </p>
                 <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7, fontFamily: "var(--font-montserrat), sans-serif" }}>
                   Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat. Buy once, no subscription.

@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Lisa Fit Method",
+  title: "Privacy Policy | Lisa Fit Method",
   description: "How Lisa Fit Method collects, uses, and protects your personal information.",
   robots: { index: true, follow: true },
 }
@@ -43,17 +43,17 @@ export default function PrivacyPage() {
 
           <h3>Information you provide directly</h3>
           <ul>
-            <li><strong>Contact form submissions</strong> — your name, email address, and message when you fill out the contact or coaching inquiry form.</li>
-            <li><strong>Account registration</strong> — your email address when you purchase a course and create a member account.</li>
-            <li><strong>Payment information</strong> — your card details are collected and processed directly by Stripe. We do not store your full card number or CVV on our servers.</li>
-            <li><strong>Workout tracking data</strong> — if you use the workout logging feature available to course members, we collect the fitness data you enter (exercises, sets, reps, weights, and notes). This data is used solely to display your personal progress within the Site and is never shared or sold.</li>
+            <li><strong>Contact form submissions</strong>:your name, email address, and message when you fill out the contact or coaching inquiry form.</li>
+            <li><strong>Account registration</strong>:your email address when you purchase a course and create a member account.</li>
+            <li><strong>Payment information</strong>:your card details are collected and processed directly by Stripe. We do not store your full card number or CVV on our servers.</li>
+            <li><strong>Workout tracking data</strong>:if you use the workout logging feature available to course members, we collect the fitness data you enter (exercises, sets, reps, weights, and notes). This data is used solely to display your personal progress within the Site and is never shared or sold.</li>
           </ul>
 
           <h3>Information collected automatically</h3>
           <ul>
-            <li><strong>Analytics</strong> — we use Google Analytics 4 (GA4) to understand how visitors use our site. GA4 may collect your IP address, browser type, device type, pages visited, and session duration. This data is aggregated and anonymized where possible.</li>
-            <li><strong>Cookies</strong> — our site and third-party services (Google Analytics, Stripe) use cookies and similar technologies to function and to track usage. You may disable cookies in your browser settings, though some features may not work correctly.</li>
-            <li><strong>Log data</strong> — our hosting provider (AWS Amplify) may collect standard server logs including your IP address, browser, and request timestamps.</li>
+            <li><strong>Analytics</strong>:we use Google Analytics 4 (GA4) to understand how visitors use our site. GA4 may collect your IP address, browser type, device type, pages visited, and session duration. This data is aggregated and anonymized where possible.</li>
+            <li><strong>Cookies</strong>:our site and third-party services (Google Analytics, Stripe) use cookies and similar technologies to function and to track usage. You may disable cookies in your browser settings, though some features may not work correctly.</li>
+            <li><strong>Log data</strong>:our hosting provider (AWS Amplify) may collect standard server logs including your IP address, browser, and request timestamps.</li>
           </ul>
 
           <h2>2. How We Use Your Information</h2>
@@ -70,10 +70,10 @@ export default function PrivacyPage() {
           <h2>3. How We Share Your Information</h2>
           <p>We share data only with service providers necessary to operate our business:</p>
           <ul>
-            <li><strong>Stripe</strong> — payment processing. Stripe's privacy policy is available at stripe.com/privacy.</li>
-            <li><strong>Google Analytics</strong> — site analytics. Subject to Google's privacy policy at policies.google.com/privacy.</li>
-            <li><strong>AWS (Amazon Web Services)</strong> — hosting, authentication, and data storage. Subject to AWS's privacy policy at aws.amazon.com/privacy.</li>
-            <li><strong>Resend</strong> — transactional email delivery. Subject to Resend's privacy policy at resend.com/legal/privacy-policy.</li>
+            <li><strong>Stripe</strong>:payment processing. Stripe's privacy policy is available at stripe.com/privacy.</li>
+            <li><strong>Google Analytics</strong>:site analytics. Subject to Google's privacy policy at policies.google.com/privacy.</li>
+            <li><strong>AWS (Amazon Web Services)</strong>:hosting, authentication, and data storage. Subject to AWS's privacy policy at aws.amazon.com/privacy.</li>
+            <li><strong>Resend</strong>:transactional email delivery. Subject to Resend's privacy policy at resend.com/legal/privacy-policy.</li>
           </ul>
 
           <h2>4. Data Retention</h2>
@@ -82,11 +82,11 @@ export default function PrivacyPage() {
           <h2>5. Your Rights</h2>
           <p>Depending on your location, you may have the following rights regarding your personal data:</p>
           <ul>
-            <li><strong>Access</strong> — request a copy of the personal data we hold about you.</li>
-            <li><strong>Correction</strong> — request that inaccurate data be corrected.</li>
-            <li><strong>Deletion</strong> — request that your data be deleted, subject to legal retention requirements.</li>
-            <li><strong>Objection</strong> — object to certain uses of your data, including analytics.</li>
-            <li><strong>Portability</strong> — request your data in a portable format.</li>
+            <li><strong>Access</strong>:request a copy of the personal data we hold about you.</li>
+            <li><strong>Correction</strong>:request that inaccurate data be corrected.</li>
+            <li><strong>Deletion</strong>:request that your data be deleted, subject to legal retention requirements.</li>
+            <li><strong>Objection</strong>:object to certain uses of your data, including analytics.</li>
+            <li><strong>Portability</strong>:request your data in a portable format.</li>
           </ul>
           <p>To exercise any of these rights, email us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We will respond within 30 days.</p>
 

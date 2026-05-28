@@ -265,7 +265,7 @@ export default function ExerciseEditPage({ params }: { params: Promise<{ slug: s
           }} />
         </button>
         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: isPublished ? "#f0e6d3" : "#555" }}>
-          {isPublished ? "Published — visible in program builder" : "Hidden — not available in program builder"}
+          {isPublished ? "Published: visible in program builder" : "Hidden: not available in program builder"}
         </span>
       </div>
 

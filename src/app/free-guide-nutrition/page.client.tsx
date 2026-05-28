@@ -84,10 +84,10 @@ export const PRINCIPLES = [
     category: "Energy Balance",
     name: "Calorie Deficit",
     tagline: "The only mechanism for fat loss",
-    body: "Fat loss has one mechanism: consuming less energy than you burn. No specific food, supplement, or workout bypasses this principle. Every effective fat loss approach works because it creates a calorie deficit — and your body accesses stored fat from everywhere at once. You cannot spot-reduce.",
+    body: "Fat loss has one mechanism: consuming less energy than you burn. No specific food, supplement, or workout bypasses this principle. Every effective fat loss approach works because it creates a calorie deficit. Your body accesses stored fat from everywhere at once. You cannot spot-reduce.",
     ref: "Hall et al. 2012 (Am J Clin Nutr): fat loss was equivalent across all diet types when total calories were matched.",
     stat: "300–500 kcal/day",
-    statLabel: "The deficit sweet spot — enough to lose fat consistently, not enough to lose muscle.",
+    statLabel: "The deficit sweet spot: enough to lose fat consistently, not enough to lose muscle.",
     practical: "A 300-500 kcal/day deficit is the sweet spot. Enough to lose fat, moderate enough to hold onto muscle.",
   },
   {
@@ -107,10 +107,10 @@ export const PRINCIPLES = [
     category: "Muscle and Metabolism",
     name: "Build Muscle",
     tagline: "The closest thing to a real shortcut",
-    body: "Muscle tissue is more metabolically active than fat tissue — building it gradually increases resting energy expenditure over time. But the bigger picture goes beyond the calorie equation: more muscle means better body composition, improved insulin sensitivity, greater functional strength, and results that hold long-term. This is the long game most people skip because they're chasing short-term weight loss instead.",
+    body: "Muscle tissue is more metabolically active than fat tissue. Building it gradually increases resting energy expenditure over time. But the bigger picture goes beyond the calorie equation: more muscle means better body composition, improved insulin sensitivity, greater functional strength, and results that hold long-term. This is the long game most people skip because they're chasing short-term weight loss instead.",
     ref: "Srikanthan and Karlamangla (Am J Med, 2014): higher muscle mass was inversely linked to all-cause mortality over 10-16 years. Muscle is the organ of longevity.",
     stat: "~6 vs ~2 kcal/lb",
-    statLabel: "Research estimate — the compounding benefit is body composition, strength, insulin sensitivity, and results built to last.",
+    statLabel: "Research estimate. The compounding benefit is body composition, strength, insulin sensitivity, and results built to last.",
     practical: "",
     courseHook: true,
   },
@@ -380,7 +380,7 @@ export default function NutritionGuideClient() {
               <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here&apos;s how to do it.</em>
             </h2>
             <p style={{ fontSize: "0.93rem", marginBottom: "1.75rem", color: muted, lineHeight: 1.7, fontFamily: dmSans }}>
-              Information is not the same thing as implementation. Knowing the principles is important. Applying them consistently is where most people struggle. That&apos;s why I built the courses — to turn the science into a step-by-step system you can actually follow without overthinking every workout, meal, or calorie target.
+              Information is not the same thing as implementation. Knowing the principles is important. Applying them consistently is where most people struggle. That&apos;s why I built the courses: to turn the science into a step-by-step system you can actually follow without overthinking every workout, meal, or calorie target.
             </p>
 
             {/* Bundle — hero */}
@@ -435,7 +435,7 @@ export default function NutritionGuideClient() {
                 Personalized TDEE calculator so you know your exact calorie target. A full meal plan built around your number, with real food and 9 verified recipes with source attribution. Science-backed content with research citations throughout.
               </p>
               {[
-                "Personalized TDEE calculator — your exact calorie target, not a generic estimate",
+                "Personalized TDEE calculator: your exact calorie target, not a generic estimate",
                 "A meal plan built around your number, with real food you will actually eat",
                 "9 verified recipes with full macros and source attribution",
                 "Science-backed education with research citations throughout",
@@ -487,7 +487,7 @@ export default function NutritionGuideClient() {
                 I built these because everything I tried before didn&apos;t work. Years of cardio without results. Tracking calories without understanding why. Following plans that didn&apos;t fit my life. I went back to the research and built what I wish I had.
               </p>
               <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.05rem", color: goldDeep, margin: 0 }}>
-                — Lisa
+                Lisa
               </p>
             </div>
 

@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Terms of Use — Lisa Fit Method",
+  title: "Terms of Use | Lisa Fit Method",
   description: "Terms and conditions governing use of lisafitmethod.com and purchase of Training Foundations.",
   robots: { index: true, follow: true },
 }
@@ -70,7 +70,7 @@ export default function TermsPage() {
           <p>Because Training Foundations is a digital product with immediate access upon purchase, all sales are final. We do not offer refunds. If you experience a technical issue preventing access to course content, contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and we will work to resolve it promptly.</p>
 
           <h3 id="access-policy">Access policy</h3>
-          <p>When you purchase a course or add-on, you receive ongoing access to that product — including content, videos, and tracking tools — for as long as Lisa Fit Method continues to operate the platform. This is not a subscription; there are no recurring charges. Access is not guaranteed in perpetuity and is contingent on the platform remaining active.</p>
+          <p>When you purchase a course or add-on, you receive ongoing access to that product (including content, videos, and tracking tools) for as long as Lisa Fit Method continues to operate the platform. This is not a subscription; there are no recurring charges. Access is not guaranteed in perpetuity and is contingent on the platform remaining active.</p>
           <p>If the platform is ever discontinued, notice will be posted on the platform itself for a reasonable period before access ends, giving active users the opportunity to export their training data and download the materials they purchased. Notice posted on the platform is considered sufficient; individual email notification is not guaranteed.</p>
           <p>Your purchase grants a personal, non-exclusive, non-transferable license to access the content for your own use. This license is not assignable and cannot be shared, gifted, or resold.</p>
 
@@ -78,17 +78,17 @@ export default function TermsPage() {
           <p><strong>Important: Please read this section carefully. By using this Site or purchasing any product, you agree to the terms below.</strong></p>
 
           <h3>Health and medical disclaimer</h3>
-          <p>The information, programs, and content on this Site — including Training Foundations and all blog content — are for informational and educational purposes only and are not a substitute for professional medical advice, diagnosis, or treatment. Lisa McPherson is a certified personal trainer, not a physician, physical therapist, or registered dietitian. Nothing on this Site constitutes medical advice. Consult your physician or a qualified healthcare provider before beginning any exercise program, particularly if you have a pre-existing medical condition, injury, or are pregnant.</p>
+          <p>The information, programs, and content on this Site (including Training Foundations and all blog content) are for informational and educational purposes only and are not a substitute for professional medical advice, diagnosis, or treatment. Lisa McPherson is a certified personal trainer, not a physician, physical therapist, or registered dietitian. Nothing on this Site constitutes medical advice. Consult your physician or a qualified healthcare provider before beginning any exercise program, particularly if you have a pre-existing medical condition, injury, or are pregnant.</p>
 
           <h3>Assumption of risk and liability release</h3>
           <p>Exercise and physical training involve inherent risks, including the risk of physical injury, illness, or death. By participating in any exercise program or following any content on this Site, <strong>you voluntarily and knowingly assume all such risks</strong> associated with physical activity and fitness training. You represent that you are physically capable of participating in the activities described and that you take full responsibility for your own health and safety.</p>
-          <p>To the fullest extent permitted by applicable law, you hereby <strong>release, waive, and discharge Lisa Fit Method and Lisa McPherson</strong> — and their successors, assigns, and representatives — from any and all claims, demands, actions, or causes of action, whether known or unknown, arising from or related to any physical injury, illness, loss, or damage you may sustain as a direct or indirect result of participating in any program, following any content, or using any service offered through this Site. This release applies even if such injury or loss results from the negligence of Lisa Fit Method or Lisa McPherson, to the extent permitted by law.</p>
+          <p>To the fullest extent permitted by applicable law, you hereby <strong>release, waive, and discharge Lisa Fit Method and Lisa McPherson</strong>, and their successors, assigns, and representatives, from any and all claims, demands, actions, or causes of action, whether known or unknown, arising from or related to any physical injury, illness, loss, or damage you may sustain as a direct or indirect result of participating in any program, following any content, or using any service offered through this Site. This release applies even if such injury or loss results from the negligence of Lisa Fit Method or Lisa McPherson, to the extent permitted by law.</p>
 
           <h3>Results disclaimer</h3>
-          <p>Fitness results vary significantly from person to person based on many factors including starting fitness level, age, genetics, nutrition, sleep, consistency, effort, and adherence to the program. Any results, testimonials, or examples presented on this Site represent individual experiences and <strong>are not typical or guaranteed</strong>. We make no representations, warranties, or guarantees — express or implied — that you will achieve any specific fitness outcome. Individual results may vary.</p>
+          <p>Fitness results vary significantly from person to person based on many factors including starting fitness level, age, genetics, nutrition, sleep, consistency, effort, and adherence to the program. Any results, testimonials, or examples presented on this Site represent individual experiences and <strong>are not typical or guaranteed</strong>. We make no representations, warranties, or guarantees, express or implied, that you will achieve any specific fitness outcome. Individual results may vary.</p>
 
           <h2>5. Intellectual Property</h2>
-          <p>All content on this Site — including text, images, video, graphics, logos, program design, and code — is the property of Lisa Fit Method or its content suppliers and is protected by United States and international copyright laws. See our <Link href="/licensing">Licensing & Copyright Policy</Link> for details.</p>
+          <p>All content on this Site (including text, images, video, graphics, logos, program design, and code) is the property of Lisa Fit Method or its content suppliers and is protected by United States and international copyright laws. See our <Link href="/licensing">Licensing & Copyright Policy</Link> for details.</p>
 
           <h2>6. Coaching Services</h2>
           <p>Coaching services offered through this Site are subject to a separate coaching agreement provided upon acceptance of a coaching application. Submission of a coaching inquiry does not guarantee acceptance. Lisa McPherson reserves the right to accept or decline any coaching application at her sole discretion.</p>
@@ -100,7 +100,7 @@ export default function TermsPage() {
           <p>The Site and its content are provided "as is" without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. We do not warrant that the Site will be error-free, uninterrupted, or free of viruses or other harmful components.</p>
 
           <h2>9. Limitation of Liability</h2>
-          <p>To the maximum extent permitted by law, Lisa Fit Method shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including loss of profits, data, or goodwill — arising from your use of (or inability to use) the Site or its content, even if we have been advised of the possibility of such damages. Our total liability to you for any claim shall not exceed the amount you paid for the relevant product or service.</p>
+          <p>To the maximum extent permitted by law, Lisa Fit Method shall not be liable for any indirect, incidental, special, consequential, or punitive damages (including loss of profits, data, or goodwill) arising from your use of (or inability to use) the Site or its content, even if we have been advised of the possibility of such damages. Our total liability to you for any claim shall not exceed the amount you paid for the relevant product or service.</p>
 
           <h2>10. Indemnification</h2>
           <p>You agree to indemnify and hold harmless Lisa Fit Method, its owner, and affiliates from any claims, losses, liabilities, damages, and expenses (including legal fees) arising from your violation of these Terms or your use of the Site.</p>
@@ -109,17 +109,17 @@ export default function TermsPage() {
           <p>These Terms are governed by the laws of the State of Florida and the United States, without regard to conflict of law principles. Any court proceedings not subject to arbitration under Section 13 shall be brought exclusively in the state or federal courts located in Broward County, Florida, and you consent to the personal jurisdiction of those courts.</p>
 
           <h2>12. User-Generated Data</h2>
-          <p>Certain features of this Site — including workout tracking functionality available to course purchasers — allow you to input and store personal fitness data such as exercise logs, weights, sets, reps, and progress notes ("User Data").</p>
+          <p>Certain features of this Site (including workout tracking functionality available to course purchasers) allow you to input and store personal fitness data such as exercise logs, weights, sets, reps, and progress notes ("User Data").</p>
           <ul>
-            <li><strong>Ownership</strong> — you retain ownership of your User Data. By submitting it, you grant us a limited license to store and display it to you through the Site.</li>
-            <li><strong>Storage and retention</strong> — User Data is retained for as long as your account is active. Upon account deletion, your User Data will be removed within 30 days.</li>
-            <li><strong>No medical use</strong> — User Data is for personal tracking purposes only. We do not analyze, share, or sell your workout logs.</li>
-            <li><strong>Accuracy</strong> — you are solely responsible for the accuracy of data you enter. We are not liable for errors, omissions, or data loss in the tracking feature.</li>
+            <li><strong>Ownership</strong>:you retain ownership of your User Data. By submitting it, you grant us a limited license to store and display it to you through the Site.</li>
+            <li><strong>Storage and retention</strong>:User Data is retained for as long as your account is active. Upon account deletion, your User Data will be removed within 30 days.</li>
+            <li><strong>No medical use</strong>:User Data is for personal tracking purposes only. We do not analyze, share, or sell your workout logs.</li>
+            <li><strong>Accuracy</strong>:you are solely responsible for the accuracy of data you enter. We are not liable for errors, omissions, or data loss in the tracking feature.</li>
           </ul>
           <p>See our <Link href="/privacy">Privacy Policy</Link> for more information on how we handle your data.</p>
 
           <h2>13. Dispute Resolution and Arbitration</h2>
-          <p><strong>Please read this section carefully — it affects your legal rights.</strong></p>
+          <p><strong>Please read this section carefully. It affects your legal rights.</strong></p>
           <p><strong>Informal resolution first.</strong> Before filing any formal claim, you agree to contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and attempt to resolve the dispute informally. We will make a good-faith effort to resolve any issue within 30 days of receiving your written notice.</p>
           <p><strong>Binding arbitration.</strong> If informal resolution fails, any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Site shall be resolved by binding arbitration administered by the American Arbitration Association (AAA) under its Consumer Arbitration Rules. The arbitration shall take place in Broward County, Florida, or virtually at the arbitrator's discretion. The arbitrator's decision shall be final and binding and may be entered as a judgment in any court of competent jurisdiction.</p>
           <p><strong>Class action waiver.</strong> To the fullest extent permitted by law, you waive the right to bring or participate in any class-action lawsuit or class-wide arbitration against Lisa Fit Method.</p>

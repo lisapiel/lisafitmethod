@@ -85,7 +85,7 @@ export default function AdminExercisesPage() {
         created++
       }
 
-      setIndexResult(`Scanned ${data.count} S3 files — created ${created} new records, skipped ${data.count - created} already indexed.`)
+      setIndexResult(`Scanned ${data.count} S3 files: created ${created} new records, skipped ${data.count - created} already indexed.`)
       await loadVideos()
     } catch {
       setIndexResult("Error: Failed to index videos.")

@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import CrossSellShelf from "@/components/CrossSellShelf.client"
 
 export const metadata: Metadata = {
-  title: "Introduction — Training Foundations | Lisa Fit Method",
+  title: "Introduction: Training Foundations | Lisa Fit Method",
 }
 
 export default function TrainingFoundationsIntroPage() {
@@ -13,7 +13,7 @@ export default function TrainingFoundationsIntroPage() {
       <div style={{ width: "100%", overflow: "hidden" }}>
         <Image
           src="/hero.png"
-          alt="Lisa Fit Method — Foundations"
+          alt="Lisa Fit Method: Foundations"
           width={1200}
           height={500}
           style={{ width: "100%", display: "block", objectFit: "cover" }}

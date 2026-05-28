@@ -50,7 +50,7 @@ export default function ContactClient() {
               <em style={{ fontStyle: "italic", color: "#a8895e" }}>I&apos;m here.</em>
             </h1>
             <p style={{ fontSize: 16, lineHeight: 1.8, color: "#6b6560", marginBottom: 32 }}>
-              Whether it&apos;s about the course, coaching, or just a question about training — feel free to reach out. I&apos;ll get back to you within 48 hours.
+              Whether it&apos;s about the course, coaching, or just a question about training, feel free to reach out. I&apos;ll get back to you within 48 hours.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <a

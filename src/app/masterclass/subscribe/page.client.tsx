@@ -352,7 +352,7 @@ export default function SubscribeClient() {
                 fontFamily: "var(--font-montserrat), sans-serif",
               }}
             >
-              {loading ? "Setting up…" : `Continue — ${selectedPlanData.price}`}
+              {loading ? "Setting up…" : `Continue · ${selectedPlanData.price}`}
             </button>
 
             <p style={{ fontSize: 11, color: "#444", textAlign: "center", marginTop: 20, lineHeight: 1.6 }}>

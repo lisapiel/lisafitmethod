@@ -17,11 +17,11 @@ import type { Metadata } from "next"
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: "Training Foundations — Lisa Fit Method",
+  title: "Training Foundations | Lisa Fit Method",
   description:
     "A complete strength training foundation built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep training with it long term. One-time payment, ongoing access.",
   openGraph: {
-    title: "Training Foundations — Lisa Fit Method",
+    title: "Training Foundations | Lisa Fit Method",
     description: "A complete strength training foundation. Learn proper form, follow a structured program, and keep building strength long after the first four weeks. One-time payment, yours to keep.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
@@ -113,8 +113,8 @@ export default async function CoursesPage() {
     mainEntity: [
       { "@type": "Question", name: "How long does each session take?", acceptedAnswer: { "@type": "Answer", text: "Between 45 and 60 minutes including warm-up and cool-down." } },
       { "@type": "Question", name: "Do I need a gym membership?", acceptedAnswer: { "@type": "Answer", text: "You need access to basic equipment: dumbbells, a resistance band, and a flat bench or equivalent." } },
-      { "@type": "Question", name: "Is this for complete beginners?", acceptedAnswer: { "@type": "Answer", text: "Yes. It's designed for people who are new to structured training or feel like they've been winging it — regardless of experience level." } },
-      { "@type": "Question", name: "Can I do more than 4 weeks?", acceptedAnswer: { "@type": "Answer", text: "Absolutely. The program is designed to be run in multiple rounds. Each round you add weight and progress further. Four weeks is the foundation — most people who see real results run it 2 or 3 times." } },
+      { "@type": "Question", name: "Is this for complete beginners?", acceptedAnswer: { "@type": "Answer", text: "Yes. It's designed for people who are new to structured training or feel like they've been winging it, regardless of experience level." } },
+      { "@type": "Question", name: "Can I do more than 4 weeks?", acceptedAnswer: { "@type": "Answer", text: "Absolutely. The program is designed to be run in multiple rounds. Each round you add weight and progress further. Four weeks is the foundation; most people who see real results run it 2 or 3 times." } },
       { "@type": "Question", name: "Is this a one-time payment?", acceptedAnswer: { "@type": "Answer", text: "Yes. One-time payment. No subscription." } },
       { "@type": "Question", name: "Can men do this program?", acceptedAnswer: { "@type": "Answer", text: "Yes. The movements and principles apply to everyone. The program has no gender-specific requirements." } },
     ],
@@ -199,7 +199,7 @@ export default async function CoursesPage() {
           <div style={{ marginTop: 2 }}>
             <div style={{ background: "#1a1208", padding: "32px 36px", borderTop: `3px solid ${accent}`, display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle — Best Value</p>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle · Best Value</p>
                 <p style={{ fontSize: `calc(13px * ${bs})`, color: "rgba(245,242,238,0.5)", lineHeight: 1.5, maxWidth: 560 }}>Both courses together. Training Foundations + Nutrition Foundations. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately.</p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
@@ -219,7 +219,7 @@ export default async function CoursesPage() {
           <div style={{ marginTop: 2 }}>
             <div style={{ background: "#111111", padding: "28px 36px", borderTop: "1px solid #2a2a2a", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between", opacity: 0.85 }}>
               <div>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 6, fontFamily: "var(--font-dm-sans), sans-serif" }}>Add-on — Progress Tracker</p>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 6, fontFamily: "var(--font-dm-sans), sans-serif" }}>Add-on · Progress Tracker</p>
                 <p style={{ fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.5, maxWidth: 540 }}>Workout tracker, available as an add-on with Training Foundations. Log every lift, build custom days, always know what to beat.</p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
@@ -251,7 +251,7 @@ export default async function CoursesPage() {
         <div className="courses-hero-text">
           <div>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>
-              Training Foundations — Full Details
+              Training Foundations: Full Details
             </p>
             <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 20 }}>
               {t.coursesHeroHeadline}
@@ -395,11 +395,11 @@ export default async function CoursesPage() {
               Pair it with<br /><em style={{ fontStyle: "italic", color: accent }}>Nutrition Foundations.</em>
             </h2>
             <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.6, marginBottom: 28 }}>
-              Training alone only gets you part of the way. Nutrition Foundations is a 4-week paid course that builds the eating habits to match — with a personalized TDEE calculator, a structured meal plan that adapts to your calorie target, science-backed education, and real recipes from verified sources.
+              Training alone only gets you part of the way. Nutrition Foundations is a 4-week paid course that builds the eating habits to match: personalized TDEE calculator, a structured meal plan that adapts to your calorie target, science-backed education, and real recipes from verified sources.
             </p>
             <ul style={{ listStyle: "none", marginBottom: 36 }}>
               {[
-                "Interactive TDEE calculator — personalized to your stats and goal",
+                "Interactive TDEE calculator, personalized to your stats and goal",
                 "4-week meal plan with real, attributed recipes",
                 "Macro education, eating-out guide, and supplement evidence",
                 "Written by a CPT with full research citations throughout",
@@ -429,7 +429,7 @@ export default async function CoursesPage() {
             {[
               { num: "01", title: "Understanding Your Body", desc: "BMR, TDEE, and your personalized calorie target" },
               { num: "02", title: "Your Nutrition Blueprint", desc: "Protein, carbs, fats, hydration, and plate building" },
-              { num: "03", title: "4-Week Meal Plan", desc: "Recipes, portions, and grocery lists — scaled to you" },
+              { num: "03", title: "4-Week Meal Plan", desc: "Recipes, portions, and grocery lists, scaled to you" },
               { num: "04", title: "Making It Stick", desc: "Eating out, troubleshooting, supplements, and recovery" },
             ].map((mod) => (
               <div key={mod.num} style={{ background: "#161616", padding: "32px 28px", position: "relative", borderTop: `2px solid rgba(201,169,110,0.4)` }}>
@@ -480,7 +480,7 @@ export default async function CoursesPage() {
             </div>
             <div style={{ background: "#1a1208", padding: "20px 28px", width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16, borderTop: `1px solid rgba(200,169,126,0.2)` }}>
               <div>
-                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 4, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle — Best Value</p>
+                <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, marginBottom: 4, fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle · Best Value</p>
                 <p style={{ fontSize: 12, color: "rgba(245,242,238,0.4)", fontFamily: "var(--font-dm-sans), sans-serif" }}>Both courses · {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} individual · Save {BUNDLE_SAVINGS_DISPLAY}</p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>

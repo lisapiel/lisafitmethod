@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import UploadPageClient from "./page.client"
 
 export const metadata: Metadata = {
-  title: "Upload — Admin",
+  title: "Upload: Admin",
   robots: { index: false, follow: false },
 }
 

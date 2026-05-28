@@ -54,7 +54,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     owned.push({
       id: "training",
       label: "Training Foundations",
-      desc: "4-week beginner strength program — 5 movements, progressive overload, workout tracking.",
+      desc: "4-week beginner strength program. 5 movements, progressive overload, workout tracking.",
       href: "/training-foundations",
       icon: "TF",
     })
@@ -63,7 +63,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     owned.push({
       id: "nutrition",
       label: "Nutrition Foundations",
-      desc: "4-week nutrition course — TDEE calculator, meal plan, real verified recipes.",
+      desc: "4-week nutrition course with TDEE calculator, meal plan, and real verified recipes.",
       href: "/nutrition-foundations",
       icon: "NF",
     })
@@ -72,7 +72,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     owned.push({
       id: "tracker",
       label: "Progress Tracker",
-      desc: "Workout tracker — build custom days, log every lift, track progress over time.",
+      desc: "Workout tracker. Build custom days, log every lift, track progress over time.",
       href: "/my-tracker",
       icon: "PT",
     })
@@ -141,7 +141,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     upsells.push({
       id: "tracker",
       label: "Progress Tracker",
-      desc: "Build any workout, log every lift, beat last week's numbers. Installs like an app on your home screen. Buy once — no subscription, ever.",
+      desc: "Build any workout, log every lift, beat last week's numbers. Installs like an app on your home screen. Buy once. No subscription, ever.",
       price: TRACKER_PRICE_DISPLAY,
       regularPrice: TRACKER_PRICE_DISPLAY,
       href: "/tracker-checkout",

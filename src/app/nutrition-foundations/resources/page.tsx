@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "References & Resources — Nutrition Foundations | Lisa Fit Method",
+  title: "References & Resources: Nutrition Foundations | Lisa Fit Method",
 }
 
 const RESEARCH = [
