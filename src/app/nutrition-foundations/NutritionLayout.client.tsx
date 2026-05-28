@@ -59,7 +59,7 @@ function NutritionHeader({ onMenuToggle }: { onMenuToggle: () => void }) {
           </svg>
         </button>
 
-        <Link href="/" style={{ textDecoration: "none" }}>
+        <Link href="/account" style={{ textDecoration: "none" }}>
           <span style={{
             fontFamily: "var(--font-cormorant), serif",
             fontSize: "1rem",

@@ -63,7 +63,7 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
             <rect y="8.5" width="14" height="1.5" fill="currentColor"/>
           </svg>
         </button>
-        <Link href="/" style={{ textDecoration: "none" }}>
+        <Link href="/account" style={{ textDecoration: "none" }}>
           <span style={{
             fontFamily: "var(--font-cormorant), serif",
             fontSize: "1rem",

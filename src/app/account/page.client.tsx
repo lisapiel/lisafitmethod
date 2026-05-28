@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link"
-import { signOut } from "aws-amplify/auth"
-import { useRouter } from "next/navigation"
+import AccountDropdown from "@/components/AccountDropdown.client"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -34,12 +33,6 @@ interface UpsellProduct {
 }
 
 export function AccountClient({ email, training, nutrition, tracker, masterclass, isAdmin }: Props) {
-  const router = useRouter()
-
-  async function handleSignOut() {
-    await signOut()
-    router.push("/")
-  }
 
   const owned: OwnedProduct[] = []
   if (masterclass && isAdmin) {
@@ -165,28 +158,12 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
         alignItems: "center",
         justifyContent: "space-between",
       }}>
-        <Link href="/" style={{ textDecoration: "none" }}>
+        <Link href="/account" style={{ textDecoration: "none" }}>
           <span style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 20, fontWeight: 600, color: "#f0e6d3" }}>
             Lisa <span style={{ color: gold }}>Fit Method</span>
           </span>
         </Link>
-        <button
-          onClick={handleSignOut}
-          style={{
-            background: "none",
-            border: `1px solid ${border}`,
-            color: "#888",
-            fontFamily: "var(--font-montserrat), sans-serif",
-            fontSize: "0.6rem",
-            fontWeight: 600,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            padding: "0.4rem 1rem",
-            cursor: "pointer",
-          }}
-        >
-          Sign Out
-        </button>
+        <AccountDropdown />
       </div>
 
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px 80px" }}>

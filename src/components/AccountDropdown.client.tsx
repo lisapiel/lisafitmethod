@@ -60,7 +60,7 @@ export default function AccountDropdown({ onNavigate }: { onNavigate?: () => voi
       <style>{`
         .ad-icon-btn:hover { background: rgba(201,169,110,0.18) !important; border-color: rgba(201,169,110,0.4) !important; }
         .ad-course-row:hover { background: rgba(201,169,110,0.07) !important; }
-        .ad-locked-row:hover { background: rgba(255,255,255,0.03) !important; }
+        .ad-locked-row:hover { background: rgba(201,169,110,0.07) !important; }
         .ad-signout:hover { color: #888 !important; }
       `}</style>
 
@@ -190,7 +190,7 @@ export default function AccountDropdown({ onNavigate }: { onNavigate?: () => voi
                 fontWeight: 700,
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
-                color: "#2e2e2e",
+                color: "#666",
                 padding: "0.65rem 1.1rem 0.25rem",
               }}>
                 Add to Your Account
@@ -201,10 +201,16 @@ export default function AccountDropdown({ onNavigate }: { onNavigate?: () => voi
                   href={course.upgradeHref}
                   onClick={() => { setOpen(false); onNavigate?.() }}
                   className="ad-locked-row"
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 1.1rem", textDecoration: "none", transition: "background 0.15s" }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "0.55rem 1.1rem", textDecoration: "none", transition: "background 0.15s" }}
                 >
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#444" }}>{course.label}</span>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.58rem", fontWeight: 700, color: "#3a3a3a" }}>{course.price}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                    <svg width="9" height="11" viewBox="0 0 9 11" fill="none" style={{ flexShrink: 0 }}>
+                      <rect x="0.5" y="4.5" width="8" height="6" rx="0.5" stroke={gold} strokeWidth="1" opacity="0.7"/>
+                      <path d="M2.5 4.5V3A2 2 0 0 1 6.5 3v1.5" stroke={gold} strokeWidth="1" opacity="0.7"/>
+                    </svg>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "rgba(240,230,211,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{course.label}</span>
+                  </div>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, color: gold, flexShrink: 0 }}>{course.price} →</span>
                 </Link>
               ))}
               {showTrackerUpsell && (
@@ -212,10 +218,16 @@ export default function AccountDropdown({ onNavigate }: { onNavigate?: () => voi
                   href="/account/courses/tracker"
                   onClick={() => { setOpen(false); onNavigate?.() }}
                   className="ad-locked-row"
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 1.1rem", textDecoration: "none", transition: "background 0.15s" }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "0.55rem 1.1rem", textDecoration: "none", transition: "background 0.15s" }}
                 >
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#444" }}>Progress Tracker</span>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.58rem", fontWeight: 700, color: "#3a3a3a" }}>$27</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                    <svg width="9" height="11" viewBox="0 0 9 11" fill="none" style={{ flexShrink: 0 }}>
+                      <rect x="0.5" y="4.5" width="8" height="6" rx="0.5" stroke={gold} strokeWidth="1" opacity="0.7"/>
+                      <path d="M2.5 4.5V3A2 2 0 0 1 6.5 3v1.5" stroke={gold} strokeWidth="1" opacity="0.7"/>
+                    </svg>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "rgba(240,230,211,0.8)" }}>Progress Tracker</span>
+                  </div>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, color: gold, flexShrink: 0 }}>$27 →</span>
                 </Link>
               )}
             </div>
