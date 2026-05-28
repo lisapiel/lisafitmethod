@@ -69,8 +69,8 @@ export default function TermsPage() {
           <h3>No refund policy</h3>
           <p>Because Training Foundations is a digital product with immediate access upon purchase, all sales are final. We do not offer refunds. If you experience a technical issue preventing access to course content, contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and we will work to resolve it promptly.</p>
 
-          <h3 id="lifetime-access">Lifetime access — definition</h3>
-          <p>"Lifetime access" means access to the purchased product — including course content, videos, and tracking tools — for as long as Lisa Fit Method continues to operate the platform. It does not guarantee access in perpetuity regardless of circumstances.</p>
+          <h3 id="access-policy">Access policy</h3>
+          <p>When you purchase a course or add-on, you receive ongoing access to that product — including content, videos, and tracking tools — for as long as Lisa Fit Method continues to operate the platform. This is not a subscription; there are no recurring charges. Access is not guaranteed in perpetuity and is contingent on the platform remaining active.</p>
           <p>If the platform is ever discontinued, notice will be posted on the platform itself for a reasonable period before access ends, giving active users the opportunity to export their training data and download the materials they purchased. Notice posted on the platform is considered sufficient; individual email notification is not guaranteed.</p>
           <p>Your purchase grants a personal, non-exclusive, non-transferable license to access the content for your own use. This license is not assignable and cannot be shared, gifted, or resold.</p>
 

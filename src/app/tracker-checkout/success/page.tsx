@@ -16,7 +16,7 @@ export default function TrackerSuccessPage() {
           Your tracker is ready.
         </h1>
         <p style={{ fontSize: 14, color: "#666", lineHeight: 1.8, marginBottom: 12 }}>
-          It&apos;s yours forever.
+          It&apos;s yours to keep.
         </p>
         <p style={{ fontSize: 13, color: "#555", lineHeight: 1.7, marginBottom: 36 }}>
           Log in to your Lisa Fit Method account and open the tracker to start building your program. A confirmation has been sent to your email.

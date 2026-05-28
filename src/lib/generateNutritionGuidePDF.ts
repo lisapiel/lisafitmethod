@@ -661,7 +661,7 @@ function NutritionGuidePDF() {
           "Everything in Nutrition Foundations + Training Foundations",
           "Personalized TDEE calculator, meal plan, recipes, and science-backed content",
           "4-week strength program with 50+ exercise videos and week-by-week workout tracking",
-          "One-time payment. Lifetime access to both courses.",
+          "One-time payment. Ongoing access to both courses.",
         ].map((bullet, i) =>
           createElement(
             View,

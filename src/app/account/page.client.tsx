@@ -66,7 +66,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     owned.push({
       id: "tracker",
       label: "Progress Tracker",
-      desc: "Lifetime workout tracker — build custom days, log every lift, track progress over time.",
+      desc: "Workout tracker — build custom days, log every lift, track progress over time.",
       href: "/my-tracker",
       icon: "PT",
     })
@@ -135,7 +135,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
     upsells.push({
       id: "tracker",
       label: "Progress Tracker",
-      desc: "Keep progressing after 4 weeks. Lifetime access.",
+      desc: "Keep progressing after 4 weeks. Buy once, no subscription.",
       price: "$27",
       regularPrice: "$27",
       href: "/checkout?member=1#tracker",

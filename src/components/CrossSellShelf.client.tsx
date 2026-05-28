@@ -49,7 +49,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
       product: "nutrition",
       label: "Nutrition Foundations",
       headline: "Put the training to work",
-      desc: "4-week nutrition course with personalized TDEE calculator, meal plan, and real recipes. One payment, yours forever.",
+      desc: "4-week nutrition course with personalized TDEE calculator, meal plan, and real recipes. One payment, ongoing access.",
       baseCents: 7700,
       href: "/checkout?product=nutrition&member=1",
     })
@@ -71,7 +71,7 @@ export default function CrossSellShelf({ currentProduct }: CrossSellShelfProps) 
       product: "tracker",
       label: "Progress Tracker",
       headline: "Keep progressing after 4 weeks",
-      desc: "Build your own workout days, log every lift, and always know the number you're trying to beat. Lifetime access.",
+      desc: "Build your own workout days, log every lift, and always know the number you're trying to beat. Buy once, no subscription.",
       baseCents: 2700,
       href: "/checkout?member=1#tracker",
     })

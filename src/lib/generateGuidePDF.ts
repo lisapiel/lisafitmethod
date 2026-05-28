@@ -420,11 +420,11 @@ function GuidePDF() {
         createElement(
           View,
           { style: upsellStyles.priceRow },
-          createElement(Text, { style: upsellStyles.strikePrice }, "$147"),
+          createElement(Text, { style: upsellStyles.strikePrice }, "$167"),
           createElement(Text, { style: upsellStyles.bigPrice }, "$97"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
         ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $147. One-time payment, lifetime access."),
+        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $167. One-time payment, ongoing access."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/courses")
       ),
       // Nutrition Foundations
@@ -437,11 +437,11 @@ function GuidePDF() {
         createElement(
           View,
           { style: upsellStyles.priceRow },
-          createElement(Text, { style: upsellStyles.strikePrice }, "$127"),
+          createElement(Text, { style: upsellStyles.strikePrice }, "$137"),
           createElement(Text, { style: upsellStyles.bigPrice }, "$77"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
         ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $127. One-time payment, lifetime access."),
+        createElement(Text, { style: upsellStyles.foundingNote }, "Regular $137. One-time payment, ongoing access."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/nutrition")
       ),
       // Bundle
@@ -458,7 +458,7 @@ function GuidePDF() {
           createElement(Text, { style: upsellStyles.bigPrice }, "$137"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Save $37")
         ),
-        createElement(Text, { style: upsellStyles.foundingNote }, "One-time payment, lifetime access to both courses."),
+        createElement(Text, { style: upsellStyles.foundingNote }, "One-time payment, ongoing access to both courses."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/checkout?product=bundle")
       ),
       // Footer

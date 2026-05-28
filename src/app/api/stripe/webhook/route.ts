@@ -355,7 +355,7 @@ async function sendTrackerConfirmationEmail(email: string) {
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     to: email,
-    subject: "Your Lifetime Workout Tracker is ready!",
+    subject: "Your Workout Tracker is ready!",
     html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
@@ -376,7 +376,7 @@ async function sendTrackerConfirmationEmail(email: string) {
             Your tracker is ready.
           </h1>
           <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-            It's yours forever. Log in to your Lisa Fit Method account and head to My Workout Tracker to start building your program.
+            It's yours to keep. Log in to your Lisa Fit Method account and head to My Workout Tracker to start building your program.
           </p>
           <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
             <tr><td style="background:#c9a96e;border-radius:2px;">

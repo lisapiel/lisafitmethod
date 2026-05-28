@@ -19,10 +19,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Training Foundations — Lisa Fit Method",
   description:
-    "A complete strength training foundation built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep training with it long term. One-time payment, lifetime access.",
+    "A complete strength training foundation built on proper movement, progressive overload, and 50+ exercise videos. Start with a structured program and keep training with it long term. One-time payment, ongoing access.",
   openGraph: {
     title: "Training Foundations — Lisa Fit Method",
-    description: "A complete strength training foundation. Learn proper form, follow a structured program, and keep building strength long after the first four weeks. One-time payment, yours forever.",
+    description: "A complete strength training foundation. Learn proper form, follow a structured program, and keep building strength long after the first four weeks. One-time payment, yours to keep.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -115,7 +115,7 @@ export default async function CoursesPage() {
       { "@type": "Question", name: "Do I need a gym membership?", acceptedAnswer: { "@type": "Answer", text: "You need access to basic equipment: dumbbells, a resistance band, and a flat bench or equivalent." } },
       { "@type": "Question", name: "Is this for complete beginners?", acceptedAnswer: { "@type": "Answer", text: "Yes. It's designed for people who are new to structured training or feel like they've been winging it — regardless of experience level." } },
       { "@type": "Question", name: "Can I do more than 4 weeks?", acceptedAnswer: { "@type": "Answer", text: "Absolutely. The program is designed to be run in multiple rounds. Each round you add weight and progress further. Four weeks is the foundation — most people who see real results run it 2 or 3 times." } },
-      { "@type": "Question", name: "Is this a one-time payment?", acceptedAnswer: { "@type": "Answer", text: "Yes. One-time payment, yours forever, no subscription." } },
+      { "@type": "Question", name: "Is this a one-time payment?", acceptedAnswer: { "@type": "Answer", text: "Yes. One-time payment. No subscription." } },
       { "@type": "Question", name: "Can men do this program?", acceptedAnswer: { "@type": "Answer", text: "Yes. The movements and principles apply to everyone. The program has no gender-specific requirements." } },
     ],
   }
@@ -220,7 +220,7 @@ export default async function CoursesPage() {
             <div style={{ background: "#111111", padding: "28px 36px", borderTop: "1px solid #2a2a2a", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "center", justifyContent: "space-between", opacity: 0.85 }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,0.7)", marginBottom: 6, fontFamily: "var(--font-dm-sans), sans-serif" }}>Add-on — Progress Tracker</p>
-                <p style={{ fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.5, maxWidth: 540 }}>Lifetime workout tracker, available as an add-on with Training Foundations. Log every lift, build custom days, always know what to beat.</p>
+                <p style={{ fontSize: `calc(12px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.5, maxWidth: 540 }}>Workout tracker, available as an add-on with Training Foundations. Log every lift, build custom days, always know what to beat.</p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 26, fontWeight: 700, color: "rgba(201,169,110,0.7)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>+$27</span>
@@ -270,7 +270,7 @@ export default async function CoursesPage() {
               Get Instant Access
             </Link>
             <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
-              One-time payment · Lifetime access<br />Built-in workout &amp; progress tracking
+              One-time payment · Buy once, access anytime<br />Built-in workout &amp; progress tracking
             </p>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default async function CoursesPage() {
             Get Instant Access
           </Link>
           <p style={{ marginTop: 18, fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access</strong> · Built-in workout &amp; progress tracking
+            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Buy once, access anytime</strong> · Built-in workout &amp; progress tracking
           </p>
           <div style={{ marginTop: 40, paddingTop: 40, borderTop: "1px solid rgba(245,242,238,0.06)", display: "flex", flexDirection: "column", alignItems: "center", gap: 20, width: "100%" }}>
             <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>Also available</p>

@@ -81,7 +81,7 @@ function TrackerUpsell() {
           My Workout Tracker
         </p>
         <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(32px, 6vw, 48px)", fontWeight: 400, color: "#f0e6d3", lineHeight: 1.2, marginBottom: 20, textAlign: "center" }}>
-          Build your program.<br /><em>Use it forever.</em>
+          Build your program.<br /><em>Use it at your own pace.</em>
         </h1>
         <p style={{ fontSize: 14, color: "#888", lineHeight: 1.8, marginBottom: 32, textAlign: "center" }}>
           Create your own workout days, add any exercise, and log every set — week after week. See your previous numbers so you always know what to beat. Yours to keep, even after the program ends.
@@ -103,7 +103,7 @@ function TrackerUpsell() {
 
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 28 }}>
           <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: 40, fontWeight: 700, color: "#c9a96e", lineHeight: 1 }}>$17</span>
-          <span style={{ fontSize: 12, color: "#666", letterSpacing: "0.08em" }}>one-time · lifetime access</span>
+          <span style={{ fontSize: 12, color: "#666", letterSpacing: "0.08em" }}>one-time · no subscription</span>
         </div>
 
         <Link

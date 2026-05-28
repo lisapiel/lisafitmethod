@@ -98,7 +98,7 @@ const emailHtml = `
                 The full 4-week nutrition course. Personalized TDEE calculator, a meal plan that adapts to your calorie target, real verified recipes with source attribution, and science-backed content with research citations throughout.
               </p>
               <p style="margin:0 0 10px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
-                <strong style="color:#1a1a1a;">$77</strong> founding price (regular $137, limited time). One payment, lifetime access.
+                <strong style="color:#1a1a1a;">$77</strong> founding price (regular $137, limited time). One payment, ongoing access.
               </p>
               <a href="https://lisafitmethod.com/nutrition" style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">See Nutrition Foundations &rarr;</a>
             </td>
@@ -115,7 +115,7 @@ const emailHtml = `
                 The 4-week strength training program that puts the nutrition to work. Five foundational movements, 50+ exercise videos, built-in workout tracking, and progressive overload from week one.
               </p>
               <p style="margin:0 0 10px;font-family:Helvetica Neue,Arial,sans-serif;font-size:13px;color:#9c9590;">
-                <strong style="color:#1a1a1a;">$97</strong> founding price (regular $167, limited time). One payment, lifetime access.
+                <strong style="color:#1a1a1a;">$97</strong> founding price (regular $167, limited time). One payment, ongoing access.
               </p>
               <a href="https://lisafitmethod.com/courses" style="font-family:Helvetica Neue,Arial,sans-serif;font-size:11px;color:#c8a97e;text-decoration:underline;">See Training Foundations &rarr;</a>
             </td>

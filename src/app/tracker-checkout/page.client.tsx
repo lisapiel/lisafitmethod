@@ -213,16 +213,16 @@ export function TrackerCheckoutClient() {
           </p>
           <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 400, color: "#f0e6d3", lineHeight: 1.2, marginBottom: 8 }}>
             Build your program.<br />
-            <em>Use it forever.</em>
+            <em>Use it at your own pace.</em>
           </h1>
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "24px 0 12px", paddingBottom: 0 }}>
             <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$17</span>
-            <span style={{ fontSize: 12, color: "#666" }}>one-time · lifetime access</span>
+            <span style={{ fontSize: 12, color: "#666" }}>one-time · no subscription</span>
           </div>
           <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 0, paddingBottom: 24, borderBottom: "1px solid #1a1a1a" }}>
-            Lifetime access refers to the lifetime of the platform.{" "}
-            <Link href="/terms#lifetime-access" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
+            Access continues for as long as the platform operates.{" "}
+            <Link href="/terms#access-policy" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
               See terms.
             </Link>
           </p>
@@ -232,7 +232,7 @@ export function TrackerCheckoutClient() {
               { heading: "Any workout, any exercise", body: "Name your own days and add any exercise you want. Push, pull, leg day — whatever works for your training." },
               { heading: "Track what matters", body: "Per exercise, choose: weight + reps, reps only, or time. Only see the fields that matter." },
               { heading: "Progressive overload built in", body: "See last week's numbers inline while you log. Always know what you need to beat." },
-              { heading: "Unlimited weeks, yours forever", body: "Add as many weeks as you want. Your data stays on your device, even after the course ends." },
+              { heading: "Unlimited weeks, no subscription", body: "Add as many weeks as you want. Your data stays on your device, even after the course ends." },
               { heading: "Works like an app on your phone", body: "Add it to your home screen for one-tap access during any workout." },
             ].map((item) => (
               <div key={item.heading} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>

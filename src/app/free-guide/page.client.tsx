@@ -428,7 +428,7 @@ export default function FreeGuideClient() {
                 <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>Start building.</em>
               </h3>
               <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                One payment, lifetime access. Keep the videos, the program, and the tracker for good. Run it once, then run it again heavier. Founding member pricing. Limited time.
+                One payment, ongoing access. Keep the videos, the program, and the tracker. Run it once, then run it again heavier. Founding member pricing. Limited time.
               </p>
               <Link
                 href="/checkout"
@@ -441,7 +441,7 @@ export default function FreeGuideClient() {
                 Get Training Foundations
               </Link>
               <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans }}>
-                One-time payment · Lifetime access · Reuse it, track it, keep building
+                One-time payment · Buy once, access anytime · Reuse it, track it, keep building
               </p>
             </div>
 

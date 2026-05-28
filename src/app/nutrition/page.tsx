@@ -14,10 +14,10 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Nutrition Foundations — Lisa Fit Method",
   description:
-    "A 4-week nutrition course for people who train. Personalized TDEE calculator, a science-backed meal plan that adapts to your calorie target, real verified recipes, and habits that stick. One-time payment, yours forever.",
+    "A 4-week nutrition course for people who train. Personalized TDEE calculator, a science-backed meal plan that adapts to your calorie target, real verified recipes, and habits that stick. One-time payment, ongoing access.",
   openGraph: {
     title: "Nutrition Foundations — Lisa Fit Method",
-    description: "A 4-week nutrition course for people who train. $77 one-time, yours forever.",
+    description: "A 4-week nutrition course for people who train. $77 one-time, ongoing access.",
     images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
@@ -165,7 +165,7 @@ export default async function NutritionPage() {
               Get Instant Access
             </Link>
             <p style={{ fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6, textAlign: "center" }}>
-              One-time payment · Lifetime access<br />No subscription · No recurring fees
+              One-time payment · Buy once, access anytime<br />No subscription · No recurring fees
             </p>
           </div>
         </div>
@@ -332,7 +332,7 @@ export default async function NutritionPage() {
             Get Instant Access
           </Link>
           <p style={{ fontSize: 13, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 40 }}>
-            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Lifetime access</strong> · No subscription
+            One-time payment · <strong style={{ color: "rgba(245,242,238,0.55)", fontWeight: 500 }}>Buy once, access anytime</strong> · No subscription
           </p>
           <div style={{ paddingTop: 32, borderTop: "1px solid rgba(245,242,238,0.06)", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
             <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>Better together</p>

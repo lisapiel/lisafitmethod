@@ -244,7 +244,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
-                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Lifetime access.</strong> Reuse it, track it, and keep progressing.
+                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Buy once, access anytime.</strong> Reuse it, track it, and keep progressing.
               </p>
             </div>
           </div>
@@ -276,7 +276,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <p style={{ marginTop: 14, fontSize: 12, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Lifetime access.</strong> More programs coming soon.
+                One-time payment. <strong style={{ color: "rgba(245,242,238,0.6)", fontWeight: 500 }}>Buy once, access anytime.</strong> More programs coming soon.
               </p>
             </div>
           </div>
@@ -408,7 +408,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.4 }}>
-                Includes 50+ exercise videos, built-in workout and progress tracking, full warm-ups and cool-downs, progression guidance, and lifetime access so you can keep using the program beyond the first four weeks.
+                Includes 50+ exercise videos, built-in workout and progress tracking, full warm-ups and cool-downs, progression guidance, and ongoing access so you can keep using the program beyond the first four weeks.
               </p>
             </div>
           </div>
@@ -571,7 +571,7 @@ export default async function HomePage() {
                 Get Both Courses
               </Link>
               <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-                One-time payment · Lifetime access
+                One-time payment · Buy once, access anytime
               </p>
             </div>
           </div>

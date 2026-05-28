@@ -29,7 +29,7 @@ const PRODUCTS: Record<string, ProductInfo> = {
       "Day A / B / C structure with warm-up, main workout, and cool-down",
       "Built-in workout tracker to log every session inside the course",
       "Nutrition module: protein, fueling, hydration, and consistency principles",
-      "Lifetime access — revisit the program any time",
+      "Buy once — revisit the program any time",
     ],
     checkoutHref: "/checkout?member=1",
     backHref: "/nutrition-foundations",
@@ -47,7 +47,7 @@ const PRODUCTS: Record<string, ProductInfo> = {
       "Real, verified recipes that actually match the macros",
       "Module on understanding your body's energy needs and hormones",
       "Macro tracking strategy without obsessing over every number",
-      "Lifetime access — revisit any module any time",
+      "Buy once — revisit any module any time",
     ],
     checkoutHref: "/checkout?product=nutrition&member=1",
     backHref: "/training-foundations",
@@ -55,7 +55,7 @@ const PRODUCTS: Record<string, ProductInfo> = {
   },
   tracker: {
     name: "Progress Tracker",
-    tagline: "Lifetime Workout Tracking — Add-On",
+    tagline: "Workout Tracking — Add-On",
     regularPrice: "$27",
     salePrice: "$27",
     memberPrice: "$27",
@@ -65,7 +65,7 @@ const PRODUCTS: Record<string, ProductInfo> = {
       "Always know the number to beat next session",
       "Track progress week over week with full history",
       "Designed to grow with you long after the 4-week course ends",
-      "One-time payment — lifetime access, never a subscription",
+      "One-time payment — buy once, no subscription",
     ],
     checkoutHref: "/checkout?member=1#tracker",
     backHref: "/training-foundations",
@@ -209,7 +209,7 @@ export default async function CoursesUpgradePage({ params }: { params: Promise<{
             </Link>
           </div>
           <p style={{ fontSize: "0.6rem", color: "#333", marginTop: 14, lineHeight: 1.6 }}>
-            One-time payment. Lifetime access. No subscription.
+            One-time payment. Buy once. No subscription.
           </p>
         </div>
 

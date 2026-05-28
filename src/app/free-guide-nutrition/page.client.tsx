@@ -403,7 +403,7 @@ export default function NutritionGuideClient() {
                 "Everything in Nutrition Foundations + Training Foundations",
                 "Personalized TDEE calculator, meal plan, recipes, and science-backed content",
                 "4-week strength program with 50+ exercise videos and week-by-week workout tracking",
-                "One-time payment. Lifetime access to both courses.",
+                "One-time payment. Ongoing access to both courses.",
               ].map((bullet, i) => (
                 <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
                   <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
@@ -414,7 +414,7 @@ export default function NutritionGuideClient() {
                 Get Both Courses
               </Link>
               <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans, marginBottom: 0 }}>
-                One-time payment · Lifetime access · Yours forever
+                One-time payment · Buy once, access anytime
               </p>
             </div>
 
@@ -449,7 +449,7 @@ export default function NutritionGuideClient() {
                 Get Nutrition Foundations
               </Link>
               <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans, marginBottom: 0 }}>
-                One-time payment · Lifetime access · Yours forever
+                One-time payment · Buy once, access anytime
               </p>
             </div>
 

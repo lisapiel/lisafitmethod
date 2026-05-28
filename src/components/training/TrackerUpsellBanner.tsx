@@ -56,7 +56,7 @@ export function TrackerUpsellBanner() {
 
       {/* Body */}
       <p style={{ fontSize: "0.65rem", color: muted, lineHeight: 1.75, marginBottom: 16, maxWidth: 480 }}>
-        The in-course tracker follows your Training Foundations program. The standalone tracker is yours — build any workout, any day, and keep it forever. Even after the program ends.
+        The in-course tracker follows your Training Foundations program. The standalone tracker is yours — build any workout, any day, and keep using it long after the program ends.
       </p>
 
       {/* Features */}
@@ -65,7 +65,7 @@ export function TrackerUpsellBanner() {
           "Name your own workout days — Push, Pull, Leg Day, whatever fits your training",
           "Add any exercise and pick how to track it: weight + reps, reps only, or time",
           "See last week’s numbers inline while you log — progressive overload built in",
-          "Unlimited weeks. Yours forever, even after the program ends.",
+          "Unlimited weeks. No subscription, even after the program ends.",
         ].map((f) => (
           <div key={f} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
             <span style={{ color: gold, fontSize: "0.6rem", marginTop: 2, flexShrink: 0 }}>✓</span>
@@ -78,7 +78,7 @@ export function TrackerUpsellBanner() {
       <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
           <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "1.4rem", fontWeight: 700, color: gold, lineHeight: 1 }}>$17</span>
-          <span style={{ fontSize: "0.58rem", color: "#555", letterSpacing: "0.06em" }}>one-time · lifetime access</span>
+          <span style={{ fontSize: "0.58rem", color: "#555", letterSpacing: "0.06em" }}>one-time · no subscription</span>
         </div>
         <Link
           href="/tracker-checkout"

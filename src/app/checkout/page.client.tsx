@@ -583,7 +583,7 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
               "Training Foundations: 50+ exercise videos, full movement breakdowns, built-in workout tracking",
               "Nutrition Foundations: personalized TDEE calculator, 4-week meal plan, real verified recipes",
               "Science-backed education in both courses with research citations throughout",
-              "Lifetime access to both courses with free future updates",
+              "Ongoing access to both courses with free future updates",
               `Save ${BUNDLE_SAVINGS_DISPLAY} vs buying individually ($${(NUTRITION_COURSE_PRICE_CENTS + COURSE_PRICE_CENTS) / 100} individual total)`,
               "Instant access to both courses after purchase",
             ] : isNutrition ? [
@@ -591,12 +591,12 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
               "4-week meal plan built around your numbers, with real recipes from verified sources",
               "Weekly grocery lists and meal prep guides",
               "Science-backed content with research references throughout",
-              "Lifetime access with free future updates",
+              "Ongoing access with free future updates",
               "Instant access after purchase",
             ] : [
               "Includes 50+ exercise videos with full movement breakdowns and form guidance",
               "Built-in workout and progress tracking so you can monitor your strength over time",
-              "Lifetime access with free future updates",
+              "Ongoing access with free future updates",
               "Designed to be repeated beyond the initial 4 weeks so you can continue building strength and confidence over time",
               "Learn how to train properly for life, not just for 30 days",
               "Instant access after purchase",
@@ -609,8 +609,8 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
           </div>
 
           <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 20, marginTop: 20 }}>
-            Lifetime access refers to the lifetime of the platform.{" "}
-            <Link href="/terms#lifetime-access" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
+            Access continues for as long as the platform operates.{" "}
+            <Link href="/terms#access-policy" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
               See terms.
             </Link>
           </p>
@@ -638,7 +638,7 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
                 />
                 <div>
                   <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#c9a96e", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                    Add the Lifetime Workout Tracker +$27
+                    Add the Workout Tracker +$27
                   </p>
                   <p style={{ margin: "0 0 10px", fontSize: 12, color: "#888", lineHeight: 1.7 }}>
                     Keep progressing long after the program ends. Build your own workout days, track every lift, and always know what numbers you&apos;re trying to beat.
@@ -648,7 +648,7 @@ export function CheckoutClient({ product = "training", memberDiscount = false }:
                       "Create your own workout days: Push, Pull, Legs, Glutes, Upper/Lower, or however you like to train",
                       "Track weight + reps, reps only, or timed exercises for any movement",
                       "See your previous numbers directly inside each workout so progressive overload becomes automatic",
-                      "Save unlimited workouts and training weeks with lifetime access",
+                      "Save unlimited workouts and training weeks, no subscription",
                     ].map((f) => (
                       <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                         <span style={{ color: "#c9a96e", fontSize: 10, marginTop: 2, flexShrink: 0 }}>✓</span>
