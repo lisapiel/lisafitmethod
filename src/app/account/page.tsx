@@ -37,5 +37,7 @@ export default async function AccountPage() {
     hasMasterclassAccess(emailStr),
   ])
 
-  return <AccountClient email={emailStr} training={training} nutrition={nutrition} tracker={tracker} masterclass={masterclass} />
+  const isAdmin = emailStr.toLowerCase() === "lisa.p.mcpherson@gmail.com"
+
+  return <AccountClient email={emailStr} training={training} nutrition={nutrition} tracker={tracker} masterclass={masterclass} isAdmin={isAdmin} />
 }

@@ -12,6 +12,7 @@ interface Props {
   nutrition: boolean
   tracker: boolean
   masterclass: boolean
+  isAdmin: boolean
 }
 
 interface OwnedProduct {
@@ -32,7 +33,7 @@ interface UpsellProduct {
   featured?: boolean
 }
 
-export function AccountClient({ email, training, nutrition, tracker, masterclass }: Props) {
+export function AccountClient({ email, training, nutrition, tracker, masterclass, isAdmin }: Props) {
   const router = useRouter()
 
   async function handleSignOut() {
@@ -41,7 +42,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
   }
 
   const owned: OwnedProduct[] = []
-  if (masterclass) {
+  if (masterclass && isAdmin) {
     owned.push({
       id: "masterclass",
       label: "Masterclass",
@@ -126,7 +127,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
       featured: true,
     })
   }
-  if (training && !masterclass) {
+  if (isAdmin && training && !masterclass) {
     upsells.push({
       id: "masterclass",
       label: "Masterclass",
