@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useCourseProgress } from "./CourseProgressContext"
+import AccountDropdown from "@/components/AccountDropdown.client"
 
 interface CourseHeaderProps {
   onMenuToggle: () => void
@@ -37,6 +38,7 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
         }
       `}</style>
 
+      {/* Left: hamburger (mobile) + wordmark */}
       <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
         <button
           onClick={onMenuToggle}
@@ -74,23 +76,27 @@ export default function CourseHeader({ onMenuToggle }: CourseHeaderProps) {
         </Link>
       </div>
 
-      {ready && currentPosition.totalSessions > 0 && (
-        <Link
-          href="/training-foundations/tracker"
-          className="header-progress-badge"
-          style={{
-            fontSize: "0.55rem",
-            letterSpacing: "0.12em",
-            color: "#c9a96e",
-            textDecoration: "none",
-            fontFamily: "var(--font-montserrat), sans-serif",
-            padding: "0.3rem 0.65rem",
-            border: "1px solid rgba(201,169,110,0.25)",
-          }}
-        >
-          W{currentPosition.week} · {currentPosition.totalSessions} sessions
-        </Link>
-      )}
+      {/* Right: progress badge (desktop) + account icon */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        {ready && currentPosition.totalSessions > 0 && (
+          <Link
+            href="/training-foundations/tracker"
+            className="header-progress-badge"
+            style={{
+              fontSize: "0.55rem",
+              letterSpacing: "0.12em",
+              color: "#c9a96e",
+              textDecoration: "none",
+              fontFamily: "var(--font-montserrat), sans-serif",
+              padding: "0.3rem 0.65rem",
+              border: "1px solid rgba(201,169,110,0.25)",
+            }}
+          >
+            W{currentPosition.week} · {currentPosition.totalSessions} sessions
+          </Link>
+        )}
+        <AccountDropdown />
+      </div>
     </header>
   )
 }

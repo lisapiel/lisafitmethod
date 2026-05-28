@@ -2,8 +2,6 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import MemberNav from "@/components/MemberNav.client"
-
 const NAV = [
   { label: "Introduction", href: "/nutrition-foundations" },
   { label: "Module 1: Understanding Your Body", href: "/nutrition-foundations/module1" },
@@ -54,6 +52,7 @@ export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean;
               z-index: 150;
               transform: translateX(-100%);
               width: 280px !important;
+              padding-top: 3.5rem;
             }
           }
           .sidebar-nav-scroll { overflow-y: auto; scrollbar-width: thin; }
@@ -61,9 +60,6 @@ export default function NutritionSidebar({ isOpen, onClose }: { isOpen: boolean;
           .sidebar-nav-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; }
           .nb-item:hover { color: #c9a96e !important; }
         `}</style>
-
-        {/* Member nav — account, courses, add-ons, sign out */}
-        <MemberNav currentCourse="nutrition" onClose={onClose} />
 
         {/* Course label */}
         <div style={{ flexShrink: 0, padding: "0.75rem 1.25rem 0.5rem" }}>
