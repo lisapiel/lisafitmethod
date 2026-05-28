@@ -20,21 +20,21 @@ function getUpsells(product: string): UpsellProduct[] {
   if (product === "training") {
     return [
       {
+        label: "Masterclass — Monthly Programming",
+        headline: "Keep training after 4 weeks",
+        desc: "New 3-day workout block every month. 361 exercise videos. Monthly Q&A with Lisa. Built-in progress tracking. From $16.42/mo.",
+        price: "From $197/yr",
+        regularPrice: "",
+        href: "/masterclass-info",
+        isBundle: false,
+      },
+      {
         label: "Nutrition Foundations",
         headline: "Pair it with the right nutrition",
         desc: "4-week nutrition course with personalized TDEE calculator, meal plan, and real verified recipes.",
         price: "$77",
         regularPrice: "$127",
         href: "/checkout?product=nutrition&member=1",
-      },
-      {
-        label: "Foundations Bundle",
-        headline: "Get both for $137",
-        desc: "Training + Nutrition together. $174 if bought separately. You save $37.",
-        price: "$137",
-        regularPrice: "$174",
-        href: "/checkout?product=bundle&member=1",
-        isBundle: true,
       },
     ]
   }

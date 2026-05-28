@@ -11,6 +11,7 @@ interface Props {
   training: boolean
   nutrition: boolean
   tracker: boolean
+  masterclass: boolean
 }
 
 interface OwnedProduct {
@@ -31,7 +32,7 @@ interface UpsellProduct {
   featured?: boolean
 }
 
-export function AccountClient({ email, training, nutrition, tracker }: Props) {
+export function AccountClient({ email, training, nutrition, tracker, masterclass }: Props) {
   const router = useRouter()
 
   async function handleSignOut() {
@@ -40,6 +41,15 @@ export function AccountClient({ email, training, nutrition, tracker }: Props) {
   }
 
   const owned: OwnedProduct[] = []
+  if (masterclass) {
+    owned.push({
+      id: "masterclass",
+      label: "Masterclass",
+      desc: "Monthly programming, 361 exercise videos, Q&A with Lisa. New block every month.",
+      href: "/masterclass",
+      icon: "MC",
+    })
+  }
   if (training) {
     owned.push({
       id: "training",
@@ -113,6 +123,17 @@ export function AccountClient({ email, training, nutrition, tracker }: Props) {
       price: "$87",
       regularPrice: "$97",
       href: "/checkout?member=1",
+      featured: true,
+    })
+  }
+  if (training && !masterclass) {
+    upsells.push({
+      id: "masterclass",
+      label: "Masterclass",
+      desc: "New 3-day block every month. 361 exercise videos. Monthly Q&A. From $16.42/mo on annual.",
+      price: "From $197/yr",
+      regularPrice: "",
+      href: "/masterclass-info",
       featured: true,
     })
   }
