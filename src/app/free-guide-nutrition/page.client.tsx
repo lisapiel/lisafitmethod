@@ -326,27 +326,30 @@ export default function NutritionGuideClient() {
             </p>
 
             <div style={{ background: black, padding: "clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 4vw, 2rem)", marginBottom: "0.5rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#4a4540", margin: "0 0 1.25rem", fontWeight: 500 }}>
+                Five Variables. One System.
+              </p>
               {[
-                { icon: <IconFlame key="e1" />, label: "Calorie Deficit", sub: "The mechanism" },
-                { icon: <IconMolecule key="e2" />, label: "Adequate Protein", sub: "The lever" },
-                { icon: <IconBarbell key="e3" />, label: "Resistance Training", sub: "The multiplier" },
-                { icon: <IconSteps key="e4" />, label: "Daily Movement", sub: "The constant" },
-                { icon: <IconMoon key="e5" />, label: "Quality Sleep", sub: "The regulator" },
+                { num: "01", label: "Calorie Deficit", sub: "The mechanism" },
+                { num: "02", label: "Adequate Protein", sub: "The lever" },
+                { num: "03", label: "Resistance Training", sub: "The multiplier" },
+                { num: "04", label: "Daily Movement", sub: "The constant" },
+                { num: "05", label: "Quality Sleep", sub: "The regulator" },
               ].map((item, i) => (
                 <div key={i}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.75rem 0" }}>
-                    <div style={{ flexShrink: 0 }}>{item.icon}</div>
-                    <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.875rem 0" }}>
+                    <span style={{ fontFamily: dmSans, fontWeight: 700, fontSize: "0.7rem", color: goldDeep, letterSpacing: "0.05em", width: 28, flexShrink: 0 }}>{item.num}</span>
+                    <div style={{ flex: 1 }}>
                       <p style={{ fontFamily: playfair, fontSize: "1.05rem", color: "#fff", margin: 0, fontWeight: 600 }}>{item.label}</p>
-                      <p style={{ fontFamily: dmSans, fontSize: "0.7rem", color: "#5a544b", margin: 0, textTransform: "uppercase", letterSpacing: "0.12em" }}>{item.sub}</p>
+                      <p style={{ fontFamily: dmSans, fontSize: "0.65rem", color: muted, margin: 0, textTransform: "uppercase", letterSpacing: "0.12em" }}>{item.sub}</p>
                     </div>
                     {i < 4 ? (
-                      <span style={{ marginLeft: "auto", color: gold, fontSize: "1.2rem", flexShrink: 0, fontFamily: dmSans }}>+</span>
+                      <span style={{ marginLeft: "auto", color: gold, fontSize: "1.1rem", flexShrink: 0, fontFamily: dmSans }}>+</span>
                     ) : (
-                      <span style={{ marginLeft: "auto", color: goldDeep, fontFamily: dmSans, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 600 }}>= Results</span>
+                      <span style={{ marginLeft: "auto", color: goldDeep, fontFamily: dmSans, fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.14em", fontWeight: 600 }}>= Results</span>
                     )}
                   </div>
-                  {i < 4 && <div style={{ height: 1, background: "#2a2722" }} />}
+                  {i < 4 && <div style={{ height: 1, background: "#1e1b18" }} />}
                 </div>
               ))}
             </div>
@@ -398,59 +401,57 @@ export default function NutritionGuideClient() {
             </div>
 
             {/* Nutrition Foundations */}
-            <div style={{ border: `1px solid ${line}`, borderLeft: `3px solid ${gold}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "0.75rem" }}>
-              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.4rem", marginTop: 0 }}>
+            <div style={{ background: black, padding: "clamp(1.75rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.75rem)", marginBottom: "0.75rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: gold, marginBottom: "0.4rem", marginTop: 0 }}>
                 Nutrition Foundations
               </p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: playfair, fontSize: "1.8rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "0.875rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
+                <span style={{ color: "#5a544b", textDecoration: "line-through", fontFamily: playfair, fontSize: "1.5rem" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
+                <span style={{ color: "#fff", fontFamily: playfair, fontSize: "clamp(2rem, 5vw, 2.9rem)", fontWeight: 700, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>Founding Price</span>
               </div>
-              <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.1rem, 2.5vw, 1.3rem)", fontWeight: 700, margin: "0 0 0.75rem", color: ink, letterSpacing: "-0.01em" }}>
-                The 4-week nutrition course built around your body.
+              <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.3rem, 3vw, 1.6rem)", fontWeight: 700, margin: "0.75rem 0 0.75rem", color: "#fff", letterSpacing: "-0.01em" }}>
+                Eat right for your body, not someone else&apos;s.
               </h3>
+              <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.25rem", lineHeight: 1.65, fontFamily: dmSans }}>
+                Personalized TDEE calculator so you know your exact calorie target. A full meal plan built around your number, with real food and 9 verified recipes with source attribution. Science-backed content with research citations throughout.
+              </p>
               {[
                 "Personalized TDEE calculator — your exact calorie target, not a generic estimate",
                 "A meal plan built around your number, with real food you will actually eat",
                 "9 verified recipes with full macros and source attribution",
                 "Science-backed education with research citations throughout",
               ].map((bullet, i) => (
-                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
-                  <span style={{ color: goldDeep, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
-                  <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, margin: 0, lineHeight: 1.6 }}>{bullet}</p>
+                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.4rem" }}>
+                  <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
+                  <p style={{ fontFamily: dmSans, fontSize: "0.85rem", color: "#b3ab9c", margin: 0, lineHeight: 1.6 }}>{bullet}</p>
                 </div>
               ))}
-              <Link href="/checkout?product=nutrition" style={{ display: "inline-block", background: gold, color: black, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "0.75rem 1.5rem", textDecoration: "none", fontFamily: dmSans, marginTop: "1.25rem" }}>
+              <Link href="/checkout?product=nutrition" style={{ display: "block", background: gold, color: black, textAlign: "center", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", padding: "1rem", textDecoration: "none", fontFamily: dmSans, maxWidth: 400, marginTop: "1.5rem" }}>
                 Get Nutrition Foundations
               </Link>
+              <p style={{ fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#5a544b", marginTop: "1rem", fontFamily: dmSans, marginBottom: 0 }}>
+                One-time payment · Lifetime access · Yours forever
+              </p>
             </div>
 
             {/* Training Foundations */}
-            <div style={{ border: `1px solid ${line}`, borderLeft: `3px solid ${line}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "1.75rem" }}>
-              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: muted, marginBottom: "0.4rem", marginTop: 0 }}>
+            <div style={{ border: `1px solid ${line}`, padding: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "1.75rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.4rem", marginTop: 0 }}>
                 Training Foundations
               </p>
               <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: playfair, fontSize: "1.8rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{COURSE_PRICE_DISPLAY}</span>
+                <span style={{ fontFamily: playfair, fontSize: "1.6rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{COURSE_PRICE_DISPLAY}</span>
                 <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
                 <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
               </div>
               <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.1rem, 2.5vw, 1.3rem)", fontWeight: 700, margin: "0 0 0.75rem", color: ink, letterSpacing: "-0.01em" }}>
                 The 4-week strength program that puts the nutrition to work.
               </h3>
-              {[
-                "5 foundational movements every beginner needs to master",
-                "50+ exercise videos with coaching cues for every movement",
-                "Built-in workout tracking so you can see your progress week by week",
-                "3 structured training days per week, progressive overload from day one",
-              ].map((bullet, i) => (
-                <div key={i} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
-                  <span style={{ color: goldDeep, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.1rem" }}>&#8594;</span>
-                  <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, margin: 0, lineHeight: 1.6 }}>{bullet}</p>
-                </div>
-              ))}
-              <Link href="/checkout" style={{ display: "inline-block", color: goldDeep, fontFamily: dmSans, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", border: `1px solid ${goldDeep}`, padding: "0.7rem 1.5rem", marginTop: "1.25rem" }}>
+              <p style={{ fontFamily: dmSans, fontSize: "0.88rem", color: muted, lineHeight: 1.65, marginBottom: "1.25rem" }}>
+                Five foundational movements, 50+ exercise videos with coaching cues, built-in workout tracking, and progressive overload from week one. Three structured training days per week.
+              </p>
+              <Link href="/checkout" style={{ display: "inline-block", color: goldDeep, fontFamily: dmSans, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", border: `1px solid ${goldDeep}`, padding: "0.7rem 1.5rem" }}>
                 Get Training Foundations
               </Link>
             </div>

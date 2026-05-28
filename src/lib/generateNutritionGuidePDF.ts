@@ -575,15 +575,18 @@ function NutritionGuidePDF() {
         return divider ? [block, divider] : [block]
       }),
 
-      // Equation section
-      createElement(View, { style: styles.divider }),
-      createElement(Text, { style: styles.sectionLabel }, "Putting it together"),
-      createElement(Text, { style: { fontSize: 13, fontFamily: "Helvetica-Bold", color: INK, marginBottom: 4 } }, "There is no sixth thing."),
-      createElement(Text, { style: { fontSize: 8.5, color: MUTED, lineHeight: 1.65, marginBottom: 10 } }, "Every sustainable body transformation runs on these five variables. You don't need all five to be perfect. But you do need all five in the frame."),
-
+      // Equation section — wrap: false keeps it together, preventing a blank overflow page
       createElement(
         View,
-        { style: styles.equationBox },
+        { wrap: false },
+        createElement(View, { style: styles.divider }),
+        createElement(Text, { style: styles.sectionLabel }, "Putting it together"),
+        createElement(Text, { style: { fontSize: 13, fontFamily: "Helvetica-Bold", color: INK, marginBottom: 4 } }, "There is no sixth thing."),
+        createElement(Text, { style: { fontSize: 8.5, color: MUTED, lineHeight: 1.65, marginBottom: 10 } }, "Every sustainable body transformation runs on these five variables. You don't need all five to be perfect. But you do need all five in the frame."),
+
+        createElement(
+          View,
+          { style: styles.equationBox },
         createElement(Text, { style: { fontSize: 7, color: "#5a544b", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 } }, "Five Variables. One System."),
         ...EQUATION_ROWS.map((row, i) => {
           const rowChildren = [
@@ -605,7 +608,8 @@ function NutritionGuidePDF() {
           if (i < 4) rowChildren.push(createElement(View, { style: styles.equationRowDivider }))
           return createElement(View, { key: i }, ...rowChildren)
         })
-      ),
+        )
+      ), // end wrap: false
 
       // Footer
       createElement(
@@ -669,7 +673,8 @@ function NutritionGuidePDF() {
           createElement(Text, { style: { ...upsellStyles.bigPrice, fontSize: 16 } }, "$77"),
           createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
         ),
-        createElement(Text, { style: upsellStyles.productName }, "The 4-week nutrition course built around your body."),
+        createElement(Text, { style: upsellStyles.productName }, "Eat right for your body, not someone else's."),
+        createElement(Text, { style: upsellStyles.productDesc }, "Personalized TDEE calculator so you know your exact calorie target. A full meal plan built around your number, with real food and 9 verified recipes with source attribution. Science-backed content with research citations throughout."),
         ...[
           "Personalized TDEE calculator — your exact calorie target, not a generic estimate",
           "A meal plan built around your number, with real food you will actually eat",
@@ -699,19 +704,7 @@ function NutritionGuidePDF() {
           createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
         ),
         createElement(Text, { style: upsellStyles.productName }, "The 4-week strength program that puts the nutrition to work."),
-        ...[
-          "5 foundational movements every beginner needs to master",
-          "50+ exercise videos with coaching cues for every movement",
-          "Built-in workout tracking so you can see your progress week by week",
-          "3 structured training days per week, progressive overload from day one",
-        ].map((bullet, i) =>
-          createElement(
-            View,
-            { style: upsellStyles.bulletRow, key: `t-${i}` },
-            createElement(Text, { style: upsellStyles.bulletArrow }, "->"),
-            createElement(Text, { style: upsellStyles.bulletText }, bullet)
-          )
-        ),
+        createElement(Text, { style: upsellStyles.productDesc }, "Five foundational movements, 50+ exercise videos with coaching cues, built-in workout tracking, and progressive overload from week one. Three structured training days per week."),
         createElement(Text, { style: { ...upsellStyles.urlText, marginTop: 6 } }, "lisafitmethod.com/courses")
       ),
 
