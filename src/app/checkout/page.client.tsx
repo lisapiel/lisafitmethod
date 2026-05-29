@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
-import { Elements, PaymentElement, ExpressCheckoutElement, useStripe, useElements } from "@stripe/react-stripe-js"
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import {
   COURSE_PRICE_CENTS, COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
@@ -85,9 +85,9 @@ function PaymentForm({
   const [promoOpen, setPromoOpen] = useState(false)
   const [promoError, setPromoError] = useState<string | null>(null)
   const [applyingPromo, setApplyingPromo] = useState(false)
-  const [expressReady, setExpressReady] = useState(false)
 
-  const confirmPayment = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!stripe || !elements) return
     setProcessing(true)
     setError(null)
@@ -101,11 +101,6 @@ function PaymentForm({
       setError(confirmError.message ?? "Payment failed. Please try again.")
       setProcessing(false)
     }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await confirmPayment()
   }
 
   const handleApply = async () => {
@@ -140,29 +135,8 @@ function PaymentForm({
         </button>
       </div>
 
-      <div style={{ marginBottom: expressReady ? 16 : 0 }}>
-        <ExpressCheckoutElement
-          options={{
-            buttonTheme: { applePay: "white", googlePay: "white" },
-            buttonType: { applePay: "buy", googlePay: "buy" },
-            paymentMethods: { link: "never", amazonPay: "never" },
-            layout: { maxColumns: 2, maxRows: 1, overflow: "never" },
-          }}
-          onReady={({ availablePaymentMethods }) => setExpressReady(!!availablePaymentMethods)}
-          onConfirm={confirmPayment}
-        />
-      </div>
-
-      {expressReady && (
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          <div style={{ flex: 1, height: 1, background: "#2a2a2a" }} />
-          <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-montserrat), sans-serif", whiteSpace: "nowrap" }}>or pay another way</span>
-          <div style={{ flex: 1, height: 1, background: "#2a2a2a" }} />
-        </div>
-      )}
-
       <div style={{ marginBottom: 20 }}>
-        <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } }, wallets: { applePay: "never", googlePay: "never" } }} />
+        <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } } }} />
       </div>
 
       {discountPct === 0 && (

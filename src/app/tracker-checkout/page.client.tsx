@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
-import { Elements, PaymentElement, ExpressCheckoutElement, useStripe, useElements } from "@stripe/react-stripe-js"
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { getCurrentUser } from "aws-amplify/auth"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
@@ -61,9 +61,9 @@ function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
   const elements = useElements()
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
-  const [expressReady, setExpressReady] = useState(false)
 
-  const confirmPayment = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!stripe || !elements) return
     setProcessing(true)
     setError(null)
@@ -79,11 +79,6 @@ function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await confirmPayment()
-  }
-
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "#1a1a1a", border: "1px solid #2a2a2a", marginBottom: 20 }}>
@@ -93,32 +88,8 @@ function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
         </button>
       </div>
 
-      {/* Express checkout — Apple Pay / Google Pay */}
-      <div style={{ marginBottom: expressReady ? 16 : 0 }}>
-        <ExpressCheckoutElement
-          options={{
-            buttonTheme: { applePay: "white", googlePay: "white" },
-            buttonType: { applePay: "buy", googlePay: "buy" },
-            paymentMethods: { link: "never", amazonPay: "never" },
-            layout: { maxColumns: 2, maxRows: 1, overflow: "never" },
-          }}
-          onReady={({ availablePaymentMethods }) => setExpressReady(!!availablePaymentMethods)}
-          onConfirm={confirmPayment}
-        />
-      </div>
-
-      {expressReady && (
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          <div style={{ flex: 1, height: 1, background: "#2a2a2a" }} />
-          <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-montserrat), sans-serif", whiteSpace: "nowrap" }}>
-            or pay another way
-          </span>
-          <div style={{ flex: 1, height: 1, background: "#2a2a2a" }} />
-        </div>
-      )}
-
       <div style={{ marginBottom: 20 }}>
-        <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } }, wallets: { applePay: "never", googlePay: "never" } }} />
+        <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } } }} />
       </div>
 
       {error && <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>{error}</p>}
