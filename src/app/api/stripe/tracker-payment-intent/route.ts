@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       amount: TRACKER_PRICE_CENTS,
       currency: "usd",
       metadata: { customerEmail: email.toLowerCase().trim(), product: "tracker" },
-      payment_method_types: ["card"],
+      automatic_payment_methods: { enabled: true },
     })
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret, finalAmount: TRACKER_PRICE_CENTS })

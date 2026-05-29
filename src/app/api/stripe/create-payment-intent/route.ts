@@ -72,14 +72,10 @@ export async function POST(request: NextRequest) {
 
     const finalAmount = courseAmount + (!isNutrition && !isBundle && includesTracker ? TRACKER_PRICE_CENTS : 0)
 
-    // Affirm minimum is $50 (5000 cents); Cash App minimum is $1 (100 cents)
-    const paymentMethods: string[] = ["card"]
-    if (finalAmount >= 5000) paymentMethods.push("affirm")
-    if (finalAmount >= 100) paymentMethods.push("cashapp")
-
     const paymentIntent = await stripe.paymentIntents.create({
       amount: finalAmount,
       currency: "usd",
+      automatic_payment_methods: { enabled: true },
       metadata: {
         customerEmail: email,
         customerName: name ?? "",
@@ -89,7 +85,6 @@ export async function POST(request: NextRequest) {
         includesTracker: (!isNutrition && !isBundle && includesTracker) ? "true" : "false",
         product: isBundle ? "bundle" : isNutrition ? "nutrition" : "training",
       },
-      payment_method_types: paymentMethods as Stripe.PaymentIntentCreateParams["payment_method_types"],
     })
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret, discountPct, finalAmount })
