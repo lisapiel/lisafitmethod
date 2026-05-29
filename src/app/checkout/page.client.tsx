@@ -46,15 +46,17 @@ const PRODUCTS = [
   },
 ]
 
-function basePriceCents(product: Product): number {
+function basePriceCents(product: Product | null): number {
+  if (!product) return 0
   if (product === "bundle") return BUNDLE_PRICE_CENTS
   if (product === "nutrition") return NUTRITION_COURSE_PRICE_CENTS
   return COURSE_PRICE_CENTS
 }
 
-function displayTotal(product: Product, withTracker: boolean): string {
-  const base = basePriceCents(product)
-  const total = base + (withTracker ? TRACKER_PRICE_CENTS : 0)
+function displayTotal(product: Product | null, withTracker: boolean): string {
+  if (!product && !withTracker) return "—"
+  if (!product) return TRACKER_PRICE_DISPLAY
+  const total = basePriceCents(product) + (withTracker ? TRACKER_PRICE_CENTS : 0)
   return `$${(total / 100).toFixed(0)}`
 }
 
@@ -279,27 +281,30 @@ const ctaButtonStyle: React.CSSProperties = {
 
 // ─── Root component ───────────────────────────────────────────────────────────
 
-export function CheckoutClient({ product: initialProduct = "bundle", memberDiscount = false }: { product?: Product; memberDiscount?: boolean }) {
-  const [selectedProduct, setSelectedProduct] = useState<Product>(initialProduct)
+export function CheckoutClient({ product: initialProduct, memberDiscount = false }: { product?: Product; memberDiscount?: boolean }) {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(initialProduct ?? null)
   const [includesTracker, setIncludesTracker] = useState(false)
   const [email, setEmail] = useState<string | null>(null)
   const [name, setName] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [discountPct, setDiscountPct] = useState(0)
-  const [finalAmount, setFinalAmount] = useState(basePriceCents(initialProduct))
+  const [finalAmount, setFinalAmount] = useState(basePriceCents(initialProduct ?? null))
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
 
   const paymentStarted = !!clientSecret
+  const nothingSelected = !selectedProduct
+  const isBundle = selectedProduct === "bundle"
 
+  // Toggle: clicking a selected card deselects it
   const handleSelectProduct = (p: Product) => {
-    if (p === selectedProduct) return
-    setSelectedProduct(p)
+    const next = p === selectedProduct ? null : p
+    setSelectedProduct(next)
     setClientSecret(null)
     setDiscountPct(0)
     setConfirmed(false)
-    setFinalAmount(basePriceCents(p) + (includesTracker ? TRACKER_PRICE_CENTS : 0))
+    setFinalAmount(basePriceCents(next) + (includesTracker ? TRACKER_PRICE_CENTS : 0))
   }
 
   const handleToggleTracker = () => {
@@ -318,7 +323,7 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
   }, [])
 
   const handleConfirm = useCallback(async () => {
-    if (!email) return
+    if (!email || !selectedProduct) return
     setConfirmed(true)
     setLoadingIntent(true)
     setIntentError(null)
@@ -345,6 +350,7 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
   }, [email, name, includesTracker, selectedProduct, memberDiscount])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
+    if (!selectedProduct) return { error: "No product selected." }
     try {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
@@ -380,8 +386,6 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
     },
   }
 
-  const isBundle = selectedProduct === "bundle"
-
   return (
     <main style={{ background: "#0a0a0a", minHeight: "100vh", color: "#f0e6d3", fontFamily: "var(--font-montserrat), sans-serif" }}>
       <style>{`
@@ -390,30 +394,62 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
           .checkout-left  { padding: 48px 24px 32px !important; border-right: none !important; border-bottom: 1px solid #1a1a1a; }
           .checkout-right { padding: 40px 24px 60px !important; }
         }
+
+        /* Base card */
         .product-card {
           border: 1px solid #1e1e1e;
           padding: 22px 24px;
           cursor: pointer;
-          transition: border-color 0.15s;
+          transition: border-color 0.18s, background 0.18s, opacity 0.18s;
           background: #0d0d0d;
           margin-bottom: 8px;
+          user-select: none;
         }
-        .product-card:hover:not(.product-card--disabled) { border-color: rgba(201,169,110,0.35); }
-        .product-card--selected { border: 2px solid #c9a96e !important; background: rgba(201,169,110,0.04) !important; }
-        .product-card--disabled { opacity: 0.38; cursor: default; pointer-events: none; }
+        .product-card:hover:not(.product-card--disabled) { border-color: rgba(201,169,110,0.4); }
+
+        /* Selected */
+        .product-card--selected {
+          border: 2px solid #c9a96e !important;
+          background: rgba(201,169,110,0.05) !important;
+        }
+
+        /* Featured (Bundle when nothing selected) */
+        .product-card--featured {
+          border-color: rgba(201,169,110,0.45) !important;
+          background: rgba(201,169,110,0.025) !important;
+        }
+
+        /* Subdued (Training/Nutrition when nothing selected) */
+        .product-card--subdued { opacity: 0.55; }
+        .product-card--subdued:hover { opacity: 1; }
+
+        /* Disabled (Training/Nutrition when bundle selected) */
+        .product-card--disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+        /* Tracker card */
         .tracker-card {
           border: 1px solid #1e1e1e;
-          padding: 18px 24px;
+          padding: 20px 24px;
           cursor: pointer;
-          transition: border-color 0.15s;
+          transition: border-color 0.18s, background 0.18s;
           background: #0d0d0d;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 16px;
+          user-select: none;
         }
-        .tracker-card:hover { border-color: rgba(201,169,110,0.35); }
-        .tracker-card--added { border: 2px solid rgba(201,169,110,0.5) !important; background: rgba(201,169,110,0.04) !important; }
+        /* Featured tracker (when a course is selected but tracker not yet added) */
+        .tracker-card--featured {
+          border-color: rgba(201,169,110,0.4) !important;
+          background: rgba(201,169,110,0.02) !important;
+        }
+        /* Added state */
+        .tracker-card--added {
+          border: 2px solid rgba(201,169,110,0.6) !important;
+          background: rgba(201,169,110,0.05) !important;
+        }
+        .tracker-card:hover:not(.tracker-card--added) { border-color: rgba(201,169,110,0.45); }
       `}</style>
 
       {/* Top bar */}
@@ -442,20 +478,29 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
           {PRODUCTS.map((p) => {
             const isSelected = selectedProduct === p.id
             const isDisabled = isBundle && p.id !== "bundle"
+            // Visual class logic
+            let cardClass = "product-card"
+            if (isSelected) cardClass += " product-card--selected"
+            else if (isDisabled) cardClass += " product-card--disabled"
+            else if (nothingSelected && p.id === "bundle") cardClass += " product-card--featured"
+            else if (nothingSelected && p.id !== "bundle") cardClass += " product-card--subdued"
+
+            const nameColor = isSelected ? "#f0e6d3" : nothingSelected && p.id === "bundle" ? "#ccc" : "#888"
+
             return (
               <div
                 key={p.id}
-                className={`product-card${isSelected ? " product-card--selected" : ""}${isDisabled ? " product-card--disabled" : ""}`}
+                className={cardClass}
                 onClick={() => !isDisabled && handleSelectProduct(p.id)}
                 role="radio"
                 aria-checked={isSelected}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 600, color: isSelected ? "#f0e6d3" : "#aaa", lineHeight: 1.2, marginBottom: 3 }}>
+                    <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 600, color: nameColor, lineHeight: 1.2, marginBottom: 3 }}>
                       {p.name}
                     </p>
-                    <p style={{ fontSize: 11, color: "#555", lineHeight: 1.4 }}>{p.tagline}</p>
+                    <p style={{ fontSize: 11, color: isSelected ? "rgba(240,230,211,0.5)" : "#555", lineHeight: 1.4 }}>{p.tagline}</p>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0, marginLeft: 16 }}>
                     <p style={{ fontSize: 22, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>{p.price}</p>
@@ -468,7 +513,7 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
                     <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>✓ Included in bundle</span>
                   ) : (
                     p.includes.map((item) => (
-                      <span key={item} style={{ fontSize: 10, color: isSelected ? "rgba(240,230,211,0.45)" : "#444", letterSpacing: "0.04em" }}>{item}</span>
+                      <span key={item} style={{ fontSize: 10, color: isSelected ? "rgba(240,230,211,0.4)" : "#444", letterSpacing: "0.04em" }}>{item}</span>
                     ))
                   )}
                 </div>
@@ -477,13 +522,10 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
                   <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.3)", padding: "3px 8px" }}>
                     {p.badge}
                   </span>
-                  {isSelected ? (
-                    <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em", display: "flex", alignItems: "center", gap: 4 }}>
-                      <span style={{ fontSize: 12 }}>●</span> Selected
-                    </span>
-                  ) : (
-                    <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.1em" }}>Select →</span>
-                  )}
+                  {isSelected
+                    ? <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>● Selected — click to remove</span>
+                    : <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.1em" }}>Select →</span>
+                  }
                 </div>
               </div>
             )
@@ -495,26 +537,22 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
               Optional add-on
             </p>
             <div
-              className={`tracker-card${includesTracker ? " tracker-card--added" : ""}`}
+              className={`tracker-card${includesTracker ? " tracker-card--added" : selectedProduct ? " tracker-card--featured" : ""}`}
               onClick={handleToggleTracker}
               style={{ cursor: paymentStarted ? "default" : "pointer" }}
             >
               <div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: includesTracker ? "#f0e6d3" : "#888", fontFamily: "var(--font-cormorant), serif", marginBottom: 2 }}>
+                <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 16, fontWeight: 600, color: includesTracker ? "#f0e6d3" : selectedProduct ? "#bbb" : "#777", marginBottom: 3, lineHeight: 1.2 }}>
                   Progress Tracker
+                  {includesTracker && <span style={{ fontSize: 11, color: "#c9a96e", marginLeft: 8 }}>● Added</span>}
                 </p>
                 <p style={{ fontSize: 11, color: "#555" }}>Log every workout. Beat last week.</p>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: includesTracker ? "#c9a96e" : "#666", fontFamily: "var(--font-montserrat), sans-serif" }}>+{TRACKER_PRICE_DISPLAY}</span>
-                <input
-                  type="checkbox"
-                  checked={includesTracker}
-                  disabled={paymentStarted}
-                  onChange={handleToggleTracker}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ accentColor: "#c9a96e", width: 16, height: 16, cursor: paymentStarted ? "default" : "pointer" }}
-                />
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <p style={{ fontSize: 16, fontWeight: 700, color: includesTracker ? "#c9a96e" : "#666", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>+{TRACKER_PRICE_DISPLAY}</p>
+                <p style={{ fontSize: 9, color: "#444", letterSpacing: "0.06em", marginTop: 3 }}>
+                  {includesTracker ? "Click to remove" : "Click to add"}
+                </p>
               </div>
             </div>
           </div>
@@ -523,10 +561,12 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#444" }}>Order total</span>
             <div style={{ textAlign: "right" }}>
-              <span style={{ fontSize: 24, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif" }}>
+              <span style={{ fontSize: 24, fontWeight: 700, color: selectedProduct || includesTracker ? "#c9a96e" : "#333", fontFamily: "var(--font-montserrat), sans-serif" }}>
                 {displayTotal(selectedProduct, includesTracker)}
               </span>
-              <span style={{ fontSize: 10, color: "#444", marginLeft: 8, letterSpacing: "0.08em" }}>one-time</span>
+              {(selectedProduct || includesTracker) && (
+                <span style={{ fontSize: 10, color: "#444", marginLeft: 8, letterSpacing: "0.08em" }}>one-time</span>
+              )}
             </div>
           </div>
 
@@ -539,7 +579,13 @@ export function CheckoutClient({ product: initialProduct = "bundle", memberDisco
             Complete your purchase
           </p>
 
-          {loadingIntent ? (
+          {!selectedProduct ? (
+            <div style={{ paddingTop: 60, textAlign: "center" }}>
+              <p style={{ fontSize: 13, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", lineHeight: 1.8 }}>
+                Select a course on the left<br />to continue.
+              </p>
+            </div>
+          ) : loadingIntent ? (
             <div style={{ padding: "48px 0", textAlign: "center", color: "#555", fontSize: 13, letterSpacing: "0.1em" }}>
               Preparing secure payment…
             </div>
