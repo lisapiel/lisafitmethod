@@ -17,6 +17,7 @@ const HIDDEN_PREFIXES = [
   "/set-password",
   "/purchase-success",
   "/tracker-checkout",
+  "/checkout",
 ]
 
 export default function SiteHeader() {
