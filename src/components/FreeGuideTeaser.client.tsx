@@ -124,8 +124,8 @@ export default function FreeGuideTeaser() {
               border: `1px solid ${status === "error" ? "#cc6666" : line}`,
               color: ink,
               fontFamily: dmSans,
-              fontSize: "0.875rem",
-              padding: "11px 14px",
+              fontSize: "1rem",
+              padding: "9px 12px",
               outline: "none",
             }}
           />

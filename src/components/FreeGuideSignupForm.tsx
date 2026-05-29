@@ -86,10 +86,9 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
                 border: `1px solid ${status === "error" ? "#cc6666" : line}`,
                 color: ink,
                 fontFamily: dmSans,
-                fontSize: "0.92rem",
-                padding: "14px 18px",
+                fontSize: "1rem",
+                padding: "10px 14px",
                 outline: "none",
-                minHeight: 50,
               }}
             />
             <button
@@ -104,11 +103,10 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
                 fontWeight: 600,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                padding: "14px 22px",
+                padding: "10px 20px",
                 cursor: status === "submitting" ? "default" : "pointer",
                 opacity: status === "submitting" ? 0.75 : 1,
                 whiteSpace: "nowrap",
-                minHeight: 50,
                 flexShrink: 0,
               }}
             >
@@ -151,10 +149,9 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
               border: `1px solid ${status === "error" ? "#884444" : "#2a2722"}`,
               color: "#f0ebe2",
               fontFamily: dmSans,
-              fontSize: "0.9rem",
-              padding: "0.75rem 1rem",
+              fontSize: "1rem",
+              padding: "0.6rem 0.875rem",
               outline: "none",
-              minHeight: 48,
             }}
           />
           <button
@@ -169,12 +166,11 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
               fontWeight: 600,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              padding: "0.75rem 1.5rem",
+              padding: "0.6rem 1.25rem",
               cursor: status === "submitting" ? "default" : "pointer",
               opacity: status === "submitting" ? 0.7 : 1,
               flexShrink: 0,
               whiteSpace: "nowrap",
-              minHeight: 48,
             }}
           >
             {status === "submitting" ? "Sending..." : "Get the Guide"}
@@ -238,10 +234,9 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
             border: `1px solid ${status === "error" ? "#884444" : "#2a2722"}`,
             color: "#f0ebe2",
             fontFamily: dmSans,
-            fontSize: "0.9rem",
-            padding: "0.75rem 1rem",
+            fontSize: "1rem",
+            padding: "0.6rem 0.875rem",
             outline: "none",
-            minHeight: 48,
           }}
         />
         <button
@@ -256,12 +251,11 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
             fontWeight: 600,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            padding: "0.75rem 1.5rem",
+            padding: "0.6rem 1.25rem",
             cursor: status === "submitting" ? "default" : "pointer",
             opacity: status === "submitting" ? 0.7 : 1,
             flexShrink: 0,
             whiteSpace: "nowrap",
-            minHeight: 48,
           }}
         >
           {status === "submitting" ? "Sending..." : "Get the Guide"}
