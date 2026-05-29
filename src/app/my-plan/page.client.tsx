@@ -85,6 +85,7 @@ interface PlanState {
   weeklySales: WeeklySales[]
   clients: Client[]
   completedTasks: Record<string, boolean>
+  customEpisodes: Episode[]
 }
 
 // ─── State helpers ─────────────────────────────────────────────────────────────
@@ -98,6 +99,7 @@ function defaultState(): PlanState {
     weeklySales: [],
     clients: [],
     completedTasks: {},
+    customEpisodes: [],
   }
 }
 
@@ -113,6 +115,7 @@ function loadState(): PlanState {
       migrated.startDate = (old.startDate as string | null) ?? null
       migrated.clients = (old.clients as Client[] | undefined) ?? []
       migrated.completedTasks = (old.completedTasks as Record<string, boolean> | undefined) ?? {}
+      migrated.customEpisodes = []
       return migrated
     }
   } catch {
@@ -180,6 +183,7 @@ function formatCurrency(n: number): string {
 // ─── Series data ───────────────────────────────────────────────────────────────
 
 const SERIES: Series[] = [
+  { id: "my-ideas",     name: "My Ideas",                  description: "Ideas you added yourself.", color: "#c9a96e" },
   { id: "wish-i-knew",  name: "Wish I Knew Before",       description: "Honest lessons from years of training — the stuff nobody told you at the start.", color: "#c9a96e" },
   { id: "do-this",      name: "Do This, Not That",         description: "Side-by-side form corrections and exercise swaps. Save-worthy demo content.", color: "#9ec9a9" },
   { id: "gym-musts",    name: "Gym-Goer Must-Knows",       description: "The unwritten rules, tips, and truths every lifter should know.", color: "#7bb3c9" },
@@ -984,6 +988,14 @@ const EPISODES: Episode[] = [
 
 const EPISODE_MAP = new Map(EPISODES.map(e => [e.id, e]))
 
+function allEps(state: PlanState): Episode[] {
+  return [...EPISODES, ...(state.customEpisodes ?? [])]
+}
+
+function findEp(state: PlanState, id: string): Episode | undefined {
+  return EPISODE_MAP.get(id) ?? (state.customEpisodes ?? []).find(e => e.id === id)
+}
+
 // ─── Format metadata ───────────────────────────────────────────────────────────
 
 const FORMAT_LABELS: Record<EpisodeFormat, string> = {
@@ -1139,8 +1151,8 @@ function HomeTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSta
   const currentDay = getCurrentDay(state.startDate)
   const currentWeek = currentDay > 0 ? Math.ceil(currentDay / 7) : 1
 
-  const totalEpisodes = EPISODES.length
-  const statusCounts = EPISODES.reduce<Record<EpisodeStatus, number>>(
+  const totalEpisodes = allEps(state).length
+  const statusCounts = allEps(state).reduce<Record<EpisodeStatus, number>>(
     (acc, ep) => {
       const s: EpisodeStatus = state.episodeStatuses[ep.id] ?? "idea"
       acc[s] = (acc[s] ?? 0) + 1
@@ -1152,8 +1164,8 @@ function HomeTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSta
   const readyCount = statusCounts.edited
   const postedCount = state.postedEntries.length
 
-  const nextToFilm = EPISODES.filter(e => (state.episodeStatuses[e.id] ?? "idea") === "idea").slice(0, 3)
-  const readyToPost = EPISODES.filter(e => state.episodeStatuses[e.id] === "edited")
+  const nextToFilm = allEps(state).filter(e => (state.episodeStatuses[e.id] ?? "idea") === "idea").slice(0, 3)
+  const readyToPost = allEps(state).filter(e => state.episodeStatuses[e.id] === "edited")
 
   const thisWeekMonday = getMondayOf(new Date())
   const weekRevenue = state.weeklySales
@@ -1252,9 +1264,13 @@ function HomeTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSta
 
 // ─── Ideas Tab ────────────────────────────────────────────────────────────────
 
+const BLANK_FORM = { title: "", hook: "", format: "talking-head" as EpisodeFormat, seriesId: "my-ideas", filmingNote: "", captionIdea: "", cta: "" }
+
 function IdeasTab({ state, update }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void }) {
   const [activeFilter, setActiveFilter] = useState("all")
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState(BLANK_FORM)
 
   const seriesFilters = SERIES.map(s => ({ id: s.id, label: s.name }))
   const formatFilters: Array<{ id: string; label: string }> = [
@@ -1267,7 +1283,8 @@ function IdeasTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSt
   ]
   const allFilters = [{ id: "all", label: "All" }, ...seriesFilters, ...formatFilters]
 
-  const filtered = EPISODES.filter(ep => {
+  const episodes = allEps(state)
+  const filtered = episodes.filter(ep => {
     if (activeFilter === "all") return true
     if (activeFilter.startsWith("fmt-")) {
       const fmt = activeFilter.slice(4) as EpisodeFormat
@@ -1284,8 +1301,97 @@ function IdeasTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSt
     update(d => ({ ...d, episodeStatuses: { ...d.episodeStatuses, [id]: s } }))
   }
 
+  function saveNewIdea() {
+    if (!form.title.trim() || !form.hook.trim()) return
+    const ep: Episode = {
+      id: "custom_" + generateId(),
+      seriesId: form.seriesId,
+      title: form.title.trim(),
+      hook: form.hook.trim(),
+      format: form.format,
+      targetLength: "",
+      filmingNote: form.filmingNote.trim(),
+      captionIdea: form.captionIdea.trim(),
+      cta: form.cta.trim() || undefined,
+      tags: [form.seriesId, form.format],
+    }
+    update(d => ({ ...d, customEpisodes: [...(d.customEpisodes ?? []), ep] }))
+    setForm(BLANK_FORM)
+    setShowForm(false)
+  }
+
+  const inputStyle = { width: "100%", boxSizing: "border-box" as const, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 10px", fontFamily: FONT_SANS, fontSize: 13, color: C.cream, outline: "none" }
+  const labelStyle = { fontFamily: FONT_SANS, fontSize: 10, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 4 }
+
   return (
     <div style={{ padding: "12px 16px" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        <button
+          onClick={() => setShowForm(v => !v)}
+          style={{ background: showForm ? C.border : C.gold, color: showForm ? C.cream : C.bg, border: "none", borderRadius: 8, padding: "8px 16px", fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+        >
+          {showForm ? "Cancel" : "+ Add Idea"}
+        </button>
+      </div>
+
+      {showForm && (
+        <div style={{ background: C.card, border: `1px solid ${C.gold}44`, borderRadius: 12, padding: "16px", marginBottom: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+          <p style={{ fontFamily: FONT_SERIF, fontSize: 14, color: C.gold, margin: 0, letterSpacing: "0.06em" }}>New Idea</p>
+
+          <div>
+            <label style={labelStyle}>Title *</label>
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="What is this video about?" style={inputStyle} />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Hook *</label>
+            <input value={form.hook} onChange={e => setForm(f => ({ ...f, hook: e.target.value }))} placeholder="Opening line — what makes someone stop scrolling?" style={inputStyle} />
+          </div>
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Format</label>
+              <select value={form.format} onChange={e => setForm(f => ({ ...f, format: e.target.value as EpisodeFormat }))} style={{ ...inputStyle, cursor: "pointer" }}>
+                <option value="talking-head">Talking Head</option>
+                <option value="gym-footage">Gym Footage</option>
+                <option value="b-roll-demo">B-Roll Demo</option>
+                <option value="do-with-me">Do With Me</option>
+                <option value="voiceover">Voiceover</option>
+                <option value="text-broll">Text + B-Roll</option>
+              </select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Series</label>
+              <select value={form.seriesId} onChange={e => setForm(f => ({ ...f, seriesId: e.target.value }))} style={{ ...inputStyle, cursor: "pointer" }}>
+                {SERIES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>What to Film</label>
+            <textarea value={form.filmingNote} onChange={e => setForm(f => ({ ...f, filmingNote: e.target.value }))} placeholder="Setup, location, what to capture..." rows={2} style={{ ...inputStyle, resize: "vertical" as const }} />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Caption Idea</label>
+            <textarea value={form.captionIdea} onChange={e => setForm(f => ({ ...f, captionIdea: e.target.value }))} placeholder="Draft the post caption..." rows={3} style={{ ...inputStyle, resize: "vertical" as const }} />
+          </div>
+
+          <div>
+            <label style={labelStyle}>CTA (optional)</label>
+            <input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder={'e.g. "Comment GUIDE to get the template"'} style={inputStyle} />
+          </div>
+
+          <button
+            onClick={saveNewIdea}
+            disabled={!form.title.trim() || !form.hook.trim()}
+            style={{ background: form.title.trim() && form.hook.trim() ? C.gold : C.border, color: form.title.trim() && form.hook.trim() ? C.bg : C.muted, border: "none", borderRadius: 8, padding: "10px 18px", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, cursor: form.title.trim() && form.hook.trim() ? "pointer" : "default" }}
+          >
+            Save Idea
+          </button>
+        </div>
+      )}
       <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", marginBottom: 16, paddingBottom: 4 }}>
         {allFilters.map(f => {
           const isActive = activeFilter === f.id
@@ -1415,8 +1521,8 @@ function EpCard({ ep, action }: EpCardProps) {
 }
 
 function EditTab({ state, update, switchToCalendar }: { state: PlanState; update: (fn: (d: PlanState) => PlanState) => void; switchToCalendar: () => void }) {
-  const filmed = EPISODES.filter(e => state.episodeStatuses[e.id] === "filmed")
-  const ready  = EPISODES.filter(e => state.episodeStatuses[e.id] === "edited")
+  const filmed = allEps(state).filter(e => state.episodeStatuses[e.id] === "filmed")
+  const ready  = allEps(state).filter(e => state.episodeStatuses[e.id] === "edited")
 
   function markEdited(id: string) {
     update(d => ({ ...d, episodeStatuses: { ...d.episodeStatuses, [id]: "edited" } }))
@@ -1481,7 +1587,7 @@ function CalendarTab({ state, update }: { state: PlanState; update: (fn: (d: Pla
   const [pickDateFor, setPickDateFor] = useState<string | null>(null)
   const [customDate, setCustomDate] = useState("")
 
-  const readyEpisodes = EPISODES.filter(e => state.episodeStatuses[e.id] === "edited")
+  const readyEpisodes = allEps(state).filter(e => state.episodeStatuses[e.id] === "edited")
 
   function scheduleEpisode(episodeId: string, date: string) {
     const entry: PostedEntry = { id: generateId(), episodeId, postedDate: date }
@@ -1573,7 +1679,7 @@ function CalendarTab({ state, update }: { state: PlanState; update: (fn: (d: Pla
             <p style={{ fontFamily: FONT_SANS, fontSize: 11, color: C.mutedLight, margin: "0 0 8px 0", letterSpacing: "0.06em" }}>{getMonthLabel(mk)}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[...entriesByMonth[mk]].sort((a, b) => b.postedDate.localeCompare(a.postedDate)).map(pe => {
-                const ep = EPISODE_MAP.get(pe.episodeId)
+                const ep = findEp(state, pe.episodeId)
                 const series = ep ? SERIES_MAP.get(ep.seriesId) : null
                 return (
                   <div key={pe.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
@@ -1627,7 +1733,7 @@ function StatsTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSt
   const bestEntry = ratedEntries.length > 0
     ? ratedEntries.reduce((best, pe) => (pe.starRating ?? 0) > (best.starRating ?? 0) ? pe : best)
     : null
-  const bestEpisode = bestEntry ? EPISODE_MAP.get(bestEntry.episodeId) : null
+  const bestEpisode = bestEntry ? findEp(state, bestEntry.episodeId) : null
 
   function getMetricsEdit(id: string): MetricEdit {
     const entry = state.postedEntries.find(pe => pe.id === id)
@@ -1710,7 +1816,7 @@ function StatsTab({ state, update }: { state: PlanState; update: (fn: (d: PlanSt
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {sortedEntries.map(pe => {
-          const ep = EPISODE_MAP.get(pe.episodeId)
+          const ep = findEp(state, pe.episodeId)
           const series = ep ? SERIES_MAP.get(ep.seriesId) : null
           const isExpanded = expandedId === pe.id
           const em = editMetrics[pe.id] ?? getMetricsEdit(pe.id)
