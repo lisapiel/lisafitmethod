@@ -16,6 +16,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ product?: string; member?: string }> }) {
   const { product, member } = await searchParams
-  const validProduct = product === "nutrition" ? "nutrition" : product === "bundle" ? "bundle" : "training"
-  return <CheckoutClient product={validProduct} memberDiscount={member === "1"} />
+  const validProduct: "training" | "nutrition" | "bundle" | undefined =
+    product === "training" ? "training" : product === "nutrition" ? "nutrition" : product === "bundle" ? "bundle" : undefined
+  return <CheckoutClient product={validProduct ?? "bundle"} memberDiscount={member === "1"} />
 }

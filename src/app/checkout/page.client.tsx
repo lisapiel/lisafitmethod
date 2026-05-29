@@ -523,7 +523,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
                     {p.badge}
                   </span>
                   {isSelected
-                    ? <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>● Selected — click to remove</span>
+                    ? <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>● Selected</span>
                     : <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.1em" }}>Select →</span>
                   }
                 </div>
@@ -551,7 +551,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
               <div style={{ textAlign: "right", flexShrink: 0 }}>
                 <p style={{ fontSize: 16, fontWeight: 700, color: includesTracker ? "#c9a96e" : "#666", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>+{TRACKER_PRICE_DISPLAY}</p>
                 <p style={{ fontSize: 9, color: "#444", letterSpacing: "0.06em", marginTop: 3 }}>
-                  {includesTracker ? "Click to remove" : "Click to add"}
+                  {includesTracker ? "● Added" : "Add →"}
                 </p>
               </div>
             </div>
