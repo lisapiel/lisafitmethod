@@ -426,7 +426,7 @@ export default function NutritionGuideClient() {
               <div style={{ display: "flex", alignItems: "baseline", gap: "0.875rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
                 <span style={{ color: "#5a544b", textDecoration: "line-through", fontFamily: playfair, fontSize: "1.5rem" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
                 <span style={{ color: "#fff", fontFamily: playfair, fontSize: "clamp(2rem, 5vw, 2.9rem)", fontWeight: 700, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
-                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>Founding Price</span>
+                <span style={{ fontSize: "0.62rem", fontWeight: 500, letterSpacing: "0.2em", textTransform: "uppercase", color: black, background: gold, padding: "4px 10px", alignSelf: "center", fontFamily: dmSans }}>Limited Time</span>
               </div>
               <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.3rem, 3vw, 1.6rem)", fontWeight: 700, margin: "0.75rem 0 0.75rem", color: "#fff", letterSpacing: "-0.01em" }}>
                 Eat right for your body, not someone else&apos;s.
@@ -461,7 +461,7 @@ export default function NutritionGuideClient() {
               <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
                 <span style={{ fontFamily: playfair, fontSize: "1.6rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{COURSE_PRICE_DISPLAY}</span>
                 <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{COURSE_REGULAR_PRICE_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Limited Time</span>
               </div>
               <h3 style={{ fontFamily: playfair, fontSize: "clamp(1.1rem, 2.5vw, 1.3rem)", fontWeight: 700, margin: "0 0 0.75rem", color: ink, letterSpacing: "-0.01em" }}>
                 The 4-week strength program that puts the nutrition to work.
@@ -477,7 +477,7 @@ export default function NutritionGuideClient() {
             {/* Urgency note */}
             <div style={{ borderLeft: `2px solid ${gold}`, paddingLeft: "1.25rem", marginBottom: "1.75rem" }}>
               <p style={{ fontFamily: dmSans, fontSize: "0.85rem", color: muted, lineHeight: 1.7, margin: 0 }}>
-                Founding member pricing ends when we hit 100 students. Regular pricing returns then. This is the cheapest these courses will ever be.
+                Limited time pricing. Regular pricing returns soon.
               </p>
             </div>
 

@@ -683,7 +683,7 @@ function NutritionGuidePDF() {
           { style: upsellStyles.priceRow },
           createElement(Text, { style: upsellStyles.strikePrice }, "$127"),
           createElement(Text, { style: { ...upsellStyles.bigPrice, fontSize: 16 } }, "$77"),
-          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
+          createElement(Text, { style: upsellStyles.priceBadge }, "Limited Time")
         ),
         createElement(Text, { style: upsellStyles.productName }, "Eat right for your body, not someone else's."),
         createElement(Text, { style: upsellStyles.productDesc }, "Personalized TDEE calculator so you know your exact calorie target. A full meal plan built around your number, with real food and 9 verified recipes with source attribution. Science-backed content with research citations throughout."),
@@ -713,7 +713,7 @@ function NutritionGuidePDF() {
           { style: upsellStyles.priceRow },
           createElement(Text, { style: upsellStyles.strikePrice }, "$147"),
           createElement(Text, { style: { ...upsellStyles.bigPrice, fontSize: 16 } }, "$97"),
-          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
+          createElement(Text, { style: upsellStyles.priceBadge }, "Limited Time")
         ),
         createElement(Text, { style: upsellStyles.productName }, "The 4-week strength program that puts the nutrition to work."),
         createElement(Text, { style: upsellStyles.productDesc }, "Five foundational movements, 50+ exercise videos with coaching cues, built-in workout tracking, and progressive overload from week one. Three structured training days per week."),
@@ -724,7 +724,7 @@ function NutritionGuidePDF() {
       createElement(
         View,
         { style: upsellStyles.urgencyBox },
-        createElement(Text, { style: upsellStyles.urgencyText }, "Founding member pricing ends when we hit 100 students. Regular pricing returns then. This is the cheapest these courses will ever be.")
+        createElement(Text, { style: upsellStyles.urgencyText }, "Limited time pricing. Regular pricing returns soon.")
       ),
 
       // Lisa's personal close

@@ -428,7 +428,7 @@ export default function FreeGuideClient() {
                 <em style={{ fontStyle: "italic", fontWeight: 600, color: gold }}>Start building.</em>
               </h3>
               <p style={{ fontSize: "0.88rem", color: "#b3ab9c", marginBottom: "1.6rem", maxWidth: 480, lineHeight: 1.65, fontFamily: dmSans }}>
-                One payment, ongoing access. Keep the videos, the program, and the tracker. Run it once, then run it again heavier. Founding member pricing. Limited time.
+                One payment, ongoing access. Keep the videos, the program, and the tracker. Run it once, then run it again heavier. Limited time pricing.
               </p>
               <Link
                 href="/checkout"
@@ -456,7 +456,7 @@ export default function FreeGuideClient() {
               <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
                 <span style={{ fontFamily: playfair, fontSize: "1.6rem", fontWeight: 700, color: ink, lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
                 <span style={{ fontFamily: dmSans, fontSize: "0.72rem", color: muted, textDecoration: "line-through" }}>{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
-                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Founding Price</span>
+                <span style={{ fontFamily: dmSans, fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: black, background: gold, padding: "3px 8px" }}>Limited Time</span>
               </div>
               <Link href="/nutrition" style={{ display: "inline-block", color: goldDeep, fontFamily: dmSans, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", border: `1px solid ${goldDeep}`, padding: "0.7rem 1.5rem" }}>
                 Explore Nutrition Foundations

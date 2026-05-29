@@ -151,7 +151,7 @@ export default async function CoursesPage() {
         .module-card  { background: #0a0a0a; padding: 36px 32px; }
         @media (max-width: 600px) {
           .modules-grid { grid-template-columns: 1fr; }
-          .module-card  { padding: 28px 0; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.06); }
+          .module-card  { padding: 28px 20px; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.06); }
         }
 
         /* Modules grid — light variant (Nutrition) */
@@ -159,7 +159,7 @@ export default async function CoursesPage() {
         .module-card-light  { background: #fff; padding: 32px 28px; }
         @media (max-width: 600px) {
           .modules-grid-light { grid-template-columns: 1fr; }
-          .module-card-light  { padding: 24px 0; background: transparent; border-bottom: 1px solid rgba(0,0,0,0.07); }
+          .module-card-light  { padding: 24px 20px; background: transparent; border-bottom: 1px solid rgba(0,0,0,0.07); }
         }
 
         /* Testimonials (LIGHT) */
@@ -260,7 +260,7 @@ export default async function CoursesPage() {
                   <span className="price-main">${t.coursePrice}</span>
                   <span className="price-was">{COURSE_REGULAR_PRICE_DISPLAY}</span>
                 </div>
-                <p className="price-note">One-time payment · Founding member price<br />Built-in workout and progress tracking</p>
+                <p className="price-note">One-time payment · Limited time price<br />Built-in workout and progress tracking</p>
               </div>
               <Link href="/checkout" className="cta-primary">Get Instant Access</Link>
               <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
@@ -338,7 +338,7 @@ export default async function CoursesPage() {
                   <span className="price-main">{NUTRITION_COURSE_PRICE_DISPLAY}</span>
                   <span className="price-was">{NUTRITION_COURSE_REGULAR_PRICE_DISPLAY}</span>
                 </div>
-                <p className="price-note">One-time payment · Founding member price<br />Ongoing access, no subscription</p>
+                <p className="price-note">One-time payment · Limited time price<br />Ongoing access, no subscription</p>
               </div>
               <Link href="/checkout?product=nutrition" className="cta-primary">Get Instant Access</Link>
               <div style={{ marginTop: 16, textAlign: "center" }}>
@@ -489,7 +489,7 @@ export default async function CoursesPage() {
             <Link href="/checkout" style={{ display: "inline-block", background: accent, color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", padding: "20px 60px" }}>
               Get Instant Access
             </Link>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.2)", fontFamily: "var(--font-dm-sans), sans-serif", marginTop: 4 }}>Training Foundations · Founding member price</p>
+            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.2)", fontFamily: "var(--font-dm-sans), sans-serif", marginTop: 4 }}>Training Foundations · Limited time price</p>
           </div>
           <div style={{ marginTop: 56, paddingTop: 40, borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center" }}>
             <Link href="/checkout?product=nutrition" style={{ color: "rgba(200,169,126,0.6)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, textDecoration: "none", letterSpacing: "0.05em" }}>

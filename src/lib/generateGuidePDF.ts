@@ -408,7 +408,7 @@ function GuidePDF() {
         { style: upsellStyles.upsellHeader },
         createElement(Text, { style: upsellStyles.upsellBrand }, "Lisa Fit Method"),
         createElement(Text, { style: upsellStyles.upsellHeadline }, "Ready to go further?"),
-        createElement(Text, { style: upsellStyles.upsellSub }, "Founding member pricing. Limited time.")
+        createElement(Text, { style: upsellStyles.upsellSub }, "Limited time pricing.")
       ),
       // Training Foundations
       createElement(
@@ -422,7 +422,7 @@ function GuidePDF() {
           { style: upsellStyles.priceRow },
           createElement(Text, { style: upsellStyles.strikePrice }, "$167"),
           createElement(Text, { style: upsellStyles.bigPrice }, "$97"),
-          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
+          createElement(Text, { style: upsellStyles.priceBadge }, "Limited Time")
         ),
         createElement(Text, { style: upsellStyles.foundingNote }, "Regular $167. One-time payment, ongoing access."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/courses")
@@ -439,7 +439,7 @@ function GuidePDF() {
           { style: upsellStyles.priceRow },
           createElement(Text, { style: upsellStyles.strikePrice }, "$137"),
           createElement(Text, { style: upsellStyles.bigPrice }, "$77"),
-          createElement(Text, { style: upsellStyles.priceBadge }, "Founding Price")
+          createElement(Text, { style: upsellStyles.priceBadge }, "Limited Time")
         ),
         createElement(Text, { style: upsellStyles.foundingNote }, "Regular $137. One-time payment, ongoing access."),
         createElement(Text, { style: upsellStyles.urlText }, "lisafitmethod.com/nutrition")

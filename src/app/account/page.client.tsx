@@ -246,7 +246,7 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
               {owned.length > 0 ? "Add to Your Account" : "Get Started"}
             </p>
             <p style={{ fontSize: "0.7rem", color: "#555", marginBottom: 16 }}>
-              {owned.length > 0 ? "10% member discount applied automatically." : "Founding member pricing. Limited time."}
+              {owned.length > 0 ? "10% member discount applied automatically." : "Limited time pricing."}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: owned.length > 0 ? 0 : 16 }}>
               {upsells.map((u) => (
