@@ -31,6 +31,7 @@ export default function SiteHeader() {
     { href: "/courses", label: "Courses" },
     { href: "/coaching", label: "Coaching" },
     { href: "/blog", label: "Blog" },
+    { href: "/faq", label: "FAQ" },
   ]
 
   return (

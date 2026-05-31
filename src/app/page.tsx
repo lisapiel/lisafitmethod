@@ -581,6 +581,63 @@ export default async function HomePage() {
       {/* TESTIMONIALS */}
       <TestimonialsSection />
 
+      {/* COMMON QUESTIONS */}
+      <section style={{ background: "var(--off-white)", padding: "100px 80px" }} className="faq-preview-section">
+        <style>{`
+          @media (max-width: 768px) {
+            .faq-preview-section { padding: 72px 28px !important; }
+            .faq-preview-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+          }
+        `}</style>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 16, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            Common Questions
+          </p>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48, gap: 24, flexWrap: "wrap" }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, margin: 0 }}>
+              Good questions.<br />
+              <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>Straight answers.</em>
+            </h2>
+            <Link href="/faq" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none", whiteSpace: "nowrap" }}>
+              See all questions →
+            </Link>
+          </div>
+          <div className="faq-preview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, marginBottom: 48 }}>
+            {[
+              {
+                q: "Do I need gym experience to start?",
+                a: "No. Training Foundations is built from the ground up for people who are brand new to lifting. The first module teaches you exactly how to move before any weight is added.",
+              },
+              {
+                q: "What equipment do I need?",
+                a: "Dumbbells and a resistance band cover most of the program. A gym membership is helpful but not required to get started.",
+              },
+              {
+                q: "How long do the workouts take?",
+                a: "About 45 to 60 minutes, three days a week. You get full warm-ups, the training block, and a cool-down all in one place.",
+              },
+              {
+                q: "How long do I have access?",
+                a: "Forever. One payment, no subscription. The videos, tracking tools, and program materials are yours to keep and reuse as long as the site exists.",
+              },
+            ].map((item) => (
+              <div key={item.q} style={{ background: "#fff", padding: "32px 36px", borderLeft: "3px solid var(--accent)" }}>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 17, fontWeight: 700, color: "var(--black)", lineHeight: 1.3, marginBottom: 10 }}>{item.q}</p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, color: "var(--muted)", lineHeight: 1.7 }}>{item.a}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <Link
+              href="/faq"
+              style={{ display: "inline-block", border: "1px solid var(--accent-dark)", color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 40px" }}
+            >
+              Read All 15 Questions
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* FINAL CTA */}
       <section style={{ background: "var(--black)", padding: "140px 80px", textAlign: "center", position: "relative", overflow: "hidden" }} className="final-cta-section">
         <style>{`

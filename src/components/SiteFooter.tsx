@@ -107,6 +107,7 @@ export default function SiteFooter() {
               { href: "/courses", label: "Courses" },
               { href: "/coaching", label: "Coaching" },
               { href: "/blog", label: "Blog" },
+              { href: "/faq", label: "FAQ" },
               { href: "/contact", label: "Contact" },
             ].map((l) => (
               <Link
