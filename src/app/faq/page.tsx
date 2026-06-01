@@ -42,59 +42,47 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: "What is The Lisa Fit Method?",
-        a: (
-          <>
-            The Lisa Fit Method is an evidence-based fitness education platform built around one idea: most people fail at training not because they lack willpower, but because no one ever properly taught them how.{" "}
-            <Link href="/about" style={linkStyle}>Lisa McPherson</Link>
-            {" "}is a certified personal trainer who rebuilt her own training from scratch after a serious back injury. That experience shaped everything here. The platform teaches you how your body works, how to move correctly, how to eat in a way that supports your goals, and how to train in a way that keeps working for years, not just weeks. Courses and coaching are the products, but the real goal is to give you the knowledge and confidence to train independently, for life.
-          </>
-        ),
+        a: "The Lisa Fit Method is built around a simple belief: lasting results come from understanding the fundamentals. After a serious back injury forced me to rebuild my own training from the ground up, I became obsessed with learning what actually works and why. Today, The Lisa Fit Method combines evidence-based training, practical nutrition, and sustainable habits to help people build strength, improve their body composition, and feel confident in the gym. Through courses and coaching, the goal is not just to help you get results, but to understand how to keep creating them for years to come.",
         schemaA:
-          "The Lisa Fit Method is an evidence-based fitness education platform built around one idea: most people fail at training not because they lack willpower, but because no one ever properly taught them how. Lisa McPherson is a certified personal trainer who rebuilt her own training from scratch after a serious back injury. That experience shaped everything here. The platform teaches you how your body works, how to move correctly, how to eat in a way that supports your goals, and how to train in a way that keeps working for years, not just weeks. Courses and coaching are the products, but the real goal is to give you the knowledge and confidence to train independently, for life.",
+          "The Lisa Fit Method is built around a simple belief: lasting results come from understanding the fundamentals. After a serious back injury forced me to rebuild my own training from the ground up, I became obsessed with learning what actually works and why. Today, The Lisa Fit Method combines evidence-based training, practical nutrition, and sustainable habits to help people build strength, improve their body composition, and feel confident in the gym. Through courses and coaching, the goal is not just to help you get results, but to understand how to keep creating them for years to come.",
       },
       {
         q: "Who is The Lisa Fit Method for?",
-        a: (
-          <>
-            It is built for adults who want to build strength, improve their body composition, and finally understand how training and nutrition actually work. The typical member falls somewhere between completely new to the gym and frustrated that nothing they have tried has produced consistent results. That includes people who have been going to the gym inconsistently for years without real progress, people returning after an injury or a long break, people who know they need to strength train but feel intimidated and do not know where to start, and people who are tired of workout videos that make them sweat without ever actually teaching them anything.{" "}
-            <Link href="/about" style={linkStyle}>Read more about Lisa and why she built this.</Link>
-          </>
-        ),
+        a: "I created The Lisa Fit Method for people who want to build strength, improve their body composition, and finally understand how training and nutrition actually work. Most people I work with are either completely new to the gym, returning after time away, or frustrated because they've spent years trying random workouts without seeing consistent results. If you've ever felt overwhelmed by fitness advice, intimidated by the gym, or unsure whether you're doing the right things, this is exactly who I built it for.",
         schemaA:
-          "It is built for adults who want to build strength, improve their body composition, and finally understand how training and nutrition actually work. The typical member falls somewhere between completely new to the gym and frustrated that nothing they have tried has produced consistent results. That includes people who have been going to the gym inconsistently for years without real progress, people returning after an injury or a long break, people who know they need to strength train but feel intimidated and do not know where to start, and people who are tired of workout videos that make them sweat without ever actually teaching them anything.",
+          "I created The Lisa Fit Method for people who want to build strength, improve their body composition, and finally understand how training and nutrition actually work. Most people I work with are either completely new to the gym, returning after time away, or frustrated because they've spent years trying random workouts without seeing consistent results. If you've ever felt overwhelmed by fitness advice, intimidated by the gym, or unsure whether you're doing the right things, this is exactly who I built it for.",
       },
       {
         q: "Which course should I start with?",
         a: (
           <>
-            If you are new to strength training, returning after a break, or just want to finally learn how to lift correctly, start with{" "}
+            If your goal is to learn how to strength train properly, build confidence in the gym, and understand the fundamentals that drive results, start with{" "}
             <Link href="/courses" style={linkStyle}>Training Foundations</Link>
-            . It is the core of the platform. It teaches the foundational movement patterns, gives you a structured program, and builds the strength base that everything else grows from. If your priority right now is understanding nutrition for fat loss or muscle building, start with{" "}
+            . If your main focus is improving your eating habits, understanding calories and macros, or learning how nutrition supports fat loss and muscle building, start with{" "}
             <Link href="/nutrition" style={linkStyle}>Nutrition Foundations</Link>
-            . The two courses complement each other and work well together, but neither requires the other as a starting point. If you want both, the{" "}
-            <Link href="/checkout?product=bundle" style={linkStyle}>Foundations Bundle</Link>
-            {" "}is the most cost-effective way to get the complete system.
+            . Both courses work independently, but together they provide the complete framework I use to help people build sustainable results.
           </>
         ),
         schemaA:
-          "If you are new to strength training, returning after a break, or just want to finally learn how to lift correctly, start with Training Foundations. It is the core of the platform. It teaches the foundational movement patterns, gives you a structured program, and builds the strength base that everything else grows from. If your priority right now is understanding nutrition for fat loss or muscle building, start with Nutrition Foundations. The two courses complement each other and work well together, but neither requires the other as a starting point. If you want both, the Foundations Bundle is the most cost-effective way to get the complete system.",
+          "If your goal is to learn how to strength train properly, build confidence in the gym, and understand the fundamentals that drive results, start with Training Foundations. If your main focus is improving your eating habits, understanding calories and macros, or learning how nutrition supports fat loss and muscle building, start with Nutrition Foundations. Both courses work independently, but together they provide the complete framework I use to help people build sustainable results.",
       },
       {
         q: "Do I need gym experience to start?",
-        a: "No. The courses are built from the ground up for people with no prior lifting experience. Training Foundations starts with the foundational movement patterns before any real weight is added. You learn how to squat correctly, how to hinge for deadlifts without lower back pain, how to push and pull with good shoulder mechanics, and how to brace your core under load. Many members say the movement education alone changed the way they think about exercise, even before the structured program begins.",
-        schemaA:
-          "No. The courses are built from the ground up for people with no prior lifting experience. Training Foundations starts with the foundational movement patterns before any real weight is added. You learn how to squat correctly, how to hinge for deadlifts without lower back pain, how to push and pull with good shoulder mechanics, and how to brace your core under load. Many members say the movement education alone changed the way they think about exercise, even before the structured program begins.",
-      },
-      {
-        q: "What makes The Lisa Fit Method different from other fitness programs?",
         a: (
           <>
-            Most fitness content tells you what to do. The Lisa Fit Method teaches you why. The difference matters because understanding the mechanics behind a movement makes you better at it, more consistent with it, and far less likely to get injured doing it. Lisa built this platform after a serious back injury that forced her to relearn movement from first principles. That experience gives the coaching a specificity you rarely find in general fitness content: precise form cues, clear explanations of what should be working and what should not, and honest guidance about what actually drives long-term progress. The goal is not to keep you dependent on a program. It is to give you enough understanding that you can train intelligently, independently, and confidently for the rest of your life.{" "}
-            <Link href="/about" style={linkStyle}>Read more about the methodology.</Link>
+            Not at all. In fact, many people who join have never followed a structured strength training program before.{" "}
+            <Link href="/courses" style={linkStyle}>Training Foundations</Link>
+            {" "}was designed to teach you the fundamentals from the ground up, including movement mechanics, exercise form, and how to progress safely over time. You don&apos;t need experience, you just need a willingness to learn.
           </>
         ),
         schemaA:
-          "Most fitness content tells you what to do. The Lisa Fit Method teaches you why. The difference matters because understanding the mechanics behind a movement makes you better at it, more consistent with it, and far less likely to get injured doing it. Lisa built this platform after a serious back injury that forced her to relearn movement from first principles. That experience gives the coaching a specificity you rarely find in general fitness content: precise form cues, clear explanations of what should be working and what should not, and honest guidance about what actually drives long-term progress. The goal is not to keep you dependent on a program. It is to give you enough understanding that you can train intelligently, independently, and confidently for the rest of your life.",
+          "Not at all. In fact, many people who join have never followed a structured strength training program before. Training Foundations was designed to teach you the fundamentals from the ground up, including movement mechanics, exercise form, and how to progress safely over time. You don't need experience, you just need a willingness to learn.",
+      },
+      {
+        q: "What makes The Lisa Fit Method different from other fitness programs?",
+        a: "Most fitness programs tell you what to do. I want you to understand why you're doing it. After a serious back injury forced me to rebuild my own training from scratch, I became obsessed with learning what actually drives results and what is mostly noise. That experience shaped everything I teach. Instead of relying on quick fixes or random workouts, you'll learn the principles behind strength training, nutrition, movement quality, and progressive overload so you can continue making progress long after a program ends.",
+        schemaA:
+          "Most fitness programs tell you what to do. I want you to understand why you're doing it. After a serious back injury forced me to rebuild my own training from scratch, I became obsessed with learning what actually drives results and what is mostly noise. That experience shaped everything I teach. Instead of relying on quick fixes or random workouts, you'll learn the principles behind strength training, nutrition, movement quality, and progressive overload so you can continue making progress long after a program ends.",
       },
     ],
   },
@@ -103,51 +91,39 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: "Will I build muscle?",
-        a: (
-          <>
-            Yes, if you train consistently, apply progressive overload, and eat enough to support recovery. All three matter. Our training courses are built around all three. Progressive overload is structured directly into the program so you always know what you should be working toward in the next session. For the nutrition side,{" "}
-            <Link href="/nutrition" style={linkStyle}>Nutrition Foundations</Link>
-            {" "}covers protein targets, calorie strategy, and how to build a meal plan aligned with a muscle-building goal.
-          </>
-        ),
+        a: "Yes, if you train consistently, challenge yourself over time, and support your training with proper nutrition. Building muscle doesn't require complicated workouts. It requires a structured plan, progressive overload, adequate recovery, and enough protein. The Lisa Fit Method is designed around those fundamentals because they're the things that actually produce results.",
         schemaA:
-          "Yes, if you train consistently, apply progressive overload, and eat enough to support recovery. All three matter. Our training courses are built around all three. Progressive overload is structured directly into the program so you always know what you should be working toward in the next session. Nutrition Foundations covers protein targets, calorie strategy, and how to build a meal plan aligned with a muscle-building goal.",
+          "Yes, if you train consistently, challenge yourself over time, and support your training with proper nutrition. Building muscle doesn't require complicated workouts. It requires a structured plan, progressive overload, adequate recovery, and enough protein. The Lisa Fit Method is designed around those fundamentals because they're the things that actually produce results.",
       },
       {
         q: "Is this good for weight loss and fat loss?",
-        a: (
-          <>
-            Strength training is one of the most effective long-term tools for body composition change. Building muscle raises your resting metabolic rate, which means your body burns more calories even at rest. Our training courses do not promise rapid fat loss, but they build the physical foundation that makes sustainable fat loss more achievable and the results more lasting. If reducing body fat is a primary goal, pairing a training program with{" "}
-            <Link href="/nutrition" style={linkStyle}>Nutrition Foundations</Link>
-            {" "}gives you the complete picture: a strength system alongside a nutrition framework that supports a healthy calorie deficit without obsessing over food.
-          </>
-        ),
+        a: "Yes, but my focus is body composition rather than simply making the number on the scale go down. Most people don't just want to lose weight. They want to lose fat, build lean muscle, feel stronger, and look better. Strength training plays a huge role in that process, and when combined with sound nutrition habits, it creates results that are far easier to maintain long term than extreme diets or endless cardio.",
         schemaA:
-          "Strength training is one of the most effective long-term tools for body composition change. Building muscle raises your resting metabolic rate, which means your body burns more calories even at rest. Our training courses do not promise rapid fat loss, but they build the physical foundation that makes sustainable fat loss more achievable and the results more lasting. Pairing a training program with Nutrition Foundations gives you the complete picture: a strength system alongside a nutrition framework that supports a healthy calorie deficit without obsessing over food.",
+          "Yes, but my focus is body composition rather than simply making the number on the scale go down. Most people don't just want to lose weight. They want to lose fat, build lean muscle, feel stronger, and look better. Strength training plays a huge role in that process, and when combined with sound nutrition habits, it creates results that are far easier to maintain long term than extreme diets or endless cardio.",
       },
       {
         q: "What is progressive overload and why does it matter?",
-        a: "Progressive overload is the principle that your body adapts to whatever you consistently ask it to do. If you repeat the same workout at the same weight every week, your body adapts to that demand and stops changing. Progress requires gradually increasing the challenge: more weight, more reps, less rest, or more volume over time. This is the mechanism behind every real strength or muscle-building result. It is also why most people who follow random workout routines plateau after a few weeks and stay stuck. Progressive overload is not an optional upgrade. It is the actual mechanism. All of our training programs are built around it from the first session.",
+        a: "Progressive overload is the principle that your body adapts to the demands you place on it. If you continue asking your muscles to do the exact same thing every week, eventually they stop changing. Real progress happens when you gradually increase the challenge through more weight, more reps, improved technique, or greater training volume. It's one of the most important concepts in fitness and the foundation of every effective strength training program.",
         schemaA:
-          "Progressive overload is the principle that your body adapts to whatever you consistently ask it to do. If you repeat the same workout at the same weight every week, your body adapts to that demand and stops changing. Progress requires gradually increasing the challenge: more weight, more reps, less rest, or more volume over time. This is the mechanism behind every real strength or muscle-building result. It is also why most people who follow random workout routines plateau after a few weeks and stay stuck. All of our training programs are built around progressive overload from the first session.",
+          "Progressive overload is the principle that your body adapts to the demands you place on it. If you continue asking your muscles to do the exact same thing every week, eventually they stop changing. Real progress happens when you gradually increase the challenge through more weight, more reps, improved technique, or greater training volume. It's one of the most important concepts in fitness and the foundation of every effective strength training program.",
       },
       {
         q: "What age group is this designed for?",
-        a: "Our courses and coaching work well for adults at any age. The emphasis on movement quality, joint mechanics, and intelligent progression makes them a particularly strong fit for people in their 30s, 40s, 50s, and beyond who want to train thoughtfully rather than grinding through high-intensity classes that leave them wrecked for days. A significant portion of the people who get the most out of our training course have dealt with past injuries, chronic back pain, or years of avoiding the gym because nothing they tried felt right for their body.",
+        a: "The Lisa Fit Method is designed for adults of all ages who want to get stronger, move better, and build sustainable habits.",
         schemaA:
-          "Our courses and coaching work well for adults at any age. The emphasis on movement quality, joint mechanics, and intelligent progression makes them a particularly strong fit for people in their 30s, 40s, 50s, and beyond who want to train thoughtfully rather than grinding through high-intensity classes that leave them wrecked for days. A significant portion of the people who get the most out of our training course have dealt with past injuries, chronic back pain, or years of avoiding the gym because nothing they tried felt right for their body.",
+          "The Lisa Fit Method is designed for adults of all ages who want to get stronger, move better, and build sustainable habits.",
       },
       {
         q: "What if I am intimidated by the gym?",
-        a: "That is a very common feeling, and the good news is that knowledge fixes most of it. Gym intimidation almost always comes down to not knowing what to do or whether you are doing it correctly. Our courses give you a specific plan: which exercises, in what order, with what form cues, for how many sets and reps. When you walk in with a real program and a clear understanding of what each movement should feel and look like, the environment stops feeling overwhelming. You also have the option to start the first few weeks at home to build confidence and movement quality before you ever step into a gym.",
+        a: "You're not alone. Most people feel that way at some point. In my experience, gym anxiety usually comes from not knowing what to do or worrying about doing it wrong. That's why education is such a big part of what I teach. When you walk into a gym with a clear plan, understand the exercises, and know what you're trying to accomplish, confidence tends to follow naturally.",
         schemaA:
-          "That is a very common feeling, and the good news is that knowledge fixes most of it. Gym intimidation almost always comes down to not knowing what to do or whether you are doing it correctly. Our courses give you a specific plan: which exercises, in what order, with what form cues, for how many sets and reps. When you walk in with a real program and a clear understanding of what each movement should feel and look like, the environment stops feeling overwhelming. You also have the option to start the first few weeks at home to build confidence and movement quality before you ever step into a gym.",
+          "You're not alone. Most people feel that way at some point. In my experience, gym anxiety usually comes from not knowing what to do or worrying about doing it wrong. That's why education is such a big part of what I teach. When you walk into a gym with a clear plan, understand the exercises, and know what you're trying to accomplish, confidence tends to follow naturally.",
       },
       {
         q: "Can I combine training with cardio?",
-        a: "Yes. Our training programs run three days per week, which leaves plenty of room for cardio on your other days. One practical note: doing a long or intense cardio session immediately before a strength session reduces your performance and slows recovery. Keeping cardio and strength work on separate days, or doing lighter cardio on rest days, tends to work better, especially when you are starting out. Walking, cycling, swimming, or whatever form of cardio you enjoy is a healthy complement to strength training.",
+        a: "Absolutely. Strength training and cardio complement each other very well when programmed intelligently. Walking, cycling, swimming, hiking, or any form of cardio you enjoy can be a great addition to your routine. I generally recommend treating strength training as the priority and using cardio to support your overall health, fitness, and recovery.",
         schemaA:
-          "Yes. Our training programs run three days per week, which leaves plenty of room for cardio on your other days. One practical note: doing a long or intense cardio session immediately before a strength session reduces your performance and slows recovery. Keeping cardio and strength work on separate days, or doing lighter cardio on rest days, tends to work better, especially when you are starting out.",
+          "Absolutely. Strength training and cardio complement each other very well when programmed intelligently. Walking, cycling, swimming, hiking, or any form of cardio you enjoy can be a great addition to your routine. I generally recommend treating strength training as the priority and using cardio to support your overall health, fitness, and recovery.",
       },
     ],
   },
@@ -160,27 +136,23 @@ const FAQ_CATEGORIES: FaqCategory[] = [
           <>
             Yes.{" "}
             <Link href="/nutrition" style={linkStyle}>Nutrition Foundations</Link>
-            {" "}is a standalone course and does not require you to be doing any specific training program at the same time. If improving your eating habits feels more urgent right now, or if you want to understand nutrition before tackling the gym, starting there is a perfectly reasonable approach. The two courses are designed to complement each other over time, but you do not have to start both at once.
+            {" "}is designed to stand on its own, so you can start there even if you&apos;re not currently following a training program. Many people choose to improve their nutrition habits first before focusing on strength training, while others work on both at the same time. There&apos;s no right answer. The best place to start is wherever you feel ready.
           </>
         ),
         schemaA:
-          "Yes. Nutrition Foundations is a standalone course and does not require you to be doing any specific training program at the same time. If improving your eating habits feels more urgent right now, or if you want to understand nutrition before tackling the gym, starting there is a perfectly reasonable approach. The two courses are designed to complement each other over time, but you do not have to start both at once.",
+          "Yes. Nutrition Foundations is designed to stand on its own, so you can start there even if you're not currently following a training program. Many people choose to improve their nutrition habits first before focusing on strength training, while others work on both at the same time. There's no right answer. The best place to start is wherever you feel ready.",
       },
       {
         q: "Do I need both Training Foundations and Nutrition Foundations?",
         a: (
           <>
-            No. Each course works on its own.{" "}
-            <Link href="/courses" style={linkStyle}>Training Foundations</Link>
-            {" "}gives you the full strength training system.{" "}
-            <Link href="/nutrition" style={linkStyle}>Nutrition Foundations</Link>
-            {" "}gives you the full nutrition framework. You can follow either one independently and get real value. That said, training and nutrition reinforce each other significantly, and pairing them is the fastest path to body composition change. If both are relevant to your goals, the{" "}
+            No. Each course provides value on its own and can help you make meaningful progress. That said, training and nutrition work best together. If your goal is to improve body composition, build muscle, lose fat, and create lasting habits, combining both gives you a more complete understanding of how the pieces fit together. The{" "}
             <Link href="/checkout?product=bundle" style={linkStyle}>Foundations Bundle</Link>
-            {" "}is the most cost-effective way to get both, and neither course requires the other as a prerequisite.
+            {" "}is the most cost-effective way to get both.
           </>
         ),
         schemaA:
-          "No. Each course works on its own. Training Foundations gives you the full strength training system. Nutrition Foundations gives you the full nutrition framework. You can follow either one independently and get real value. That said, training and nutrition reinforce each other significantly, and pairing them is the fastest path to body composition change. If both are relevant to your goals, the Foundations Bundle is the most cost-effective way to get both, and neither course requires the other as a prerequisite.",
+          "No. Each course provides value on its own and can help you make meaningful progress. That said, training and nutrition work best together. If your goal is to improve body composition, build muscle, lose fat, and create lasting habits, combining both gives you a more complete understanding of how the pieces fit together.",
       },
     ],
   },
@@ -189,39 +161,27 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: "What equipment do I need?",
-        a: "Most of the training program can be done with a set of dumbbells and a resistance band. If you train at a gym, everything the program calls for will be available. If you train at home, adjustable dumbbells and one or two resistance bands cover the vast majority of movements. Equipment alternatives are noted throughout the course so you can always find a workable substitute. You do not need a full home gym or specialty equipment to start.",
+        a: "You don't need a fully equipped commercial gym to get started. Most exercises can be performed with a set of dumbbells and resistance bands, and alternatives are provided whenever possible. Whether you train at home or in a gym, the focus is on learning movement patterns and applying progressive overload, not chasing fancy equipment.",
         schemaA:
-          "Most of the training program can be done with a set of dumbbells and a resistance band. If you train at a gym, everything the program calls for will be available. If you train at home, adjustable dumbbells and one or two resistance bands cover the vast majority of movements. Equipment alternatives are noted throughout the course so you can always find a workable substitute. You do not need a full home gym or specialty equipment to start.",
+          "You don't need a fully equipped commercial gym to get started. Most exercises can be performed with a set of dumbbells and resistance bands, and alternatives are provided whenever possible. Whether you train at home or in a gym, the focus is on learning movement patterns and applying progressive overload, not chasing fancy equipment.",
       },
       {
         q: "Can I do this at home?",
-        a: "Yes. Our training courses are designed to work in both gym and home settings. Most exercises have home-friendly variations using dumbbells and resistance bands. The program clearly notes which variations work best in each setting. If you decide to move from training at home to a gym at any point, the movement patterns and strength you built at home carry over directly.",
+        a: "Yes. Many people begin at home and get great results. The fundamental movement patterns don't change just because you're training outside a gym. As long as you have access to a few basic pieces of equipment, you can build strength, improve your technique, and develop confidence before ever stepping foot into a commercial gym.",
         schemaA:
-          "Yes. Our training courses are designed to work in both gym and home settings. Most exercises have home-friendly variations using dumbbells and resistance bands. The program clearly notes which variations work best in each setting. If you decide to move from training at home to a gym at any point, the movement patterns and strength you built at home carry over directly.",
+          "Yes. Many people begin at home and get great results. The fundamental movement patterns don't change just because you're training outside a gym. As long as you have access to a few basic pieces of equipment, you can build strength, improve your technique, and develop confidence before ever stepping foot into a commercial gym.",
       },
       {
         q: "How long do I have access?",
-        a: "Your access does not expire. One payment, no subscription, no end date. You can return to the exercise videos, the program structure, and all course materials at any time. This is intentional: our courses are designed to be used more than once. Most people run Training Foundations, take a short break, and then run it again with heavier weights and sharper form. Having permanent access means you can keep using the material for as long as it serves you.",
+        a: "Once you purchase a course, it's yours. There are no subscriptions, recurring fees, or expiration dates. You can revisit the lessons, exercise videos, and materials whenever you need them, whether that's next week or several years from now.",
         schemaA:
-          "Your access does not expire. One payment, no subscription, no end date. You can return to the exercise videos, the program structure, and all course materials at any time. Our courses are designed to be used more than once. Most people run Training Foundations, take a short break, and then run it again with heavier weights and sharper form. Having permanent access means you can keep using the material for as long as it serves you.",
-      },
-      {
-        q: "Is there a refund policy?",
-        a: "Yes. If you complete the program and genuinely feel it was not worth what you paid, reach out within 30 days of your purchase. We review situations individually and will work something out. The courses deliver results when followed, and the vast majority of people who complete them are glad they enrolled. But we are not in the business of keeping money from someone who made a genuine effort and found it was not the right fit.",
-        schemaA:
-          "Yes. If you complete the program and genuinely feel it was not worth what you paid, reach out within 30 days of your purchase. We review situations individually and will work something out. We are not in the business of keeping money from someone who made a genuine effort and found it was not the right fit.",
+          "Once you purchase a course, it's yours. There are no subscriptions, recurring fees, or expiration dates. You can revisit the lessons, exercise videos, and materials whenever you need them, whether that's next week or several years from now.",
       },
       {
         q: "What happens after I finish the program?",
-        a: (
-          <>
-            Run it again with more weight. The 4-week structure in Training Foundations is designed to be repeatable. The second and third time through, you will be lifting heavier, your form will be sharper, and your progress log will show you exactly how much stronger you have gotten. Most members run the program two or three times in a row before they want more complexity. When you are ready for individualized programming,{" "}
-            <Link href="/coaching" style={linkStyle}>1:1 coaching with Lisa</Link>
-            {" "}is the natural next step. She builds custom programs around your current level, your goals, your schedule, and how you have been progressing.
-          </>
-        ),
+        a: "Run it again. Most people are surprised by how much stronger, more skilled, and more confident they feel the second time through. The goal was never to complete a short challenge and move on. The goal is to learn principles and habits you can continue applying for years. Many people repeat Training Foundations multiple times before they ever need something more advanced.",
         schemaA:
-          "Run it again with more weight. The 4-week structure in Training Foundations is designed to be repeatable. The second and third time through, you will be lifting heavier, your form will be sharper, and your progress log will show you exactly how much stronger you have gotten. Most members run the program two or three times in a row before they want more complexity. When you are ready for individualized programming, 1:1 coaching with Lisa is the natural next step.",
+          "Run it again. Most people are surprised by how much stronger, more skilled, and more confident they feel the second time through. The goal was never to complete a short challenge and move on. The goal is to learn principles and habits you can continue applying for years. Many people repeat Training Foundations multiple times before they ever need something more advanced.",
       },
     ],
   },
@@ -230,26 +190,20 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: "What is the difference between courses and coaching?",
-        a: (
-          <>
-            Our courses are structured self-paced education products. You access them on your own schedule, follow the program, and apply what you learn independently. Coaching is a direct, ongoing relationship with Lisa. She writes a fully custom program built around your specific situation, reviews your form, adjusts the plan as you progress, and checks in with you regularly.{" "}
-            <Link href="/courses" style={linkStyle}>Courses</Link>
-            {" "}are the right starting point for most people. Coaching is for people who want personalized programming, direct feedback, and accountability through something more specific than a general course can address.
-          </>
-        ),
+        a: "The courses are designed to teach you the principles, systems, and habits that drive results so you can apply them independently. Coaching is much more personalized. I create a custom plan based on your goals, training history, lifestyle, and individual needs, then provide ongoing guidance, feedback, and accountability along the way.",
         schemaA:
-          "Our courses are structured self-paced education products. You access them on your own schedule, follow the program, and apply what you learn independently. Coaching is a direct, ongoing relationship with Lisa. She writes a fully custom program built around your specific situation, reviews your form, adjusts the plan as you progress, and checks in with you regularly. Courses are the right starting point for most people. Coaching is for people who want personalized programming, direct feedback, and accountability through something more specific than a general course can address.",
+          "The courses are designed to teach you the principles, systems, and habits that drive results so you can apply them independently. Coaching is much more personalized. I create a custom plan based on your goals, training history, lifestyle, and individual needs, then provide ongoing guidance, feedback, and accountability along the way.",
       },
       {
         q: "How do I know if 1:1 coaching is right for me?",
         a: (
           <>
-            If you have a specific goal that needs a tailored approach, an injury history that requires individualized programming, or you simply want the accountability and direct feedback of working with a trainer, coaching is likely worth it. If you are newer to training and still building your foundation, starting with a course first usually makes more sense. The coursework teaches you enough that when you do start coaching, you and Lisa can have much more productive conversations about where you are and where you want to go.{" "}
+            If you have a specific goal, an injury history, a unique situation that requires a customized approach, or simply want direct support and accountability, coaching may be the right fit. For most people, however, I recommend starting with a course first. It provides a strong foundation and helps you get far more value out of coaching if you decide to pursue it later.{" "}
             <Link href="/coaching" style={linkStyle}>Learn more about coaching.</Link>
           </>
         ),
         schemaA:
-          "If you have a specific goal that needs a tailored approach, an injury history that requires individualized programming, or you simply want the accountability and direct feedback of working with a trainer, coaching is likely worth it. If you are newer to training and still building your foundation, starting with a course first usually makes more sense. The coursework teaches you enough that when you do start coaching, you and Lisa can have much more productive conversations about where you are and where you want to go.",
+          "If you have a specific goal, an injury history, a unique situation that requires a customized approach, or simply want direct support and accountability, coaching may be the right fit. For most people, however, I recommend starting with a course first. It provides a strong foundation and helps you get far more value out of coaching if you decide to pursue it later.",
       },
     ],
   },
@@ -320,7 +274,7 @@ export default function FaqPage() {
               lineHeight: 1.75,
               maxWidth: 640,
             }}>
-              The Lisa Fit Method is a fitness education platform built around evidence-based training and nutrition. It exists to teach people how to build strength, improve their body composition, and understand what they are doing well enough to keep progressing on their own. These are the questions people ask most before they start.
+              The Lisa Fit Method is a fitness education platform built around evidence-based training and nutrition. Its goal is to help people build strength, improve their body composition, and understand the principles behind their results so they can keep progressing with confidence. These are the questions people ask most before getting started.
             </p>
           </div>
         </section>
