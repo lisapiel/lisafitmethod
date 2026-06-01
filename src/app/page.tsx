@@ -602,7 +602,7 @@ export default async function HomePage() {
               See all questions →
             </Link>
           </div>
-          <div className="faq-preview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, marginBottom: 48 }}>
+          <div className="faq-preview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             {[
               {
                 q: "Do I need gym experience to start?",
@@ -626,14 +626,6 @@ export default async function HomePage() {
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, color: "var(--muted)", lineHeight: 1.7 }}>{item.a}</p>
               </div>
             ))}
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <Link
-              href="/faq"
-              style={{ display: "inline-block", border: "1px solid var(--accent-dark)", color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 40px" }}
-            >
-              Read All 15 Questions
-            </Link>
           </div>
         </div>
       </section>
