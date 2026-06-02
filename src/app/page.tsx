@@ -2,7 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
-import VideoPlayer from "@/components/VideoPlayer.client"
+import dynamic from "next/dynamic"
+const VideoPlayer = dynamic(() => import("@/components/VideoPlayer.client"), { ssr: false })
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
 import { TestimonialsSection, COURSE_TESTIMONIALS, COACHING_TESTIMONIALS } from "@/components/TestimonialsSection"
 import {
