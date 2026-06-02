@@ -15,7 +15,7 @@ function makeDynamo() {
   )
 }
 
-async function saveLead(email: string, source: string) {
+async function saveLead(email: string, source: string, name?: string) {
   try {
     const db = makeDynamo()
     const existing = await db.send(new ScanCommand({
@@ -33,6 +33,7 @@ async function saveLead(email: string, source: string) {
       Item: {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         email,
+        name: name ?? "",
         source,
         createdAt: new Date().toISOString(),
       },
@@ -42,7 +43,9 @@ async function saveLead(email: string, source: string) {
   }
 }
 
-const emailHtml = `
+function buildEmailHtml(name: string) {
+  const greeting = name ? `Hi ${name}, glad you are here.` : "Hi, glad you are here."
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -60,7 +63,7 @@ const emailHtml = `
             <td style="padding:36px 40px 28px;border-left:1px solid #e8e0d5;border-right:1px solid #e8e0d5;">
               <p style="margin:0 0 24px;font-family:Helvetica Neue,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:#c8a97e;">Lisa Fit Method</p>
               <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:28px;font-weight:700;color:#0a0a0a;line-height:1.2;letter-spacing:-0.3px;">Your 5 Foundation Movements are inside.</h1>
-              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:15px;line-height:1.75;color:#6b6560;">Hi, glad you are here. Below is a link to read the full free guide online, plus a PDF cheat sheet of all five movement patterns you can keep handy.</p>
+              <p style="margin:0;font-family:Helvetica Neue,Arial,sans-serif;font-size:15px;line-height:1.75;color:#6b6560;">${greeting} Below is a link to read the full free guide online, plus a PDF cheat sheet of all five movement patterns you can keep handy.</p>
             </td>
           </tr>
 
@@ -177,25 +180,27 @@ const emailHtml = `
 </body>
 </html>
 `
+}
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json() as { email?: string; source?: string }
+    const body = await req.json() as { email?: string; name?: string; source?: string }
     const email = body.email?.trim().toLowerCase()
+    const name = body.name?.trim() ?? ""
     const source = body.source ?? "free-guide-page"
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email required" }, { status: 400 })
     }
 
-    await saveLead(email, source)
+    await saveLead(email, source, name)
 
     const resend = new Resend(process.env.RESEND_API_KEY)
     const { error: resendError } = await resend.emails.send({
       from: "Lisa Fit Method <hello@lisafitmethod.com>",
       to: email,
       subject: "Your free guide + PDF cheat sheet",
-      html: emailHtml,
+      html: buildEmailHtml(name),
     })
 
     if (resendError) {
