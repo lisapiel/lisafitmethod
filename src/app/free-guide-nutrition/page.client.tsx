@@ -84,11 +84,12 @@ export const PRINCIPLES = [
     category: "Energy Balance",
     name: "Calorie Deficit",
     tagline: "The only mechanism for fat loss",
-    body: "Fat loss has one mechanism: consuming less energy than you burn. No specific food, supplement, or workout bypasses this principle. Every effective fat loss approach works because it creates a calorie deficit. Your body accesses stored fat from everywhere at once. You cannot spot-reduce.",
+    body: "Fat loss has one mechanism: consuming less energy than you burn. No specific food, supplement, or workout bypasses this principle. Every effective fat loss approach works because it creates a calorie deficit, and your body accesses stored fat from everywhere at once. You cannot spot-reduce.",
+    body2: "This is where most of the confusion in nutrition starts. Low-carb diets, intermittent fasting, meal plans, detoxes, and portion control can all produce results, but not because they contain a special fat-burning property. They work when they help you consistently eat fewer calories than you burn. The method changes. The mechanism does not.",
     ref: "Hall et al. 2012 (Am J Clin Nutr): fat loss was equivalent across all diet types when total calories were matched.",
-    stat: "300–500 kcal/day",
+    stat: "300-500 kcal/day",
     statLabel: "The deficit sweet spot: enough to lose fat consistently, not enough to lose muscle.",
-    practical: "A 300-500 kcal/day deficit is the sweet spot. Enough to lose fat, moderate enough to hold onto muscle.",
+    practical: "A 300-500 kcal/day deficit is the sweet spot. Enough to lose fat, moderate enough to hold onto muscle and maintain training performance.",
   },
   {
     num: 2,
@@ -96,10 +97,11 @@ export const PRINCIPLES = [
     name: "Protein",
     tagline: "The lever that controls body composition",
     body: "In a deficit, your body pulls from fat and muscle. Protein is what tells it to protect the muscle. It also requires significantly more energy to digest than carbs or fat, meaning your body burns more calories just processing it. Getting enough protein is one of the few levers that works in multiple directions at once.",
+    body2: "Most people focus on losing weight. The real goal is improving body composition. Protein helps shift the balance toward losing fat while keeping the muscle you've worked hard to build. It also improves fullness, making a calorie deficit easier to maintain without constantly feeling hungry.",
     ref: "Morton et al. 2018 (Br J Sports Med): meta-analysis of 49 studies found 1.6-2.2 g/kg (0.7-1 g/lb) optimizes muscle retention and growth.",
-    stat: "0.7–1g per lb",
+    stat: "0.7-1g per lb",
     statLabel: "The daily protein target that protects muscle and supports fat loss at the same time.",
-    practical: "Target 0.7-1 g per lb of bodyweight (1.6-2.2 g/kg). A 140 lb (65 kg) person needs 98-140 g/day.",
+    practical: "Target 0.7-1 g per lb of bodyweight (1.6-2.2 g/kg). A 140 lb (65 kg) person needs approximately 98-140 g/day.",
     courseHook: false,
   },
   {
@@ -107,7 +109,8 @@ export const PRINCIPLES = [
     category: "Muscle and Metabolism",
     name: "Build Muscle",
     tagline: "The closest thing to a real shortcut",
-    body: "Muscle tissue is more metabolically active than fat tissue. Building it gradually increases resting energy expenditure over time. But the bigger picture goes beyond the calorie equation: more muscle means better body composition, improved insulin sensitivity, greater functional strength, and results that hold long-term. This is the long game most people skip because they're chasing short-term weight loss instead.",
+    body: "Muscle tissue is more metabolically active than fat tissue, building it gradually increases resting energy expenditure over time. But the bigger picture goes beyond the calorie equation: more muscle means better body composition, improved insulin sensitivity, greater functional strength, and results that hold long-term. This is the long game most people skip because they're chasing short-term weight loss instead.",
+    body2: "Most people think they want to lose weight. What they usually want is to look leaner, stronger, and more athletic. Those are body composition goals. Two people can weigh exactly the same and look completely different depending on how much muscle they carry. The scale measures weight. Muscle changes shape.",
     ref: "Srikanthan and Karlamangla (Am J Med, 2014): higher muscle mass was inversely linked to all-cause mortality over 10-16 years. Muscle is the organ of longevity.",
     stat: "~6 vs ~2 kcal/lb",
     statLabel: "Research estimate. The compounding benefit is body composition, strength, insulin sensitivity, and results built to last.",
@@ -120,10 +123,11 @@ export const PRINCIPLES = [
     name: "Daily Movement",
     tagline: "The hidden calorie variable nobody talks about",
     body: "NEAT (Non-Exercise Activity Thermogenesis) is everything you burn outside the gym: walking, standing, taking stairs. It varies by up to 2,000 kcal/day between people of similar size and similar workout habits. One full gym session can be cancelled out by sitting the rest of the day. Your steps matter more than most people realize.",
+    body2: "This is one of the biggest reasons why two people following the same workout plan can get very different results. The workout might only represent one hour of the day. The other twenty-three hours matter too. Small movement habits repeated daily often contribute more to long-term calorie expenditure than people expect.",
     ref: "Levine et al. 2005 (Science, Mayo Clinic): NEAT accounts for 15-50% of total daily energy expenditure and varies by up to 2,000 kcal/day between individuals.",
     stat: "2,000 kcal/day",
     statLabel: "How much NEAT output can differ between people of similar size and similar workout habits.",
-    practical: "8,000-10,000 steps/day is a solid daily target. Walk after meals. Take the stairs. It adds up fast.",
+    practical: "8,000-10,000 steps/day is a solid daily target. Walk after meals. Take the stairs. Park farther away. Small habits compound surprisingly fast.",
   },
   {
     num: 5,
@@ -131,10 +135,11 @@ export const PRINCIPLES = [
     name: "Sleep",
     tagline: "The hormone controller you are probably ignoring",
     body: "Sleeping 4 hours raises ghrelin (the hunger hormone) by 28% and drops leptin (the fullness hormone) by 18%. That's a 24% spike in next-day hunger you can't willpower your way through. Poor sleep doesn't just make you tired. It changes your hormones and stacks the deck against every good choice you try to make the next day.",
+    body2: "This is why fat loss often feels dramatically harder when you're sleep deprived. You're not simply lacking discipline. Your body is actively pushing you toward higher-calorie foods while reducing your ability to feel satisfied. At the same time, recovery, training performance, mood, and decision-making all suffer.",
     ref: "Spiegel et al. 2004 (Ann Intern Med, University of Chicago): sleep restriction significantly increases hunger and appetite for calorie-dense food.",
     stat: "+28% ghrelin",
     statLabel: "What one night at 4 hours does to your hunger hormone. You cannot willpower through that.",
-    practical: "7-9 hours. Not a wellness trend. A hormonal requirement.",
+    practical: "7-9 hours. Not a wellness trend. A biological requirement for recovery, appetite regulation, and long-term progress.",
   },
 ]
 
@@ -152,12 +157,13 @@ function Rule() {
   return <div style={{ height: 1, background: line, margin: "2.5rem 0" }} />
 }
 
-function PrincipleCard({ num, category, name, tagline, body, ref: reference, stat, statLabel, practical, courseHook, icon }: {
+function PrincipleCard({ num, category, name, tagline, body, body2, ref: reference, stat, statLabel, practical, courseHook, icon }: {
   num: number
   category: string
   name: string
   tagline: string
   body: string
+  body2?: string
   ref: string
   stat?: string
   statLabel?: string
@@ -186,6 +192,11 @@ function PrincipleCard({ num, category, name, tagline, body, ref: reference, sta
       <p style={{ fontSize: "0.9rem", margin: "0.65rem 0 0", lineHeight: 1.72, color: muted, fontFamily: dmSans }}>
         {body}
       </p>
+      {body2 && (
+        <p style={{ fontSize: "0.9rem", margin: "0.65rem 0 0", lineHeight: 1.72, color: muted, fontFamily: dmSans }}>
+          {body2}
+        </p>
+      )}
       <p style={{ fontSize: "0.76rem", color: muted, fontStyle: "italic", margin: "0.6rem 0 0", lineHeight: 1.55, fontFamily: dmSans }}>
         {reference}
       </p>
@@ -207,7 +218,7 @@ function PrincipleCard({ num, category, name, tagline, body, ref: reference, sta
         <div style={{ marginTop: "0.875rem", background: black, padding: "0.875rem 1.25rem", display: "flex", alignItems: "flex-start", gap: "0.875rem" }}>
           <span style={{ color: gold, fontSize: "0.85rem", flexShrink: 0, paddingTop: "0.05rem" }}>-&gt;</span>
           <p style={{ fontSize: "0.87rem", color: "#c9bfb0", margin: 0, lineHeight: 1.62, fontFamily: dmSans }}>
-            This is what the 4-week program is built around. <strong style={{ color: "#fff" }}>Structured resistance training that builds muscle progressively</strong>, session by session, week by week, with the nutrition module to back it up.
+            This is what the 4-week program is built around. <strong style={{ color: "#fff" }}>Structured resistance training that builds muscle progressively</strong>, session by session, week by week, supported by nutrition that allows you to recover and grow.
           </p>
         </div>
       )}
@@ -299,18 +310,23 @@ export default function NutritionGuideClient() {
               <em style={{ fontStyle: "italic", fontWeight: 600, color: goldDeep }}>Here&apos;s what actually drives fat loss, muscle growth, and long-term body composition.</em>
             </h1>
             <p style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", color: muted, maxWidth: 600, marginBottom: 0, lineHeight: 1.72, fontFamily: dmSans }}>
-              Five principles. Real references. No supplements to buy, no protocol to follow.{" "}
-              <strong style={{ color: ink }}>This is the actual science behind every approach that works, whether the plan knows it or not.</strong>
+              Five principles. Real references. No supplements to buy, no complicated protocol to follow. Just the fundamentals that sit underneath every approach that actually works.
             </p>
 
             <Rule />
 
             <div style={{ background: panel, padding: "clamp(1.5rem, 4vw, 2rem) clamp(1.25rem, 4vw, 2.25rem)", marginBottom: "0.5rem", borderLeft: `2px solid ${gold}` }}>
               <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
-                I spent years following plans that promised results and didn&apos;t deliver. Fat burners. Endless cardio. Detox cleanses. Tracking calories without ever understanding why nothing was working. Eventually I stopped looking for shortcuts and went back to the actual research.
+                For a long time, I thought I was doing everything right. I was training hard, showing up consistently, and putting in the effort. But I wasn&apos;t getting the results I expected. Part of the problem was that I didn&apos;t understand nutrition nearly as well as I do now. Like a lot of women, I was under-eating, under-recovering, and wondering why my progress had stalled despite doing all the work.
               </p>
-              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.5rem", color: muted, fontFamily: dmSans }}>
-                I&apos;m an engineer. I needed the mechanism, not the marketing. What I found was simpler than the fitness industry makes it seem, and more effective than most of the shortcuts being sold online.
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
+                At the same time, I&apos;ve worked with people who experienced the opposite problem. They tried every detox, fat burner, cleanse, or restrictive diet they could find and still felt stuck. Different paths. Same outcome. The truth is that most people don&apos;t need another shortcut. They need a better understanding of the fundamentals.
+              </p>
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
+                When I started taking my health seriously and digging into the research, everything became much simpler. Fat loss, muscle growth, energy levels, recovery, and long-term health all became easier to understand because I finally understood the mechanisms behind them. I&apos;m an engineer by training. I wanted evidence, not marketing.
+              </p>
+              <p style={{ fontSize: "0.93rem", lineHeight: 1.75, marginBottom: "0.75rem", color: muted, fontFamily: dmSans }}>
+                This guide contains the five nutrition principles that changed the way I think about food, body composition, and health. They&apos;re simple, evidence-based, and applicable whether your goal is fat loss, muscle gain, or simply feeling better.
               </p>
               <p style={{ fontFamily: playfair, fontStyle: "italic", fontSize: "1.05rem", color: goldDeep, margin: 0 }}>
                 Lisa McPherson, CPT
