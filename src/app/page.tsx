@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
-import VideoPlayerWrapper from "@/components/VideoPlayerWrapper.client"
+import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
 import { TestimonialsSection, COURSE_TESTIMONIALS, COACHING_TESTIMONIALS } from "@/components/TestimonialsSection"
 import {
@@ -189,7 +189,7 @@ export default async function HomePage() {
 
         {trailerUrl && (
           <div className="home-video-band">
-            <VideoPlayerWrapper src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <VideoPlayer src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         )}
 
