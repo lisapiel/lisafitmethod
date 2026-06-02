@@ -96,9 +96,11 @@ export default function SiteHeader() {
           background: none;
           border: none;
           cursor: pointer;
-          padding: 4px;
+          padding: 10px 8px;
           flex-direction: column;
           gap: 5px;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
         .site-header-hamburger span {
           display: block;

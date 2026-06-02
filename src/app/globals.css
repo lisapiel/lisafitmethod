@@ -4,13 +4,22 @@
 
 @layer base {
   :root {
+    /* Brand tokens — available from first paint, before any JS */
+    --black: #0a0a0a;
+    --off-white: #f5f2ee;
+    --warm-white: #faf8f5;
+    --accent: #c8a97e;
+    --accent-dark: #a8895e;
+    --text: #1a1a1a;
+    --muted: #6b6560;
     scroll-behavior: smooth;
   }
 
   html,
   body {
     max-width: 100%;
-    overflow-x: hidden;
+    /* clip is stronger than hidden on iOS Safari — never creates a scroll container */
+    overflow-x: clip;
   }
 
   * {
@@ -19,6 +28,16 @@
     padding: 0;
   }
 }
+
+/* Hero fade-up animations — in globals so they're available before hydration */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up-1 { animation: fadeUp 0.8s ease forwards 0.2s; opacity: 0; }
+.fade-up-2 { animation: fadeUp 0.8s ease forwards 0.4s; opacity: 0; }
+.fade-up-3 { animation: fadeUp 0.8s ease forwards 0.6s; opacity: 0; }
+.fade-up-4 { animation: fadeUp 0.8s ease forwards 0.8s; opacity: 0; }
 
 @layer utilities {
   .scrollbar-thin {

@@ -28,8 +28,11 @@ export default function VideoPlayer({
     video.addEventListener("loadeddata", attemptPlay)
     video.addEventListener("canplay", attemptPlay)
 
+    // Re-play when tab becomes visible again (iOS suspends video in background)
+    const onVisible = () => { if (document.visibilityState === "visible") attemptPlay() }
+    document.addEventListener("visibilitychange", onVisible)
+
     // Intersection Observer: re-trigger play when the video scrolls into view
-    // (handles cases where the video is off-screen during initial load)
     let observer: IntersectionObserver | null = null
     if (typeof IntersectionObserver !== "undefined") {
       observer = new IntersectionObserver(
@@ -46,6 +49,7 @@ export default function VideoPlayer({
     return () => {
       video.removeEventListener("loadeddata", attemptPlay)
       video.removeEventListener("canplay", attemptPlay)
+      document.removeEventListener("visibilitychange", onVisible)
       observer?.disconnect()
     }
   }, [src])
