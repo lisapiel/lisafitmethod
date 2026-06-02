@@ -14,6 +14,7 @@ type Product = "training" | "nutrition" | "tracker"
 
 interface MergedRow {
   email: string
+  name?: string
   products: Product[]
   hasCognitoAccount: boolean
   leadSource: string | null
@@ -146,7 +147,7 @@ export default function AdminLeadsPage() {
       }
 
       if (leadsRes.status === "fulfilled" && leadsRes.value.ok) {
-        const data = await leadsRes.value.json() as { leads: { id: string; email: string; source: string; createdAt: string }[] }
+        const data = await leadsRes.value.json() as { leads: { id: string; email: string; name?: string; source: string; createdAt: string }[] }
         for (const l of data.leads ?? []) {
           const key = l.email.toLowerCase()
           const existing = map.get(key)
@@ -154,9 +155,10 @@ export default function AdminLeadsPage() {
             if (!existing.leadSource) {
               existing.leadSource = l.source
               existing.leadId = l.id
+              if (l.name) existing.name = l.name
             }
           } else {
-            map.set(key, { email: l.email, products: [], hasCognitoAccount: false, leadSource: l.source, leadId: l.id, createdAt: l.createdAt })
+            map.set(key, { email: l.email, name: l.name, products: [], hasCognitoAccount: false, leadSource: l.source, leadId: l.id, createdAt: l.createdAt })
           }
         }
       }
@@ -296,12 +298,19 @@ export default function AdminLeadsPage() {
                   alignItems: "center",
                 }}
               >
-                <a
-                  href={`mailto:${row.email}`}
-                  style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: gold, textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                >
-                  {row.email}
-                </a>
+                <div style={{ overflow: "hidden" }}>
+                  {row.name && (
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#f0e6d3", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {row.name}
+                    </p>
+                  )}
+                  <a
+                    href={`mailto:${row.email}`}
+                    style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: gold, textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}
+                  >
+                    {row.email}
+                  </a>
+                </div>
 
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}>
                   {row.products.map((p) => <ProductBadge key={p} product={p} />)}
