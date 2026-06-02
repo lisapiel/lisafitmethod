@@ -447,9 +447,14 @@ export default async function CoursesPage() {
       <section className="faq-section">
         <div className="faq-inner">
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "rgba(168,137,94,0.8)", marginBottom: 20 }}>Common questions</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(26px, 2.8vw, 36px) * ${hs})`, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2, marginBottom: 48 }}>
-            What you should know.
-          </h2>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 24, marginBottom: 48, flexWrap: "wrap" }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(26px, 2.8vw, 36px) * ${hs})`, fontWeight: 700, color: "#1a1a1a", lineHeight: 1.2, margin: 0 }}>
+              What you should know.
+            </h2>
+            <Link href="/faq" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(168,137,94,0.8)", textDecoration: "none", whiteSpace: "nowrap" }}>
+              See all questions →
+            </Link>
+          </div>
           <div>
             {[
               { q: "How long is each training session?", a: "Between 45 and 60 minutes including warm-up and cool-down. Some days run a little shorter." },

@@ -30,7 +30,7 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
     const trimmedName = name.trim()
     const trimmedEmail = email.trim().toLowerCase()
     if (!trimmedName) {
-      setErrorMsg("Please enter your first name.")
+      setErrorMsg("Please enter your name.")
       setStatus("error")
       return
     }
@@ -85,10 +85,10 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
       <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 420 }}>
         <input
           type="text"
-          autoComplete="given-name"
+          autoComplete="name"
           value={name}
           onChange={(e) => { setName(e.target.value); if (status === "error") setStatus("idle") }}
-          placeholder="Your first name"
+          placeholder="Your name"
           style={{
             background: "#fff",
             border: `1px solid ${status === "error" && !name.trim() ? "#cc6666" : line}`,
@@ -158,10 +158,10 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
         <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 480 }}>
           <input
             type="text"
-            autoComplete="given-name"
+            autoComplete="name"
             value={name}
             onChange={(e) => { setName(e.target.value); if (status === "error") setStatus("idle") }}
-            placeholder="Your first name"
+            placeholder="Your name"
             style={inputStyleDark(status === "error" && !name.trim())}
           />
           <input
@@ -234,10 +234,10 @@ export function FreeGuideSignupForm({ source, apiEndpoint = "/api/free-guide", v
       <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 480 }}>
         <input
           type="text"
-          autoComplete="given-name"
+          autoComplete="name"
           value={name}
           onChange={(e) => { setName(e.target.value); if (status === "error") setStatus("idle") }}
-          placeholder="Your first name"
+          placeholder="Your name"
           style={inputStyleDark(status === "error" && !name.trim())}
         />
         <input
