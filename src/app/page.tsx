@@ -24,7 +24,6 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Lisa Fit Method | Train the Right Way",
     description: "A complete strength training foundation for beginners and returners. Proper movement, real structure, and a body built to last.",
-    images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
 }
 
