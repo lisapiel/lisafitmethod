@@ -9,13 +9,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Nutrition Guide — The 5 Principles That Actually Work",
     description: "Stop searching for shortcuts. The 5 science-backed nutrition principles behind every real body transformation. Free from Lisa Fit Method.",
-    images: [{ url: "/hero.png", width: 1200, height: 800 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Free Nutrition Guide — The 5 Principles That Actually Work",
     description: "Stop searching for shortcuts. The 5 nutrition principles behind every real body transformation. Free from Lisa Fit Method.",
-    images: ["/hero.png"],
   },
 }
 
