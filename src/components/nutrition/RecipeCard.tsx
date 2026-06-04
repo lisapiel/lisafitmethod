@@ -5,6 +5,13 @@ const muted = "#888"
 const dark = "#111"
 const border = "#2a2a2a"
 
+export interface RecipeIngredient {
+  qty: number
+  unit: string
+  item: string
+  isWhole?: boolean
+}
+
 export interface Recipe {
   name: string
   sourceLabel: string
@@ -18,11 +25,35 @@ export interface Recipe {
   fatG: number
   description: string
   servingNote?: string
+  ingredients: RecipeIngredient[]
+  batchServings?: number
+}
+
+function fmtQty(n: number): string {
+  if (n <= 0) return "—"
+  const SNAPS: [number, string][] = [
+    [0.125, "⅛"], [0.25, "¼"], [1 / 3, "⅓"],
+    [0.5, "½"], [2 / 3, "⅔"], [0.75, "¾"],
+  ]
+  const whole = Math.floor(n)
+  const frac = n - whole
+  if (frac < 0.1) return String(whole)
+  if (frac > 0.88) return String(whole + 1)
+  const best = SNAPS.reduce<[number, string]>(
+    (b, c) => Math.abs(c[0] - frac) < Math.abs(b[0] - frac) ? c : b,
+    SNAPS[0]
+  )
+  const [val, str] = best
+  if (Math.abs(val - frac) > 0.12) {
+    return n >= 10 ? String(Math.round(n)) : n.toFixed(1).replace(/\.0$/, "")
+  }
+  return whole === 0 ? str : `${whole}${str}`
 }
 
 export default function RecipeCard({ recipe, scaleFactor = 1 }: { recipe: Recipe; scaleFactor?: number }) {
   const scale = (v: number) => Math.round(v * scaleFactor)
   const isScaled = Math.abs(scaleFactor - 1) > 0.05
+  const batchN = recipe.batchServings ?? 1
 
   return (
     <div style={{ background: dark, border: `1px solid ${border}`, overflow: "hidden" }}>
@@ -62,6 +93,43 @@ export default function RecipeCard({ recipe, scaleFactor = 1 }: { recipe: Recipe
             {recipe.servingNote}
           </p>
         )}
+      </div>
+
+      {/* Ingredients */}
+      <div style={{ padding: "0.875rem 1.25rem", borderBottom: `1px solid ${border}` }}>
+        <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: isScaled ? goldDeep : "#555", margin: "0 0 0.4rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
+          {isScaled ? `Your portions (×${scaleFactor.toFixed(1)})` : "Ingredients"}
+        </p>
+        {batchN > 1 && (
+          <p style={{ fontSize: "0.6rem", color: "#555", margin: "0 0 0.5rem", fontStyle: "italic", fontFamily: "var(--font-montserrat), sans-serif" }}>
+            Shown per 1 serving — full batch makes {batchN}
+          </p>
+        )}
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.18rem" }}>
+          {recipe.ingredients.map((ing, i) => {
+            const perServing = ing.qty / batchN
+            const scaled = perServing * scaleFactor
+            let qtyStr: string
+            if (ing.unit === "to taste" || ing.qty === 0) {
+              qtyStr = "to taste"
+            } else if (ing.isWhole) {
+              qtyStr = String(Math.max(1, Math.round(scaled)))
+            } else {
+              qtyStr = fmtQty(scaled)
+            }
+            const unitStr = (ing.unit && ing.unit !== "to taste") ? ` ${ing.unit}` : ""
+            return (
+              <li key={i} style={{ display: "flex", gap: "0.5rem", fontSize: "0.72rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
+                <span style={{ color: isScaled ? gold : "#666", flexShrink: 0, minWidth: "3.5rem" }}>
+                  {qtyStr}{unitStr}
+                </span>
+                <span style={{ color: isScaled ? cream : muted }}>
+                  {ing.item}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
       </div>
 
       {/* Macros */}
