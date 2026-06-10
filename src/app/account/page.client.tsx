@@ -17,6 +17,7 @@ interface Props {
   nutrition: boolean
   tracker: boolean
   masterclass: boolean
+  coaching: boolean
   isAdmin: boolean
 }
 
@@ -38,9 +39,18 @@ interface UpsellProduct {
   featured?: boolean
 }
 
-export function AccountClient({ email, training, nutrition, tracker, masterclass, isAdmin }: Props) {
+export function AccountClient({ email, training, nutrition, tracker, masterclass, coaching, isAdmin }: Props) {
 
   const owned: OwnedProduct[] = []
+  if (coaching) {
+    owned.push({
+      id: "coaching",
+      label: "1:1 Coaching",
+      desc: "Your personalised coaching portal — workouts, progress tracking, weekly check-ins, and direct messaging with Lisa.",
+      href: "/my-coaching",
+      icon: "CO",
+    })
+  }
   if (masterclass && isAdmin) {
     owned.push({
       id: "masterclass",

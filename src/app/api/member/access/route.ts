@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess } from "@/lib/authTokens"
+import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -20,14 +20,15 @@ export async function GET() {
   })
 
   if (!email) {
-    return NextResponse.json({ email: null, training: false, nutrition: false, tracker: false })
+    return NextResponse.json({ email: null, training: false, nutrition: false, tracker: false, coaching: false })
   }
 
-  const [training, nutrition, tracker] = await Promise.all([
+  const [training, nutrition, tracker, coaching] = await Promise.all([
     hasTrainingAccess(email),
     hasNutritionAccess(email),
     hasTrackerAccess(email),
+    hasCoachingAccess(email),
   ])
 
-  return NextResponse.json({ email, training, nutrition, tracker })
+  return NextResponse.json({ email, training, nutrition, tracker, coaching })
 }

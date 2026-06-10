@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasMasterclassAccess } from "@/lib/authTokens"
+import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasMasterclassAccess, hasCoachingAccess } from "@/lib/authTokens"
 import { AccountClient } from "./page.client"
 
 export const metadata: Metadata = {
@@ -30,14 +30,15 @@ export default async function AccountPage() {
 
   const emailStr = email as string
 
-  const [training, nutrition, tracker, masterclass] = await Promise.all([
+  const [training, nutrition, tracker, masterclass, coaching] = await Promise.all([
     hasTrainingAccess(emailStr),
     hasNutritionAccess(emailStr),
     hasTrackerAccess(emailStr),
     hasMasterclassAccess(emailStr),
+    hasCoachingAccess(emailStr),
   ])
 
   const isAdmin = emailStr.toLowerCase() === "lisa.p.mcpherson@gmail.com"
 
-  return <AccountClient email={emailStr} training={training} nutrition={nutrition} tracker={tracker} masterclass={masterclass} isAdmin={isAdmin} />
+  return <AccountClient email={emailStr} training={training} nutrition={nutrition} tracker={tracker} masterclass={masterclass} coaching={coaching} isAdmin={isAdmin} />
 }

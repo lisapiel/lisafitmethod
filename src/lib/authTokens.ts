@@ -211,3 +211,45 @@ export async function hasMasterclassAccess(email: string): Promise<boolean> {
     return false
   }
 }
+
+export async function grantCoachingAccess(email: string, plan?: string, startDate?: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: {
+        userId: `coaching_access_${email.toLowerCase()}`,
+        active: true,
+        plan: plan ?? "coaching",
+        startDate: startDate ?? new Date().toISOString().split("T")[0],
+        grantedAt: new Date().toISOString(),
+      },
+    })
+  )
+}
+
+export async function hasCoachingAccess(email: string): Promise<boolean> {
+  if (email.toLowerCase() === ADMIN_EMAIL) return true
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })
+    )
+    if (!result.Item) return false
+    return result.Item.active === true
+  } catch {
+    return false
+  }
+}
+
+export async function revokeCoachingAccess(email: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_access_${email.toLowerCase()}` },
+      UpdateExpression: "SET active = :false",
+      ExpressionAttributeValues: { ":false": false },
+    })
+  )
+}

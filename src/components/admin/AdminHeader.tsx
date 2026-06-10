@@ -18,6 +18,7 @@ export default function AdminHeader() {
 
   const navItems = [
     { href: "/admin", label: "Dashboard" },
+    { href: "/admin/coaching", label: "Coaching" },
     { href: "/admin/customers", label: "Customers" },
     { href: "/admin/videos", label: "Videos" },
     { href: "/admin/photos", label: "Photos" },

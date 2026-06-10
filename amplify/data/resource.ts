@@ -99,6 +99,170 @@ const schema = a.schema({
       allow.publicApiKey().to(["create"]),
       allow.authenticated().to(["read", "update", "delete"]),
     ]),
+
+  // ── Coaching Portal ────────────────────────────────────────────────────────
+
+  CoachingClient: a
+    .model({
+      email: a.string().required(),
+      displayName: a.string().required(),
+      phone: a.string(),
+      status: a.enum(["ACTIVE", "PAUSED", "INACTIVE"]),
+      goal: a.string(),
+      currentPhase: a.string(),
+      startDate: a.string(),
+      currentProgramId: a.string(),
+      weightUnit: a.enum(["LBS", "KG"]),
+      tags: a.string(),
+      privateNotes: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  Exercise: a
+    .model({
+      name: a.string().required(),
+      videoS3Key: a.string(),
+      thumbnailS3Key: a.string(),
+      primaryMuscle: a.string(),
+      secondaryMuscles: a.string(),
+      equipment: a.string(),
+      category: a.string(),
+      difficulty: a.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
+      movementPattern: a.string(),
+      coachingCues: a.string(),
+      commonMistakes: a.string(),
+      setup: a.string(),
+      execution: a.string(),
+      notes: a.string(),
+      substitutions: a.string(),
+      status: a.enum(["ACTIVE", "INACTIVE"]),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  CoachingProgram: a
+    .model({
+      name: a.string().required(),
+      clientEmail: a.string(),
+      isTemplate: a.boolean(),
+      status: a.enum(["DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"]),
+      weeks: a.string().required(),
+      notes: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  CoachingWorkoutLog: a
+    .model({
+      clientEmail: a.string().required(),
+      programId: a.string().required(),
+      weekNumber: a.integer().required(),
+      dayLabel: a.string().required(),
+      completedAt: a.string().required(),
+      setData: a.string().required(),
+      overallRpe: a.integer(),
+      energyLevel: a.integer(),
+      clientNotes: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  ClientProgressSnapshot: a
+    .model({
+      clientEmail: a.string().required(),
+      snapshotDate: a.string().required(),
+      weight: a.float(),
+      weightUnit: a.enum(["LBS", "KG"]),
+      waist: a.float(),
+      hips: a.float(),
+      glutes: a.float(),
+      chest: a.float(),
+      arm: a.float(),
+      thigh: a.float(),
+      customMeasurements: a.string(),
+      photoS3Keys: a.string(),
+      notes: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  CoachingGoal: a
+    .model({
+      clientEmail: a.string().required(),
+      type: a.string().required(),
+      label: a.string(),
+      startDate: a.string(),
+      targetDate: a.string(),
+      startValue: a.float(),
+      targetValue: a.float(),
+      currentValue: a.float(),
+      unit: a.string(),
+      notes: a.string(),
+      status: a.enum(["ON_TRACK", "NEEDS_ATTENTION", "ACHIEVED"]),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  CoachingCheckIn: a
+    .model({
+      clientEmail: a.string().required(),
+      submittedAt: a.string().required(),
+      status: a.enum(["PENDING", "REVIEWED"]),
+      weight: a.float(),
+      weightUnit: a.enum(["LBS", "KG"]),
+      sleepQuality: a.integer(),
+      energyLevel: a.integer(),
+      hungerLevel: a.integer(),
+      stressLevel: a.integer(),
+      digestion: a.integer(),
+      trainingPerformance: a.integer(),
+      nutritionAdherence: a.integer(),
+      workoutConsistency: a.integer(),
+      wins: a.string(),
+      struggles: a.string(),
+      questionsForCoach: a.string(),
+      additionalNotes: a.string(),
+      measurementSnapshot: a.string(),
+      photoS3Keys: a.string(),
+      coachFeedback: a.string(),
+      reviewedAt: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  CoachingMessage: a
+    .model({
+      threadId: a.string().required(),
+      fromEmail: a.string().required(),
+      toEmail: a.string().required(),
+      body: a.string().required(),
+      sentAt: a.string().required(),
+      readAt: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
+
+  CoachTask: a
+    .model({
+      title: a.string().required(),
+      clientEmail: a.string(),
+      dueDate: a.string(),
+      completedAt: a.string(),
+      priority: a.enum(["HIGH", "MEDIUM", "LOW"]),
+      notes: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(["create", "read", "update", "delete"]),
+    ]),
 })
 
 export type Schema = ClientSchema<typeof schema>

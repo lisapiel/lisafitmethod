@@ -13,6 +13,7 @@ const SERVER_KEYS = [
   "COGNITO_USER_POOL_ID",
   "RESEND_API_KEY",
   "PROMO_CODES",
+  "AMBRISA_CDN_URL",
 ]
 
 const nextConfig: NextConfig = {
