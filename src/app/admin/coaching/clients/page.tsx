@@ -1,23 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
+import type { CoachingClientRecord } from "@/lib/authTokens"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
-type Client = {
-  id: string
-  email: string
-  displayName: string
-  status: "ACTIVE" | "PAUSED" | "INACTIVE" | null
-  goal: string | null
-  startDate: string | null
-  currentProgramId: string | null
-  createdAt: string
-}
+type Client = CoachingClientRecord
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: "#5c9e6a",
@@ -44,24 +35,23 @@ export default function ClientsPage() {
   const [query, setQuery] = useState("")
 
   useEffect(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.CoachingClient.list({ authMode: "userPool" }).then(({ data }) => {
-      setClients(data.map((c) => ({
-        id: c.id,
-        email: c.email,
-        displayName: c.displayName,
-        status: (c.status ?? "ACTIVE") as Client["status"],
-        goal: c.goal ?? null,
-        startDate: c.startDate ?? null,
-        currentProgramId: c.currentProgramId ?? null,
-        createdAt: c.createdAt,
-      })).sort((a, b) => a.displayName.localeCompare(b.displayName)))
+    async function load() {
+      try {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString() ?? ""
+        const res = await fetch("/api/admin/coaching/clients", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json() as { clients: Client[] }
+        setClients(data.clients ?? [])
+      } catch { /* handled */ }
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    load()
   }, [])
 
   const filtered = clients.filter((c) => {
-    if (filter !== "ALL" && c.status !== filter) return false
+    if (filter !== "ALL" && (c.status ?? "ACTIVE") !== filter) return false
     if (query && !c.displayName.toLowerCase().includes(query.toLowerCase()) && !c.email.toLowerCase().includes(query.toLowerCase())) return false
     return true
   })
@@ -72,7 +62,7 @@ export default function ClientsPage() {
         <div>
           <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2rem", fontWeight: 300, color: "#f0e6d3", marginBottom: "0.25rem" }}>Clients</h1>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888" }}>
-            {loading ? "Loading…" : `${clients.filter((c) => c.status === "ACTIVE").length} active clients`}
+            {loading ? "Loading…" : `${clients.filter((c) => (c.status ?? "ACTIVE") === "ACTIVE").length} active clients`}
           </p>
         </div>
         <Link href="/admin/coaching/clients/new" style={{ display: "inline-block", background: gold, color: "#0a0a0a", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>
@@ -113,7 +103,7 @@ export default function ClientsPage() {
         <div>
           {filtered.map((c) => (
             <Link
-              key={c.id}
+              key={c.email}
               href={`/admin/coaching/clients/${encodeURIComponent(c.email)}`}
               style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 20px", background: "#111", border: `1px solid ${border}`, marginBottom: 6, textDecoration: "none" }}
             >

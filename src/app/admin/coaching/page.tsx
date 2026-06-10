@@ -23,6 +23,7 @@ type RecentClient = {
   displayName: string
   status: string | null
   startDate: string | null
+  createdAt?: string
 }
 
 function timeAgo(iso: string) {
@@ -80,20 +81,20 @@ export default function AdminCoachingDashboard() {
         const token = session.tokens?.accessToken?.toString() ?? ""
 
         const [clientsRes, checkInsRes, exercisesRes, programsRes, appsRes] = await Promise.allSettled([
-          db.models.CoachingClient.list({ authMode: "userPool" }),
+          fetch("/api/admin/coaching/clients", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ clients: RecentClient[] }>),
           db.models.CoachingCheckIn.list({ authMode: "userPool" }),
           db.models.Exercise.list({ authMode: "userPool" }),
           db.models.CoachingProgram.list({ authMode: "userPool" }),
           fetch("/api/admin/coaching/applications", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ applications: CoachingApplication[] }>),
         ])
 
-        const clients = clientsRes.status === "fulfilled" ? clientsRes.value.data : []
+        const clients = clientsRes.status === "fulfilled" ? clientsRes.value.clients : []
         const checkIns = checkInsRes.status === "fulfilled" ? checkInsRes.value.data : []
         const exercises = exercisesRes.status === "fulfilled" ? exercisesRes.value.data : []
         const programs = programsRes.status === "fulfilled" ? programsRes.value.data : []
         const applications = appsRes.status === "fulfilled" ? appsRes.value.applications : []
 
-        const activeClients = clients.filter((c) => c.status === "ACTIVE")
+        const activeClients = clients.filter((c) => (c.status ?? "ACTIVE") === "ACTIVE")
         const pending = checkIns.filter((ci) => (ci.status ?? "PENDING") === "PENDING")
         const activeExercises = exercises.filter((e) => e.status !== "INACTIVE")
         const activePrograms = programs.filter((p) => p.status !== "ARCHIVED")
@@ -118,7 +119,6 @@ export default function AdminCoachingDashboard() {
           clients
             .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
             .slice(0, 5)
-            .map((c) => ({ email: c.email, displayName: c.displayName, status: c.status ?? null, startDate: c.startDate ?? null }))
         )
       } catch { /* handled by layout */ }
       setLoading(false)

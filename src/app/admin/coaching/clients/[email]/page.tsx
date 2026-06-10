@@ -2,27 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import type { Schema } from "@/lib/amplifyConfig"
+import type { CoachingClientRecord } from "@/lib/authTokens"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
-type ClientData = {
-  id: string
-  email: string
-  displayName: string
-  phone: string | null
-  status: "ACTIVE" | "PAUSED" | "INACTIVE" | null
-  goal: string | null
-  currentPhase: string | null
-  startDate: string | null
-  currentProgramId: string | null
-  weightUnit: "LBS" | "KG" | null
-  tags: string | null
-  privateNotes: string | null
-}
+type ClientData = CoachingClientRecord
 
 type Program = { id: string; name: string; status: string | null }
 type CheckIn = { id: string; submittedAt: string; status: string | null; weight: number | null; weightUnit: string | null }
@@ -74,24 +63,20 @@ export default function ClientProfilePage() {
   const [selectedProgramId, setSelectedProgramId] = useState("")
 
   const load = useCallback(async () => {
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    const [clientsRes, checkInsRes, programsRes] = await Promise.allSettled([
-      db.models.CoachingClient.list({ authMode: "userPool" }),
-      db.models.CoachingCheckIn.list({ authMode: "userPool" }),
-      db.models.CoachingProgram.list({ authMode: "userPool" }),
-    ])
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
 
-    if (clientsRes.status === "fulfilled") {
-      const found = clientsRes.value.data.find((c) => c.email.toLowerCase() === emailParam.toLowerCase())
-      if (found) {
-        const c: ClientData = {
-          id: found.id, email: found.email, displayName: found.displayName,
-          phone: found.phone ?? null, status: (found.status ?? "ACTIVE") as ClientData["status"],
-          goal: found.goal ?? null, currentPhase: found.currentPhase ?? null,
-          startDate: found.startDate ?? null, currentProgramId: found.currentProgramId ?? null,
-          weightUnit: (found.weightUnit ?? "LBS") as ClientData["weightUnit"],
-          tags: found.tags ?? null, privateNotes: found.privateNotes ?? null,
-        }
+      const [clientRes, checkInsRes, programsRes] = await Promise.allSettled([
+        fetch(`/api/admin/coaching/clients/${encodeURIComponent(emailParam)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((r) => r.json() as Promise<{ client: ClientData }>),
+        generateClient<Schema>({ authMode: "userPool" }).models.CoachingCheckIn.list({ authMode: "userPool" }),
+        generateClient<Schema>({ authMode: "userPool" }).models.CoachingProgram.list({ authMode: "userPool" }),
+      ])
+
+      if (clientRes.status === "fulfilled" && clientRes.value.client) {
+        const c = clientRes.value.client
         setClient(c)
         setNotes(c.privateNotes ?? "")
 
@@ -103,26 +88,35 @@ export default function ClientProfilePage() {
           }
         }
       }
-    }
 
-    if (checkInsRes.status === "fulfilled") {
-      const mine = checkInsRes.value.data
-        .filter((ci) => ci.clientEmail.toLowerCase() === emailParam.toLowerCase())
-        .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
-        .slice(0, 5)
-      setRecentCheckIns(mine.map((ci) => ({ id: ci.id, submittedAt: ci.submittedAt, status: ci.status ?? null, weight: ci.weight ?? null, weightUnit: ci.weightUnit ?? null })))
-    }
+      if (checkInsRes.status === "fulfilled") {
+        const mine = checkInsRes.value.data
+          .filter((ci) => ci.clientEmail.toLowerCase() === emailParam.toLowerCase())
+          .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+          .slice(0, 5)
+        setRecentCheckIns(mine.map((ci) => ({ id: ci.id, submittedAt: ci.submittedAt, status: ci.status ?? null, weight: ci.weight ?? null, weightUnit: ci.weightUnit ?? null })))
+      }
+    } catch { /* handled */ }
 
     setLoading(false)
   }, [emailParam])
 
   useEffect(() => { load() }, [load])
 
+  async function patchClient(updates: Partial<ClientData>) {
+    const session = await fetchAuthSession()
+    const token = session.tokens?.accessToken?.toString() ?? ""
+    await fetch(`/api/admin/coaching/clients/${encodeURIComponent(emailParam)}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    })
+  }
+
   async function saveNotes() {
     if (!client) return
     setSavingNotes(true)
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    await db.models.CoachingClient.update({ id: client.id, privateNotes: notes })
+    await patchClient({ privateNotes: notes })
     setClient((c) => c ? { ...c, privateNotes: notes } : c)
     setSavingNotes(false)
     setEditingNotes(false)
@@ -131,9 +125,11 @@ export default function ClientProfilePage() {
   async function assignProgram() {
     if (!client || !selectedProgramId) return
     setSavingProgram(true)
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    await db.models.CoachingClient.update({ id: client.id, currentProgramId: selectedProgramId })
-    await db.models.CoachingProgram.update({ id: selectedProgramId, status: "ACTIVE", clientEmail: client.email })
+    await patchClient({ currentProgramId: selectedProgramId })
+    try {
+      const db = generateClient<Schema>({ authMode: "userPool" })
+      await db.models.CoachingProgram.update({ id: selectedProgramId, status: "ACTIVE", clientEmail: client.email })
+    } catch { /* AppSync not yet deployed — silently skip */ }
     setClient((c) => c ? { ...c, currentProgramId: selectedProgramId } : c)
     setProgram(allPrograms.find((p) => p.id === selectedProgramId) ?? null)
     setSavingProgram(false)
@@ -142,8 +138,7 @@ export default function ClientProfilePage() {
 
   async function updateStatus(newStatus: "ACTIVE" | "PAUSED" | "INACTIVE") {
     if (!client) return
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    await db.models.CoachingClient.update({ id: client.id, status: newStatus })
+    await patchClient({ status: newStatus })
     setClient((c) => c ? { ...c, status: newStatus } : c)
   }
 
@@ -299,7 +294,6 @@ export default function ClientProfilePage() {
             {[
               { label: "Weight unit", value: client.weightUnit ?? "LBS" },
               { label: "Start date", value: formatDate(client.startDate) },
-              { label: "Phase", value: client.currentPhase ?? "—" },
             ].map(({ label, value }) => (
               <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#444", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>

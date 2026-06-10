@@ -362,3 +362,80 @@ export async function setCoachingSettings(priceInCents: number): Promise<void> {
     })
   )
 }
+
+// ── Coaching Client Records ────────────────────────────────────────────────────
+
+export interface CoachingClientRecord {
+  email: string
+  displayName: string
+  phone?: string
+  goal?: string
+  startDate?: string
+  weightUnit?: "LBS" | "KG"
+  status?: "ACTIVE" | "PAUSED" | "INACTIVE"
+  currentProgramId?: string
+  privateNotes?: string
+  createdAt?: string
+}
+
+export async function createCoachingClientRecord(data: CoachingClientRecord): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: {
+        userId: `coaching_client_${data.email.toLowerCase()}`,
+        ...data,
+        email: data.email.toLowerCase(),
+        status: data.status ?? "ACTIVE",
+        createdAt: data.createdAt ?? new Date().toISOString(),
+      },
+    })
+  )
+}
+
+export async function getCoachingClientRecord(email: string): Promise<CoachingClientRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_client_${email.toLowerCase()}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as CoachingClientRecord
+}
+
+export async function updateCoachingClientRecord(email: string, updates: Partial<CoachingClientRecord>): Promise<void> {
+  const db = makeDb()
+  const sets: string[] = []
+  const values: Record<string, unknown> = {}
+  const names: Record<string, string> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (k === "email") continue
+    sets.push(`#${k} = :${k}`)
+    values[`:${k}`] = v
+    names[`#${k}`] = k
+  }
+  if (sets.length === 0) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_client_${email.toLowerCase()}` },
+      UpdateExpression: `SET ${sets.join(", ")}`,
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: values,
+    })
+  )
+}
+
+export async function listCoachingClientRecords(): Promise<CoachingClientRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_client_" },
+    })
+  )
+  return ((result.Items ?? []) as (CoachingClientRecord & { userId: string })[])
+    .map((item) => item as CoachingClientRecord)
+    .sort((a, b) => (a.displayName ?? "").localeCompare(b.displayName ?? ""))
+}

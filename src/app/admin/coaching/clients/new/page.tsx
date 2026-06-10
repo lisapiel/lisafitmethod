@@ -1,11 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { generateClient } from "aws-amplify/data"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -54,22 +52,14 @@ export default function NewClientPage() {
       const grantRes = await fetch("/api/admin/coaching/grant-access", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ email: emailVal, displayName: displayName.trim(), startDate }),
+        body: JSON.stringify({
+          email: emailVal, displayName: displayName.trim(),
+          phone: phone.trim() || undefined, goal: goal.trim() || undefined,
+          startDate, weightUnit,
+        }),
       })
       const grantData = await grantRes.json() as { ok?: boolean; accountCreated?: boolean; error?: string }
       if (!grantRes.ok) throw new Error(grantData.error ?? "Failed to grant access")
-
-      // Create CoachingClient record
-      const client = generateClient<Schema>({ authMode: "userPool" })
-      await client.models.CoachingClient.create({
-        email: emailVal,
-        displayName: displayName.trim(),
-        phone: phone.trim() || undefined,
-        goal: goal.trim() || undefined,
-        startDate,
-        status: "ACTIVE",
-        weightUnit,
-      })
 
       setResult({ accountCreated: grantData.accountCreated ?? false, email: emailVal })
     } catch (err) {

@@ -8,7 +8,7 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
-import { grantCoachingAccess, generateAuthToken, storeAuthToken } from "@/lib/authTokens"
+import { grantCoachingAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const body = await req.json() as { email: string; displayName: string; plan?: string; startDate?: string }
+  const body = await req.json() as { email: string; displayName: string; phone?: string; goal?: string; startDate?: string; weightUnit?: string; plan?: string }
   if (!body.email || !body.displayName) {
     return NextResponse.json({ error: "Missing email or displayName" }, { status: 400 })
   }
@@ -174,6 +174,15 @@ export async function POST(req: NextRequest) {
   }
 
   await grantCoachingAccess(email, body.plan, body.startDate)
+  await createCoachingClientRecord({
+    email,
+    displayName,
+    phone: body.phone?.trim() || undefined,
+    goal: body.goal?.trim() || undefined,
+    startDate: body.startDate,
+    weightUnit: (body.weightUnit as "LBS" | "KG") || "LBS",
+    status: "ACTIVE",
+  })
 
   if (!accountExists) {
     // Create Cognito account with temp password

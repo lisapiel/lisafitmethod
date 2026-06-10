@@ -12,7 +12,7 @@ import {
   generateAuthToken, storeAuthToken,
   grantTrainingAccess, grantTrackerAccess, grantNutritionAccess,
   grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
-  grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication,
+  grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication, createCoachingClientRecord,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -674,6 +674,7 @@ async function provisionCoachingSubscriber(email: string, name: string) {
   const firstName = name.split(" ")[0] || "there"
 
   await grantCoachingAccess(email, "monthly")
+  await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE" })
 
   let userExists = false
   try {
