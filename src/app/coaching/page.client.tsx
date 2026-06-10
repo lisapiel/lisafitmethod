@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function CoachingClient({ settings }: Props) {
-  const [form, setForm] = useState({ name: "", email: "", goal: "", message: "" })
+  const [form, setForm] = useState({ name: "", email: "", goals: "", currentFitnessLevel: "", whyCoaching: "" })
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle")
 
   const t = settings.text
@@ -28,12 +28,13 @@ export default function CoachingClient({ settings }: Props) {
     e.preventDefault()
     setStatus("sending")
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("/api/coaching/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, type: "coaching" }),
+        body: JSON.stringify(form),
       })
-      if (res.ok) {
+      const data = await res.json() as { ok: boolean }
+      if (data.ok) {
         setStatus("done")
       } else {
         setStatus("error")
@@ -157,23 +158,34 @@ export default function CoachingClient({ settings }: Props) {
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6560", marginBottom: 6 }}>What&apos;s your main goal?</label>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6560", marginBottom: 6 }}>What are your main goals? *</label>
                   <input
+                    required
                     type="text"
-                    placeholder="e.g. Build strength, fix my form, lose body fat..."
-                    value={form.goal}
-                    onChange={(e) => setForm((f) => ({ ...f, goal: e.target.value }))}
-                    style={{ ...inputStyle, color: form.goal ? "#1a1a1a" : "#999" }}
+                    placeholder="e.g. Build strength, lose body fat, improve my form..."
+                    value={form.goals}
+                    onChange={(e) => setForm((f) => ({ ...f, goals: e.target.value }))}
+                    style={inputStyle}
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6560", marginBottom: 6 }}>Tell me where you&apos;re at *</label>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6560", marginBottom: 6 }}>Current fitness level</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Complete beginner, training 3x/week for 2 years..."
+                    value={form.currentFitnessLevel}
+                    onChange={(e) => setForm((f) => ({ ...f, currentFitnessLevel: e.target.value }))}
+                    style={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6b6560", marginBottom: 6 }}>Why do you want coaching? *</label>
                   <textarea
                     required
-                    rows={5}
-                    placeholder="Training history, injuries, what's worked or hasn't, what you're looking for..."
-                    value={form.message}
-                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                    rows={4}
+                    placeholder="What's brought you here, what you're looking for, any injuries or context..."
+                    value={form.whyCoaching}
+                    onChange={(e) => setForm((f) => ({ ...f, whyCoaching: e.target.value }))}
                     style={{ ...inputStyle, resize: "vertical" }}
                   />
                 </div>

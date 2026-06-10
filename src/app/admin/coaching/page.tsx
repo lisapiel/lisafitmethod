@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { Schema } from "@/lib/amplifyConfig"
+import type { CoachingApplication } from "@/lib/authTokens"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -66,7 +68,7 @@ function QuickAction({ label, href, primary }: { label: string; href: string; pr
 
 export default function AdminCoachingDashboard() {
   const [loading, setLoading] = useState(true)
-  const [counts, setCounts] = useState({ clients: 0, pending: 0, exercises: 0, programs: 0 })
+  const [counts, setCounts] = useState({ clients: 0, pending: 0, exercises: 0, programs: 0, pendingApplications: 0 })
   const [pendingCheckIns, setPendingCheckIns] = useState<PendingCheckIn[]>([])
   const [recentClients, setRecentClients] = useState<RecentClient[]>([])
 
@@ -74,28 +76,35 @@ export default function AdminCoachingDashboard() {
     async function load() {
       try {
         const db = generateClient<Schema>({ authMode: "userPool" })
-        const [clientsRes, checkInsRes, exercisesRes, programsRes] = await Promise.allSettled([
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString() ?? ""
+
+        const [clientsRes, checkInsRes, exercisesRes, programsRes, appsRes] = await Promise.allSettled([
           db.models.CoachingClient.list({ authMode: "userPool" }),
           db.models.CoachingCheckIn.list({ authMode: "userPool" }),
           db.models.Exercise.list({ authMode: "userPool" }),
           db.models.CoachingProgram.list({ authMode: "userPool" }),
+          fetch("/api/admin/coaching/applications", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ applications: CoachingApplication[] }>),
         ])
 
         const clients = clientsRes.status === "fulfilled" ? clientsRes.value.data : []
         const checkIns = checkInsRes.status === "fulfilled" ? checkInsRes.value.data : []
         const exercises = exercisesRes.status === "fulfilled" ? exercisesRes.value.data : []
         const programs = programsRes.status === "fulfilled" ? programsRes.value.data : []
+        const applications = appsRes.status === "fulfilled" ? appsRes.value.applications : []
 
         const activeClients = clients.filter((c) => c.status === "ACTIVE")
         const pending = checkIns.filter((ci) => (ci.status ?? "PENDING") === "PENDING")
         const activeExercises = exercises.filter((e) => e.status !== "INACTIVE")
         const activePrograms = programs.filter((p) => p.status !== "ARCHIVED")
+        const pendingApps = applications.filter((a) => a.status === "PENDING")
 
         setCounts({
           clients: activeClients.length,
           pending: pending.length,
           exercises: activeExercises.length,
           programs: activePrograms.length,
+          pendingApplications: pendingApps.length,
         })
 
         setPendingCheckIns(
@@ -129,8 +138,9 @@ export default function AdminCoachingDashboard() {
       </p>
 
       {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
         <StatCard label="Active Clients" value={loading ? "—" : counts.clients} sub="coaching clients" href="/admin/coaching/clients" />
+        <StatCard label="Applications" value={loading ? "—" : counts.pendingApplications} sub="pending review" href="/admin/coaching/applications" />
         <StatCard label="Pending Check-Ins" value={loading ? "—" : counts.pending} sub="awaiting review" href="/admin/coaching/check-ins" />
         <StatCard label="Exercises" value={loading ? "—" : counts.exercises} sub="in your library" href="/admin/coaching/exercises" />
         <StatCard label="Programs" value={loading ? "—" : counts.programs} sub="saved programs" href="/admin/coaching/programs" />
@@ -142,7 +152,8 @@ export default function AdminCoachingDashboard() {
           Quick Actions
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-          <QuickAction label="Add Client" href="/admin/coaching/clients/new" primary />
+          <QuickAction label="Applications" href="/admin/coaching/applications" primary />
+          <QuickAction label="Add Client" href="/admin/coaching/clients/new" />
           <QuickAction label="Build Program" href="/admin/coaching/programs/new" />
           <QuickAction label="Review Check-Ins" href="/admin/coaching/check-ins" />
           <QuickAction label="Exercise Library" href="/admin/coaching/exercises" />

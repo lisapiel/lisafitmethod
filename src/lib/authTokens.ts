@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
 
 const TABLE = "lfm-user-progress"
 
@@ -250,6 +250,115 @@ export async function revokeCoachingAccess(email: string): Promise<void> {
       Key: { userId: `coaching_access_${email.toLowerCase()}` },
       UpdateExpression: "SET active = :false",
       ExpressionAttributeValues: { ":false": false },
+    })
+  )
+}
+
+// ── Coaching applications ─────────────────────────────────────────────────────
+
+export interface CoachingApplication {
+  userId: string
+  id: string
+  email: string
+  name: string
+  goals: string
+  currentFitnessLevel: string
+  whyCoaching: string
+  status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"
+  applicationDate: string
+  reviewedAt?: string
+  stripeCheckoutUrl?: string
+  stripeSubscriptionId?: string
+}
+
+export async function submitCoachingApplication(data: {
+  email: string
+  name: string
+  goals: string
+  currentFitnessLevel: string
+  whyCoaching: string
+}): Promise<string> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const item: CoachingApplication = {
+    userId: `coaching_app_${id}`,
+    id,
+    email: data.email.trim().toLowerCase(),
+    name: data.name.trim(),
+    goals: data.goals.trim(),
+    currentFitnessLevel: data.currentFitnessLevel.trim(),
+    whyCoaching: data.whyCoaching.trim(),
+    status: "PENDING",
+    applicationDate: new Date().toISOString(),
+  }
+  await db.send(new PutCommand({ TableName: TABLE, Item: item }))
+  return id
+}
+
+export async function listCoachingApplications(): Promise<CoachingApplication[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_app_" },
+    })
+  )
+  return ((result.Items ?? []) as CoachingApplication[]).sort(
+    (a, b) => b.applicationDate.localeCompare(a.applicationDate)
+  )
+}
+
+export async function getCoachingApplication(id: string): Promise<CoachingApplication | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_app_${id}` } })
+  )
+  return result.Item ? (result.Item as CoachingApplication) : null
+}
+
+export async function updateCoachingApplication(id: string, updates: Partial<CoachingApplication>): Promise<void> {
+  const db = makeDb()
+  const sets: string[] = []
+  const values: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (k === "userId" || k === "id") continue
+    sets.push(`#${k} = :${k}`)
+    values[`:${k}`] = v
+  }
+  if (sets.length === 0) return
+  const names: Record<string, string> = {}
+  for (const k of Object.keys(updates)) {
+    if (k === "userId" || k === "id") continue
+    names[`#${k}`] = k
+  }
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_app_${id}` },
+      UpdateExpression: `SET ${sets.join(", ")}`,
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: values,
+    })
+  )
+}
+
+// ── Coaching settings (monthly price) ────────────────────────────────────────
+
+export async function getCoachingSettings(): Promise<{ priceInCents: number }> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: "coaching_settings" } })
+  )
+  return { priceInCents: result.Item?.priceInCents ?? 0 }
+}
+
+export async function setCoachingSettings(priceInCents: number): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: "coaching_settings", priceInCents, updatedAt: new Date().toISOString() },
     })
   )
 }

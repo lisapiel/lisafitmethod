@@ -12,6 +12,7 @@ import {
   generateAuthToken, storeAuthToken,
   grantTrainingAccess, grantTrackerAccess, grantNutritionAccess,
   grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
+  grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -632,6 +633,144 @@ async function provisionMasterclassUser(
   })
 }
 
+function coachingPaymentFailedEmail(email: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;letter-spacing:0.04em;">
+            Lisa <span style="color:#c8a97e;">Fit Method</span>
+          </span>
+        </td></tr>
+        <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:#1a1a1a;">Payment issue on your account</h1>
+          <p style="margin:0 0 24px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            We couldn't process your coaching membership payment. Please update your payment method to keep your access. No data is lost.
+          </p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr><td style="background:#c8a97e;border-radius:2px;">
+              <a href="https://lisafitmethod.com/account" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+                Update Payment →
+              </a>
+            </td></tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#999;">Account: ${email}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+async function provisionCoachingSubscriber(email: string, name: string) {
+  const cognito = makeCognito()
+  const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+  const firstName = name.split(" ")[0] || "there"
+
+  await grantCoachingAccess(email, "monthly")
+
+  let userExists = false
+  try {
+    await cognito.send(new AdminGetUserCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+      Username: email,
+    }))
+    userExists = true
+  } catch {
+    userExists = false
+  }
+
+  if (userExists) {
+    await resend.emails.send({
+      from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      to: email,
+      subject: "Your coaching portal is ready — Lisa Fit Method",
+      html: `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;">Lisa <span style="color:#c8a97e;">Fit Method</span></span>
+        </td></tr>
+        <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">You're in, ${firstName}.</h1>
+          <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">Payment confirmed — your coaching portal is now active. Log in with your existing account to get started. I'm already working on your program.</p>
+          <table cellpadding="0" cellspacing="0"><tr><td style="background:#c8a97e;border-radius:2px;">
+            <a href="https://lisafitmethod.com/my-coaching" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Open Coaching Portal →</a>
+          </td></tr></table>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`,
+    })
+    return
+  }
+
+  // New user — create account and send set-password link
+  try {
+    await cognito.send(new AdminCreateUserCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+      Username: email,
+      UserAttributes: [
+        { Name: "email", Value: email },
+        { Name: "email_verified", Value: "true" },
+      ],
+      TemporaryPassword: generateTempPassword(),
+      MessageAction: "SUPPRESS",
+    }))
+  } catch (err) {
+    if (!(err instanceof UsernameExistsException)) throw err
+  }
+
+  const token = generateAuthToken()
+  await storeAuthToken(token, email, "setup")
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
+
+  await resend.emails.send({
+    from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    to: email,
+    subject: "Welcome to 1:1 Coaching — set up your account",
+    html: `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;">Lisa <span style="color:#c8a97e;">Fit Method</span></span>
+        </td></tr>
+        <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="width:56px;vertical-align:middle;"><img src="https://lisafitmethod.com/lisa-email.jpg" alt="Lisa" width="48" height="48" style="width:48px;height:48px;border-radius:50%;object-fit:cover;display:block;" /></td>
+              <td style="padding-left:14px;vertical-align:middle;"><p style="margin:0;font-size:14px;font-weight:600;color:#1a1a1a;">Lisa McPherson</p><p style="margin:2px 0 0;font-size:12px;color:#888;">Certified Personal Trainer</p></td>
+            </tr>
+          </table>
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">Welcome, ${firstName}. Let's get started.</h1>
+          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">Payment confirmed — I'm so excited to work with you. Set your password to access your coaching portal where you'll find your workouts, check-in forms, and direct messaging with me.</p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;"><tr><td style="background:#c8a97e;border-radius:2px;">
+            <a href="${setPasswordUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Set Your Password →</a>
+          </td></tr></table>
+          <p style="margin:0;font-size:12px;color:#999;">This link expires in 48 hours. Email: <strong style="color:#888;">${email}</strong></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`,
+  })
+}
+
 async function recordPurchase(intent: Stripe.PaymentIntent) {
   let appsyncUrl = ""
   let appsyncApiKey = ""
@@ -761,13 +900,14 @@ export async function POST(request: NextRequest) {
 
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription
-    if (subscription.metadata?.product !== "masterclass") return NextResponse.json({ received: true })
+    const product = subscription.metadata?.product
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
-    if (email) {
+    if (product === "masterclass" && email) {
       await revokeMasterclassAccess(email).catch((err) =>
         console.error("revokeMasterclassAccess failed:", err)
       )
     }
+    // coaching subscriptions handled in the coaching block below
   }
 
   if (event.type === "invoice.payment_failed") {
@@ -776,9 +916,11 @@ export async function POST(request: NextRequest) {
     if (!subscriptionId) return NextResponse.json({ received: true })
     const stripe = makeStripe()
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    if (subscription.metadata?.product !== "masterclass") return NextResponse.json({ received: true })
+    const product = subscription.metadata?.product
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
-    if (email) {
+    if (!email) return NextResponse.json({ received: true })
+
+    if (product === "masterclass") {
       const resend = new Resend(process.env.RESEND_API_KEY ?? "")
       await resend.emails.send({
         from: "Lisa Fit Method <noreply@lisafitmethod.com>",
@@ -786,6 +928,52 @@ export async function POST(request: NextRequest) {
         subject: "Action needed: Masterclass payment issue",
         html: masterclassDunningEmail(email),
       }).catch((err) => console.error("Dunning email failed:", err))
+    }
+
+    if (product === "coaching") {
+      const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+      await resend.emails.send({
+        from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+        to: email,
+        subject: "Action needed: Coaching payment issue",
+        html: coachingPaymentFailedEmail(email),
+      }).catch((err) => console.error("Coaching dunning email failed:", err))
+    }
+  }
+
+  // ── Coaching subscription events ──────────────────────────────────────────
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as unknown as { subscription?: string; billing_reason?: string }
+    const subscriptionId = invoice.subscription
+    if (!subscriptionId) return NextResponse.json({ received: true })
+    const stripe = makeStripe()
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
+    if (subscription.metadata?.product !== "coaching") return NextResponse.json({ received: true })
+
+    const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
+    const name = subscription.metadata?.customerName ?? ""
+    const applicationId = subscription.metadata?.applicationId ?? ""
+    if (!email) return NextResponse.json({ received: true })
+
+    if (invoice.billing_reason === "subscription_create") {
+      await provisionCoachingSubscriber(email, name)
+      if (applicationId) {
+        await updateCoachingApplication(applicationId, {
+          status: "PAID",
+          stripeSubscriptionId: subscriptionId,
+        }).catch((err) => console.error("updateCoachingApplication failed:", err))
+      }
+    }
+  }
+
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription
+    if (subscription.metadata?.product !== "coaching") return NextResponse.json({ received: true })
+    const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
+    if (email) {
+      await revokeCoachingAccess(email).catch((err) =>
+        console.error("revokeCoachingAccess failed:", err)
+      )
     }
   }
 

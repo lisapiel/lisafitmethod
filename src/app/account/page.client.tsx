@@ -249,6 +249,54 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
           </div>
         )}
 
+        {/* Coaching CTA */}
+        {!coaching && (
+          <div style={{ marginBottom: 40 }}>
+            <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 16 }}>
+              1:1 Coaching
+            </p>
+            <div style={{
+              background: "#111",
+              border: `1px solid ${border}`,
+              borderLeft: `3px solid ${gold}`,
+              padding: "20px 24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 16,
+              flexWrap: "wrap",
+            }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 6 }}>
+                  Personalised Coaching
+                </p>
+                <p style={{ fontSize: "0.75rem", color: "#888", lineHeight: 1.6 }}>
+                  Custom programming, weekly check-ins, and direct access to Lisa. Spaces are limited — apply to be considered.
+                </p>
+              </div>
+              <Link
+                href="/coaching"
+                style={{
+                  display: "inline-block",
+                  background: "transparent",
+                  color: gold,
+                  border: `1px solid rgba(201,169,110,0.5)`,
+                  fontFamily: "var(--font-montserrat), sans-serif",
+                  fontSize: "0.6rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  padding: "0.65rem 1.25rem",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Apply →
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Upsell shelf */}
         {upsells.length > 0 && (
           <div>
