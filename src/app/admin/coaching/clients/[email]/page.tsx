@@ -204,9 +204,11 @@ export default function ClientProfilePage() {
       {/* Quick actions */}
       <div style={{ display: "flex", gap: 8, marginBottom: "1.5rem", flexWrap: "wrap" }}>
         {[
-          { label: "Check-Ins", href: `/admin/coaching/check-ins?client=${encodeURIComponent(client.email)}` },
-          { label: "Messages", href: `/admin/coaching/messages?client=${encodeURIComponent(client.email)}` },
-          { label: "Progress", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/program` },
+          { label: "Program", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/program` },
+          { label: "Progress", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/progress` },
+          { label: "Messages", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/messages` },
+          { label: "Check-Ins", href: `/admin/coaching/check-ins` },
+          { label: "Notes", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/notes` },
         ].map(({ label, href }) => (
           <Link key={label} href={href} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>
             {label}
