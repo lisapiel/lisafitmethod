@@ -6,6 +6,7 @@ import {
   AdminGetUserCommand,
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
+import Stripe from "stripe"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
 import { grantCoachingAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord } from "@/lib/authTokens"
@@ -132,6 +133,54 @@ function coachingAccessGrantedEmail(name: string): string {
 </html>`
 }
 
+function paymentLinkEmail(name: string, checkoutUrl: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
+<body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;letter-spacing:0.04em;">
+            Lisa <span style="color:#c8a97e;">Fit Method</span>
+          </span>
+        </td></tr>
+        <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
+            You're in, ${name}.
+          </h1>
+          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            I've reviewed your application and I'm excited to work with you. Click below to set up your monthly membership and get access to your coaching portal.
+          </p>
+          <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            Once payment is confirmed, you'll receive your login details and I'll start building your personalised program.
+          </p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="background:#c8a97e;border-radius:2px;">
+                <a href="${checkoutUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
+                  Set Up My Coaching →
+                </a>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#999;">
+            This link is unique to you. Any questions, reply to this email or DM me on Instagram
+            <a href="https://instagram.com/lisafitmethod" style="color:#c8a97e;">@lisafitmethod</a>.
+          </p>
+        </td></tr>
+        <tr><td align="center" style="padding-top:24px;">
+          <p style="margin:0;font-size:11px;color:#aaa;">Lisa Fit Method · lisafitmethod.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
 export async function POST(req: NextRequest) {
   const auth = req.headers.get("authorization")
   if (!auth?.startsWith("Bearer ")) {
@@ -149,7 +198,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const body = await req.json() as { email: string; displayName: string; phone?: string; goal?: string; startDate?: string; weightUnit?: string; plan?: string }
+  const body = await req.json() as { email: string; displayName: string; phone?: string; goal?: string; startDate?: string; weightUnit?: string; plan?: string; priceInCents?: number }
   if (!body.email || !body.displayName) {
     return NextResponse.json({ error: "Missing email or displayName" }, { status: 400 })
   }
@@ -173,7 +222,7 @@ export async function POST(req: NextRequest) {
     accountExists = false
   }
 
-  await grantCoachingAccess(email, body.plan, body.startDate)
+  // Always create the client record so they appear in the admin list
   await createCoachingClientRecord({
     email,
     displayName,
@@ -184,8 +233,8 @@ export async function POST(req: NextRequest) {
     status: "ACTIVE",
   })
 
+  // Ensure Cognito account exists
   if (!accountExists) {
-    // Create Cognito account with temp password
     try {
       await cognito.send(new AdminCreateUserCommand({
         UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
@@ -200,18 +249,56 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       if (!(err instanceof UsernameExistsException)) throw err
     }
+  }
 
+  // If a price is set: create Stripe checkout and send payment link (access granted after payment)
+  if (body.priceInCents && body.priceInCents >= 100) {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lisafitmethod.com"
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      customer_email: email,
+      line_items: [{
+        price_data: {
+          currency: "usd",
+          product_data: { name: "1:1 Coaching — Lisa Fit Method" },
+          unit_amount: body.priceInCents,
+          recurring: { interval: "month" },
+        },
+        quantity: 1,
+      }],
+      metadata: { product: "coaching", customerEmail: email, customerName: displayName },
+      subscription_data: {
+        metadata: { product: "coaching", customerEmail: email, customerName: displayName },
+      },
+      success_url: `${baseUrl}/coaching/welcome`,
+      cancel_url: `${baseUrl}/coaching`,
+    })
+
+    await resend.emails.send({
+      from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      to: email,
+      subject: "You're approved — set up your coaching membership",
+      html: paymentLinkEmail(firstName, session.url ?? ""),
+    }).catch((err) => console.error("Payment link email failed:", err))
+
+    return NextResponse.json({ ok: true, accountCreated: !accountExists, checkoutUrl: session.url })
+  }
+
+  // No price: grant immediate access and send welcome email
+  await grantCoachingAccess(email, body.plan, body.startDate)
+
+  if (!accountExists) {
     const token = generateAuthToken()
     await storeAuthToken(token, email, "setup")
     const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
-
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       to: email,
       subject: "Welcome to Lisa Fit Method Coaching",
       html: coachingWelcomeEmail(firstName, setPasswordUrl),
     })
-
     return NextResponse.json({ ok: true, accountCreated: true })
   } else {
     await resend.emails.send({
@@ -220,7 +307,6 @@ export async function POST(req: NextRequest) {
       subject: "Your coaching portal is ready",
       html: coachingAccessGrantedEmail(firstName),
     })
-
     return NextResponse.json({ ok: true, accountCreated: false })
   }
 }

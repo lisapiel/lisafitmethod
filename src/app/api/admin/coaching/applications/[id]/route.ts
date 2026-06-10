@@ -12,7 +12,6 @@ import {
   ADMIN_EMAIL,
   getCoachingApplication,
   updateCoachingApplication,
-  getCoachingSettings,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -147,7 +146,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   const { id } = await params
-  const body = await req.json() as { action: "approve" | "decline" }
+  const body = await req.json() as { action: "approve" | "decline"; priceInCents?: number }
 
   const application = await getCoachingApplication(id)
   if (!application) {
@@ -171,9 +170,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   if (body.action === "approve") {
-    const { priceInCents } = await getCoachingSettings()
-    if (!priceInCents) {
-      return NextResponse.json({ error: "Coaching price not set — configure in Admin > Settings" }, { status: 400 })
+    const priceInCents = body.priceInCents
+    if (!priceInCents || priceInCents < 100) {
+      return NextResponse.json({ error: "Monthly price is required (minimum $1.00)" }, { status: 400 })
     }
 
     // Ensure applicant has a Cognito account (so Stripe can match them later)

@@ -41,6 +41,7 @@ export default function AdminApplicationsPage() {
   const [filter, setFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "DECLINED" | "PAID">("PENDING")
   const [acting, setActing] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [prices, setPrices] = useState<Record<string, string>>({})
 
   const load = useCallback(async () => {
     try {
@@ -58,14 +59,24 @@ export default function AdminApplicationsPage() {
   useEffect(() => { load() }, [load])
 
   async function act(id: string, action: "approve" | "decline") {
+    if (action === "approve") {
+      const priceStr = prices[id] ?? ""
+      const priceInCents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0
+      if (!priceInCents || priceInCents < 100) {
+        alert("Please enter a monthly price (minimum $1.00) before approving.")
+        return
+      }
+    }
     setActing(id)
     try {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString() ?? ""
+      const priceStr = prices[id] ?? ""
+      const priceInCents = priceStr ? Math.round(parseFloat(priceStr) * 100) : undefined
       const res = await fetch(`/api/admin/coaching/applications/${id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, priceInCents }),
       })
       const data = await res.json() as { ok: boolean; error?: string; checkoutUrl?: string }
       if (!data.ok) {
@@ -144,21 +155,35 @@ export default function AdminApplicationsPage() {
                       </div>
                     </div>
                     {app.status === "PENDING" && (
-                      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                        <button
-                          onClick={() => act(app.id, "decline")}
-                          disabled={acting === app.id}
-                          style={{ background: "transparent", border: `1px solid ${border}`, color: "#d97460", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}
-                        >
-                          Decline
-                        </button>
-                        <button
-                          onClick={() => act(app.id, "approve")}
-                          disabled={acting === app.id}
-                          style={{ background: gold, border: "none", color: "#111", padding: "7px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}
-                        >
-                          {acting === app.id ? "Sending…" : "Approve + Send Payment Link"}
-                        </button>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, alignItems: "flex-end" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                          <span style={{ background: "#0a0a0a", border: `1px solid ${border}`, borderRight: "none", padding: "7px 10px", fontSize: "0.75rem", color: "#555" }}>$</span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={prices[app.id] ?? ""}
+                            onChange={(e) => setPrices((p) => ({ ...p, [app.id]: e.target.value }))}
+                            placeholder="Monthly price"
+                            style={{ width: 130, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none" }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            onClick={() => act(app.id, "decline")}
+                            disabled={acting === app.id}
+                            style={{ background: "transparent", border: `1px solid ${border}`, color: "#d97460", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}
+                          >
+                            Decline
+                          </button>
+                          <button
+                            onClick={() => act(app.id, "approve")}
+                            disabled={acting === app.id}
+                            style={{ background: gold, border: "none", color: "#111", padding: "7px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}
+                          >
+                            {acting === app.id ? "Sending…" : "Approve + Send Payment Link"}
+                          </button>
+                        </div>
                       </div>
                     )}
                     {(app.status === "APPROVED") && app.stripeCheckoutUrl && (

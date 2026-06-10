@@ -32,9 +32,10 @@ export default function NewClientPage() {
   const [goal, setGoal] = useState("")
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0])
   const [weightUnit, setWeightUnit] = useState<"LBS" | "KG">("LBS")
+  const [monthlyPrice, setMonthlyPrice] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
-  const [result, setResult] = useState<{ accountCreated: boolean; email: string } | null>(null)
+  const [result, setResult] = useState<{ accountCreated: boolean; email: string; checkoutUrl?: string } | null>(null)
 
   async function handleSave() {
     if (!displayName.trim() || !email.trim()) { setError("Name and email are required"); return }
@@ -49,6 +50,13 @@ export default function NewClientPage() {
       const token = session.tokens?.accessToken?.toString() ?? ""
 
       // Grant coaching access + create/notify Cognito user
+      const priceInCents = monthlyPrice ? Math.round(parseFloat(monthlyPrice) * 100) : undefined
+      if (monthlyPrice && (!priceInCents || priceInCents < 100)) {
+        setError("Price must be at least $1.00")
+        setSaving(false)
+        return
+      }
+
       const grantRes = await fetch("/api/admin/coaching/grant-access", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -56,12 +64,13 @@ export default function NewClientPage() {
           email: emailVal, displayName: displayName.trim(),
           phone: phone.trim() || undefined, goal: goal.trim() || undefined,
           startDate, weightUnit,
+          priceInCents,
         }),
       })
-      const grantData = await grantRes.json() as { ok?: boolean; accountCreated?: boolean; error?: string }
+      const grantData = await grantRes.json() as { ok?: boolean; accountCreated?: boolean; checkoutUrl?: string; error?: string }
       if (!grantRes.ok) throw new Error(grantData.error ?? "Failed to grant access")
 
-      setResult({ accountCreated: grantData.accountCreated ?? false, email: emailVal })
+      setResult({ accountCreated: grantData.accountCreated ?? false, email: emailVal, checkoutUrl: grantData.checkoutUrl })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.")
     }
@@ -74,12 +83,14 @@ export default function NewClientPage() {
         <div style={{ background: "#111", border: `1px solid ${border}`, padding: "32px 28px", textAlign: "center" }}>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2rem", color: gold, marginBottom: 12 }}>Client Added ✓</p>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888", marginBottom: 8, lineHeight: 1.6 }}>
-            <strong style={{ color: "#f0e6d3" }}>{displayName}</strong> ({result.email}) is now in your coaching roster.
+            <strong style={{ color: "#f0e6d3" }}>{displayName}</strong> ({result.email}) has been added to your coaching roster.
           </p>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#555", marginBottom: 28 }}>
-            {result.accountCreated
-              ? "A new account was created and a setup email with a password link has been sent."
-              : "They already had an account. A portal access notification email was sent."}
+            {result.checkoutUrl
+              ? "A payment link has been emailed to them. Access will be granted automatically once they pay."
+              : result.accountCreated
+                ? "A new account was created and a welcome email with a password setup link has been sent."
+                : "They already had an account. A portal access notification email was sent."}
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             <Link
@@ -89,7 +100,7 @@ export default function NewClientPage() {
               View Client Profile →
             </Link>
             <button
-              onClick={() => { setResult(null); setDisplayName(""); setEmail(""); setPhone(""); setGoal("") }}
+              onClick={() => { setResult(null); setDisplayName(""); setEmail(""); setPhone(""); setGoal(""); setMonthlyPrice("") }}
               style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "11px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}
             >
               Add Another
@@ -169,6 +180,25 @@ export default function NewClientPage() {
         </div>
 
         <div>
+          <FieldLabel>Monthly Price (USD)</FieldLabel>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ background: "#0a0a0a", border: `1px solid ${border}`, borderRight: "none", padding: "9px 12px", fontSize: "0.8rem", color: "#555", borderRadius: "0" }}>$</span>
+            <input
+              type="number"
+              min="1"
+              step="0.01"
+              value={monthlyPrice}
+              onChange={(e) => setMonthlyPrice(e.target.value)}
+              placeholder="197.00 — leave blank for immediate access"
+              style={{ flex: 1, background: "#111", border: `1px solid ${border}`, borderLeft: "none", color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", marginTop: 5 }}>
+            {monthlyPrice ? `$${parseFloat(monthlyPrice || "0").toFixed(2)}/month — payment link emailed, access granted after payment` : "Leave blank to grant immediate access without payment"}
+          </p>
+        </div>
+
+        <div>
           <FieldLabel>Preferred Weight Unit</FieldLabel>
           <div style={{ display: "flex", gap: 8 }}>
             {(["LBS", "KG"] as const).map((u) => (
@@ -193,7 +223,7 @@ export default function NewClientPage() {
             style={{ background: saving ? "#555" : gold, color: "#0a0a0a", border: "none", padding: "12px 28px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", cursor: saving ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8 }}
           >
             {saving && <Spinner />}
-            {saving ? "Adding Client…" : "Add Client & Send Email"}
+            {saving ? "Adding Client…" : monthlyPrice ? "Add Client & Send Payment Link" : "Add Client & Grant Access"}
           </button>
           <button onClick={() => router.push("/admin/coaching/clients")} style={{ background: "none", border: "none", color: "#555", padding: "12px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>
             Cancel
