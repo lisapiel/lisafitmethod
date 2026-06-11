@@ -1,11 +1,10 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation"
-import { signOut } from "aws-amplify/auth"
+import { usePathname } from "next/navigation"
 import Link from "next/link"
+import AccountDropdown from "@/components/AccountDropdown.client"
 
 const accent = "#c8a97e"
-const accentDark = "#a8895e"
 const warmWhite = "#faf8f5"
 const black = "#0a0a0a"
 const muted = "#6b6560"
@@ -77,21 +76,13 @@ function MessageIcon() {
 
 export default function CoachingClientLayout({
   children,
-  email,
 }: {
   children: React.ReactNode
-  email: string
 }) {
   const pathname = usePathname()
-  const router = useRouter()
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
-
-  async function handleSignOut() {
-    await signOut()
-    router.push("/login")
-  }
 
   return (
     <div style={{ minHeight: "100dvh", background: warmWhite, display: "flex", flexDirection: "column" }}>
@@ -143,32 +134,7 @@ export default function CoachingClientLayout({
           </span>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{
-            fontFamily: "var(--font-dm-sans), sans-serif",
-            fontSize: "0.75rem",
-            color: muted,
-          }}>
-            {email}
-          </span>
-          <button
-            onClick={handleSignOut}
-            style={{
-              background: "none",
-              border: `1px solid ${border}`,
-              color: muted,
-              fontFamily: "var(--font-dm-sans), sans-serif",
-              fontSize: "0.7rem",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              padding: "0.35rem 0.9rem",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
-          >
-            Sign Out
-          </button>
-        </div>
+        <AccountDropdown />
       </header>
 
       <div style={{ display: "flex", flex: 1 }}>
@@ -264,4 +230,3 @@ export default function CoachingClientLayout({
   )
 }
 
-void accentDark

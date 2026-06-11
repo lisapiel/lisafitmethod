@@ -27,5 +27,5 @@ export default async function MyCoachingLayout({ children }: { children: React.R
     redirect("/account")
   }
 
-  return <CoachingClientLayout email={email as string}>{children}</CoachingClientLayout>
+  return <CoachingClientLayout>{children}</CoachingClientLayout>
 }
