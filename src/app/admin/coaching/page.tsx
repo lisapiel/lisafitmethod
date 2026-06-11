@@ -159,6 +159,7 @@ export default function AdminCoachingDashboard() {
           <QuickAction label="Exercise Library" href="/admin/coaching/exercises" />
           <QuickAction label="Messages" href="/admin/coaching/messages" />
           <QuickAction label="Tasks" href="/admin/coaching/tasks" />
+          <QuickAction label="Backfill from Stripe" href="/admin/coaching/backfill-payment" />
         </div>
       </div>
 
