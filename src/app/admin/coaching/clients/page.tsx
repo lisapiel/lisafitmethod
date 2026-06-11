@@ -31,7 +31,7 @@ function initials(name: string) {
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "PAUSED" | "INACTIVE">("ACTIVE")
+  const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "PAUSED" | "INACTIVE">("ALL")
   const [query, setQuery] = useState("")
 
   useEffect(() => {

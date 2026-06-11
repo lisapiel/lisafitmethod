@@ -11,8 +11,10 @@ import {
 import {
   ADMIN_EMAIL,
   grantCoachingAccess,
+  hasCoachingAccess,
   createCoachingClientRecord,
   getCoachingClientRecord,
+  updateCoachingClientRecord,
   listCoachingApplications,
   updateCoachingApplication,
   generateAuthToken,
@@ -97,13 +99,21 @@ export async function POST(req: NextRequest) {
     }, { status: 404 })
   }
 
-  // 3. Provision: grant access + ensure client record exists
+  // 3. Provision: grant access + upsert client record (always force ACTIVE)
+  const hadAccess = await hasCoachingAccess(email)
   await grantCoachingAccess(email, "monthly")
 
   const existingClient = await getCoachingClientRecord(email)
-  const displayName = customerName || existingClient?.displayName || email.split("@")[0]
+  const displayName = existingClient?.displayName || customerName || email.split("@")[0]
+  let clientAction: "created" | "updated_to_active" | "already_active"
   if (!existingClient) {
     await createCoachingClientRecord({ email, displayName, status: "ACTIVE" })
+    clientAction = "created"
+  } else if (existingClient.status !== "ACTIVE") {
+    await updateCoachingClientRecord(email, { status: "ACTIVE" })
+    clientAction = "updated_to_active"
+  } else {
+    clientAction = "already_active"
   }
 
   // 4. Update any matching application
@@ -217,6 +227,8 @@ export async function POST(req: NextRequest) {
     email,
     subscriptionId: activeSub.id,
     displayName,
-    message: `Provisioned ${email} from active subscription ${activeSub.id}`,
+    clientAction,
+    accessAction: hadAccess ? "already_had_access" : "granted",
+    message: `Provisioned ${email}: client record ${clientAction}, access ${hadAccess ? "already existed" : "granted"}, sub ${activeSub.id}`,
   })
 }
