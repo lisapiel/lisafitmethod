@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -42,16 +40,12 @@ function formatDate(iso: string) {
 function RatingRow({ label, value }: { label: string; value: number | null }) {
   if (!value) return null
   const color = value >= 4 ? "#5c9e6a" : value >= 3 ? gold : "#d97460"
-  const bars = [1, 2, 3, 4, 5]
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.06em", width: 130, flexShrink: 0 }}>{label.toUpperCase()}</span>
       <div style={{ display: "flex", gap: 4 }}>
-        {bars.map((n) => (
-          <div key={n} style={{
-            width: 28, height: 10, borderRadius: 3,
-            background: n <= value ? color : "#2a2a2a",
-          }} />
+        {[1, 2, 3, 4, 5].map((n) => (
+          <div key={n} style={{ width: 28, height: 10, borderRadius: 3, background: n <= value ? color : "#2a2a2a" }} />
         ))}
       </div>
       <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color }}>{value}/5</span>
@@ -82,6 +76,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   const { id } = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [token, setToken] = useState("")
   const [checkIn, setCheckIn] = useState<CheckIn | null>(null)
   const [clientName, setClientName] = useState("")
   const [feedback, setFeedback] = useState("")
@@ -91,37 +86,52 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   useEffect(() => {
     async function load() {
       try {
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const { data: ci } = await db.models.CoachingCheckIn.get({ id })
-        if (!ci) { setLoading(false); return }
+        const session = await fetchAuthSession()
+        const accessToken = session.tokens?.accessToken?.toString() ?? ""
+        setToken(accessToken)
+        if (!accessToken) return
 
-        setCheckIn({
-          id: ci.id,
-          clientEmail: ci.clientEmail,
-          submittedAt: ci.submittedAt,
-          status: (ci.status ?? "PENDING") as CheckIn["status"],
-          weight: ci.weight ?? null,
-          weightUnit: ci.weightUnit ?? null,
-          sleepQuality: ci.sleepQuality ?? null,
-          energyLevel: ci.energyLevel ?? null,
-          hungerLevel: ci.hungerLevel ?? null,
-          stressLevel: ci.stressLevel ?? null,
-          digestion: ci.digestion ?? null,
-          trainingPerformance: ci.trainingPerformance ?? null,
-          nutritionAdherence: ci.nutritionAdherence ?? null,
-          workoutConsistency: ci.workoutConsistency ?? null,
-          wins: ci.wins ?? null,
-          struggles: ci.struggles ?? null,
-          questionsForCoach: ci.questionsForCoach ?? null,
-          additionalNotes: ci.additionalNotes ?? null,
-          coachFeedback: ci.coachFeedback ?? null,
-          reviewedAt: ci.reviewedAt ?? null,
-        })
-        if (ci.coachFeedback) setFeedback(ci.coachFeedback)
+        const [ciRes, clientsRes] = await Promise.allSettled([
+          fetch(`/api/admin/coaching/check-ins/${id}`, { headers: { Authorization: `Bearer ${accessToken}` } }),
+          fetch("/api/admin/coaching/clients", { headers: { Authorization: `Bearer ${accessToken}` } }),
+        ])
 
-        const { data: clients } = await db.models.CoachingClient.list({ authMode: "userPool" })
-        const match = clients.find((c) => c.email.toLowerCase() === ci.clientEmail.toLowerCase())
-        if (match) setClientName(match.displayName)
+        if (ciRes.status === "fulfilled" && ciRes.value.ok) {
+          const data = await ciRes.value.json()
+          const ci = data.checkIn
+          setCheckIn({
+            id: ci.id,
+            clientEmail: ci.clientEmail,
+            submittedAt: ci.submittedAt,
+            status: (ci.status ?? "PENDING") as CheckIn["status"],
+            weight: ci.weight != null ? Number(ci.weight) : null,
+            weightUnit: ci.weightUnit ?? null,
+            sleepQuality: ci.sleepQuality != null ? Number(ci.sleepQuality) : null,
+            energyLevel: ci.energyLevel != null ? Number(ci.energyLevel) : null,
+            hungerLevel: ci.hungerLevel != null ? Number(ci.hungerLevel) : null,
+            stressLevel: ci.stressLevel != null ? Number(ci.stressLevel) : null,
+            digestion: ci.digestion != null ? Number(ci.digestion) : null,
+            trainingPerformance: ci.trainingPerformance != null ? Number(ci.trainingPerformance) : null,
+            nutritionAdherence: ci.nutritionAdherence != null ? Number(ci.nutritionAdherence) : null,
+            workoutConsistency: ci.workoutConsistency != null ? Number(ci.workoutConsistency) : null,
+            wins: ci.wins ?? null,
+            struggles: ci.struggles ?? null,
+            questionsForCoach: ci.questionsForCoach ?? null,
+            additionalNotes: ci.additionalNotes ?? null,
+            coachFeedback: ci.coachFeedback ?? null,
+            reviewedAt: ci.reviewedAt ?? null,
+          })
+          if (ci.coachFeedback) setFeedback(ci.coachFeedback)
+
+          // Look up client name
+          if (clientsRes.status === "fulfilled" && clientsRes.value.ok) {
+            const clientData = await clientsRes.value.json()
+            const match = (clientData.clients ?? []).find(
+              (c: { email: string; displayName: string }) => c.email.toLowerCase() === ci.clientEmail.toLowerCase()
+            )
+            if (match) setClientName(match.displayName)
+          }
+        }
       } catch { /* handled by layout */ }
       setLoading(false)
     }
@@ -129,32 +139,23 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   }, [id])
 
   async function sendFeedback() {
-    if (!checkIn || !feedback.trim()) return
+    if (!checkIn || !feedback.trim() || !token) return
     setSaving(true)
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      const coachEmail = (await fetchUserAttributes()).email ?? ""
-      const now = new Date().toISOString()
-
-      await db.models.CoachingCheckIn.update({
-        id: checkIn.id,
-        status: "REVIEWED",
-        coachFeedback: feedback.trim(),
-        reviewedAt: now,
+      const res = await fetch(`/api/admin/coaching/check-ins/${id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ feedback: feedback.trim() }),
       })
-
-      const emails = [coachEmail, checkIn.clientEmail].sort()
-      const threadId = `${emails[0]}_${emails[1]}`
-      await db.models.CoachingMessage.create({
-        threadId,
-        fromEmail: coachEmail,
-        toEmail: checkIn.clientEmail,
-        body: `Feedback on your check-in from ${formatDate(checkIn.submittedAt)}:\n\n${feedback.trim()}`,
-        sentAt: now,
-      })
-
-      setSaved(true)
-      setCheckIn((prev) => prev ? { ...prev, status: "REVIEWED", coachFeedback: feedback.trim(), reviewedAt: now } : prev)
+      if (res.ok) {
+        setSaved(true)
+        setCheckIn((prev) => prev ? {
+          ...prev,
+          status: "REVIEWED",
+          coachFeedback: feedback.trim(),
+          reviewedAt: new Date().toISOString(),
+        } : prev)
+      }
     } catch (err) {
       console.error(err)
     }
@@ -181,12 +182,10 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   return (
     <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        {/* Back link */}
         <Link href="/admin/coaching/check-ins" style={{ color: muted, fontSize: "0.75rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "1.5rem" }}>
           ← Check-In Queue
         </Link>
 
-        {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "2rem", gap: 16, flexWrap: "wrap" }}>
           <div>
             <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>
@@ -211,9 +210,8 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-          {/* Left column — submission data */}
+          {/* Left column */}
           <div>
-            {/* Weight */}
             {checkIn.weight && (
               <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>Weight</p>
@@ -223,7 +221,6 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
               </div>
             )}
 
-            {/* Wellbeing ratings */}
             <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Wellbeing</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -235,7 +232,6 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
               </div>
             </div>
 
-            {/* Training & nutrition */}
             <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem" }}>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Training & Nutrition</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -246,29 +242,13 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             </div>
           </div>
 
-          {/* Right column — text responses */}
+          {/* Right column */}
           <div>
             <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>
-              {checkIn.wins ? (
-                <Section label="Wins">
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, lineHeight: 1.6, margin: 0 }}>{checkIn.wins}</p>
-                </Section>
-              ) : null}
-              {checkIn.struggles ? (
-                <Section label="Struggles">
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, lineHeight: 1.6, margin: 0 }}>{checkIn.struggles}</p>
-                </Section>
-              ) : null}
-              {checkIn.questionsForCoach ? (
-                <Section label="Questions for You">
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "#e8c98a", lineHeight: 1.6, margin: 0 }}>{checkIn.questionsForCoach}</p>
-                </Section>
-              ) : null}
-              {checkIn.additionalNotes ? (
-                <Section label="Additional Notes">
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, lineHeight: 1.6, margin: 0 }}>{checkIn.additionalNotes}</p>
-                </Section>
-              ) : null}
+              {checkIn.wins ? <Section label="Wins"><p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, lineHeight: 1.6, margin: 0 }}>{checkIn.wins}</p></Section> : null}
+              {checkIn.struggles ? <Section label="Struggles"><p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, lineHeight: 1.6, margin: 0 }}>{checkIn.struggles}</p></Section> : null}
+              {checkIn.questionsForCoach ? <Section label="Questions for You"><p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "#e8c98a", lineHeight: 1.6, margin: 0 }}>{checkIn.questionsForCoach}</p></Section> : null}
+              {checkIn.additionalNotes ? <Section label="Additional Notes"><p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, lineHeight: 1.6, margin: 0 }}>{checkIn.additionalNotes}</p></Section> : null}
               {!checkIn.wins && !checkIn.struggles && !checkIn.questionsForCoach && !checkIn.additionalNotes && (
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: muted, textAlign: "center", padding: "1rem 0" }}>No text responses</p>
               )}
@@ -287,18 +267,9 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             placeholder="Write your feedback for this client. Be specific — what's working, what to adjust, encouragement..."
             rows={8}
             style={{
-              width: "100%",
-              background: "#111",
-              border: `1px solid ${border}`,
-              borderRadius: 6,
-              color: cream,
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: "0.875rem",
-              lineHeight: 1.6,
-              padding: "0.875rem 1rem",
-              resize: "vertical",
-              outline: "none",
-              boxSizing: "border-box",
+              width: "100%", background: "#111", border: `1px solid ${border}`, borderRadius: 6,
+              color: cream, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.875rem",
+              lineHeight: 1.6, padding: "0.875rem 1rem", resize: "vertical", outline: "none", boxSizing: "border-box",
             }}
           />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1rem" }}>
@@ -312,16 +283,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => router.push("/admin/coaching/check-ins")}
-                style={{
-                  background: "transparent",
-                  border: `1px solid ${border}`,
-                  color: muted,
-                  padding: "10px 20px",
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                  fontSize: "0.8rem",
-                  cursor: "pointer",
-                  borderRadius: 4,
-                }}
+                style={{ background: "transparent", border: `1px solid ${border}`, color: muted, padding: "10px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", cursor: "pointer", borderRadius: 4 }}
               >
                 Back to Queue
               </button>
@@ -329,16 +291,10 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                 onClick={sendFeedback}
                 disabled={saving || !feedback.trim()}
                 style={{
-                  background: feedback.trim() ? gold : "#2a2a2a",
-                  border: "none",
-                  color: feedback.trim() ? "#111" : muted,
-                  padding: "10px 24px",
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                  fontSize: "0.8rem",
-                  fontWeight: 700,
-                  cursor: feedback.trim() ? "pointer" : "not-allowed",
-                  borderRadius: 4,
-                  transition: "background 0.15s",
+                  background: feedback.trim() ? gold : "#2a2a2a", border: "none",
+                  color: feedback.trim() ? "#111" : muted, padding: "10px 24px",
+                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 700,
+                  cursor: feedback.trim() ? "pointer" : "not-allowed", borderRadius: 4, transition: "background 0.15s",
                 }}
               >
                 {saving ? "Sending..." : reviewed ? "Update Feedback" : "Send Feedback"}

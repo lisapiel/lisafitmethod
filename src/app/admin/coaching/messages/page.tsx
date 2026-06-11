@@ -1,17 +1,16 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 const cream = "#f0e6d3"
 const muted = "#888"
-const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 type ThreadSummary = {
+  threadId: string
   clientEmail: string
   clientName: string
   lastMessage: string
@@ -47,42 +46,15 @@ export default function AdminMessagesPage() {
 
   const loadThreads = useCallback(async () => {
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      const [messagesRes, clientsRes] = await Promise.allSettled([
-        db.models.CoachingMessage.list({ authMode: "userPool" }),
-        db.models.CoachingClient.list({ authMode: "userPool" }),
-      ])
-
-      const allMessages = messagesRes.status === "fulfilled" ? messagesRes.value.data : []
-      const allClients = clientsRes.status === "fulfilled" ? clientsRes.value.data : []
-      const nameMap: Record<string, string> = {}
-      for (const c of allClients) nameMap[c.email.toLowerCase()] = c.displayName
-
-      // Group by thread, derive client email from message participants
-      const threadMap: Record<string, { messages: typeof allMessages[0][]; clientEmail: string }> = {}
-      for (const msg of allMessages) {
-        const clientEmail = msg.fromEmail === COACH_EMAIL ? msg.toEmail : msg.fromEmail
-        if (!threadMap[msg.threadId]) {
-          threadMap[msg.threadId] = { messages: [], clientEmail }
-        }
-        threadMap[msg.threadId].messages.push(msg)
-      }
-
-      const summaries: ThreadSummary[] = Object.values(threadMap).map(({ messages, clientEmail }) => {
-        const sorted = [...messages].sort((a, b) => b.sentAt.localeCompare(a.sentAt))
-        const last = sorted[0]
-        const unread = messages.filter((m) => m.fromEmail !== COACH_EMAIL && !m.readAt).length
-        return {
-          clientEmail,
-          clientName: nameMap[clientEmail.toLowerCase()] ?? clientEmail,
-          lastMessage: last.body.slice(0, 80) + (last.body.length > 80 ? "…" : ""),
-          lastAt: last.sentAt,
-          unreadCount: unread,
-        }
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) return
+      const res = await fetch("/api/admin/coaching/messages", {
+        headers: { Authorization: `Bearer ${token}` },
       })
-
-      summaries.sort((a, b) => b.lastAt.localeCompare(a.lastAt))
-      setThreads(summaries)
+      if (!res.ok) return
+      const data = await res.json()
+      setThreads(data.threads ?? [])
     } catch { /* handled by layout */ }
     setLoading(false)
   }, [])
@@ -135,7 +107,6 @@ export default function AdminMessagesPage() {
                   gap: 14,
                 }}
               >
-                {/* Avatar */}
                 <div style={{
                   width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
                   background: t.unreadCount > 0 ? `${gold}20` : "#2a2a2a",

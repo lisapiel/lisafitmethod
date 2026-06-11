@@ -1,16 +1,12 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
 const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
-const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 type Message = {
   id: string
@@ -51,41 +47,25 @@ export default function MessagesClient() {
   const [input, setInput] = useState("")
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const threadId = [myEmail, COACH_EMAIL].filter(Boolean).sort().join("_")
 
-  const loadMessages = useCallback(async (email: string) => {
+  const loadMessages = useCallback(async () => {
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      const { data } = await db.models.CoachingMessage.list({ authMode: "userPool" })
-      const tid = [email, COACH_EMAIL].sort().join("_")
-      const thread = data
-        .filter((m) => m.threadId === tid)
-        .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
-        .map((m) => ({
-          id: m.id,
-          fromEmail: m.fromEmail,
-          toEmail: m.toEmail,
-          body: m.body,
-          sentAt: m.sentAt,
-          readAt: m.readAt ?? null,
-        }))
-      setMessages(thread)
-
-      // Mark coach messages as read
-      const unread = data.filter((m) => m.threadId === tid && m.toEmail === email && !m.readAt)
-      if (unread.length > 0) {
-        const now = new Date().toISOString()
-        await Promise.all(unread.map((m) => db.models.CoachingMessage.update({ id: m.id, readAt: now })))
-      }
-    } catch { /* handled by layout */ }
+      const res = await fetch("/api/coaching/messages")
+      if (!res.ok) return
+      const data = await res.json()
+      setMessages(data.messages ?? [])
+    } catch { /* network error */ }
   }, [])
 
   useEffect(() => {
     async function init() {
-      const attrs = await fetchUserAttributes()
-      const email = attrs.email ?? ""
-      setMyEmail(email)
-      await loadMessages(email)
+      // Get email from member access endpoint
+      try {
+        const res = await fetch("/api/member/access")
+        const data = await res.json()
+        if (data.email) setMyEmail(data.email)
+      } catch { /* ignore */ }
+      await loadMessages()
       setLoading(false)
     }
     init()
@@ -94,8 +74,8 @@ export default function MessagesClient() {
   // Poll every 30s + on focus
   useEffect(() => {
     if (!myEmail) return
-    const interval = setInterval(() => loadMessages(myEmail), 30_000)
-    const onFocus = () => loadMessages(myEmail)
+    const interval = setInterval(loadMessages, 30_000)
+    const onFocus = () => loadMessages()
     window.addEventListener("focus", onFocus)
     return () => { clearInterval(interval); window.removeEventListener("focus", onFocus) }
   }, [myEmail, loadMessages])
@@ -106,22 +86,19 @@ export default function MessagesClient() {
   }, [messages.length])
 
   async function send() {
-    if (!input.trim() || !myEmail) return
+    if (!input.trim()) return
     setSending(true)
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.CoachingMessage.create({
-        threadId,
-        fromEmail: myEmail,
-        toEmail: COACH_EMAIL,
-        body: input.trim(),
-        sentAt: new Date().toISOString(),
+      const res = await fetch("/api/coaching/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: input.trim() }),
       })
-      setInput("")
-      await loadMessages(myEmail)
-    } catch (err) {
-      console.error(err)
-    }
+      if (res.ok) {
+        setInput("")
+        await loadMessages()
+      }
+    } catch { /* network error */ }
     setSending(false)
   }
 
@@ -184,7 +161,7 @@ export default function MessagesClient() {
                   <div style={{ flex: 1, height: 1, background: border }} />
                 </div>
                 {group.messages.map((msg) => {
-                  const isMe = msg.fromEmail === myEmail
+                  const isMe = myEmail ? msg.fromEmail.toLowerCase() === myEmail.toLowerCase() : false
                   return (
                     <div key={msg.id} style={{ display: "flex", justifyContent: isMe ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
                       {!isMe && (

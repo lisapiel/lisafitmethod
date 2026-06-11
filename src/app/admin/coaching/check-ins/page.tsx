@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -61,26 +60,32 @@ export default function AdminCheckInsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const { data } = await db.models.CoachingCheckIn.list({ authMode: "userPool" })
-        const mapped = data
-          .sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
-          .map((ci) => ({
-            id: ci.id,
-            clientEmail: ci.clientEmail,
-            submittedAt: ci.submittedAt,
-            status: (ci.status ?? "PENDING") as CheckIn["status"],
-            weight: ci.weight ?? null,
-            weightUnit: ci.weightUnit ?? null,
-            sleepQuality: ci.sleepQuality ?? null,
-            energyLevel: ci.energyLevel ?? null,
-            trainingPerformance: ci.trainingPerformance ?? null,
-            nutritionAdherence: ci.nutritionAdherence ?? null,
-            workoutConsistency: ci.workoutConsistency ?? null,
-            wins: ci.wins ?? null,
-            struggles: ci.struggles ?? null,
-            questionsForCoach: ci.questionsForCoach ?? null,
-          }))
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) return
+        const res = await fetch("/api/admin/coaching/check-ins", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        const mapped = (data.checkIns ?? []).map((ci: Record<string, unknown>) => ({
+          id: ci.id as string,
+          clientEmail: ci.clientEmail as string,
+          submittedAt: ci.submittedAt as string,
+          status: (ci.status ?? "PENDING") as CheckIn["status"],
+          weight: ci.weight != null ? Number(ci.weight) : null,
+          weightUnit: (ci.weightUnit as string | null) ?? null,
+          sleepQuality: ci.sleepQuality != null ? Number(ci.sleepQuality) : null,
+          energyLevel: ci.energyLevel != null ? Number(ci.energyLevel) : null,
+          trainingPerformance: ci.trainingPerformance != null ? Number(ci.trainingPerformance) : null,
+          nutritionAdherence: ci.nutritionAdherence != null ? Number(ci.nutritionAdherence) : null,
+          workoutConsistency: ci.workoutConsistency != null ? Number(ci.workoutConsistency) : null,
+          wins: (ci.wins as string | null) ?? null,
+          struggles: (ci.struggles as string | null) ?? null,
+          questionsForCoach: (ci.questionsForCoach as string | null) ?? null,
+        }))
+        // Sort oldest-first for pending, newest-first for reviewed
+        mapped.sort((a: CheckIn, b: CheckIn) => a.submittedAt.localeCompare(b.submittedAt))
         setCheckIns(mapped)
       } catch { /* handled by layout */ }
       setLoading(false)
@@ -94,7 +99,6 @@ export default function AdminCheckInsPage() {
   return (
     <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
           <Link href="/admin/coaching" style={{ color: muted, fontSize: "0.75rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "1rem" }}>
             ← Coaching
@@ -114,7 +118,6 @@ export default function AdminCheckInsPage() {
           </div>
         </div>
 
-        {/* Tabs */}
         <div style={{ display: "flex", gap: 8, marginBottom: "1.5rem" }}>
           {(["PENDING", "REVIEWED", "ALL"] as const).map((t) => (
             <button
@@ -163,7 +166,6 @@ export default function AdminCheckInsPage() {
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* Client + date row */}
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                         <div style={{
                           width: 32, height: 32, borderRadius: "50%",
@@ -187,31 +189,21 @@ export default function AdminCheckInsPage() {
                         </div>
                       </div>
 
-                      {/* Ratings row */}
                       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.06em" }}>SLEEP</span>
-                          <RatingDot value={ci.sleepQuality} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.06em" }}>ENERGY</span>
-                          <RatingDot value={ci.energyLevel} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.06em" }}>TRAINING</span>
-                          <RatingDot value={ci.trainingPerformance} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.06em" }}>NUTRITION</span>
-                          <RatingDot value={ci.nutritionAdherence} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.06em" }}>CONSISTENCY</span>
-                          <RatingDot value={ci.workoutConsistency} />
-                        </div>
+                        {[
+                          ["SLEEP", ci.sleepQuality],
+                          ["ENERGY", ci.energyLevel],
+                          ["TRAINING", ci.trainingPerformance],
+                          ["NUTRITION", ci.nutritionAdherence],
+                          ["CONSISTENCY", ci.workoutConsistency],
+                        ].map(([label, val]) => (
+                          <div key={label as string} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.06em" }}>{label as string}</span>
+                            <RatingDot value={val as number | null} />
+                          </div>
+                        ))}
                       </div>
 
-                      {/* Preview of wins/struggles */}
                       {(ci.wins || ci.struggles || ci.questionsForCoach) && (
                         <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap" }}>
                           {ci.wins && (
@@ -235,13 +227,8 @@ export default function AdminCheckInsPage() {
 
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
                       <span style={{
-                        display: "inline-block",
-                        padding: "3px 10px",
-                        borderRadius: 4,
-                        fontFamily: "var(--font-montserrat), sans-serif",
-                        fontSize: "0.6rem",
-                        fontWeight: 700,
-                        letterSpacing: "0.08em",
+                        display: "inline-block", padding: "3px 10px", borderRadius: 4,
+                        fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.08em",
                         background: isPending ? `${gold}18` : "#2a2a2a",
                         color: isPending ? gold : muted,
                         border: `1px solid ${isPending ? gold : border}`,

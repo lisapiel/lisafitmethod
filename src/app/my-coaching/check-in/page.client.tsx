@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -125,8 +122,6 @@ function TextBlock({ label, value, onChange, placeholder }: { label: string; val
 
 export default function CheckInClient() {
   const [loading, setLoading] = useState(true)
-  const [email, setEmail] = useState("")
-  const [, setWeightUnit] = useState<"LBS" | "KG">("LBS")
   const [alreadySubmitted, setAlreadySubmitted] = useState(false)
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<FormState>(INITIAL)
@@ -136,26 +131,15 @@ export default function CheckInClient() {
   useEffect(() => {
     async function init() {
       try {
-        const attrs = await fetchUserAttributes()
-        const userEmail = attrs.email ?? ""
-        setEmail(userEmail)
-
-        const db = generateClient<Schema>({ authMode: "userPool" })
-
-        // Get client's weight unit preference
-        const { data: clients } = await db.models.CoachingClient.list({ authMode: "userPool" })
-        const me = clients.find((c) => c.email.toLowerCase() === userEmail.toLowerCase())
-        if (me?.weightUnit) {
-          setWeightUnit(me.weightUnit as "LBS" | "KG")
-          setForm((f) => ({ ...f, weightUnit: me.weightUnit as "LBS" | "KG" }))
+        const res = await fetch("/api/coaching/check-in")
+        if (res.ok) {
+          const data = await res.json()
+          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          const recent = (data.checkIns ?? []).find(
+            (ci: { submittedAt: string }) => new Date(ci.submittedAt) > weekAgo
+          )
+          if (recent) setAlreadySubmitted(true)
         }
-
-        // Check if already submitted this week
-        const { data: checkIns } = await db.models.CoachingCheckIn.list({ authMode: "userPool" })
-        const mine = checkIns.filter((ci) => ci.clientEmail.toLowerCase() === userEmail.toLowerCase())
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        const recent = mine.find((ci) => new Date(ci.submittedAt) > weekAgo)
-        if (recent) setAlreadySubmitted(true)
       } catch { /* layout handles auth */ }
       setLoading(false)
     }
@@ -173,28 +157,32 @@ export default function CheckInClient() {
 
   async function submit() {
     setSaving(true)
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    await db.models.CoachingCheckIn.create({
-      clientEmail: email,
-      submittedAt: new Date().toISOString(),
-      status: "PENDING",
-      weight: form.weight ? parseFloat(form.weight) : undefined,
-      weightUnit: form.weightUnit,
-      sleepQuality: form.sleepQuality || undefined,
-      energyLevel: form.energyLevel || undefined,
-      hungerLevel: form.hungerLevel || undefined,
-      stressLevel: form.stressLevel || undefined,
-      digestion: form.digestion || undefined,
-      trainingPerformance: form.trainingPerformance || undefined,
-      nutritionAdherence: form.nutritionAdherence || undefined,
-      workoutConsistency: form.workoutConsistency || undefined,
-      wins: form.wins || undefined,
-      struggles: form.struggles || undefined,
-      questionsForCoach: form.questionsForCoach || undefined,
-      additionalNotes: form.additionalNotes || undefined,
-    })
+    try {
+      const res = await fetch("/api/coaching/check-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          weight: form.weight || undefined,
+          weightUnit: form.weightUnit,
+          sleepQuality: form.sleepQuality || undefined,
+          energyLevel: form.energyLevel || undefined,
+          hungerLevel: form.hungerLevel || undefined,
+          stressLevel: form.stressLevel || undefined,
+          digestion: form.digestion || undefined,
+          trainingPerformance: form.trainingPerformance || undefined,
+          nutritionAdherence: form.nutritionAdherence || undefined,
+          workoutConsistency: form.workoutConsistency || undefined,
+          wins: form.wins || undefined,
+          struggles: form.struggles || undefined,
+          questionsForCoach: form.questionsForCoach || undefined,
+          additionalNotes: form.additionalNotes || undefined,
+        }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      }
+    } catch { /* network error */ }
     setSaving(false)
-    setSubmitted(true)
   }
 
   if (loading) {
@@ -308,7 +296,7 @@ export default function CheckInClient() {
                 style={{ flex: 1, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", fontWeight: 600, outline: "none", borderRadius: 6 }}
               />
               {(["LBS", "KG"] as const).map((u) => (
-                <button key={u} onClick={() => { set("weightUnit")(u); setWeightUnit(u) }}
+                <button key={u} onClick={() => set("weightUnit")(u)}
                   style={{ background: form.weightUnit === u ? accent : white, border: `2px solid ${form.weightUnit === u ? accent : border}`, color: form.weightUnit === u ? black : muted, padding: "12px 16px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", borderRadius: 6 }}>
                   {u}
                 </button>

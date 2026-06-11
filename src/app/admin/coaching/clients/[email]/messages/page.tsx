@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback, use } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -45,74 +43,87 @@ function Spinner() {
 export default function AdminClientMessagesPage({ params }: { params: Promise<{ email: string }> }) {
   const { email: encodedEmail } = use(params)
   const clientEmail = decodeURIComponent(encodedEmail)
-  const threadId = [clientEmail, COACH_EMAIL].sort().join("_")
+  const threadId = [clientEmail.toLowerCase(), COACH_EMAIL].sort().join("_")
 
   const [loading, setLoading] = useState(true)
+  const [token, setToken] = useState("")
   const [clientName, setClientName] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const loadMessages = useCallback(async () => {
+  const loadMessages = useCallback(async (accessToken: string) => {
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      const { data } = await db.models.CoachingMessage.list({ authMode: "userPool" })
-      const thread = data
-        .filter((m) => m.threadId === threadId)
-        .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
-        .map((m) => ({ id: m.id, fromEmail: m.fromEmail, body: m.body, sentAt: m.sentAt, readAt: m.readAt ?? null }))
-      setMessages(thread)
-
-      // Mark client's messages as read
-      const unread = data.filter((m) => m.threadId === threadId && m.toEmail === COACH_EMAIL && !m.readAt)
-      if (unread.length > 0) {
-        const now = new Date().toISOString()
-        await Promise.all(unread.map((m) => db.models.CoachingMessage.update({ id: m.id, readAt: now })))
-      }
+      const res = await fetch(`/api/admin/coaching/messages/${encodeURIComponent(threadId)}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      setMessages(
+        (data.messages ?? []).map((m: Record<string, unknown>) => ({
+          id: m.id as string,
+          fromEmail: m.fromEmail as string,
+          body: m.body as string,
+          sentAt: m.sentAt as string,
+          readAt: (m.readAt as string | null) ?? null,
+        }))
+      )
     } catch { /* handled by layout */ }
   }, [threadId])
 
   useEffect(() => {
     async function init() {
       try {
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const { data: clients } = await db.models.CoachingClient.list({ authMode: "userPool" })
-        const match = clients.find((c) => c.email.toLowerCase() === clientEmail.toLowerCase())
-        if (match) setClientName(match.displayName)
+        const session = await fetchAuthSession()
+        const accessToken = session.tokens?.accessToken?.toString() ?? ""
+        setToken(accessToken)
+        if (!accessToken) return
+
+        // Fetch client name
+        const clientsRes = await fetch("/api/admin/coaching/clients", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        if (clientsRes.ok) {
+          const data = await clientsRes.json()
+          const match = (data.clients ?? []).find(
+            (c: { email: string; displayName: string }) => c.email.toLowerCase() === clientEmail.toLowerCase()
+          )
+          if (match) setClientName(match.displayName)
+        }
+
+        await loadMessages(accessToken)
       } catch { /* handled by layout */ }
-      await loadMessages()
       setLoading(false)
     }
     init()
   }, [clientEmail, loadMessages])
 
   useEffect(() => {
-    const interval = setInterval(loadMessages, 30_000)
-    const onFocus = () => loadMessages()
+    if (!token) return
+    const interval = setInterval(() => loadMessages(token), 30_000)
+    const onFocus = () => loadMessages(token)
     window.addEventListener("focus", onFocus)
     return () => { clearInterval(interval); window.removeEventListener("focus", onFocus) }
-  }, [loadMessages])
+  }, [token, loadMessages])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages.length])
 
   async function send() {
-    if (!input.trim()) return
+    if (!input.trim() || !token) return
     setSending(true)
     try {
-      const coachEmail = (await fetchUserAttributes()).email ?? COACH_EMAIL
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.CoachingMessage.create({
-        threadId,
-        fromEmail: coachEmail,
-        toEmail: clientEmail,
-        body: input.trim(),
-        sentAt: new Date().toISOString(),
+      const res = await fetch(`/api/admin/coaching/messages/${encodeURIComponent(threadId)}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ body: input.trim(), toEmail: clientEmail }),
       })
-      setInput("")
-      await loadMessages()
+      if (res.ok) {
+        setInput("")
+        await loadMessages(token)
+      }
     } catch (err) {
       console.error(err)
     }
@@ -173,7 +184,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                       <div style={{ flex: 1, height: 1, background: border }} />
                     </div>
                     {group.messages.map((msg) => {
-                      const isCoach = msg.fromEmail === COACH_EMAIL
+                      const isCoach = msg.fromEmail.toLowerCase() === COACH_EMAIL
                       return (
                         <div key={msg.id} style={{ display: "flex", justifyContent: isCoach ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
                           {!isCoach && (
@@ -220,36 +231,19 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
               placeholder={`Message ${clientName || clientEmail}… (Enter to send)`}
               rows={1}
               style={{
-                flex: 1,
-                background: "#111",
-                border: `1px solid ${border}`,
-                borderRadius: 6,
-                padding: "0.65rem 0.875rem",
-                fontFamily: "var(--font-montserrat), sans-serif",
-                fontSize: "0.875rem",
-                color: cream,
-                resize: "none",
-                outline: "none",
-                lineHeight: 1.5,
-                maxHeight: 120,
-                overflowY: "auto",
+                flex: 1, background: "#111", border: `1px solid ${border}`, borderRadius: 6,
+                padding: "0.65rem 0.875rem", fontFamily: "var(--font-montserrat), sans-serif",
+                fontSize: "0.875rem", color: cream, resize: "none", outline: "none",
+                lineHeight: 1.5, maxHeight: 120, overflowY: "auto",
               }}
             />
             <button
               onClick={send}
               disabled={sending || !input.trim()}
               style={{
-                background: input.trim() ? gold : "#2a2a2a",
-                border: "none",
-                borderRadius: 6,
-                width: 38,
-                height: 38,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: input.trim() ? "pointer" : "not-allowed",
-                flexShrink: 0,
-                transition: "background 0.15s",
+                background: input.trim() ? gold : "#2a2a2a", border: "none", borderRadius: 6,
+                width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: input.trim() ? "pointer" : "not-allowed", flexShrink: 0, transition: "background 0.15s",
               }}
             >
               {sending ? (

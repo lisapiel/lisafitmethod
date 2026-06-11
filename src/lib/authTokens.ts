@@ -439,3 +439,161 @@ export async function listCoachingClientRecords(): Promise<CoachingClientRecord[
     .map((item) => item as CoachingClientRecord)
     .sort((a, b) => (a.displayName ?? "").localeCompare(b.displayName ?? ""))
 }
+
+// ── Coaching Messages ─────────────────────────────────────────────────────────
+
+export interface CoachingMessageRecord {
+  id: string
+  threadId: string
+  fromEmail: string
+  toEmail: string
+  body: string
+  sentAt: string
+  readAt?: string
+}
+
+export async function createCoachingMessage(data: Omit<CoachingMessageRecord, "id">): Promise<CoachingMessageRecord> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const record: CoachingMessageRecord = { id, ...data }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_msg_${data.threadId}_${data.sentAt}_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function listCoachingMessages(threadId: string): Promise<CoachingMessageRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": `coaching_msg_${threadId}_` },
+    })
+  )
+  return ((result.Items ?? []) as CoachingMessageRecord[])
+    .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
+}
+
+export async function listAllCoachingMessages(): Promise<CoachingMessageRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_msg_" },
+    })
+  )
+  return ((result.Items ?? []) as CoachingMessageRecord[])
+    .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
+}
+
+export async function markCoachingMessagesRead(threadId: string, toEmail: string): Promise<void> {
+  const db = makeDb()
+  const messages = await listCoachingMessages(threadId)
+  const now = new Date().toISOString()
+  const unread = messages.filter((m) => m.toEmail.toLowerCase() === toEmail.toLowerCase() && !m.readAt)
+  await Promise.all(
+    unread.map((m) =>
+      db.send(
+        new UpdateCommand({
+          TableName: TABLE,
+          Key: { userId: `coaching_msg_${m.threadId}_${m.sentAt}_${m.id}` },
+          UpdateExpression: "SET readAt = :readAt",
+          ExpressionAttributeValues: { ":readAt": now },
+        })
+      )
+    )
+  )
+}
+
+// ── Coaching Check-Ins ────────────────────────────────────────────────────────
+
+export interface CoachingCheckInRecord {
+  id: string
+  clientEmail: string
+  submittedAt: string
+  status: "PENDING" | "REVIEWED"
+  weight?: number
+  weightUnit?: "LBS" | "KG"
+  sleepQuality?: number
+  energyLevel?: number
+  hungerLevel?: number
+  stressLevel?: number
+  digestion?: number
+  trainingPerformance?: number
+  nutritionAdherence?: number
+  workoutConsistency?: number
+  wins?: string
+  struggles?: string
+  questionsForCoach?: string
+  additionalNotes?: string
+  coachFeedback?: string
+  reviewedAt?: string
+}
+
+export async function createCoachingCheckIn(data: Omit<CoachingCheckInRecord, "id">): Promise<CoachingCheckInRecord> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const record: CoachingCheckInRecord = { id, ...data }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_checkin_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function getCoachingCheckIn(id: string): Promise<CoachingCheckInRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_checkin_${id}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as CoachingCheckInRecord
+}
+
+export async function listCoachingCheckIns(clientEmail?: string): Promise<CoachingCheckInRecord[]> {
+  const db = makeDb()
+  const params = clientEmail
+    ? {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
+        ExpressionAttributeValues: { ":prefix": "coaching_checkin_", ":email": clientEmail.toLowerCase() },
+      }
+    : {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix)",
+        ExpressionAttributeValues: { ":prefix": "coaching_checkin_" },
+      }
+  const result = await db.send(new ScanCommand(params))
+  return ((result.Items ?? []) as CoachingCheckInRecord[])
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+}
+
+export async function updateCoachingCheckIn(id: string, updates: Partial<CoachingCheckInRecord>): Promise<void> {
+  const db = makeDb()
+  const sets: string[] = []
+  const values: Record<string, unknown> = {}
+  const names: Record<string, string> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (k === "id") continue
+    sets.push(`#${k} = :${k}`)
+    values[`:${k}`] = v
+    names[`#${k}`] = k
+  }
+  if (sets.length === 0) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_checkin_${id}` },
+      UpdateExpression: `SET ${sets.join(", ")}`,
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: values,
+    })
+  )
+}

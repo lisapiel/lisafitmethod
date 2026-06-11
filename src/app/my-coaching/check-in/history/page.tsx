@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -65,32 +62,29 @@ export default function CheckInHistoryPage() {
   useEffect(() => {
     async function load() {
       try {
-        const attrs = await fetchUserAttributes()
-        const email = attrs.email ?? ""
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const { data } = await db.models.CoachingCheckIn.list({ authMode: "userPool" })
-        const mine = data
-          .filter((ci) => ci.clientEmail.toLowerCase() === email.toLowerCase())
-          .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
-          .map((ci) => ({
-            id: ci.id,
-            submittedAt: ci.submittedAt,
+        const res = await fetch("/api/coaching/check-in")
+        if (res.ok) {
+          const data = await res.json()
+          const mapped = (data.checkIns ?? []).map((ci: Record<string, unknown>) => ({
+            id: ci.id as string,
+            submittedAt: ci.submittedAt as string,
             status: (ci.status ?? "PENDING") as CheckIn["status"],
-            weight: ci.weight ?? null,
-            weightUnit: ci.weightUnit ?? null,
-            sleepQuality: ci.sleepQuality ?? null,
-            energyLevel: ci.energyLevel ?? null,
-            trainingPerformance: ci.trainingPerformance ?? null,
-            nutritionAdherence: ci.nutritionAdherence ?? null,
-            workoutConsistency: ci.workoutConsistency ?? null,
-            wins: ci.wins ?? null,
-            struggles: ci.struggles ?? null,
-            questionsForCoach: ci.questionsForCoach ?? null,
-            coachFeedback: ci.coachFeedback ?? null,
-            reviewedAt: ci.reviewedAt ?? null,
+            weight: ci.weight != null ? Number(ci.weight) : null,
+            weightUnit: (ci.weightUnit as string | null) ?? null,
+            sleepQuality: ci.sleepQuality != null ? Number(ci.sleepQuality) : null,
+            energyLevel: ci.energyLevel != null ? Number(ci.energyLevel) : null,
+            trainingPerformance: ci.trainingPerformance != null ? Number(ci.trainingPerformance) : null,
+            nutritionAdherence: ci.nutritionAdherence != null ? Number(ci.nutritionAdherence) : null,
+            workoutConsistency: ci.workoutConsistency != null ? Number(ci.workoutConsistency) : null,
+            wins: (ci.wins as string | null) ?? null,
+            struggles: (ci.struggles as string | null) ?? null,
+            questionsForCoach: (ci.questionsForCoach as string | null) ?? null,
+            coachFeedback: (ci.coachFeedback as string | null) ?? null,
+            reviewedAt: (ci.reviewedAt as string | null) ?? null,
           }))
-        setCheckIns(mine)
-        if (mine.length > 0) setExpanded(mine[0].id)
+          setCheckIns(mapped)
+          if (mapped.length > 0) setExpanded(mapped[0].id)
+        }
       } catch { /* handled by layout */ }
       setLoading(false)
     }
@@ -131,10 +125,7 @@ export default function CheckInHistoryPage() {
                   style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 1.25rem", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      width: 10, height: 10, borderRadius: "50%",
-                      background: reviewed ? "#5c9e6a" : accent,
-                    }} />
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: reviewed ? "#5c9e6a" : accent }} />
                     <div>
                       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", fontWeight: 600, color: black, margin: 0 }}>
                         {formatDate(ci.submittedAt)}
@@ -153,7 +144,6 @@ export default function CheckInHistoryPage() {
                 {/* Expanded content */}
                 {isOpen && (
                   <div style={{ borderTop: `1px solid ${border}`, padding: "1.25rem" }}>
-                    {/* Ratings row */}
                     <div style={{ display: "flex", gap: 16, marginBottom: "1.25rem", flexWrap: "wrap" }}>
                       <RatingBadge label="Sleep" value={ci.sleepQuality} />
                       <RatingBadge label="Energy" value={ci.energyLevel} />
@@ -162,7 +152,6 @@ export default function CheckInHistoryPage() {
                       <RatingBadge label="Consistency" value={ci.workoutConsistency} />
                     </div>
 
-                    {/* Text responses */}
                     {ci.wins && (
                       <div style={{ marginBottom: "1rem" }}>
                         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Wins</p>
@@ -182,7 +171,6 @@ export default function CheckInHistoryPage() {
                       </div>
                     )}
 
-                    {/* Coach feedback */}
                     {ci.coachFeedback && (
                       <div style={{ background: "#fdf9f4", border: `1px solid #f0e4cc`, borderRadius: 6, padding: "1rem 1.25rem", marginTop: "0.75rem" }}>
                         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
