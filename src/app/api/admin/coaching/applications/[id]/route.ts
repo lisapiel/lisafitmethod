@@ -243,7 +243,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     await createCoachingClientRecord({
       email: application.email,
       displayName: application.name,
-      status: "ACTIVE",
+      status: "PENDING_PAYMENT",
       goal: application.goals || undefined,
     }).catch((err) => console.error("createCoachingClientRecord failed:", err))
 

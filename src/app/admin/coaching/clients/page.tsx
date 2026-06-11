@@ -11,9 +11,17 @@ const border = "#2a2a2a"
 type Client = CoachingClientRecord
 
 const STATUS_COLORS: Record<string, string> = {
+  PENDING_PAYMENT: "#d97460",
   ACTIVE: "#5c9e6a",
   PAUSED: "#c9a96e",
   INACTIVE: "#444",
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: "AWAITING PAYMENT",
+  ACTIVE: "ACTIVE",
+  PAUSED: "PAUSED",
+  INACTIVE: "INACTIVE",
 }
 
 function Spinner() {
@@ -31,7 +39,7 @@ function initials(name: string) {
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "PAUSED" | "INACTIVE">("ALL")
+  const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "PENDING_PAYMENT" | "PAUSED" | "INACTIVE">("ALL")
   const [query, setQuery] = useState("")
 
   useEffect(() => {
@@ -78,9 +86,9 @@ export default function ClientsPage() {
           onChange={(e) => setQuery(e.target.value)}
           style={{ flex: "1 1 200px", background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none" }}
         />
-        {(["ACTIVE", "PAUSED", "INACTIVE", "ALL"] as const).map((s) => (
+        {(["ACTIVE", "PENDING_PAYMENT", "PAUSED", "INACTIVE", "ALL"] as const).map((s) => (
           <button key={s} onClick={() => setFilter(s)} style={{ background: filter === s ? "#2a2a2a" : "none", border: `1px solid ${filter === s ? "#3a3a3a" : border}`, color: filter === s ? "#f0e6d3" : "#555", padding: "9px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
-            {s}
+            {STATUS_LABELS[s] ?? s}
           </button>
         ))}
       </div>
@@ -122,7 +130,7 @@ export default function ClientsPage() {
                   <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: gold, letterSpacing: "0.08em" }}>PROGRAM SET</span>
                 )}
                 <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", color: STATUS_COLORS[c.status ?? "ACTIVE"] ?? "#666" }}>
-                  {c.status ?? "ACTIVE"}
+                  {STATUS_LABELS[c.status ?? "ACTIVE"] ?? c.status ?? "ACTIVE"}
                 </span>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="#444" strokeWidth="1.2" strokeLinecap="round" /></svg>
               </div>

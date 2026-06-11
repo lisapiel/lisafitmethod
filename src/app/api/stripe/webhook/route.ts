@@ -13,6 +13,7 @@ import {
   grantTrainingAccess, grantTrackerAccess, grantNutritionAccess,
   grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
   grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication, createCoachingClientRecord,
+  getCoachingClientRecord, updateCoachingClientRecord,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -674,7 +675,14 @@ async function provisionCoachingSubscriber(email: string, name: string) {
   const firstName = name.split(" ")[0] || "there"
 
   await grantCoachingAccess(email, "monthly")
-  await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE" })
+
+  // Promote existing PENDING_PAYMENT record to ACTIVE; otherwise create new ACTIVE record
+  const existing = await getCoachingClientRecord(email)
+  if (existing) {
+    await updateCoachingClientRecord(email, { status: "ACTIVE" })
+  } else {
+    await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE" })
+  }
 
   let userExists = false
   try {

@@ -4,164 +4,24 @@ import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import WorkoutBuilder from "@/components/coaching/WorkoutBuilder"
+import WorkoutLibraryModal from "@/components/coaching/WorkoutLibraryModal"
+import type { ProgramExercise } from "@/components/coaching/ExerciseRow"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
-type ProgramExercise = {
-  exerciseId: string
-  name: string
-  videoS3Key: string
-  sets: string
-  reps: string
-  weight: string
-  rpe: string
-  rest: string
-  tempo: string
-  coachNotes: string
-}
-
-type ProgramDay = {
-  dayLabel: string
-  notes: string
-  exercises: ProgramExercise[]
-}
-
-type ProgramWeek = {
-  weekNumber: number
-  label: string
-  days: ProgramDay[]
-}
-
-type SearchExercise = {
-  id: string
-  name: string
-  videoS3Key: string | null
-  thumbnailS3Key: string | null
-  primaryMuscle: string | null
-  category: string | null
-}
-
+type ProgramDay = { dayLabel: string; notes: string; exercises: ProgramExercise[] }
+type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 type ProgramStatus = "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
 
 function emptyDay(label: string): ProgramDay { return { dayLabel: label, notes: "", exercises: [] } }
 function emptyWeek(n: number): ProgramWeek { return { weekNumber: n, label: `Week ${n}`, days: [emptyDay("Day 1"), emptyDay("Day 2"), emptyDay("Day 3")] } }
-function emptyExercise(ex: SearchExercise): ProgramExercise {
-  return { exerciseId: ex.id, name: ex.name, videoS3Key: ex.videoS3Key ?? "", sets: "3", reps: "10-12", weight: "", rpe: "", rest: "60s", tempo: "", coachNotes: "" }
-}
-
-const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
-function cdnThumb(key: string | null | undefined) {
-  if (!key) return ""
-  return `${CDN}/${encodeURIComponent(key.replace(/\.mp4$/i, ".jpg"))}`
-}
 
 function Spinner() {
   return (
-    <div style={{ width: 16, height: 16, border: "2px solid #333", borderTop: `2px solid ${gold}`, borderRadius: "50%", flexShrink: 0, animation: "spin 0.7s linear infinite" }}>
+    <div style={{ width: 14, height: 14, border: "2px solid #333", borderTop: `2px solid ${gold}`, borderRadius: "50%", animation: "spin 0.7s linear infinite" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  )
-}
-
-function SmallInput({ value, onChange, placeholder, width }: { value: string; onChange: (v: string) => void; placeholder?: string; width?: number | string }) {
-  return (
-    <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-      style={{ background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "5px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", width: width ?? 64, boxSizing: "border-box" }}
-    />
-  )
-}
-
-function ExerciseSearchModal({ onSelect, onClose }: { onSelect: (ex: SearchExercise) => void; onClose: () => void }) {
-  const [query, setQuery] = useState("")
-  const [exercises, setExercises] = useState<SearchExercise[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function loadEx() {
-      try {
-        const session = await fetchAuthSession()
-        const token = session.tokens?.accessToken?.toString()
-        if (!token) return
-        const res = await fetch("/api/admin/coaching/exercises", { headers: { Authorization: `Bearer ${token}` } })
-        if (res.ok) {
-          const data = await res.json()
-          setExercises(
-            (data.exercises ?? [])
-              .filter((e: Record<string, unknown>) => e.status !== "INACTIVE")
-              .map((e: Record<string, unknown>) => ({
-                id: e.id as string,
-                name: e.name as string,
-                videoS3Key: (e.videoS3Key as string | null) ?? null,
-                thumbnailS3Key: (e.thumbnailS3Key as string | null) ?? null,
-                primaryMuscle: (e.primaryMuscle as string | null) ?? null,
-                category: (e.category as string | null) ?? null,
-              }))
-          )
-        }
-      } catch { /* ignore */ }
-      setLoading(false)
-    }
-    loadEx()
-  }, [])
-
-  const filtered = query.length < 2 ? exercises.slice(0, 80) : exercises.filter((e) => e.name.toLowerCase().includes(query.toLowerCase()))
-
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
-      <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 2, width: "100%", maxWidth: 520, maxHeight: "80vh", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${border}` }}>
-          <input autoFocus type="search" placeholder="Search exercises…" value={query} onChange={(e) => setQuery(e.target.value)}
-            style={{ width: "100%", background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-        </div>
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {loading ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 20, color: "#555" }}><Spinner /><span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem" }}>Loading…</span></div>
-          ) : filtered.map((ex) => (
-            <button key={ex.id} onClick={() => { onSelect(ex); onClose() }}
-              style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", background: "none", border: "none", borderBottom: `1px solid #1a1a1a`, cursor: "pointer", textAlign: "left" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {ex.thumbnailS3Key && <img src={cdnThumb(ex.thumbnailS3Key)} alt="" style={{ width: 40, height: 40, objectFit: "cover", flexShrink: 0 }} />}
-              <div>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#f0e6d3", margin: 0 }}>{ex.name}</p>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", margin: 0 }}>{ex.primaryMuscle ?? ex.category ?? ""}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-        <div style={{ padding: "12px 20px", borderTop: `1px solid ${border}` }}>
-          <button onClick={onClose} style={{ background: "none", border: `1px solid ${border}`, color: "#666", padding: "7px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>Cancel</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ExerciseRow({ ex, onUpdate, onRemove }: { ex: ProgramExercise; onUpdate: (u: ProgramExercise) => void; onRemove: () => void }) {
-  const set = (key: keyof ProgramExercise) => (val: string) => onUpdate({ ...ex, [key]: val })
-  return (
-    <div style={{ background: "#0f0f0f", border: `1px solid ${border}`, padding: "12px 14px", marginBottom: 8 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-        <div style={{ width: 36, height: 36, flexShrink: 0 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {ex.videoS3Key && <img src={cdnThumb(ex.videoS3Key)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
-        </div>
-        <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#f0e6d3", flex: 1 }}>{ex.name}</span>
-        <button onClick={onRemove} style={{ background: "none", border: "none", color: "#444", cursor: "pointer", padding: "4px 8px", fontSize: "0.8rem" }}>×</button>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-        {(["sets", "reps", "weight", "rpe", "rest", "tempo"] as const).map((field) => (
-          <div key={field}>
-            <div style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#555", marginBottom: 3, letterSpacing: "0.08em", textTransform: "uppercase" }}>{field}</div>
-            <SmallInput value={ex[field]} onChange={set(field)} placeholder={field === "sets" ? "3" : field === "reps" ? "10-12" : field === "rest" ? "60s" : ""} width={field === "weight" ? 80 : field === "reps" ? 72 : 60} />
-          </div>
-        ))}
-        <div style={{ flex: "1 1 160px" }}>
-          <div style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#555", marginBottom: 3, letterSpacing: "0.08em", textTransform: "uppercase" }}>Coach Notes</div>
-          <input type="text" value={ex.coachNotes} onChange={(e) => set("coachNotes")(e.target.value)} placeholder="Any notes…"
-            style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "5px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", boxSizing: "border-box" }} />
-        </div>
-      </div>
     </div>
   )
 }
@@ -178,7 +38,7 @@ export default function EditProgramPage() {
   const [weeks, setWeeks] = useState<ProgramWeek[]>([emptyWeek(1)])
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
-  const [showSearch, setShowSearch] = useState(false)
+  const [showWorkoutLibrary, setShowWorkoutLibrary] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -226,9 +86,18 @@ export default function EditProgramPage() {
 
   function removeWeek(idx: number) {
     if (weeks.length === 1) return
-    const nw = weeks.filter((_, i) => i !== idx).map((w, i) => ({ ...w, weekNumber: i + 1, label: `Week ${i + 1}` }))
+    const nw = weeks.filter((_, i) => i !== idx).map((w, i) => ({ ...w, weekNumber: i + 1, label: w.label.startsWith("Week ") ? `Week ${i + 1}` : w.label }))
     setWeeks(nw)
     setActiveWeek(Math.min(idx, nw.length - 1))
+    setActiveDay(0)
+  }
+
+  function duplicateWeek(idx: number) {
+    const src = weeks[idx]
+    const n = weeks.length + 1
+    const copy: ProgramWeek = { ...src, weekNumber: n, label: `Week ${n}`, days: src.days.map((d) => ({ ...d, exercises: [...d.exercises] })) }
+    setWeeks((ws) => [...ws.slice(0, idx + 1), copy, ...ws.slice(idx + 1)].map((w, i) => ({ ...w, weekNumber: i + 1 })))
+    setActiveWeek(idx + 1)
     setActiveDay(0)
   }
 
@@ -240,8 +109,38 @@ export default function EditProgramPage() {
 
   function removeDay(idx: number) {
     if ((week?.days.length ?? 0) <= 1) return
-    setWeeks((ws) => ws.map((w, wi) => wi !== activeWeek ? w : { ...w, days: w.days.filter((_, i) => i !== idx).map((d, i) => ({ ...d, dayLabel: `Day ${i + 1}` })) }))
+    setWeeks((ws) => ws.map((w, wi) => wi !== activeWeek ? w : { ...w, days: w.days.filter((_, i) => i !== idx).map((d, i) => ({ ...d, dayLabel: d.dayLabel.startsWith("Day ") ? `Day ${i + 1}` : d.dayLabel })) }))
     setActiveDay(Math.min(idx, (week?.days.length ?? 2) - 2))
+  }
+
+  function moveDayUp(idx: number) {
+    if (idx === 0 || !week) return
+    setWeeks((ws) => ws.map((w, wi) => {
+      if (wi !== activeWeek) return w
+      const next = [...w.days]
+      ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
+      return { ...w, days: next }
+    }))
+    setActiveDay(idx - 1)
+  }
+
+  function moveDayDown(idx: number) {
+    if (!week || idx === week.days.length - 1) return
+    setWeeks((ws) => ws.map((w, wi) => {
+      if (wi !== activeWeek) return w
+      const next = [...w.days]
+      ;[next[idx + 1], next[idx]] = [next[idx], next[idx + 1]]
+      return { ...w, days: next }
+    }))
+    setActiveDay(idx + 1)
+  }
+
+  function insertWorkout(workout: { name: string; exercises: ProgramExercise[] }) {
+    updateDay((d) => ({
+      ...d,
+      dayLabel: d.exercises.length === 0 && d.dayLabel.startsWith("Day ") ? workout.name : d.dayLabel,
+      exercises: [...d.exercises, ...workout.exercises],
+    }))
   }
 
   async function handleSave() {
@@ -261,15 +160,8 @@ export default function EditProgramPage() {
           notes: programNotes || undefined,
         }),
       })
-      if (res.ok) {
-        setSaved(true)
-        setTimeout(() => setSaved(false), 3000)
-      } else {
-        setError("Failed to save. Please try again.")
-      }
-    } catch {
-      setError("Failed to save. Please try again.")
-    }
+      if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000) } else { setError("Failed to save.") }
+    } catch { setError("Failed to save.") }
     setSaving(false)
   }
 
@@ -299,11 +191,9 @@ export default function EditProgramPage() {
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
         <Link href="/admin/coaching/programs" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#666", textDecoration: "none", letterSpacing: "0.08em" }}>← Programs</Link>
         <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0, flex: 1 }}>{programName || "Edit Program"}</h1>
-        <button onClick={handleDuplicate} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
-          Duplicate
-        </button>
+        <button onClick={handleDuplicate} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>Duplicate</button>
         {clientEmail && (
-          <Link href={`/admin/coaching/clients/${encodeURIComponent(clientEmail)}/program`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.08em" }}>
+          <Link href={`/admin/coaching/clients/${encodeURIComponent(clientEmail)}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.08em" }}>
             Client: {clientEmail}
           </Link>
         )}
@@ -321,10 +211,7 @@ export default function EditProgramPage() {
         <div>
           <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", display: "block", marginBottom: 6 }}>Status</label>
           <select value={programStatus} onChange={(e) => setProgramStatus(e.target.value as ProgramStatus)} style={{ background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none" }}>
-            <option value="DRAFT">Draft</option>
-            <option value="ACTIVE">Active</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="ARCHIVED">Archived</option>
+            <option value="DRAFT">Draft</option><option value="ACTIVE">Active</option><option value="COMPLETED">Completed</option><option value="ARCHIVED">Archived</option>
           </select>
         </div>
       </div>
@@ -338,17 +225,20 @@ export default function EditProgramPage() {
           </div>
         ))}
         <button onClick={addWeek} style={{ background: "none", border: `1px dashed ${border}`, color: "#555", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>+ Week</button>
+        <button onClick={() => duplicateWeek(activeWeek)} style={{ background: "none", border: `1px dashed ${border}`, color: "#555", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>⎘ Duplicate Week</button>
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
         <input type="text" value={week?.label ?? ""} onChange={(e) => setWeeks((ws) => ws.map((w, i) => i !== activeWeek ? w : { ...w, label: e.target.value }))} style={{ background: "#111", border: `1px solid ${border}`, color: "#888", padding: "6px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", width: 200 }} />
       </div>
 
-      {/* Day tabs */}
+      {/* Day tabs with reorder */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
         {week?.days.map((d, di) => (
-          <div key={di} style={{ display: "flex", alignItems: "center" }}>
-            <button onClick={() => setActiveDay(di)} style={{ background: di === activeDay ? "#2a2a2a" : "transparent", border: `1px solid ${di === activeDay ? "#3a3a3a" : border}`, color: di === activeDay ? "#f0e6d3" : "#666", padding: "6px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>{d.dayLabel}</button>
+          <div key={di} style={{ display: "flex", alignItems: "center", border: di === activeDay ? `1px solid #3a3a3a` : `1px solid ${border}`, background: di === activeDay ? "#2a2a2a" : "transparent" }}>
+            <button onClick={() => moveDayUp(di)} disabled={di === 0} style={{ background: "none", border: "none", color: di === 0 ? "#333" : "#888", cursor: di === 0 ? "not-allowed" : "pointer", padding: "0 4px", fontSize: "0.65rem", lineHeight: 1 }}>◀</button>
+            <button onClick={() => setActiveDay(di)} style={{ background: "none", border: "none", color: di === activeDay ? "#f0e6d3" : "#666", padding: "6px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>{d.dayLabel}</button>
+            <button onClick={() => moveDayDown(di)} disabled={di === (week?.days.length ?? 1) - 1} style={{ background: "none", border: "none", color: di === (week?.days.length ?? 1) - 1 ? "#333" : "#888", cursor: di === (week?.days.length ?? 1) - 1 ? "not-allowed" : "pointer", padding: "0 4px", fontSize: "0.65rem", lineHeight: 1 }}>▶</button>
             {(week?.days.length ?? 0) > 1 && <button onClick={() => removeDay(di)} style={{ background: "none", border: "none", color: "#333", cursor: "pointer", padding: "0 4px", fontSize: "0.75rem" }}>×</button>}
           </div>
         ))}
@@ -357,16 +247,18 @@ export default function EditProgramPage() {
 
       {day && (
         <div>
-          <div style={{ marginBottom: "1rem", display: "flex", gap: 12 }}>
-            <input type="text" value={day.dayLabel} onChange={(e) => updateDay((d) => ({ ...d, dayLabel: e.target.value }))} style={{ background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", width: 120 }} />
-            <input type="text" value={day.notes} onChange={(e) => updateDay((d) => ({ ...d, notes: e.target.value }))} placeholder="Day notes…" style={{ background: "#111", border: `1px solid ${border}`, color: "#888", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", flex: 1 }} />
+          <div style={{ marginBottom: "1rem", display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <input type="text" value={day.dayLabel} onChange={(e) => updateDay((d) => ({ ...d, dayLabel: e.target.value }))} style={{ background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", width: 160 }} />
+            <input type="text" value={day.notes} onChange={(e) => updateDay((d) => ({ ...d, notes: e.target.value }))} placeholder="Day notes…" style={{ background: "#111", border: `1px solid ${border}`, color: "#888", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", flex: "1 1 240px" }} />
+            <button onClick={() => setShowWorkoutLibrary(true)} style={{ background: "none", border: `1px solid ${gold}`, color: gold, padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+              + Insert from Library
+            </button>
           </div>
-          {day.exercises.map((ex, i) => (
-            <ExerciseRow key={i} ex={ex} onUpdate={(u) => updateDay((d) => ({ ...d, exercises: d.exercises.map((e, j) => j !== i ? e : u) }))} onRemove={() => updateDay((d) => ({ ...d, exercises: d.exercises.filter((_, j) => j !== i) }))} />
-          ))}
-          <button onClick={() => setShowSearch(true)} style={{ background: "none", border: `1px dashed ${border}`, color: "#555", padding: "10px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", width: "100%", marginTop: day.exercises.length ? 4 : 0 }}>
-            + Add Exercise
-          </button>
+
+          <WorkoutBuilder
+            exercises={day.exercises}
+            onChange={(exs) => updateDay((d) => ({ ...d, exercises: exs }))}
+          />
         </div>
       )}
 
@@ -378,7 +270,12 @@ export default function EditProgramPage() {
         <button onClick={() => router.push("/admin/coaching/programs")} style={{ background: "none", border: "none", color: "#555", padding: "12px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>Back</button>
       </div>
 
-      {showSearch && <ExerciseSearchModal onSelect={(ex) => updateDay((d) => ({ ...d, exercises: [...d.exercises, emptyExercise(ex)] }))} onClose={() => setShowSearch(false)} />}
+      {showWorkoutLibrary && (
+        <WorkoutLibraryModal
+          onSelect={insertWorkout}
+          onClose={() => setShowWorkoutLibrary(false)}
+        />
+      )}
     </div>
   )
 }

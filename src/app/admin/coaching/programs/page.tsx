@@ -17,6 +17,8 @@ type Program = {
   createdAt: string
 }
 
+type Kind = "TEMPLATES" | "CLIENT_COPIES"
+
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: "#666",
   ACTIVE: "#5c9e6a",
@@ -36,6 +38,7 @@ export default function ProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<"ALL" | "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED">("ALL")
+  const [kind, setKind] = useState<Kind>("TEMPLATES")
 
   useEffect(() => {
     async function load() {
@@ -63,7 +66,12 @@ export default function ProgramsPage() {
     load()
   }, [])
 
-  const filtered = filter === "ALL" ? programs : programs.filter((p) => p.status === filter)
+  // First by kind, then by status filter
+  const kindFiltered = programs.filter((p) => {
+    const isCopy = !!p.clientEmail
+    return kind === "TEMPLATES" ? !isCopy : isCopy
+  })
+  const filtered = filter === "ALL" ? kindFiltered : kindFiltered.filter((p) => p.status === filter)
 
   return (
     <div>
@@ -79,10 +87,22 @@ export default function ProgramsPage() {
         </Link>
       </div>
 
+      {/* Kind toggle: Templates vs Client Copies */}
+      <div style={{ display: "flex", gap: 6, marginBottom: "0.75rem" }}>
+        {(["TEMPLATES", "CLIENT_COPIES"] as const).map((k) => {
+          const count = programs.filter((p) => k === "TEMPLATES" ? !p.clientEmail : !!p.clientEmail).length
+          return (
+            <button key={k} onClick={() => setKind(k)} style={{ background: kind === k ? gold : "transparent", border: `1px solid ${kind === k ? gold : border}`, color: kind === k ? "#0a0a0a" : "#888", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: kind === k ? 700 : 500, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+              {k === "TEMPLATES" ? `Templates (${count})` : `Client Copies (${count})`}
+            </button>
+          )
+        })}
+      </div>
+
       <div style={{ display: "flex", gap: 6, marginBottom: "1.5rem" }}>
         {(["ALL", "DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"] as const).map((s) => (
           <button key={s} onClick={() => setFilter(s)} style={{ background: filter === s ? "#2a2a2a" : "none", border: `1px solid ${filter === s ? "#3a3a3a" : border}`, color: filter === s ? "#f0e6d3" : "#555", padding: "6px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
-            {s === "ALL" ? `All (${programs.length})` : `${s} (${programs.filter((p) => p.status === s).length})`}
+            {s === "ALL" ? `All (${kindFiltered.length})` : `${s} (${kindFiltered.filter((p) => p.status === s).length})`}
           </button>
         ))}
       </div>

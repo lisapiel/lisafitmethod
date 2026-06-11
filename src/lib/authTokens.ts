@@ -372,7 +372,7 @@ export interface CoachingClientRecord {
   goal?: string
   startDate?: string
   weightUnit?: "LBS" | "KG"
-  status?: "ACTIVE" | "PAUSED" | "INACTIVE"
+  status?: "PENDING_PAYMENT" | "ACTIVE" | "PAUSED" | "INACTIVE"
   currentProgramId?: string
   privateNotes?: string
   createdAt?: string
@@ -763,6 +763,79 @@ export async function updateProgramRecord(id: string, updates: Partial<CoachingP
       UpdateExpression: expr.expression,
       ExpressionAttributeNames: expr.names,
       ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+// ── Workouts (saved single-workout templates for program composition) ────────
+
+export interface CoachingWorkoutTemplateRecord {
+  id: string
+  name: string
+  description?: string
+  category?: string         // e.g. "Lower Body", "Push", "Pull"
+  exercises: string         // JSON array same shape as program day exercises
+  createdAt?: string
+  updatedAt?: string
+}
+
+export async function createWorkoutTemplate(data: Omit<CoachingWorkoutTemplateRecord, "id" | "createdAt" | "updatedAt"> & { id?: string }): Promise<CoachingWorkoutTemplateRecord> {
+  const db = makeDb()
+  const id = data.id ?? randomBytes(16).toString("hex")
+  const now = new Date().toISOString()
+  const record: CoachingWorkoutTemplateRecord = { ...data, id, createdAt: now, updatedAt: now }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_workout_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function getWorkoutTemplate(id: string): Promise<CoachingWorkoutTemplateRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_workout_${id}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as CoachingWorkoutTemplateRecord
+}
+
+export async function listWorkoutTemplates(): Promise<CoachingWorkoutTemplateRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_workout_" },
+    })
+  )
+  return ((result.Items ?? []) as CoachingWorkoutTemplateRecord[])
+    .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+}
+
+export async function updateWorkoutTemplate(id: string, updates: Partial<CoachingWorkoutTemplateRecord>): Promise<void> {
+  const db = makeDb()
+  const expr = buildUpdateExpression({ ...updates, updatedAt: new Date().toISOString() })
+  if (!expr) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_workout_${id}` },
+      UpdateExpression: expr.expression,
+      ExpressionAttributeNames: expr.names,
+      ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+export async function deleteWorkoutTemplate(id: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new DeleteCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_workout_${id}` },
     })
   )
 }

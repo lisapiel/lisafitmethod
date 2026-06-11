@@ -222,7 +222,8 @@ export async function POST(req: NextRequest) {
     accountExists = false
   }
 
-  // Always create the client record so they appear in the admin list
+  // Paid signup → PENDING_PAYMENT until webhook fires; free grants → ACTIVE
+  const hasPrice = (body.priceInCents ?? 0) >= 100
   await createCoachingClientRecord({
     email,
     displayName,
@@ -230,7 +231,7 @@ export async function POST(req: NextRequest) {
     goal: body.goal?.trim() || undefined,
     startDate: body.startDate,
     weightUnit: (body.weightUnit as "LBS" | "KG") || "LBS",
-    status: "ACTIVE",
+    status: hasPrice ? "PENDING_PAYMENT" : "ACTIVE",
   })
 
   // Ensure Cognito account exists

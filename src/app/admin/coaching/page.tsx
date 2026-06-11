@@ -152,6 +152,8 @@ export default function AdminCoachingDashboard() {
           <QuickAction label="Applications" href="/admin/coaching/applications" primary />
           <QuickAction label="Add Client" href="/admin/coaching/clients/new" />
           <QuickAction label="Build Program" href="/admin/coaching/programs/new" />
+          <QuickAction label="Build Workout" href="/admin/coaching/workouts/new" />
+          <QuickAction label="Workout Library" href="/admin/coaching/workouts" />
           <QuickAction label="Review Check-Ins" href="/admin/coaching/check-ins" />
           <QuickAction label="Exercise Library" href="/admin/coaching/exercises" />
           <QuickAction label="Messages" href="/admin/coaching/messages" />

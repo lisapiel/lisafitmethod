@@ -11,7 +11,7 @@ const border = "#2a2a2a"
 
 type ClientData = CoachingClientRecord
 
-type Program = { id: string; name: string; status: string | null }
+type Program = { id: string; name: string; status: string | null; isTemplate?: boolean; clientEmail?: string | null }
 type CheckIn = { id: string; submittedAt: string; status: string | null; weight: number | null; weightUnit: string | null }
 
 function Spinner() {
@@ -87,6 +87,8 @@ export default function ClientProfilePage() {
             id: p.id as string,
             name: p.name as string,
             status: (p.status as string | null) ?? null,
+            isTemplate: (p.isTemplate as boolean | undefined) ?? false,
+            clientEmail: (p.clientEmail as string | null) ?? null,
           }))
           setAllPrograms(progs)
           if (c.currentProgramId) {
@@ -137,23 +139,37 @@ export default function ClientProfilePage() {
   async function assignProgram() {
     if (!client || !selectedProgramId) return
     setSavingProgram(true)
-    await patchClient({ currentProgramId: selectedProgramId })
     try {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString() ?? ""
-      await fetch(`/api/admin/coaching/programs/${selectedProgramId}`, {
-        method: "PATCH",
+      const res = await fetch(`/api/admin/coaching/clients/${encodeURIComponent(client.email)}/assign-program`, {
+        method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "ACTIVE", clientEmail: client.email }),
+        body: JSON.stringify({ programId: selectedProgramId }),
       })
+      if (res.ok) {
+        const data = await res.json()
+        const assignedId = data.programId
+        setClient((c) => c ? { ...c, currentProgramId: assignedId } : c)
+        // Reload programs list to include the new copy
+        const progsRes = await fetch("/api/admin/coaching/programs", { headers: { Authorization: `Bearer ${token}` } })
+        if (progsRes.ok) {
+          const pData = await progsRes.json()
+          const progs = (pData.programs ?? []).map((p: Record<string, unknown>) => ({
+            id: p.id as string,
+            name: p.name as string,
+            status: (p.status as string | null) ?? null,
+          }))
+          setAllPrograms(progs)
+          setProgram(progs.find((p: Program) => p.id === assignedId) ?? null)
+        }
+      }
     } catch { /* ignore */ }
-    setClient((c) => c ? { ...c, currentProgramId: selectedProgramId } : c)
-    setProgram(allPrograms.find((p) => p.id === selectedProgramId) ?? null)
     setSavingProgram(false)
     setShowAssignProgram(false)
   }
 
-  async function updateStatus(newStatus: "ACTIVE" | "PAUSED" | "INACTIVE") {
+  async function updateStatus(newStatus: "ACTIVE" | "PAUSED" | "INACTIVE" | "PENDING_PAYMENT") {
     if (!client) return
     await patchClient({ status: newStatus })
     setClient((c) => c ? { ...c, status: newStatus } : c)
@@ -172,7 +188,8 @@ export default function ClientProfilePage() {
     )
   }
 
-  const STATUS_COLORS: Record<string, string> = { ACTIVE: "#5c9e6a", PAUSED: "#c9a96e", INACTIVE: "#444" }
+  const STATUS_COLORS: Record<string, string> = { ACTIVE: "#5c9e6a", PAUSED: "#c9a96e", INACTIVE: "#444", PENDING_PAYMENT: "#d97460" }
+  const STATUS_LABELS: Record<string, string> = { ACTIVE: "ACTIVE", PAUSED: "PAUSED", INACTIVE: "INACTIVE", PENDING_PAYMENT: "AWAITING PAYMENT" }
 
   return (
     <div style={{ maxWidth: 900 }}>
@@ -190,7 +207,7 @@ export default function ClientProfilePage() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6, flexWrap: "wrap" }}>
             <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0 }}>{client.displayName}</h1>
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.12em", color: STATUS_COLORS[client.status ?? "ACTIVE"] }}>
-              {client.status ?? "ACTIVE"}
+              {STATUS_LABELS[client.status ?? "ACTIVE"] ?? client.status ?? "ACTIVE"}
             </span>
           </div>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
@@ -205,9 +222,9 @@ export default function ClientProfilePage() {
           )}
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {(["ACTIVE", "PAUSED", "INACTIVE"] as const).map((s) => (
+          {(["PENDING_PAYMENT", "ACTIVE", "PAUSED", "INACTIVE"] as const).map((s) => (
             <button key={s} onClick={() => updateStatus(s)} style={{ background: client.status === s ? "#1a1a1a" : "none", border: `1px solid ${client.status === s ? "#3a3a3a" : border}`, color: client.status === s ? STATUS_COLORS[s] : "#444", padding: "6px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
-              {s}
+              {STATUS_LABELS[s]}
             </button>
           ))}
         </div>
@@ -244,6 +261,11 @@ export default function ClientProfilePage() {
                 {program.name}
               </Link>
               <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#5c9e6a", letterSpacing: "0.08em" }}>{program.status ?? "ACTIVE"}</span>
+              <div style={{ marginTop: 12 }}>
+                <Link href={`/admin/coaching/programs/${program.id}`} style={{ display: "inline-block", background: gold, color: "#0a0a0a", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>
+                  Edit Program
+                </Link>
+              </div>
             </div>
           ) : (
             <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444" }}>No program assigned yet.</p>
@@ -335,9 +357,15 @@ export default function ClientProfilePage() {
                 style={{ width: "100%", background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", marginBottom: 16 }}
               >
                 <option value="">Select a program…</option>
-                {allPrograms.filter((p) => p.status !== "ARCHIVED").map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
+                {allPrograms
+                  .filter((p) => p.status !== "ARCHIVED")
+                  // Show templates + this client's own program copies; hide other clients' copies
+                  .filter((p) => p.isTemplate !== false || !p.clientEmail || p.clientEmail.toLowerCase() === client.email.toLowerCase())
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}{p.clientEmail && p.clientEmail.toLowerCase() === client.email.toLowerCase() ? " (this client's copy)" : ""}
+                    </option>
+                  ))}
               </select>
               <div style={{ display: "flex", gap: 10 }}>
                 <button onClick={assignProgram} disabled={!selectedProgramId || savingProgram} style={{ background: selectedProgramId ? gold : "#333", color: "#0a0a0a", border: "none", padding: "10px 22px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: selectedProgramId ? "pointer" : "not-allowed" }}>
