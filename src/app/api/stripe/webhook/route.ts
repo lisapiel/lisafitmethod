@@ -868,34 +868,44 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // ── Masterclass subscription events ──────────────────────────────────────
+  // ── Subscription invoice events (masterclass + coaching) ─────────────────
   if (event.type === "invoice.paid") {
     const invoice = event.data.object as unknown as { subscription?: string; billing_reason?: string }
     const subscriptionId = invoice.subscription
     if (!subscriptionId) return NextResponse.json({ received: true })
 
-    const stripe = makeStripe()
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
-    if (subscription.metadata?.product !== "masterclass") return NextResponse.json({ received: true })
-
+    const subscription = await makeStripe().subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
+    const product = subscription.metadata?.product
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
-    const plan = subscription.metadata?.plan ?? "monthly"
     const currentPeriodEnd = subscription.current_period_end
 
     if (!email) return NextResponse.json({ received: true })
 
     try {
-      if (invoice.billing_reason === "subscription_create") {
-        // First payment — provision user and grant access
-        await provisionMasterclassUser(email, subscriptionId, plan, currentPeriodEnd)
-      } else {
-        // Renewal payment — just extend access period
-        await renewMasterclassAccess(email, new Date(currentPeriodEnd * 1000).toISOString())
+      if (product === "masterclass") {
+        const plan = subscription.metadata?.plan ?? "monthly"
+        if (invoice.billing_reason === "subscription_create") {
+          await provisionMasterclassUser(email, subscriptionId, plan, currentPeriodEnd)
+        } else {
+          await renewMasterclassAccess(email, new Date(currentPeriodEnd * 1000).toISOString())
+        }
+      } else if (product === "coaching") {
+        const name = subscription.metadata?.customerName ?? ""
+        const applicationId = subscription.metadata?.applicationId ?? ""
+        if (invoice.billing_reason === "subscription_create") {
+          await provisionCoachingSubscriber(email, name)
+          if (applicationId) {
+            await updateCoachingApplication(applicationId, {
+              status: "PAID",
+              stripeSubscriptionId: subscriptionId,
+            }).catch((err) => console.error("updateCoachingApplication failed:", err))
+          }
+        }
       }
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error)
-      console.error("Masterclass invoice.paid failed:", detail)
-      return NextResponse.json({ error: "Masterclass provisioning failed", detail }, { status: 500 })
+      console.error("invoice.paid failed:", detail)
+      return NextResponse.json({ error: "Subscription provisioning failed", detail }, { status: 500 })
     }
   }
 
@@ -939,31 +949,6 @@ export async function POST(request: NextRequest) {
         subject: "Action needed: Coaching payment issue",
         html: coachingPaymentFailedEmail(email),
       }).catch((err) => console.error("Coaching dunning email failed:", err))
-    }
-  }
-
-  // ── Coaching subscription events ──────────────────────────────────────────
-  if (event.type === "invoice.paid") {
-    const invoice = event.data.object as unknown as { subscription?: string; billing_reason?: string }
-    const subscriptionId = invoice.subscription
-    if (!subscriptionId) return NextResponse.json({ received: true })
-    const stripe = makeStripe()
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
-    if (subscription.metadata?.product !== "coaching") return NextResponse.json({ received: true })
-
-    const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
-    const name = subscription.metadata?.customerName ?? ""
-    const applicationId = subscription.metadata?.applicationId ?? ""
-    if (!email) return NextResponse.json({ received: true })
-
-    if (invoice.billing_reason === "subscription_create") {
-      await provisionCoachingSubscriber(email, name)
-      if (applicationId) {
-        await updateCoachingApplication(applicationId, {
-          status: "PAID",
-          stripeSubscriptionId: subscriptionId,
-        }).catch((err) => console.error("updateCoachingApplication failed:", err))
-      }
     }
   }
 

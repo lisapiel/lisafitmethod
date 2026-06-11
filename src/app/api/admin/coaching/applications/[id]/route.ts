@@ -12,6 +12,7 @@ import {
   ADMIN_EMAIL,
   getCoachingApplication,
   updateCoachingApplication,
+  createCoachingClientRecord,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -237,6 +238,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     })
 
     const checkoutUrl = session.url ?? ""
+
+    // Create client record now so admin can see and prep program before payment completes
+    await createCoachingClientRecord({
+      email: application.email,
+      displayName: application.name,
+      status: "ACTIVE",
+      goal: application.goals || undefined,
+    }).catch((err) => console.error("createCoachingClientRecord failed:", err))
 
     await updateCoachingApplication(id, {
       status: "APPROVED",
