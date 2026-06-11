@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { generateClient } from "aws-amplify/data"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 import type { ScannedExercise } from "@/app/api/admin/coaching/exercises/scan/route"
 
 const gold = "#c9a96e"
@@ -87,22 +85,23 @@ function ImportModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
     setProgress({ done: 0, total: exercises.length })
     abortRef.current = false
 
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    const BATCH = 10
+    const session = await fetchAuthSession()
+    const token = session.tokens?.accessToken?.toString()
+    if (!token) { setPhase("idle"); setError("Not authenticated"); return }
 
+    const BATCH = 25
     for (let i = 0; i < exercises.length; i += BATCH) {
       if (abortRef.current) break
-      const batch = exercises.slice(i, i + BATCH)
-      await Promise.allSettled(
-        batch.map((ex) =>
-          client.models.Exercise.create({
-            name: ex.name,
-            videoS3Key: ex.videoS3Key,
-            thumbnailS3Key: ex.thumbnailS3Key,
-            status: "ACTIVE",
-          })
-        )
-      )
+      const batch = exercises.slice(i, i + BATCH).map((ex) => ({
+        name: ex.name,
+        videoS3Key: ex.videoS3Key,
+        thumbnailS3Key: ex.thumbnailS3Key,
+      }))
+      await fetch("/api/admin/coaching/exercises/import", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ exercises: batch }),
+      })
       setProgress({ done: Math.min(i + BATCH, exercises.length), total: exercises.length })
     }
     setPhase("done")
@@ -214,24 +213,32 @@ export default function CoachingExercisesPage() {
   const [previewVideo, setPreviewVideo] = useState<{ key: string; name: string } | null>(null)
   const [showImport, setShowImport] = useState(false)
 
-  function load() {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.Exercise.list({ authMode: "userPool" })
-      .then(({ data }) => {
-        setExercises(data.map((e) => ({
-          id: e.id,
-          name: e.name,
-          videoS3Key: e.videoS3Key ?? null,
-          thumbnailS3Key: e.thumbnailS3Key ?? null,
-          primaryMuscle: e.primaryMuscle ?? null,
-          category: e.category ?? null,
-          equipment: e.equipment ?? null,
-          difficulty: e.difficulty ?? null,
-          status: e.status ?? null,
-        })))
-        setLoading(false)
+  async function load() {
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) { setLoading(false); return }
+      const res = await fetch("/api/admin/coaching/exercises", {
+        headers: { Authorization: `Bearer ${token}` },
       })
-      .catch(() => setLoading(false))
+      if (res.ok) {
+        const data = await res.json()
+        setExercises(
+          (data.exercises ?? []).map((e: Record<string, unknown>) => ({
+            id: e.id as string,
+            name: e.name as string,
+            videoS3Key: (e.videoS3Key as string | null) ?? null,
+            thumbnailS3Key: (e.thumbnailS3Key as string | null) ?? null,
+            primaryMuscle: (e.primaryMuscle as string | null) ?? null,
+            category: (e.category as string | null) ?? null,
+            equipment: (e.equipment as string | null) ?? null,
+            difficulty: (e.difficulty as Exercise["difficulty"]) ?? null,
+            status: (e.status as Exercise["status"]) ?? null,
+          }))
+        )
+      }
+    } catch { /* ignore */ }
+    setLoading(false)
   }
 
   useEffect(() => { load() }, [])

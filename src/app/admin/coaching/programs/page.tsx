@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -39,19 +38,29 @@ export default function ProgramsPage() {
   const [filter, setFilter] = useState<"ALL" | "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED">("ALL")
 
   useEffect(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.CoachingProgram.list({ authMode: "userPool" }).then(({ data }) => {
-      setPrograms(data.map((p) => ({
-        id: p.id,
-        name: p.name,
-        clientEmail: p.clientEmail ?? null,
-        isTemplate: p.isTemplate ?? null,
-        status: (p.status ?? "DRAFT") as Program["status"],
-        notes: p.notes ?? null,
-        createdAt: p.createdAt,
-      })).sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+    async function load() {
+      try {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) return
+        const res = await fetch("/api/admin/coaching/programs", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        setPrograms((data.programs ?? []).map((p: Record<string, unknown>) => ({
+          id: p.id as string,
+          name: p.name as string,
+          clientEmail: (p.clientEmail as string | null) ?? null,
+          isTemplate: (p.isTemplate as boolean | null) ?? null,
+          status: ((p.status ?? "DRAFT") as Program["status"]),
+          notes: (p.notes as string | null) ?? null,
+          createdAt: (p.createdAt as string) ?? "",
+        })))
+      } catch { /* handled */ }
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    load()
   }, [])
 
   const filtered = filter === "ALL" ? programs : programs.filter((p) => p.status === filter)
@@ -70,7 +79,6 @@ export default function ProgramsPage() {
         </Link>
       </div>
 
-      {/* Filter tabs */}
       <div style={{ display: "flex", gap: 6, marginBottom: "1.5rem" }}>
         {(["ALL", "DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"] as const).map((s) => (
           <button key={s} onClick={() => setFilter(s)} style={{ background: filter === s ? "#2a2a2a" : "none", border: `1px solid ${filter === s ? "#3a3a3a" : border}`, color: filter === s ? "#f0e6d3" : "#555", padding: "6px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>

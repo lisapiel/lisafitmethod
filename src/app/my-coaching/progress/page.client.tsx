@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -121,40 +118,36 @@ export default function ProgressClient() {
   useEffect(() => {
     async function load() {
       try {
-        const attrs = await fetchUserAttributes()
-        const email = attrs.email ?? ""
-        const db = generateClient<Schema>({ authMode: "userPool" })
-
         const [checkInsRes, snapshotsRes] = await Promise.allSettled([
-          db.models.CoachingCheckIn.list({ authMode: "userPool" }),
-          db.models.ClientProgressSnapshot.list({ authMode: "userPool" }),
+          fetch("/api/coaching/check-in").then((r) => r.json()),
+          fetch("/api/coaching/progress").then((r) => r.json()),
         ])
 
         if (checkInsRes.status === "fulfilled") {
-          const mine = checkInsRes.value.data.filter((ci) => ci.clientEmail.toLowerCase() === email.toLowerCase() && ci.weight)
+          const ciList: Array<Record<string, unknown>> = (checkInsRes.value.checkIns ?? []).filter((ci: Record<string, unknown>) => ci.weight)
           setWeightData(
-            mine
-              .sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
-              .map((ci) => ({ date: ci.submittedAt, weight: ci.weight!, unit: ci.weightUnit ?? "lbs" }))
+            ciList
+              .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
+              .map((ci) => ({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" }))
           )
         }
 
         if (snapshotsRes.status === "fulfilled") {
+          const snaps: Array<Record<string, unknown>> = snapshotsRes.value.snapshots ?? []
           setSnapshots(
-            snapshotsRes.value.data
-              .filter((s) => s.clientEmail.toLowerCase() === email.toLowerCase())
-              .sort((a, b) => b.snapshotDate.localeCompare(a.snapshotDate))
+            snaps
+              .sort((a, b) => (b.snapshotDate as string).localeCompare(a.snapshotDate as string))
               .map((s) => ({
-                id: s.id,
-                snapshotDate: s.snapshotDate,
-                weight: s.weight ?? null,
-                weightUnit: s.weightUnit ?? null,
-                waist: s.waist ?? null,
-                hips: s.hips ?? null,
-                chest: s.chest ?? null,
-                arm: s.arm ?? null,
-                thigh: s.thigh ?? null,
-                notes: s.notes ?? null,
+                id: s.id as string,
+                snapshotDate: s.snapshotDate as string,
+                weight: s.weight != null ? Number(s.weight) : null,
+                weightUnit: (s.weightUnit as string | null) ?? null,
+                waist: s.waist != null ? Number(s.waist) : null,
+                hips: s.hips != null ? Number(s.hips) : null,
+                chest: s.chest != null ? Number(s.chest) : null,
+                arm: s.arm != null ? Number(s.arm) : null,
+                thigh: s.thigh != null ? Number(s.thigh) : null,
+                notes: (s.notes as string | null) ?? null,
               }))
           )
         }

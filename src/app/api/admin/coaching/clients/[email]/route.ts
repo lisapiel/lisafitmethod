@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
-import { ADMIN_EMAIL, getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
+import {
+  ADMIN_EMAIL,
+  getCoachingClientRecord,
+  updateCoachingClientRecord,
+  listCoachingClientRecords,
+} from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -28,7 +33,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ emai
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const { email } = await params
-  const client = await getCoachingClientRecord(decodeURIComponent(email))
+  const decoded = decodeURIComponent(email)
+
+  let client = await getCoachingClientRecord(decoded)
+
+  // Fallback: scan all records and match by email field (handles userId/case drift)
+  if (!client) {
+    const all = await listCoachingClientRecords()
+    const match = all.find((c) => c.email?.toLowerCase() === decoded.toLowerCase())
+    if (match) client = match
+  }
+
   if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 })
   return NextResponse.json({ client })
 }

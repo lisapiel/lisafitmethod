@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 
 const TABLE = "lfm-user-progress"
 
@@ -594,6 +594,397 @@ export async function updateCoachingCheckIn(id: string, updates: Partial<Coachin
       UpdateExpression: `SET ${sets.join(", ")}`,
       ExpressionAttributeNames: names,
       ExpressionAttributeValues: values,
+    })
+  )
+}
+
+// ── Generic helpers ───────────────────────────────────────────────────────────
+
+function buildUpdateExpression(updates: Record<string, unknown>): {
+  expression: string
+  names: Record<string, string>
+  values: Record<string, unknown>
+} | null {
+  const sets: string[] = []
+  const values: Record<string, unknown> = {}
+  const names: Record<string, string> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (k === "id") continue
+    sets.push(`#${k} = :${k}`)
+    values[`:${k}`] = v
+    names[`#${k}`] = k
+  }
+  if (sets.length === 0) return null
+  return { expression: `SET ${sets.join(", ")}`, names, values }
+}
+
+// ── Exercises ─────────────────────────────────────────────────────────────────
+
+export interface ExerciseRecord {
+  id: string
+  name: string
+  videoS3Key?: string
+  thumbnailS3Key?: string
+  primaryMuscle?: string
+  secondaryMuscles?: string
+  equipment?: string
+  category?: string
+  difficulty?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
+  movementPattern?: string
+  coachingCues?: string
+  commonMistakes?: string
+  setup?: string
+  execution?: string
+  notes?: string
+  substitutions?: string
+  status?: "ACTIVE" | "INACTIVE"
+  createdAt?: string
+}
+
+export async function createExerciseRecord(data: Omit<ExerciseRecord, "id" | "createdAt"> & { id?: string }): Promise<ExerciseRecord> {
+  const db = makeDb()
+  const id = data.id ?? randomBytes(16).toString("hex")
+  const record: ExerciseRecord = {
+    ...data,
+    id,
+    status: data.status ?? "ACTIVE",
+    createdAt: new Date().toISOString(),
+  }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_exercise_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function getExerciseRecord(id: string): Promise<ExerciseRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_exercise_${id}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as ExerciseRecord
+}
+
+export async function listExerciseRecords(): Promise<ExerciseRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_exercise_" },
+    })
+  )
+  return ((result.Items ?? []) as ExerciseRecord[])
+    .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+}
+
+export async function updateExerciseRecord(id: string, updates: Partial<ExerciseRecord>): Promise<void> {
+  const db = makeDb()
+  const expr = buildUpdateExpression(updates)
+  if (!expr) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_exercise_${id}` },
+      UpdateExpression: expr.expression,
+      ExpressionAttributeNames: expr.names,
+      ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+// ── Programs ──────────────────────────────────────────────────────────────────
+
+export interface CoachingProgramRecord {
+  id: string
+  name: string
+  clientEmail?: string
+  isTemplate?: boolean
+  status?: "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
+  weeks: string // JSON string
+  notes?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export async function createProgramRecord(data: Omit<CoachingProgramRecord, "id" | "createdAt"> & { id?: string }): Promise<CoachingProgramRecord> {
+  const db = makeDb()
+  const id = data.id ?? randomBytes(16).toString("hex")
+  const now = new Date().toISOString()
+  const record: CoachingProgramRecord = {
+    ...data,
+    id,
+    status: data.status ?? "DRAFT",
+    createdAt: now,
+    updatedAt: now,
+  }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_program_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function getProgramRecord(id: string): Promise<CoachingProgramRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_program_${id}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as CoachingProgramRecord
+}
+
+export async function listProgramRecords(): Promise<CoachingProgramRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_program_" },
+    })
+  )
+  return ((result.Items ?? []) as CoachingProgramRecord[])
+    .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+}
+
+export async function updateProgramRecord(id: string, updates: Partial<CoachingProgramRecord>): Promise<void> {
+  const db = makeDb()
+  const expr = buildUpdateExpression({ ...updates, updatedAt: new Date().toISOString() })
+  if (!expr) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_program_${id}` },
+      UpdateExpression: expr.expression,
+      ExpressionAttributeNames: expr.names,
+      ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+// ── Workout Logs ──────────────────────────────────────────────────────────────
+
+export interface CoachingWorkoutLogRecord {
+  id: string
+  clientEmail: string
+  programId: string
+  weekNumber: number
+  dayLabel: string
+  completedAt: string
+  setData: string // JSON
+  overallRpe?: number
+  energyLevel?: number
+  clientNotes?: string
+}
+
+export async function createWorkoutLogRecord(data: Omit<CoachingWorkoutLogRecord, "id">): Promise<CoachingWorkoutLogRecord> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const record: CoachingWorkoutLogRecord = { id, ...data }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_workoutlog_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function listWorkoutLogRecords(clientEmail?: string): Promise<CoachingWorkoutLogRecord[]> {
+  const db = makeDb()
+  const params = clientEmail
+    ? {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
+        ExpressionAttributeValues: { ":prefix": "coaching_workoutlog_", ":email": clientEmail.toLowerCase() },
+      }
+    : {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix)",
+        ExpressionAttributeValues: { ":prefix": "coaching_workoutlog_" },
+      }
+  const result = await db.send(new ScanCommand(params))
+  return ((result.Items ?? []) as CoachingWorkoutLogRecord[])
+    .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
+}
+
+// ── Progress Snapshots ────────────────────────────────────────────────────────
+
+export interface ProgressSnapshotRecord {
+  id: string
+  clientEmail: string
+  snapshotDate: string
+  weight?: number
+  weightUnit?: "LBS" | "KG"
+  waist?: number
+  hips?: number
+  glutes?: number
+  chest?: number
+  arm?: number
+  thigh?: number
+  customMeasurements?: string
+  photoS3Keys?: string
+  notes?: string
+}
+
+export async function createSnapshotRecord(data: Omit<ProgressSnapshotRecord, "id">): Promise<ProgressSnapshotRecord> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const record: ProgressSnapshotRecord = { id, ...data }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_snapshot_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function listSnapshotRecords(clientEmail?: string): Promise<ProgressSnapshotRecord[]> {
+  const db = makeDb()
+  const params = clientEmail
+    ? {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
+        ExpressionAttributeValues: { ":prefix": "coaching_snapshot_", ":email": clientEmail.toLowerCase() },
+      }
+    : {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix)",
+        ExpressionAttributeValues: { ":prefix": "coaching_snapshot_" },
+      }
+  const result = await db.send(new ScanCommand(params))
+  return ((result.Items ?? []) as ProgressSnapshotRecord[])
+    .sort((a, b) => b.snapshotDate.localeCompare(a.snapshotDate))
+}
+
+// ── Goals ─────────────────────────────────────────────────────────────────────
+
+export interface CoachingGoalRecord {
+  id: string
+  clientEmail: string
+  type: string
+  label?: string
+  startDate?: string
+  targetDate?: string
+  startValue?: number
+  targetValue?: number
+  currentValue?: number
+  unit?: string
+  notes?: string
+  status?: "ON_TRACK" | "NEEDS_ATTENTION" | "ACHIEVED"
+}
+
+export async function createGoalRecord(data: Omit<CoachingGoalRecord, "id">): Promise<CoachingGoalRecord> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const record: CoachingGoalRecord = { id, ...data }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_goal_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function listGoalRecords(clientEmail?: string): Promise<CoachingGoalRecord[]> {
+  const db = makeDb()
+  const params = clientEmail
+    ? {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
+        ExpressionAttributeValues: { ":prefix": "coaching_goal_", ":email": clientEmail.toLowerCase() },
+      }
+    : {
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix)",
+        ExpressionAttributeValues: { ":prefix": "coaching_goal_" },
+      }
+  const result = await db.send(new ScanCommand(params))
+  return (result.Items ?? []) as CoachingGoalRecord[]
+}
+
+export async function updateGoalRecord(id: string, updates: Partial<CoachingGoalRecord>): Promise<void> {
+  const db = makeDb()
+  const expr = buildUpdateExpression(updates)
+  if (!expr) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_goal_${id}` },
+      UpdateExpression: expr.expression,
+      ExpressionAttributeNames: expr.names,
+      ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+// ── Coach Tasks ───────────────────────────────────────────────────────────────
+
+export interface CoachTaskRecord {
+  id: string
+  title: string
+  clientEmail?: string
+  dueDate?: string
+  completedAt?: string
+  priority?: "HIGH" | "MEDIUM" | "LOW"
+  notes?: string
+  createdAt?: string
+}
+
+export async function createTaskRecord(data: Omit<CoachTaskRecord, "id" | "createdAt">): Promise<CoachTaskRecord> {
+  const db = makeDb()
+  const id = randomBytes(16).toString("hex")
+  const record: CoachTaskRecord = { id, createdAt: new Date().toISOString(), ...data }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `coaching_task_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function listTaskRecords(): Promise<CoachTaskRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix)",
+      ExpressionAttributeValues: { ":prefix": "coaching_task_" },
+    })
+  )
+  return ((result.Items ?? []) as CoachTaskRecord[])
+    .sort((a) => (a.completedAt ? 1 : -1))
+}
+
+export async function updateTaskRecord(id: string, updates: Partial<CoachTaskRecord>): Promise<void> {
+  const db = makeDb()
+  const expr = buildUpdateExpression(updates)
+  if (!expr) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_task_${id}` },
+      UpdateExpression: expr.expression,
+      ExpressionAttributeNames: expr.names,
+      ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+export async function deleteTaskRecord(id: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new DeleteCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_task_${id}` },
     })
   )
 }

@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -79,11 +78,31 @@ function ExerciseSearchModal({ onSelect, onClose }: { onSelect: (ex: SearchExerc
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.Exercise.list({ authMode: "userPool" }).then(({ data }) => {
-      setExercises(data.filter((e) => e.status !== "INACTIVE").map((e) => ({ id: e.id, name: e.name, videoS3Key: e.videoS3Key ?? null, thumbnailS3Key: e.thumbnailS3Key ?? null, primaryMuscle: e.primaryMuscle ?? null, category: e.category ?? null })))
+    async function loadEx() {
+      try {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) return
+        const res = await fetch("/api/admin/coaching/exercises", { headers: { Authorization: `Bearer ${token}` } })
+        if (res.ok) {
+          const data = await res.json()
+          setExercises(
+            (data.exercises ?? [])
+              .filter((e: Record<string, unknown>) => e.status !== "INACTIVE")
+              .map((e: Record<string, unknown>) => ({
+                id: e.id as string,
+                name: e.name as string,
+                videoS3Key: (e.videoS3Key as string | null) ?? null,
+                thumbnailS3Key: (e.thumbnailS3Key as string | null) ?? null,
+                primaryMuscle: (e.primaryMuscle as string | null) ?? null,
+                category: (e.category as string | null) ?? null,
+              }))
+          )
+        }
+      } catch { /* ignore */ }
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    loadEx()
   }, [])
 
   const filtered = query.length < 2 ? exercises.slice(0, 80) : exercises.filter((e) => e.name.toLowerCase().includes(query.toLowerCase()))
@@ -169,16 +188,27 @@ export default function EditProgramPage() {
   const day = week?.days[activeDay]
 
   const load = useCallback(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.CoachingProgram.get({ id }).then(({ data }) => {
-      if (!data) { setLoading(false); return }
-      setProgramName(data.name)
-      setProgramNotes(data.notes ?? "")
-      setProgramStatus((data.status ?? "DRAFT") as ProgramStatus)
-      setClientEmail(data.clientEmail ?? null)
-      try { setWeeks(JSON.parse(data.weeks) as ProgramWeek[]) } catch { /* keep default */ }
+    async function doLoad() {
+      try {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) { setLoading(false); return }
+        const res = await fetch(`/api/admin/coaching/programs/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+        if (res.ok) {
+          const data = await res.json()
+          const p = data.program
+          if (p) {
+            setProgramName(p.name)
+            setProgramNotes(p.notes ?? "")
+            setProgramStatus((p.status ?? "DRAFT") as ProgramStatus)
+            setClientEmail(p.clientEmail ?? null)
+            try { setWeeks(JSON.parse(p.weeks) as ProgramWeek[]) } catch { /* keep default */ }
+          }
+        }
+      } catch { /* ignore */ }
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    doLoad()
   }, [id])
 
   useEffect(() => { load() }, [load])
@@ -217,11 +247,26 @@ export default function EditProgramPage() {
   async function handleSave() {
     if (!programName.trim()) { setError("Program name is required"); return }
     setSaving(true); setError("")
-    const client = generateClient<Schema>({ authMode: "userPool" })
     try {
-      await client.models.CoachingProgram.update({ id, name: programName.trim(), status: programStatus, weeks: JSON.stringify(weeks), notes: programNotes || undefined })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) { setError("Not authenticated"); setSaving(false); return }
+      const res = await fetch(`/api/admin/coaching/programs/${id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: programName.trim(),
+          status: programStatus,
+          weeks: JSON.stringify(weeks),
+          notes: programNotes || undefined,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      } else {
+        setError("Failed to save. Please try again.")
+      }
     } catch {
       setError("Failed to save. Please try again.")
     }
@@ -229,9 +274,20 @@ export default function EditProgramPage() {
   }
 
   async function handleDuplicate() {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    const { data: dup } = await client.models.CoachingProgram.create({ name: `${programName} (copy)`, isTemplate: true, status: "DRAFT", weeks: JSON.stringify(weeks) })
-    if (dup?.id) router.push(`/admin/coaching/programs/${dup.id}`)
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) return
+      const res = await fetch(`/api/admin/coaching/programs/${id}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ newName: `${programName} (copy)`, asTemplate: true }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.program?.id) router.push(`/admin/coaching/programs/${data.program.id}`)
+      }
+    } catch { /* ignore */ }
   }
 
   if (loading) {

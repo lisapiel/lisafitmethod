@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { generateClient } from "aws-amplify/data"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 import type { CoachingClientRecord } from "@/lib/authTokens"
 
 const gold = "#c9a96e"
@@ -70,9 +68,13 @@ export default function ClientProfilePage() {
       const [clientRes, checkInsRes, programsRes] = await Promise.allSettled([
         fetch(`/api/admin/coaching/clients/${encodeURIComponent(emailParam)}`, {
           headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json() as Promise<{ client: ClientData }>),
-        generateClient<Schema>({ authMode: "userPool" }).models.CoachingCheckIn.list({ authMode: "userPool" }),
-        generateClient<Schema>({ authMode: "userPool" }).models.CoachingProgram.list({ authMode: "userPool" }),
+        }).then((r) => r.json() as Promise<{ client?: ClientData; error?: string }>),
+        fetch("/api/admin/coaching/check-ins", {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((r) => r.json() as Promise<{ checkIns?: Array<Record<string, unknown>> }>),
+        fetch("/api/admin/coaching/programs", {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((r) => r.json() as Promise<{ programs?: Array<Record<string, unknown>> }>),
       ])
 
       if (clientRes.status === "fulfilled" && clientRes.value.client) {
@@ -81,7 +83,11 @@ export default function ClientProfilePage() {
         setNotes(c.privateNotes ?? "")
 
         if (programsRes.status === "fulfilled") {
-          const progs = programsRes.value.data.map((p) => ({ id: p.id, name: p.name, status: p.status ?? null }))
+          const progs = (programsRes.value.programs ?? []).map((p) => ({
+            id: p.id as string,
+            name: p.name as string,
+            status: (p.status as string | null) ?? null,
+          }))
           setAllPrograms(progs)
           if (c.currentProgramId) {
             setProgram(progs.find((p) => p.id === c.currentProgramId) ?? null)
@@ -90,11 +96,17 @@ export default function ClientProfilePage() {
       }
 
       if (checkInsRes.status === "fulfilled") {
-        const mine = checkInsRes.value.data
-          .filter((ci) => ci.clientEmail.toLowerCase() === emailParam.toLowerCase())
-          .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+        const mine = (checkInsRes.value.checkIns ?? [])
+          .filter((ci) => (ci.clientEmail as string).toLowerCase() === emailParam.toLowerCase())
+          .sort((a, b) => (b.submittedAt as string).localeCompare(a.submittedAt as string))
           .slice(0, 5)
-        setRecentCheckIns(mine.map((ci) => ({ id: ci.id, submittedAt: ci.submittedAt, status: ci.status ?? null, weight: ci.weight ?? null, weightUnit: ci.weightUnit ?? null })))
+        setRecentCheckIns(mine.map((ci) => ({
+          id: ci.id as string,
+          submittedAt: ci.submittedAt as string,
+          status: (ci.status as string | null) ?? null,
+          weight: ci.weight != null ? Number(ci.weight) : null,
+          weightUnit: (ci.weightUnit as string | null) ?? null,
+        })))
       }
     } catch { /* handled */ }
 
@@ -127,9 +139,14 @@ export default function ClientProfilePage() {
     setSavingProgram(true)
     await patchClient({ currentProgramId: selectedProgramId })
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.CoachingProgram.update({ id: selectedProgramId, status: "ACTIVE", clientEmail: client.email })
-    } catch { /* AppSync not yet deployed — silently skip */ }
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      await fetch(`/api/admin/coaching/programs/${selectedProgramId}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ACTIVE", clientEmail: client.email }),
+      })
+    } catch { /* ignore */ }
     setClient((c) => c ? { ...c, currentProgramId: selectedProgramId } : c)
     setProgram(allPrograms.find((p) => p.id === selectedProgramId) ?? null)
     setSavingProgram(false)

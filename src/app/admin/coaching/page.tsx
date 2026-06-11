@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 import type { CoachingApplication } from "@/lib/authTokens"
 
 const gold = "#c9a96e"
@@ -76,26 +74,25 @@ export default function AdminCoachingDashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const db = generateClient<Schema>({ authMode: "userPool" })
         const session = await fetchAuthSession()
         const token = session.tokens?.accessToken?.toString() ?? ""
 
         const [clientsRes, checkInsRes, exercisesRes, programsRes, appsRes] = await Promise.allSettled([
           fetch("/api/admin/coaching/clients", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ clients: RecentClient[] }>),
-          db.models.CoachingCheckIn.list({ authMode: "userPool" }),
-          db.models.Exercise.list({ authMode: "userPool" }),
-          db.models.CoachingProgram.list({ authMode: "userPool" }),
+          fetch("/api/admin/coaching/check-ins", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ checkIns: Array<Record<string, unknown>> }>),
+          fetch("/api/admin/coaching/exercises", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ exercises: Array<Record<string, unknown>> }>),
+          fetch("/api/admin/coaching/programs", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ programs: Array<Record<string, unknown>> }>),
           fetch("/api/admin/coaching/applications", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ applications: CoachingApplication[] }>),
         ])
 
         const clients = clientsRes.status === "fulfilled" ? clientsRes.value.clients : []
-        const checkIns = checkInsRes.status === "fulfilled" ? checkInsRes.value.data : []
-        const exercises = exercisesRes.status === "fulfilled" ? exercisesRes.value.data : []
-        const programs = programsRes.status === "fulfilled" ? programsRes.value.data : []
+        const checkIns = checkInsRes.status === "fulfilled" ? (checkInsRes.value.checkIns ?? []) : []
+        const exercises = exercisesRes.status === "fulfilled" ? (exercisesRes.value.exercises ?? []) : []
+        const programs = programsRes.status === "fulfilled" ? (programsRes.value.programs ?? []) : []
         const applications = appsRes.status === "fulfilled" ? appsRes.value.applications : []
 
         const activeClients = clients.filter((c) => (c.status ?? "ACTIVE") === "ACTIVE")
-        const pending = checkIns.filter((ci) => (ci.status ?? "PENDING") === "PENDING")
+        const pending = checkIns.filter((ci) => ((ci.status as string) ?? "PENDING") === "PENDING")
         const activeExercises = exercises.filter((e) => e.status !== "INACTIVE")
         const activePrograms = programs.filter((p) => p.status !== "ARCHIVED")
         const pendingApps = applications.filter((a) => a.status === "PENDING")
@@ -110,9 +107,9 @@ export default function AdminCoachingDashboard() {
 
         setPendingCheckIns(
           pending
-            .sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
+            .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
             .slice(0, 5)
-            .map((ci) => ({ id: ci.id, clientEmail: ci.clientEmail, submittedAt: ci.submittedAt }))
+            .map((ci) => ({ id: ci.id as string, clientEmail: ci.clientEmail as string, submittedAt: ci.submittedAt as string }))
         )
 
         setRecentClients(

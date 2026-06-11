@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -28,22 +27,36 @@ export default function ClientProgramPage() {
   const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
 
   const load = useCallback(async () => {
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    const [clientsRes] = await Promise.allSettled([db.models.CoachingClient.list({ authMode: "userPool" })])
-    if (clientsRes.status === "fulfilled") {
-      const c = clientsRes.value.data.find((x) => x.email.toLowerCase() === emailParam.toLowerCase())
-      if (c) {
-        setClientName(c.displayName)
-        if (c.currentProgramId) {
-          const { data: prog } = await db.models.CoachingProgram.get({ id: c.currentProgramId })
-          if (prog) {
-            setProgramName(prog.name)
-            setProgramId(prog.id)
-            try { setWeeks(JSON.parse(prog.weeks) as ProgramWeek[]) } catch { /* empty */ }
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) { setLoading(false); return }
+
+      const clientRes = await fetch(`/api/admin/coaching/clients/${encodeURIComponent(emailParam)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (clientRes.ok) {
+        const data = await clientRes.json()
+        const c = data.client
+        if (c) {
+          setClientName(c.displayName)
+          if (c.currentProgramId) {
+            const progRes = await fetch(`/api/admin/coaching/programs/${c.currentProgramId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            if (progRes.ok) {
+              const pData = await progRes.json()
+              const prog = pData.program
+              if (prog) {
+                setProgramName(prog.name)
+                setProgramId(prog.id)
+                try { setWeeks(JSON.parse(prog.weeks) as ProgramWeek[]) } catch { /* empty */ }
+              }
+            }
           }
         }
       }
-    }
+    } catch { /* ignore */ }
     setLoading(false)
   }, [emailParam])
 

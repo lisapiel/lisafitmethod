@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -104,26 +103,38 @@ export default function NewExercisePage() {
   async function handleSave() {
     if (!form.name.trim()) { setError("Name is required"); return }
     setSaving(true); setError("")
-    const client = generateClient<Schema>({ authMode: "userPool" })
     try {
-      const { data: created } = await client.models.Exercise.create({
-        name: form.name.trim(),
-        videoS3Key: form.videoS3Key || undefined,
-        thumbnailS3Key: form.thumbnailS3Key || undefined,
-        primaryMuscle: form.primaryMuscle || undefined,
-        secondaryMuscles: form.secondaryMuscles.length ? JSON.stringify(form.secondaryMuscles) : undefined,
-        equipment: form.equipment.length ? JSON.stringify(form.equipment) : undefined,
-        category: form.category || undefined,
-        difficulty: form.difficulty || undefined,
-        movementPattern: form.movementPattern || undefined,
-        setup: form.setup || undefined,
-        execution: form.execution || undefined,
-        coachingCues: form.coachingCues ? JSON.stringify(form.coachingCues.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
-        commonMistakes: form.commonMistakes ? JSON.stringify(form.commonMistakes.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
-        notes: form.notes || undefined,
-        status: "ACTIVE",
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) { setError("Not authenticated"); setSaving(false); return }
+      const res = await fetch("/api/admin/coaching/exercises", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          videoS3Key: form.videoS3Key || undefined,
+          thumbnailS3Key: form.thumbnailS3Key || undefined,
+          primaryMuscle: form.primaryMuscle || undefined,
+          secondaryMuscles: form.secondaryMuscles.length ? JSON.stringify(form.secondaryMuscles) : undefined,
+          equipment: form.equipment.length ? JSON.stringify(form.equipment) : undefined,
+          category: form.category || undefined,
+          difficulty: form.difficulty || undefined,
+          movementPattern: form.movementPattern || undefined,
+          setup: form.setup || undefined,
+          execution: form.execution || undefined,
+          coachingCues: form.coachingCues ? JSON.stringify(form.coachingCues.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
+          commonMistakes: form.commonMistakes ? JSON.stringify(form.commonMistakes.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
+          notes: form.notes || undefined,
+          status: "ACTIVE",
+        }),
       })
-      if (created?.id) router.push(`/admin/coaching/exercises/${created.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.exercise?.id) router.push(`/admin/coaching/exercises/${data.exercise.id}`)
+      } else {
+        setError("Failed to create exercise.")
+        setSaving(false)
+      }
     } catch {
       setError("Failed to create exercise. Please try again.")
       setSaving(false)

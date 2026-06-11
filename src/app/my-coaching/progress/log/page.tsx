@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -40,7 +37,6 @@ const inputStyle: React.CSSProperties = {
 
 export default function LogMeasurementsPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
   const [weightUnit, setWeightUnit] = useState<"LBS" | "KG">("LBS")
   const [form, setForm] = useState({
     snapshotDate: new Date().toISOString().slice(0, 10),
@@ -56,14 +52,12 @@ export default function LogMeasurementsPage() {
 
   useEffect(() => {
     async function init() {
-      const attrs = await fetchUserAttributes()
-      const userEmail = attrs.email ?? ""
-      setEmail(userEmail)
       try {
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const { data: clients } = await db.models.CoachingClient.list({ authMode: "userPool" })
-        const me = clients.find((c) => c.email.toLowerCase() === userEmail.toLowerCase())
-        if (me?.weightUnit) setWeightUnit(me.weightUnit as "LBS" | "KG")
+        const res = await fetch("/api/coaching/program")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.client?.weightUnit) setWeightUnit(data.client.weightUnit as "LBS" | "KG")
+        }
       } catch { /* handled by layout */ }
     }
     init()
@@ -75,20 +69,23 @@ export default function LogMeasurementsPage() {
   async function save() {
     setSaving(true)
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.ClientProgressSnapshot.create({
-        clientEmail: email,
-        snapshotDate: form.snapshotDate,
-        weight: form.weight ? parseFloat(form.weight) : undefined,
-        weightUnit: weightUnit,
-        waist: form.waist ? parseFloat(form.waist) : undefined,
-        hips: form.hips ? parseFloat(form.hips) : undefined,
-        chest: form.chest ? parseFloat(form.chest) : undefined,
-        arm: form.arm ? parseFloat(form.arm) : undefined,
-        thigh: form.thigh ? parseFloat(form.thigh) : undefined,
-        notes: form.notes || undefined,
+      const res = await fetch("/api/coaching/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          snapshotDate: form.snapshotDate,
+          weight: form.weight ? parseFloat(form.weight) : undefined,
+          weightUnit: weightUnit,
+          waist: form.waist ? parseFloat(form.waist) : undefined,
+          hips: form.hips ? parseFloat(form.hips) : undefined,
+          chest: form.chest ? parseFloat(form.chest) : undefined,
+          arm: form.arm ? parseFloat(form.arm) : undefined,
+          thigh: form.thigh ? parseFloat(form.thigh) : undefined,
+          notes: form.notes || undefined,
+        }),
       })
-      router.push("/my-coaching/progress")
+      if (res.ok) router.push("/my-coaching/progress")
+      else setSaving(false)
     } catch (err) {
       console.error(err)
       setSaving(false)

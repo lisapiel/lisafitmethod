@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -94,18 +93,33 @@ function ExerciseSearchModal({ onSelect, onClose }: { onSelect: (ex: SearchExerc
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.Exercise.list({ authMode: "userPool" }).then(({ data }) => {
-      setExercises(data.filter((e) => e.status !== "INACTIVE").map((e) => ({
-        id: e.id,
-        name: e.name,
-        videoS3Key: e.videoS3Key ?? null,
-        thumbnailS3Key: e.thumbnailS3Key ?? null,
-        primaryMuscle: e.primaryMuscle ?? null,
-        category: e.category ?? null,
-      })))
+    async function load() {
+      try {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) return
+        const res = await fetch("/api/admin/coaching/exercises", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setExercises(
+            (data.exercises ?? [])
+              .filter((e: Record<string, unknown>) => e.status !== "INACTIVE")
+              .map((e: Record<string, unknown>) => ({
+                id: e.id as string,
+                name: e.name as string,
+                videoS3Key: (e.videoS3Key as string | null) ?? null,
+                thumbnailS3Key: (e.thumbnailS3Key as string | null) ?? null,
+                primaryMuscle: (e.primaryMuscle as string | null) ?? null,
+                category: (e.category as string | null) ?? null,
+              }))
+          )
+        }
+      } catch { /* ignore */ }
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    load()
   }, [])
 
   const filtered = query.length < 2
@@ -287,16 +301,32 @@ export default function NewProgramPage() {
   async function handleSave() {
     if (!programName.trim()) { setError("Program name is required"); return }
     setSaving(true); setError("")
-    const client = generateClient<Schema>({ authMode: "userPool" })
     try {
-      const { data: created } = await client.models.CoachingProgram.create({
-        name: programName.trim(),
-        isTemplate: true,
-        status: "DRAFT",
-        weeks: JSON.stringify(weeks),
-        notes: programNotes || undefined,
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) {
+        setError("Not authenticated")
+        setSaving(false)
+        return
+      }
+      const res = await fetch("/api/admin/coaching/programs", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: programName.trim(),
+          isTemplate: true,
+          status: "DRAFT",
+          weeks: JSON.stringify(weeks),
+          notes: programNotes || undefined,
+        }),
       })
-      if (created?.id) router.push(`/admin/coaching/programs/${created.id}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.program?.id) router.push(`/admin/coaching/programs/${data.program.id}`)
+      } else {
+        setError("Failed to save program. Please try again.")
+        setSaving(false)
+      }
     } catch {
       setError("Failed to save program. Please try again.")
       setSaving(false)

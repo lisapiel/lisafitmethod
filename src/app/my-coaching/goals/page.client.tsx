@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -71,31 +68,31 @@ export default function GoalsClient() {
   useEffect(() => {
     async function load() {
       try {
-        const attrs = await fetchUserAttributes()
-        const email = attrs.email ?? ""
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const { data } = await db.models.CoachingGoal.list({ authMode: "userPool" })
-        setGoals(
-          data
-            .filter((g: { clientEmail: string; status?: string | null }) => g.clientEmail.toLowerCase() === email.toLowerCase())
-            .sort((a: { status?: string | null }, b: { status?: string | null }) => {
-              const statusOrder: Record<string, number> = { ON_TRACK: 0, NEEDS_ATTENTION: 1, ACHIEVED: 2 }
-              return (statusOrder[a.status ?? ""] ?? 0) - (statusOrder[b.status ?? ""] ?? 0)
-            })
-            .map((g: { id: string; type: string; label?: string | null; startDate?: string | null; targetDate?: string | null; startValue?: number | null; targetValue?: number | null; currentValue?: number | null; unit?: string | null; notes?: string | null; status?: string | null }) => ({
-              id: g.id,
-              type: g.type,
-              label: g.label ?? null,
-              startDate: g.startDate ?? null,
-              targetDate: g.targetDate ?? null,
-              startValue: g.startValue ?? null,
-              targetValue: g.targetValue ?? null,
-              currentValue: g.currentValue ?? null,
-              unit: g.unit ?? null,
-              notes: g.notes ?? null,
-              status: (g.status ?? null) as Goal["status"],
-            }))
-        )
+        const res = await fetch("/api/coaching/goals")
+        if (res.ok) {
+          const data = await res.json()
+          const goalsList: Array<Record<string, unknown>> = data.goals ?? []
+          setGoals(
+            goalsList
+              .sort((a, b) => {
+                const statusOrder: Record<string, number> = { ON_TRACK: 0, NEEDS_ATTENTION: 1, ACHIEVED: 2 }
+                return (statusOrder[(a.status as string) ?? ""] ?? 0) - (statusOrder[(b.status as string) ?? ""] ?? 0)
+              })
+              .map((g) => ({
+                id: g.id as string,
+                type: g.type as string,
+                label: (g.label as string | null) ?? null,
+                startDate: (g.startDate as string | null) ?? null,
+                targetDate: (g.targetDate as string | null) ?? null,
+                startValue: g.startValue != null ? Number(g.startValue) : null,
+                targetValue: g.targetValue != null ? Number(g.targetValue) : null,
+                currentValue: g.currentValue != null ? Number(g.currentValue) : null,
+                unit: (g.unit as string | null) ?? null,
+                notes: (g.notes as string | null) ?? null,
+                status: ((g.status as string | null) ?? null) as Goal["status"],
+              }))
+          )
+        }
       } catch { /* handled by layout */ }
       setLoading(false)
     }

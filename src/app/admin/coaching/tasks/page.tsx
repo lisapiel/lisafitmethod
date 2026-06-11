@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -53,41 +52,54 @@ export default function AdminTasksPage() {
   const [adding, setAdding] = useState(false)
   const [showForm, setShowForm] = useState(false)
 
+  async function getToken() {
+    const session = await fetchAuthSession()
+    return session.tokens?.accessToken?.toString() ?? ""
+  }
+
   async function loadTasks() {
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      const { data } = await db.models.CoachTask.list({ authMode: "userPool" })
-      setTasks(
-        data
-          .sort((a, b) => {
-            if (!!a.completedAt !== !!b.completedAt) return a.completedAt ? 1 : -1
-            if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate)
-            if (a.dueDate) return -1
-            if (b.dueDate) return 1
-            return (b.createdAt ?? "").localeCompare(a.createdAt ?? "")
-          })
-          .map((t) => ({
-            id: t.id,
-            title: t.title,
-            clientEmail: t.clientEmail ?? null,
-            dueDate: t.dueDate ?? null,
-            completedAt: t.completedAt ?? null,
-            priority: (t.priority ?? "MEDIUM") as Task["priority"],
-            notes: t.notes ?? null,
-          }))
-      )
+      const token = await getToken()
+      if (!token) { setLoading(false); return }
+      const res = await fetch("/api/admin/coaching/tasks", { headers: { Authorization: `Bearer ${token}` } })
+      if (res.ok) {
+        const data = await res.json()
+        setTasks(
+          (data.tasks ?? [])
+            .sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+              const aDone = !!a.completedAt
+              const bDone = !!b.completedAt
+              if (aDone !== bDone) return aDone ? 1 : -1
+              if (a.dueDate && b.dueDate) return (a.dueDate as string).localeCompare(b.dueDate as string)
+              if (a.dueDate) return -1
+              if (b.dueDate) return 1
+              return ((b.createdAt as string) ?? "").localeCompare((a.createdAt as string) ?? "")
+            })
+            .map((t: Record<string, unknown>) => ({
+              id: t.id as string,
+              title: t.title as string,
+              clientEmail: (t.clientEmail as string | null) ?? null,
+              dueDate: (t.dueDate as string | null) ?? null,
+              completedAt: (t.completedAt as string | null) ?? null,
+              priority: ((t.priority ?? "MEDIUM") as Task["priority"]),
+              notes: (t.notes as string | null) ?? null,
+            }))
+        )
+      }
     } catch { /* handled by layout */ }
     setLoading(false)
   }
 
-  useEffect(() => { loadTasks() }, [])
+  useEffect(() => { loadTasks() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function toggleComplete(task: Task) {
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.CoachTask.update({
-        id: task.id,
-        completedAt: task.completedAt ? null : new Date().toISOString(),
+      const token = await getToken()
+      if (!token) return
+      await fetch(`/api/admin/coaching/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ completedAt: task.completedAt ? null : new Date().toISOString() }),
       })
       await loadTasks()
     } catch (err) { console.error(err) }
@@ -97,12 +109,17 @@ export default function AdminTasksPage() {
     if (!newTitle.trim()) return
     setAdding(true)
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.CoachTask.create({
-        title: newTitle.trim(),
-        clientEmail: newClient.trim() || undefined,
-        dueDate: newDue || undefined,
-        priority: newPriority,
+      const token = await getToken()
+      if (!token) { setAdding(false); return }
+      await fetch("/api/admin/coaching/tasks", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTitle.trim(),
+          clientEmail: newClient.trim() || undefined,
+          dueDate: newDue || undefined,
+          priority: newPriority,
+        }),
       })
       setNewTitle(""); setNewClient(""); setNewDue(""); setNewPriority("MEDIUM")
       setShowForm(false)
@@ -113,8 +130,12 @@ export default function AdminTasksPage() {
 
   async function deleteTask(id: string) {
     try {
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      await db.models.CoachTask.delete({ id })
+      const token = await getToken()
+      if (!token) return
+      await fetch(`/api/admin/coaching/tasks/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
       await loadTasks()
     } catch (err) { console.error(err) }
   }

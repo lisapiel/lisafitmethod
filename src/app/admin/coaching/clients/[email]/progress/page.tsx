@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -120,41 +119,42 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
   useEffect(() => {
     async function load() {
       try {
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const [clientsRes, checkInsRes, snapshotsRes] = await Promise.allSettled([
-          db.models.CoachingClient.list({ authMode: "userPool" }),
-          db.models.CoachingCheckIn.list({ authMode: "userPool" }),
-          db.models.ClientProgressSnapshot.list({ authMode: "userPool" }),
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) { setLoading(false); return }
+
+        const [clientRes, checkInsRes, snapshotsRes] = await Promise.allSettled([
+          fetch(`/api/admin/coaching/clients/${encodeURIComponent(clientEmail)}`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+          fetch("/api/admin/coaching/check-ins", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+          fetch(`/api/admin/coaching/progress/${encodeURIComponent(clientEmail)}`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
         ])
 
-        if (clientsRes.status === "fulfilled") {
-          const match = clientsRes.value.data.find((c) => c.email.toLowerCase() === clientEmail.toLowerCase())
-          if (match) setClientName(match.displayName)
+        if (clientRes.status === "fulfilled" && clientRes.value.client) {
+          setClientName(clientRes.value.client.displayName)
         }
 
-        const checkIns = checkInsRes.status === "fulfilled" ? checkInsRes.value.data : []
-        const myCheckIns = checkIns.filter((ci) => ci.clientEmail.toLowerCase() === clientEmail.toLowerCase() && ci.weight)
+        const checkIns: Array<Record<string, unknown>> = checkInsRes.status === "fulfilled" ? (checkInsRes.value.checkIns ?? []) : []
+        const myCheckIns = checkIns.filter((ci) => (ci.clientEmail as string).toLowerCase() === clientEmail.toLowerCase() && ci.weight)
         const wData = myCheckIns
-          .sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
-          .map((ci) => ({ date: ci.submittedAt, weight: ci.weight!, unit: ci.weightUnit ?? "lbs" }))
+          .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
+          .map((ci) => ({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" }))
         setWeightData(wData)
 
-        const snaps = snapshotsRes.status === "fulfilled" ? snapshotsRes.value.data : []
+        const snaps: Array<Record<string, unknown>> = snapshotsRes.status === "fulfilled" ? (snapshotsRes.value.snapshots ?? []) : []
         setSnapshots(
           snaps
-            .filter((s) => s.clientEmail.toLowerCase() === clientEmail.toLowerCase())
-            .sort((a, b) => b.snapshotDate.localeCompare(a.snapshotDate))
+            .sort((a, b) => (b.snapshotDate as string).localeCompare(a.snapshotDate as string))
             .map((s) => ({
-              id: s.id,
-              snapshotDate: s.snapshotDate,
-              weight: s.weight ?? null,
-              weightUnit: s.weightUnit ?? null,
-              waist: s.waist ?? null,
-              hips: s.hips ?? null,
-              chest: s.chest ?? null,
-              arm: s.arm ?? null,
-              thigh: s.thigh ?? null,
-              notes: s.notes ?? null,
+              id: s.id as string,
+              snapshotDate: s.snapshotDate as string,
+              weight: s.weight != null ? Number(s.weight) : null,
+              weightUnit: (s.weightUnit as string | null) ?? null,
+              waist: s.waist != null ? Number(s.waist) : null,
+              hips: s.hips != null ? Number(s.hips) : null,
+              chest: s.chest != null ? Number(s.chest) : null,
+              arm: s.arm != null ? Number(s.arm) : null,
+              thigh: s.thigh != null ? Number(s.thigh) : null,
+              notes: (s.notes as string | null) ?? null,
             }))
         )
       } catch { /* handled by layout */ }

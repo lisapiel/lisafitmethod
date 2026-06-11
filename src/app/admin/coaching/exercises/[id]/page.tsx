@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { generateClient } from "aws-amplify/data"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -116,55 +115,75 @@ export default function EditExercisePage() {
   const [showVideo, setShowVideo] = useState(false)
 
   useEffect(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    client.models.Exercise.get({ id }).then(({ data }) => {
-      if (!data) { setLoading(false); return }
-      setForm({
-        name: data.name,
-        videoS3Key: data.videoS3Key ?? "",
-        thumbnailS3Key: data.thumbnailS3Key ?? "",
-        primaryMuscle: data.primaryMuscle ?? "",
-        secondaryMuscles: (() => { try { return JSON.parse(data.secondaryMuscles ?? "[]") as string[] } catch { return [] } })(),
-        equipment: (() => { try { return JSON.parse(data.equipment ?? "[]") as string[] } catch { return [] } })(),
-        category: data.category ?? "",
-        difficulty: data.difficulty ?? "",
-        movementPattern: data.movementPattern ?? "",
-        setup: data.setup ?? "",
-        execution: data.execution ?? "",
-        coachingCues: (() => { try { return (JSON.parse(data.coachingCues ?? "[]") as string[]).join("\n") } catch { return data.coachingCues ?? "" } })(),
-        commonMistakes: (() => { try { return (JSON.parse(data.commonMistakes ?? "[]") as string[]).join("\n") } catch { return data.commonMistakes ?? "" } })(),
-        notes: data.notes ?? "",
-        status: data.status ?? "ACTIVE",
-      })
+    async function loadExercise() {
+      try {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.accessToken?.toString()
+        if (!token) { setLoading(false); return }
+        const res = await fetch(`/api/admin/coaching/exercises/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+        if (res.ok) {
+          const respData = await res.json()
+          const data = respData.exercise
+          if (data) {
+            setForm({
+              name: data.name,
+              videoS3Key: data.videoS3Key ?? "",
+              thumbnailS3Key: data.thumbnailS3Key ?? "",
+              primaryMuscle: data.primaryMuscle ?? "",
+              secondaryMuscles: (() => { try { return JSON.parse(data.secondaryMuscles ?? "[]") as string[] } catch { return [] } })(),
+              equipment: (() => { try { return JSON.parse(data.equipment ?? "[]") as string[] } catch { return [] } })(),
+              category: data.category ?? "",
+              difficulty: data.difficulty ?? "",
+              movementPattern: data.movementPattern ?? "",
+              setup: data.setup ?? "",
+              execution: data.execution ?? "",
+              coachingCues: (() => { try { return (JSON.parse(data.coachingCues ?? "[]") as string[]).join("\n") } catch { return data.coachingCues ?? "" } })(),
+              commonMistakes: (() => { try { return (JSON.parse(data.commonMistakes ?? "[]") as string[]).join("\n") } catch { return data.commonMistakes ?? "" } })(),
+              notes: data.notes ?? "",
+              status: data.status ?? "ACTIVE",
+            })
+          }
+        }
+      } catch { /* ignore */ }
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    loadExercise()
   }, [id])
 
   async function handleSave() {
     if (!form.name.trim()) { setError("Name is required"); return }
     setSaving(true); setError("")
-    const client = generateClient<Schema>({ authMode: "userPool" })
     try {
-      await client.models.Exercise.update({
-        id,
-        name: form.name.trim(),
-        videoS3Key: form.videoS3Key || undefined,
-        thumbnailS3Key: form.thumbnailS3Key || undefined,
-        primaryMuscle: form.primaryMuscle || undefined,
-        secondaryMuscles: form.secondaryMuscles.length ? JSON.stringify(form.secondaryMuscles) : undefined,
-        equipment: form.equipment.length ? JSON.stringify(form.equipment) : undefined,
-        category: form.category || undefined,
-        difficulty: form.difficulty || undefined,
-        movementPattern: form.movementPattern || undefined,
-        setup: form.setup || undefined,
-        execution: form.execution || undefined,
-        coachingCues: form.coachingCues ? JSON.stringify(form.coachingCues.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
-        commonMistakes: form.commonMistakes ? JSON.stringify(form.commonMistakes.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
-        notes: form.notes || undefined,
-        status: form.status,
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) { setError("Not authenticated"); setSaving(false); return }
+      const res = await fetch(`/api/admin/coaching/exercises/${id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          videoS3Key: form.videoS3Key || undefined,
+          thumbnailS3Key: form.thumbnailS3Key || undefined,
+          primaryMuscle: form.primaryMuscle || undefined,
+          secondaryMuscles: form.secondaryMuscles.length ? JSON.stringify(form.secondaryMuscles) : undefined,
+          equipment: form.equipment.length ? JSON.stringify(form.equipment) : undefined,
+          category: form.category || undefined,
+          difficulty: form.difficulty || undefined,
+          movementPattern: form.movementPattern || undefined,
+          setup: form.setup || undefined,
+          execution: form.execution || undefined,
+          coachingCues: form.coachingCues ? JSON.stringify(form.coachingCues.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
+          commonMistakes: form.commonMistakes ? JSON.stringify(form.commonMistakes.split("\n").map((l) => l.trim()).filter(Boolean)) : undefined,
+          notes: form.notes || undefined,
+          status: form.status,
+        }),
       })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      } else {
+        setError("Failed to save. Please try again.")
+      }
     } catch {
       setError("Failed to save. Please try again.")
     }
@@ -172,9 +191,16 @@ export default function EditExercisePage() {
   }
 
   async function handleDeactivate() {
-    const client = generateClient<Schema>({ authMode: "userPool" })
-    await client.models.Exercise.update({ id, status: form.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" })
-    setForm((f) => ({ ...f, status: f.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }))
+    const session = await fetchAuthSession()
+    const token = session.tokens?.accessToken?.toString()
+    if (!token) return
+    const newStatus = form.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
+    await fetch(`/api/admin/coaching/exercises/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    setForm((f) => ({ ...f, status: newStatus }))
   }
 
   const set = (key: keyof FormState) => (val: FormState[keyof FormState]) =>

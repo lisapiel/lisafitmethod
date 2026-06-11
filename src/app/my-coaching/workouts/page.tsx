@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -39,38 +36,28 @@ export default function WorkoutsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const attrs = await fetchUserAttributes()
-        const email = attrs.email ?? ""
-        const db = generateClient<Schema>({ authMode: "userPool" })
-
-        const [clientsRes, logsRes] = await Promise.allSettled([
-          db.models.CoachingClient.list({ authMode: "userPool" }),
-          db.models.CoachingWorkoutLog.list({ authMode: "userPool" }),
+        const [programRes, logsRes] = await Promise.allSettled([
+          fetch("/api/coaching/program").then((r) => r.json()),
+          fetch("/api/coaching/workout-log").then((r) => r.json()),
         ])
 
-        let programId: string | null = null
-        if (clientsRes.status === "fulfilled") {
-          const found = clientsRes.value.data.find((c) => c.email.toLowerCase() === email.toLowerCase())
-          programId = found?.currentProgramId ?? null
+        let prog: Record<string, unknown> | null = null
+        if (programRes.status === "fulfilled") {
+          prog = programRes.value.program
         }
 
-        if (!programId) { setNoProgram(true); setLoading(false); return }
+        if (!prog) { setNoProgram(true); setLoading(false); return }
 
         if (logsRes.status === "fulfilled") {
           const done = new Set(
-            logsRes.value.data
-              .filter((l) => l.clientEmail.toLowerCase() === email.toLowerCase())
-              .map((l) => `${l.weekNumber}::${l.dayLabel}`)
+            (logsRes.value.logs ?? []).map((l: Record<string, unknown>) => `${l.weekNumber}::${l.dayLabel}`)
           )
-          setCompletedDays(done)
+          setCompletedDays(done as Set<string>)
         }
 
-        const { data: prog } = await db.models.CoachingProgram.get({ id: programId })
-        if (prog) {
-          setProgramName(prog.name)
-          setProgramNotes(prog.notes ?? "")
-          try { setWeeks(JSON.parse(prog.weeks) as ProgramWeek[]) } catch { /* empty */ }
-        }
+        setProgramName(prog.name as string)
+        setProgramNotes((prog.notes as string) ?? "")
+        try { setWeeks(JSON.parse(prog.weeks as string) as ProgramWeek[]) } catch { /* empty */ }
       } catch { /* handled by layout */ }
       setLoading(false)
     }

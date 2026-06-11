@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -69,41 +67,37 @@ export default function MyCoachingHomeClient() {
         const userEmail = attrs.email ?? ""
         setEmail(userEmail)
 
-        const db = generateClient<Schema>({ authMode: "userPool" })
-        const [clientsRes, logsRes] = await Promise.allSettled([
-          db.models.CoachingClient.list({ authMode: "userPool" }),
-          db.models.CoachingWorkoutLog.list({ authMode: "userPool" }),
+        const [programRes, logsRes] = await Promise.allSettled([
+          fetch("/api/coaching/program").then((r) => r.json()),
+          fetch("/api/coaching/workout-log").then((r) => r.json()),
         ])
 
-        let programId: string | null = null
-        if (clientsRes.status === "fulfilled") {
-          const found = clientsRes.value.data.find((c) => c.email.toLowerCase() === userEmail.toLowerCase())
-          if (found) {
+        if (programRes.status === "fulfilled") {
+          const c = programRes.value.client
+          const prog = programRes.value.program
+          if (c) {
             setClientInfo({
-              displayName: found.displayName,
-              goal: found.goal ?? null,
-              currentProgramId: found.currentProgramId ?? null,
-              startDate: found.startDate ?? null,
-              weightUnit: (found.weightUnit ?? "LBS") as ClientInfo["weightUnit"],
+              displayName: c.displayName,
+              goal: c.goal ?? null,
+              currentProgramId: c.currentProgramId ?? null,
+              startDate: c.startDate ?? null,
+              weightUnit: (c.weightUnit ?? "LBS") as ClientInfo["weightUnit"],
             })
-            programId = found.currentProgramId ?? null
           }
-        }
-
-        if (logsRes.status === "fulfilled") {
-          const myLogs = logsRes.value.data
-            .filter((l) => l.clientEmail.toLowerCase() === userEmail.toLowerCase())
-            .map((l) => ({ weekNumber: l.weekNumber, dayLabel: l.dayLabel, completedAt: l.completedAt }))
-          setLogs(myLogs)
-        }
-
-        if (programId) {
-          const { data: prog } = await db.models.CoachingProgram.get({ id: programId })
           if (prog) {
             try {
               setProgram({ id: prog.id, name: prog.name, weeks: JSON.parse(prog.weeks) as ProgramWeek[] })
             } catch { /* invalid JSON */ }
           }
+        }
+
+        if (logsRes.status === "fulfilled") {
+          const myLogs = (logsRes.value.logs ?? []).map((l: Record<string, unknown>) => ({
+            weekNumber: Number(l.weekNumber),
+            dayLabel: l.dayLabel as string,
+            completedAt: l.completedAt as string,
+          }))
+          setLogs(myLogs)
         }
       } catch { /* auth error handled by layout */ }
       setLoading(false)

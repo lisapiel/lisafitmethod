@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
-import { generateClient } from "aws-amplify/data"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import type { Schema } from "@/lib/amplifyConfig"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -316,26 +314,21 @@ export default function WorkoutLoggerClient() {
       const userEmail = attrs.email ?? ""
       setEmail(userEmail)
 
-      const db = generateClient<Schema>({ authMode: "userPool" })
-      const [clientsRes, logsRes] = await Promise.allSettled([
-        db.models.CoachingClient.list({ authMode: "userPool" }),
-        db.models.CoachingWorkoutLog.list({ authMode: "userPool" }),
+      const [programRes, logsRes] = await Promise.allSettled([
+        fetch("/api/coaching/program").then((r) => r.json()),
+        fetch("/api/coaching/workout-log").then((r) => r.json()),
       ])
 
-      let progId: string | null = null
-      if (clientsRes.status === "fulfilled") {
-        const found = clientsRes.value.data.find((c) => c.email.toLowerCase() === userEmail.toLowerCase())
-        progId = found?.currentProgramId ?? null
-        if (progId) setProgramId(progId)
+      let prog: Record<string, unknown> | null = null
+      if (programRes.status === "fulfilled") {
+        prog = programRes.value.program
+        if (prog?.id) setProgramId(prog.id as string)
       }
 
-      if (!progId) { setLoading(false); return }
-
-      const { data: prog } = await db.models.CoachingProgram.get({ id: progId })
       if (!prog) { setLoading(false); return }
 
       let weeks: ProgramWeek[] = []
-      try { weeks = JSON.parse(prog.weeks) as ProgramWeek[] } catch { /* empty */ }
+      try { weeks = JSON.parse(prog.weeks as string) as ProgramWeek[] } catch { /* empty */ }
 
       const targetWeek = weeks.find((w) => w.weekNumber === weekId) ?? null
       const targetDay = targetWeek?.days[dayIndex] ?? null
@@ -347,16 +340,16 @@ export default function WorkoutLoggerClient() {
       // Check if already logged
       let prevSetData: PrevSetData = []
       if (logsRes.status === "fulfilled") {
-        const myLogs = logsRes.value.data.filter((l) => l.clientEmail.toLowerCase() === userEmail.toLowerCase())
-        const existingLog = myLogs.find((l) => l.weekNumber === weekId && l.dayLabel === targetDay.dayLabel)
+        const myLogs = (logsRes.value.logs ?? []) as Array<Record<string, unknown>>
+        const existingLog = myLogs.find((l) => Number(l.weekNumber) === weekId && l.dayLabel === targetDay.dayLabel)
         if (existingLog) { setAlreadyLogged(true); setLoading(false); return }
 
         // Find previous week's log for same dayLabel
         const prevLog = myLogs
-          .filter((l) => l.dayLabel === targetDay.dayLabel && l.weekNumber < weekId)
-          .sort((a, b) => b.weekNumber - a.weekNumber)[0]
+          .filter((l) => l.dayLabel === targetDay.dayLabel && Number(l.weekNumber) < weekId)
+          .sort((a, b) => Number(b.weekNumber) - Number(a.weekNumber))[0]
         if (prevLog) {
-          try { prevSetData = JSON.parse(prevLog.setData) as PrevSetData } catch { /* ignore */ }
+          try { prevSetData = JSON.parse(prevLog.setData as string) as PrevSetData } catch { /* ignore */ }
         }
       }
 
@@ -396,16 +389,17 @@ export default function WorkoutLoggerClient() {
       }))
     )
 
-    const db = generateClient<Schema>({ authMode: "userPool" })
-    await db.models.CoachingWorkoutLog.create({
-      clientEmail: email,
-      programId,
-      weekNumber: weekId,
-      dayLabel: day.dayLabel,
-      completedAt: new Date().toISOString(),
-      setData: JSON.stringify(setData),
-      overallRpe: overallRpe ? parseInt(overallRpe) : undefined,
-      clientNotes: clientNotes || undefined,
+    await fetch("/api/coaching/workout-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        programId,
+        weekNumber: weekId,
+        dayLabel: day.dayLabel,
+        setData: JSON.stringify(setData),
+        overallRpe: overallRpe ? parseInt(overallRpe) : undefined,
+        clientNotes: clientNotes || undefined,
+      }),
     })
 
     setSaving(false)
