@@ -587,7 +587,20 @@ export default function WorkoutLoggerClient() {
   }
 
   return (
-    <div style={{ paddingBottom: 100 }}>
+    <div className="workout-logger-page">
+      <style>{`
+        /* Page bottom padding scaled so finish bar + mobile bottom nav fit
+           without covering the workout notes / last exercise. */
+        .workout-logger-page { padding-bottom: 100px; }
+        @media (max-width: 768px) {
+          .workout-logger-page { padding-bottom: calc(170px + env(safe-area-inset-bottom)); }
+          .workout-finish-bar { bottom: calc(64px + env(safe-area-inset-bottom)) !important; }
+        }
+        @media (min-width: 769px) {
+          .workout-finish-bar { bottom: 0 !important; }
+        }
+      `}</style>
+
       {/* Back nav */}
       <div style={{ marginBottom: "1.25rem" }}>
         <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, textDecoration: "none" }}>← Workouts</Link>
@@ -664,8 +677,9 @@ export default function WorkoutLoggerClient() {
         </div>
       </div>
 
-      {/* Sticky finish bar */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: white, borderTop: `1px solid ${border}`, padding: "1rem 1.5rem calc(1rem + env(safe-area-inset-bottom))", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, zIndex: 10 }}>
+      {/* Sticky finish bar — positioned above the mobile bottom nav on phones
+          so the "Finish Workout" button isn't hidden behind it. */}
+      <div className="workout-finish-bar" style={{ position: "fixed", left: 0, right: 0, background: white, borderTop: `1px solid ${border}`, padding: "1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, zIndex: 50 }}>
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, color: black, margin: 0 }}>
             {completedSets === totalSets && totalSets > 0 ? "All sets done! 🎉" : `${completedSets}/${totalSets} sets`}

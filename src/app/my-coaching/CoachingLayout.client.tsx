@@ -1,6 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import AccountDropdown from "@/components/AccountDropdown.client"
 
@@ -80,6 +81,27 @@ export default function CoachingClientLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+
+  // Hide mobile bottom nav while typing — when an input or textarea is focused,
+  // the on-screen keyboard pushes the fixed bottom nav above the keyboard and
+  // covers the action buttons. Letting the keyboard sit on top of the empty
+  // nav space is the cleaner mobile pattern.
+  useEffect(() => {
+    function isEditable(el: EventTarget | null): boolean {
+      if (!(el instanceof HTMLElement)) return false
+      const tag = el.tagName
+      return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable
+    }
+    function onFocusIn(e: FocusEvent) { if (isEditable(e.target)) setKeyboardOpen(true) }
+    function onFocusOut(e: FocusEvent) { if (isEditable(e.target)) setKeyboardOpen(false) }
+    document.addEventListener("focusin", onFocusIn)
+    document.addEventListener("focusout", onFocusOut)
+    return () => {
+      document.removeEventListener("focusin", onFocusIn)
+      document.removeEventListener("focusout", onFocusOut)
+    }
+  }, [])
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
@@ -185,7 +207,8 @@ export default function CoachingClientLayout({
         </main>
       </div>
 
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav — hides when a text input is focused so the
+          on-screen keyboard doesn't push it over the content. */}
       <nav className="coaching-mobile-nav" style={{
         position: "fixed",
         bottom: 0,
@@ -196,6 +219,9 @@ export default function CoachingClientLayout({
         padding: "0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom))",
         justifyContent: "space-around",
         zIndex: 100,
+        transform: keyboardOpen ? "translateY(100%)" : "translateY(0)",
+        transition: "transform 0.15s ease",
+        pointerEvents: keyboardOpen ? "none" : "auto",
       }}>
         {navLinks.map(({ href, label, exact, icon: Icon }) => {
           const active = isActive(href, exact)
