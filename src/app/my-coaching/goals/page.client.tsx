@@ -101,15 +101,41 @@ export default function GoalsClient() {
 
   if (loading) return <Spinner />
 
+  // Group by category (type)
+  const TYPE_LABELS: Record<string, string> = {
+    "body-composition": "Body Composition",
+    "strength": "Strength",
+    "habit": "Habits",
+    "custom": "Personal",
+  }
+  const TYPE_ICONS: Record<string, string> = {
+    "body-composition": "⚖️",
+    "strength": "💪",
+    "habit": "🎯",
+    "custom": "✨",
+  }
+  const ordered: Array<{ key: string; label: string; icon: string; items: Goal[] }> = []
+  for (const key of ["body-composition", "strength", "habit", "custom"]) {
+    const items = goals.filter((g) => (g.type || "").toLowerCase() === key)
+    if (items.length) ordered.push({ key, label: TYPE_LABELS[key], icon: TYPE_ICONS[key], items })
+  }
+  // Catch-all for unknown types
+  const matchedIds = new Set(ordered.flatMap((g) => g.items.map((i) => i.id)))
+  const other = goals.filter((g) => !matchedIds.has(g.id))
+  if (other.length) ordered.push({ key: "other", label: "Other", icon: "✨", items: other })
+
+  const achievedCount = goals.filter((g) => g.status === "ACHIEVED").length
+  const onTrackCount = goals.filter((g) => g.status === "ON_TRACK").length
+
   return (
     <div>
       <div style={{ marginBottom: "1.75rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Your</p>
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>What you&apos;re working toward</p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: 0 }}>Goals</h1>
       </div>
 
       {goals.length === 0 ? (
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "3rem 2rem", textAlign: "center" }}>
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "2.75rem 2rem", textAlign: "center" }}>
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: `${accent}18`, border: `1.5px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <circle cx="11" cy="11" r="9" stroke={accent} strokeWidth="1.4" />
@@ -117,20 +143,44 @@ export default function GoalsClient() {
               <circle cx="11" cy="11" r="1.5" fill={accent} />
             </svg>
           </div>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.3rem", color: black, margin: "0 0 8px" }}>No goals set yet</p>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 24px", lineHeight: 1.6, maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
-            Lisa will set your goals after reviewing your first check-in. Have specific goals in mind? Let her know.
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: black, margin: "0 0 10px" }}>
+            Your goals will be created after your first coaching review.
           </p>
-          <Link href="/my-coaching/messages" style={{ display: "inline-block", background: accent, color: black, padding: "12px 24px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: muted, margin: "0 0 24px", lineHeight: 1.6, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
+            Lisa is reviewing your check-in to set goals that are personal to where you are now and where you want to go. Have specific goals in mind? Let her know.
+          </p>
+          <Link href="/my-coaching/messages" style={{ display: "inline-block", background: accent, color: black, padding: "13px 26px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", borderRadius: 4 }}>
             Message Lisa
           </Link>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: "1rem" }}>
-          {goals.map((goal) => {
+        <>
+          {/* Summary strip */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem", marginBottom: "1.5rem" }}>
+            <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem" }}>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: accent, margin: 0, lineHeight: 1 }}>{goals.length}</p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Active</p>
+            </div>
+            <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem" }}>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: "#5c9e6a", margin: 0, lineHeight: 1 }}>{onTrackCount}</p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>On track</p>
+            </div>
+            <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem" }}>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: achievedCount > 0 ? accent : black, margin: 0, lineHeight: 1 }}>{achievedCount}</p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Achieved 🏆</p>
+            </div>
+          </div>
+
+          {ordered.map(({ key, label, icon, items }) => (
+            <div key={key} style={{ marginBottom: "1.75rem" }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: muted, margin: "0 0 10px" }}>
+                <span style={{ marginRight: 6 }}>{icon}</span> {label}
+              </p>
+              <div style={{ display: "grid", gap: "0.75rem" }}>
+                {items.map((goal) => {
             const statusStyle = STATUS_STYLE[goal.status ?? ""] ?? { color: muted, bg: white, label: "" }
             return (
-              <div key={goal.id} style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.5rem" }}>
+              <div key={goal.id} style={{ background: white, border: `1px solid ${goal.status === "ACHIEVED" ? accent : border}`, borderRadius: 8, padding: "1.25rem 1.5rem" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
                   <div>
                     <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>
@@ -179,8 +229,11 @@ export default function GoalsClient() {
                 )}
               </div>
             )
-          })}
-        </div>
+                })}
+              </div>
+            </div>
+          ))}
+        </>
       )}
     </div>
   )

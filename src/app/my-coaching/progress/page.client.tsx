@@ -110,34 +110,44 @@ function Spinner() {
   )
 }
 
-type WorkoutLog = { completedAt: string; weekNumber: number; dayLabel: string }
+type WorkoutLog = { completedAt: string; weekNumber: number; dayLabel: string; setData?: string }
 type WorkoutStats = {
   total: number
   thisWeek: number
   lastWorkout: string | null
   streakWeeks: number
 }
+type StrengthPR = { exerciseId: string; name: string; startWeight: number; currentWeight: number; currentReps: number; pctChange: number; lastDate: string }
+type Milestone = { date: string; title: string; icon: string; subtitle?: string }
 
 export default function ProgressClient() {
   const [loading, setLoading] = useState(true)
   const [weightData, setWeightData] = useState<WeightPoint[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [workoutStats, setWorkoutStats] = useState<WorkoutStats>({ total: 0, thisWeek: 0, lastWorkout: null, streakWeeks: 0 })
+  const [strengthPRs, setStrengthPRs] = useState<StrengthPR[]>([])
+  const [milestones, setMilestones] = useState<Milestone[]>([])
+  const [clientStartDate, setClientStartDate] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
       try {
-        const [checkInsRes, snapshotsRes, logsRes] = await Promise.allSettled([
+        const [checkInsRes, snapshotsRes, logsRes, progRes] = await Promise.allSettled([
           fetch("/api/coaching/check-in").then((r) => r.json()),
           fetch("/api/coaching/progress").then((r) => r.json()),
           fetch("/api/coaching/workout-log").then((r) => r.json()),
+          fetch("/api/coaching/program").then((r) => r.json()),
         ])
+
+        const startDate = progRes.status === "fulfilled" ? (progRes.value.client?.startDate ?? null) : null
+        setClientStartDate(startDate)
 
         if (logsRes.status === "fulfilled") {
           const logs: WorkoutLog[] = (logsRes.value.logs ?? []).map((l: Record<string, unknown>) => ({
             completedAt: l.completedAt as string,
             weekNumber: Number(l.weekNumber),
             dayLabel: l.dayLabel as string,
+            setData: l.setData as string | undefined,
           }))
           const now = new Date()
           const startOfWeek = new Date(now)
@@ -169,15 +179,95 @@ export default function ProgressClient() {
             lastWorkout: sorted[0]?.completedAt ?? null,
             streakWeeks: streak,
           })
+
+          // Strength progress: per exercise, find first weight ever lifted and current best
+          const sortedAsc = [...logs].sort((a, b) => a.completedAt.localeCompare(b.completedAt))
+          const byEx: Record<string, { name: string; firstWeight: number; firstReps: number; bestWeight: number; bestReps: number; lastDate: string }> = {}
+          for (const log of sortedAsc) {
+            if (!log.setData) continue
+            let sets: Array<{ exerciseId?: string; exerciseName?: string; weight?: string | number; reps?: string | number; completed?: boolean }> = []
+            try { sets = JSON.parse(log.setData) } catch { continue }
+            for (const s of sets) {
+              const w = Number(s.weight)
+              const r = Number(s.reps)
+              if (!s.exerciseId || !w || !r) continue
+              if (s.completed === false) continue
+              const cur = byEx[s.exerciseId]
+              if (!cur) {
+                byEx[s.exerciseId] = { name: s.exerciseName ?? "", firstWeight: w, firstReps: r, bestWeight: w, bestReps: r, lastDate: log.completedAt }
+              } else {
+                if (w > cur.bestWeight || (w === cur.bestWeight && r > cur.bestReps)) {
+                  byEx[s.exerciseId] = { ...cur, bestWeight: w, bestReps: r, lastDate: log.completedAt }
+                }
+              }
+            }
+          }
+          const prs: StrengthPR[] = Object.entries(byEx)
+            .filter(([, v]) => v.bestWeight > v.firstWeight)
+            .map(([id, v]) => ({
+              exerciseId: id,
+              name: v.name,
+              startWeight: v.firstWeight,
+              currentWeight: v.bestWeight,
+              currentReps: v.bestReps,
+              pctChange: +(((v.bestWeight - v.firstWeight) / v.firstWeight) * 100).toFixed(0),
+              lastDate: v.lastDate,
+            }))
+            .sort((a, b) => b.pctChange - a.pctChange)
+            .slice(0, 6)
+          setStrengthPRs(prs)
+
+          // Milestones: auto-derived from logs + start date
+          const milestoneList: Milestone[] = []
+          if (startDate) {
+            milestoneList.push({ date: startDate, title: "Started coaching", icon: "🚀", subtitle: "Day one — welcome to the journey" })
+          }
+          if (sortedAsc[0]) {
+            milestoneList.push({ date: sortedAsc[0].completedAt, title: "First workout logged", icon: "💪" })
+          }
+          for (const milestone of [10, 25, 50, 100, 200]) {
+            if (logs.length >= milestone) {
+              const m = sortedAsc[milestone - 1]
+              milestoneList.push({ date: m.completedAt, title: `${milestone} workouts completed`, icon: milestone >= 100 ? "🏆" : "🎯" })
+            }
+          }
+          for (const wks of [4, 8, 12, 24, 52]) {
+            if (streak >= wks) {
+              milestoneList.push({ date: new Date().toISOString(), title: `${wks} week streak`, icon: "🔥" })
+              break
+            }
+          }
+          setMilestones(milestoneList.sort((a, b) => b.date.localeCompare(a.date)))
         }
 
         if (checkInsRes.status === "fulfilled") {
-          const ciList: Array<Record<string, unknown>> = (checkInsRes.value.checkIns ?? []).filter((ci: Record<string, unknown>) => ci.weight)
-          setWeightData(
-            ciList
-              .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
-              .map((ci) => ({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" }))
-          )
+          const allCheckIns: Array<Record<string, unknown>> = checkInsRes.value.checkIns ?? []
+          const ciList = allCheckIns
+            .filter((ci) => ci.weight)
+            .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
+          setWeightData(ciList.map((ci) => ({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" })))
+
+          // Additional milestones from weight check-ins
+          const sortedAll = [...allCheckIns].sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
+          if (sortedAll[0]) {
+            setMilestones((prev) => [...prev, { date: sortedAll[0].submittedAt as string, title: "First check-in submitted", icon: "✍️" }])
+          }
+          if (ciList.length >= 2) {
+            const start = Number(ciList[0].weight)
+            const last = Number(ciList[ciList.length - 1].weight)
+            const unit = (ciList[0].weightUnit as string) ?? "lbs"
+            const lost = +(start - last).toFixed(1)
+            const thresholds = [5, 10, 15, 20, 25, 30]
+            for (const t of thresholds) {
+              if (lost >= t) {
+                // Find first time the threshold was crossed
+                const crossingPoint = ciList.find((ci) => start - Number(ci.weight) >= t)
+                if (crossingPoint) {
+                  setMilestones((prev) => prev.some((m) => m.title === `Lost first ${t} ${unit}`) ? prev : [...prev, { date: crossingPoint.submittedAt as string, title: `Lost first ${t} ${unit}`, icon: "📉" }])
+                }
+              }
+            }
+          }
         }
 
         if (snapshotsRes.status === "fulfilled") {
@@ -277,8 +367,40 @@ export default function ProgressClient() {
         )}
       </div>
 
+      {/* Strength Progress */}
+      {strengthPRs.length > 0 && (
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 16px" }}>
+            Strength Progress 💪
+          </p>
+          <div style={{ display: "grid", gap: 10 }}>
+            {strengthPRs.map((pr) => (
+              <div key={pr.exerciseId} style={{ background: "#fdf9f4", border: `1px solid #f0e8dc`, borderRadius: 6, padding: "12px 14px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, flexWrap: "wrap", gap: 6 }}>
+                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: black, margin: 0 }}>{pr.name}</p>
+                  <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 700, color: "#5c9e6a" }}>+{pr.pctChange}%</span>
+                </div>
+                <div style={{ display: "flex", gap: 20, alignItems: "baseline" }}>
+                  <div>
+                    <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 2px" }}>Started</p>
+                    <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: 0, textDecoration: "line-through" }}>{pr.startWeight}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: accent, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 2px" }}>Now</p>
+                    <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: accent, margin: 0 }}>{pr.currentWeight} <span style={{ fontSize: "0.7rem", color: muted, fontWeight: 400 }}>× {pr.currentReps}</span></p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: "12px 0 0", fontStyle: "italic" }}>
+            Top exercises where you&apos;ve added the most weight since you started.
+          </p>
+        </div>
+      )}
+
       {/* Measurement snapshots */}
-      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem" }}>
+      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", flexWrap: "wrap", gap: 8 }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: 0 }}>
             Measurement History
@@ -318,6 +440,35 @@ export default function ProgressClient() {
           </div>
         )}
       </div>
+
+      {/* Milestone timeline */}
+      {milestones.length > 0 && (
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginTop: "1.25rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 18px" }}>
+            Your Journey
+          </p>
+          <div style={{ position: "relative", paddingLeft: 24 }}>
+            <div style={{ position: "absolute", left: 11, top: 6, bottom: 6, width: 2, background: `${accent}33` }} />
+            {milestones.map((m, i) => (
+              <div key={i} style={{ position: "relative", marginBottom: i === milestones.length - 1 ? 0 : 18 }}>
+                <div style={{ position: "absolute", left: -19, top: 4, width: 22, height: 22, borderRadius: "50%", background: white, border: `2px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}>
+                  {m.icon}
+                </div>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 2px" }}>
+                  {new Date(m.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </p>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1rem", fontWeight: 700, color: black, margin: 0 }}>{m.title}</p>
+                {m.subtitle && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "2px 0 0", fontStyle: "italic" }}>{m.subtitle}</p>}
+              </div>
+            ))}
+          </div>
+          {clientStartDate && milestones.length < 3 && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "18px 0 0", fontStyle: "italic" }}>
+              More milestones unlock as you progress. Keep going.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

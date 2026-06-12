@@ -375,6 +375,9 @@ export interface CoachingClientRecord {
   status?: "PENDING_PAYMENT" | "ACTIVE" | "PAUSED" | "INACTIVE"
   currentProgramId?: string
   privateNotes?: string
+  coachMessage?: string         // Coach-authored personal note shown on the client home page
+  coachMessageUpdatedAt?: string
+  startingWeight?: number       // For goal progress reference
   createdAt?: string
 }
 
@@ -941,16 +944,17 @@ export async function listSnapshotRecords(clientEmail?: string): Promise<Progres
 export interface CoachingGoalRecord {
   id: string
   clientEmail: string
-  type: string
+  type: string                  // "body-composition" | "strength" | "habit" | "custom"
   label?: string
   startDate?: string
   targetDate?: string
   startValue?: number
   targetValue?: number
   currentValue?: number
-  unit?: string
+  unit?: string                 // e.g. "lbs", "kg", "in", "g/day", "reps"
   notes?: string
   status?: "ON_TRACK" | "NEEDS_ATTENTION" | "ACHIEVED"
+  createdAt?: string
 }
 
 export async function createGoalRecord(data: Omit<CoachingGoalRecord, "id">): Promise<CoachingGoalRecord> {

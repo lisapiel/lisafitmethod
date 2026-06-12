@@ -59,6 +59,15 @@ export default function ClientProfilePage() {
   const [showAssignProgram, setShowAssignProgram] = useState(false)
   const [savingProgram, setSavingProgram] = useState(false)
   const [selectedProgramId, setSelectedProgramId] = useState("")
+  // Coach message (shown on client home page)
+  const [coachMessage, setCoachMessage] = useState("")
+  const [editingCoachMessage, setEditingCoachMessage] = useState(false)
+  const [savingCoachMessage, setSavingCoachMessage] = useState(false)
+  // Goals
+  const [goals, setGoals] = useState<Array<{ id: string; type: string; label: string | null; startValue: number | null; targetValue: number | null; currentValue: number | null; unit: string | null; status: string | null }>>([])
+  const [showAddGoal, setShowAddGoal] = useState(false)
+  const [newGoal, setNewGoal] = useState({ type: "body-composition", label: "", startValue: "", targetValue: "", currentValue: "", unit: "" })
+  const [savingGoal, setSavingGoal] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -81,6 +90,7 @@ export default function ClientProfilePage() {
         const c = clientRes.value.client
         setClient(c)
         setNotes(c.privateNotes ?? "")
+        setCoachMessage(c.coachMessage ?? "")
 
         if (programsRes.status === "fulfilled") {
           const progs = (programsRes.value.programs ?? []).map((p) => ({
@@ -110,10 +120,99 @@ export default function ClientProfilePage() {
           weightUnit: (ci.weightUnit as string | null) ?? null,
         })))
       }
+
+      // Load goals for this client
+      const goalsRes = await fetch(`/api/admin/coaching/goals?clientEmail=${encodeURIComponent(emailParam)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (goalsRes.ok) {
+        const data = await goalsRes.json()
+        setGoals((data.goals ?? []).map((g: Record<string, unknown>) => ({
+          id: g.id as string,
+          type: g.type as string,
+          label: (g.label as string | null) ?? null,
+          startValue: g.startValue != null ? Number(g.startValue) : null,
+          targetValue: g.targetValue != null ? Number(g.targetValue) : null,
+          currentValue: g.currentValue != null ? Number(g.currentValue) : null,
+          unit: (g.unit as string | null) ?? null,
+          status: (g.status as string | null) ?? null,
+        })))
+      }
     } catch { /* handled */ }
 
     setLoading(false)
   }, [emailParam])
+
+  async function saveCoachMessage() {
+    setSavingCoachMessage(true)
+    await patchClient({ coachMessage: coachMessage.trim() || undefined, coachMessageUpdatedAt: new Date().toISOString() })
+    setClient((c) => c ? { ...c, coachMessage: coachMessage.trim() || undefined, coachMessageUpdatedAt: new Date().toISOString() } : c)
+    setSavingCoachMessage(false)
+    setEditingCoachMessage(false)
+  }
+
+  async function addGoal() {
+    if (!newGoal.label.trim()) return
+    setSavingGoal(true)
+    const session = await fetchAuthSession()
+    const token = session.tokens?.accessToken?.toString() ?? ""
+    const res = await fetch("/api/admin/coaching/goals", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientEmail: emailParam,
+        type: newGoal.type,
+        label: newGoal.label.trim(),
+        startValue: newGoal.startValue || undefined,
+        targetValue: newGoal.targetValue || undefined,
+        currentValue: newGoal.currentValue || newGoal.startValue || undefined,
+        unit: newGoal.unit.trim() || undefined,
+        status: "ON_TRACK",
+      }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const g = data.goal
+      setGoals((prev) => [...prev, {
+        id: g.id,
+        type: g.type,
+        label: g.label ?? null,
+        startValue: g.startValue != null ? Number(g.startValue) : null,
+        targetValue: g.targetValue != null ? Number(g.targetValue) : null,
+        currentValue: g.currentValue != null ? Number(g.currentValue) : null,
+        unit: g.unit ?? null,
+        status: g.status ?? "ON_TRACK",
+      }])
+      setNewGoal({ type: "body-composition", label: "", startValue: "", targetValue: "", currentValue: "", unit: "" })
+      setShowAddGoal(false)
+    }
+    setSavingGoal(false)
+  }
+
+  async function deleteGoal(id: string) {
+    if (!confirm("Delete this goal?")) return
+    const session = await fetchAuthSession()
+    const token = session.tokens?.accessToken?.toString() ?? ""
+    const res = await fetch(`/api/admin/coaching/goals/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (res.ok) setGoals((prev) => prev.filter((g) => g.id !== id))
+  }
+
+  async function updateGoalCurrent(id: string, currentValue: string, status: string) {
+    const session = await fetchAuthSession()
+    const token = session.tokens?.accessToken?.toString() ?? ""
+    const updates: Record<string, unknown> = {}
+    if (currentValue !== "") updates.currentValue = currentValue
+    if (status) updates.status = status
+    await fetch(`/api/admin/coaching/goals/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    })
+    setGoals((prev) => prev.map((g) => g.id === id ? { ...g, currentValue: currentValue !== "" ? Number(currentValue) : g.currentValue, status: status || g.status } : g))
+  }
 
   useEffect(() => { load() }, [load])
 
@@ -340,6 +439,122 @@ export default function ClientProfilePage() {
               </div>
             ))}
           </div>
+        </SectionCard>
+      </div>
+
+      {/* Coach Message (shown on client's home page) */}
+      <div style={{ marginTop: "1rem" }}>
+        <SectionCard
+          title="Message to Client (shown on their home)"
+          action={
+            <button onClick={() => setEditingCoachMessage((v) => !v)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+              {editingCoachMessage ? "Cancel" : (coachMessage ? "Edit" : "Add")}
+            </button>
+          }
+        >
+          {editingCoachMessage ? (
+            <div>
+              <textarea
+                value={coachMessage}
+                onChange={(e) => setCoachMessage(e.target.value)}
+                placeholder="A personal note this client will see at the top of their portal. Keep it short and motivating, e.g. 'Great work hitting all workouts last week. This week focus on hitting your protein goal every day.'"
+                rows={4}
+                style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 10, lineHeight: 1.5 }}
+              />
+              <button onClick={saveCoachMessage} disabled={savingCoachMessage} style={{ background: gold, color: "#0a0a0a", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}>
+                {savingCoachMessage ? "Saving…" : "Save Message"}
+              </button>
+            </div>
+          ) : coachMessage ? (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "#f0e6d3", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
+              &ldquo;{coachMessage}&rdquo;
+            </p>
+          ) : (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444", margin: 0 }}>
+              No message set. Add one to give this client a personal coaching touch on their home page.
+            </p>
+          )}
+        </SectionCard>
+      </div>
+
+      {/* Goals */}
+      <div style={{ marginTop: "1rem" }}>
+        <SectionCard
+          title="Goals"
+          action={
+            <button onClick={() => setShowAddGoal(true)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+              + Add Goal
+            </button>
+          }
+        >
+          {goals.length === 0 && !showAddGoal ? (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444", margin: 0 }}>
+              No goals set. Add a body composition, strength, habit, or custom goal.
+            </p>
+          ) : (
+            <>
+              {goals.map((g) => (
+                <div key={g.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 110px 90px 30px", gap: 8, alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${border}` }}>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 1px" }}>{(g.type || "").replace(/-/g, " ")}</p>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#f0e6d3", margin: 0, fontWeight: 600 }}>{g.label}</p>
+                  </div>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888", whiteSpace: "nowrap" }}>{g.startValue ?? "—"} → {g.targetValue ?? "—"} {g.unit ?? ""}</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={g.currentValue ?? ""}
+                    onBlur={(e) => updateGoalCurrent(g.id, e.target.value, g.status ?? "ON_TRACK")}
+                    placeholder="Current"
+                    style={{ background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", borderRadius: 2 }}
+                  />
+                  <select
+                    defaultValue={g.status ?? "ON_TRACK"}
+                    onChange={(e) => updateGoalCurrent(g.id, "", e.target.value)}
+                    style={{ background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 6px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", outline: "none", borderRadius: 2 }}
+                  >
+                    <option value="ON_TRACK">On track</option>
+                    <option value="NEEDS_ATTENTION">Attention</option>
+                    <option value="ACHIEVED">Achieved</option>
+                  </select>
+                  <button onClick={() => deleteGoal(g.id)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", padding: "0 4px", fontSize: "1rem" }}>×</button>
+                </div>
+              ))}
+
+              {showAddGoal && (
+                <div style={{ marginTop: 14, padding: "14px", background: "#0a0a0a", border: `1px solid ${border}` }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.12em", textTransform: "uppercase", margin: "0 0 10px" }}>New Goal</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8, marginBottom: 8 }}>
+                    <select value={newGoal.type} onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }}>
+                      <option value="body-composition">Body Composition</option>
+                      <option value="strength">Strength</option>
+                      <option value="habit">Habit</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Goal name (e.g. Lose 15 lbs, Pull-up goal, Hit 110g protein)"
+                      value={newGoal.label}
+                      onChange={(e) => setNewGoal({ ...newGoal, label: e.target.value })}
+                      style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none" }}
+                    />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                    <input placeholder="Start" inputMode="decimal" value={newGoal.startValue} onChange={(e) => setNewGoal({ ...newGoal, startValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
+                    <input placeholder="Current" inputMode="decimal" value={newGoal.currentValue} onChange={(e) => setNewGoal({ ...newGoal, currentValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
+                    <input placeholder="Target" inputMode="decimal" value={newGoal.targetValue} onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
+                    <input placeholder="Unit (lbs, reps)" value={newGoal.unit} onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={addGoal} disabled={!newGoal.label.trim() || savingGoal} style={{ background: newGoal.label.trim() ? gold : "#333", color: newGoal.label.trim() ? "#0a0a0a" : "#666", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: newGoal.label.trim() ? "pointer" : "not-allowed" }}>
+                      {savingGoal ? "Adding…" : "Add Goal"}
+                    </button>
+                    <button onClick={() => setShowAddGoal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "8px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", cursor: "pointer" }}>Cancel</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </SectionCard>
       </div>
 
