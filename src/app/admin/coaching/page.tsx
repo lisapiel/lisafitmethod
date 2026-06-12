@@ -65,11 +65,14 @@ function QuickAction({ label, href, primary }: { label: string; href: string; pr
   )
 }
 
+type UnreadThread = { threadId: string; clientEmail: string; clientName: string; lastMessage: string; lastAt: string; unreadCount: number }
+
 export default function AdminCoachingDashboard() {
   const [loading, setLoading] = useState(true)
-  const [counts, setCounts] = useState({ clients: 0, pending: 0, exercises: 0, programs: 0, pendingApplications: 0 })
+  const [counts, setCounts] = useState({ clients: 0, pending: 0, exercises: 0, programs: 0, pendingApplications: 0, unreadMessages: 0 })
   const [pendingCheckIns, setPendingCheckIns] = useState<PendingCheckIn[]>([])
   const [recentClients, setRecentClients] = useState<RecentClient[]>([])
+  const [unreadThreads, setUnreadThreads] = useState<UnreadThread[]>([])
 
   useEffect(() => {
     async function load() {
@@ -77,12 +80,13 @@ export default function AdminCoachingDashboard() {
         const session = await fetchAuthSession()
         const token = session.tokens?.accessToken?.toString() ?? ""
 
-        const [clientsRes, checkInsRes, exercisesRes, programsRes, appsRes] = await Promise.allSettled([
+        const [clientsRes, checkInsRes, exercisesRes, programsRes, appsRes, messagesRes] = await Promise.allSettled([
           fetch("/api/admin/coaching/clients", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ clients: RecentClient[] }>),
           fetch("/api/admin/coaching/check-ins", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ checkIns: Array<Record<string, unknown>> }>),
           fetch("/api/admin/coaching/exercises", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ exercises: Array<Record<string, unknown>> }>),
           fetch("/api/admin/coaching/programs", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ programs: Array<Record<string, unknown>> }>),
           fetch("/api/admin/coaching/applications", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ applications: CoachingApplication[] }>),
+          fetch("/api/admin/coaching/messages", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json() as Promise<{ threads: UnreadThread[] }>),
         ])
 
         const clients = clientsRes.status === "fulfilled" ? clientsRes.value.clients : []
@@ -90,12 +94,15 @@ export default function AdminCoachingDashboard() {
         const exercises = exercisesRes.status === "fulfilled" ? (exercisesRes.value.exercises ?? []) : []
         const programs = programsRes.status === "fulfilled" ? (programsRes.value.programs ?? []) : []
         const applications = appsRes.status === "fulfilled" ? appsRes.value.applications : []
+        const threads = messagesRes.status === "fulfilled" ? (messagesRes.value.threads ?? []) : []
 
         const activeClients = clients.filter((c) => (c.status ?? "ACTIVE") === "ACTIVE")
         const pending = checkIns.filter((ci) => ((ci.status as string) ?? "PENDING") === "PENDING")
         const activeExercises = exercises.filter((e) => e.status !== "INACTIVE")
         const activePrograms = programs.filter((p) => p.status !== "ARCHIVED")
         const pendingApps = applications.filter((a) => a.status === "PENDING")
+        const threadsWithUnread = threads.filter((t) => t.unreadCount > 0)
+        const totalUnread = threadsWithUnread.reduce((sum, t) => sum + t.unreadCount, 0)
 
         setCounts({
           clients: activeClients.length,
@@ -103,7 +110,9 @@ export default function AdminCoachingDashboard() {
           exercises: activeExercises.length,
           programs: activePrograms.length,
           pendingApplications: pendingApps.length,
+          unreadMessages: totalUnread,
         })
+        setUnreadThreads(threadsWithUnread.sort((a, b) => b.lastAt.localeCompare(a.lastAt)).slice(0, 5))
 
         setPendingCheckIns(
           pending
@@ -137,11 +146,46 @@ export default function AdminCoachingDashboard() {
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>
         <StatCard label="Active Clients" value={loading ? "—" : counts.clients} sub="coaching clients" href="/admin/coaching/clients" />
+        <StatCard label="Unread Messages" value={loading ? "—" : counts.unreadMessages} sub={counts.unreadMessages > 0 ? "needs reply" : "all caught up"} href="/admin/coaching/messages" />
         <StatCard label="Applications" value={loading ? "—" : counts.pendingApplications} sub="pending review" href="/admin/coaching/applications" />
         <StatCard label="Pending Check-Ins" value={loading ? "—" : counts.pending} sub="awaiting review" href="/admin/coaching/check-ins" />
         <StatCard label="Exercises" value={loading ? "—" : counts.exercises} sub="in your library" href="/admin/coaching/exercises" />
         <StatCard label="Programs" value={loading ? "—" : counts.programs} sub="saved programs" href="/admin/coaching/programs" />
       </div>
+
+      {/* Unread messages banner */}
+      {!loading && unreadThreads.length > 0 && (
+        <div style={{ background: "#1a1a1a", border: `1px solid ${gold}`, padding: "1.25rem 1.5rem", marginBottom: "2.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem", flexWrap: "wrap", gap: 8 }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: 0 }}>
+              📬 Unread messages ({counts.unreadMessages})
+            </p>
+            <Link href="/admin/coaching/messages" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.08em" }}>
+              View all →
+            </Link>
+          </div>
+          <div style={{ display: "grid", gap: "0.4rem" }}>
+            {unreadThreads.map((t) => (
+              <Link
+                key={t.threadId}
+                href={`/admin/coaching/clients/${encodeURIComponent(t.clientEmail)}/messages`}
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "0.6rem 0.75rem", background: "#0d0d0d", border: `1px solid ${border}`, textDecoration: "none" }}
+              >
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: `${gold}22`, border: `1.5px solid ${gold}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: gold }}>{t.clientName.charAt(0).toUpperCase()}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 600, color: cream, margin: 0 }}>{t.clientName}</p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#888", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.lastMessage}</p>
+                </div>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: 20, height: 20, padding: "0 6px", borderRadius: 10, background: gold, color: "#111", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, flexShrink: 0 }}>
+                  {t.unreadCount}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick actions */}
       <div style={{ marginBottom: "2.5rem" }}>

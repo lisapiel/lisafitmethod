@@ -35,6 +35,17 @@ type ExerciseSetMap = Record<number, SetEntry[]> // keyed by exercise index
 
 type PrevSetData = Array<{ exerciseId: string; setNumber: number; weight: string; reps: string; rpe: string; completed: boolean }>
 
+type ExerciseInfo = {
+  name: string
+  primaryMuscle: string | null
+  secondaryMuscles: string[]
+  equipment: string[]
+  difficulty: string | null
+  execution: string | null
+  coachingCues: string[]
+  commonMistakes: string[]
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseSetsCount(s: string): number {
@@ -97,12 +108,17 @@ function SetRow({
   prescribed: { reps: string; weight: string; rpe: string }
   onChange: (updated: SetEntry) => void
 }) {
+  const hint = (val: string) => (
+    <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: val ? accent : "transparent", fontWeight: 600, marginBottom: 2, height: 12 }}>
+      {val ? `Last: ${val}` : "—"}
+    </div>
+  )
   return (
     <div style={{
       display: "grid",
       gridTemplateColumns: "32px 1fr 1fr 1fr 44px",
       gap: 8,
-      alignItems: "center",
+      alignItems: "end",
       padding: "8px 0",
       borderBottom: `1px solid ${entry.completed ? "#e8f4e8" : border}`,
       background: entry.completed ? "#f8fdf8" : "transparent",
@@ -111,12 +127,13 @@ function SetRow({
       paddingRight: entry.completed ? 8 : 0,
     }}>
       {/* Set number */}
-      <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 600, color: entry.completed ? "#5c9e6a" : muted, textAlign: "center" }}>
+      <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 600, color: entry.completed ? "#5c9e6a" : muted, textAlign: "center", paddingBottom: 8 }}>
         {setNum}
       </span>
 
       {/* Weight */}
       <div>
+        {hint(entry._prevWeight ?? "")}
         <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>Weight</div>
         <input
           type="text"
@@ -134,6 +151,7 @@ function SetRow({
 
       {/* Reps */}
       <div>
+        {hint(entry._prevReps ?? "")}
         <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>Reps</div>
         <input
           type="text"
@@ -151,6 +169,7 @@ function SetRow({
 
       {/* RPE */}
       <div>
+        {hint("")}
         <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>RPE</div>
         <input
           type="text"
@@ -174,7 +193,7 @@ function SetRow({
           background: entry.completed ? "#5c9e6a" : "transparent",
           border: `2px solid ${entry.completed ? "#5c9e6a" : border}`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", flexShrink: 0,
+          cursor: "pointer", flexShrink: 0, marginBottom: 4,
         }}
       >
         {entry.completed && (
@@ -187,15 +206,108 @@ function SetRow({
   )
 }
 
+function ExerciseInfoCard({ info }: { info: ExerciseInfo | undefined }) {
+  const [open, setOpen] = useState(false)
+  if (!info) return null
+  const hasContent = info.execution || info.coachingCues.length || info.commonMistakes.length || info.primaryMuscle || info.equipment.length
+  if (!hasContent) return null
+
+  return (
+    <div style={{ borderTop: `1px solid ${border}`, background: "#fdfbf7" }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: "transparent", border: "none", padding: "10px 18px",
+          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 600,
+          color: muted, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+        }}
+      >
+        <span>
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style={{ marginRight: 6, verticalAlign: "middle" }}>
+            <circle cx="5.5" cy="5.5" r="4.5" stroke={accent} strokeWidth="1.2" />
+            <path d="M5.5 3v3M5.5 7.5v0.5" stroke={accent} strokeWidth="1.2" strokeLinecap="round" />
+          </svg>
+          How to do it
+        </span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+          <path d="M2 4l3 3 3-3" stroke={muted} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{ padding: "0 18px 14px" }}>
+          {/* Quick facts */}
+          {(info.primaryMuscle || info.equipment.length > 0 || info.difficulty) && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+              {info.primaryMuscle && (
+                <span style={{ display: "inline-block", background: "#fff", border: `1px solid ${border}`, color: black, padding: "3px 9px", borderRadius: 999, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 600 }}>
+                  {info.primaryMuscle}
+                </span>
+              )}
+              {info.equipment.slice(0, 3).map((eq) => (
+                <span key={eq} style={{ display: "inline-block", background: "#fff", border: `1px solid ${border}`, color: muted, padding: "3px 9px", borderRadius: 999, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem" }}>
+                  {eq}
+                </span>
+              ))}
+              {info.difficulty && (
+                <span style={{ display: "inline-block", background: `${accent}18`, border: `1px solid ${accent}55`, color: accent, padding: "3px 9px", borderRadius: 999, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.04em" }}>
+                  {info.difficulty}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Instructions */}
+          {info.execution && (
+            <div style={{ marginBottom: 12 }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: black, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>How To</p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: "#4a4540", margin: 0, lineHeight: 1.55 }}>
+                {info.execution}
+              </p>
+            </div>
+          )}
+
+          {/* Coaching cues */}
+          {info.coachingCues.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: accent, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>Coaching Cues</p>
+              <ul style={{ margin: 0, padding: "0 0 0 16px", color: "#4a4540" }}>
+                {info.coachingCues.map((c, i) => (
+                  <li key={i} style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", marginBottom: 3, lineHeight: 1.5 }}>{c}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Common mistakes */}
+          {info.commonMistakes.length > 0 && (
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: "#d97460", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>Avoid</p>
+              <ul style={{ margin: 0, padding: "0 0 0 16px", color: "#4a4540" }}>
+                {info.commonMistakes.map((m, i) => (
+                  <li key={i} style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", marginBottom: 3, lineHeight: 1.5 }}>{m}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ExerciseBlock({
   ex,
   sets,
+  info,
   onSetChange,
   onVideoClick,
 }: {
   ex: ProgramExercise
   exIdx?: number
   sets: ExtendedSetEntry[]
+  info?: ExerciseInfo
   onSetChange: (setIdx: number, updated: SetEntry) => void
   onVideoClick: () => void
 }) {
@@ -272,17 +384,10 @@ function ExerciseBlock({
             onChange={(updated) => onSetChange(si, updated)}
           />
         ))}
-        {/* Previous session hint */}
-        {sets[0]?._prevWeight || sets[0]?._prevReps ? (
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: "#bbb", margin: "8px 0 0" }}>
-            Last time: {sets[0]._prevWeight ? `${sets[0]._prevWeight} ×` : ""} {sets[0]._prevReps ? `${sets[0]._prevReps} reps` : ""}
-          </p>
-        ) : (
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: "#ccc", margin: "8px 0 0" }}>
-            Enter prescribed weight or go by feel
-          </p>
-        )}
       </div>
+
+      {/* Collapsible exercise info */}
+      <ExerciseInfoCard info={info} />
     </div>
   )
 }
@@ -301,6 +406,7 @@ export default function WorkoutLoggerClient() {
   const [week, setWeek] = useState<ProgramWeek | null>(null)
   const [day, setDay] = useState<ProgramDay | null>(null)
   const [setMap, setSetMap] = useState<ExerciseSetMap>({})
+  const [exerciseInfo, setExerciseInfo] = useState<Record<string, ExerciseInfo>>({})
   const [videoModal, setVideoModal] = useState<{ key: string; name: string } | null>(null)
   const [overallRpe, setOverallRpe] = useState("")
   const [clientNotes, setClientNotes] = useState("")
@@ -359,6 +465,22 @@ export default function WorkoutLoggerClient() {
         initialMap[i] = initSets(ex, prevSetData) as ExtendedSetEntry[]
       })
       setSetMap(initialMap)
+
+      // Fetch exercise info (instructions, cues, mistakes) for each exercise in this day
+      const ids = Array.from(new Set(targetDay.exercises.map((e) => e.exerciseId).filter(Boolean)))
+      if (ids.length > 0) {
+        try {
+          const infoRes = await fetch("/api/coaching/exercise-info", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids }),
+          })
+          if (infoRes.ok) {
+            const data = await infoRes.json()
+            setExerciseInfo(data.exercises ?? {})
+          }
+        } catch { /* not critical */ }
+      }
     } catch { /* layout handles auth */ }
     setLoading(false)
   }, [weekId, dayIndex])
@@ -507,6 +629,7 @@ export default function WorkoutLoggerClient() {
             ex={ex}
             exIdx={i}
             sets={(setMap[i] ?? []) as ExtendedSetEntry[]}
+            info={exerciseInfo[ex.exerciseId]}
             onSetChange={(si, updated) => updateSet(i, si, updated)}
             onVideoClick={() => ex.videoS3Key && setVideoModal({ key: ex.videoS3Key, name: ex.name })}
           />

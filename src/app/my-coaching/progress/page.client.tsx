@@ -110,18 +110,66 @@ function Spinner() {
   )
 }
 
+type WorkoutLog = { completedAt: string; weekNumber: number; dayLabel: string }
+type WorkoutStats = {
+  total: number
+  thisWeek: number
+  lastWorkout: string | null
+  streakWeeks: number
+}
+
 export default function ProgressClient() {
   const [loading, setLoading] = useState(true)
   const [weightData, setWeightData] = useState<WeightPoint[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
+  const [workoutStats, setWorkoutStats] = useState<WorkoutStats>({ total: 0, thisWeek: 0, lastWorkout: null, streakWeeks: 0 })
 
   useEffect(() => {
     async function load() {
       try {
-        const [checkInsRes, snapshotsRes] = await Promise.allSettled([
+        const [checkInsRes, snapshotsRes, logsRes] = await Promise.allSettled([
           fetch("/api/coaching/check-in").then((r) => r.json()),
           fetch("/api/coaching/progress").then((r) => r.json()),
+          fetch("/api/coaching/workout-log").then((r) => r.json()),
         ])
+
+        if (logsRes.status === "fulfilled") {
+          const logs: WorkoutLog[] = (logsRes.value.logs ?? []).map((l: Record<string, unknown>) => ({
+            completedAt: l.completedAt as string,
+            weekNumber: Number(l.weekNumber),
+            dayLabel: l.dayLabel as string,
+          }))
+          const now = new Date()
+          const startOfWeek = new Date(now)
+          startOfWeek.setDate(now.getDate() - now.getDay())
+          startOfWeek.setHours(0, 0, 0, 0)
+
+          const sorted = [...logs].sort((a, b) => b.completedAt.localeCompare(a.completedAt))
+          const thisWeek = logs.filter((l) => new Date(l.completedAt) >= startOfWeek).length
+
+          // Streak: count consecutive ISO weeks ending this week with ≥1 workout
+          function isoWeekKey(d: Date) {
+            const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+            t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7))
+            const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1))
+            const week = Math.ceil((((t.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+            return `${t.getUTCFullYear()}-${week}`
+          }
+          const weeksWithWorkouts = new Set(logs.map((l) => isoWeekKey(new Date(l.completedAt))))
+          let streak = 0
+          const cursor = new Date(now)
+          while (weeksWithWorkouts.has(isoWeekKey(cursor))) {
+            streak++
+            cursor.setDate(cursor.getDate() - 7)
+          }
+
+          setWorkoutStats({
+            total: logs.length,
+            thisWeek,
+            lastWorkout: sorted[0]?.completedAt ?? null,
+            streakWeeks: streak,
+          })
+        }
 
         if (checkInsRes.status === "fulfilled") {
           const ciList: Array<Record<string, unknown>> = (checkInsRes.value.checkIns ?? []).filter((ci: Record<string, unknown>) => ci.weight)
@@ -170,6 +218,48 @@ export default function ProgressClient() {
         <Link href="/my-coaching/progress/log" style={{ display: "inline-block", background: black, color: white, padding: "10px 22px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>
           + Log Measurements
         </Link>
+      </div>
+
+      {/* Workout stats */}
+      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 16px" }}>
+          Training Activity
+        </p>
+        {workoutStats.total === 0 ? (
+          <div style={{ background: "#faf8f5", borderRadius: 6, padding: "1.25rem", textAlign: "center" }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: "0 0 10px" }}>
+              No workouts logged yet — start your first one to build a streak.
+            </p>
+            <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none", fontWeight: 600 }}>
+              Go to workouts →
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 16 }}>
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Total Workouts</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{workoutStats.total}</p>
+            </div>
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>This Week</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: workoutStats.thisWeek > 0 ? "#5c9e6a" : black, margin: 0 }}>{workoutStats.thisWeek}</p>
+            </div>
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Week Streak</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: workoutStats.streakWeeks > 0 ? accent : black, margin: 0 }}>
+                {workoutStats.streakWeeks} {workoutStats.streakWeeks > 0 && <span style={{ fontSize: "1rem" }}>🔥</span>}
+              </p>
+            </div>
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Last Workout</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.1rem", fontWeight: 700, color: black, margin: "8px 0 0", lineHeight: 1.2 }}>
+                {workoutStats.lastWorkout
+                  ? new Date(workoutStats.lastWorkout).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+                  : "—"}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Weight chart */}
