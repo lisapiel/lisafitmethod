@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { submitCoachingApplication, listCoachingApplications } from "@/lib/authTokens"
+import { notifyAdmin } from "@/lib/notifyAdmin"
 
 export const dynamic = "force-dynamic"
 
@@ -37,6 +38,20 @@ export async function POST(req: NextRequest) {
     goals: goals.trim(),
     currentFitnessLevel: (currentFitnessLevel ?? "").trim(),
     whyCoaching: (whyCoaching ?? "").trim(),
+  })
+
+  await notifyAdmin({
+    kind: "application-received",
+    subject: `New coaching application — ${name.trim()}`,
+    headline: `${name.trim()} applied for 1:1 coaching`,
+    body: goals.trim(),
+    ctaLabel: "Review application",
+    ctaHref: "https://lisafitmethod.com/admin/coaching/applications",
+    meta: {
+      email: emailLower,
+      "fitness level": (currentFitnessLevel ?? "").trim() || "—",
+      "why coaching": (whyCoaching ?? "").trim() || "—",
+    },
   })
 
   return NextResponse.json({ ok: true })

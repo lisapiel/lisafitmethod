@@ -8,6 +8,7 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
+import { notifyAdmin } from "@/lib/notifyAdmin"
 import {
   generateAuthToken, storeAuthToken,
   grantTrainingAccess, grantTrackerAccess, grantNutritionAccess,
@@ -678,11 +679,25 @@ async function provisionCoachingSubscriber(email: string, name: string) {
 
   // Promote existing PENDING_PAYMENT record to ACTIVE; otherwise create new ACTIVE record
   const existing = await getCoachingClientRecord(email)
+  const wasNew = !existing
   if (existing) {
     await updateCoachingClientRecord(email, { status: "ACTIVE" })
   } else {
     await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE" })
   }
+
+  // Notify Lisa that a new client is active
+  notifyAdmin({
+    kind: "subscriber-active",
+    subject: `${name} is now active on 1:1 coaching`,
+    headline: `${name} just paid — they're active on 1:1 coaching`,
+    body: wasNew
+      ? "This is a new client. Their coaching portal is unlocked. Time to build them a program."
+      : "Their PENDING_PAYMENT status just flipped to ACTIVE. Their coaching portal is unlocked.",
+    ctaLabel: "Open client profile",
+    ctaHref: `https://lisafitmethod.com/admin/coaching/clients/${encodeURIComponent(email)}`,
+    meta: { email },
+  }).catch(() => {})
 
   let userExists = false
   try {

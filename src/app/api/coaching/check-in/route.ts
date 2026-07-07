@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { createCoachingCheckIn, listCoachingCheckIns } from "@/lib/authTokens"
+import { createCoachingCheckIn, listCoachingCheckIns, getCoachingClientRecord } from "@/lib/authTokens"
+import { notifyAdmin } from "@/lib/notifyAdmin"
 
 export const dynamic = "force-dynamic"
 
@@ -53,6 +54,25 @@ export async function POST(req: NextRequest) {
     ...(body.questionsForCoach && { questionsForCoach: body.questionsForCoach }),
     ...(body.additionalNotes && { additionalNotes: body.additionalNotes }),
   })
+
+  // Fire admin notification (non-blocking)
+  const client = await getCoachingClientRecord(email).catch(() => null)
+  const clientName = client?.displayName || email
+  const excerpt = [body.wins, body.struggles, body.questionsForCoach].filter(Boolean).map((s: string) => String(s).slice(0, 220)).join("\n\n") || "(No text notes — see check-in for ratings + weight.)"
+  notifyAdmin({
+    kind: "check-in-received",
+    subject: `Check-in from ${clientName}`,
+    headline: `${clientName} submitted their weekly check-in`,
+    body: excerpt,
+    ctaLabel: "Review check-in",
+    ctaHref: "https://lisafitmethod.com/admin/coaching/check-ins",
+    meta: {
+      client: email,
+      weight: body.weight != null ? `${body.weight} ${body.weightUnit || ""}` : null,
+      "training performance": body.trainingPerformance ? `${body.trainingPerformance}/5` : null,
+      "nutrition adherence": body.nutritionAdherence ? `${body.nutritionAdherence}/5` : null,
+    },
+  }).catch(() => {})
 
   return NextResponse.json({ checkIn })
 }

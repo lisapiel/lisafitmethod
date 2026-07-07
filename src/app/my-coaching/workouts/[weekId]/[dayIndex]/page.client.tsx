@@ -27,7 +27,8 @@ type ProgramExercise = {
   coachNotes: string
 }
 
-type ProgramDay = { dayLabel: string; notes: string; exercises: ProgramExercise[] }
+type WarmupCooldown = { notes: string; exercises: ProgramExercise[] }
+type ProgramDay = { dayLabel: string; notes: string; warmup?: WarmupCooldown; exercises: ProgramExercise[]; cooldown?: WarmupCooldown }
 type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 
 type SetEntry = { weight: string; reps: string; rpe: string; completed: boolean }
@@ -77,6 +78,149 @@ function Spinner() {
   )
 }
 
+function RpeInfoModal({ onClose }: { onClose: () => void }) {
+  const rows: Array<{ n: string; label: string; desc: string }> = [
+    { n: "10", label: "Maximum effort", desc: "Could not do another rep. Failure." },
+    { n: "9", label: "Very hard", desc: "Could maybe squeeze out 1 more rep." },
+    { n: "8", label: "Hard", desc: "Could do 2 more reps with good form." },
+    { n: "7", label: "Challenging", desc: "Could do 3 more reps. Solid working weight." },
+    { n: "5–6", label: "Moderate", desc: "Working, but with 4–5 reps in the tank." },
+    { n: "1–4", label: "Easy", desc: "Warmup / activation range." },
+  ]
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{ background: white, borderRadius: 8, padding: "1.5rem 1.5rem 1.25rem", maxWidth: 420, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.35)" }}
+      >
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>
+          What is RPE?
+        </p>
+        <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 10px" }}>
+          Rate of Perceived Exertion
+        </h3>
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: muted, lineHeight: 1.5, margin: "0 0 14px" }}>
+          A 1–10 rating of how hard a set felt. Answer honestly — this helps Lisa know if the weight is right and if you can push harder next week.
+        </p>
+        <div style={{ border: `1px solid ${border}`, borderRadius: 6, overflow: "hidden" }}>
+          {rows.map((r, i) => (
+            <div key={r.n} style={{ display: "grid", gridTemplateColumns: "56px 1fr", borderTop: i === 0 ? "none" : `1px solid ${border}`, padding: "8px 12px", background: i % 2 === 0 ? "#faf8f5" : "#fff" }}>
+              <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: accent }}>{r.n}</div>
+              <div>
+                <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", fontWeight: 600, color: black }}>{r.label}</div>
+                <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, lineHeight: 1.4 }}>{r.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          style={{ marginTop: 16, width: "100%", background: black, color: white, border: "none", padding: "12px 20px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.06em", cursor: "pointer", borderRadius: 4 }}
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function WarmupCooldownDisplay({
+  label,
+  data,
+  onVideoClick,
+}: {
+  label: "Warmup" | "Cooldown"
+  data: WarmupCooldown
+  onVideoClick: (key: string, name: string) => void
+}) {
+  const hasContent = data.notes || data.exercises.length > 0
+  const [open, setOpen] = useState(true)
+  if (!hasContent) return null
+
+  return (
+    <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, marginBottom: "1rem", overflow: "hidden" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: "transparent", border: "none", padding: "12px 16px", cursor: "pointer",
+        }}
+      >
+        <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 700, color: accent, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+          {label === "Warmup" ? "🔥 " : "🧘 "}{label}
+          <span style={{ marginLeft: 8, color: muted, fontWeight: 400 }}>
+            {data.exercises.length > 0 ? `· ${data.exercises.length} drill${data.exercises.length !== 1 ? "s" : ""}` : "· notes"}
+          </span>
+        </span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+          <path d="M2 4l4 4 4-4" stroke={muted} strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${border}` }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.68rem", color: muted, margin: "10px 0 12px", fontStyle: "italic" }}>
+            No tracking — just a guide. Do this to prep{label === "Cooldown" ? " recovery" : ""}.
+          </p>
+
+          {data.notes && (
+            <div style={{ background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6, padding: "10px 12px", marginBottom: data.exercises.length > 0 ? 12 : 0 }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: black, margin: 0, lineHeight: 1.55, whiteSpace: "pre-wrap" }}>
+                {data.notes}
+              </p>
+            </div>
+          )}
+
+          {data.exercises.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {data.exercises.map((ex, i) => (
+                <div
+                  key={i}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 10px", background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6 }}
+                >
+                  <div
+                    onClick={() => ex.videoS3Key && onVideoClick(ex.videoS3Key, ex.name)}
+                    style={{ width: 42, height: 42, borderRadius: 4, overflow: "hidden", background: "#f0ede8", flexShrink: 0, cursor: ex.videoS3Key ? "pointer" : "default", position: "relative" }}
+                  >
+                    {ex.videoS3Key ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={cdnThumb(ex.videoS3Key)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.18)" }}>
+                          <div style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", fontWeight: 600, color: black, margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {ex.name}
+                    </p>
+                    <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0 }}>
+                      {[ex.sets && `${ex.sets} set${ex.sets !== "1" ? "s" : ""}`, ex.reps && `${ex.reps} reps`, ex.rest && `Rest ${ex.rest}`].filter(Boolean).join(" · ") || "As needed"}
+                    </p>
+                    {ex.coachNotes && (
+                      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: accent, margin: "2px 0 0", fontStyle: "italic" }}>
+                        {ex.coachNotes}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: string; onClose: () => void }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
@@ -102,11 +246,13 @@ function SetRow({
   entry,
   prescribed,
   onChange,
+  onRpeInfoClick,
 }: {
   setNum: number
   entry: ExtendedSetEntry
   prescribed: { reps: string; weight: string; rpe: string }
   onChange: (updated: SetEntry) => void
+  onRpeInfoClick?: () => void
 }) {
   const hint = (val: string) => (
     <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: val ? accent : "transparent", fontWeight: 600, marginBottom: 2, height: 12 }}>
@@ -167,22 +313,45 @@ function SetRow({
         />
       </div>
 
-      {/* RPE */}
+      {/* RPE (dropdown with info icon) */}
       <div>
         {hint("")}
-        <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>RPE</div>
-        <input
-          type="text"
-          inputMode="decimal"
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase" }}>RPE</span>
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onRpeInfoClick?.() }}
+            aria-label="What is RPE?"
+            style={{
+              width: 14, height: 14, borderRadius: "50%", background: "transparent",
+              border: `1px solid ${muted}`, color: muted, cursor: "pointer",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontStyle: "italic",
+              padding: 0, lineHeight: 1,
+            }}
+          >
+            i
+          </button>
+        </div>
+        <select
           value={entry.rpe}
           onChange={(e) => onChange({ ...entry, rpe: e.target.value })}
-          placeholder={prescribed.rpe || "—"}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
+            color: entry.rpe ? black : "#aaa", padding: "8px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
             fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
+            appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
+            backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 8px center",
+            paddingRight: 22,
           }}
-        />
+        >
+          <option value="">—</option>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+            <option key={n} value={String(n)}>{n}</option>
+          ))}
+        </select>
       </div>
 
       {/* Complete toggle */}
@@ -303,6 +472,7 @@ function ExerciseBlock({
   info,
   onSetChange,
   onVideoClick,
+  onRpeInfoClick,
 }: {
   ex: ProgramExercise
   exIdx?: number
@@ -310,6 +480,7 @@ function ExerciseBlock({
   info?: ExerciseInfo
   onSetChange: (setIdx: number, updated: SetEntry) => void
   onVideoClick: () => void
+  onRpeInfoClick?: () => void
 }) {
   const completedCount = sets.filter((s) => s.completed).length
   const allDone = completedCount === sets.length
@@ -382,6 +553,7 @@ function ExerciseBlock({
             entry={s}
             prescribed={{ reps: ex.reps, weight: ex.weight, rpe: ex.rpe }}
             onChange={(updated) => onSetChange(si, updated)}
+            onRpeInfoClick={onRpeInfoClick}
           />
         ))}
       </div>
@@ -413,6 +585,7 @@ export default function WorkoutLoggerClient() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [alreadyLogged, setAlreadyLogged] = useState(false)
+  const [showRpeInfo, setShowRpeInfo] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -632,6 +805,22 @@ export default function WorkoutLoggerClient() {
         </div>
       )}
 
+      {/* Warmup (read-only, collapsible) */}
+      {day.warmup && (
+        <WarmupCooldownDisplay
+          label="Warmup"
+          data={day.warmup}
+          onVideoClick={(key, name) => setVideoModal({ key, name })}
+        />
+      )}
+
+      {/* Main workout section header (only shown when warmup or cooldown exists) */}
+      {(day.warmup || day.cooldown) && (day.warmup?.notes || (day.warmup?.exercises.length ?? 0) > 0 || day.cooldown?.notes || (day.cooldown?.exercises.length ?? 0) > 0) && day.exercises.length > 0 && (
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0.5rem 0 0.75rem" }}>
+          💪 Main Workout
+        </p>
+      )}
+
       {/* Exercise blocks */}
       {day.exercises.length === 0 ? (
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted }}>No exercises for this day.</p>
@@ -645,8 +834,18 @@ export default function WorkoutLoggerClient() {
             info={exerciseInfo[ex.exerciseId]}
             onSetChange={(si, updated) => updateSet(i, si, updated)}
             onVideoClick={() => ex.videoS3Key && setVideoModal({ key: ex.videoS3Key, name: ex.name })}
+            onRpeInfoClick={() => setShowRpeInfo(true)}
           />
         ))
+      )}
+
+      {/* Cooldown (read-only, collapsible) */}
+      {day.cooldown && (
+        <WarmupCooldownDisplay
+          label="Cooldown"
+          data={day.cooldown}
+          onVideoClick={(key, name) => setVideoModal({ key, name })}
+        />
       )}
 
       {/* Post-workout notes */}
@@ -654,15 +853,43 @@ export default function WorkoutLoggerClient() {
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 12px" }}>Workout notes</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
           <div>
-            <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted, display: "block", marginBottom: 4 }}>Overall RPE (1–10)</label>
-            <input
-              type="text"
-              inputMode="decimal"
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted }}>Overall RPE (1–10)</label>
+              <button
+                type="button"
+                onClick={() => setShowRpeInfo(true)}
+                aria-label="What is RPE?"
+                style={{
+                  width: 14, height: 14, borderRadius: "50%", background: "transparent",
+                  border: `1px solid ${muted}`, color: muted, cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontStyle: "italic",
+                  padding: 0, lineHeight: 1,
+                }}
+              >
+                i
+              </button>
+            </div>
+            <select
               value={overallRpe}
               onChange={(e) => setOverallRpe(e.target.value)}
-              placeholder="7"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
-            />
+              style={{
+                width: "100%", background: "#faf8f5", border: `1px solid ${border}`,
+                color: overallRpe ? black : "#aaa", padding: "9px 12px",
+                fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
+                fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
+                appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
+                backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 10px center",
+                paddingRight: 26,
+              }}
+            >
+              <option value="">—</option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                <option key={n} value={String(n)}>{n}</option>
+              ))}
+            </select>
           </div>
         </div>
         <div>
@@ -712,6 +939,11 @@ export default function WorkoutLoggerClient() {
       {/* Video modal */}
       {videoModal && (
         <VideoModal videoKey={videoModal.key} name={videoModal.name} onClose={() => setVideoModal(null)} />
+      )}
+
+      {/* RPE info modal */}
+      {showRpeInfo && (
+        <RpeInfoModal onClose={() => setShowRpeInfo(false)} />
       )}
     </div>
   )

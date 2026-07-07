@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { CoachingApplication } from "@/lib/authTokens"
+import InstallPrompt from "./InstallPrompt.client"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -139,9 +140,11 @@ export default function AdminCoachingDashboard() {
       <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2rem", fontWeight: 300, color: cream, marginBottom: "0.5rem" }}>
         Coaching
       </h1>
-      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, marginBottom: "2.5rem" }}>
+      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, marginBottom: "1.5rem" }}>
         Manage your online coaching clients
       </p>
+
+      <InstallPrompt />
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2.5rem" }}>

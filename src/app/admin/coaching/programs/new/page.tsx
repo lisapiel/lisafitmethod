@@ -6,15 +6,23 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import WorkoutBuilder from "@/components/coaching/WorkoutBuilder"
 import WorkoutLibraryModal from "@/components/coaching/WorkoutLibraryModal"
+import WarmupCooldownSection from "@/components/coaching/WarmupCooldownSection"
 import type { ProgramExercise } from "@/components/coaching/ExerciseRow"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
-type ProgramDay = { dayLabel: string; notes: string; exercises: ProgramExercise[] }
+type WarmupCooldown = { notes: string; exercises: ProgramExercise[] }
+type ProgramDay = {
+  dayLabel: string
+  notes: string
+  warmup?: WarmupCooldown
+  exercises: ProgramExercise[]
+  cooldown?: WarmupCooldown
+}
 type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 
-function emptyDay(label: string): ProgramDay { return { dayLabel: label, notes: "", exercises: [] } }
+function emptyDay(label: string): ProgramDay { return { dayLabel: label, notes: "", warmup: { notes: "", exercises: [] }, exercises: [], cooldown: { notes: "", exercises: [] } } }
 function emptyWeek(n: number): ProgramWeek {
   return { weekNumber: n, label: `Week ${n}`, days: [emptyDay("Day 1"), emptyDay("Day 2"), emptyDay("Day 3")] }
 }
@@ -214,9 +222,27 @@ export default function NewProgramPage() {
             </button>
           </div>
 
+          {/* Warmup section */}
+          <WarmupCooldownSection
+            label="Warmup"
+            data={day.warmup ?? { notes: "", exercises: [] }}
+            onChange={(w) => updateDay((d) => ({ ...d, warmup: w }))}
+          />
+
+          {/* Main exercises */}
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "22px 0 10px" }}>
+            Main Workout
+          </p>
           <WorkoutBuilder
             exercises={day.exercises}
             onChange={(exs) => updateDay((d) => ({ ...d, exercises: exs }))}
+          />
+
+          {/* Cooldown section */}
+          <WarmupCooldownSection
+            label="Cooldown"
+            data={day.cooldown ?? { notes: "", exercises: [] }}
+            onChange={(c) => updateDay((d) => ({ ...d, cooldown: c }))}
           />
         </div>
       )}
