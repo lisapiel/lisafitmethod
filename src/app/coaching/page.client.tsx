@@ -231,10 +231,7 @@ export default function CoachingClient() {
         .ch-4col      { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
         .ch-3col      { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
         .ch-2col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .ch-ss-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .ch-ss-card  { display: flex; flex-direction: column; gap: 8px; }
-        .ch-ss-img   { position: relative; padding-top: 145%; border-radius: 14px; overflow: hidden; background: #ede9e3; box-shadow: 0 4px 16px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05); }
-        .ch-ss-label { font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: ${MUTED}; text-align: center; }
+        .ch-portal-screenshots { /* wrapper only, sizing handled inline */ }
 
         @media (max-width: 900px) {
           .ch-hero      { padding: 80px 28px 64px; }
@@ -410,38 +407,68 @@ export default function CoachingClient() {
               <a href="#apply" className="ch-link">See how it works →</a>
             </div>
 
-            {/* Portal screenshots — 2×2 clean grid */}
-            <div className="ch-ss-grid">
-              {/* Home dashboard */}
-              <div className="ch-ss-card">
-                <div className="ch-ss-img">
-                  <Image src="/portal-mobile-home.jpg" alt="Coaching portal — your dashboard" fill style={{ objectFit: "cover", objectPosition: "top" }} />
+            {/* Portal screenshots */}
+            <div className="ch-portal-screenshots">
+              {/* Row 1 — home + workout at full natural portrait ratio, no cropping */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                <div style={{ borderRadius: 14, overflow: "hidden", boxShadow: "0 6px 24px rgba(0,0,0,0.09)" }}>
+                  <Image
+                    src="/portal-mobile-home.jpg"
+                    alt="Coaching portal — home dashboard"
+                    width={1164} height={2357}
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                  />
                 </div>
-                <p className="ch-ss-label">Your Dashboard</p>
+                <div style={{ borderRadius: 14, overflow: "hidden", boxShadow: "0 6px 24px rgba(0,0,0,0.09)" }}>
+                  <Image
+                    src="/portal-mobile-workout.jpg"
+                    alt="Coaching portal — workout tracking"
+                    width={1204} height={2352}
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                  />
+                </div>
               </div>
 
-              {/* Workout set tracking */}
-              <div className="ch-ss-card">
-                <div className="ch-ss-img">
-                  <Image src="/portal-mobile-workout.jpg" alt="Coaching portal — workout tracking" fill style={{ objectFit: "cover", objectPosition: "top" }} />
+              {/* Row 2 — program in phone frame, how-to card overlaid at natural ratio */}
+              <div style={{ position: "relative", paddingBottom: "22%" }}>
+                {/* Phone frame */}
+                <div style={{
+                  width: "54%",
+                  margin: "0 auto",
+                  background: "#1a1a1a",
+                  borderRadius: 28,
+                  padding: "12px 9px 9px",
+                  boxShadow: "0 24px 64px rgba(0,0,0,0.28)",
+                }}>
+                  <div style={{ borderRadius: 20, overflow: "hidden" }}>
+                    <Image
+                      src="/portal-mobile-program.jpg"
+                      alt="Coaching portal — your program"
+                      width={1205} height={2432}
+                      style={{ width: "100%", height: "auto", display: "block" }}
+                    />
+                  </div>
                 </div>
-                <p className="ch-ss-label">Track Every Set</p>
-              </div>
 
-              {/* How-to coaching cues card */}
-              <div className="ch-ss-card">
-                <div className="ch-ss-img">
-                  <Image src="/portal-mobile-howto.jpg" alt="Coaching portal — exercise coaching cues" fill style={{ objectFit: "cover", objectPosition: "top" }} />
+                {/* How-to card — natural 1:1 ratio, overlaid bottom-right corner */}
+                <div style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  width: "56%",
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.22)",
+                  border: "3px solid #fff",
+                  zIndex: 2,
+                }}>
+                  <Image
+                    src="/portal-mobile-howto.jpg"
+                    alt="Coaching portal — exercise coaching cues"
+                    width={1061} height={994}
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                  />
                 </div>
-                <p className="ch-ss-label">Exercise Coaching</p>
-              </div>
-
-              {/* Program overview */}
-              <div className="ch-ss-card">
-                <div className="ch-ss-img">
-                  <Image src="/portal-mobile-program.jpg" alt="Coaching portal — your program" fill style={{ objectFit: "cover", objectPosition: "top" }} />
-                </div>
-                <p className="ch-ss-label">Your Program</p>
               </div>
             </div>
           </div>
