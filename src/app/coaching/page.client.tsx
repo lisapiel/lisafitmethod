@@ -352,13 +352,12 @@ export default function CoachingClient() {
 
           {/* Photo right */}
           <div className="ch-hero-photo-wrap" style={{ position: "relative" }}>
-            {/* PHOTO: save /public/lisa-coaching-hero.jpg (portrait — smiling/standing pose) */}
-            <div style={{ position: "relative", height: 600, background: "#1a1a1a", overflow: "hidden" }}>
+            <div style={{ background: "#1a1a1a", overflow: "hidden" }}>
               <Image
                 src="/lisa-coaching-hero.jpg"
                 alt="Lisa McPherson, certified personal trainer"
-                fill
-                style={{ objectFit: "cover", objectPosition: "top center" }}
+                width={998} height={1388}
+                style={{ width: "100%", height: "auto", display: "block" }}
                 priority
               />
             </div>
@@ -697,13 +696,12 @@ export default function CoachingClient() {
       <section className="ch-section" style={{ background: CREAM }}>
         <div className="ch-narrow">
           <div className="ch-2col">
-            {/* PHOTO: save /public/lisa-coaching-about.jpg (portrait — flexing or confident pose) */}
-            <div style={{ position: "relative", height: 540, background: "#e8e2d9", overflow: "hidden", flexShrink: 0 }}>
+            <div style={{ background: "#e8e2d9", overflow: "hidden" }}>
               <Image
                 src="/lisa-coaching-about.jpg"
                 alt="Lisa McPherson"
-                fill
-                style={{ objectFit: "cover", objectPosition: "top center" }}
+                width={1022} height={1786}
+                style={{ width: "100%", height: "auto", display: "block" }}
               />
             </div>
 
