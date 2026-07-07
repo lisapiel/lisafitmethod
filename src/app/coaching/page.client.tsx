@@ -231,8 +231,14 @@ export default function CoachingClient() {
         .ch-4col      { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
         .ch-3col      { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
         .ch-2col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .ch-portal-wrap { display: flex; flex-direction: column; gap: 20px; align-items: center; }
-        .ch-phones    { display: flex; gap: 16px; justify-content: center; }
+        .ch-portal-wrap { display: flex; align-items: flex-end; justify-content: center; gap: 12px; padding-top: 16px; }
+        .ch-phone       { background: #1a1a1a; border-radius: 24px; padding: 12px 8px 8px; box-shadow: 0 20px 48px rgba(0,0,0,0.22); flex-shrink: 0; }
+        .ch-phone-side  { width: 136px; }
+        .ch-phone-center { width: 156px; margin-bottom: 24px; }
+        .ch-phone-screen { position: relative; background: #f5f2ee; border-radius: 14px; overflow: hidden; }
+        .ch-phone-side .ch-phone-screen  { height: 250px; }
+        .ch-phone-center .ch-phone-screen { height: 288px; }
+        .ch-phone-label { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(240,230,211,0.45); text-align: center; margin-top: 8px; }
 
         @media (max-width: 900px) {
           .ch-hero      { padding: 80px 28px 64px; }
@@ -243,10 +249,19 @@ export default function CoachingClient() {
           .ch-4col      { grid-template-columns: repeat(2, 1fr); }
           .ch-3col      { grid-template-columns: 1fr; }
           .ch-2col-form { grid-template-columns: 1fr; }
+          .ch-portal-wrap { gap: 8px; }
+          .ch-phone-side  { width: 110px; }
+          .ch-phone-center { width: 126px; }
+          .ch-phone-side .ch-phone-screen  { height: 202px; }
+          .ch-phone-center .ch-phone-screen { height: 232px; }
         }
         @media (max-width: 480px) {
           .ch-4col      { grid-template-columns: 1fr; }
-          .ch-phones    { flex-direction: column; align-items: center; }
+          .ch-portal-wrap { gap: 6px; }
+          .ch-phone-side  { width: 90px; }
+          .ch-phone-center { width: 104px; }
+          .ch-phone-side .ch-phone-screen  { height: 165px; }
+          .ch-phone-center .ch-phone-screen { height: 190px; }
         }
 
         .ch-btn-primary {
@@ -409,50 +424,48 @@ export default function CoachingClient() {
               <a href="#apply" className="ch-link">See how it works →</a>
             </div>
 
-            {/* Portal screenshots */}
+            {/* Portal screenshots — 3 phones in cascading layout */}
             <div className="ch-portal-wrap">
-              {/* Desktop frame */}
-              {/* SCREENSHOT: save /public/portal-desktop.jpg (screenshot of /my-coaching/workouts dashboard) */}
-              <div style={{ width: "100%", background: "#1a1a1a", borderRadius: 8, padding: "12px 12px 0", boxShadow: "0 20px 48px rgba(0,0,0,0.15)" }}>
-                <div style={{ display: "flex", gap: 5, marginBottom: 10 }}>
-                  {["#3a3a3a", "#3a3a3a", "#3a3a3a"].map((c, i) => (
-                    <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />
-                  ))}
-                </div>
-                <div style={{ position: "relative", height: 220, background: "#f5f2ee", borderRadius: "4px 4px 0 0", overflow: "hidden" }}>
+              {/* Left phone: workout set tracking */}
+              {/* SCREENSHOT: save /public/portal-mobile-workout.jpg (Hip Thrust with logged weights) */}
+              <div className="ch-phone ch-phone-side">
+                <div className="ch-phone-screen">
                   <Image
-                    src="/portal-desktop.jpg"
-                    alt="Lisa Fit Method coaching portal — desktop view"
+                    src="/portal-mobile-workout.jpg"
+                    alt="Coaching portal — workout tracking"
                     fill
-                    style={{ objectFit: "cover", objectPosition: "top left" }}
+                    style={{ objectFit: "cover", objectPosition: "top" }}
                   />
                 </div>
+                <p className="ch-phone-label">Track</p>
               </div>
 
-              {/* Two phones */}
-              <div className="ch-phones">
-                {/* SCREENSHOT: save /public/portal-mobile-program.jpg (mobile program/weeks overview) */}
-                <div style={{ width: 148, background: "#1a1a1a", borderRadius: 20, padding: "14px 8px 8px", boxShadow: "0 16px 36px rgba(0,0,0,0.18)" }}>
-                  <div style={{ position: "relative", height: 258, background: "#f5f2ee", borderRadius: 12, overflow: "hidden" }}>
-                    <Image
-                      src="/portal-mobile-program.jpg"
-                      alt="Lisa Fit Method coaching portal — program overview on mobile"
-                      fill
-                      style={{ objectFit: "cover", objectPosition: "top" }}
-                    />
-                  </div>
+              {/* Center phone: home dashboard (elevated) */}
+              {/* SCREENSHOT: save /public/portal-mobile-home.jpg (home dashboard with goal, PRs, today's workout) */}
+              <div className="ch-phone ch-phone-center">
+                <div className="ch-phone-screen">
+                  <Image
+                    src="/portal-mobile-home.jpg"
+                    alt="Coaching portal — home dashboard"
+                    fill
+                    style={{ objectFit: "cover", objectPosition: "top" }}
+                  />
                 </div>
-                {/* SCREENSHOT: save /public/portal-mobile-workout.jpg (mobile workout detail with exercises) */}
-                <div style={{ width: 148, background: "#1a1a1a", borderRadius: 20, padding: "14px 8px 8px", boxShadow: "0 16px 36px rgba(0,0,0,0.18)" }}>
-                  <div style={{ position: "relative", height: 258, background: "#f5f2ee", borderRadius: 12, overflow: "hidden" }}>
-                    <Image
-                      src="/portal-mobile-workout.jpg"
-                      alt="Lisa Fit Method coaching portal — workout tracking on mobile"
-                      fill
-                      style={{ objectFit: "cover", objectPosition: "top" }}
-                    />
-                  </div>
+                <p className="ch-phone-label">Your Plan</p>
+              </div>
+
+              {/* Right phone: how-to coaching cues */}
+              {/* SCREENSHOT: save /public/portal-mobile-howto.jpg ("How to do it" card with coaching cues) */}
+              <div className="ch-phone ch-phone-side">
+                <div className="ch-phone-screen">
+                  <Image
+                    src="/portal-mobile-howto.jpg"
+                    alt="Coaching portal — exercise coaching cues"
+                    fill
+                    style={{ objectFit: "cover", objectPosition: "top" }}
+                  />
                 </div>
+                <p className="ch-phone-label">Coach</p>
               </div>
             </div>
           </div>
