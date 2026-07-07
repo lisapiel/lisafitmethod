@@ -197,23 +197,83 @@ export default function AdminApplicationsPage() {
                   </div>
 
                   {/* Application details */}
-                  <div style={{ display: "grid", gap: 8 }}>
-                    {app.goals && (
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {/* New-format fields */}
+                    {app.primaryGoal && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: gold, margin: "0 0 3px" }}>Primary Goal</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: cream, margin: 0 }}>{app.primaryGoal}</p>
+                      </div>
+                    )}
+                    {/* Legacy goals field */}
+                    {!app.primaryGoal && app.goals && (
                       <div>
                         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: gold, margin: "0 0 3px" }}>Goals</p>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: cream, margin: 0, lineHeight: 1.5 }}>{app.goals}</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: cream, margin: 0, lineHeight: 1.5 }}>{app.goals}</p>
                       </div>
                     )}
-                    {app.currentFitnessLevel && (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+                      {app.trainingExperience && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Experience</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.trainingExperience}</p>
+                        </div>
+                      )}
+                      {app.daysPerWeek && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Days/Week</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.daysPerWeek}</p>
+                        </div>
+                      )}
+                      {app.equipment && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Equipment</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.equipment}</p>
+                        </div>
+                      )}
+                      {app.coachingOption && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Option</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.coachingOption}</p>
+                        </div>
+                      )}
+                      {app.coursesCompleted && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Courses</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.coursesCompleted}</p>
+                        </div>
+                      )}
+                    </div>
+                    {app.injuries && (
                       <div>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Current Level</p>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#bbb", margin: 0 }}>{app.currentFitnessLevel}</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Injuries / Limitations</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.injuries}</p>
                       </div>
                     )}
-                    {app.whyCoaching && (
+                    {app.whyNow && (
                       <div>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Why Coaching</p>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyCoaching}</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Now</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyNow}</p>
+                      </div>
+                    )}
+                    {/* Legacy whyCoaching */}
+                    {!app.whyNow && app.whyCoaching && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Coaching</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyCoaching}</p>
+                      </div>
+                    )}
+                    {app.whyLisa && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Lisa</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyLisa}</p>
+                      </div>
+                    )}
+                    {/* Legacy */}
+                    {app.currentFitnessLevel && !app.trainingExperience && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Current Level</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.currentFitnessLevel}</p>
                       </div>
                     )}
                   </div>

@@ -175,7 +175,7 @@ export default function SiteHeader() {
           ) : loggedIn === false ? (
             <>
               <Link href="/login" className="site-header-login">Log In</Link>
-              <Link href="/checkout" className="site-header-cta">Get The Course</Link>
+              <Link href="/coaching#apply" className="site-header-cta">Apply for Coaching</Link>
             </>
           ) : null}
           <button
@@ -201,7 +201,7 @@ export default function SiteHeader() {
         )}
         {loggedIn === false && (
           <Link
-            href="/checkout"
+            href="/coaching#apply"
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-dm-sans), sans-serif",
@@ -217,7 +217,7 @@ export default function SiteHeader() {
               marginTop: 4,
             }}
           >
-            Get The Course
+            Apply for Coaching
           </Link>
         )}
       </div>

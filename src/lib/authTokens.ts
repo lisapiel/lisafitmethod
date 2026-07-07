@@ -261,9 +261,20 @@ export interface CoachingApplication {
   id: string
   email: string
   name: string
+  // Legacy fields kept for backward compat with older applications
   goals: string
   currentFitnessLevel: string
   whyCoaching: string
+  // Extended fields (new applications)
+  trainingExperience?: string
+  primaryGoal?: string
+  whyNow?: string
+  daysPerWeek?: string
+  equipment?: string
+  injuries?: string
+  coursesCompleted?: string
+  coachingOption?: string
+  whyLisa?: string
   status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"
   applicationDate: string
   reviewedAt?: string
@@ -277,6 +288,15 @@ export async function submitCoachingApplication(data: {
   goals: string
   currentFitnessLevel: string
   whyCoaching: string
+  trainingExperience?: string
+  primaryGoal?: string
+  whyNow?: string
+  daysPerWeek?: string
+  equipment?: string
+  injuries?: string
+  coursesCompleted?: string
+  coachingOption?: string
+  whyLisa?: string
 }): Promise<string> {
   const db = makeDb()
   const id = randomBytes(16).toString("hex")
@@ -288,6 +308,15 @@ export async function submitCoachingApplication(data: {
     goals: data.goals.trim(),
     currentFitnessLevel: data.currentFitnessLevel.trim(),
     whyCoaching: data.whyCoaching.trim(),
+    trainingExperience: data.trainingExperience?.trim(),
+    primaryGoal: data.primaryGoal?.trim(),
+    whyNow: data.whyNow?.trim(),
+    daysPerWeek: data.daysPerWeek?.trim(),
+    equipment: data.equipment?.trim(),
+    injuries: data.injuries?.trim(),
+    coursesCompleted: data.coursesCompleted?.trim(),
+    coachingOption: data.coachingOption?.trim(),
+    whyLisa: data.whyLisa?.trim(),
     status: "PENDING",
     applicationDate: new Date().toISOString(),
   }
