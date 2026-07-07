@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import WorkoutBuilder from "./WorkoutBuilder"
+import WarmupCooldownBuilder from "./WarmupCooldownBuilder"
 import type { ProgramExercise } from "./ExerciseRow"
 
 const gold = "#c9a96e"
@@ -72,7 +72,10 @@ export default function WarmupCooldownSection({
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", margin: "0 0 6px" }}>
             Drills / Movements (optional)
           </p>
-          <WorkoutBuilder
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", margin: "0 0 8px", fontStyle: "italic" }}>
+            Single-round drills. Choose reps or duration. No sets, RPE or tracking — this is a guide for the client.
+          </p>
+          <WarmupCooldownBuilder
             exercises={data.exercises}
             onChange={(exs) => onChange({ ...data, exercises: exs })}
           />

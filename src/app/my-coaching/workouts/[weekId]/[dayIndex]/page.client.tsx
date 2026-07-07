@@ -25,6 +25,7 @@ type ProgramExercise = {
   rest: string
   tempo: string
   coachNotes: string
+  metric?: "reps" | "time"
 }
 
 type WarmupCooldown = { notes: string; exercises: ProgramExercise[] }
@@ -203,7 +204,9 @@ function WarmupCooldownDisplay({
                       {ex.name}
                     </p>
                     <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0 }}>
-                      {[ex.sets && `${ex.sets} set${ex.sets !== "1" ? "s" : ""}`, ex.reps && `${ex.reps} reps`, ex.rest && `Rest ${ex.rest}`].filter(Boolean).join(" · ") || "As needed"}
+                      {ex.reps
+                        ? ex.metric === "time" ? ex.reps : `${ex.reps} reps`
+                        : "As needed"}
                     </p>
                     {ex.coachNotes && (
                       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: accent, margin: "2px 0 0", fontStyle: "italic" }}>

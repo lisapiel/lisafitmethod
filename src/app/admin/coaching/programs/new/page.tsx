@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -8,6 +8,16 @@ import WorkoutBuilder from "@/components/coaching/WorkoutBuilder"
 import WorkoutLibraryModal from "@/components/coaching/WorkoutLibraryModal"
 import WarmupCooldownSection from "@/components/coaching/WarmupCooldownSection"
 import type { ProgramExercise } from "@/components/coaching/ExerciseRow"
+
+type ProgramListItem = {
+  id: string
+  name: string
+  clientEmail: string | null
+  isTemplate: boolean
+  status: string
+  weeks: string
+  notes: string | null
+}
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -45,6 +55,61 @@ export default function NewProgramPage() {
   const [showWorkoutLibrary, setShowWorkoutLibrary] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+
+  const [existingPrograms, setExistingPrograms] = useState<ProgramListItem[]>([])
+  const [templateChoice, setTemplateChoice] = useState<"blank" | string>("blank")
+  const [templateLoaded, setTemplateLoaded] = useState<string | null>(null)
+
+  const loadExisting = useCallback(async () => {
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) return
+      const res = await fetch("/api/admin/coaching/programs", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const data = await res.json() as { programs: ProgramListItem[] }
+        setExistingPrograms(data.programs ?? [])
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => { loadExisting() }, [loadExisting])
+
+  function applyTemplate(id: string) {
+    setTemplateChoice(id)
+    if (id === "blank") {
+      setWeeks([emptyWeek(1)])
+      setActiveWeek(0)
+      setActiveDay(0)
+      setTemplateLoaded(null)
+      return
+    }
+    const source = existingPrograms.find((p) => p.id === id)
+    if (!source) return
+    try {
+      const sourceWeeks = JSON.parse(source.weeks) as ProgramWeek[]
+      // deep-copy so edits don't mutate cached data
+      const cloned = sourceWeeks.map((w) => ({
+        ...w,
+        days: w.days.map((d) => ({
+          ...d,
+          warmup: d.warmup ? { notes: d.warmup.notes, exercises: [...d.warmup.exercises] } : { notes: "", exercises: [] },
+          cooldown: d.cooldown ? { notes: d.cooldown.notes, exercises: [...d.cooldown.exercises] } : { notes: "", exercises: [] },
+          exercises: [...d.exercises],
+        })),
+      }))
+      setWeeks(cloned)
+      setActiveWeek(0)
+      setActiveDay(0)
+      if (!programName.trim()) setProgramName(`Copy of ${source.name}`)
+      if (!programNotes.trim() && source.notes) setProgramNotes(source.notes)
+      setTemplateLoaded(source.name)
+    } catch {
+      setError("Couldn't load that program — its data looks corrupted.")
+    }
+  }
 
   const week = weeks[activeWeek]
   const day = week?.days[activeDay]
@@ -162,6 +227,47 @@ export default function NewProgramPage() {
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
         <Link href="/admin/coaching/programs" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#666", textDecoration: "none", letterSpacing: "0.08em" }}>← Programs</Link>
         <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0 }}>New Program</h1>
+      </div>
+
+      {/* Start from existing program */}
+      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "16px 24px", marginBottom: "1rem" }}>
+        <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", display: "block", marginBottom: 8 }}>Start from</label>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <select
+            value={templateChoice}
+            onChange={(e) => applyTemplate(e.target.value)}
+            style={{
+              background: "#111", border: `1px solid ${border}`, color: "#f0e6d3",
+              padding: "9px 32px 9px 12px", fontFamily: "var(--font-montserrat), sans-serif",
+              fontSize: "0.75rem", outline: "none", boxSizing: "border-box",
+              appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
+              backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
+              backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
+              minWidth: 260,
+            }}
+          >
+            <option value="blank">Blank program (start from scratch)</option>
+            {existingPrograms.length > 0 && (
+              <>
+                <optgroup label="Templates">
+                  {existingPrograms.filter((p) => p.isTemplate).map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Client programs">
+                  {existingPrograms.filter((p) => !p.isTemplate).map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </optgroup>
+              </>
+            )}
+          </select>
+          {templateLoaded && (
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: gold, letterSpacing: "0.06em" }}>
+              ✓ Loaded from &ldquo;{templateLoaded}&rdquo; — edit freely, saves as a new program
+            </span>
+          )}
+        </div>
       </div>
 
       <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "20px 24px", marginBottom: "1.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>

@@ -14,6 +14,7 @@ export type ProgramExercise = {
   rest: string
   tempo: string
   coachNotes: string
+  metric?: "reps" | "time"
 }
 
 const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
