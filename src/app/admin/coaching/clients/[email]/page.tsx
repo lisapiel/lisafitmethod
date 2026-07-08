@@ -577,38 +577,52 @@ export default function ClientProfilePage() {
           ) : (
             <>
               {goals.map((g) => (
-                <div key={g.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 110px 90px 30px", gap: 8, alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${border}` }}>
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 1px" }}>{(g.type || "").replace(/-/g, " ")}</p>
-                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: "#f0e6d3", margin: 0, fontWeight: 600 }}>{g.label}</p>
+                <div key={g.id} style={{ padding: "10px 0", borderBottom: `1px solid ${border}` }}>
+                  {/* Header row */}
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 2px" }}>
+                        {(g.type || "").replace(/-/g, " ")}
+                      </p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: "#f0e6d3", margin: 0, fontWeight: 600 }}>{g.label}</p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#888", margin: "3px 0 0" }}>
+                        {g.startValue ?? "—"} → {g.targetValue ?? "—"} {g.unit ?? ""}
+                      </p>
+                    </div>
+                    <button onClick={() => deleteGoal(g.id)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", padding: "2px 6px", fontSize: "1rem", flexShrink: 0 }}>×</button>
                   </div>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888", whiteSpace: "nowrap" }}>{g.startValue ?? "—"} → {g.targetValue ?? "—"} {g.unit ?? ""}</span>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    defaultValue={g.currentValue ?? ""}
-                    onBlur={(e) => updateGoalCurrent(g.id, e.target.value, g.status ?? "ON_TRACK")}
-                    placeholder="Current"
-                    style={{ background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", borderRadius: 2 }}
-                  />
-                  <select
-                    defaultValue={g.status ?? "ON_TRACK"}
-                    onChange={(e) => updateGoalCurrent(g.id, "", e.target.value)}
-                    style={{ background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 6px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", outline: "none", borderRadius: 2 }}
-                  >
-                    <option value="ON_TRACK">On track</option>
-                    <option value="NEEDS_ATTENTION">Attention</option>
-                    <option value="ACHIEVED">Achieved</option>
-                  </select>
-                  <button onClick={() => deleteGoal(g.id)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", padding: "0 4px", fontSize: "1rem" }}>×</button>
+                  {/* Current + status row — wraps on mobile */}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, flex: "1 1 130px" }}>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Current:</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        defaultValue={g.currentValue ?? ""}
+                        onBlur={(e) => updateGoalCurrent(g.id, e.target.value, g.status ?? "ON_TRACK")}
+                        placeholder="—"
+                        style={{ flex: 1, minWidth: 0, background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", borderRadius: 2, boxSizing: "border-box" }}
+                      />
+                    </div>
+                    <select
+                      defaultValue={g.status ?? "ON_TRACK"}
+                      onChange={(e) => updateGoalCurrent(g.id, "", e.target.value)}
+                      style={{ flex: "1 1 130px", minWidth: 0, background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", borderRadius: 2, boxSizing: "border-box" }}
+                    >
+                      <option value="ON_TRACK">On track</option>
+                      <option value="NEEDS_ATTENTION">Needs attention</option>
+                      <option value="ACHIEVED">Achieved</option>
+                    </select>
+                  </div>
                 </div>
               ))}
 
               {showAddGoal && (
                 <div style={{ marginTop: 14, padding: "14px", background: "#0a0a0a", border: `1px solid ${border}` }}>
                   <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.12em", textTransform: "uppercase", margin: "0 0 10px" }}>New Goal</p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8, marginBottom: 8 }}>
-                    <select value={newGoal.type} onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }}>
+                  {/* Type + Label — stacks on narrow */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8, marginBottom: 8 }}>
+                    <select value={newGoal.type} onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}>
                       <option value="body-composition">Body Composition</option>
                       <option value="strength">Strength</option>
                       <option value="habit">Habit</option>
@@ -616,23 +630,24 @@ export default function ClientProfilePage() {
                     </select>
                     <input
                       type="text"
-                      placeholder="Goal name (e.g. Lose 15 lbs, Pull-up goal, Hit 110g protein)"
+                      placeholder="Goal name (e.g. Lose 15 lbs)"
                       value={newGoal.label}
                       onChange={(e) => setNewGoal({ ...newGoal, label: e.target.value })}
-                      style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none" }}
+                      style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
-                    <input placeholder="Start" inputMode="decimal" value={newGoal.startValue} onChange={(e) => setNewGoal({ ...newGoal, startValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
-                    <input placeholder="Current" inputMode="decimal" value={newGoal.currentValue} onChange={(e) => setNewGoal({ ...newGoal, currentValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
-                    <input placeholder="Target" inputMode="decimal" value={newGoal.targetValue} onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
-                    <input placeholder="Unit (lbs, reps)" value={newGoal.unit} onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none" }} />
+                  {/* Numeric fields — 2 per row on narrow, 4 on wider */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 8, marginBottom: 10 }}>
+                    <input placeholder="Start" inputMode="decimal" value={newGoal.startValue} onChange={(e) => setNewGoal({ ...newGoal, startValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Current" inputMode="decimal" value={newGoal.currentValue} onChange={(e) => setNewGoal({ ...newGoal, currentValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Target" inputMode="decimal" value={newGoal.targetValue} onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Unit (lbs, reps)" value={newGoal.unit} onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={addGoal} disabled={!newGoal.label.trim() || savingGoal} style={{ background: newGoal.label.trim() ? gold : "#333", color: newGoal.label.trim() ? "#0a0a0a" : "#666", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: newGoal.label.trim() ? "pointer" : "not-allowed" }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button onClick={addGoal} disabled={!newGoal.label.trim() || savingGoal} style={{ background: newGoal.label.trim() ? gold : "#333", color: newGoal.label.trim() ? "#0a0a0a" : "#666", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: newGoal.label.trim() ? "pointer" : "not-allowed", flex: "1 1 auto" }}>
                       {savingGoal ? "Adding…" : "Add Goal"}
                     </button>
-                    <button onClick={() => setShowAddGoal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "8px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", cursor: "pointer" }}>Cancel</button>
+                    <button onClick={() => setShowAddGoal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>Cancel</button>
                   </div>
                 </div>
               )}

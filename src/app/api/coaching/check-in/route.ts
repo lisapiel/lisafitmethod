@@ -35,6 +35,17 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
+  // Sanitize measurements: array of { label, value, unit } — drop empty rows
+  type MeasurementIn = { label?: unknown; value?: unknown; unit?: unknown }
+  const rawMeasurements = Array.isArray(body.measurements) ? body.measurements as MeasurementIn[] : []
+  const measurements = rawMeasurements
+    .map((m) => ({
+      label: String(m.label ?? "").trim(),
+      value: String(m.value ?? "").trim(),
+      unit: String(m.unit ?? "").trim(),
+    }))
+    .filter((m) => m.label && m.value)
+
   const checkIn = await createCoachingCheckIn({
     clientEmail: email.toLowerCase(),
     submittedAt: new Date().toISOString(),
@@ -53,6 +64,7 @@ export async function POST(req: NextRequest) {
     ...(body.struggles && { struggles: body.struggles }),
     ...(body.questionsForCoach && { questionsForCoach: body.questionsForCoach }),
     ...(body.additionalNotes && { additionalNotes: body.additionalNotes }),
+    ...(measurements.length > 0 && { measurementSnapshot: JSON.stringify(measurements) }),
   })
 
   // Fire admin notification (non-blocking)

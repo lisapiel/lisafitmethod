@@ -579,6 +579,9 @@ export interface CoachingCheckInRecord {
   additionalNotes?: string
   coachFeedback?: string
   reviewedAt?: string
+  // Optional body measurements captured during the check-in.
+  // Stored as JSON string: Array<{ label, value, unit }>
+  measurementSnapshot?: string
 }
 
 export async function createCoachingCheckIn(data: Omit<CoachingCheckInRecord, "id">): Promise<CoachingCheckInRecord> {

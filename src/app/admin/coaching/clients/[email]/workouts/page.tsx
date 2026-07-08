@@ -167,6 +167,135 @@ function computeWeekProgress(logs: WorkoutLog[]): WeekProgress {
   }
 }
 
+// ── Per-exercise progress across all logs ──────────────────────────────────
+
+type ExerciseTrend = {
+  exerciseId: string
+  name: string
+  sessions: number
+  firstWeight: number
+  latestWeight: number
+  firstReps: number
+  latestReps: number
+  firstDate: string
+  latestDate: string
+}
+
+function computeExerciseProgress(logs: WorkoutLog[]): ExerciseTrend[] {
+  // Bucket sets by exercise, keyed by exerciseId
+  const buckets = new Map<string, Array<{ name: string; date: string; maxWeight: number; maxReps: number }>>()
+  for (const log of logs) {
+    let sets: SetEntry[] = []
+    try { sets = JSON.parse(log.setData) as SetEntry[] } catch { continue }
+    // Per exercise per workout: take max weight and max reps for that workout
+    const perExerciseMax = new Map<string, { name: string; maxWeight: number; maxReps: number }>()
+    for (const s of sets) {
+      if (!s.completed) continue
+      const w = parseNum(s.weight)
+      const r = parseNum(s.reps)
+      const name = s.exerciseName ?? s.exerciseId
+      const cur = perExerciseMax.get(s.exerciseId)
+      if (!cur) perExerciseMax.set(s.exerciseId, { name, maxWeight: w, maxReps: r })
+      else perExerciseMax.set(s.exerciseId, { name, maxWeight: Math.max(cur.maxWeight, w), maxReps: Math.max(cur.maxReps, r) })
+    }
+    for (const [id, { name, maxWeight, maxReps }] of perExerciseMax) {
+      if (!buckets.has(id)) buckets.set(id, [])
+      buckets.get(id)!.push({ name, date: log.completedAt, maxWeight, maxReps })
+    }
+  }
+
+  const trends: ExerciseTrend[] = []
+  for (const [exerciseId, records] of buckets) {
+    if (records.length === 0) continue
+    // records already come from logs sorted newest-first; reverse for oldest-first
+    const sorted = [...records].sort((a, b) => a.date.localeCompare(b.date))
+    const first = sorted[0]
+    const latest = sorted[sorted.length - 1]
+    trends.push({
+      exerciseId,
+      name: latest.name,
+      sessions: sorted.length,
+      firstWeight: first.maxWeight,
+      latestWeight: latest.maxWeight,
+      firstReps: first.maxReps,
+      latestReps: latest.maxReps,
+      firstDate: first.date,
+      latestDate: latest.date,
+    })
+  }
+
+  // Sort by most-tracked first, then largest delta
+  return trends.sort((a, b) => {
+    if (b.sessions !== a.sessions) return b.sessions - a.sessions
+    const aDelta = a.latestWeight - a.firstWeight
+    const bDelta = b.latestWeight - b.firstWeight
+    return Math.abs(bDelta) - Math.abs(aDelta)
+  })
+}
+
+function ExerciseProgressCard({ trends }: { trends: ExerciseTrend[] }) {
+  if (trends.length === 0) return null
+  const shown = trends.slice(0, 10)
+
+  return (
+    <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1.25rem" }}>
+      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
+        Progress by exercise
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {shown.map((t) => {
+          const weightDelta = t.latestWeight - t.firstWeight
+          const repsDelta = t.latestReps - t.firstReps
+          const showWeight = t.latestWeight > 0 || t.firstWeight > 0
+          const showReps = t.latestReps > 0 && !showWeight
+          const primaryDelta = showWeight ? weightDelta : repsDelta
+          const primaryUnit = showWeight ? "lb" : "reps"
+          const arrow = primaryDelta > 0 ? "↗" : primaryDelta < 0 ? "↘" : "→"
+          const arrowColor = primaryDelta > 0 ? green : primaryDelta < 0 ? red : muted
+          const deltaText = primaryDelta === 0
+            ? "stable"
+            : `${primaryDelta > 0 ? "+" : ""}${primaryDelta.toFixed(primaryDelta % 1 ? 1 : 0)} ${primaryUnit}`
+          return (
+            <div key={t.exerciseId} style={{ padding: "8px 10px", background: "#0f0f0f", border: `1px solid ${border}`, borderLeft: `3px solid ${arrowColor}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 600, color: cream, minWidth: 0, flex: "1 1 140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {t.name}
+                </span>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: arrowColor, letterSpacing: "0.04em", flexShrink: 0 }}>
+                  {arrow} {deltaText}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
+                {showWeight && (
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted }}>
+                    <span style={{ color: "#555", textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.08em" }}>Weight </span>
+                    {t.firstWeight} → {t.latestWeight}
+                  </span>
+                )}
+                {showReps && (
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted }}>
+                    <span style={{ color: "#555", textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.08em" }}>Reps </span>
+                    {t.firstReps} → {t.latestReps}
+                  </span>
+                )}
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted }}>
+                  <span style={{ color: "#555", textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.08em" }}>Sessions </span>
+                  {t.sessions}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {trends.length > shown.length && (
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: muted, margin: "10px 0 0", textAlign: "center" }}>
+          + {trends.length - shown.length} more exercises tracked
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ── Sub-components ─────────────────────────────────────────────────────────
 
 function ProgressPreview({ progress }: { progress: WeekProgress }) {
@@ -494,6 +623,7 @@ export default function AdminClientWorkoutsPage() {
   useEffect(() => { load() }, [load])
 
   const progress = useMemo(() => computeWeekProgress(logs), [logs])
+  const exerciseTrends = useMemo(() => computeExerciseProgress(logs), [logs])
 
   function handleFeedbackSaved(id: string, feedback: string, at: string) {
     setLogs((cur) => cur.map((l) => l.id === id ? { ...l, coachFeedback: feedback, coachFeedbackAt: at } : l))
@@ -522,6 +652,8 @@ export default function AdminClientWorkoutsPage() {
       </div>
 
       <ProgressPreview progress={progress} />
+
+      <ExerciseProgressCard trends={exerciseTrends} />
 
       {logs.length === 0 ? (
         <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "2.5rem", textAlign: "center" }}>

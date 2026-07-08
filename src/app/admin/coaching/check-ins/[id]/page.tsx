@@ -31,6 +31,7 @@ type CheckIn = {
   additionalNotes: string | null
   coachFeedback: string | null
   reviewedAt: string | null
+  measurementSnapshot: string | null
 }
 
 function formatDate(iso: string) {
@@ -120,6 +121,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             additionalNotes: ci.additionalNotes ?? null,
             coachFeedback: ci.coachFeedback ?? null,
             reviewedAt: ci.reviewedAt ?? null,
+            measurementSnapshot: ci.measurementSnapshot ?? null,
           })
           if (ci.coachFeedback) setFeedback(ci.coachFeedback)
 
@@ -209,7 +211,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           </span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
           {/* Left column */}
           <div>
             {checkIn.weight && (
@@ -220,6 +222,29 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                 </p>
               </div>
             )}
+
+            {(() => {
+              let ms: Array<{ label: string; value: string; unit: string }> = []
+              try { if (checkIn.measurementSnapshot) ms = JSON.parse(checkIn.measurementSnapshot) } catch { /* ignore */ }
+              if (ms.length === 0) return null
+              return (
+                <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Measurements</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {ms.map((m, i) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, paddingBottom: 6, borderBottom: i === ms.length - 1 ? "none" : `1px solid #1e1e1e` }}>
+                        <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: cream, textTransform: "capitalize" }}>
+                          {m.label}
+                        </span>
+                        <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: cream }}>
+                          {m.value}{m.unit ? ` ${m.unit}` : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Wellbeing</p>

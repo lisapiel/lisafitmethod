@@ -61,6 +61,90 @@ function Spinner() {
   )
 }
 
+function UpdateGoalRow({ goal, onSaved }: { goal: Goal; onSaved: (v: number) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(goal.currentValue != null ? String(goal.currentValue) : "")
+  const [saving, setSaving] = useState(false)
+  const [savedFlash, setSavedFlash] = useState(false)
+
+  async function save() {
+    const num = parseFloat(value)
+    if (isNaN(num)) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/coaching/goals/${goal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentValue: num }),
+      })
+      if (res.ok) {
+        onSaved(num)
+        setSavedFlash(true)
+        setTimeout(() => setSavedFlash(false), 1500)
+        setEditing(false)
+      }
+    } catch { /* ignore */ }
+    setSaving(false)
+  }
+
+  if (!editing) {
+    return (
+      <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px dashed ${border}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        {savedFlash ? (
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: "#5c9e6a", fontWeight: 600 }}>
+            ✓ Updated
+          </span>
+        ) : (
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted }}>
+            Progress this week?
+          </span>
+        )}
+        <button
+          onClick={() => setEditing(true)}
+          style={{ background: "none", border: `1px solid ${accent}`, color: accent, padding: "7px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", borderRadius: 4 }}
+        >
+          Update current →
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px dashed ${border}` }}>
+      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+        Update your current value
+      </p>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <input
+          type="text"
+          inputMode="decimal"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoFocus
+          placeholder={goal.currentValue != null ? String(goal.currentValue) : "—"}
+          style={{ flex: "1 1 100px", minWidth: 0, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+        />
+        {goal.unit && (
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, flexShrink: 0 }}>{goal.unit}</span>
+        )}
+        <button
+          onClick={save}
+          disabled={saving || !value.trim()}
+          style={{ background: saving || !value.trim() ? "#ccc" : accent, color: black, border: "none", padding: "10px 16px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 700, cursor: saving || !value.trim() ? "wait" : "pointer", borderRadius: 4 }}
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button
+          onClick={() => { setEditing(false); setValue(goal.currentValue != null ? String(goal.currentValue) : "") }}
+          style={{ background: "none", border: `1px solid ${border}`, color: muted, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", cursor: "pointer", borderRadius: 4 }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function GoalsClient() {
   const [loading, setLoading] = useState(true)
   const [goals, setGoals] = useState<Goal[]>([])
@@ -216,6 +300,14 @@ export default function GoalsClient() {
                 )}
 
                 <ProgressBar start={goal.startValue} current={goal.currentValue} target={goal.targetValue} />
+
+                {/* Client-side update: update current value */}
+                {goal.status !== "ACHIEVED" && (
+                  <UpdateGoalRow
+                    goal={goal}
+                    onSaved={(newValue) => setGoals((gs) => gs.map((g) => g.id === goal.id ? { ...g, currentValue: newValue } : g))}
+                  />
+                )}
 
                 {/* Target date */}
                 {goal.targetDate && (

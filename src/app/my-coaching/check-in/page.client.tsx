@@ -11,6 +11,8 @@ const white = "#fff"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+type Measurement = { label: string; value: string; unit: string }
+
 type FormState = {
   weight: string
   weightUnit: "LBS" | "KG"
@@ -26,6 +28,7 @@ type FormState = {
   struggles: string
   questionsForCoach: string
   additionalNotes: string
+  measurements: Measurement[]
 }
 
 const INITIAL: FormState = {
@@ -33,6 +36,7 @@ const INITIAL: FormState = {
   sleepQuality: 0, energyLevel: 0, hungerLevel: 0, stressLevel: 0, digestion: 0,
   trainingPerformance: 0, nutritionAdherence: 0, workoutConsistency: 0,
   wins: "", struggles: "", questionsForCoach: "", additionalNotes: "",
+  measurements: [],
 }
 
 const STEPS = [
@@ -149,6 +153,19 @@ export default function CheckInClient() {
   const set = <K extends keyof FormState>(key: K) => (val: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: val }))
 
+  function updateMeasurement(idx: number, patch: Partial<Measurement>) {
+    setForm((f) => ({
+      ...f,
+      measurements: f.measurements.map((m, i) => i === idx ? { ...m, ...patch } : m),
+    }))
+  }
+  function addMeasurement() {
+    setForm((f) => ({ ...f, measurements: [...f.measurements, { label: "", value: "", unit: "in" }] }))
+  }
+  function removeMeasurement(idx: number) {
+    setForm((f) => ({ ...f, measurements: f.measurements.filter((_, i) => i !== idx) }))
+  }
+
   function canProceed() {
     if (step === 2) return form.sleepQuality > 0 && form.energyLevel > 0 && form.hungerLevel > 0 && form.stressLevel > 0
     if (step === 3) return form.trainingPerformance > 0 && form.nutritionAdherence > 0 && form.workoutConsistency > 0
@@ -176,6 +193,7 @@ export default function CheckInClient() {
           struggles: form.struggles || undefined,
           questionsForCoach: form.questionsForCoach || undefined,
           additionalNotes: form.additionalNotes || undefined,
+          measurements: form.measurements.filter((m) => m.label.trim() && m.value.trim()),
         }),
       })
       if (res.ok) {
@@ -283,24 +301,93 @@ export default function CheckInClient() {
         {step === 1 && (
           <div>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: black, margin: "0 0 4px" }}>Body Metrics</h2>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1.5rem" }}>This is optional but helps Lisa track your progress over time.</p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1.25rem" }}>Weight helps Lisa track progress. Measurements are optional but useful.</p>
 
             <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, display: "block", marginBottom: 8 }}>Current Weight</label>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <input
                 type="text"
                 inputMode="decimal"
                 value={form.weight}
                 onChange={(e) => set("weight")(e.target.value)}
-                placeholder="e.g. 68.5"
-                style={{ flex: 1, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", fontWeight: 600, outline: "none", borderRadius: 6 }}
+                placeholder="e.g. 145"
+                style={{ flex: "1 1 140px", minWidth: 0, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", fontWeight: 600, outline: "none", borderRadius: 6, boxSizing: "border-box" }}
               />
-              {(["LBS", "KG"] as const).map((u) => (
-                <button key={u} onClick={() => set("weightUnit")(u)}
-                  style={{ background: form.weightUnit === u ? accent : white, border: `2px solid ${form.weightUnit === u ? accent : border}`, color: form.weightUnit === u ? black : muted, padding: "12px 16px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", borderRadius: 6 }}>
-                  {u}
-                </button>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                {(["LBS", "KG"] as const).map((u) => (
+                  <button key={u} onClick={() => set("weightUnit")(u)}
+                    style={{ background: form.weightUnit === u ? accent : white, border: `2px solid ${form.weightUnit === u ? accent : border}`, color: form.weightUnit === u ? black : muted, padding: "10px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", borderRadius: 6 }}>
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Optional body measurements */}
+            <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: `1px solid ${border}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black }}>Measurements (optional)</label>
+                {form.measurements.length > 0 && (
+                  <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted }}>
+                    {form.measurements.length} added
+                  </span>
+                )}
+              </div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, margin: "0 0 12px", lineHeight: 1.5 }}>
+                Waist, hips, arms, thigh, chest — whatever you track. You choose the labels and units.
+              </p>
+
+              {form.measurements.map((m, idx) => (
+                <div key={idx} style={{ background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6, padding: 10, marginBottom: 8 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "start", marginBottom: 8 }}>
+                    <input
+                      type="text"
+                      value={m.label}
+                      onChange={(e) => updateMeasurement(idx, { label: e.target.value })}
+                      placeholder="e.g. Waist"
+                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeMeasurement(idx)}
+                      aria-label="Remove measurement"
+                      style={{ background: "none", border: "none", color: "#c14646", padding: "6px 10px", cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 8 }}>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={m.value}
+                      onChange={(e) => updateMeasurement(idx, { value: e.target.value })}
+                      placeholder="e.g. 28.5"
+                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+                    />
+                    <select
+                      value={m.unit}
+                      onChange={(e) => updateMeasurement(idx, { unit: e.target.value })}
+                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+                    >
+                      <option value="in">in</option>
+                      <option value="cm">cm</option>
+                      <option value="lbs">lbs</option>
+                      <option value="kg">kg</option>
+                      <option value="%">%</option>
+                      <option value="">no unit</option>
+                    </select>
+                  </div>
+                </div>
               ))}
+
+              <button
+                type="button"
+                onClick={addMeasurement}
+                style={{ background: "none", border: `1px dashed ${border}`, color: muted, padding: "10px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", borderRadius: 4, width: "100%" }}
+              >
+                + Add measurement
+              </button>
             </div>
           </div>
         )}
