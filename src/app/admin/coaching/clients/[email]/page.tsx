@@ -377,6 +377,7 @@ export default function ClientProfilePage() {
       <div className="h-scroll" style={{ display: "flex", gap: 8, marginBottom: "1.5rem", flexWrap: "wrap" }}>
         {[
           { label: "Workouts", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts` },
+          { label: "Nutrition", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/nutrition` },
           { label: "Program", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/program` },
           { label: "Progress", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/progress` },
           { label: "Messages", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/messages` },

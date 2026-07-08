@@ -3,7 +3,7 @@ import {
   CognitoIdentityProviderClient,
   GetUserCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
-import { listCoachingApplications } from "@/lib/authTokens"
+import { listCoachingApplications, getBundleCredit } from "@/lib/authTokens"
 import { ADMIN_EMAIL } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -32,5 +32,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const applications = await listCoachingApplications()
-  return NextResponse.json({ applications })
+  // Enrich with bundleCredit so the queue can show a "Bundle credit $137" pill
+  const enriched = await Promise.all(applications.map(async (app) => {
+    const bundleCredit = await getBundleCredit(app.email).catch(() => null)
+    return { ...app, bundleCredit }
+  }))
+  return NextResponse.json({ applications: enriched })
 }

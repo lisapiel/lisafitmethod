@@ -13,6 +13,7 @@ import {
   getCoachingApplication,
   updateCoachingApplication,
   createCoachingClientRecord,
+  getBundleCredit,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -206,6 +207,27 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const stripe = makeStripe()
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lisafitmethod.com"
 
+    // If the applicant bought the bundle within the credit window, create a
+    // one-time Stripe coupon for the bundle credit and apply it to the first
+    // invoice. Second month onwards is full price.
+    const credit = await getBundleCredit(application.email)
+    let bundleCouponId: string | null = null
+    if (credit.available && credit.amountCents > 0) {
+      try {
+        const coupon = await stripe.coupons.create({
+          amount_off: Math.min(credit.amountCents, priceInCents),
+          currency: "usd",
+          duration: "once",
+          max_redemptions: 1,
+          name: "Bundle credit",
+          metadata: { applicantEmail: application.email, applicationId: id },
+        })
+        bundleCouponId = coupon.id
+      } catch (err) {
+        console.error("Stripe coupon create failed:", err)
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
@@ -219,11 +241,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         },
         quantity: 1,
       }],
+      ...(bundleCouponId ? { discounts: [{ coupon: bundleCouponId }] } : {}),
       metadata: {
         product: "coaching",
         customerEmail: application.email,
         customerName: application.name,
         applicationId: id,
+        ...(bundleCouponId ? { bundleCouponId } : {}),
       },
       subscription_data: {
         metadata: {

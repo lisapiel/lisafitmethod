@@ -5,6 +5,10 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { CoachingApplication } from "@/lib/authTokens"
 
+type EnrichedApplication = CoachingApplication & {
+  bundleCredit?: { available: boolean; amountCents: number; expiresAt: string | null; purchasedAt: string | null } | null
+}
+
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 const cream = "#f0e6d3"
@@ -37,7 +41,7 @@ function Spinner() {
 
 export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true)
-  const [applications, setApplications] = useState<CoachingApplication[]>([])
+  const [applications, setApplications] = useState<EnrichedApplication[]>([])
   const [filter, setFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "DECLINED" | "PAID">("PENDING")
   const [acting, setActing] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -50,7 +54,7 @@ export default function AdminApplicationsPage() {
       const res = await fetch("/api/admin/coaching/applications", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      const data = await res.json() as { applications: CoachingApplication[] }
+      const data = await res.json() as { applications: EnrichedApplication[] }
       setApplications(data.applications ?? [])
     } catch { /* handled by layout */ }
     setLoading(false)
@@ -145,9 +149,14 @@ export default function AdminApplicationsPage() {
                   {/* Header row */}
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
                     <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: cream }}>{app.name}</span>
                         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: s.color, border: `1px solid ${s.color}44`, padding: "2px 8px", borderRadius: 3 }}>{s.label}</span>
+                        {app.bundleCredit?.available && (
+                          <span style={{ background: gold, color: "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", padding: "3px 8px", borderRadius: 3, textTransform: "uppercase" }}>
+                            Bundle credit ${(app.bundleCredit.amountCents / 100).toFixed(0)}
+                          </span>
+                        )}
                       </div>
                       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted }}>{app.email}</span>
@@ -168,6 +177,11 @@ export default function AdminApplicationsPage() {
                             style={{ width: 130, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none" }}
                           />
                         </div>
+                        {app.bundleCredit?.available && prices[app.id] && parseFloat(prices[app.id]) > 0 && (
+                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.06em" }}>
+                            First month: ${Math.max(0, parseFloat(prices[app.id]) - app.bundleCredit.amountCents / 100).toFixed(2)}
+                          </span>
+                        )}
                         <div style={{ display: "flex", gap: 8 }}>
                           <button
                             onClick={() => act(app.id, "decline")}

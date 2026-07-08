@@ -9,7 +9,7 @@ import {
 import Stripe from "stripe"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
-import { grantCoachingAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord } from "@/lib/authTokens"
+import { grantCoachingAccess, grantNutritionAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -289,6 +289,8 @@ export async function POST(req: NextRequest) {
 
   // No price: grant immediate access and send welcome email
   await grantCoachingAccess(email, body.plan, body.startDate)
+  // Coaching bundles the Nutrition Foundations course
+  await grantNutritionAccess(email).catch((err) => console.error("grantNutritionAccess failed:", err))
 
   if (!accountExists) {
     const token = generateAuthToken()

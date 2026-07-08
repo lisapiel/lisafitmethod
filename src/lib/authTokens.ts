@@ -408,6 +408,20 @@ export interface CoachingClientRecord {
   coachMessageUpdatedAt?: string
   startingWeight?: number       // For goal progress reference
   createdAt?: string
+  // Nutrition profile (set via /my-coaching/setup, editable by client)
+  heightInches?: number
+  age?: number
+  sex?: "male" | "female"
+  activityLevel?: number        // 1.2 / 1.375 / 1.55 / 1.725 / 1.9
+  nutritionGoal?: "fat-loss" | "maintain" | "muscle-gain"
+  // Optional coach-set macro override (takes precedence over auto-computed values)
+  customMacros?: {
+    calories?: number
+    protein?: number
+    carbs?: number
+    fat?: number
+    updatedAt: string
+  }
 }
 
 export async function createCoachingClientRecord(data: CoachingClientRecord): Promise<void> {
@@ -1209,4 +1223,70 @@ export async function deleteCoachingClientCascade(email: string): Promise<Delete
   }
 
   return result
+}
+
+// ── Bundle purchase tracking (for bundle → coaching credit) ─────────────────
+
+export const BUNDLE_CREDIT_CENTS = 13700 // $137
+export const BUNDLE_CREDIT_DAYS = 90     // credit valid for 90 days after purchase
+
+export interface BundlePurchaseRecord {
+  email: string
+  purchasedAt: string
+  paymentIntentId: string
+  bundleCreditUsedAt?: string
+  usedForCoachingSubscriptionId?: string
+}
+
+export async function recordBundlePurchase(email: string, paymentIntentId: string): Promise<void> {
+  const db = makeDb()
+  const lower = email.toLowerCase()
+  // Do not overwrite if a record already exists (idempotent — first purchase wins for credit tracking)
+  const existing = await db.send(new GetCommand({ TableName: TABLE, Key: { userId: `bundle_purchase_${lower}` } }))
+  if (existing.Item) return
+  const record: BundlePurchaseRecord = {
+    email: lower,
+    purchasedAt: new Date().toISOString(),
+    paymentIntentId,
+  }
+  await db.send(new PutCommand({
+    TableName: TABLE,
+    Item: { userId: `bundle_purchase_${lower}`, ...record },
+  }))
+}
+
+export async function getBundlePurchase(email: string): Promise<BundlePurchaseRecord | null> {
+  const db = makeDb()
+  const result = await db.send(new GetCommand({
+    TableName: TABLE, Key: { userId: `bundle_purchase_${email.toLowerCase()}` },
+  }))
+  if (!result.Item) return null
+  return result.Item as BundlePurchaseRecord
+}
+
+export type BundleCredit = { available: boolean; amountCents: number; expiresAt: string | null; purchasedAt: string | null }
+
+export async function getBundleCredit(email: string): Promise<BundleCredit> {
+  const record = await getBundlePurchase(email)
+  if (!record) return { available: false, amountCents: BUNDLE_CREDIT_CENTS, expiresAt: null, purchasedAt: null }
+  if (record.bundleCreditUsedAt) return { available: false, amountCents: BUNDLE_CREDIT_CENTS, expiresAt: null, purchasedAt: record.purchasedAt }
+  const expiresAt = new Date(new Date(record.purchasedAt).getTime() + BUNDLE_CREDIT_DAYS * 86_400_000).toISOString()
+  const expired = expiresAt < new Date().toISOString()
+  return {
+    available: !expired,
+    amountCents: BUNDLE_CREDIT_CENTS,
+    expiresAt,
+    purchasedAt: record.purchasedAt,
+  }
+}
+
+export async function markBundleCreditUsed(email: string, subscriptionId: string): Promise<void> {
+  const db = makeDb()
+  const lower = email.toLowerCase()
+  await db.send(new UpdateCommand({
+    TableName: TABLE,
+    Key: { userId: `bundle_purchase_${lower}` },
+    UpdateExpression: "SET bundleCreditUsedAt = :at, usedForCoachingSubscriptionId = :sub",
+    ExpressionAttributeValues: { ":at": new Date().toISOString(), ":sub": subscriptionId },
+  }))
 }

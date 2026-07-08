@@ -74,12 +74,18 @@ function IconClose() {
   )
 }
 
-const bottomNav = [
+type BottomNavItem = {
+  href: string
+  label: string
+  icon: (props: { active: boolean }) => React.ReactElement
+  matchExact?: boolean
+}
+const bottomNav: BottomNavItem[] = [
   { href: "/admin/coaching", label: "Home", icon: IconHome, matchExact: true },
   { href: "/admin/coaching/clients", label: "Clients", icon: IconClients },
   { href: "/admin/coaching/check-ins", label: "Check-ins", icon: IconCheckIn },
-  { href: "/admin/coaching/messages", label: "Messages", icon: IconMessages },
-] as const
+  { href: "/admin/coaching/messages", label: "Messages", icon: (p) => <IconMessages {...p} count={0} /> },
+]
 
 const drawerLinks = [
   { section: "Coaching", items: [
@@ -133,7 +139,7 @@ export default function CoachingLayout({ children }: { children: React.ReactNode
   const [activity, setActivity] = useState<{ pendingCheckIns: number; unreadMessages: number }>({ pendingCheckIns: 0, unreadMessages: 0 })
 
   // Show back button whenever we're deeper than the top-level sections
-  const topSections = new Set(bottomNav.map((n) => n.href))
+  const topSections = new Set<string>(bottomNav.map((n) => n.href))
   const showBack = !topSections.has(pathname)
   const title = pageTitle(pathname)
 

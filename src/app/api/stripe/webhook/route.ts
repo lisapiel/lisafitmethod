@@ -15,6 +15,7 @@ import {
   grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
   grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication, createCoachingClientRecord,
   getCoachingClientRecord, updateCoachingClientRecord,
+  recordBundlePurchase, markBundleCreditUsed,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -670,12 +671,18 @@ function coachingPaymentFailedEmail(email: string): string {
 </html>`
 }
 
-async function provisionCoachingSubscriber(email: string, name: string) {
+async function provisionCoachingSubscriber(email: string, name: string, subscriptionId?: string) {
   const cognito = makeCognito()
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   const firstName = name.split(" ")[0] || "there"
 
   await grantCoachingAccess(email, "monthly")
+  // Coaching bundles the Nutrition Foundations course
+  await grantNutritionAccess(email).catch((err) => console.error("grantNutritionAccess failed:", err))
+  // If a bundle credit was applied, mark it used so it can't be reused
+  if (subscriptionId) {
+    await markBundleCreditUsed(email, subscriptionId).catch(() => { /* no bundle purchase record — nothing to mark */ })
+  }
 
   // Promote existing PENDING_PAYMENT record to ACTIVE; otherwise create new ACTIVE record
   const existing = await getCoachingClientRecord(email)
@@ -874,6 +881,7 @@ export async function POST(request: NextRequest) {
         } else if (product === "bundle") {
           await provisionUser(email)
           await provisionNutritionUser(email)
+          await recordBundlePurchase(email, intent.id).catch((err) => console.error("recordBundlePurchase failed:", err))
         } else {
           await provisionUser(email)
           if (includesTracker) {
@@ -916,7 +924,7 @@ export async function POST(request: NextRequest) {
         const name = subscription.metadata?.customerName ?? ""
         const applicationId = subscription.metadata?.applicationId ?? ""
         if (invoice.billing_reason === "subscription_create") {
-          await provisionCoachingSubscriber(email, name)
+          await provisionCoachingSubscriber(email, name, subscriptionId)
           if (applicationId) {
             await updateCoachingApplication(applicationId, {
               status: "PAID",

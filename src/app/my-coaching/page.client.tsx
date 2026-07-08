@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
 import Link from "next/link"
+import { resolveMacrosFor } from "@/lib/nutrition"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -21,6 +22,14 @@ type ClientInfo = {
   weightUnit: "LBS" | "KG"
   coachMessage: string | null
   coachMessageUpdatedAt: string | null
+  // Nutrition profile
+  heightInches?: number
+  age?: number
+  sex?: "male" | "female"
+  activityLevel?: number
+  nutritionGoal?: "fat-loss" | "maintain" | "muscle-gain"
+  startingWeight?: number
+  customMacros?: { calories?: number; protein?: number; carbs?: number; fat?: number; updatedAt: string }
 }
 
 type ProgramInfo = {
@@ -110,6 +119,13 @@ export default function MyCoachingHomeClient() {
               weightUnit: (c.weightUnit ?? "LBS") as "LBS" | "KG",
               coachMessage: c.coachMessage ?? null,
               coachMessageUpdatedAt: c.coachMessageUpdatedAt ?? null,
+              heightInches: c.heightInches,
+              age: c.age,
+              sex: c.sex,
+              activityLevel: c.activityLevel,
+              nutritionGoal: c.nutritionGoal,
+              startingWeight: c.startingWeight,
+              customMacros: c.customMacros,
             })
           }
           if (prog) {
@@ -232,6 +248,10 @@ export default function MyCoachingHomeClient() {
 
   const goalPct = primaryGoal ? goalProgressPct(primaryGoal) : null
 
+  // Nutrition state: needs setup (no body data) OR macros resolved
+  const nutritionMissing = !!clientInfo && (clientInfo.heightInches == null || clientInfo.age == null || clientInfo.sex == null)
+  const macros = clientInfo ? resolveMacrosFor(clientInfo) : null
+
   // Latest logged workout with unread coach feedback
   const latestFeedback = (() => {
     const withFb = logs.filter((l) => l.coachFeedback && l.coachFeedbackAt)
@@ -323,6 +343,54 @@ export default function MyCoachingHomeClient() {
           <span style={{ display: "inline-block", width: 8, height: 8, background: accent, borderRadius: "50%" }} />
           <span style={{ flex: 1, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: black, fontWeight: 600 }}>
             New note from Lisa on your last workout →
+          </span>
+        </Link>
+      )}
+
+      {/* ── Nutrition setup nudge ──────────────────────────────────────── */}
+      {nutritionMissing && (
+        <Link
+          href="/my-coaching/setup"
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: white, border: `1px solid ${accent}`, borderLeft: `4px solid ${accent}`,
+            padding: "12px 14px", borderRadius: 8, marginBottom: "1rem",
+            textDecoration: "none",
+          }}
+        >
+          <span style={{ flex: 1 }}>
+            <span style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginBottom: 2 }}>
+              Finish setup
+            </span>
+            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: black, fontWeight: 600 }}>
+              Set up your nutrition profile to see your macros →
+            </span>
+          </span>
+        </Link>
+      )}
+
+      {/* ── Today's macro strip (when resolved) ─────────────────────────── */}
+      {macros && (
+        <Link
+          href="/my-coaching/nutrition"
+          style={{
+            display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+            background: white, border: `1px solid ${border}`,
+            padding: "10px 14px", borderRadius: 8, marginBottom: "1rem",
+            textDecoration: "none",
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent }}>
+            Today · weekly average
+          </span>
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, fontWeight: 700 }}>
+            {macros.calories.toLocaleString()} kcal
+          </span>
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: muted }}>
+            {macros.protein}P · {macros.carbs}C · {macros.fat}F
+          </span>
+          <span style={{ marginLeft: "auto", color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem" }}>
+            View →
           </span>
         </Link>
       )}

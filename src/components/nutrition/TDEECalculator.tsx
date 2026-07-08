@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { computeBMR, computeTDEE, computeMacros, type NutritionGoal } from "@/lib/nutrition"
 
 const gold = "#c9a96e"
 const goldDeep = "#a8895e"
@@ -37,19 +38,11 @@ const ACTIVITY_LEVELS = [
   },
 ]
 
-const GOALS = [
-  { value: "fat_loss", label: "Fat Loss", adjustment: -400 },
+const GOALS: Array<{ value: NutritionGoal; label: string; adjustment: number }> = [
+  { value: "fat-loss", label: "Fat Loss", adjustment: -400 },
   { value: "maintain", label: "Maintain / Body Recomp", adjustment: 0 },
-  { value: "muscle_gain", label: "Muscle Gain", adjustment: 300 },
+  { value: "muscle-gain", label: "Muscle Gain", adjustment: 300 },
 ]
-
-function mifflinBMR(sex: "male" | "female", weightKg: number, heightCm: number, age: number): number {
-  const base = 10 * weightKg + 6.25 * heightCm - 5 * age
-  return sex === "male" ? base + 5 : base - 161
-}
-
-function lbsToKg(lbs: number) { return lbs * 0.453592 }
-function inToCm(feet: number, inches: number) { return (feet * 12 + inches) * 2.54 }
 
 const inputStyle: React.CSSProperties = {
   display: "block",
@@ -82,7 +75,7 @@ interface NutritionProfile {
   fat: number
   weightLbs: number
   tdee: number
-  goal: string
+  goal: NutritionGoal
 }
 
 export default function TDEECalculator() {
@@ -92,7 +85,7 @@ export default function TDEECalculator() {
   const [heightFeet, setHeightFeet] = useState("")
   const [heightInches, setHeightInches] = useState("")
   const [activity, setActivity] = useState<number>(1.375)
-  const [goal, setGoal] = useState<string>("fat_loss")
+  const [goal, setGoal] = useState<NutritionGoal>("fat-loss")
   const [result, setResult] = useState<NutritionProfile | null>(null)
   const [saved, setSaved] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
@@ -112,22 +105,12 @@ export default function TDEECalculator() {
     setErrors(errs)
     if (errs.length > 0) return
 
-    const weightKg = lbsToKg(weightNum)
-    const heightCm = inToCm(feetNum, inchesNum)
-    const bmr = mifflinBMR(sex, weightKg, heightCm, ageNum)
-    const tdee = Math.round(bmr * activity)
-    const goalObj = GOALS.find((g) => g.value === goal)!
-    const targetCals = tdee + goalObj.adjustment
+    const heightIn = feetNum * 12 + inchesNum
+    const bmr = computeBMR({ sex, weightLbs: weightNum, heightInches: heightIn, age: ageNum })
+    const tdee = Math.round(computeTDEE(bmr, activity))
+    const macros = computeMacros({ tdee, goal, weightLbs: weightNum })
 
-    // Macro split: protein 1g/lb, fat 0.35g/lb, carbs remainder
-    const proteinG = Math.round(weightNum * 1.0)
-    const fatG = Math.round(weightNum * 0.35)
-    const proteinCals = proteinG * 4
-    const fatCals = fatG * 9
-    const carbCals = Math.max(targetCals - proteinCals - fatCals, 0)
-    const carbG = Math.round(carbCals / 4)
-
-    setResult({ calories: targetCals, protein: proteinG, carbs: carbG, fat: fatG, weightLbs: weightNum, tdee, goal })
+    setResult({ calories: macros.calories, protein: macros.protein, carbs: macros.carbs, fat: macros.fat, weightLbs: weightNum, tdee, goal })
     setSaved(false)
   }
 

@@ -14,6 +14,7 @@ const border = "#e8e2dc"
 const navLinks = [
   { href: "/my-coaching", label: "Home", exact: true, icon: HomeIcon },
   { href: "/my-coaching/workouts", label: "Workouts", icon: DumbellIcon },
+  { href: "/my-coaching/nutrition", label: "Nutrition", icon: NutritionIcon },
   { href: "/my-coaching/progress", label: "Progress", icon: ChartIcon },
   { href: "/my-coaching/check-in", label: "Check-In", icon: CheckIcon },
   { href: "/my-coaching/goals", label: "Goals", icon: GoalIcon },
@@ -63,6 +64,15 @@ function GoalIcon() {
       <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.2" />
       <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.2" />
       <circle cx="8" cy="8" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
+function NutritionIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 2c2.5 0 4.5 2 4.5 4.5 0 3.5-2.5 7-4.5 7S3.5 10 3.5 6.5C3.5 4 5.5 2 8 2Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M8 2v11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   )
 }

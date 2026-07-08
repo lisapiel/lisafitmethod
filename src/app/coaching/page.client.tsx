@@ -205,6 +205,24 @@ export default function CoachingClient() {
   const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }))
 
+  // Bundle-credit lookup — debounced by email input. Shows a banner if the
+  // applicant's email matches a bundle purchase within the credit window.
+  const [bundleCredit, setBundleCredit] = useState<{ available: boolean; amountCents: number; expiresAt: string | null } | null>(null)
+  useEffect(() => {
+    const email = form.email.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setBundleCredit(null); return }
+    const timeout = setTimeout(() => {
+      fetch(`/api/coaching/bundle-credit?email=${encodeURIComponent(email)}`)
+        .then((r) => r.json())
+        .then((d: { available?: boolean; amountCents?: number; expiresAt?: string | null }) => {
+          if (d.available) setBundleCredit({ available: true, amountCents: d.amountCents ?? 0, expiresAt: d.expiresAt ?? null })
+          else setBundleCredit(null)
+        })
+        .catch(() => setBundleCredit(null))
+    }, 400)
+    return () => clearTimeout(timeout)
+  }, [form.email])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus("sending")
@@ -938,6 +956,25 @@ export default function CoachingClient() {
 
                   {status === "error" && (
                     <p style={{ fontSize: 13, color: "#c0392b" }}>Something went wrong. Please try again or reach out on Instagram.</p>
+                  )}
+
+                  {bundleCredit?.available && (
+                    <div
+                      style={{
+                        background: `${ACCENT}18`,
+                        border: `1px solid ${ACCENT}`,
+                        borderLeft: `4px solid ${ACCENT}`,
+                        padding: "12px 14px",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: ACCENT, margin: "0 0 4px" }}>
+                        Bundle credit found ✓
+                      </p>
+                      <p style={{ fontSize: 13, color: TEXT, margin: 0, lineHeight: 1.5 }}>
+                        We&apos;ll credit your <strong>${(bundleCredit.amountCents / 100).toFixed(0)}</strong> bundle purchase toward your first month of coaching if you&apos;re approved.
+                      </p>
+                    </div>
                   )}
 
                   <button
