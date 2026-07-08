@@ -588,6 +588,7 @@ export default function WorkoutLoggerClient() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [alreadyLogged, setAlreadyLogged] = useState(false)
+  const [existingFeedback, setExistingFeedback] = useState<{ text: string; at: string } | null>(null)
   const [showRpeInfo, setShowRpeInfo] = useState(false)
 
   const load = useCallback(async () => {
@@ -624,7 +625,22 @@ export default function WorkoutLoggerClient() {
       if (logsRes.status === "fulfilled") {
         const myLogs = (logsRes.value.logs ?? []) as Array<Record<string, unknown>>
         const existingLog = myLogs.find((l) => Number(l.weekNumber) === weekId && l.dayLabel === targetDay.dayLabel)
-        if (existingLog) { setAlreadyLogged(true); setLoading(false); return }
+        if (existingLog) {
+          setAlreadyLogged(true)
+          if (existingLog.coachFeedback) {
+            setExistingFeedback({
+              text: existingLog.coachFeedback as string,
+              at: (existingLog.coachFeedbackAt as string) ?? "",
+            })
+            // mark seen so home page badge clears
+            try {
+              const seenIso = new Date().toISOString()
+              localStorage.setItem("lfm-coach-feedback-seen-at", seenIso)
+            } catch { /* ignore */ }
+          }
+          setLoading(false)
+          return
+        }
 
         // Find previous week's log for same dayLabel
         const prevLog = myLogs
@@ -724,7 +740,7 @@ export default function WorkoutLoggerClient() {
         <div style={{ marginBottom: "1.5rem" }}>
           <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, textDecoration: "none" }}>← Workouts</Link>
         </div>
-        <div style={{ background: white, border: `1px solid #c8e6c8`, borderRadius: 8, padding: "2.5rem", textAlign: "center" }}>
+        <div style={{ background: white, border: `1px solid #c8e6c8`, borderRadius: 8, padding: "2.5rem", textAlign: "center", marginBottom: existingFeedback ? "1rem" : 0 }}>
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#f0faf0", border: "2px solid #5c9e6a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12l5.5 6L20 6" stroke="#5c9e6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
@@ -732,6 +748,20 @@ export default function WorkoutLoggerClient() {
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 24px" }}>You&apos;ve already logged {week.label} — {day.dayLabel}.</p>
           <Link href="/my-coaching/workouts" style={{ display: "inline-block", background: accent, color: black, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>View all workouts</Link>
         </div>
+
+        {existingFeedback && (
+          <div style={{ background: "#fdfbf7", border: `1px solid ${accent}`, borderLeft: `4px solid ${accent}`, borderRadius: 8, padding: "1.25rem 1.5rem" }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
+              From Lisa{existingFeedback.at ? ` · ${(() => {
+                const days = Math.floor((Date.now() - new Date(existingFeedback.at).getTime()) / 86_400_000)
+                return days === 0 ? "today" : days === 1 ? "yesterday" : `${days}d ago`
+              })()}` : ""}
+            </p>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontStyle: "italic", fontSize: "1rem", color: black, margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+              &ldquo;{existingFeedback.text}&rdquo;
+            </p>
+          </div>
+        )}
       </div>
     )
   }

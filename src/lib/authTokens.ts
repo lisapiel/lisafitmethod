@@ -885,6 +885,40 @@ export interface CoachingWorkoutLogRecord {
   overallRpe?: number
   energyLevel?: number
   clientNotes?: string
+  coachFeedback?: string
+  coachFeedbackAt?: string
+}
+
+export async function getWorkoutLogRecord(id: string): Promise<CoachingWorkoutLogRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `coaching_workoutlog_${id}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as CoachingWorkoutLogRecord
+}
+
+export async function updateWorkoutLogRecord(id: string, updates: Partial<CoachingWorkoutLogRecord>): Promise<void> {
+  const db = makeDb()
+  const sets: string[] = []
+  const values: Record<string, unknown> = {}
+  const names: Record<string, string> = {}
+  for (const [k, v] of Object.entries(updates)) {
+    if (k === "id") continue
+    sets.push(`#${k} = :${k}`)
+    values[`:${k}`] = v
+    names[`#${k}`] = k
+  }
+  if (sets.length === 0) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_workoutlog_${id}` },
+      UpdateExpression: `SET ${sets.join(", ")}`,
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: values,
+    })
+  )
 }
 
 export async function createWorkoutLogRecord(data: Omit<CoachingWorkoutLogRecord, "id">): Promise<CoachingWorkoutLogRecord> {
@@ -1093,4 +1127,86 @@ export async function deleteTaskRecord(id: string): Promise<void> {
       Key: { userId: `coaching_task_${id}` },
     })
   )
+}
+
+// ── Hard delete a coaching client + all their coaching data ─────────────────
+
+export interface DeleteClientResult {
+  clientRecord: boolean
+  accessGrant: boolean
+  workoutLogs: number
+  checkIns: number
+  snapshots: number
+  goals: number
+  messages: number
+}
+
+export async function deleteCoachingClientCascade(email: string): Promise<DeleteClientResult> {
+  const db = makeDb()
+  const lower = email.toLowerCase()
+  const result: DeleteClientResult = {
+    clientRecord: false, accessGrant: false,
+    workoutLogs: 0, checkIns: 0, snapshots: 0, goals: 0, messages: 0,
+  }
+
+  // 1. Client record
+  try {
+    await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_client_${lower}` } }))
+    result.clientRecord = true
+  } catch (e) { console.error("delete client record failed", e) }
+
+  // 2. Access grant
+  try {
+    await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_access_${lower}` } }))
+    result.accessGrant = true
+  } catch (e) { console.error("delete access grant failed", e) }
+
+  // 3. Workout logs
+  const logs = await listWorkoutLogRecords(lower)
+  for (const log of logs) {
+    try {
+      await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_workoutlog_${log.id}` } }))
+      result.workoutLogs += 1
+    } catch (e) { console.error("delete workout log failed", log.id, e) }
+  }
+
+  // 4. Check-ins
+  const checkIns = await listCoachingCheckIns(lower)
+  for (const ci of checkIns) {
+    try {
+      await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_checkin_${ci.id}` } }))
+      result.checkIns += 1
+    } catch (e) { console.error("delete check-in failed", ci.id, e) }
+  }
+
+  // 5. Progress snapshots
+  const snapshots = await listSnapshotRecords(lower)
+  for (const s of snapshots) {
+    try {
+      await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_snapshot_${s.id}` } }))
+      result.snapshots += 1
+    } catch (e) { console.error("delete snapshot failed", s.id, e) }
+  }
+
+  // 6. Goals
+  const goals = await listGoalRecords(lower)
+  for (const g of goals) {
+    try {
+      await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_goal_${g.id}` } }))
+      result.goals += 1
+    } catch (e) { console.error("delete goal failed", g.id, e) }
+  }
+
+  // 7. Messages — thread is deterministic: sorted [client, coach].join("_")
+  const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
+  const threadId = [lower, COACH_EMAIL].sort().join("_")
+  const messages = await listCoachingMessages(threadId)
+  for (const m of messages) {
+    try {
+      await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `coaching_msg_${m.threadId}_${m.sentAt}_${m.id}` } }))
+      result.messages += 1
+    } catch (e) { console.error("delete message failed", m.id, e) }
+  }
+
+  return result
 }

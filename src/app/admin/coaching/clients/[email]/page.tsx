@@ -52,6 +52,11 @@ export default function ClientProfilePage() {
   const [program, setProgram] = useState<Program | null>(null)
   const [allPrograms, setAllPrograms] = useState<Program[]>([])
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([])
+  const [recentWorkouts, setRecentWorkouts] = useState<Array<{ id: string; completedAt: string; dayLabel: string; weekNumber: number; overallRpe: number | null; hasFeedback: boolean }>>([])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState("")
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState("")
   const [loading, setLoading] = useState(true)
   const [editingNotes, setEditingNotes] = useState(false)
   const [notes, setNotes] = useState("")
@@ -138,6 +143,22 @@ export default function ClientProfilePage() {
           status: (g.status as string | null) ?? null,
         })))
       }
+
+      // Load recent workouts
+      const workoutsRes = await fetch(`/api/admin/coaching/clients/${encodeURIComponent(emailParam)}/workouts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (workoutsRes.ok) {
+        const data = await workoutsRes.json() as { logs?: Array<Record<string, unknown>> }
+        setRecentWorkouts((data.logs ?? []).slice(0, 5).map((l) => ({
+          id: l.id as string,
+          completedAt: l.completedAt as string,
+          dayLabel: l.dayLabel as string,
+          weekNumber: Number(l.weekNumber ?? 0),
+          overallRpe: l.overallRpe != null ? Number(l.overallRpe) : null,
+          hasFeedback: Boolean(l.coachFeedback),
+        })))
+      }
     } catch { /* handled */ }
 
     setLoading(false)
@@ -149,6 +170,29 @@ export default function ClientProfilePage() {
     setClient((c) => c ? { ...c, coachMessage: coachMessage.trim() || undefined, coachMessageUpdatedAt: new Date().toISOString() } : c)
     setSavingCoachMessage(false)
     setEditingCoachMessage(false)
+  }
+
+  async function handleDeleteClient() {
+    if (deleteConfirmText !== "DELETE" || !client) return
+    setDeleting(true)
+    setDeleteError("")
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const res = await fetch(`/api/admin/coaching/clients/${encodeURIComponent(client.email)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "DELETE" }),
+      })
+      if (res.ok) {
+        router.push("/admin/coaching/clients")
+      } else {
+        setDeleteError("Delete failed. Try again.")
+      }
+    } catch {
+      setDeleteError("Delete failed. Try again.")
+    }
+    setDeleting(false)
   }
 
   async function addGoal() {
@@ -330,21 +374,22 @@ export default function ClientProfilePage() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: "flex", gap: 8, marginBottom: "1.5rem", flexWrap: "wrap" }}>
+      <div className="h-scroll" style={{ display: "flex", gap: 8, marginBottom: "1.5rem", flexWrap: "wrap" }}>
         {[
+          { label: "Workouts", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts` },
           { label: "Program", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/program` },
           { label: "Progress", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/progress` },
           { label: "Messages", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/messages` },
           { label: "Check-Ins", href: `/admin/coaching/check-ins` },
           { label: "Notes", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/notes` },
         ].map(({ label, href }) => (
-          <Link key={label} href={href} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>
+          <Link key={label} href={href} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>
             {label}
           </Link>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
         {/* Current Program */}
         <SectionCard
           title="Current Program"
@@ -393,6 +438,43 @@ export default function ClientProfilePage() {
                   {ci.status ?? "PENDING"}
                 </span>
               </div>
+            ))
+          )}
+        </SectionCard>
+
+        {/* Recent Workouts */}
+        <SectionCard
+          title="Recent Workouts"
+          action={
+            <Link href={`/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              View All
+            </Link>
+          }
+        >
+          {recentWorkouts.length === 0 ? (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444" }}>No workouts logged yet.</p>
+          ) : (
+            recentWorkouts.map((w) => (
+              <Link
+                key={w.id}
+                href={`/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts`}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, textDecoration: "none" }}
+              >
+                <div>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#f0e6d3", margin: 0 }}>
+                    {formatDate(w.completedAt)} · {w.dayLabel}
+                  </p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", margin: 0 }}>
+                    Week {w.weekNumber}{w.overallRpe ? ` · RPE ${w.overallRpe}` : ""}
+                  </p>
+                </div>
+                <span style={{
+                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", letterSpacing: "0.08em",
+                  color: w.hasFeedback ? "#5c9e6a" : gold,
+                }}>
+                  {w.hasFeedback ? "✓ FEEDBACK" : "NEEDS FEEDBACK"}
+                </span>
+              </Link>
             ))
           )}
         </SectionCard>
@@ -590,6 +672,74 @@ export default function ClientProfilePage() {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Danger zone */}
+      <div style={{ marginTop: "2.5rem", border: `1px solid #4a1e1e`, background: "#170a0a", padding: "16px 20px" }}>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#c14646", margin: "0 0 6px" }}>
+          Danger zone
+        </p>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#888", margin: "0 0 12px", lineHeight: 1.5 }}>
+          Permanently remove this client and all their coaching data. Their Cognito login account will stay.
+        </p>
+        <button
+          onClick={() => { setDeleteConfirmText(""); setDeleteError(""); setShowDeleteModal(true) }}
+          style={{ background: "none", border: `1px solid #4a1e1e`, color: "#c14646", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}
+        >
+          Delete client
+        </button>
+      </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div
+          onClick={() => setShowDeleteModal(false)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ background: "#111", border: `1px solid ${border}`, borderLeft: `4px solid #c14646`, padding: "1.5rem", maxWidth: 460, width: "100%" }}
+          >
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#c14646", margin: "0 0 6px" }}>
+              Danger zone
+            </p>
+            <h3 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.35rem", color: "#f0e6d3", margin: "0 0 10px", fontWeight: 500 }}>
+              Delete {client.displayName}?
+            </h3>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#888", margin: "0 0 12px", lineHeight: 1.5 }}>
+              This permanently removes their coaching data — client record, workouts, check-ins, progress snapshots, goals, and message thread. Their Cognito login account will stay. This cannot be undone.
+            </p>
+            <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+              Type DELETE to confirm
+            </label>
+            <input
+              type="text"
+              autoFocus
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE"
+              style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", outline: "none", boxSizing: "border-box", marginBottom: 12 }}
+            />
+            {deleteError && <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#c14646", margin: "0 0 10px" }}>{deleteError}</p>}
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowDeleteModal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteClient}
+                disabled={deleteConfirmText !== "DELETE" || deleting}
+                style={{
+                  background: deleteConfirmText === "DELETE" && !deleting ? "#c14646" : "#333",
+                  color: "#fff", border: "none", padding: "9px 20px",
+                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                  cursor: deleteConfirmText === "DELETE" && !deleting ? "pointer" : "not-allowed",
+                }}
+              >
+                {deleting ? "Deleting…" : "Delete forever"}
+              </button>
             </div>
           </div>
         </div>

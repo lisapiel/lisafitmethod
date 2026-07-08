@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#f0e6d3" }}>
+    <div data-parent="admin-shell" style={{ minHeight: "100vh", background: "#0a0a0a", color: "#f0e6d3" }}>
       <AdminHeader />
       <main style={{ padding: "2.5rem 2rem", maxWidth: 1200, margin: "0 auto" }}>{children}</main>
     </div>

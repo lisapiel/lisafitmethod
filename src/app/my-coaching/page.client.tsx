@@ -34,6 +34,8 @@ type WorkoutLog = {
   dayLabel: string
   completedAt: string
   setData?: string
+  coachFeedback?: string
+  coachFeedbackAt?: string
 }
 
 type Goal = {
@@ -123,6 +125,8 @@ export default function MyCoachingHomeClient() {
             dayLabel: l.dayLabel as string,
             completedAt: l.completedAt as string,
             setData: l.setData as string | undefined,
+            coachFeedback: l.coachFeedback as string | undefined,
+            coachFeedbackAt: l.coachFeedbackAt as string | undefined,
           })))
         }
 
@@ -228,6 +232,23 @@ export default function MyCoachingHomeClient() {
 
   const goalPct = primaryGoal ? goalProgressPct(primaryGoal) : null
 
+  // Latest logged workout with unread coach feedback
+  const latestFeedback = (() => {
+    const withFb = logs.filter((l) => l.coachFeedback && l.coachFeedbackAt)
+    if (withFb.length === 0) return null
+    const newest = withFb.sort((a, b) => (b.coachFeedbackAt ?? "").localeCompare(a.coachFeedbackAt ?? ""))[0]
+    let seenAt = ""
+    try { seenAt = typeof window !== "undefined" ? (localStorage.getItem("lfm-coach-feedback-seen-at") ?? "") : "" } catch { /* ignore */ }
+    if (seenAt && (newest.coachFeedbackAt ?? "") <= seenAt) return null
+    // Compute the dayIndex for the log's day so we can link to it
+    let dayIndex = -1
+    if (program) {
+      const w = program.weeks.find((x) => x.weekNumber === newest.weekNumber)
+      if (w) dayIndex = w.days.findIndex((d) => d.dayLabel === newest.dayLabel)
+    }
+    return { log: newest, dayIndex }
+  })()
+
   return (
     <div>
       {/* ── Greeting ────────────────────────────────────────────────────── */}
@@ -287,6 +308,24 @@ export default function MyCoachingHomeClient() {
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>{clientInfo.goal}</p>
         </div>
       ) : null}
+
+      {/* ── New feedback nudge ─────────────────────────────────────────── */}
+      {latestFeedback && latestFeedback.dayIndex >= 0 && (
+        <Link
+          href={`/my-coaching/workouts/${latestFeedback.log.weekNumber}/${latestFeedback.dayIndex}`}
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: `${accent}18`, border: `1px solid ${accent}`,
+            padding: "10px 14px", borderRadius: 8, marginBottom: "1rem",
+            textDecoration: "none",
+          }}
+        >
+          <span style={{ display: "inline-block", width: 8, height: 8, background: accent, borderRadius: "50%" }} />
+          <span style={{ flex: 1, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: black, fontWeight: 600 }}>
+            New note from Lisa on your last workout →
+          </span>
+        </Link>
+      )}
 
       {/* ── Section 2: Today's Workout (Primary CTA) ────────────────────── */}
       {!program ? (

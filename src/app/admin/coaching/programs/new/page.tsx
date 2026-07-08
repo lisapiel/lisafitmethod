@@ -284,7 +284,7 @@ export default function NewProgramPage() {
       </div>
 
       {/* Week tabs */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
+      <div className="h-scroll" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
         {weeks.map((w, wi) => (
           <div key={wi} style={{ display: "flex", alignItems: "center" }}>
             <button onClick={() => { setActiveWeek(wi); setActiveDay(0) }}
@@ -304,7 +304,7 @@ export default function NewProgramPage() {
       </div>
 
       {/* Day tabs with reorder */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
+      <div className="h-scroll" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
         {week?.days.map((d, di) => (
           <div key={di} style={{ display: "flex", alignItems: "center", border: di === activeDay ? `1px solid #3a3a3a` : `1px solid ${border}`, background: di === activeDay ? "#2a2a2a" : "transparent" }}>
             <button onClick={() => moveDayUp(di)} disabled={di === 0} style={{ background: "none", border: "none", color: di === 0 ? "#333" : "#888", cursor: di === 0 ? "not-allowed" : "pointer", padding: "0 4px", fontSize: "0.65rem", lineHeight: 1 }}>◀</button>

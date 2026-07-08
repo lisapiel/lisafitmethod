@@ -92,7 +92,7 @@ export default function ClientProgramPage() {
       ) : (
         <>
           {/* Week tabs */}
-          <div style={{ display: "flex", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
+          <div className="h-scroll" style={{ display: "flex", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
             {weeks.map((w, wi) => (
               <button key={wi} onClick={() => { setActiveWeek(wi); setActiveDay(0) }}
                 style={{ background: wi === activeWeek ? gold : "#161616", border: `1px solid ${wi === activeWeek ? gold : border}`, color: wi === activeWeek ? "#0a0a0a" : "#888", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: wi === activeWeek ? 700 : 400, cursor: "pointer" }}>
@@ -102,7 +102,7 @@ export default function ClientProgramPage() {
           </div>
 
           {/* Day tabs */}
-          <div style={{ display: "flex", gap: 6, marginBottom: "1.25rem", flexWrap: "wrap" }}>
+          <div className="h-scroll" style={{ display: "flex", gap: 6, marginBottom: "1.25rem", flexWrap: "wrap" }}>
             {week?.days.map((d, di) => (
               <button key={di} onClick={() => setActiveDay(di)}
                 style={{ background: di === activeDay ? "#2a2a2a" : "transparent", border: `1px solid ${di === activeDay ? "#3a3a3a" : border}`, color: di === activeDay ? "#f0e6d3" : "#666", padding: "6px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>

@@ -5,6 +5,7 @@ import {
   getCoachingClientRecord,
   updateCoachingClientRecord,
   listCoachingClientRecords,
+  deleteCoachingClientCascade,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -56,4 +57,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ em
   const updates = await req.json()
   await updateCoachingClientRecord(decodeURIComponent(email), updates)
   return NextResponse.json({ ok: true })
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ email: string }> }) {
+  if (!(await verifyAdmin(req))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  const { email } = await params
+  const body = await req.json().catch(() => ({})) as { confirm?: string }
+  if (body.confirm !== "DELETE") {
+    return NextResponse.json({ error: "confirm must equal 'DELETE'" }, { status: 400 })
+  }
+  const decoded = decodeURIComponent(email)
+  const result = await deleteCoachingClientCascade(decoded)
+  return NextResponse.json({ ok: true, deleted: result })
 }

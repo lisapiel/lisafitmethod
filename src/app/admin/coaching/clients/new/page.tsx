@@ -85,13 +85,23 @@ export default function NewClientPage() {
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888", marginBottom: 8, lineHeight: 1.6 }}>
             <strong style={{ color: "#f0e6d3" }}>{displayName}</strong> ({result.email}) has been added to your coaching roster.
           </p>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#555", marginBottom: 28 }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#666", marginBottom: 20, lineHeight: 1.6 }}>
             {result.checkoutUrl
-              ? "A payment link has been emailed to them. Access will be granted automatically once they pay."
+              ? "A Stripe payment link has been emailed to them. Their coaching portal will unlock automatically once they pay."
               : result.accountCreated
                 ? "A new account was created and a welcome email with a password setup link has been sent."
                 : "They already had an account. A portal access notification email was sent."}
           </p>
+          {result.checkoutUrl && (
+            <div style={{ background: "#0a0a0a", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 24, textAlign: "left" }}>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#666", margin: "0 0 6px" }}>
+                Payment link (copy if you want to send via DM)
+              </p>
+              <p style={{ fontFamily: "monospace", fontSize: "0.7rem", color: gold, margin: 0, wordBreak: "break-all", lineHeight: 1.4 }}>
+                {result.checkoutUrl}
+              </p>
+            </div>
+          )}
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             <Link
               href={`/admin/coaching/clients/${encodeURIComponent(result.email)}`}
@@ -193,8 +203,10 @@ export default function NewClientPage() {
               style={{ flex: 1, background: "#111", border: `1px solid ${border}`, borderLeft: "none", color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
             />
           </div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", marginTop: 5 }}>
-            {monthlyPrice ? `$${parseFloat(monthlyPrice || "0").toFixed(2)}/month — payment link emailed, access granted after payment` : "Leave blank to grant immediate access without payment"}
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#666", marginTop: 6, lineHeight: 1.5 }}>
+            {monthlyPrice
+              ? `→ Client gets an email with a Stripe payment link for $${parseFloat(monthlyPrice || "0").toFixed(2)}/mo. Coaching portal unlocks automatically once they pay.`
+              : "→ Grant free/comped access. Client gets a welcome email and can log in right away."}
           </p>
         </div>
 
