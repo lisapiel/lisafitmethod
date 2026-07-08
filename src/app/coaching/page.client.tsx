@@ -237,7 +237,7 @@ export default function CoachingClient() {
         @media (max-width: 900px) {
           .ch-hero      { padding: 80px 28px 64px; }
           .ch-hero-grid { grid-template-columns: 1fr; gap: 48px; }
-          .ch-hero-photo-wrap { order: -1; }
+          .ch-hero-photo-wrap { }
           .ch-section   { padding: 72px 28px; }
           .ch-2col      { grid-template-columns: 1fr; gap: 48px; }
           .ch-4col      { grid-template-columns: repeat(2, 1fr); }
@@ -324,7 +324,7 @@ export default function CoachingClient() {
               <span style={{ color: ACCENT }}>Better movement. For life.</span>
             </h1>
             <p style={{ fontSize: 17, color: "rgba(240,230,211,0.65)", lineHeight: 1.7, marginBottom: 40, maxWidth: 520 }}>
-              Personalized 1:1 coaching for people who want to build strength, improve their body composition, move better, and stay consistent — without the guesswork.
+              Personalized 1:1 coaching for people who want to build strength, improve their body composition, move better, and stay consistent. No guesswork.
             </p>
             <p style={{ fontSize: 16, color: "rgba(240,230,211,0.5)", lineHeight: 1.7, marginBottom: 48, maxWidth: 520 }}>
               Every program is built around you, adapts as you progress, and keeps you accountable every step of the way.
@@ -365,13 +365,13 @@ export default function CoachingClient() {
             {/* Quote card */}
             <div style={{
               position: "absolute", bottom: 32, left: -24, right: 24,
-              background: "rgba(10,10,10,0.92)", backdropFilter: "blur(8px)",
+              background: "rgba(10,10,10,0.55)", backdropFilter: "blur(8px)",
               padding: "24px 28px", borderLeft: `3px solid ${ACCENT}`,
             }}>
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 15, color: "rgba(240,230,211,0.85)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
                 &ldquo;I&apos;ve been through injuries. I know how frustrating it is. That&apos;s why my coaching is built to help you get stronger, move better, and train in a way your body can actually handle long term.&rdquo;
               </p>
-              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>— Lisa</p>
+              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa</p>
             </div>
           </div>
         </div>
@@ -534,7 +534,7 @@ export default function CoachingClient() {
                 How we coach
               </h2>
               <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.7, marginBottom: 32 }}>
-                Your program is 100% personalized and evolves with you. We look at the whole picture — training, recovery, nutrition, lifestyle, and mindset — so nothing is missed.
+                Your program is 100% personalized and evolves with you. We look at the whole picture: training, recovery, nutrition, lifestyle, and mindset. Nothing gets overlooked.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 24px" }}>
                 {[
@@ -735,7 +735,7 @@ export default function CoachingClient() {
                   "You&apos;re not just a number",
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ color: ACCENT, fontSize: 18, lineHeight: 1 }}>—</span>
+                    <span style={{ color: ACCENT, fontSize: 18, lineHeight: 1 }}>+</span>
                     <span style={{ fontSize: 14, color: TEXT, fontWeight: 500 }} dangerouslySetInnerHTML={{ __html: item }} />
                   </div>
                 ))}
