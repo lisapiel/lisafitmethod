@@ -191,6 +191,7 @@ function Label({ children }: { children: React.ReactNode }) {
 export default function CoachingClient() {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle")
+  const [faqOpen, setFaqOpen] = useState<number | null>(null)
 
   useEffect(() => {
     fetch("/api/member/access")
@@ -396,6 +397,7 @@ export default function CoachingClient() {
                   "Weekly check-ins",
                   "Direct messaging",
                   "Goals and metrics",
+                  "Nutrition targets and check-in accountability",
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <IconCheck />
@@ -642,12 +644,17 @@ export default function CoachingClient() {
             </h2>
           </div>
 
+          <p style={{ textAlign: "center", fontSize: 14, color: "rgba(240,230,211,0.38)", maxWidth: 480, margin: "0 auto 32px" }}>
+            Pricing is right here because you should know what you are getting into before we ever talk.
+          </p>
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: 780, margin: "0 auto 40px" }}>
             {/* Card 1 */}
             <div style={{ background: "#161616", padding: "44px 40px", borderTop: `2px solid #333` }}>
               <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>3-month coaching</p>
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,497</p>
-              <p style={{ fontSize: 13, color: "rgba(240,230,211,0.4)", marginBottom: 28 }}>per month</p>
+              <p style={{ fontSize: 13, color: "rgba(240,230,211,0.4)", marginBottom: 6 }}>per month</p>
+              <p style={{ fontSize: 12, color: "rgba(240,230,211,0.25)", marginBottom: 28 }}>or pay in full at $3,997 (saves about $450)</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <span style={{ color: ACCENT, fontSize: 14, marginTop: 1, flexShrink: 0 }}>✓</span>
@@ -664,11 +671,12 @@ export default function CoachingClient() {
             <div style={{ background: "#1e1a15", padding: "44px 40px", borderTop: `2px solid ${ACCENT}`, position: "relative" }}>
               <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 2, background: ACCENT }} />
               <div style={{ position: "absolute", top: 18, right: 18, background: ACCENT, color: "#0a0a0a", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px" }}>
-                Save $300/mo
+                Save $200/mo
               </div>
               <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>6-month coaching</p>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,197</p>
-              <p style={{ fontSize: 13, color: "rgba(240,230,211,0.4)", marginBottom: 28 }}>per month</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,297</p>
+              <p style={{ fontSize: 13, color: "rgba(240,230,211,0.4)", marginBottom: 6 }}>per month</p>
+              <p style={{ fontSize: 12, color: "rgba(240,230,211,0.25)", marginBottom: 28 }}>or pay in full at $6,997 (saves about $785)</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <span style={{ color: ACCENT, fontSize: 14, marginTop: 1, flexShrink: 0 }}>✓</span>
@@ -737,7 +745,46 @@ export default function CoachingClient() {
         </div>
       </section>
 
-      {/* ── SECTION 10: APPLY FORM ────────────────────────────────────────── */}
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+      <section className="ch-section" style={{ background: "#fff" }}>
+        <div className="ch-narrow" style={{ maxWidth: 760 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Common questions</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 48 }}>
+            Questions people ask before applying.
+          </h2>
+          <div>
+            {[
+              {
+                q: "How is this different from apps like Future or Caliber?",
+                a: "You work directly with me, not an assigned trainer from a pool. I keep my roster small on purpose so every client gets my full attention and a program built specifically for them.",
+              },
+              {
+                q: "Is there a smaller way to start before committing to coaching?",
+                a: "Yes. The Training Foundations bundle ($137) is the best place to start. It also comes with a $137 credit toward your first month of coaching if you decide to upgrade within 90 days.",
+              },
+              {
+                q: "Do you coach nutrition too?",
+                a: "Yes. Every client gets personalized nutrition targets and weekly check-in support. No rigid meal plans, just clear targets that actually work around your real life.",
+              },
+            ].map(({ q, a }, i) => (
+              <div key={q} style={{ borderBottom: `1px solid ${BORDER}` }}>
+                <button
+                  onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                  style={{ width: "100%", background: "none", border: "none", padding: "22px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, cursor: "pointer", textAlign: "left" }}
+                >
+                  <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 18, fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>{q}</span>
+                  <span style={{ color: ACCENT, fontSize: 22, lineHeight: 1, flexShrink: 0, transform: faqOpen === i ? "rotate(45deg)" : "none", transition: "transform 0.2s", display: "inline-block" }}>+</span>
+                </button>
+                {faqOpen === i && (
+                  <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.7, paddingBottom: 22, margin: 0 }}>{a}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── APPLY FORM ───────────────────────────────────────────────────── */}
       <section id="apply" className="ch-section" style={{ background: "#f0ebe3" }}>
         <div className="ch-narrow">
           <div className="ch-2col">
@@ -754,7 +801,7 @@ export default function CoachingClient() {
                 I personally review every application and respond within 48 hours.
               </p>
               <Link href="/courses" className="ch-link">
-                Not ready for coaching yet? Start with Training Foundations first →
+                Not ready yet? The Training Foundations bundle ($137) is a great place to start. It counts as a $137 credit toward coaching if you upgrade within 90 days →
               </Link>
             </div>
 
@@ -877,7 +924,7 @@ export default function CoachingClient() {
                       <select required value={form.coachingOption} onChange={set("coachingOption")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
                         <option>$1,497/month, 3-month commitment</option>
-                        <option>$1,197/month, 6-month commitment</option>
+                        <option>$1,297/month, 6-month commitment</option>
                         <option>Not sure yet, I would like to discuss on a call</option>
                       </select>
                     </div>

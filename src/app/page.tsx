@@ -526,7 +526,7 @@ export default async function HomePage() {
                 Train right.<br /><em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match.</em>
               </h2>
               <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.65, maxWidth: 500, marginBottom: 24 }}>
-                Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately. Get both for {BUNDLE_PRICE_DISPLAY} and save {BUNDLE_SAVINGS_DISPLAY}.
+                Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. {BUNDLE_INDIVIDUAL_TOTAL_DISPLAY} if bought separately. Get both for {BUNDLE_PRICE_DISPLAY} and save {BUNDLE_SAVINGS_DISPLAY}. Your bundle purchase also counts as a $137 credit toward 1:1 coaching if you decide to upgrade within 90 days.
               </p>
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 <div style={{ padding: "14px 20px", background: "#161616", borderLeft: "2px solid rgba(200,169,126,0.4)" }}>
@@ -551,6 +551,77 @@ export default async function HomePage() {
               <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 One-time payment · Buy once, access anytime
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* COACHING */}
+      <section style={{ background: "#0a0a0a", padding: "100px 80px", borderTop: "1px solid #161616" }} className="coaching-promo-section">
+        <style>{`
+          @media (max-width: 768px) {
+            .coaching-promo-section { padding: 72px 28px !important; }
+            .coaching-promo-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+          }
+        `}</style>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="coaching-promo-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
+                1:1 Coaching with Lisa
+              </p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "#f5f2ee", lineHeight: 1.15, marginBottom: 28 }}>
+                The courses are the starting point.<br />
+                <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Coaching is where it clicks.</em>
+              </h2>
+              <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.55)", lineHeight: 1.7, marginBottom: 36, maxWidth: 460 }}>
+                If you want a fully custom program, real weekly accountability, and someone who knows your training inside out, this is what that looks like.
+              </p>
+              <ul style={{ listStyle: "none", marginBottom: 40 }}>
+                {[
+                  "Your program, built entirely around your goals and body",
+                  "Weekly check-ins with adjustments based on your progress",
+                  "Nutrition targets and check-in accountability",
+                  "Form feedback, direct messaging, and full support",
+                ].map((item) => (
+                  <li key={item} style={{ display: "flex", gap: 12, padding: "9px 0", borderBottom: "1px solid rgba(245,242,238,0.06)", fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.5 }}>
+                    <span style={{ color: "var(--accent)", flexShrink: 0 }}>→</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+                <Link href="/coaching#apply" style={{ display: "inline-block", background: "var(--accent)", color: "#0a0a0a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 36px" }}>
+                  Apply for Coaching
+                </Link>
+                <Link href="/coaching" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(245,242,238,0.5)", textDecoration: "none" }}>
+                  Learn more →
+                </Link>
+              </div>
+              <p style={{ marginTop: 16, fontSize: 11, color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                From $1,297/month. Applications reviewed within 48 hours.
+              </p>
+            </div>
+
+            <div style={{ background: "#111", padding: "44px 40px", borderLeft: "3px solid rgba(200,169,126,0.35)" }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 28 }}>
+                How it works
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+                {[
+                  { n: "01", title: "You apply", body: "A short application so I understand your goals, training history, and what you need most." },
+                  { n: "02", title: "I build your program", body: "Custom training built around your body, schedule, equipment, and recovery. Nothing generic." },
+                  { n: "03", title: "We adjust every week", body: "Weekly check-ins, progress reviews, and a plan that evolves as you do." },
+                ].map(({ n, title, body }) => (
+                  <div key={n} style={{ display: "flex", gap: 20 }}>
+                    <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 28, fontWeight: 300, color: "rgba(200,169,126,0.3)", lineHeight: 1, flexShrink: 0 }}>{n}</span>
+                    <div>
+                      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, fontWeight: 600, color: "#f5f2ee", marginBottom: 4 }}>{title}</p>
+                      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(245,242,238,0.45)", lineHeight: 1.6 }}>{body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

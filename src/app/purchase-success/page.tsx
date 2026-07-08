@@ -195,10 +195,34 @@ export default async function PurchaseSuccessPage({ searchParams }: { searchPara
         Go to Login →
       </Link>
 
-      <p style={{ fontSize: 12, color: "#444", lineHeight: 1.8, marginBottom: upsells.length > 0 ? 56 : 0 }}>
+      <p style={{ fontSize: 12, color: "#444", lineHeight: 1.8, marginBottom: 40 }}>
         Didn&apos;t get an email? Check your spam folder.<br />
         Still nothing? Email <a href="mailto:lisa@lisafitmethod.com" style={{ color: gold, textDecoration: "none" }}>lisa@lisafitmethod.com</a>
       </p>
+
+      <div style={{
+        maxWidth: 440,
+        background: "#111",
+        border: "1px solid #1e1a15",
+        borderLeft: `3px solid ${gold}`,
+        padding: "24px 28px",
+        textAlign: "left",
+        marginBottom: upsells.length > 0 ? 56 : 0,
+        width: "100%",
+      }}>
+        <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 8, fontFamily: "var(--font-montserrat), sans-serif" }}>
+          1:1 Coaching
+        </p>
+        <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 300, color: "#f0e6d3", marginBottom: 8 }}>
+          Your purchase gives you a $137 credit toward coaching.
+        </p>
+        <p style={{ fontSize: 12, color: "#666", lineHeight: 1.7, marginBottom: 16 }}>
+          Good for 90 days. Apply when you are ready.
+        </p>
+        <Link href="/coaching" style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, textDecoration: "none", fontFamily: "var(--font-montserrat), sans-serif" }}>
+          Apply for coaching →
+        </Link>
+      </div>
 
       {upsells.length > 0 && (
         <div style={{ width: "100%", maxWidth: 560 }}>
