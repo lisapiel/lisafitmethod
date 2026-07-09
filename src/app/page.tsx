@@ -301,33 +301,33 @@ export default async function HomePage() {
         `}</style>
         <div className="story-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center", maxWidth: 1100, margin: "0 auto" }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 24 }}>Why this exists</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2rem, 3.2vw, 3.5rem) * ${hs})`, fontWeight: 700, lineHeight: 1.15, color: "var(--black)", marginBottom: 32 }}>
+            <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 24 }}>Why this exists</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h2) * ${hs})`, fontWeight: 700, lineHeight: 1.1, color: "var(--black)", marginBottom: 32 }}>
               I learned the hard way so you don&apos;t have to.
             </h2>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
+            <p style={{ fontSize: `calc(var(--text-body) * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
               I trained for years chasing hard workouts, thinking more was better. I had no real system, no structure, just effort and I wasn&apos;t seeing the results I wanted.
             </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
+            <p style={{ fontSize: `calc(var(--text-body) * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
               Then I hurt my back lifting. I was in pain every day for over 8 months. I couldn&apos;t train the way I used to or even trust my own body. If you&apos;ve ever been injured like that, you know it&apos;s not just physical. You start wondering what&apos;s safe, what&apos;s making it worse, and whether you&apos;ll ever feel like yourself again. So I did what my brain naturally does. As an engineer, I&apos;ve always needed to understand how things work, so I went deep into everything I had skipped for too long. Movement quality, warm-ups, mobility, stability, progressive overload, recovery, nutrition, and how to build strength without constantly beating your body up.
             </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
+            <p style={{ fontSize: `calc(var(--text-body) * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
               I rebuilt slowly and came back stronger than ever, moving better, and with a body that finally reflected the work I was putting in.
             </p>
-            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)" }}>
+            <p style={{ fontSize: `calc(var(--text-body) * ${bs})`, lineHeight: 1.65, color: "var(--muted)" }}>
               That experience changed everything. It&apos;s why I became a certified personal trainer, and it&apos;s why I created Lisa Fit Method. Because most people don&apos;t need more random workouts. They need structure, a plan that makes sense for their body, and a real understanding of what they&apos;re doing and why it matters. That&apos;s the approach I use to help my clients get stronger, move better, lose fat, build visible muscle definition, and feel more confident in their training.
             </p>
-            <Link href="/about" style={{ display: "inline-block", marginTop: 28, fontSize: 12, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none" }}>
+            <Link href="/about" style={{ display: "inline-block", marginTop: 28, fontSize: "var(--text-small)", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none" }}>
               My full story →
             </Link>
           </div>
           <div>
             <div style={{ background: "var(--black)", color: "var(--off-white)", padding: "48px 40px", position: "relative" }}>
               <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 120, color: "var(--accent)", opacity: 0.3, position: "absolute", top: -20, left: 28, lineHeight: 1, userSelect: "none" }}>&ldquo;</span>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(22px * ${hs})`, fontStyle: "italic", lineHeight: 1.6, color: "var(--off-white)", position: "relative", zIndex: 1 }}>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h3) * ${hs})`, fontStyle: "italic", lineHeight: 1.5, color: "var(--off-white)", position: "relative", zIndex: 1 }}>
                 Your body isn&apos;t the problem. The plan is.
               </p>
-              <cite style={{ display: "block", marginTop: 24, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontStyle: "normal", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent)" }}>
+              <cite style={{ display: "block", marginTop: 24, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontStyle: "normal", fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent)" }}>
                 Lisa McPherson, CPT
               </cite>
             </div>
@@ -359,13 +359,13 @@ export default async function HomePage() {
         `}</style>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 64 }}>
-            <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+            <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>
               The Courses
             </p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2rem, 3.2vw, 3.5rem) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 16 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h2) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.1, marginBottom: 16 }}>
               Prefer to start on your own? Start here.
             </h2>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 18, fontStyle: "italic", color: "var(--accent-dark)", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-body-lg)", fontStyle: "italic", color: "var(--accent-dark)", margin: 0 }}>
               Everything I had to learn the hard way, organized into a system.
             </p>
           </div>
@@ -373,10 +373,10 @@ export default async function HomePage() {
           <div className="courses-cards-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
             {/* Training Foundations */}
             <div style={{ background: "#fff", padding: "40px 36px", border: "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 Training Foundations
               </p>
-              <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: 22, fontWeight: 700, color: "var(--black)", lineHeight: 1.25, marginBottom: 24 }}>
+              <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 24 }}>
                 Learn to train with structure, so your effort finally goes somewhere.
               </h3>
               <ul style={{ listStyle: "none", marginBottom: 32, flex: 1 }}>
@@ -386,7 +386,7 @@ export default async function HomePage() {
                   "The Training Program. Fully structured workouts with sets, reps, warm-ups, progression guidance, and built-in workout tracking so you can clearly see your progress over time.",
                   "Works from home or the gym. Dumbbells and bands are enough to start.",
                 ].map((item) => (
-                  <li key={item} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(13px * ${bs})`, color: "var(--muted)", lineHeight: 1.5 }}>
+                  <li key={item} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(var(--text-small) * ${bs})`, color: "var(--muted)", lineHeight: 1.55 }}>
                     <span style={{ color: "var(--accent-dark)", flexShrink: 0 }}>→</span>
                     {item}
                   </li>
@@ -398,13 +398,13 @@ export default async function HomePage() {
                   <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>${t.coursePrice}</span>
                   <span style={{ fontSize: 9, color: "#fff", background: "var(--accent-dark)", padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>LIMITED TIME</span>
                 </div>
-                <Link href="/checkout" style={{ display: "block", background: "var(--accent-dark)", color: "#fff", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 24px", textAlign: "center", marginBottom: 10 }}>
+                <Link href="/checkout" style={{ display: "block", background: "var(--accent-dark)", color: "#fff", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(14px, 1.2vw, 18px) clamp(20px, 2vw, 28px)", textAlign: "center", marginBottom: 10 }}>
                   Get Instant Access
                 </Link>
-                <Link href="/courses" style={{ display: "block", border: "1px solid rgba(168,137,94,0.4)", color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "14px 24px", textAlign: "center", marginBottom: 16 }}>
+                <Link href="/courses" style={{ display: "block", border: "1px solid rgba(168,137,94,0.4)", color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(12px, 1vw, 16px) clamp(20px, 2vw, 28px)", textAlign: "center", marginBottom: 16 }}>
                   Explore the Course
                 </Link>
-                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+                <p style={{ fontSize: "var(--text-eyebrow)", color: "rgba(0,0,0,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
                   Includes 50+ exercise videos, built-in workout and progress tracking, full warm-ups and cool-downs, progression guidance, and ongoing access.
                 </p>
               </div>
@@ -412,10 +412,10 @@ export default async function HomePage() {
 
             {/* Nutrition Foundations */}
             <div style={{ background: "#fff", padding: "40px 36px", border: "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 8, fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 Nutrition Foundations
               </p>
-              <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: 22, fontWeight: 700, color: "var(--black)", lineHeight: 1.25, marginBottom: 24 }}>
+              <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 24 }}>
                 Eat to match your training, without overthinking it.
               </h3>
               <ul style={{ listStyle: "none", marginBottom: 32, flex: 1 }}>
@@ -425,7 +425,7 @@ export default async function HomePage() {
                   "Science-backed education. No bro-science.",
                   "Eating out, supplements, and troubleshooting guides for real life.",
                 ].map((item) => (
-                  <li key={item} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(13px * ${bs})`, color: "var(--muted)", lineHeight: 1.5 }}>
+                  <li key={item} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(var(--text-small) * ${bs})`, color: "var(--muted)", lineHeight: 1.55 }}>
                     <span style={{ color: "var(--accent-dark)", flexShrink: 0 }}>→</span>
                     {item}
                   </li>
@@ -437,13 +437,13 @@ export default async function HomePage() {
                   <span style={{ fontSize: 44, fontWeight: 700, color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{NUTRITION_COURSE_PRICE_DISPLAY}</span>
                   <span style={{ fontSize: 9, color: "#fff", background: "var(--accent-dark)", padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>LIMITED TIME</span>
                 </div>
-                <Link href="/checkout?product=nutrition" style={{ display: "block", background: "var(--accent-dark)", color: "#fff", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "16px 24px", textAlign: "center", marginBottom: 10 }}>
+                <Link href="/checkout?product=nutrition" style={{ display: "block", background: "var(--accent-dark)", color: "#fff", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(14px, 1.2vw, 18px) clamp(20px, 2vw, 28px)", textAlign: "center", marginBottom: 10 }}>
                   Get Instant Access · {NUTRITION_COURSE_PRICE_DISPLAY}
                 </Link>
-                <Link href="/nutrition" style={{ display: "block", border: "1px solid rgba(168,137,94,0.4)", color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "14px 24px", textAlign: "center", marginBottom: 16 }}>
+                <Link href="/nutrition" style={{ display: "block", border: "1px solid rgba(168,137,94,0.4)", color: "var(--accent-dark)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(12px, 1vw, 16px) clamp(20px, 2vw, 28px)", textAlign: "center", marginBottom: 16 }}>
                   Explore the Course
                 </Link>
-                <p style={{ fontSize: 11, color: "rgba(0,0,0,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+                <p style={{ fontSize: "var(--text-eyebrow)", color: "rgba(0,0,0,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
                   One-time payment. Buy once, access anytime.
                 </p>
               </div>
@@ -459,25 +459,25 @@ export default async function HomePage() {
         `}</style>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
-            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle</p>
+            <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif" }}>Foundations Bundle</p>
             <span style={{ fontSize: 9, color: "#0a0a0a", background: "var(--accent)", padding: "3px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Best Value</span>
           </div>
           <div className="bundle-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 48 }}>
             <div style={{ flex: 1 }}>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 16 }}>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h3) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 16 }}>
                 Train right. <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match.</em>
               </h2>
-              <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.65, maxWidth: 500, marginBottom: 24 }}>
+              <p style={{ fontSize: `calc(var(--text-small) * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.65, maxWidth: "60ch", marginBottom: 24 }}>
                 Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you upgrade to 1:1 coaching within 90 days, your full $137 counts as a credit toward your first month.
               </p>
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 <div style={{ padding: "14px 20px", background: "#161616", borderLeft: "2px solid rgba(200,169,126,0.4)" }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "var(--off-white)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 2 }}>Training Foundations</p>
-                  <p style={{ fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>${t.coursePrice} value</p>
+                  <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, color: "var(--off-white)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 2 }}>Training Foundations</p>
+                  <p style={{ fontSize: "var(--text-eyebrow)", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>${t.coursePrice} value</p>
                 </div>
                 <div style={{ padding: "14px 20px", background: "#161616", borderLeft: "2px solid rgba(200,169,126,0.4)" }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "var(--off-white)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 2 }}>Nutrition Foundations</p>
-                  <p style={{ fontSize: 11, color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_PRICE_DISPLAY} value</p>
+                  <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, color: "var(--off-white)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 2 }}>Nutrition Foundations</p>
+                  <p style={{ fontSize: "var(--text-eyebrow)", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif" }}>{NUTRITION_COURSE_PRICE_DISPLAY} value</p>
                 </div>
               </div>
             </div>
@@ -486,16 +486,16 @@ export default async function HomePage() {
                 <span style={{ fontSize: 16, color: "rgba(245,242,238,0.25)", textDecoration: "line-through", fontFamily: "var(--font-dm-sans), sans-serif" }}>{BUNDLE_INDIVIDUAL_TOTAL_DISPLAY}</span>
                 <span style={{ fontSize: 56, fontWeight: 700, color: "var(--accent)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1 }}>{BUNDLE_PRICE_DISPLAY}</span>
               </div>
-              <p style={{ fontSize: 11, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20 }}>You save {BUNDLE_SAVINGS_DISPLAY}</p>
-              <Link href="/checkout?product=bundle" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 40px" }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 20 }}>You save {BUNDLE_SAVINGS_DISPLAY}</p>
+              <Link href="/checkout?product=bundle" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(14px, 1.2vw, 18px) clamp(28px, 3vw, 44px)" }}>
                 Get Both Courses
               </Link>
-              <p style={{ marginTop: 14, fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              <p style={{ marginTop: 14, fontSize: "var(--text-eyebrow)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 One-time payment · Buy once, access anytime
               </p>
             </div>
           </div>
-          <p style={{ marginTop: 40, fontSize: 13, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", textAlign: "center" }}>
+          <p style={{ marginTop: 40, fontSize: "var(--text-small)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", textAlign: "center" }}>
             Want it built around you instead?{" "}
             <Link href="/coaching" style={{ color: "rgba(200,169,126,0.6)", textDecoration: "underline" }}>
               That&apos;s 1:1 coaching.
@@ -516,14 +516,14 @@ export default async function HomePage() {
           }
         `}</style>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 16, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+          <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 16, fontFamily: "var(--font-dm-sans), sans-serif" }}>
             Common Questions
           </p>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48, gap: 24, flexWrap: "wrap" }}>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2rem, 3.2vw, 3.5rem) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, margin: 0 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h2) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.1, margin: 0 }}>
               Good questions. <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>Straight answers.</em>
             </h2>
-            <Link href="/faq" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none", whiteSpace: "nowrap" }}>
+            <Link href="/faq" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none", whiteSpace: "nowrap" }}>
               See all questions →
             </Link>
           </div>
@@ -547,8 +547,8 @@ export default async function HomePage() {
               },
             ].map((item) => (
               <div key={item.q} style={{ background: "#fff", padding: "32px 36px", borderLeft: "3px solid var(--accent)" }}>
-                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 17, fontWeight: 700, color: "var(--black)", lineHeight: 1.3, marginBottom: 10 }}>{item.q}</p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 14, color: "var(--muted)", lineHeight: 1.7 }}>{item.a}</p>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontWeight: 700, color: "var(--black)", lineHeight: 1.2, marginBottom: 10 }}>{item.q}</p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-body)", color: "var(--muted)", lineHeight: 1.7 }}>{item.a}</p>
               </div>
             ))}
           </div>
@@ -563,21 +563,21 @@ export default async function HomePage() {
           }
         `}</style>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 800, height: 800, background: "radial-gradient(circle, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
-        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2.25rem, 3.8vw, 4rem) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
+        <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
+        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h2) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
           Stop guessing. <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Start training with someone who actually knows your body.</em>
         </h2>
-        <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: 500, margin: "0 auto 48px", lineHeight: 1.4, position: "relative", zIndex: 1 }}>
+        <p style={{ fontSize: `calc(var(--text-body) * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: "60ch", margin: "0 auto 48px", lineHeight: 1.65, position: "relative", zIndex: 1 }}>
           Apply for 1:1 coaching and get a fully custom program, weekly check-ins, and real accountability from someone who will actually be there.
         </p>
         <div style={{ position: "relative", zIndex: 1, display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
-          <Link href="/coaching#apply" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "20px 72px", marginBottom: 16 }}>
+          <Link href="/coaching#apply" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(16px, 1.4vw, 20px) clamp(40px, 5vw, 72px)", marginBottom: 16 }}>
             Apply for Coaching
           </Link>
-          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>
+          <p style={{ fontSize: "var(--text-small)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>
             $1,497/month. 3-month minimum. Spots are limited. Applications reviewed personally within 48 hours.
           </p>
-          <p style={{ fontSize: 12, color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+          <p style={{ fontSize: "var(--text-small)", color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
             Prefer to start with the courses?{" "}
             <Link href="/checkout" style={{ color: "rgba(200,169,126,0.6)", textDecoration: "underline" }}>
               Training Foundations is ${t.coursePrice}.

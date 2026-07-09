@@ -13,6 +13,15 @@
     --text: #1a1a1a;
     --muted: #6b6560;
     scroll-behavior: smooth;
+
+    /* Fluid type scale — used site-wide */
+    --text-h1:       clamp(2.5rem,  4.5vw, 5rem);
+    --text-h2:       clamp(2rem,    3.2vw, 3.5rem);
+    --text-h3:       clamp(1.25rem, 1.6vw, 1.75rem);
+    --text-body-lg:  clamp(1.125rem,1.4vw, 1.5rem);
+    --text-body:     clamp(1rem,    1.15vw,1.25rem);
+    --text-small:    clamp(0.875rem,0.95vw,1.0625rem);
+    --text-eyebrow:  clamp(0.75rem, 0.85vw,0.9375rem);
   }
 
   html,

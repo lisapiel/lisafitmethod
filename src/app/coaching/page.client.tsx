@@ -178,7 +178,7 @@ const inputBase: React.CSSProperties = {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <label style={{ display: "block", fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>
+    <label style={{ display: "block", fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>
       {children}
     </label>
   )
@@ -272,12 +272,12 @@ export default function CoachingClient() {
           background: ${ACCENT};
           color: #0a0a0a;
           font-family: var(--font-dm-sans), sans-serif;
-          font-size: 12px;
+          font-size: var(--text-small);
           font-weight: 700;
           letter-spacing: 0.2em;
           text-transform: uppercase;
           text-decoration: none;
-          padding: 17px 36px;
+          padding: clamp(1rem, 1.1vw, 1.125rem) clamp(2rem, 2.5vw, 2.75rem);
           border: none;
           cursor: pointer;
           transition: background 0.2s;
@@ -288,16 +288,16 @@ export default function CoachingClient() {
           background: transparent;
           color: rgba(240,230,211,0.6);
           font-family: var(--font-dm-sans), sans-serif;
-          font-size: 13px;
+          font-size: var(--text-small);
           font-weight: 500;
           text-decoration: none;
           border: 1px solid rgba(240,230,211,0.2);
-          padding: 16px 28px;
+          padding: clamp(0.9rem, 1vw, 1rem) clamp(1.5rem, 1.8vw, 2rem);
           transition: border-color 0.2s, color 0.2s;
         }
         .ch-btn-outline:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
         .ch-link {
-          font-size: 14px;
+          font-size: var(--text-body);
           color: ${ACCENT_DARK};
           text-decoration: none;
           font-weight: 500;
@@ -314,7 +314,7 @@ export default function CoachingClient() {
           color: ${ACCENT};
           display: flex; align-items: center; justify-content: center;
           font-family: var(--font-playfair), serif;
-          font-size: 17px;
+          font-size: var(--text-body);
           flex-shrink: 0;
         }
         .ch-input:focus  { border-color: ${ACCENT} !important; }
@@ -335,13 +335,13 @@ export default function CoachingClient() {
 
           {/* Text left */}
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 24 }}>
+            <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 24 }}>
               Online 1:1 Coaching
             </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(34px,4.4vw,58px)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h1)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
               Stronger body. <span style={{ color: ACCENT }}>Better movement. For life.</span>
             </h1>
-            <p style={{ fontSize: "clamp(15px, 1.15vw, 17px)", color: "rgba(240,230,211,0.72)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
+            <p style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.72)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
               Personalized 1:1 coaching for people who want to build real strength, improve their body composition, and move better. You bring the effort. I bring the plan, the feedback, and the accountability.
             </p>
 
@@ -355,7 +355,7 @@ export default function CoachingClient() {
               ].map(({ icon, label }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 12, color: "rgba(240,230,211,0.55)" }}>
                   <span style={{ color: ACCENT, flexShrink: 0 }}>{icon}</span>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{label}</span>
+                  <span style={{ fontSize: "var(--text-small)", fontWeight: 500 }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -383,10 +383,10 @@ export default function CoachingClient() {
               background: "rgba(10,10,10,0.55)", backdropFilter: "blur(8px)",
               padding: "24px 28px", borderLeft: `3px solid ${ACCENT}`,
             }}>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(14px, 1vw, 15px)", color: "rgba(240,230,211,0.88)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-small)", color: "rgba(240,230,211,0.88)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
                 &ldquo;I&apos;ve had to rebuild my body from injury. Now I help you build yours with strength, structure, and smarter training.&rdquo;
               </p>
-              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa M</p>
+              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa M</p>
             </div>
           </div>
         </div>
@@ -398,11 +398,11 @@ export default function CoachingClient() {
           <div className="ch-2col">
             {/* Text */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Your coaching experience</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,2.8vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.15, marginBottom: 16 }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Your coaching experience</p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 16 }}>
                 Everything you need in one place.
               </h2>
-              <p style={{ fontSize: "clamp(14px, 1vw, 16px)", color: MUTED, lineHeight: 1.7, marginBottom: 36 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.65, marginBottom: 36 }}>
                 Your whole program lives inside my coaching platform, which you can save to your phone&apos;s home screen so it opens just like an app. Open it at the gym, follow your workout, watch the demos, log your sets, track your progress, and message me when you need help. I built the platform myself. Former engineer habits die hard.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 40 }}>
@@ -416,7 +416,7 @@ export default function CoachingClient() {
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <IconCheck />
-                    <span style={{ fontSize: 15, color: TEXT, lineHeight: 1.5 }}>{item}</span>
+                    <span style={{ fontSize: "var(--text-body)", color: TEXT, lineHeight: 1.65 }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -495,8 +495,8 @@ export default function CoachingClient() {
       <section className="ch-section" style={{ background: CREAM }}>
         <div className="ch-narrow">
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 14 }}>What you&apos;ll get</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, margin: 0 }}>
+            <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 14 }}>What you&apos;ll get</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, margin: 0 }}>
               Results that go beyond how you look.
             </h2>
           </div>
@@ -509,8 +509,8 @@ export default function CoachingClient() {
             ].map(({ icon, title, body }) => (
               <div key={title} style={{ background: "#f0ebe3", padding: "clamp(28px, 3vw, 36px) clamp(24px, 2.5vw, 32px)", borderBottom: `2px solid ${ACCENT}` }}>
                 <div style={{ color: ACCENT, marginBottom: 16 }}>{icon}</div>
-                <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(18px, 1.4vw, 21px)", fontWeight: 700, color: TEXT, marginBottom: 10, lineHeight: 1.25 }}>{title}</h3>
-                <p style={{ fontSize: "clamp(13px, 0.95vw, 14.5px)", color: MUTED, lineHeight: 1.65, margin: 0 }}>{body}</p>
+                <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontWeight: 700, color: TEXT, marginBottom: 10, lineHeight: 1.1 }}>{title}</h3>
+                <p style={{ fontSize: "var(--text-small)", color: MUTED, lineHeight: 1.5, margin: 0 }}>{body}</p>
               </div>
             ))}
           </div>
@@ -523,8 +523,8 @@ export default function CoachingClient() {
           <div className="ch-2col">
             {/* Who this is for */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Who this is for</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(22px,2.4vw,34px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 32 }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Who this is for</p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 32 }}>
                 This is for you if
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -536,7 +536,7 @@ export default function CoachingClient() {
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <IconCheck />
-                    <span style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: TEXT, lineHeight: 1.6 }}>{item}</span>
+                    <span style={{ fontSize: "var(--text-body)", color: TEXT, lineHeight: 1.65 }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -544,11 +544,11 @@ export default function CoachingClient() {
 
             {/* How we coach */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>How we coach</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(22px,2.4vw,34px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 14 }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>How we coach</p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 14 }}>
                 Coaching that looks at everything
               </h2>
-              <p style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: MUTED, lineHeight: 1.7, marginBottom: 32 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, marginBottom: 32 }}>
                 Your program is 100% built around you, and it evolves as you do. Training, recovery, nutrition, lifestyle, mindset. If it affects your progress, we pay attention to it.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px 24px" }}>
@@ -563,8 +563,8 @@ export default function CoachingClient() {
                   <div key={title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                     <span style={{ color: ACCENT, flexShrink: 0, marginTop: 2 }}>{icon}</span>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: TEXT, margin: "0 0 4px" }}>{title}</p>
-                      <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.55 }}>{body}</p>
+                      <p style={{ fontSize: "var(--text-body)", fontWeight: 600, color: TEXT, margin: "0 0 4px", lineHeight: 1.65 }}>{title}</p>
+                      <p style={{ fontSize: "var(--text-small)", color: MUTED, margin: 0, lineHeight: 1.5 }}>{body}</p>
                     </div>
                   </div>
                 ))}
@@ -577,8 +577,8 @@ export default function CoachingClient() {
       {/* ── SECTION 6: HOW COACHING WORKS ────────────────────────────────── */}
       <section className="ch-section" style={{ background: CREAM }}>
         <div className="ch-narrow" style={{ maxWidth: 760 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>How coaching works</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 56 }}>
+          <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>How coaching works</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 56 }}>
             From application to progress
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -612,8 +612,8 @@ export default function CoachingClient() {
               <div key={n} style={{ display: "flex", gap: 20, paddingBottom: i < arr.length - 1 ? 36 : 0, borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : "none", marginBottom: i < arr.length - 1 ? 36 : 0 }}>
                 <div className="ch-step-num">{n}</div>
                 <div style={{ minWidth: 0 }}>
-                  <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(18px, 1.4vw, 21px)", fontWeight: 700, color: TEXT, margin: "6px 0 10px" }}>{title}</h3>
-                  <p style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: MUTED, lineHeight: 1.7, margin: 0 }}>{body}</p>
+                  <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontWeight: 700, color: TEXT, margin: "6px 0 10px", lineHeight: 1.1 }}>{title}</h3>
+                  <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, margin: 0 }}>{body}</p>
                 </div>
               </div>
             ))}
@@ -624,8 +624,8 @@ export default function CoachingClient() {
       {/* ── SECTION 7: A TYPICAL WEEK ─────────────────────────────────────── */}
       <section className="ch-section" style={{ background: "#fff" }}>
         <div className="ch-narrow" style={{ maxWidth: 720 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>A typical week</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 32 }}>
+          <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>A typical week</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 32 }}>
             What a week actually looks like
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 40 }}>
@@ -639,11 +639,11 @@ export default function CoachingClient() {
             ].map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                 <IconCheck />
-                <span style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: TEXT, lineHeight: 1.6 }}>{item}</span>
+                <span style={{ fontSize: "var(--text-body)", color: TEXT, lineHeight: 1.65 }}>{item}</span>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(20px, 1.8vw, 24px)", fontStyle: "italic", color: ACCENT, margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontStyle: "italic", color: ACCENT, margin: 0, lineHeight: 1.1 }}>
             Simple. Structured. Personal.
           </p>
         </div>
@@ -653,31 +653,31 @@ export default function CoachingClient() {
       <section className="ch-section" style={{ background: "#0a0a0a" }}>
         <div className="ch-narrow">
           <div style={{ textAlign: "center", marginBottom: 52 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 14 }}>Investment</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, margin: 0 }}>
+            <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 14 }}>Investment</p>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: "#f5f2ee", lineHeight: 1.1, margin: 0 }}>
               Simple pricing, out in the open.
             </h2>
           </div>
 
-          <p style={{ textAlign: "center", fontSize: "clamp(13px, 0.95vw, 14.5px)", color: "rgba(240,230,211,0.45)", maxWidth: 520, margin: "0 auto 32px", lineHeight: 1.65 }}>
+          <p style={{ textAlign: "center", fontSize: "var(--text-small)", color: "rgba(240,230,211,0.45)", maxWidth: 520, margin: "0 auto 32px", lineHeight: 1.5 }}>
             Pricing is right here because you should know what you are getting into before we ever talk.
           </p>
 
           <div className="ch-price-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: 780, margin: "0 auto 40px" }}>
             {/* Card 1 */}
             <div style={{ background: "#161616", padding: "44px 40px", borderTop: `2px solid #333` }}>
-              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>3-month coaching</p>
+              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>3-month coaching</p>
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,497</p>
-              <p style={{ fontSize: 13, color: "rgba(240,230,211,0.4)", marginBottom: 6 }}>per month</p>
-              <p style={{ fontSize: 12, color: "rgba(240,230,211,0.25)", marginBottom: 28 }}>or pay in full at $3,997 (saves about $450)</p>
+              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.4)", marginBottom: 6, lineHeight: 1.5 }}>per month</p>
+              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.25)", marginBottom: 28, lineHeight: 1.5 }}>or pay in full at $3,997 (saves about $450)</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                  <span style={{ color: ACCENT, fontSize: 14, marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: 14, color: "rgba(240,230,211,0.65)", lineHeight: 1.5 }}>3-month minimum commitment</span>
+                  <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>3-month minimum commitment</span>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                  <span style={{ color: ACCENT, fontSize: 14, marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: 14, color: "rgba(240,230,211,0.65)", lineHeight: 1.5 }}>Best if you want focused support, a clear plan, and accountability while you build momentum.</span>
+                  <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>Best if you want focused support, a clear plan, and accountability while you build momentum.</span>
                 </div>
               </div>
             </div>
@@ -688,29 +688,29 @@ export default function CoachingClient() {
               <div style={{ position: "absolute", top: 18, right: 18, background: ACCENT, color: "#0a0a0a", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px" }}>
                 Save $200/mo
               </div>
-              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>6-month coaching</p>
+              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>6-month coaching</p>
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,297</p>
-              <p style={{ fontSize: 13, color: "rgba(240,230,211,0.4)", marginBottom: 6 }}>per month</p>
-              <p style={{ fontSize: 12, color: "rgba(240,230,211,0.25)", marginBottom: 28 }}>or pay in full at $6,997 (saves about $785)</p>
+              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.4)", marginBottom: 6, lineHeight: 1.5 }}>per month</p>
+              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.25)", marginBottom: 28, lineHeight: 1.5 }}>or pay in full at $6,997 (saves about $785)</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                  <span style={{ color: ACCENT, fontSize: 14, marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: 14, color: "rgba(240,230,211,0.65)", lineHeight: 1.5 }}>6-month minimum commitment</span>
+                  <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>6-month minimum commitment</span>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                  <span style={{ color: ACCENT, fontSize: 14, marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: 14, color: "rgba(240,230,211,0.65)", lineHeight: 1.5 }}>Best if you want longer-term support, more time to build strength, improve body composition, and create lasting results.</span>
+                  <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>Best if you want longer-term support, more time to build strength, improve body composition, and create lasting results.</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "clamp(14px, 1vw, 15px)", color: "rgba(240,230,211,0.5)", marginBottom: 28, maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.65 }}>
+            <p style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.5)", marginBottom: 28, maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.65 }}>
               Coaching is by application because I keep spots limited and I only take people I&apos;m confident I can help.
             </p>
             <a href="#apply" className="ch-btn-primary" style={{ display: "inline-block" }}>Apply Now</a>
-            <p style={{ fontSize: 12, color: "rgba(240,230,211,0.3)", marginTop: 16 }}>Applications reviewed personally within 48 hours.</p>
+            <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.3)", marginTop: 16, lineHeight: 1.5 }}>Applications reviewed personally within 48 hours.</p>
           </div>
         </div>
       </section>
@@ -729,17 +729,17 @@ export default function CoachingClient() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>About me</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 24 }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>About me</p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 24 }}>
                 A coach who gets it
               </h2>
-              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 20 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, marginBottom: 20 }}>
                 I&apos;ve been through my own injuries and setbacks. Eight months of back pain taught me more about training than any certification did.
               </p>
-              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 20 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, marginBottom: 20 }}>
                 I rebuilt my body with smart training, patience, and consistency. Now I help other people do the same thing, without the years of guessing I went through.
               </p>
-              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 40 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, marginBottom: 40 }}>
                 My goal is simple. A strong, resilient body that supports the life you actually want to live.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 24px" }}>
@@ -751,7 +751,7 @@ export default function CoachingClient() {
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ color: ACCENT, fontSize: 18, lineHeight: 1 }}>+</span>
-                    <span style={{ fontSize: 14, color: TEXT, fontWeight: 500 }} dangerouslySetInnerHTML={{ __html: item }} />
+                    <span style={{ fontSize: "var(--text-body)", color: TEXT, fontWeight: 500, lineHeight: 1.65 }} dangerouslySetInnerHTML={{ __html: item }} />
                   </div>
                 ))}
               </div>
@@ -763,8 +763,8 @@ export default function CoachingClient() {
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
       <section className="ch-section" style={{ background: "#fff" }}>
         <div className="ch-narrow" style={{ maxWidth: 760 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Common questions</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 48 }}>
+          <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Common questions</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 48 }}>
             Questions people ask before applying.
           </h2>
           <div>
@@ -803,11 +803,11 @@ export default function CoachingClient() {
                   onClick={() => setFaqOpen(faqOpen === i ? null : i)}
                   style={{ width: "100%", background: "none", border: "none", padding: "22px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, cursor: "pointer", textAlign: "left" }}
                 >
-                  <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(16px, 1.2vw, 18px)", fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>{q}</span>
+                  <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h3)", fontWeight: 700, color: TEXT, lineHeight: 1.1 }}>{q}</span>
                   <span style={{ color: ACCENT, fontSize: 22, lineHeight: 1, flexShrink: 0, transform: faqOpen === i ? "rotate(45deg)" : "none", transition: "transform 0.2s", display: "inline-block" }}>+</span>
                 </button>
                 {faqOpen === i && (
-                  <p style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: MUTED, lineHeight: 1.7, paddingBottom: 22, margin: 0 }}>{a}</p>
+                  <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, paddingBottom: 22, margin: 0 }}>{a}</p>
                 )}
               </div>
             ))}
@@ -821,18 +821,18 @@ export default function CoachingClient() {
           <div className="ch-2col">
             {/* Left: heading */}
             <div style={{ paddingTop: 8 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Apply for coaching</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 20 }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Apply for coaching</p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h2)", fontWeight: 700, color: TEXT, lineHeight: 1.1, marginBottom: 20 }}>
                 Apply for coaching
               </h2>
-              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 12 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, marginBottom: 12 }}>
                 Tell me about your goals, your training, and what you need help with most.
               </p>
-              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 32 }}>
+              <p style={{ fontSize: "var(--text-body)", color: MUTED, lineHeight: 1.7, marginBottom: 32 }}>
                 I personally review every application and respond within 48 hours.
               </p>
 
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 14 }}>
+              <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 14 }}>
                 What happens next
               </p>
               <ol style={{ paddingLeft: 0, listStyle: "none", counterReset: "steps", margin: "0 0 32px" }}>
@@ -846,9 +846,9 @@ export default function CoachingClient() {
                       flexShrink: 0, width: 26, height: 26, borderRadius: "50%",
                       border: `1px solid ${ACCENT}`, color: ACCENT,
                       display: "inline-flex", alignItems: "center", justifyContent: "center",
-                      fontFamily: "var(--font-playfair), serif", fontSize: 13,
+                      fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-small)",
                     }}>{i + 1}</span>
-                    <span style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: TEXT, lineHeight: 1.6, marginTop: 2 }}>{item}</span>
+                    <span style={{ fontSize: "var(--text-body)", color: TEXT, lineHeight: 1.65, marginTop: 2 }}>{item}</span>
                   </li>
                 ))}
               </ol>
@@ -863,7 +863,7 @@ export default function CoachingClient() {
               {status === "done" ? (
                 <div style={{ background: "#0a0a0a", padding: "52px 44px", textAlign: "center" }}>
                   <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 30, fontWeight: 700, color: ACCENT, marginBottom: 16 }}>Got it — thank you.</p>
-                  <p style={{ fontSize: 16, color: "rgba(240,230,211,0.6)", lineHeight: 1.7 }}>
+                  <p style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.6)", lineHeight: 1.7 }}>
                     Your application has been received. I&apos;ll be in touch within 48 hours. Check your inbox (and spam just in case).
                   </p>
                 </div>
@@ -982,7 +982,7 @@ export default function CoachingClient() {
                   </div>
 
                   {status === "error" && (
-                    <p style={{ fontSize: 13, color: "#c0392b" }}>Something went wrong. Please try again or reach out on Instagram.</p>
+                    <p style={{ fontSize: "var(--text-small)", color: "#c0392b", lineHeight: 1.5 }}>Something went wrong. Please try again or reach out on Instagram.</p>
                   )}
 
                   {bundleCredit?.available && (
@@ -995,10 +995,10 @@ export default function CoachingClient() {
                         borderRadius: 4,
                       }}
                     >
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: ACCENT, margin: "0 0 4px" }}>
+                      <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: ACCENT, margin: "0 0 4px" }}>
                         Bundle credit found ✓
                       </p>
-                      <p style={{ fontSize: 13, color: TEXT, margin: 0, lineHeight: 1.5 }}>
+                      <p style={{ fontSize: "var(--text-small)", color: TEXT, margin: 0, lineHeight: 1.5 }}>
                         We&apos;ll credit your <strong>${(bundleCredit.amountCents / 100).toFixed(0)}</strong> bundle purchase toward your first month of coaching if you&apos;re approved.
                       </p>
                     </div>
@@ -1008,7 +1008,7 @@ export default function CoachingClient() {
                     type="submit"
                     disabled={status === "sending"}
                     className="ch-btn-primary"
-                    style={{ width: "100%", opacity: status === "sending" ? 0.6 : 1, fontSize: 13 }}
+                    style={{ width: "100%", opacity: status === "sending" ? 0.6 : 1, fontSize: "var(--text-small)" }}
                   >
                     {status === "sending" ? "Sending…" : "Submit Application"}
                   </button>
