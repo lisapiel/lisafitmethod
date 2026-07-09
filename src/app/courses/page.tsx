@@ -204,7 +204,7 @@ export default async function CoursesPage() {
         <div className="courses-intro">
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 24 }}>Courses</p>
           <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 4vw, 54px) * ${hs})`, fontWeight: 900, color: "#1a1a1a", lineHeight: 1.1, marginBottom: 24 }}>
-            Two courses.<br /><em style={{ fontStyle: "italic", color: accent }}>One complete foundation.</em>
+            Two courses. <em style={{ fontStyle: "italic", color: accent }}>One complete foundation.</em>
           </h1>
           <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(26,26,26,0.5)", lineHeight: 1.7, maxWidth: 580, margin: "0 auto 48px" }}>
             Structured fitness and nutrition systems built for real life. Learn how to move well, train consistently, and eat in a way that supports your goals without obsessing over every detail.
@@ -301,7 +301,7 @@ export default async function CoursesPage() {
           <div>
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.3em", textTransform: "uppercase", color: accent, marginBottom: 20 }}>Nutrition Foundations</p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 4vw, 52px) * ${hs})`, fontWeight: 900, color: "#1a1a1a", lineHeight: 1.08, marginBottom: 24 }}>
-              Eat to match<br /><em style={{ fontStyle: "italic", color: accent }}>your training.</em>
+              Eat to match <em style={{ fontStyle: "italic", color: accent }}>your training.</em>
             </h2>
             <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(26,26,26,0.5)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
               A 4-week nutrition course with a personalised TDEE calculator, a structured meal plan built around your calorie target, science-backed education, and real recipes from verified sources.

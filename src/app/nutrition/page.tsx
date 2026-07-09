@@ -142,8 +142,7 @@ export default async function NutritionPage() {
               Lisa Fit Method
             </p>
             <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(44px, 5vw, 72px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.05, marginBottom: 24 }}>
-              Nutrition<br />
-              <em style={{ fontStyle: "italic", color: accent }}>Foundations.</em>
+              Nutrition <em style={{ fontStyle: "italic", color: accent }}>Foundations.</em>
             </h1>
             <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.6)", lineHeight: 1.5, maxWidth: 520, marginBottom: 32 }}>
               A 4-week nutrition course built for people who train. Personalized to your body. Grounded in research. Practical enough to actually use.
@@ -255,7 +254,7 @@ export default async function NutritionPage() {
           <div style={{ paddingTop: 60 }}>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16 }}>Pair it with</p>
             <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(26px * ${hs})`, fontWeight: 700, color: "#0a0a0a", marginBottom: 20, lineHeight: 1.2 }}>
-              Train smarter with<br /><em style={{ fontStyle: "italic", color: "#a8895e" }}>Training Foundations.</em>
+              Train smarter with <em style={{ fontStyle: "italic", color: "#a8895e" }}>Training Foundations.</em>
             </h3>
             <p style={{ fontSize: `calc(14px * ${bs})`, color: "#1a1a1a", lineHeight: 1.6, marginBottom: 16 }}>
               Nutrition Foundations pairs perfectly with Training Foundations — a 4-week beginner strength training program covering the five foundational movements with built-in workout tracking and progressive overload guidance.
@@ -315,8 +314,7 @@ export default async function NutritionPage() {
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 700, height: 700, background: "radial-gradient(circle, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
         <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: accent, marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
         <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(38px, 4.5vw, 60px) * ${hs})`, fontWeight: 900, color: "#f5f2ee", lineHeight: 1.1, marginBottom: 12, position: "relative", zIndex: 1 }}>
-          Eat to match<br />
-          <em style={{ fontStyle: "italic", color: accent }}>your training.</em>
+          Eat to match <em style={{ fontStyle: "italic", color: accent }}>your training.</em>
         </h2>
         <p style={{ fontSize: `calc(15px * ${bs})`, color: "rgba(245,242,238,0.45)", maxWidth: 440, margin: "0 auto 40px", lineHeight: 1.5, position: "relative", zIndex: 1 }}>
           Four modules. A personalized calculator. A full meal plan. Everything you need to stop guessing and start eating with intention.

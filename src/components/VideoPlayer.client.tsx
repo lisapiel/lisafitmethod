@@ -1,46 +1,40 @@
 "use client"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 
 export default function VideoPlayer({
   src,
+  poster,
   style,
 }: {
   src: string
+  poster?: string
   style?: React.CSSProperties
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
-    // iOS Safari requires muted to be set directly on the DOM node (not just the attribute)
     video.muted = true
-    // defaultMuted ensures muted state survives re-renders
     video.defaultMuted = true
 
     const attemptPlay = () => {
-      video.play().catch(() => {})
+      video.play().catch(() => { setFailed(true) })
     }
 
-    // Try immediately, and again whenever the browser has enough data
     attemptPlay()
     video.addEventListener("loadeddata", attemptPlay)
     video.addEventListener("canplay", attemptPlay)
 
-    // Re-play when tab becomes visible again (iOS suspends video in background)
     const onVisible = () => { if (document.visibilityState === "visible") attemptPlay() }
     document.addEventListener("visibilitychange", onVisible)
 
-    // Intersection Observer: re-trigger play when the video scrolls into view
     let observer: IntersectionObserver | null = null
     if (typeof IntersectionObserver !== "undefined") {
       observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) attemptPlay()
-          })
-        },
+        (entries) => { entries.forEach((e) => { if (e.isIntersecting) attemptPlay() }) },
         { threshold: 0.1 }
       )
       observer.observe(video)
@@ -54,6 +48,10 @@ export default function VideoPlayer({
     }
   }, [src])
 
+  if (failed && poster) {
+    return <img src={poster} alt="" style={{ ...style, objectFit: "cover" }} />
+  }
+
   return (
     <video
       ref={videoRef}
@@ -63,7 +61,8 @@ export default function VideoPlayer({
       loop
       playsInline
       preload="auto"
-      style={{ ...style, pointerEvents: "none", cursor: "default" }}
+      poster={poster}
+      style={{ ...style, pointerEvents: "none", cursor: "default", display: failed ? "none" : undefined }}
     />
   )
 }

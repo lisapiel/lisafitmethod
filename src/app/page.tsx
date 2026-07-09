@@ -164,16 +164,27 @@ export default async function HomePage() {
             overflow: hidden;
             background: #111;
           }
+          .home-hero-row {
+            display: grid;
+            grid-template-columns: 58fr 42fr;
+            min-height: 500px;
+          }
           .home-hero-content {
-            max-width: 720px;
-            padding: 64px 80px 88px;
+            padding: 60px 48px 68px 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+          .home-hero-photo-col {
+            position: relative;
+            overflow: hidden;
           }
           .hero-h1 {
             font-family: var(--font-playfair), serif;
-            font-size: calc(clamp(36px, 5.5vw, 68px) * ${hs});
+            font-size: calc(clamp(28px, 3.2vw, 48px) * ${hs});
             font-weight: 900;
             color: var(--off-white);
-            line-height: 1.07;
+            line-height: 1.08;
             margin-bottom: 24px;
             text-wrap: balance;
           }
@@ -187,16 +198,19 @@ export default async function HomePage() {
             gap: 12px;
             flex-wrap: wrap;
             align-items: center;
-            margin-top: 36px;
+            margin-top: 32px;
             margin-bottom: 16px;
           }
+          .home-hero-photo-section { display: none; }
           @media (max-width: 1024px) {
-            .home-hero-content { padding: 56px 48px 72px; }
+            .home-hero-row { grid-template-columns: 1fr; min-height: auto; }
+            .home-hero-photo-col { display: none; }
+            .home-hero-content { padding: 48px 48px 60px 48px; }
+            .home-hero-photo-section { display: block; }
           }
           @media (max-width: 768px) {
             .home-video-band { height: 56vw; min-height: 240px; }
             .home-hero-content { padding: 40px 24px 56px; }
-            .hero-para-hide { display: none; }
             .hero-ctas { flex-direction: column; align-items: stretch; }
             .hero-cta-primary, .hero-cta-secondary { display: block !important; text-align: center; }
           }
@@ -204,58 +218,63 @@ export default async function HomePage() {
 
         {trailerUrl && (
           <div className="home-video-band">
-            <VideoPlayer src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <VideoPlayer src={trailerUrl} poster={heroUrl || undefined} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         )}
 
-        <div className="home-hero-content">
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
-            1:1 Online Coaching
-          </p>
-          <h1 className="hero-h1">
-            <span>Build a stronger body</span>
-            <em>with a plan that actually fits you.</em>
-          </h1>
-          <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.65, maxWidth: 580, marginBottom: 20 }}>
-            Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
-          </p>
-          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580, marginBottom: 14 }}>
-            Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through.
-          </p>
-          <p className="hero-para-hide" style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580, marginBottom: 14 }}>
-            If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for.
-          </p>
-          <p className="hero-para-hide" style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580, marginBottom: 14 }}>
-            You&apos;ll train from a clear plan inside my coaching platform, with video demos, progress tracking, weekly check-ins I review personally, form feedback, and direct access to me when you need it. As you progress, your plan adjusts with you, so you always know what to focus on next.
-          </p>
-          <p className="hero-para-hide" style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580 }}>
-            My goal is to help you build a strong, capable body that looks good, moves well, and lasts.
-          </p>
-          <div className="hero-ctas">
-            <Link
-              href="/coaching#apply"
-              className="hero-cta-primary"
-              style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 2.5rem", whiteSpace: "nowrap" }}
-            >
-              Apply for Coaching
-            </Link>
-            <Link
-              href="/checkout"
-              className="hero-cta-secondary"
-              style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 1.5rem" }}
-            >
-              Want to start on your own first? Check out the courses.
-            </Link>
+        <div className="home-hero-row">
+          <div className="home-hero-content">
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
+              1:1 Online Coaching
+            </p>
+            <h1 className="hero-h1">
+              <span>Build a stronger body</span>
+              <em>with a plan that actually fits you.</em>
+            </h1>
+            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.65, marginBottom: 18 }}>
+              Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
+            </p>
+            <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65 }}>
+              Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through. If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for. My goal is simple. A strong, capable body that looks good, moves well, and lasts.
+            </p>
+            <div className="hero-ctas">
+              <Link
+                href="/coaching#apply"
+                className="hero-cta-primary"
+                style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 2.5rem", whiteSpace: "nowrap" }}
+              >
+                Apply for Coaching
+              </Link>
+              <Link
+                href="/checkout"
+                className="hero-cta-secondary"
+                style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 1.5rem" }}
+              >
+                Want to start on your own first? Check out the courses.
+              </Link>
+            </div>
+            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+              $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
+            </p>
           </div>
-          <p style={{ fontSize: 11, color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6, maxWidth: 520 }}>
-            $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
-          </p>
+          {heroUrl && (
+            <div className="home-hero-photo-col">
+              <Image
+                src={heroUrl}
+                alt="Lisa McPherson, Lisa Fit Method"
+                fill
+                style={{ objectFit: "cover", objectPosition: settings.crops.hero }}
+                sizes="(max-width: 1024px) 1px, 42vw"
+                priority
+              />
+            </div>
+          )}
         </div>
       </section>
 
-      {/* HERO PHOTO */}
+      {/* HERO PHOTO — mobile/tablet only (desktop sees it in the hero right column) */}
       {heroUrl && (
-        <section style={{ background: "#0a0a0a" }} className="home-hero-photo">
+        <section style={{ background: "#0a0a0a" }} className="home-hero-photo-section">
           <style>{`
             .home-hero-photo-wrap { position: relative; width: 100%; height: 70vh; overflow: hidden; }
             @media (max-width: 768px) { .home-hero-photo-wrap { height: 80vw; } }
@@ -446,7 +465,7 @@ export default async function HomePage() {
           <div className="bundle-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 48 }}>
             <div style={{ flex: 1 }}>
               <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(28px, 3vw, 40px) * ${hs})`, fontWeight: 700, color: "var(--off-white)", lineHeight: 1.15, marginBottom: 16 }}>
-                Train right.<br /><em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match.</em>
+                Train right. <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match.</em>
               </h2>
               <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.65, maxWidth: 500, marginBottom: 24 }}>
                 Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you upgrade to 1:1 coaching within 90 days, your full $137 counts as a credit toward your first month.
@@ -502,8 +521,7 @@ export default async function HomePage() {
           </p>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48, gap: 24, flexWrap: "wrap" }}>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, margin: 0 }}>
-              Good questions.<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>Straight answers.</em>
+              Good questions. <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>Straight answers.</em>
             </h2>
             <Link href="/faq" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none", whiteSpace: "nowrap" }}>
               See all questions →
@@ -547,8 +565,7 @@ export default async function HomePage() {
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 800, height: 800, background: "radial-gradient(circle, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
         <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
         <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(42px, 5vw, 68px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
-          Stop guessing.<br />
-          <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Start training with someone who actually knows your body.</em>
+          Stop guessing. <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Start training with someone who actually knows your body.</em>
         </h2>
         <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: 500, margin: "0 auto 48px", lineHeight: 1.4, position: "relative", zIndex: 1 }}>
           Apply for 1:1 coaching and get a fully custom program, weekly check-ins, and real accountability from someone who will actually be there.

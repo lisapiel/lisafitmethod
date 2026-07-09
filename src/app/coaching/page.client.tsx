@@ -339,8 +339,7 @@ export default function CoachingClient() {
               Online 1:1 Coaching
             </p>
             <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(34px,4.4vw,58px)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
-              Stronger body.<br />
-              <span style={{ color: ACCENT }}>Better movement. For life.</span>
+              Stronger body. <span style={{ color: ACCENT }}>Better movement. For life.</span>
             </h1>
             <p style={{ fontSize: "clamp(15px, 1.15vw, 17px)", color: "rgba(240,230,211,0.72)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
               Personalized 1:1 coaching for people who want to build real strength, improve their body composition, and move better. You bring the effort. I bring the plan, the feedback, and the accountability.
