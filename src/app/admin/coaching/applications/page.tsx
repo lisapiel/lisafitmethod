@@ -245,6 +245,19 @@ export default function AdminApplicationsPage() {
                           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.equipment}</p>
                         </div>
                       )}
+                      {app.investmentReadiness && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Investment</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.investmentReadiness}</p>
+                        </div>
+                      )}
+                      {app.startTiming && (
+                        <div>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Start Timing</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.startTiming}</p>
+                        </div>
+                      )}
+                      {/* Legacy fields kept visible if present on older applications */}
                       {app.coachingOption && (
                         <div>
                           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Option</p>
@@ -264,22 +277,28 @@ export default function AdminApplicationsPage() {
                         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.injuries}</p>
                       </div>
                     )}
+                    {app.whatHaveYouTried && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>What they&apos;ve tried</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whatHaveYouTried}</p>
+                      </div>
+                    )}
                     {app.whyNow && (
                       <div>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Now</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Now (legacy)</p>
                         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyNow}</p>
                       </div>
                     )}
                     {/* Legacy whyCoaching */}
-                    {!app.whyNow && app.whyCoaching && (
+                    {!app.whyNow && !app.whatHaveYouTried && app.whyCoaching && (
                       <div>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Coaching</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Coaching (legacy)</p>
                         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyCoaching}</p>
                       </div>
                     )}
                     {app.whyLisa && (
                       <div>
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Lisa</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Why Lisa (legacy)</p>
                         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{app.whyLisa}</p>
                       </div>
                     )}

@@ -275,6 +275,10 @@ export interface CoachingApplication {
   coursesCompleted?: string
   coachingOption?: string
   whyLisa?: string
+  // Refined form fields (July 2026)
+  whatHaveYouTried?: string
+  investmentReadiness?: string
+  startTiming?: string
   status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"
   applicationDate: string
   reviewedAt?: string
@@ -297,6 +301,9 @@ export async function submitCoachingApplication(data: {
   coursesCompleted?: string
   coachingOption?: string
   whyLisa?: string
+  whatHaveYouTried?: string
+  investmentReadiness?: string
+  startTiming?: string
 }): Promise<string> {
   const db = makeDb()
   const id = randomBytes(16).toString("hex")
@@ -317,6 +324,9 @@ export async function submitCoachingApplication(data: {
     coursesCompleted: data.coursesCompleted?.trim(),
     coachingOption: data.coachingOption?.trim(),
     whyLisa: data.whyLisa?.trim(),
+    whatHaveYouTried: data.whatHaveYouTried?.trim(),
+    investmentReadiness: data.investmentReadiness?.trim(),
+    startTiming: data.startTiming?.trim(),
     status: "PENDING",
     applicationDate: new Date().toISOString(),
   }

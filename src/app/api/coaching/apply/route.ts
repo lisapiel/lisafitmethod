@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
   const name = b.name?.trim() ?? ""
   const email = b.email?.trim().toLowerCase() ?? ""
   const primaryGoal = b.primaryGoal?.trim() ?? ""
-  const whyNow = b.whyNow?.trim() ?? ""
+  const whatHaveYouTried = b.whatHaveYouTried?.trim() ?? ""
 
-  if (!name || !email || !primaryGoal || !whyNow) {
+  if (!name || !email || !primaryGoal) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
@@ -41,23 +41,22 @@ export async function POST(req: NextRequest) {
     name,
     goals: primaryGoal,
     currentFitnessLevel: b.trainingExperience?.trim() ?? "",
-    whyCoaching: whyNow,
+    whyCoaching: whatHaveYouTried,
     trainingExperience: b.trainingExperience?.trim(),
     primaryGoal,
-    whyNow,
     daysPerWeek: b.daysPerWeek?.trim(),
     equipment: b.equipment?.trim(),
     injuries: b.injuries?.trim(),
-    coursesCompleted: b.coursesCompleted?.trim(),
-    coachingOption: b.coachingOption?.trim(),
-    whyLisa: b.whyLisa?.trim(),
+    whatHaveYouTried,
+    investmentReadiness: b.investmentReadiness?.trim(),
+    startTiming: b.startTiming?.trim(),
   })
 
   await notifyAdmin({
     kind: "application-received",
-    subject: `New coaching application — ${name}`,
+    subject: `New coaching application from ${name}`,
     headline: `${name} applied for 1:1 coaching`,
-    body: `Goal: ${primaryGoal}\n\n${whyNow}`,
+    body: `Goal: ${primaryGoal}\n\nWhat they've tried: ${whatHaveYouTried || "(nothing shared)"}`,
     ctaLabel: "Review application",
     ctaHref: "https://lisafitmethod.com/admin/coaching/applications",
     meta: {
@@ -67,9 +66,8 @@ export async function POST(req: NextRequest) {
       "days per week": b.daysPerWeek ?? "—",
       equipment: b.equipment ?? "—",
       "injuries / limitations": b.injuries || "None mentioned",
-      "courses completed": b.coursesCompleted ?? "—",
-      "coaching option": b.coachingOption ?? "—",
-      "why Lisa": b.whyLisa?.substring(0, 300) ?? "—",
+      "investment readiness": b.investmentReadiness ?? "—",
+      "start timing": b.startTiming ?? "—",
     },
   })
 

@@ -138,13 +138,12 @@ interface FormState {
   email: string
   trainingExperience: string
   primaryGoal: string
-  whyNow: string
   daysPerWeek: string
   equipment: string
   injuries: string
-  coursesCompleted: string
-  coachingOption: string
-  whyLisa: string
+  whatHaveYouTried: string
+  investmentReadiness: string
+  startTiming: string
 }
 
 const emptyForm: FormState = {
@@ -152,13 +151,12 @@ const emptyForm: FormState = {
   email: "",
   trainingExperience: "",
   primaryGoal: "",
-  whyNow: "",
   daysPerWeek: "",
   equipment: "",
   injuries: "",
-  coursesCompleted: "",
-  coachingOption: "",
-  whyLisa: "",
+  whatHaveYouTried: "",
+  investmentReadiness: "",
+  startTiming: "",
 }
 
 // ─── Shared input styles ──────────────────────────────────────────────────────
@@ -253,16 +251,19 @@ export default function CoachingClient() {
         .ch-portal-screenshots { /* wrapper only, sizing handled inline */ }
 
         @media (max-width: 900px) {
-          .ch-hero      { padding: 80px 28px 64px; }
+          .ch-hero      { padding: 80px 24px 64px; }
           .ch-hero-grid { grid-template-columns: 1fr; gap: 48px; }
           .ch-hero-photo-wrap { }
-          .ch-section   { padding: 72px 28px; }
+          .ch-section   { padding: 72px 24px; }
           .ch-2col      { grid-template-columns: 1fr; gap: 48px; }
           .ch-4col      { grid-template-columns: repeat(2, 1fr); }
           .ch-3col      { grid-template-columns: 1fr; }
           .ch-2col-form { grid-template-columns: 1fr; }
+          .ch-price-grid { grid-template-columns: 1fr !important; max-width: 440px !important; }
         }
         @media (max-width: 480px) {
+          .ch-hero      { padding: 64px 20px 48px; }
+          .ch-section   { padding: 56px 20px; }
           .ch-4col      { grid-template-columns: 1fr; }
         }
 
@@ -337,15 +338,12 @@ export default function CoachingClient() {
             <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 24 }}>
               Online 1:1 Coaching
             </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(38px,4.5vw,62px)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(34px,4.4vw,58px)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
               Stronger body.<br />
               <span style={{ color: ACCENT }}>Better movement. For life.</span>
             </h1>
-            <p style={{ fontSize: 17, color: "rgba(240,230,211,0.65)", lineHeight: 1.7, marginBottom: 40, maxWidth: 520 }}>
-              Personalized 1:1 coaching for people who want to build strength, improve their body composition, move better, and stay consistent. No guesswork.
-            </p>
-            <p style={{ fontSize: 16, color: "rgba(240,230,211,0.5)", lineHeight: 1.7, marginBottom: 48, maxWidth: 520 }}>
-              Every program is built around you, adapts as you progress, and keeps you accountable every step of the way.
+            <p style={{ fontSize: "clamp(15px, 1.15vw, 17px)", color: "rgba(240,230,211,0.72)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
+              Personalized 1:1 coaching for people who want to build real strength, improve their body composition, and move better. You bring the effort. I bring the plan, the feedback, and the accountability.
             </p>
 
             {/* 4 benefit icons */}
@@ -386,10 +384,10 @@ export default function CoachingClient() {
               background: "rgba(10,10,10,0.55)", backdropFilter: "blur(8px)",
               padding: "24px 28px", borderLeft: `3px solid ${ACCENT}`,
             }}>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 15, color: "rgba(240,230,211,0.85)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
-                &ldquo;I&apos;ve been through injuries. I know how frustrating it is. That&apos;s why my coaching is built to help you get stronger, move better, and train in a way your body can actually handle long term.&rdquo;
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(14px, 1vw, 15px)", color: "rgba(240,230,211,0.88)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
+                &ldquo;I&apos;ve had to rebuild my body from injury. Now I help you build yours with strength, structure, and smarter training.&rdquo;
               </p>
-              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa</p>
+              <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa M</p>
             </div>
           </div>
         </div>
@@ -402,11 +400,11 @@ export default function CoachingClient() {
             {/* Text */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Your coaching experience</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(28px,3vw,42px)", fontWeight: 700, color: TEXT, lineHeight: 1.15, marginBottom: 16 }}>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,2.8vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.15, marginBottom: 16 }}>
                 Everything you need in one place.
               </h2>
-              <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.7, marginBottom: 36 }}>
-                Access your program on desktop or add it to your phone&apos;s home screen like an app.
+              <p style={{ fontSize: "clamp(14px, 1vw, 16px)", color: MUTED, lineHeight: 1.7, marginBottom: 36 }}>
+                Your whole program lives inside my coaching platform, which you can save to your phone&apos;s home screen so it opens just like an app. Open it at the gym, follow your workout, watch the demos, log your sets, track your progress, and message me when you need help. I built the platform myself. Former engineer habits die hard.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 40 }}>
                 {[
@@ -505,15 +503,15 @@ export default function CoachingClient() {
           </div>
           <div className="ch-4col">
             {[
-              { icon: <IconFlash />, title: "Stronger, more capable", body: "You'll build real strength in your lifts and in your daily life." },
-              { icon: <IconFigure />, title: "Improve body composition", body: "Build muscle, lose fat, and feel more confident in your body." },
-              { icon: <IconArrows />, title: "Move better, feel better", body: "Better mobility, better movement patterns, less pain." },
-              { icon: <IconLeaf />, title: "Sustainable results", body: "You'll learn how to train, eat, and recover in a way you can actually maintain for years." },
+              { icon: <IconFlash />, title: "Stronger, more capable", body: "Real strength you can measure. Heavier lifts in the gym, and a body that handles life better outside of it." },
+              { icon: <IconFigure />, title: "Improve body composition", body: "Build muscle, lose fat, and start liking what you see. Not from a quick fix, but from training you can sustain long term." },
+              { icon: <IconArrows />, title: "Move better, feel better", body: "Better mobility, cleaner movement, and less of the nagging discomfort you’ve been trying to ignore." },
+              { icon: <IconLeaf />, title: "Sustainable results", body: "You’ll understand how to train, eat, and recover, so the results don’t disappear when the coaching ends." },
             ].map(({ icon, title, body }) => (
-              <div key={title} style={{ background: "#f0ebe3", padding: "36px 32px", borderBottom: `2px solid ${ACCENT}` }}>
+              <div key={title} style={{ background: "#f0ebe3", padding: "clamp(28px, 3vw, 36px) clamp(24px, 2.5vw, 32px)", borderBottom: `2px solid ${ACCENT}` }}>
                 <div style={{ color: ACCENT, marginBottom: 16 }}>{icon}</div>
-                <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: 20, fontWeight: 700, color: TEXT, marginBottom: 10 }}>{title}</h3>
-                <p style={{ fontSize: 14, color: MUTED, lineHeight: 1.6, margin: 0 }}>{body}</p>
+                <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(18px, 1.4vw, 21px)", fontWeight: 700, color: TEXT, marginBottom: 10, lineHeight: 1.25 }}>{title}</h3>
+                <p style={{ fontSize: "clamp(13px, 0.95vw, 14.5px)", color: MUTED, lineHeight: 1.65, margin: 0 }}>{body}</p>
               </div>
             ))}
           </div>
@@ -527,19 +525,19 @@ export default function CoachingClient() {
             {/* Who this is for */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Who this is for</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.5vw,36px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 32 }}>
-                Who this is for
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(22px,2.4vw,34px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 32 }}>
+                This is for you if
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {[
                   "You want to get stronger, leaner, and move better",
-                  "You want personalized coaching and real accountability",
-                  "You've tried random programs and are ready for a plan that actually works",
-                  "You're ready to commit to 3–6 months and put in the work",
+                  "You’ve done the random programs. They went nowhere.",
+                  "You want someone actually checking your work every week",
+                  "You’re ready to commit 3 to 6 months and put in the effort",
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <IconCheck />
-                    <span style={{ fontSize: 15, color: TEXT, lineHeight: 1.6 }}>{item}</span>
+                    <span style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: TEXT, lineHeight: 1.6 }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -548,24 +546,24 @@ export default function CoachingClient() {
             {/* How we coach */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>How we coach</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.5vw,36px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 14 }}>
-                How we coach
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(22px,2.4vw,34px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 14 }}>
+                Coaching that looks at everything
               </h2>
-              <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.7, marginBottom: 32 }}>
-                Your program is 100% personalized and evolves with you. We look at the whole picture: training, recovery, nutrition, lifestyle, and mindset. Nothing gets overlooked.
+              <p style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: MUTED, lineHeight: 1.7, marginBottom: 32 }}>
+                Your program is 100% built around you, and it evolves as you do. Training, recovery, nutrition, lifestyle, mindset. If it affects your progress, we pay attention to it.
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 24px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px 24px" }}>
                 {[
                   { icon: <IconBarbell />, title: "Custom training", body: "Built around your goals, experience, equipment, schedule, and recovery." },
                   { icon: <IconCalendar />, title: "Weekly check-ins", body: "I review your progress and adjust your plan every week." },
                   { icon: <IconPlay />, title: "Form feedback", body: "Send videos, get detailed feedback, and improve your technique." },
-                  { icon: <IconMessage />, title: "Direct support", body: "Message me anytime. I'm here when you need guidance." },
+                  { icon: <IconMessage />, title: "Direct support", body: "Message me when you need me. Real answers, usually same day." },
                   { icon: <IconShield />, title: "Injury-aware approach", body: "We work around your injuries and build resilience." },
-                  { icon: <IconBook />, title: "Education", body: "You'll understand why you're doing what you're doing and how to progress long term." },
+                  { icon: <IconBook />, title: "Education", body: "You’ll understand why you’re doing what you’re doing and how to progress long term." },
                 ].map(({ icon, title, body }) => (
                   <div key={title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                     <span style={{ color: ACCENT, flexShrink: 0, marginTop: 2 }}>{icon}</span>
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <p style={{ fontSize: 14, fontWeight: 600, color: TEXT, margin: "0 0 4px" }}>{title}</p>
                       <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.55 }}>{body}</p>
                     </div>
@@ -581,8 +579,8 @@ export default function CoachingClient() {
       <section className="ch-section" style={{ background: CREAM }}>
         <div className="ch-narrow" style={{ maxWidth: 760 }}>
           <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>How coaching works</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 56 }}>
-            How coaching works
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 56 }}>
+            From application to progress
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
             {[
@@ -594,12 +592,12 @@ export default function CoachingClient() {
               {
                 n: "2",
                 title: "We define your goals",
-                body: "After your first check-in, we set clear goals based on where you are now and where you want to go. Strength, muscle, fat loss, body recomposition, movement quality, or consistency — we get specific.",
+                body: "After your first check-in, we set clear goals based on where you are now and where you want to go. Strength, muscle, fat loss, body recomposition, movement quality, or consistency. We get specific.",
               },
               {
                 n: "3",
                 title: "I build your program",
-                body: "Your training is built around your goal, your body, your experience level, your schedule, your equipment, and your recovery. A plan that makes sense for you, not just one that looks good on paper.",
+                body: "Built around your goal, your body, your experience, your schedule, your equipment, and your recovery. A plan that makes sense for your life, not just one that looks good on paper.",
               },
               {
                 n: "4",
@@ -612,11 +610,11 @@ export default function CoachingClient() {
                 body: "Every week, you complete a check-in. I review your training, recovery, nutrition, body metrics, progress, struggles, and wins. Then we adjust what needs to be adjusted so you keep moving forward.",
               },
             ].map(({ n, title, body }, i, arr) => (
-              <div key={n} style={{ display: "flex", gap: 24, paddingBottom: i < arr.length - 1 ? 36 : 0, borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : "none", marginBottom: i < arr.length - 1 ? 36 : 0 }}>
+              <div key={n} style={{ display: "flex", gap: 20, paddingBottom: i < arr.length - 1 ? 36 : 0, borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : "none", marginBottom: i < arr.length - 1 ? 36 : 0 }}>
                 <div className="ch-step-num">{n}</div>
-                <div>
-                  <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: 20, fontWeight: 700, color: TEXT, margin: "6px 0 10px" }}>{title}</h3>
-                  <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.7, margin: 0 }}>{body}</p>
+                <div style={{ minWidth: 0 }}>
+                  <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(18px, 1.4vw, 21px)", fontWeight: 700, color: TEXT, margin: "6px 0 10px" }}>{title}</h3>
+                  <p style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: MUTED, lineHeight: 1.7, margin: 0 }}>{body}</p>
                 </div>
               </div>
             ))}
@@ -628,8 +626,8 @@ export default function CoachingClient() {
       <section className="ch-section" style={{ background: "#fff" }}>
         <div className="ch-narrow" style={{ maxWidth: 720 }}>
           <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>A typical week</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 32 }}>
-            A typical week inside coaching
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 32 }}>
+            What a week actually looks like
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 40 }}>
             {[
@@ -642,11 +640,11 @@ export default function CoachingClient() {
             ].map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                 <IconCheck />
-                <span style={{ fontSize: 16, color: TEXT, lineHeight: 1.6 }}>{item}</span>
+                <span style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: TEXT, lineHeight: 1.6 }}>{item}</span>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 24, fontStyle: "italic", color: ACCENT, margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(20px, 1.8vw, 24px)", fontStyle: "italic", color: ACCENT, margin: 0 }}>
             Simple. Structured. Personal.
           </p>
         </div>
@@ -657,16 +655,16 @@ export default function CoachingClient() {
         <div className="ch-narrow">
           <div style={{ textAlign: "center", marginBottom: 52 }}>
             <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 14 }}>Investment</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, margin: 0 }}>
-              Investment
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: "#f5f2ee", lineHeight: 1.2, margin: 0 }}>
+              Simple pricing, out in the open.
             </h2>
           </div>
 
-          <p style={{ textAlign: "center", fontSize: 14, color: "rgba(240,230,211,0.38)", maxWidth: 480, margin: "0 auto 32px" }}>
+          <p style={{ textAlign: "center", fontSize: "clamp(13px, 0.95vw, 14.5px)", color: "rgba(240,230,211,0.45)", maxWidth: 520, margin: "0 auto 32px", lineHeight: 1.65 }}>
             Pricing is right here because you should know what you are getting into before we ever talk.
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: 780, margin: "0 auto 40px" }}>
+          <div className="ch-price-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: 780, margin: "0 auto 40px" }}>
             {/* Card 1 */}
             <div style={{ background: "#161616", padding: "44px 40px", borderTop: `2px solid #333` }}>
               <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>3-month coaching</p>
@@ -709,8 +707,8 @@ export default function CoachingClient() {
           </div>
 
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: 15, color: "rgba(240,230,211,0.45)", marginBottom: 28, maxWidth: 480, margin: "0 auto 28px" }}>
-              Coaching is by application only because I keep spots limited and want to make sure it&apos;s the right fit on both sides.
+            <p style={{ fontSize: "clamp(14px, 1vw, 15px)", color: "rgba(240,230,211,0.5)", marginBottom: 28, maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.65 }}>
+              Coaching is by application because I keep spots limited and I only take people I&apos;m confident I can help.
             </p>
             <a href="#apply" className="ch-btn-primary" style={{ display: "inline-block" }}>Apply Now</a>
             <p style={{ fontSize: 12, color: "rgba(240,230,211,0.3)", marginTop: 16 }}>Applications reviewed personally within 48 hours.</p>
@@ -732,18 +730,18 @@ export default function CoachingClient() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>A coach who gets it</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 24 }}>
+              <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>About me</p>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 24 }}>
                 A coach who gets it
               </h2>
-              <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.75, marginBottom: 20 }}>
-                I&apos;ve been through my own injuries and setbacks. I know how discouraging it can feel, and how hard it is to know what to do.
+              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 20 }}>
+                I&apos;ve been through my own injuries and setbacks. Eight months of back pain taught me more about training than any certification did.
               </p>
-              <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.75, marginBottom: 20 }}>
-                I rebuilt my body through smart training, patience, and consistency — and now I help others do the same.
+              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 20 }}>
+                I rebuilt my body with smart training, patience, and consistency. Now I help other people do the same thing, without the years of guessing I went through.
               </p>
-              <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.75, marginBottom: 40 }}>
-                My goal is simple: to help you build a strong, resilient body that supports the life you want to live.
+              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 40 }}>
+                My goal is simple. A strong, resilient body that supports the life you actually want to live.
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 24px" }}>
                 {[
@@ -767,7 +765,7 @@ export default function CoachingClient() {
       <section className="ch-section" style={{ background: "#fff" }}>
         <div className="ch-narrow" style={{ maxWidth: 760 }}>
           <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Common questions</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 48 }}>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 48 }}>
             Questions people ask before applying.
           </h2>
           <div>
@@ -784,17 +782,33 @@ export default function CoachingClient() {
                 q: "Do you coach nutrition too?",
                 a: "Yes. Every client gets personalized nutrition targets and weekly check-in support. No rigid meal plans, just clear targets that actually work around your real life.",
               },
+              {
+                q: "What if I have an injury or pain?",
+                a: "Tell me about it in the application. Working around injuries is a big part of what I do. We train what we can, build up what we can’t yet, and I’ll tell you honestly if something needs a medical professional first.",
+              },
+              {
+                q: "How much time do I need?",
+                a: "Most of my clients train 3 to 4 days a week and spend about five minutes on their Sunday check-in. Your program is built around your schedule, not the other way around.",
+              },
+              {
+                q: "How fast will I see results?",
+                a: "Honestly? You’ll feel the difference in a few weeks. Visible change takes about 12 weeks of consistent work. That’s exactly why coaching starts at 3 months. I don’t take clients for outcomes I can’t deliver.",
+              },
+              {
+                q: "What happens after I apply?",
+                a: "I personally read your application within 48 hours. If I think I can help, we get on a short call, I map out how I’d coach you, and you decide. If I’m not the right fit, I’ll tell you that too.",
+              },
             ].map(({ q, a }, i) => (
               <div key={q} style={{ borderBottom: `1px solid ${BORDER}` }}>
                 <button
                   onClick={() => setFaqOpen(faqOpen === i ? null : i)}
                   style={{ width: "100%", background: "none", border: "none", padding: "22px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, cursor: "pointer", textAlign: "left" }}
                 >
-                  <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: 18, fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>{q}</span>
+                  <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(16px, 1.2vw, 18px)", fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>{q}</span>
                   <span style={{ color: ACCENT, fontSize: 22, lineHeight: 1, flexShrink: 0, transform: faqOpen === i ? "rotate(45deg)" : "none", transition: "transform 0.2s", display: "inline-block" }}>+</span>
                 </button>
                 {faqOpen === i && (
-                  <p style={{ fontSize: 15, color: MUTED, lineHeight: 1.7, paddingBottom: 22, margin: 0 }}>{a}</p>
+                  <p style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: MUTED, lineHeight: 1.7, paddingBottom: 22, margin: 0 }}>{a}</p>
                 )}
               </div>
             ))}
@@ -809,15 +823,37 @@ export default function CoachingClient() {
             {/* Left: heading */}
             <div style={{ paddingTop: 8 }}>
               <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 16 }}>Apply for coaching</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(26px,3vw,40px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 20 }}>
+              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(24px,2.8vw,38px)", fontWeight: 700, color: TEXT, lineHeight: 1.2, marginBottom: 20 }}>
                 Apply for coaching
               </h2>
-              <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.75, marginBottom: 12 }}>
+              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 12 }}>
                 Tell me about your goals, your training, and what you need help with most.
               </p>
-              <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.75, marginBottom: 36 }}>
+              <p style={{ fontSize: "clamp(14px, 1.05vw, 16px)", color: MUTED, lineHeight: 1.75, marginBottom: 32 }}>
                 I personally review every application and respond within 48 hours.
               </p>
+
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 14 }}>
+                What happens next
+              </p>
+              <ol style={{ paddingLeft: 0, listStyle: "none", counterReset: "steps", margin: "0 0 32px" }}>
+                {[
+                  "I read your application. Personally, within 48 hours.",
+                  "If it’s a fit, we book a short call and I map out your plan.",
+                  "You decide. No pressure either way.",
+                ].map((item, i) => (
+                  <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 12 }}>
+                    <span style={{
+                      flexShrink: 0, width: 26, height: 26, borderRadius: "50%",
+                      border: `1px solid ${ACCENT}`, color: ACCENT,
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "var(--font-playfair), serif", fontSize: 13,
+                    }}>{i + 1}</span>
+                    <span style={{ fontSize: "clamp(14px, 1vw, 15.5px)", color: TEXT, lineHeight: 1.6, marginTop: 2 }}>{item}</span>
+                  </li>
+                ))}
+              </ol>
+
               <Link href="/courses" className="ch-link">
                 Not ready yet? The Training Foundations bundle ($137) is a great place to start. It counts as a $137 credit toward coaching if you upgrade within 90 days →
               </Link>
@@ -846,22 +882,7 @@ export default function CoachingClient() {
                     </div>
                   </div>
 
-                  {/* Q3: Training experience */}
-                  <div>
-                    <Label>How long have you been training consistently? *</Label>
-                    <div className="ch-select-wrap">
-                      <select required value={form.trainingExperience} onChange={set("trainingExperience")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
-                        <option value="">Select…</option>
-                        <option>Less than 6 months</option>
-                        <option>6 to 12 months</option>
-                        <option>1 to 2 years</option>
-                        <option>3 to 5 years</option>
-                        <option>5+ years</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Q4: Primary goal */}
+                  {/* Q3: Primary goal */}
                   <div>
                     <Label>What is your primary goal? *</Label>
                     <div className="ch-select-wrap">
@@ -879,13 +900,22 @@ export default function CoachingClient() {
                     </div>
                   </div>
 
-                  {/* Q5: Why now */}
+                  {/* Q4: Training experience */}
                   <div>
-                    <Label>Why do you want to start coaching now? *</Label>
-                    <textarea required rows={4} value={form.whyNow} onChange={set("whyNow")} style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                    <Label>How long have you been training consistently? *</Label>
+                    <div className="ch-select-wrap">
+                      <select required value={form.trainingExperience} onChange={set("trainingExperience")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
+                        <option value="">Select…</option>
+                        <option>Less than 6 months</option>
+                        <option>6 to 12 months</option>
+                        <option>1 to 2 years</option>
+                        <option>3 to 5 years</option>
+                        <option>5+ years</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {/* Q6+Q7: Days + Equipment */}
+                  {/* Q5+Q6: Days + Equipment */}
                   <div className="ch-2col-form">
                     <div>
                       <Label>Days per week you can train? *</Label>
@@ -914,44 +944,42 @@ export default function CoachingClient() {
                     </div>
                   </div>
 
-                  {/* Q8: Injuries */}
+                  {/* Q7: Injuries */}
                   <div>
                     <Label>Any current or past injuries, pain, or limitations I should know about? *</Label>
                     <textarea required rows={3} value={form.injuries} onChange={set("injuries")} placeholder="None, or describe..." style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
                   </div>
 
-                  {/* Q9: Courses */}
+                  {/* Q8: What have you tried */}
                   <div>
-                    <Label>Have you completed my Training Foundations or Nutrition Foundations course? *</Label>
+                    <Label>What have you tried so far, and what made it hard to stick? *</Label>
+                    <textarea required rows={4} value={form.whatHaveYouTried} onChange={set("whatHaveYouTried")} placeholder="Programs, apps, trainers, anything you've done. And what got in the way." style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                  </div>
+
+                  {/* Q9: Investment readiness */}
+                  <div>
+                    <Label>Coaching is $1,297 to $1,497/month with a 3-month minimum. Are you in a position to invest at that level if we&apos;re a fit? *</Label>
                     <div className="ch-select-wrap">
-                      <select required value={form.coursesCompleted} onChange={set("coursesCompleted")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
+                      <select required value={form.investmentReadiness} onChange={set("investmentReadiness")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
-                        <option>Yes, both</option>
-                        <option>Training Foundations only</option>
-                        <option>Nutrition Foundations only</option>
-                        <option>Not yet</option>
-                        <option>Currently working through them</option>
+                        <option>Yes</option>
+                        <option>I&apos;d need to discuss it with someone</option>
+                        <option>No</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* Q10: Coaching option */}
+                  {/* Q10: Start timing */}
                   <div>
-                    <Label>Which coaching option are you interested in? *</Label>
+                    <Label>How soon do you want to start? *</Label>
                     <div className="ch-select-wrap">
-                      <select required value={form.coachingOption} onChange={set("coachingOption")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
+                      <select required value={form.startTiming} onChange={set("startTiming")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
-                        <option>$1,497/month, 3-month commitment</option>
-                        <option>$1,297/month, 6-month commitment</option>
-                        <option>Not sure yet, I would like to discuss on a call</option>
+                        <option>Now</option>
+                        <option>Within a month</option>
+                        <option>Just exploring</option>
                       </select>
                     </div>
-                  </div>
-
-                  {/* Q11: Why Lisa */}
-                  <div>
-                    <Label>Why do you want to work with me specifically? *</Label>
-                    <textarea required rows={4} value={form.whyLisa} onChange={set("whyLisa")} style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
                   </div>
 
                   {status === "error" && (
