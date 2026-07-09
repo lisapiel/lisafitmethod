@@ -150,12 +150,12 @@ export default function SiteHeader() {
           color: rgba(240, 230, 211, 0.75);
           text-decoration: none;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .site-header { padding: 0 24px; }
           .site-header-nav { display: none; }
           .site-header-hamburger { display: flex; }
         }
-        @media (min-width: 769px) {
+        @media (min-width: 1025px) {
           .site-header-mobile-menu { display: none !important; }
         }
       `}</style>

@@ -154,7 +154,7 @@ export default async function HomePage() {
     >
       {accent !== "#c8a97e" && <style>{`:root { --accent: ${accent}; }`}</style>}
 
-      {/* HERO — video first, directly under nav */}
+      {/* HERO */}
       <section style={{ background: "#0a0a0a" }} className="home-hero">
         <style>{`
           .home-video-band {
@@ -164,25 +164,41 @@ export default async function HomePage() {
             overflow: hidden;
             background: #111;
           }
-          .home-hero-text {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 56px 80px 80px;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 60px;
-            align-items: start;
+          .home-hero-content {
+            max-width: 720px;
+            padding: 64px 80px 88px;
           }
-          .home-hero-cta-col { min-width: 240px; }
-          .home-hero-fallback {
-            padding: 100px 80px 80px;
-            max-width: 1100px;
-            margin: 0 auto;
+          .hero-h1 {
+            font-family: var(--font-playfair), serif;
+            font-size: calc(clamp(36px, 5.5vw, 68px) * ${hs});
+            font-weight: 900;
+            color: var(--off-white);
+            line-height: 1.07;
+            margin-bottom: 24px;
+            text-wrap: balance;
+          }
+          .hero-h1 em {
+            display: block;
+            font-style: italic;
+            color: var(--accent);
+          }
+          .hero-ctas {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 36px;
+            margin-bottom: 16px;
+          }
+          @media (max-width: 1024px) {
+            .home-hero-content { padding: 56px 48px 72px; }
           }
           @media (max-width: 768px) {
             .home-video-band { height: 56vw; min-height: 240px; }
-            .home-hero-text { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 56px; }
-            .home-hero-fallback { padding: 64px 24px 56px; }
+            .home-hero-content { padding: 40px 24px 56px; }
+            .hero-para-hide { display: none; }
+            .hero-ctas { flex-direction: column; align-items: stretch; }
+            .hero-cta-primary, .hero-cta-secondary { display: block !important; text-align: center; }
           }
         `}</style>
 
@@ -192,85 +208,49 @@ export default async function HomePage() {
           </div>
         )}
 
-        {trailerUrl ? (
-          <div className="home-hero-text">
-            <div>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
-                1:1 Online Coaching
-              </p>
-              <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 20 }}>
-                Build a stronger body<br />
-                <em style={{ fontStyle: "italic", color: "var(--accent)" }}>with a plan that actually fits you.</em>
-              </h1>
-              <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.6, maxWidth: 500, marginBottom: 16 }}>
-                Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
-              </p>
-              <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 12 }}>
-                Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through.
-              </p>
-              <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 12 }}>
-                If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for.
-              </p>
-              <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 12 }}>
-                You&apos;ll train from a clear plan inside my coaching platform, with video demos, progress tracking, weekly check-ins I review personally, form feedback, and direct access to me when you need it. As you progress, your plan adjusts with you, so you always know what to focus on next.
-              </p>
-              <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500 }}>
-                My goal is to help you build a strong, capable body that looks good, moves well, and lasts.
-              </p>
-            </div>
-            <div className="home-hero-cta-col">
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-                <Link href="/coaching#apply" style={{ display: "block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 32px", textAlign: "center" }}>
-                  Apply for Coaching
-                </Link>
-                <Link href="/checkout" style={{ display: "block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "14px 20px", textAlign: "center" }}>
-                  Want to start on your own first? Check out the courses.
-                </Link>
-              </div>
-              <p style={{ fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
-                $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
-              </p>
-            </div>
+        <div className="home-hero-content">
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
+            1:1 Online Coaching
+          </p>
+          <h1 className="hero-h1">
+            <span>Build a stronger body</span>
+            <em>with a plan that actually fits you.</em>
+          </h1>
+          <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.65, maxWidth: 580, marginBottom: 20 }}>
+            Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
+          </p>
+          <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580, marginBottom: 14 }}>
+            Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through.
+          </p>
+          <p className="hero-para-hide" style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580, marginBottom: 14 }}>
+            If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for.
+          </p>
+          <p className="hero-para-hide" style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580, marginBottom: 14 }}>
+            You&apos;ll train from a clear plan inside my coaching platform, with video demos, progress tracking, weekly check-ins I review personally, form feedback, and direct access to me when you need it. As you progress, your plan adjusts with you, so you always know what to focus on next.
+          </p>
+          <p className="hero-para-hide" style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: 580 }}>
+            My goal is to help you build a strong, capable body that looks good, moves well, and lasts.
+          </p>
+          <div className="hero-ctas">
+            <Link
+              href="/coaching#apply"
+              className="hero-cta-primary"
+              style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 2.5rem", whiteSpace: "nowrap" }}
+            >
+              Apply for Coaching
+            </Link>
+            <Link
+              href="/checkout"
+              className="hero-cta-secondary"
+              style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 1.5rem" }}
+            >
+              Want to start on your own first? Check out the courses.
+            </Link>
           </div>
-        ) : (
-          <div className="home-hero-fallback">
-            <p className="fade-up-1" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
-              1:1 Online Coaching
-            </p>
-            <h1 className="fade-up-2" style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(40px, 4.5vw, 64px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.05, marginBottom: 24 }}>
-              Build a stronger body<br />
-              <em style={{ fontStyle: "italic", color: "var(--accent)" }}>with a plan that actually fits you.</em>
-            </h1>
-            <p className="fade-up-3" style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.6, maxWidth: 500, marginBottom: 16 }}>
-              Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
-            </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 12 }}>
-              Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through.
-            </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 12 }}>
-              If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for.
-            </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 12 }}>
-              You&apos;ll train from a clear plan inside my coaching platform, with video demos, progress tracking, weekly check-ins I review personally, form feedback, and direct access to me when you need it. As you progress, your plan adjusts with you, so you always know what to focus on next.
-            </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.6, maxWidth: 500, marginBottom: 32 }}>
-              My goal is to help you build a strong, capable body that looks good, moves well, and lasts.
-            </p>
-            <div className="fade-up-4" style={{ alignSelf: "flex-start" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
-                <Link href="/coaching#apply" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "18px 42px", textAlign: "center" }}>
-                  Apply for Coaching
-                </Link>
-                <Link href="/checkout" style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "14px 28px", textAlign: "center" }}>
-                  Want to start on your own first? Check out the courses.
-                </Link>
-              </div>
-              <p style={{ fontSize: 11, color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-                $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
-              </p>
-            </div>
-          </div>
-        )}
+          <p style={{ fontSize: 11, color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6, maxWidth: 520 }}>
+            $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
+          </p>
+        </div>
       </section>
 
       {/* HERO PHOTO */}
@@ -307,13 +287,16 @@ export default async function HomePage() {
               I learned the hard way so you don&apos;t have to.
             </h2>
             <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
-              I trained for years chasing hard workouts, thinking more was better. I had no real system, no structure, just effort. And then I hurt my back.
+              I trained for years chasing hard workouts, thinking more was better. I had no real system, no structure, just effort and I wasn&apos;t seeing the results I wanted.
             </p>
             <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
-              Eight months of pain. I couldn&apos;t train at all. That forced me to actually study the things I had been skipping: movement quality, mobility, stability, progressive overload, how nutrition supports recovery. I rebuilt everything from scratch, slower and smarter, and came back stronger than before.
+              Then I hurt my back lifting. I was in pain every day for over 8 months. I couldn&apos;t train the way I used to or even trust my own body. If you&apos;ve ever been injured like that, you know it&apos;s not just physical. You start wondering what&apos;s safe, what&apos;s making it worse, and whether you&apos;ll ever feel like yourself again. So I did what my brain naturally does. As an engineer, I&apos;ve always needed to understand how things work, so I went deep into everything I had skipped for too long. Movement quality, warm-ups, mobility, stability, progressive overload, recovery, nutrition, and how to build strength without constantly beating your body up.
+            </p>
+            <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
+              I rebuilt slowly and came back stronger than ever, moving better, and with a body that finally reflected the work I was putting in.
             </p>
             <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)" }}>
-              What I figured out during that time is what this is all built on. If I had trained this way from the start, I would have gotten better results, avoided the injury, and understood my body a lot sooner.
+              That experience changed everything. It&apos;s why I became a certified personal trainer, and it&apos;s why I created Lisa Fit Method. Because most people don&apos;t need more random workouts. They need structure, a plan that makes sense for their body, and a real understanding of what they&apos;re doing and why it matters. That&apos;s the approach I use to help my clients get stronger, move better, lose fat, build visible muscle definition, and feel more confident in their training.
             </p>
             <Link href="/about" style={{ display: "inline-block", marginTop: 28, fontSize: 12, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none" }}>
               My full story →
@@ -379,10 +362,10 @@ export default async function HomePage() {
               </h3>
               <ul style={{ listStyle: "none", marginBottom: 32, flex: 1 }}>
                 {[
-                  "Foundation Movements",
-                  "Core & Glute Priority",
-                  "The Training Program: structured workouts with progress tracking",
-                  "Works from home or gym",
+                  "Foundation Movements. The movement patterns every strong body is built on.",
+                  "Core & Glute Priority. Spinal stability, stronger glutes, and better posture under load.",
+                  "The Training Program. Fully structured workouts with sets, reps, warm-ups, progression guidance, and built-in workout tracking so you can clearly see your progress over time.",
+                  "Works from home or the gym. Dumbbells and bands are enough to start.",
                 ].map((item) => (
                   <li key={item} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(13px * ${bs})`, color: "var(--muted)", lineHeight: 1.5 }}>
                     <span style={{ color: "var(--accent-dark)", flexShrink: 0 }}>→</span>
@@ -418,10 +401,10 @@ export default async function HomePage() {
               </h3>
               <ul style={{ listStyle: "none", marginBottom: 32, flex: 1 }}>
                 {[
-                  "Interactive calorie and macro calculator",
-                  "4-week meal plan",
-                  "Science-backed education",
-                  "Eating out and supplements guides",
+                  "Interactive calorie and macro calculator, personalized to your stats.",
+                  "4-week meal plan that scales to your calorie target.",
+                  "Science-backed education. No bro-science.",
+                  "Eating out, supplements, and troubleshooting guides for real life.",
                 ].map((item) => (
                   <li key={item} style={{ display: "flex", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(0,0,0,0.06)", fontSize: `calc(13px * ${bs})`, color: "var(--muted)", lineHeight: 1.5 }}>
                     <span style={{ color: "var(--accent-dark)", flexShrink: 0 }}>→</span>
