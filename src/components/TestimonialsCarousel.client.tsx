@@ -14,18 +14,6 @@ export type Testimonial = {
   dateIso: string
 }
 
-function Stars({ count }: { count: number }) {
-  return (
-    <div role="img" aria-label={`${count} out of 5 stars`} style={{ display: "flex", gap: 3, marginBottom: 18 }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill="#c8a97e" aria-hidden="true">
-          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-        </svg>
-      ))}
-    </div>
-  )
-}
-
 function TestimonialCard({ t }: { t: Testimonial }) {
   return (
     <article
@@ -63,7 +51,6 @@ function TestimonialCard({ t }: { t: Testimonial }) {
           </p>
         </div>
       </div>
-      <Stars count={t.stars} />
       <blockquote
         style={{
           margin: 0, flex: 1,
@@ -76,20 +63,6 @@ function TestimonialCard({ t }: { t: Testimonial }) {
       >
         &ldquo;{t.quote}&rdquo;
       </blockquote>
-      <div style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "nowrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-            <circle cx="12" cy="12" r="10" stroke="#a8895e" strokeWidth="2" />
-            <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#a8895e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif", whiteSpace: "nowrap" }}>
-            Verified · {t.tag}
-          </span>
-        </div>
-        <time dateTime={t.dateIso} style={{ fontSize: 11, color: "#b5afa8", fontFamily: "var(--font-dm-sans), sans-serif", flexShrink: 0, whiteSpace: "nowrap" }}>
-          {t.date}
-        </time>
-      </div>
     </article>
   )
 }
