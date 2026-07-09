@@ -181,11 +181,11 @@ export default async function HomePage() {
           }
           .hero-h1 {
             font-family: var(--font-playfair), serif;
-            font-size: calc(clamp(28px, 3.2vw, 48px) * ${hs});
+            font-size: calc(clamp(2.5rem, 4.5vw, 5rem) * ${hs});
             font-weight: 900;
             color: var(--off-white);
-            line-height: 1.08;
-            margin-bottom: 24px;
+            line-height: 1.05;
+            margin-bottom: clamp(20px, 1.8vw, 32px);
             text-wrap: balance;
           }
           .hero-h1 em {
@@ -198,8 +198,8 @@ export default async function HomePage() {
             gap: 12px;
             flex-wrap: wrap;
             align-items: center;
-            margin-top: 32px;
-            margin-bottom: 16px;
+            margin-top: clamp(24px, 2.5vw, 36px);
+            margin-bottom: clamp(12px, 1.2vw, 20px);
           }
           .home-hero-photo-section { display: none; }
           @media (max-width: 1024px) {
@@ -224,36 +224,36 @@ export default async function HomePage() {
 
         <div className="home-hero-row">
           <div className="home-hero-content">
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20 }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.75rem, 0.85vw, 0.9375rem)", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "clamp(16px, 1.5vw, 28px)" }}>
               1:1 Online Coaching
             </p>
             <h1 className="hero-h1">
               <span>Build a stronger body</span>
               <em>with a plan that actually fits you.</em>
             </h1>
-            <p style={{ fontSize: `calc(16px * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.65, marginBottom: 18 }}>
+            <p style={{ fontSize: `calc(clamp(1.125rem, 1.4vw, 1.5rem) * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.5, marginBottom: "clamp(14px, 1.5vw, 24px)" }}>
               Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
             </p>
-            <p style={{ fontSize: `calc(14px * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65 }}>
+            <p style={{ fontSize: `calc(clamp(1rem, 1.15vw, 1.25rem) * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: "60ch" }}>
               Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through. If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for. My goal is simple. A strong, capable body that looks good, moves well, and lasts.
             </p>
             <div className="hero-ctas">
               <Link
                 href="/coaching#apply"
                 className="hero-cta-primary"
-                style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 2.5rem", whiteSpace: "nowrap" }}
+                style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.875rem, 1vw, 1.0625rem)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(1rem, 1.1vw, 1.125rem) clamp(2.5rem, 2.2vw, 2.75rem)", whiteSpace: "nowrap" }}
               >
                 Apply for Coaching
               </Link>
               <Link
                 href="/checkout"
                 className="hero-cta-secondary"
-                style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "1rem 1.5rem" }}
+                style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.875rem, 1vw, 1.0625rem)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(1rem, 1.1vw, 1.125rem) clamp(1.5rem, 1.6vw, 2rem)" }}
               >
                 Want to start on your own first? Check out the courses.
               </Link>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
+            <p style={{ fontSize: "clamp(0.8125rem, 0.9vw, 1rem)", color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
               $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
             </p>
           </div>
@@ -302,7 +302,7 @@ export default async function HomePage() {
         <div className="story-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center", maxWidth: 1100, margin: "0 auto" }}>
           <div>
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 24 }}>Why this exists</p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(36px, 3.5vw, 52px) * ${hs})`, fontWeight: 700, lineHeight: 1.15, color: "var(--black)", marginBottom: 32 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2rem, 3.2vw, 3.5rem) * ${hs})`, fontWeight: 700, lineHeight: 1.15, color: "var(--black)", marginBottom: 32 }}>
               I learned the hard way so you don&apos;t have to.
             </h2>
             <p style={{ fontSize: `calc(16px * ${bs})`, lineHeight: 1.65, color: "var(--muted)", marginBottom: 20 }}>
@@ -362,7 +362,7 @@ export default async function HomePage() {
             <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent-dark)", marginBottom: 20, fontFamily: "var(--font-dm-sans), sans-serif" }}>
               The Courses
             </p>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 16 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2rem, 3.2vw, 3.5rem) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, marginBottom: 16 }}>
               Prefer to start on your own? Start here.
             </h2>
             <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 18, fontStyle: "italic", color: "var(--accent-dark)", margin: 0 }}>
@@ -520,7 +520,7 @@ export default async function HomePage() {
             Common Questions
           </p>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48, gap: 24, flexWrap: "wrap" }}>
-            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(32px, 3.5vw, 48px) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, margin: 0 }}>
+            <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2rem, 3.2vw, 3.5rem) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.15, margin: 0 }}>
               Good questions. <em style={{ fontStyle: "italic", color: "var(--accent-dark)" }}>Straight answers.</em>
             </h2>
             <Link href="/faq" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--accent-dark)", textDecoration: "none", whiteSpace: "nowrap" }}>
@@ -564,7 +564,7 @@ export default async function HomePage() {
         `}</style>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 800, height: 800, background: "radial-gradient(circle, rgba(200,169,126,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
         <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 20, position: "relative", zIndex: 1 }}>Ready to start?</p>
-        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(42px, 5vw, 68px) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
+        <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(clamp(2.25rem, 3.8vw, 4rem) * ${hs})`, fontWeight: 900, color: "var(--off-white)", lineHeight: 1.1, marginBottom: 24, position: "relative", zIndex: 1 }}>
           Stop guessing. <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Start training with someone who actually knows your body.</em>
         </h2>
         <p style={{ fontSize: `calc(17px * ${bs})`, color: "rgba(245,242,238,0.5)", maxWidth: 500, margin: "0 auto 48px", lineHeight: 1.4, position: "relative", zIndex: 1 }}>
