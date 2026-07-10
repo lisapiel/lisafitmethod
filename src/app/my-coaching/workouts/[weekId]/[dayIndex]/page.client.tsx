@@ -59,6 +59,34 @@ function cdnThumb(key: string) {
   return `${CDN}/${encodeURIComponent(key.replace(/\.mp4$/i, ".jpg"))}`
 }
 
+// Draft persistence for in-progress workouts. Keeps the client's typed
+// weight/reps/RPE/completed alive across app backgrounding, screen locks, and
+// PWA tab kills so they don't lose their work.
+type WorkoutDraft = {
+  setMap: ExerciseSetMap
+  overallRpe: string
+  clientNotes: string
+  // "|"-joined exerciseIds, used to invalidate the draft if the coach edits
+  // the day's exercise lineup after the client started logging.
+  exerciseSignature: string
+  savedAt: string
+}
+
+function readWorkoutDraft(key: string): WorkoutDraft | null {
+  try {
+    if (typeof window === "undefined") return null
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as WorkoutDraft
+    if (!parsed || typeof parsed !== "object" || !parsed.setMap) return null
+    return parsed
+  } catch { return null }
+}
+
+function clearWorkoutDraft(key: string) {
+  try { if (typeof window !== "undefined") localStorage.removeItem(key) } catch { /* ignore */ }
+}
+
 function initSets(ex: ProgramExercise, prevData?: PrevSetData): SetEntry[] {
   const count = parseSetsCount(ex.sets)
   return Array.from({ length: count }, (_, i) => {
@@ -590,6 +618,15 @@ export default function WorkoutLoggerClient() {
   const [alreadyLogged, setAlreadyLogged] = useState(false)
   const [existingFeedback, setExistingFeedback] = useState<{ text: string; at: string } | null>(null)
   const [showRpeInfo, setShowRpeInfo] = useState(false)
+  // Set once initial load finishes and the workout is ready to accept edits.
+  // Used to gate the draft-save effect so we don't overwrite a saved draft
+  // with an empty setMap during the initial render.
+  const [ready, setReady] = useState(false)
+
+  // Draft key — one per week+day for this browser. Persists in-progress
+  // weight/reps/RPE/completed across app backgrounding, screen locks, and
+  // PWA tab kills, so the client doesn't lose their entries mid-workout.
+  const draftKey = `lfm-workout-draft-${weekId}-${dayIndex}`
 
   const load = useCallback(async () => {
     try {
@@ -627,6 +664,8 @@ export default function WorkoutLoggerClient() {
         const existingLog = myLogs.find((l) => Number(l.weekNumber) === weekId && l.dayLabel === targetDay.dayLabel)
         if (existingLog) {
           setAlreadyLogged(true)
+          // Workout is server-side; any local draft is stale.
+          clearWorkoutDraft(draftKey)
           if (existingLog.coachFeedback) {
             setExistingFeedback({
               text: existingLog.coachFeedback as string,
@@ -651,12 +690,45 @@ export default function WorkoutLoggerClient() {
         }
       }
 
-      // Init set map
+      // Init set map — start from prescribed sets with last-week hints...
       const initialMap: ExerciseSetMap = {}
       targetDay.exercises.forEach((ex, i) => {
         initialMap[i] = initSets(ex, prevSetData) as ExtendedSetEntry[]
       })
+
+      // ...then, if there's a valid draft for this week+day, layer the
+      // client's in-progress inputs (weight/reps/RPE/completed) on top.
+      // We keep the _prevWeight/_prevReps hints from the fresh init and only
+      // pull the user's typed values from the draft.
+      const currentSignature = targetDay.exercises.map((e) => e.exerciseId).join("|")
+      const draft = readWorkoutDraft(draftKey)
+      if (draft && draft.exerciseSignature === currentSignature) {
+        for (const [idxStr, draftSets] of Object.entries(draft.setMap)) {
+          const idx = Number(idxStr)
+          const base = initialMap[idx]
+          if (!base || !Array.isArray(draftSets)) continue
+          initialMap[idx] = base.map((baseSet, si) => {
+            const d = draftSets[si] as ExtendedSetEntry | undefined
+            if (!d) return baseSet
+            return {
+              ...baseSet,
+              weight: d.weight ?? baseSet.weight,
+              reps: d.reps ?? baseSet.reps,
+              rpe: d.rpe ?? baseSet.rpe,
+              completed: !!d.completed,
+            }
+          })
+        }
+        if (draft.overallRpe) setOverallRpe(draft.overallRpe)
+        if (draft.clientNotes) setClientNotes(draft.clientNotes)
+      } else if (draft) {
+        // Draft is for a different exercise layout (coach edited the program).
+        // Drop it so we don't try to restore mismatched data.
+        clearWorkoutDraft(draftKey)
+      }
+
       setSetMap(initialMap)
+      setReady(true)
 
       // Fetch exercise info (instructions, cues, mistakes) for each exercise in this day
       const ids = Array.from(new Set(targetDay.exercises.map((e) => e.exerciseId).filter(Boolean)))
@@ -675,9 +747,39 @@ export default function WorkoutLoggerClient() {
       }
     } catch { /* layout handles auth */ }
     setLoading(false)
-  }, [weekId, dayIndex])
+  }, [weekId, dayIndex, draftKey])
 
   useEffect(() => { load() }, [load])
+
+  // Persist in-progress edits to localStorage on every change. Gated on
+  // `ready` so we don't overwrite the saved draft during initial mount with
+  // an empty setMap. Also skipped once the workout is fully saved or the
+  // "already completed" branch fires.
+  useEffect(() => {
+    if (!ready || saved || alreadyLogged || !day) return
+    const signature = day.exercises.map((e) => e.exerciseId).join("|")
+    try {
+      // Strip the hint fields (_prevWeight / _prevReps) — they're derived
+      // from the server, no need to persist them locally.
+      const stripped: ExerciseSetMap = {}
+      for (const [k, sets] of Object.entries(setMap)) {
+        stripped[Number(k)] = sets.map((s) => ({
+          weight: s.weight,
+          reps: s.reps,
+          rpe: s.rpe,
+          completed: s.completed,
+        }))
+      }
+      const draft: WorkoutDraft = {
+        setMap: stripped,
+        overallRpe,
+        clientNotes,
+        exerciseSignature: signature,
+        savedAt: new Date().toISOString(),
+      }
+      localStorage.setItem(draftKey, JSON.stringify(draft))
+    } catch { /* ignore quota / private mode errors */ }
+  }, [ready, saved, alreadyLogged, day, setMap, overallRpe, clientNotes, draftKey])
 
   function updateSet(exIdx: number, setIdx: number, updated: SetEntry) {
     setSetMap((prev) => ({
@@ -703,7 +805,7 @@ export default function WorkoutLoggerClient() {
       }))
     )
 
-    await fetch("/api/coaching/workout-log", {
+    const res = await fetch("/api/coaching/workout-log", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -715,6 +817,10 @@ export default function WorkoutLoggerClient() {
         clientNotes: clientNotes || undefined,
       }),
     })
+
+    // Only clear the draft if the server actually accepted the log —
+    // otherwise we'd lose the client's work on a bad network.
+    if (res.ok) clearWorkoutDraft(draftKey)
 
     setSaving(false)
     setSaved(true)
