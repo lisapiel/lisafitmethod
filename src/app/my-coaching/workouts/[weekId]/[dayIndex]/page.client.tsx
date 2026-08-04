@@ -668,8 +668,8 @@ export default function WorkoutLoggerClient() {
       const currentProgramId = prog.id as string
       if (logsRes.status === "fulfilled") {
         const allLogs = (logsRes.value.logs ?? []) as Array<Record<string, unknown>>
-        const myLogs = allLogs.filter((l) => (l.programId as string) === currentProgramId)
-        const existingLog = myLogs.find((l) => Number(l.weekNumber) === weekId && l.dayLabel === targetDay.dayLabel)
+        const currentProgramLogs = allLogs.filter((l) => (l.programId as string) === currentProgramId)
+        const existingLog = currentProgramLogs.find((l) => Number(l.weekNumber) === weekId && l.dayLabel === targetDay.dayLabel)
         if (existingLog) {
           setAlreadyLogged(true)
           // Workout is server-side; any local draft is stale.
@@ -689,15 +689,41 @@ export default function WorkoutLoggerClient() {
           return
         }
 
-        // Find previous week's log for same dayLabel WITHIN this program,
-        // so the "Last: X" hints reflect what the client actually did in
-        // the current program, not a stale number from a prior block.
-        const prevLog = myLogs
-          .filter((l) => l.dayLabel === targetDay.dayLabel && Number(l.weekNumber) < weekId)
-          .sort((a, b) => Number(b.weekNumber) - Number(a.weekNumber))[0]
-        if (prevLog) {
-          try { prevSetData = JSON.parse(prevLog.setData as string) as PrevSetData } catch { /* ignore */ }
+        // Build "last time" hints per exercise, looking ACROSS ALL PROGRAMS.
+        // If the coach reuses an exercise (e.g. Barbell Squat) in a new
+        // program, we want the client to still see what they lifted last
+        // time on it as a hint. Only brand-new exercises get no hint.
+        //
+        // Algorithm: for each exercise scheduled today, scan every log
+        // newest-first and take the first one that contains an entry for
+        // that exerciseId. Cache parsed setData per log so we don't parse
+        // the same log multiple times.
+        const logsNewestFirst = [...allLogs].sort((a, b) =>
+          String(b.completedAt ?? "").localeCompare(String(a.completedAt ?? ""))
+        )
+        const parsedCache = new Map<string, PrevSetData>()
+        function parseLogSets(log: Record<string, unknown>): PrevSetData {
+          const id = String(log.id ?? "")
+          const cached = parsedCache.get(id)
+          if (cached) return cached
+          let arr: PrevSetData = []
+          try { arr = JSON.parse(String(log.setData ?? "[]")) as PrevSetData } catch { /* ignore */ }
+          parsedCache.set(id, arr)
+          return arr
         }
+
+        const hintsByExercise: PrevSetData = []
+        for (const ex of targetDay.exercises) {
+          for (const log of logsNewestFirst) {
+            const sets = parseLogSets(log)
+            const forThisExercise = sets.filter((s) => s.exerciseId === ex.exerciseId)
+            if (forThisExercise.length > 0) {
+              hintsByExercise.push(...forThisExercise)
+              break
+            }
+          }
+        }
+        prevSetData = hintsByExercise
       }
 
       // Init set map — start from prescribed sets with last-week hints...
