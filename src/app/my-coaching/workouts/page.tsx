@@ -49,8 +49,15 @@ export default function WorkoutsPage() {
         if (!prog) { setNoProgram(true); setLoading(false); return }
 
         if (logsRes.status === "fulfilled") {
+          // Only count workouts logged AGAINST THIS PROGRAM as done. If the
+          // coach assigns a new program that reuses week/day labels, we
+          // don't want the previous program's completions to make new
+          // workouts show up as already done.
+          const currentProgramId = prog.id as string
           const done = new Set(
-            (logsRes.value.logs ?? []).map((l: Record<string, unknown>) => `${l.weekNumber}::${l.dayLabel}`)
+            (logsRes.value.logs ?? [])
+              .filter((l: Record<string, unknown>) => (l.programId as string) === currentProgramId)
+              .map((l: Record<string, unknown>) => `${l.weekNumber}::${l.dayLabel}`)
           )
           setCompletedDays(done as Set<string>)
         }

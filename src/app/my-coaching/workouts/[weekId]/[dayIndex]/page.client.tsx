@@ -657,10 +657,18 @@ export default function WorkoutLoggerClient() {
 
       if (!targetDay) { setLoading(false); return }
 
-      // Check if already logged
+      // Check if already logged.
+      //
+      // Scope "already logged" to logs from THIS program. When the coach
+      // assigns a new program, its Week 1/Day 1 must not be treated as
+      // completed just because the client did a "Week 1/Day 1" in the
+      // previous program. Old logs stay in the DB and still power the
+      // long-term progress views.
       let prevSetData: PrevSetData = []
+      const currentProgramId = prog.id as string
       if (logsRes.status === "fulfilled") {
-        const myLogs = (logsRes.value.logs ?? []) as Array<Record<string, unknown>>
+        const allLogs = (logsRes.value.logs ?? []) as Array<Record<string, unknown>>
+        const myLogs = allLogs.filter((l) => (l.programId as string) === currentProgramId)
         const existingLog = myLogs.find((l) => Number(l.weekNumber) === weekId && l.dayLabel === targetDay.dayLabel)
         if (existingLog) {
           setAlreadyLogged(true)
@@ -681,7 +689,9 @@ export default function WorkoutLoggerClient() {
           return
         }
 
-        // Find previous week's log for same dayLabel
+        // Find previous week's log for same dayLabel WITHIN this program,
+        // so the "Last: X" hints reflect what the client actually did in
+        // the current program, not a stale number from a prior block.
         const prevLog = myLogs
           .filter((l) => l.dayLabel === targetDay.dayLabel && Number(l.weekNumber) < weekId)
           .sort((a, b) => Number(b.weekNumber) - Number(a.weekNumber))[0]

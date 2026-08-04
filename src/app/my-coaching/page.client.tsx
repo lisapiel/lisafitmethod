@@ -42,6 +42,7 @@ type WorkoutLog = {
   weekNumber: number
   dayLabel: string
   completedAt: string
+  programId?: string
   setData?: string
   coachFeedback?: string
   coachFeedbackAt?: string
@@ -140,6 +141,7 @@ export default function MyCoachingHomeClient() {
             weekNumber: Number(l.weekNumber),
             dayLabel: l.dayLabel as string,
             completedAt: l.completedAt as string,
+            programId: l.programId as string | undefined,
             setData: l.setData as string | undefined,
             coachFeedback: l.coachFeedback as string | undefined,
             coachFeedbackAt: l.coachFeedbackAt as string | undefined,
@@ -234,12 +236,16 @@ export default function MyCoachingHomeClient() {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3)
 
-  // Find next uncompleted day
+  // Find next uncompleted day.
+  // Only count workouts logged AGAINST THIS PROGRAM as completed. When a
+  // coach assigns a new program that reuses week/day labels, we don't want
+  // the previous program's completions to skip today's workout.
   const nextWorkout = program ? (() => {
+    const currentProgramLogs = logs.filter((l) => l.programId === program.id)
     for (const week of program.weeks) {
       for (let di = 0; di < week.days.length; di++) {
         const day = week.days[di]
-        const done = logs.some((l) => l.weekNumber === week.weekNumber && l.dayLabel === day.dayLabel)
+        const done = currentProgramLogs.some((l) => l.weekNumber === week.weekNumber && l.dayLabel === day.dayLabel)
         if (!done) return { week, day, dayIndex: di }
       }
     }
