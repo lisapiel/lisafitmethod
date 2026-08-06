@@ -9,6 +9,7 @@ type Kind =
   | "subscriber-active"
   | "message-received"
   | "check-in-received"
+  | "workout-completed"
 
 interface NotifyPayload {
   kind: Kind
@@ -75,6 +76,7 @@ function labelForKind(k: Kind): string {
     case "subscriber-active": return "New Active Client"
     case "message-received": return "New Message"
     case "check-in-received": return "Check-In Received"
+    case "workout-completed": return "Workout Completed"
   }
 }
 
