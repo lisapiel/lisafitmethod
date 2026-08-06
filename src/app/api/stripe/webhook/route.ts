@@ -24,6 +24,20 @@ function makeStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
 }
 
+// Stripe v22+ (API 2025-09-30) moved current_period_end off the top-level
+// Subscription onto its items. Handle both shapes so we don't return NaN
+// dates that get written into DynamoDB.
+function extractCurrentPeriodEnd(subscription: Stripe.Subscription): number | null {
+  const legacy = (subscription as unknown as { current_period_end?: number }).current_period_end
+  if (typeof legacy === "number" && legacy > 0) return legacy
+  const items = subscription.items?.data ?? []
+  for (const item of items) {
+    const cpe = (item as unknown as { current_period_end?: number }).current_period_end
+    if (typeof cpe === "number" && cpe > 0) return cpe
+  }
+  return null
+}
+
 function makeCognito() {
   return new CognitoIdentityProviderClient({
     region: process.env.COGNITO_REGION ?? "us-east-2",
@@ -676,6 +690,19 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   const firstName = name.split(" ")[0] || "there"
 
+  // Idempotency: subscription-create can be delivered by both
+  // checkout.session.completed AND invoice.paid. We want the first one to
+  // fully provision and the second (or a retry) to be a no-op — no duplicate
+  // welcome emails, no duplicate admin notifications.
+  const preexisting = await getCoachingClientRecord(email)
+  if (preexisting?.status === "ACTIVE") {
+    // Still refresh bundle-credit-used marker in case the first pass missed it
+    if (subscriptionId) {
+      await markBundleCreditUsed(email, subscriptionId).catch(() => { /* no bundle purchase — nothing to mark */ })
+    }
+    return
+  }
+
   await grantCoachingAccess(email, "monthly")
   // Coaching bundles the Nutrition Foundations course
   await grantNutritionAccess(email).catch((err) => console.error("grantNutritionAccess failed:", err))
@@ -685,9 +712,8 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   }
 
   // Promote existing PENDING_PAYMENT record to ACTIVE; otherwise create new ACTIVE record
-  const existing = await getCoachingClientRecord(email)
-  const wasNew = !existing
-  if (existing) {
+  const wasNew = !preexisting
+  if (preexisting) {
     await updateCoachingClientRecord(email, { status: "ACTIVE" })
   } else {
     await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE" })
@@ -899,16 +925,80 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ── First-time subscription activation (primary provisioning path) ──────
+  // checkout.session.completed fires immediately after Stripe collects
+  // payment. It's the most reliable trigger for one-time coaching activation
+  // because it doesn't depend on where Stripe puts the subscription
+  // reference on the invoice (which changed between API versions).
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session
+    // Only care about paid subscription checkouts
+    if (session.mode !== "subscription" || session.payment_status !== "paid") {
+      return NextResponse.json({ received: true })
+    }
+    const product = session.metadata?.product
+    const email = (session.metadata?.customerEmail ?? session.customer_email ?? "").toLowerCase()
+    if (!email) return NextResponse.json({ received: true })
+    const subscriptionId = typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id ?? ""
+
+    try {
+      if (product === "coaching") {
+        const name = session.metadata?.customerName ?? ""
+        const applicationId = session.metadata?.applicationId ?? ""
+        await provisionCoachingSubscriber(email, name, subscriptionId)
+        if (applicationId) {
+          await updateCoachingApplication(applicationId, {
+            status: "PAID",
+            stripeSubscriptionId: subscriptionId,
+          }).catch((err) => console.error("updateCoachingApplication failed:", err))
+        }
+      } else if (product === "masterclass") {
+        const plan = session.metadata?.plan ?? "monthly"
+        if (subscriptionId) {
+          const stripe = makeStripe()
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+          const periodEnd = extractCurrentPeriodEnd(subscription)
+          if (periodEnd) {
+            await provisionMasterclassUser(email, subscriptionId, plan, periodEnd)
+          }
+        }
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error)
+      console.error("checkout.session.completed failed:", detail)
+      return NextResponse.json({ error: "Provisioning failed", detail }, { status: 500 })
+    }
+  }
+
   // ── Subscription invoice events (masterclass + coaching) ─────────────────
+  // Still handles renewals AND acts as a fallback if
+  // checkout.session.completed didn't fire for the first payment.
   if (event.type === "invoice.paid") {
-    const invoice = event.data.object as unknown as { subscription?: string; billing_reason?: string }
-    const subscriptionId = invoice.subscription
+    const invoice = event.data.object as unknown as {
+      subscription?: string
+      billing_reason?: string
+      parent?: { subscription_details?: { subscription?: string | { id?: string } } }
+      lines?: { data?: Array<{ subscription?: string | { id?: string } }> }
+    }
+    // The subscription reference lives in different places depending on
+    // Stripe API version. Try them all.
+    const subscriptionId =
+      (typeof invoice.subscription === "string" ? invoice.subscription : "") ||
+      (typeof invoice.parent?.subscription_details?.subscription === "string"
+        ? invoice.parent.subscription_details.subscription
+        : invoice.parent?.subscription_details?.subscription?.id ?? "") ||
+      (invoice.lines?.data?.map((l) =>
+        typeof l.subscription === "string" ? l.subscription : l.subscription?.id
+      ).find(Boolean) ?? "")
+
     if (!subscriptionId) return NextResponse.json({ received: true })
 
-    const subscription = await makeStripe().subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
+    const subscription = await makeStripe().subscriptions.retrieve(subscriptionId)
     const product = subscription.metadata?.product
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
-    const currentPeriodEnd = subscription.current_period_end
+    const currentPeriodEnd = extractCurrentPeriodEnd(subscription)
 
     if (!email) return NextResponse.json({ received: true })
 
@@ -916,14 +1006,15 @@ export async function POST(request: NextRequest) {
       if (product === "masterclass") {
         const plan = subscription.metadata?.plan ?? "monthly"
         if (invoice.billing_reason === "subscription_create") {
-          await provisionMasterclassUser(email, subscriptionId, plan, currentPeriodEnd)
+          if (currentPeriodEnd) await provisionMasterclassUser(email, subscriptionId, plan, currentPeriodEnd)
         } else {
-          await renewMasterclassAccess(email, new Date(currentPeriodEnd * 1000).toISOString())
+          if (currentPeriodEnd) await renewMasterclassAccess(email, new Date(currentPeriodEnd * 1000).toISOString())
         }
       } else if (product === "coaching") {
         const name = subscription.metadata?.customerName ?? ""
         const applicationId = subscription.metadata?.applicationId ?? ""
         if (invoice.billing_reason === "subscription_create") {
+          // Idempotent — safe even if checkout.session.completed already ran
           await provisionCoachingSubscriber(email, name, subscriptionId)
           if (applicationId) {
             await updateCoachingApplication(applicationId, {
