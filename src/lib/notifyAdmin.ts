@@ -1,7 +1,9 @@
 import { Resend } from "resend"
+import { CONTACT_EMAIL } from "@/lib/contact"
 
-// Where admin notification emails go. Overridable via env for staging.
-const ADMIN_NOTIFY_TO = process.env.ADMIN_NOTIFY_EMAIL ?? "lisa.p.mcpherson@gmail.com"
+// Where admin notification emails go. Set ADMIN_NOTIFY_EMAIL env var to override;
+// falls back to the centralized CONTACT_EMAIL so changing contact.ts updates everything.
+const ADMIN_NOTIFY_TO = process.env.ADMIN_NOTIFY_EMAIL ?? CONTACT_EMAIL
 const FROM = "Lisa Fit Method <noreply@lisafitmethod.com>"
 
 type Kind =
@@ -11,6 +13,7 @@ type Kind =
   | "check-in-received"
   | "workout-completed"
   | "webhook-failure"
+  | "payment-failed"
 
 interface NotifyPayload {
   kind: Kind
@@ -79,6 +82,7 @@ function labelForKind(k: Kind): string {
     case "check-in-received": return "Check-In Received"
     case "workout-completed": return "Workout Completed"
     case "webhook-failure": return "⚠ Webhook Failure"
+    case "payment-failed": return "⚠ Payment Failed"
   }
 }
 

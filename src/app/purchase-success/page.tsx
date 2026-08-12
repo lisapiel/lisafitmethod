@@ -216,10 +216,10 @@ export default async function PurchaseSuccessPage({ searchParams }: { searchPara
         {product === "bundle" ? (
           <>
             <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 300, color: "#f0e6d3", marginBottom: 8 }}>
-              Your purchase gives you a $137 credit toward coaching.
+              Your purchase includes a $137 coaching credit.
             </p>
             <p style={{ fontSize: 12, color: "#666", lineHeight: 1.7, marginBottom: 16 }}>
-              Good for 90 days. Apply when you are ready.
+              Submit your coaching application within 90 days of purchase to claim it. You don&apos;t need to start coaching within those 90 days.
             </p>
             <Link href="/coaching" style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, textDecoration: "none", fontFamily: "var(--font-montserrat), sans-serif" }}>
               Apply for coaching →

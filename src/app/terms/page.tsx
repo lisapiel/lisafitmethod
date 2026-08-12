@@ -1,15 +1,15 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next"
 import Link from "next/link"
+import { CONTACT_EMAIL } from "@/lib/contact"
 
 export const metadata: Metadata = {
   title: "Terms of Use | Lisa Fit Method",
-  description: "Terms and conditions governing use of lisafitmethod.com and purchase of Training Foundations.",
+  description: "Terms and conditions governing use of lisafitmethod.com and purchase of digital products and services from Lisa Fit Method.",
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "May 23, 2026"
-const CONTACT_EMAIL = "lisafitmethod.course@gmail.com"
+const LAST_UPDATED = "August 12, 2026"
 
 export default function TermsPage() {
   return (
@@ -17,6 +17,7 @@ export default function TermsPage() {
       <style>{`
         .legal-body h2 { font-family: var(--font-playfair), serif; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; margin: 2.5rem 0 1rem; }
         .legal-body h3 { font-size: 1rem; font-weight: 600; color: #1a1a1a; margin: 1.75rem 0 0.5rem; }
+        .legal-body h4 { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; margin: 1.25rem 0 0.35rem; font-style: italic; }
         .legal-body p { font-size: 15px; line-height: 1.85; color: #4a4540; margin-bottom: 1rem; }
         .legal-body ul { margin: 0 0 1rem 1.5rem; }
         .legal-body li { font-size: 15px; line-height: 1.85; color: #4a4540; margin-bottom: 0.35rem; }
@@ -52,26 +53,32 @@ export default function TermsPage() {
             <li>Use the Site to send unsolicited communications or spam.</li>
           </ul>
 
-          <h2>3. Course Purchase and Access</h2>
+          <h2>3. Digital Products</h2>
 
-          <h3>Digital product delivery</h3>
-          <p>Training Foundations is a digital course delivered via the Site. Upon successful payment, you will receive access credentials by email to access course materials through your member account at lisafitmethod.com/training-foundations.</p>
+          <h3>Products and delivery</h3>
+          <p>Lisa Fit Method offers several digital products, including Training Foundations, Nutrition Foundations, the Complete Foundations Bundle, the Progress Tracker, and other digital products offered from time to time. Each is a digital product delivered via the Site. Upon successful payment, access is granted to the relevant content or tool through your member account.</p>
 
-          <h3>License to course content</h3>
-          <p>Your purchase grants you a personal, non-exclusive, non-transferable license to access and use the course content for your own personal, non-commercial use. You may not:</p>
+          <h3>License</h3>
+          <p>Your purchase grants you a personal, non-exclusive, non-transferable license to access and use the purchased content or tool for your own personal, non-commercial use. You may not:</p>
           <ul>
-            <li>Share, resell, sublicense, or otherwise distribute course content to any third party.</li>
+            <li>Share, resell, sublicense, or otherwise distribute content to any third party.</li>
             <li>Screenshot, record, download, or copy course videos, materials, or programs for distribution.</li>
-            <li>Use course content to create competing products or services.</li>
+            <li>Use purchased content to create competing products or services.</li>
             <li>Share your login credentials with others.</li>
           </ul>
 
-          <h3>No refund policy</h3>
-          <p>Because Training Foundations is a digital product with immediate access upon purchase, all sales are final. We do not offer refunds. If you experience a technical issue preventing access to course content, contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and we will work to resolve it promptly.</p>
+          <h3>Refund policy</h3>
+          <p>Because our digital products grant immediate access upon purchase, all sales are final. We do not offer refunds except in the following limited circumstances:</p>
+          <ul>
+            <li><strong>Duplicate or incorrect charges.</strong> If you were charged more than once for the same product, or if an incorrect amount was charged, contact us promptly and we will correct it.</li>
+            <li><strong>Technical access failure.</strong> If a verified Lisa Fit Method technical issue prevents you from accessing a product you purchased, and we are unable to reasonably resolve it, we will issue a refund for that product.</li>
+            <li><strong>Required by applicable law.</strong> Where a refund is required by law, we will provide one.</li>
+          </ul>
+          <p>If you have difficulty accessing a product, please contact us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> before requesting a refund so we have the opportunity to resolve the issue.</p>
 
           <h3 id="access-policy">Access policy</h3>
-          <p>When you purchase a course or add-on, you receive ongoing access to that product (including content, videos, and tracking tools) for as long as Lisa Fit Method continues to operate the platform. This is not a subscription; there are no recurring charges. Access is not guaranteed in perpetuity and is contingent on the platform remaining active.</p>
-          <p>If the platform is ever discontinued, notice will be posted on the platform itself for a reasonable period before access ends, giving active users the opportunity to export their training data and download the materials they purchased. Notice posted on the platform is considered sufficient; individual email notification is not guaranteed.</p>
+          <p>When you purchase a digital product, you receive ongoing access to that product for as long as Lisa Fit Method continues to operate the platform. This is not a subscription; there are no recurring charges for one-time digital product purchases. Access is not guaranteed in perpetuity and is contingent on the platform remaining active.</p>
+          <p>If the platform is ever discontinued, Lisa Fit Method will provide reasonable advance notice where practicable. Where technically feasible, users may be given the opportunity to export eligible user-generated data and/or access materials that Lisa Fit Method expressly makes available for download before access ends.</p>
           <p>Your purchase grants a personal, non-exclusive, non-transferable license to access the content for your own use. This license is not assignable and cannot be shared, gifted, or resold.</p>
 
           <h2 id="risk">4. Health Disclaimer, Assumption of Risk, and Results</h2>
@@ -91,7 +98,39 @@ export default function TermsPage() {
           <p>All content on this Site (including text, images, video, graphics, logos, program design, and code) is the property of Lisa Fit Method or its content suppliers and is protected by United States and international copyright laws. See our <Link href="/licensing">Licensing & Copyright Policy</Link> for details.</p>
 
           <h2 id="coaching">6. Coaching Services</h2>
-          <p>Submission of a coaching inquiry does not guarantee acceptance. Lisa McPherson reserves the right to accept or decline any coaching application at her sole discretion. The specific coaching tier, monthly price, commitment length (if any), and cancellation terms applicable to your enrollment will be disclosed on the payment confirmation page and reiterated in your welcome email. By enrolling, you agree to those terms in addition to the general Terms of Use and the Assumption of Risk and Liability Release above.</p>
+
+          <h3>Application and acceptance</h3>
+          <p>Submission of a coaching application does not guarantee acceptance. Lisa Fit Method reviews coaching applications and reserves the right to accept or decline any application at its sole discretion. No charge is made for submitting an application.</p>
+
+          <h3>Enrollment and tier disclosure</h3>
+          <p>If your application is accepted, you will receive confirmation by email. Before proceeding to payment, you will be presented with the specific coaching tier, monthly price, commitment terms, and cancellation terms that apply to your enrollment. Payment is not collected until you have reviewed and confirmed these terms. By proceeding to payment, you agree to those terms in addition to the general Terms of Use and the Assumption of Risk and Liability Release in Section 4.</p>
+
+          <h3>Billing, commitment, and cancellation</h3>
+
+          <h4>Month-to-month ($497/month)</h4>
+          <p>Coaching is billed monthly with no minimum commitment. You may request cancellation at any time by emailing <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Cancellations are effective from the date the request is received. If your request is received before your next scheduled billing charge is processed, no further charge will be made. Coaching continues through the end of the already-paid billing period. If a billing charge is processed after we have received a valid cancellation request that preceded the billing date, that charge will be treated as an incorrect charge and refunded.</p>
+
+          <h4>3-month commitment ($397/month)</h4>
+          <p>Coaching is billed monthly at $397 per month. You commit to the first three monthly payments. You may submit a cancellation request at any time, including during the initial commitment period, by emailing <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. A cancellation request received during the first three months schedules the coaching to end after the three-month commitment is fulfilled; it does not eliminate the remaining committed payments. Throughout any period for which you have paid, you will continue to receive coaching and retain access to your coaching portal. After the initial three months, billing continues month-to-month at $397 per month and the same cancellation process as above applies.</p>
+
+          <h3>Coaching refund policy</h3>
+          <p>Coaching payments already made are generally non-refundable. Exceptions include duplicate or incorrect charges and refunds required by applicable law. Lisa Fit Method may, at its discretion, provide a partial or full refund where it determines that a refund is appropriate.</p>
+
+          <h3>Failed payments</h3>
+          <p>If a coaching payment cannot be processed, you will receive a notification with instructions for updating your payment method. Our payment processor may automatically retry an unsuccessful payment. If payment cannot be collected after retries, coaching access may be suspended or terminated. You remain responsible for amounts owed for periods during which you received coaching services.</p>
+
+          <h3>Termination by Lisa Fit Method</h3>
+          <p>Lisa Fit Method may terminate a coaching engagement, without refund of amounts already paid, in the event of: nonpayment or repeated payment failures; harassment or abusive behavior toward Lisa McPherson or any Lisa Fit Method representative; unauthorized sharing or misuse of coaching materials or content; material violation of these Terms of Use; or conduct that makes continuing the coaching relationship unreasonable or unsafe.</p>
+          <p>If Lisa Fit Method ends a coaching engagement for a reason unrelated to any breach by the client, future billing will cease and a pro-rata refund will be provided for any portion of the current paid period during which coaching services will not be delivered.</p>
+
+          <h3>Complete Foundations Bundle coaching credit</h3>
+          <p>Purchasers of the Complete Foundations Bundle may apply a $137 coaching credit toward their first coaching payment, subject to the following:</p>
+          <ul>
+            <li>To claim the credit, your coaching application must be submitted within 90 days of your bundle purchase date. You are not required to begin coaching within those 90 days; only the application must be submitted within that window. Holding this credit does not guarantee acceptance into 1:1 coaching.</li>
+            <li>If your application is accepted, the $137 credit is applied toward your first monthly coaching payment.</li>
+            <li>The credit has no cash value and is non-transferable.</li>
+            <li>The credit may not be combined with another promotional coaching credit or discount unless Lisa Fit Method expressly permits it.</li>
+          </ul>
 
           <h2>7. Third-Party Links and Services</h2>
           <p>This Site may contain links to third-party websites or services. We are not responsible for the content, privacy practices, or terms of any third-party site. Links do not constitute endorsement.</p>
@@ -109,12 +148,12 @@ export default function TermsPage() {
           <p>These Terms are governed by the laws of the State of Florida and the United States, without regard to conflict of law principles. Any court proceedings not subject to arbitration under Section 13 shall be brought exclusively in the state or federal courts located in Broward County, Florida, and you consent to the personal jurisdiction of those courts.</p>
 
           <h2>12. User-Generated Data</h2>
-          <p>Certain features of this Site (including workout tracking functionality available to course purchasers) allow you to input and store personal fitness data such as exercise logs, weights, sets, reps, and progress notes ("User Data").</p>
+          <p>Certain features of this Site (including workout tracking functionality available to course members and coaching clients) allow you to input and store personal fitness data such as exercise logs, weights, sets, reps, and progress notes ("User Data").</p>
           <ul>
-            <li><strong>Ownership</strong>:you retain ownership of your User Data. By submitting it, you grant us a limited license to store and display it to you through the Site.</li>
-            <li><strong>Storage and retention</strong>:User Data is retained for as long as your account is active. Upon account deletion, your User Data will be removed within 30 days.</li>
-            <li><strong>No medical use</strong>:User Data is for personal tracking purposes only. We do not analyze, share, or sell your workout logs.</li>
-            <li><strong>Accuracy</strong>:you are solely responsible for the accuracy of data you enter. We are not liable for errors, omissions, or data loss in the tracking feature.</li>
+            <li><strong>Ownership:</strong> You retain ownership of your User Data. By submitting it, you grant us a limited license to store and process it to provide the features of this Site.</li>
+            <li><strong>Storage and retention:</strong> User Data is retained for as long as your account is active. Upon account deletion, your User Data will be removed within 30 days.</li>
+            <li><strong>Data use:</strong> Your workout and progress data may be processed to provide platform features including tracking, progress calculations, and related tools. If you are an active 1:1 coaching client, relevant workout and progress data may be accessed and reviewed by authorized Lisa Fit Method personnel as part of providing your coaching services. Lisa Fit Method does not sell your workout data or share it with third parties for their own advertising purposes. Authorized service providers may process data where necessary to operate the platform, consistent with our <Link href="/privacy">Privacy Policy</Link>.</li>
+            <li><strong>Accuracy:</strong> You are solely responsible for the accuracy of data you enter. We are not liable for errors, omissions, or data loss in the tracking feature.</li>
           </ul>
           <p>See our <Link href="/privacy">Privacy Policy</Link> for more information on how we handle your data.</p>
 

@@ -1090,6 +1090,15 @@ export async function POST(request: NextRequest) {
         subject: "Action needed: Coaching payment issue",
         html: coachingPaymentFailedEmail(email),
       }).catch((err) => console.error("Coaching dunning email failed:", err))
+      notifyAdmin({
+        kind: "payment-failed",
+        subject: `Coaching payment failed — ${email}`,
+        headline: "A coaching payment could not be processed",
+        body: `The recurring coaching payment for ${email} failed.\n\nA payment-update email has been sent to the client. Stripe will retry automatically. If not resolved after retries, coaching access will be suspended.\n\nCheck Stripe for the failure reason and follow up if the client does not respond.`,
+        ctaLabel: "Open Stripe dashboard",
+        ctaHref: "https://dashboard.stripe.com/subscriptions",
+        meta: { email, subscriptionId: subscriptionId ?? "" },
+      }).catch(() => {})
     }
   }
 

@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next"
 import Link from "next/link"
+import { CONTACT_EMAIL } from "@/lib/contact"
 
 export const metadata: Metadata = {
   title: "Licensing & Copyright — Lisa Fit Method",
@@ -8,8 +9,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "May 23, 2026"
-const CONTACT_EMAIL = "lisafitmethod.course@gmail.com"
+const LAST_UPDATED = "August 12, 2026"
 
 export default function LicensingPage() {
   return (
@@ -40,18 +40,18 @@ export default function LicensingPage() {
         <div className="legal-body" style={{ maxWidth: 720, margin: "0 auto" }}>
 
           <div className="notice-box">
-            <p>All content on lisafitmethod.com — including but not limited to photographs, video recordings, written programs, blog articles, and course materials — is the exclusive property of Lisa McPherson / Lisa Fit Method and is protected under United States and international copyright law. Unauthorized use is strictly prohibited.</p>
+            <p>All content on lisafitmethod.com — including but not limited to photographs, video recordings, written programs, blog articles, and course materials — is owned by or licensed to Lisa McPherson / Lisa Fit Method and is protected under United States and international copyright law. Unauthorized use is strictly prohibited.</p>
           </div>
 
           <h2>1. Copyright Ownership</h2>
           <p>Copyright © {new Date().getFullYear()} Lisa McPherson / Lisa Fit Method. All rights reserved.</p>
-          <p>The following content is owned exclusively by Lisa Fit Method and protected under 17 U.S.C. § 101 et seq. (U.S. Copyright Act) and applicable international treaties:</p>
+          <p>The following content is owned by or licensed to Lisa Fit Method and protected under 17 U.S.C. § 101 et seq. (U.S. Copyright Act) and applicable international treaties:</p>
           <ul>
             <li><strong>Photography</strong> — all photographs appearing on this website, including hero images, portrait photos, and lifestyle photography.</li>
-            <li><strong>Video content</strong> — all exercise demonstration videos, coaching videos, and any video content created for Training Foundations or related products.</li>
+            <li><strong>Video content</strong> — all exercise demonstration videos, coaching videos, and any video content created for Lisa Fit Method products and programs.</li>
             <li><strong>Written content</strong> — all blog articles, course programs, training guides, and instructional text.</li>
             <li><strong>Branding and design</strong> — the Lisa Fit Method name, logo, visual identity, and site design.</li>
-            <li><strong>Training programs</strong> — the Training Foundations program design, structure, sequencing, and all associated materials.</li>
+            <li><strong>Training programs and materials</strong> — all training programs, nutrition education materials, course modules, curricula, and associated video, written, and instructional content offered through Lisa Fit Method, including current and future products.</li>
           </ul>
 
           <h2>2. Prohibited Uses</h2>

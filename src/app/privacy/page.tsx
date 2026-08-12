@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from "next"
 import Link from "next/link"
+import { CONTACT_EMAIL } from "@/lib/contact"
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Lisa Fit Method",
@@ -8,8 +9,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "May 23, 2026"
-const CONTACT_EMAIL = "lisafitmethod.course@gmail.com"
+const LAST_UPDATED = "August 12, 2026"
 
 export default function PrivacyPage() {
   return (
@@ -43,10 +43,11 @@ export default function PrivacyPage() {
 
           <h3>Information you provide directly</h3>
           <ul>
-            <li><strong>Contact form submissions</strong>:your name, email address, and message when you fill out the contact or coaching inquiry form.</li>
-            <li><strong>Account registration</strong>:your email address when you purchase a course and create a member account.</li>
-            <li><strong>Payment information</strong>:your card details are collected and processed directly by Stripe. We do not store your full card number or CVV on our servers.</li>
-            <li><strong>Workout tracking data</strong>:if you use the workout logging feature available to course members, we collect the fitness data you enter (exercises, sets, reps, weights, and notes). This data is used solely to display your personal progress within the Site and is never shared or sold.</li>
+            <li><strong>Contact and coaching application information</strong>: your name, email address, and message when you fill out the contact form; and, for coaching applications, information you provide about your fitness goals, training experience, weekly availability, equipment, injuries or limitations, training history, tier preference, and start timing.</li>
+            <li><strong>Account registration</strong>: your email address when you purchase a course and create a member account.</li>
+            <li><strong>Payment information</strong>: your card details are collected and processed directly by Stripe. We do not store your full card number or CVV on our servers.</li>
+            <li><strong>Purchase and enrollment acceptance records</strong>: when you complete a purchase or accept coaching terms, we record your email address, the product purchased, the version of our Terms and (where applicable) Liability Waiver you accepted, the transaction reference, and technical details from your browser session (IP address and user agent) at the moment of acceptance. These records document when and how you agreed to our terms and are retained for legal compliance, fraud prevention, and transaction integrity purposes.</li>
+            <li><strong>Workout tracking data</strong>: if you use the workout logging feature available to course members and coaching clients, we collect the fitness data you enter (exercises, sets, reps, weights, and notes).</li>
           </ul>
 
           <h3>Information collected automatically</h3>
@@ -63,6 +64,8 @@ export default function PrivacyPage() {
             <li>To process payments via Stripe.</li>
             <li>To analyze site traffic and improve our content and user experience via GA4.</li>
             <li>To send transactional emails related to your purchase or account (e.g., account setup, course access).</li>
+            <li>To maintain records of purchase and terms acceptance for legal compliance and transaction integrity.</li>
+            <li>For 1:1 coaching clients, to review your workout and progress data as part of providing coaching services.</li>
             <li>To comply with legal obligations.</li>
           </ul>
           <p>We do not sell your personal information to third parties. We do not use your data for advertising profiling beyond standard GA4 analytics.</p>

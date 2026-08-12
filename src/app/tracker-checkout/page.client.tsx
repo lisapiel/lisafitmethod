@@ -56,17 +56,27 @@ const ctaButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 }
 
-function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
+function PaymentForm({ email, clientSecret, onBack }: { email: string; clientSecret: string; onBack: () => void }) {
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!stripe || !elements) return
+    if (!termsAccepted) {
+      setError("Please agree to the Terms of Purchase before continuing.")
+      return
+    }
     setProcessing(true)
     setError(null)
+    fetch("/api/checkout/record-acceptance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, product: "tracker", clientSecret }),
+    }).catch(() => {})
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -92,12 +102,33 @@ function PaymentForm({ email, onBack }: { email: string; onBack: () => void }) {
         <PaymentElement options={{ layout: "tabs", fields: { billingDetails: { name: "auto" } } }} />
       </div>
 
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 16, cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => { setTermsAccepted(e.target.checked); if (e.target.checked) setError(null) }}
+          style={{ marginTop: 3, accentColor: "#c9a96e", flexShrink: 0, width: 16, height: 16, cursor: "pointer" }}
+          required
+        />
+        <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6 }}>
+          I agree to the{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
+            Terms of Purchase
+          </a>
+          {" "}and{" "}
+          <a href="/terms#access-policy" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
+            Access Policy
+          </a>
+          .
+        </span>
+      </label>
+
       {error && <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>{error}</p>}
 
       <button
         type="submit"
-        disabled={!stripe || processing}
-        style={{ ...ctaButtonStyle, background: processing ? "#8a7550" : "#c9a96e", cursor: processing ? "not-allowed" : "pointer", marginBottom: 16 }}
+        disabled={!stripe || processing || !termsAccepted}
+        style={{ ...ctaButtonStyle, background: !termsAccepted ? "#3a2f1f" : processing ? "#8a7550" : "#c9a96e", color: !termsAccepted ? "#6a5a3f" : "#0a0a0a", cursor: !termsAccepted || processing ? "not-allowed" : "pointer", marginBottom: 16 }}
       >
         {processing ? "Processing…" : "Complete Purchase · $27"}
       </button>
@@ -262,7 +293,7 @@ export function TrackerCheckoutClient() {
             </div>
           ) : email && confirmed && clientSecret ? (
             <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
-              <PaymentForm email={email} onBack={handleBack} />
+              <PaymentForm email={email} clientSecret={clientSecret} onBack={handleBack} />
             </Elements>
           ) : email && !confirmed ? (
             <div>
