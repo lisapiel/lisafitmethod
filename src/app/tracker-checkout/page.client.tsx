@@ -116,7 +116,7 @@ function PaymentForm({ email, clientSecret, onBack }: { email: string; clientSec
             Terms of Purchase
           </a>
           {", "}
-          <a href="/terms#access-policy" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
+          <a href="/terms#refund-policy" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
             Refund Policy
           </a>
           {", and "}

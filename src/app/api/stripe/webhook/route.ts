@@ -16,6 +16,7 @@ import {
   grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication, createCoachingClientRecord,
   getCoachingClientRecord, updateCoachingClientRecord,
   recordBundlePurchase, markBundleCreditUsed,
+  stampCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -704,6 +705,9 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   }
 
   await grantCoachingAccess(email, "monthly")
+  // Stamp the current terms versions on the access record so the portal
+  // layout check passes without requiring reacceptance for new clients.
+  await stampCoachingAccessVersions(email, TERMS_VERSION, LIABILITY_WAIVER_VERSION).catch(() => {})
   // Coaching bundles the Nutrition Foundations course
   await grantNutritionAccess(email).catch((err) => console.error("grantNutritionAccess failed:", err))
   // If a bundle credit was applied, mark it used so it can't be reused

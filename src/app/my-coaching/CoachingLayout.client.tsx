@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { fetchAuthSession } from "aws-amplify/auth"
 import AccountDropdown from "@/components/AccountDropdown.client"
 
 const accent = "#c8a97e"
@@ -85,13 +86,148 @@ function MessageIcon() {
   )
 }
 
+function ReacceptInterstitial({ onAccepted }: { onAccepted: () => void }) {
+  const [termsChecked, setTermsChecked] = useState(false)
+  const [waiverChecked, setWaiverChecked] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!termsChecked || !waiverChecked) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) { setError("Session expired — please refresh the page."); setSubmitting(false); return }
+      const res = await fetch("/api/coaching/reaccept", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      })
+      if (!res.ok) { setError("Something went wrong. Please try again."); setSubmitting(false); return }
+      onAccepted()
+    } catch {
+      setError("Something went wrong. Please try again.")
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div style={{
+      minHeight: "100dvh",
+      background: warmWhite,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem 1.5rem",
+    }}>
+      <div style={{ maxWidth: 520, width: "100%" }}>
+        <p style={{
+          fontSize: 11,
+          fontWeight: 500,
+          letterSpacing: "0.25em",
+          textTransform: "uppercase",
+          color: accent,
+          marginBottom: 12,
+          fontFamily: "var(--font-dm-sans), sans-serif",
+        }}>
+          1:1 Coaching
+        </p>
+        <h1 style={{
+          fontFamily: "var(--font-playfair), serif",
+          fontSize: "clamp(24px, 4vw, 32px)",
+          fontWeight: 700,
+          color: black,
+          lineHeight: 1.2,
+          marginBottom: 16,
+        }}>
+          Updated Terms & Waiver
+        </h1>
+        <p style={{
+          fontSize: 15,
+          color: muted,
+          lineHeight: 1.7,
+          marginBottom: 28,
+          fontFamily: "var(--font-dm-sans), sans-serif",
+        }}>
+          Our Coaching Terms &amp; Conditions and Assumption of Risk &amp; Liability Waiver have been updated.
+          Please review and accept them to continue using your coaching portal.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <label style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 16, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={termsChecked}
+              onChange={(e) => setTermsChecked(e.target.checked)}
+              style={{ marginTop: 3, accentColor: accent, flexShrink: 0, width: 16, height: 16, cursor: "pointer" }}
+            />
+            <span style={{ fontSize: 13, color: muted, lineHeight: 1.6, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              I have read and agree to the{" "}
+              <a href="/terms#coaching" target="_blank" rel="noopener noreferrer" style={{ color: "#a8895e", textDecoration: "underline" }}>
+                Coaching Terms &amp; Conditions
+              </a>
+              , including the cancellation and refund policy.
+            </span>
+          </label>
+
+          <label style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 24, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={waiverChecked}
+              onChange={(e) => setWaiverChecked(e.target.checked)}
+              style={{ marginTop: 3, accentColor: accent, flexShrink: 0, width: 16, height: 16, cursor: "pointer" }}
+            />
+            <span style={{ fontSize: 13, color: muted, lineHeight: 1.6, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+              I have read and agree to the{" "}
+              <a href="/terms#risk" target="_blank" rel="noopener noreferrer" style={{ color: "#a8895e", textDecoration: "underline" }}>
+                Assumption of Risk &amp; Liability Waiver
+              </a>
+              {" "}and understand that exercise, including remote/online training, involves inherent risks of injury, illness, or death. I confirm that I have disclosed any known injury, medical condition, physical limitation, pregnancy, or other circumstance relevant to my ability to exercise safely and agree to update Lisa Fit Method if that information changes.
+            </span>
+          </label>
+
+          {error && (
+            <p style={{ fontSize: 13, color: "#d9534f", marginBottom: 16, fontFamily: "var(--font-dm-sans), sans-serif" }}>{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={!termsChecked || !waiverChecked || submitting}
+            style={{
+              width: "100%",
+              background: (!termsChecked || !waiverChecked) ? "#ddd5ca" : submitting ? "#b8996a" : accent,
+              color: (!termsChecked || !waiverChecked) ? "#9a9087" : black,
+              fontFamily: "var(--font-dm-sans), sans-serif",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              border: "none",
+              padding: "16px 32px",
+              cursor: (!termsChecked || !waiverChecked || submitting) ? "not-allowed" : "pointer",
+              transition: "background 0.2s ease",
+            }}
+          >
+            {submitting ? "Saving…" : "Accept & Continue"}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function CoachingClientLayout({
   children,
+  needsReaccept = false,
 }: {
   children: React.ReactNode
+  needsReaccept?: boolean
 }) {
   const pathname = usePathname()
   const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [reacceptDone, setReacceptDone] = useState(false)
 
   // Hide mobile bottom nav while typing — when an input or textarea is focused,
   // the on-screen keyboard pushes the fixed bottom nav above the keyboard and
@@ -115,6 +251,10 @@ export default function CoachingClientLayout({
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
+
+  if (needsReaccept && !reacceptDone) {
+    return <ReacceptInterstitial onAccepted={() => setReacceptDone(true)} />
+  }
 
   return (
     <div style={{ minHeight: "100dvh", background: warmWhite, display: "flex", flexDirection: "column" }}>

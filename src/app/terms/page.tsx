@@ -67,7 +67,7 @@ export default function TermsPage() {
             <li>Share your login credentials with others.</li>
           </ul>
 
-          <h3>Refund policy</h3>
+          <h3 id="refund-policy">Refund policy</h3>
           <p>Because our digital products grant immediate access upon purchase, all sales are final. We do not offer refunds except in the following limited circumstances:</p>
           <ul>
             <li><strong>Duplicate or incorrect charges.</strong> If you were charged more than once for the same product, or if an incorrect amount was charged, contact us promptly and we will correct it.</li>

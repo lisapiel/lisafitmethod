@@ -1379,3 +1379,102 @@ export async function listAcceptancesForEmail(email: string): Promise<TermsAccep
   return ((result.Items ?? []) as TermsAcceptanceRecord[])
     .sort((a, b) => b.acceptedAt.localeCompare(a.acceptedAt))
 }
+
+// ── Coaching-access version stamping ─────────────────────────────────────────
+// Versions are stored directly on the coaching_access_ record so the layout
+// can check them with a single GET (the same record already read by
+// hasCoachingAccess) rather than doing an expensive Scan.
+
+export async function getCoachingAccessVersions(email: string): Promise<{
+  acceptedTermsVersion?: string
+  acceptedWaiverVersion?: string
+} | null> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })
+    )
+    if (!result.Item) return null
+    return {
+      acceptedTermsVersion: result.Item.acceptedTermsVersion as string | undefined,
+      acceptedWaiverVersion: result.Item.acceptedWaiverVersion as string | undefined,
+    }
+  } catch {
+    return null
+  }
+}
+
+export async function stampCoachingAccessVersions(
+  email: string,
+  termsVersion: string,
+  waiverVersion: string
+): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_access_${email.toLowerCase()}` },
+      UpdateExpression: "SET acceptedTermsVersion = :tv, acceptedWaiverVersion = :wv",
+      ExpressionAttributeValues: { ":tv": termsVersion, ":wv": waiverVersion },
+    })
+  )
+}
+
+// ── Waiver-acceptance tokens (one-time links, e.g. for clients who paid ──────
+// without completing the acceptance interstitial)
+
+export interface WaiverToken {
+  email: string
+  expiresAt: string
+  used: boolean
+}
+
+export function generateWaiverToken(): string {
+  return randomBytes(32).toString("hex")
+}
+
+export async function storeWaiverToken(token: string, email: string): Promise<void> {
+  const db = makeDb()
+  const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: {
+        userId: `waiver_token_${token}`,
+        email: email.toLowerCase(),
+        expiresAt,
+        used: false,
+      },
+    })
+  )
+}
+
+export async function getWaiverToken(token: string): Promise<WaiverToken | null> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `waiver_token_${token}` } })
+    )
+    if (!result.Item) return null
+    return {
+      email: result.Item.email as string,
+      expiresAt: result.Item.expiresAt as string,
+      used: result.Item.used as boolean,
+    }
+  } catch {
+    return null
+  }
+}
+
+export async function markWaiverTokenUsed(token: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `waiver_token_${token}` },
+      UpdateExpression: "SET #used = :true",
+      ExpressionAttributeNames: { "#used": "used" },
+      ExpressionAttributeValues: { ":true": true },
+    })
+  )
+}
