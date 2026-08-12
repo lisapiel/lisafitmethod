@@ -29,7 +29,7 @@ const GROUPS: { label: string; where: string; keys: string[]; labels: Record<str
       module1_cover: "Module 1: Foundation Movements",
       module2_cover: "Module 2: Core & Glute Priority",
       module3_cover: "Module 3: The 4-Week Program",
-      module4_cover: "Module 4: Nutrition Foundations",
+      module4_cover: "Module 4: Nutrition Essentials",
     },
   },
   {

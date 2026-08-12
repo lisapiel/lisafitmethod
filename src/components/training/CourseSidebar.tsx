@@ -101,7 +101,7 @@ const nav: NavSection[] = [
     ],
   },
   {
-    label: "Module 4: Nutrition",
+    label: "Module 4: Nutrition Essentials",
     items: [
       { href: "/training-foundations/module4#protein",     label: "Protein Is Your Priority" },
       { href: "/training-foundations/module4#fuel",        label: "Eat Enough To Train" },

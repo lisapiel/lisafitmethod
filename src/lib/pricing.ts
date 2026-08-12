@@ -25,3 +25,12 @@ export const MASTERCLASS_6MONTH_DISPLAY = "$137"
 export const MASTERCLASS_ANNUAL_DISPLAY = "$197"
 export const MASTERCLASS_6MONTH_PER_MONTH_DISPLAY = "$22.83"
 export const MASTERCLASS_ANNUAL_PER_MONTH_DISPLAY = "$16.42"
+
+// 1:1 Coaching — two tiers
+// (Admin enters the matching cents value manually at approval time; these
+// constants exist so marketing copy stays consistent across pages.)
+export const COACHING_3MONTH_CENTS = 39700
+export const COACHING_MTM_CENTS = 49700
+export const COACHING_3MONTH_DISPLAY = "$397"
+export const COACHING_MTM_DISPLAY = "$497"
+export const COACHING_FROM_DISPLAY = "$397/month"

@@ -198,12 +198,12 @@ const FAQ_CATEGORIES: FaqCategory[] = [
         q: "How do I know if 1:1 coaching is right for me?",
         a: (
           <>
-            If you have a specific goal, an injury history, a unique situation that requires a customized approach, or simply want direct support and accountability, coaching may be the right fit. For most people, however, I recommend starting with a course first. It provides a strong foundation and helps you get far more value out of coaching if you decide to pursue it later.{" "}
+            Choose coaching if you want a plan built completely around your goals, training history, schedule, equipment, and any injuries or limitations, plus weekly check-ins and direct support along the way. Choose the courses if you prefer a self-guided approach at your own pace. Both are real ways to work together.{" "}
             <Link href="/coaching" style={linkStyle}>Learn more about coaching.</Link>
           </>
         ),
         schemaA:
-          "If you have a specific goal, an injury history, a unique situation that requires a customized approach, or simply want direct support and accountability, coaching may be the right fit. For most people, however, I recommend starting with a course first. It provides a strong foundation and helps you get far more value out of coaching if you decide to pursue it later.",
+          "Choose coaching if you want a plan built completely around your goals, training history, schedule, equipment, and any injuries or limitations, plus weekly check-ins and direct support along the way. Choose the courses if you prefer a self-guided approach at your own pace. Both are real ways to work together.",
       },
     ],
   },

@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Module 4: Nutrition Foundations | Lisa Fit Method",
+  title: "Module 4: Nutrition Essentials | Lisa Fit Method",
 }
 
 const gold = "#c9a96e"
@@ -208,10 +208,10 @@ export default function Module4Page() {
       {/* ── Page header ── */}
       <SectionLabel>Module 4</SectionLabel>
       <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 300, color: cream, lineHeight: 1.2, marginBottom: "1rem" }}>
-        Nutrition Foundations
+        Nutrition Essentials
       </h2>
       <div style={{ fontSize: "0.9rem", color: dim, lineHeight: 1.65, maxWidth: 700, marginBottom: "0.75rem" }}>
-        This is not a meal plan, a restrictive diet, or a complicated calorie-tracking system. It is five foundational principles that support everything you do in the gym and help you build a strong, healthy body composition without obsessing over food.
+        Introductory nutrition principles that support your training. Not a meal plan, not a restrictive diet, not calorie-tracking. Five foundational principles that help you build a strong, healthy body composition without obsessing over food. For the full calculator, meal plan, recipes, and grocery guidance, the standalone <Link href="/nutrition-foundations" style={{ color: gold, textDecoration: "none" }}>Nutrition Foundations course</Link> goes deeper.
       </div>
       <div style={{ fontSize: "0.9rem", color: dim, lineHeight: 1.65, maxWidth: 700, marginBottom: "0.75rem" }}>
         About a year ago, I started taking nutrition seriously for the first time. Not dieting. Not tracking every gram. Just genuinely understanding what my body needed to perform, recover, and build muscle. The difference it made was bigger than almost any training change I had ever made.

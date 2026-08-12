@@ -225,37 +225,42 @@ export default async function HomePage() {
         <div className="home-hero-row">
           <div className="home-hero-content">
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.75rem, 0.85vw, 0.9375rem)", fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "clamp(16px, 1.5vw, 28px)" }}>
-              1:1 Online Coaching
+              Strength · Nutrition · Coaching
             </p>
             <h1 className="hero-h1">
               <span>Build a stronger body</span>
               <em>with a plan that actually fits you.</em>
             </h1>
             <p style={{ fontSize: `calc(clamp(1.125rem, 1.4vw, 1.5rem) * ${bs})`, color: "rgba(245,242,238,0.65)", lineHeight: 1.5, marginBottom: "clamp(14px, 1.5vw, 24px)" }}>
-              Personalized coaching for people who want to get stronger, build muscle, improve their body composition, and move better, even with a few old injuries or limitations in the mix.
+              Learn the system on your own with structured training and nutrition courses, or work with me 1:1 for a plan built completely around you.
             </p>
             <p style={{ fontSize: `calc(clamp(1rem, 1.15vw, 1.25rem) * ${bs})`, color: "rgba(245,242,238,0.4)", lineHeight: 1.65, maxWidth: "60ch" }}>
-              Your program starts with you. Your goals, your experience, your schedule, your equipment, and what your body has been through. If you&apos;ve been training but not seeing the results you want, or you&apos;re working around an old injury and don&apos;t know how to adjust, this is exactly what this coaching is for. My goal is simple. A strong, capable body that looks good, moves well, and lasts.
+              Every approach adapts to your goals, experience, schedule, equipment, and any injuries or limitations you&apos;re working around.
             </p>
             <div className="hero-ctas">
               <Link
-                href="/coaching#apply"
+                href="/courses"
                 className="hero-cta-primary"
                 style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.875rem, 1vw, 1.0625rem)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(1rem, 1.1vw, 1.125rem) clamp(2.5rem, 2.2vw, 2.75rem)", whiteSpace: "nowrap" }}
               >
-                Apply for Coaching
+                Explore Courses
               </Link>
               <Link
-                href="/checkout"
+                href="/coaching"
                 className="hero-cta-secondary"
-                style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.3)", color: "rgba(245,242,238,0.55)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.875rem, 1vw, 1.0625rem)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(1rem, 1.1vw, 1.125rem) clamp(1.5rem, 1.6vw, 2rem)" }}
+                style={{ display: "inline-block", border: "1px solid rgba(200,169,126,0.35)", color: "rgba(245,242,238,0.85)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.875rem, 1vw, 1.0625rem)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(1rem, 1.1vw, 1.125rem) clamp(2.5rem, 2.2vw, 2.75rem)", whiteSpace: "nowrap" }}
               >
-                Want to start on your own first? Check out the courses.
+                1:1 Coaching
               </Link>
             </div>
-            <p style={{ fontSize: "clamp(0.8125rem, 0.9vw, 1rem)", color: "rgba(245,242,238,0.28)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6 }}>
-              $1,497/month. 3-month minimum. Limited to 20 clients. Applications reviewed personally within 48 hours.
-            </p>
+            <div style={{ display: "flex", gap: "clamp(20px, 2.4vw, 40px)", flexWrap: "wrap", marginTop: "clamp(4px, 0.6vw, 10px)" }}>
+              <p style={{ fontSize: "clamp(0.8125rem, 0.9vw, 1rem)", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6, margin: 0 }}>
+                From $77 · one-time payment
+              </p>
+              <p style={{ fontSize: "clamp(0.8125rem, 0.9vw, 1rem)", color: "rgba(245,242,238,0.35)", fontFamily: "var(--font-dm-sans), sans-serif", lineHeight: 1.6, margin: 0 }}>
+                From $397/month
+              </p>
+            </div>
           </div>
           {heroUrl && (
             <div className="home-hero-photo-col">
@@ -290,6 +295,51 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* CHOOSE YOUR PATH */}
+      <section style={{ background: "#0a0a0a", padding: "clamp(48px, 6vw, 96px) clamp(24px, 4vw, 80px)", borderTop: "1px solid rgba(200,169,126,0.12)" }} className="choose-path-section">
+        <style>{`
+          .choose-path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 980px; margin: 0 auto; }
+          @media (max-width: 768px) { .choose-path-grid { grid-template-columns: 1fr; gap: 16px; } }
+          .choose-path-card { background: #111; border: 1px solid rgba(200,169,126,0.15); padding: clamp(28px, 3vw, 44px); transition: border-color 0.2s; display: flex; flex-direction: column; }
+          .choose-path-card:hover { border-color: rgba(200,169,126,0.4); }
+        `}</style>
+        <div style={{ maxWidth: 980, margin: "0 auto clamp(28px, 3vw, 48px)", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.75rem, 2.6vw, 2.5rem)", fontWeight: 700, color: "#f5f2ee", lineHeight: 1.15, margin: 0 }}>
+            Choose how you want to start.
+          </h2>
+        </div>
+        <div className="choose-path-grid">
+          <Link href="/courses" className="choose-path-card" style={{ textDecoration: "none", color: "inherit" }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 14 }}>
+              Self-Guided Courses
+            </p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.95rem, 1.05vw, 1.05rem)", color: "rgba(245,242,238,0.7)", lineHeight: 1.6, margin: "0 0 20px" }}>
+              Training and nutrition education you can follow at your own pace.
+            </p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(245,242,238,0.4)", letterSpacing: "0.05em", margin: "0 0 24px" }}>
+              From $77 · one-time payment
+            </p>
+            <span style={{ marginTop: "auto", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)" }}>
+              Explore Courses →
+            </span>
+          </Link>
+          <Link href="/coaching" className="choose-path-card" style={{ textDecoration: "none", color: "inherit" }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 14 }}>
+              1:1 Coaching
+            </p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "clamp(0.95rem, 1.05vw, 1.05rem)", color: "rgba(245,242,238,0.7)", lineHeight: 1.6, margin: "0 0 20px" }}>
+              A custom plan, weekly check-ins, form feedback, and direct support.
+            </p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 13, color: "rgba(245,242,238,0.4)", letterSpacing: "0.05em", margin: "0 0 24px" }}>
+              From $397/month
+            </p>
+            <span style={{ marginTop: "auto", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent)" }}>
+              Explore Coaching →
+            </span>
+          </Link>
+        </div>
+      </section>
 
       {/* STORY */}
       <section style={{ background: "var(--off-white)", padding: "80px 80px" }} className="story-section">
@@ -363,7 +413,7 @@ export default async function HomePage() {
               The Courses
             </p>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: `calc(var(--text-h2) * ${hs})`, fontWeight: 700, color: "var(--black)", lineHeight: 1.1, marginBottom: 16 }}>
-              Prefer to start on your own? Start here.
+              Train at your own pace.
             </h2>
             <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-body-lg)", fontStyle: "italic", color: "var(--accent-dark)", margin: 0 }}>
               Everything I had to learn the hard way, organized into a system.
@@ -468,7 +518,7 @@ export default async function HomePage() {
                 Train right. <em style={{ fontStyle: "italic", color: "var(--accent)" }}>Eat to match.</em>
               </h2>
               <p style={{ fontSize: `calc(var(--text-small) * ${bs})`, color: "rgba(245,242,238,0.45)", lineHeight: 1.65, maxWidth: "60ch", marginBottom: 24 }}>
-                Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you upgrade to 1:1 coaching within 90 days, your full $137 counts as a credit toward your first month.
+                The Complete Foundations Bundle: both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month.
               </p>
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 <div style={{ padding: "14px 20px", background: "#161616", borderLeft: "2px solid rgba(200,169,126,0.4)" }}>
@@ -496,9 +546,9 @@ export default async function HomePage() {
             </div>
           </div>
           <p style={{ marginTop: 40, fontSize: "var(--text-small)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", textAlign: "center" }}>
-            Want it built around you instead?{" "}
+            Want a plan built completely around you?{" "}
             <Link href="/coaching" style={{ color: "rgba(200,169,126,0.6)", textDecoration: "underline" }}>
-              That&apos;s 1:1 coaching.
+              Explore 1:1 coaching.
             </Link>
           </p>
         </div>
@@ -539,11 +589,11 @@ export default async function HomePage() {
               },
               {
                 q: "Can I try the courses before committing to coaching?",
-                a: "Yes, and most of my coaching clients did exactly that. Your course purchase counts as a $137 credit toward coaching if you upgrade within 90 days. It's also a good way to see how I teach before committing to 1:1 work.",
+                a: "Yes, and most of my coaching clients did exactly that. The Complete Foundations Bundle is a great on-ramp — it's $137 one-time and if you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month. It's also a good way to see how I teach before committing to 1:1 work.",
               },
               {
-                q: "How available are you during coaching?",
-                a: "Very. Weekly check-ins plus messaging anytime between them. I respond same day in most cases. That access is a big part of what makes this different from app-based coaching.",
+                q: "How is this different from a workout app?",
+                a: "Weekly check-ins plus messaging anytime between them. I personally review every workout and every check-in and I adjust your program based on what's actually working. Real answers, usually same day. No generic algorithm-generated programs.",
               },
             ].map((item) => (
               <div key={item.q} style={{ background: "#fff", padding: "32px 36px", borderLeft: "3px solid var(--accent)" }}>
@@ -574,13 +624,16 @@ export default async function HomePage() {
           <Link href="/coaching#apply" style={{ display: "inline-block", background: "var(--accent)", color: "var(--black)", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", padding: "clamp(16px, 1.4vw, 20px) clamp(40px, 5vw, 72px)", marginBottom: 16 }}>
             Apply for Coaching
           </Link>
-          <p style={{ fontSize: "var(--text-small)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28 }}>
-            $1,497/month. 3-month minimum. Spots are limited. Applications reviewed personally within 48 hours.
+          <p style={{ fontSize: "var(--text-small)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 12 }}>
+            Coaching from $397/month. Applications reviewed personally within 48 hours.
+          </p>
+          <p style={{ fontSize: "var(--text-small)", color: "rgba(245,242,238,0.3)", fontFamily: "var(--font-dm-sans), sans-serif", marginBottom: 28, maxWidth: "50ch", lineHeight: 1.6 }}>
+            I keep my coaching roster intentionally small so every client gets personal attention.
           </p>
           <p style={{ fontSize: "var(--text-small)", color: "rgba(245,242,238,0.25)", fontFamily: "var(--font-dm-sans), sans-serif" }}>
-            Prefer to start with the courses?{" "}
-            <Link href="/checkout" style={{ color: "rgba(200,169,126,0.6)", textDecoration: "underline" }}>
-              Training Foundations is ${t.coursePrice}.
+            Prefer a self-guided approach?{" "}
+            <Link href="/courses" style={{ color: "rgba(200,169,126,0.6)", textDecoration: "underline" }}>
+              Explore the courses.
             </Link>
           </p>
         </div>

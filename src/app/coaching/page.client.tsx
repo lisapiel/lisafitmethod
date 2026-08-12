@@ -142,7 +142,7 @@ interface FormState {
   equipment: string
   injuries: string
   whatHaveYouTried: string
-  investmentReadiness: string
+  coachingOption: string
   startTiming: string
 }
 
@@ -155,7 +155,7 @@ const emptyForm: FormState = {
   equipment: "",
   injuries: "",
   whatHaveYouTried: "",
-  investmentReadiness: "",
+  coachingOption: "",
   startTiming: "",
 }
 
@@ -532,7 +532,7 @@ export default function CoachingClient() {
                   "You want to get stronger, leaner, and move better",
                   "You’ve done the random programs. They went nowhere.",
                   "You want someone actually checking your work every week",
-                  "You’re ready to commit 3 to 6 months and put in the effort",
+                  "You’re ready to follow a personalized plan consistently and put in the effort.",
                 ].map((item) => (
                   <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <IconCheck />
@@ -664,42 +664,48 @@ export default function CoachingClient() {
           </p>
 
           <div className="ch-price-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: 780, margin: "0 auto 40px" }}>
-            {/* Card 1 */}
-            <div style={{ background: "#161616", padding: "44px 40px", borderTop: `2px solid #333` }}>
+            {/* Card 1 — PRIMARY / dominant · 3-month · BEST VALUE */}
+            <div style={{ background: "#1e1a15", padding: "44px 40px", borderTop: `2px solid ${ACCENT}`, position: "relative" }}>
+              <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 2, background: ACCENT }} />
+              <div style={{ position: "absolute", top: 18, right: 18, background: ACCENT, color: "#0a0a0a", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px" }}>
+                Best Value
+              </div>
               <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>3-month coaching</p>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,497</p>
-              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.4)", marginBottom: 6, lineHeight: 1.5 }}>per month</p>
-              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.25)", marginBottom: 28, lineHeight: 1.5 }}>or pay in full at $3,997 (saves about $450)</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$397</p>
+              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.4)", marginBottom: 28, lineHeight: 1.5 }}>per month</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>3-month minimum commitment</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.75)", lineHeight: 1.65 }}>3-month minimum commitment</span>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>Best if you want focused support, a clear plan, and accountability while you build momentum.</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.75)", lineHeight: 1.65 }}>After 3 months, continues month-to-month at $397/month until cancelled</span>
+                </div>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.75)", lineHeight: 1.65 }}>Save $100/month compared with month-to-month</span>
+                </div>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.75)", lineHeight: 1.65 }}>Best if you&apos;re ready to give the plan enough time to actually work</span>
                 </div>
               </div>
             </div>
 
-            {/* Card 2 — highlighted */}
-            <div style={{ background: "#1e1a15", padding: "44px 40px", borderTop: `2px solid ${ACCENT}`, position: "relative" }}>
-              <div style={{ position: "absolute", top: -1, left: 0, right: 0, height: 2, background: ACCENT }} />
-              <div style={{ position: "absolute", top: 18, right: 18, background: ACCENT, color: "#0a0a0a", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px" }}>
-                Save $200/mo
-              </div>
-              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>6-month coaching</p>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$1,297</p>
-              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.4)", marginBottom: 6, lineHeight: 1.5 }}>per month</p>
-              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.25)", marginBottom: 28, lineHeight: 1.5 }}>or pay in full at $6,997 (saves about $785)</p>
+            {/* Card 2 — SECONDARY / quieter · month-to-month */}
+            <div style={{ background: "#161616", padding: "44px 40px", borderTop: `2px solid #333` }}>
+              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(240,230,211,0.45)", marginBottom: 14 }}>Month-to-month coaching</p>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 44, fontWeight: 900, color: ACCENT, margin: "0 0 4px", lineHeight: 1 }}>$497</p>
+              <p style={{ fontSize: "var(--text-small)", color: "rgba(240,230,211,0.4)", marginBottom: 28, lineHeight: 1.5 }}>per month</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>6-month minimum commitment</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>Cancel anytime</span>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                   <span style={{ color: ACCENT, fontSize: "var(--text-body)", marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>Best if you want longer-term support, more time to build strength, improve body composition, and create lasting results.</span>
+                  <span style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.65)", lineHeight: 1.65 }}>Best if you want maximum flexibility</span>
                 </div>
               </div>
             </div>
@@ -770,12 +776,12 @@ export default function CoachingClient() {
           <div>
             {[
               {
-                q: "How is this different from apps like Future or Caliber?",
-                a: "You work directly with me, not an assigned trainer from a pool. I keep my roster small on purpose so every client gets my full attention and a program built specifically for them.",
+                q: "How is this different from a workout app?",
+                a: "You work directly with me, not an algorithm and not an assigned trainer from a pool. I personally review every workout and every check-in, I adjust your program based on what's actually working, and I keep my roster small on purpose so every client gets my full attention.",
               },
               {
                 q: "Is there a smaller way to start before committing to coaching?",
-                a: "Yes. The Training Foundations bundle ($137) is the best place to start. It also comes with a $137 credit toward your first month of coaching if you decide to upgrade within 90 days.",
+                a: "Yes. The Complete Foundations Bundle ($137) is the best place to start. If you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month.",
               },
               {
                 q: "Do you coach nutrition too?",
@@ -791,7 +797,7 @@ export default function CoachingClient() {
               },
               {
                 q: "How fast will I see results?",
-                a: "Honestly? You’ll feel the difference in a few weeks. Visible change takes about 12 weeks of consistent work. That’s exactly why coaching starts at 3 months. I don’t take clients for outcomes I can’t deliver.",
+                a: "Honestly? You’ll feel the difference in a few weeks. Visible change usually takes about 12 weeks of consistent work. That’s why the primary tier starts with a 3-month commitment. I don’t take clients for outcomes I can’t deliver.",
               },
               {
                 q: "What happens after I apply?",
@@ -854,7 +860,7 @@ export default function CoachingClient() {
               </ol>
 
               <Link href="/courses" className="ch-link">
-                Not ready yet? The Training Foundations bundle ($137) is a great place to start. It counts as a $137 credit toward coaching if you upgrade within 90 days →
+                Prefer a self-guided approach? The Complete Foundations Bundle ($137) is a great place to start. Upgrade to coaching within 90 days and the full $137 credits toward your first coaching month →
               </Link>
             </div>
 
@@ -955,15 +961,15 @@ export default function CoachingClient() {
                     <textarea required rows={4} value={form.whatHaveYouTried} onChange={set("whatHaveYouTried")} placeholder="Programs, apps, trainers, anything you've done. And what got in the way." style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
                   </div>
 
-                  {/* Q9: Investment readiness */}
+                  {/* Q9: Coaching option */}
                   <div>
-                    <Label>Coaching is $1,297 to $1,497/month with a 3-month minimum. Are you in a position to invest at that level if we&apos;re a fit? *</Label>
+                    <Label>Which coaching option are you most interested in? *</Label>
                     <div className="ch-select-wrap">
-                      <select required value={form.investmentReadiness} onChange={set("investmentReadiness")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
+                      <select required value={form.coachingOption} onChange={set("coachingOption")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
-                        <option>Yes</option>
-                        <option>I&apos;d need to discuss it with someone</option>
-                        <option>No</option>
+                        <option>3-month coaching — $397/month</option>
+                        <option>Month-to-month coaching — $497/month</option>
+                        <option>I&apos;m not sure yet</option>
                       </select>
                     </div>
                   </div>

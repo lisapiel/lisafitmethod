@@ -213,15 +213,31 @@ export default async function PurchaseSuccessPage({ searchParams }: { searchPara
         <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 8, fontFamily: "var(--font-montserrat), sans-serif" }}>
           1:1 Coaching
         </p>
-        <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 300, color: "#f0e6d3", marginBottom: 8 }}>
-          Your purchase gives you a $137 credit toward coaching.
-        </p>
-        <p style={{ fontSize: 12, color: "#666", lineHeight: 1.7, marginBottom: 16 }}>
-          Good for 90 days. Apply when you are ready.
-        </p>
-        <Link href="/coaching" style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, textDecoration: "none", fontFamily: "var(--font-montserrat), sans-serif" }}>
-          Apply for coaching →
-        </Link>
+        {product === "bundle" ? (
+          <>
+            <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 300, color: "#f0e6d3", marginBottom: 8 }}>
+              Your purchase gives you a $137 credit toward coaching.
+            </p>
+            <p style={{ fontSize: 12, color: "#666", lineHeight: 1.7, marginBottom: 16 }}>
+              Good for 90 days. Apply when you are ready.
+            </p>
+            <Link href="/coaching" style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, textDecoration: "none", fontFamily: "var(--font-montserrat), sans-serif" }}>
+              Apply for coaching →
+            </Link>
+          </>
+        ) : (
+          <>
+            <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: 18, fontWeight: 300, color: "#f0e6d3", marginBottom: 8 }}>
+              Want more personalized support?
+            </p>
+            <p style={{ fontSize: 12, color: "#666", lineHeight: 1.7, marginBottom: 16 }}>
+              1:1 coaching gives you a custom plan, weekly check-ins, and direct support.
+            </p>
+            <Link href="/coaching" style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, textDecoration: "none", fontFamily: "var(--font-montserrat), sans-serif" }}>
+              Explore 1:1 coaching →
+            </Link>
+          </>
+        )}
       </div>
 
       {upsells.length > 0 && (

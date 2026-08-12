@@ -32,7 +32,7 @@ const TRAINING_MODULES = [
   { num: "01", tag: "Module 1", title: "Foundation Movements", items: ["Hip hinge: protect your back under load", "Squat pattern: hips, knees, and core working together", "Push pattern: press safely without destroying your shoulders", "Pull pattern: build posture, stability, and upper body strength", "Brace & carry: how your core actually works"] },
   { num: "02", tag: "Module 2", title: "Core & Glute Priority", items: ["Core stability fundamentals", "Glute strength and lower body stability", "Load the posterior chain safely", "Build a stronger core that supports heavier lifting"] },
   { num: "03", tag: "Module 3", title: "The Training Program", items: ["3 structured training days per week", "Built-in warm-ups and cool-downs", "Progressive overload system included", "Step-by-step exercise guidance", "Workout and progress tracking built in", "Designed to be repeated and progressed"] },
-  { num: "04", tag: "Module 4", title: "Nutrition Foundations", items: ["Protein first", "Fuel your training properly", "Consistency over perfection", "Hydration affects everything", "Stop overcomplicating nutrition"] },
+  { num: "04", tag: "Module 4", title: "Nutrition Essentials", items: ["Protein first", "Fuel your training properly", "Consistency over perfection", "Hydration affects everything", "Stop overcomplicating nutrition"] },
 ]
 
 const NUTRITION_MODULES = [

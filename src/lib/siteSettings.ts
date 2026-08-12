@@ -127,7 +127,7 @@ export const DEFAULTS: SiteSettings = {
     mod3Title: "The Training System",
     mod3Desc:
       "A structured 3-day training system designed to help you progressively build strength, improve movement quality, and learn how to train properly long term.",
-    mod4Title: "Nutrition Foundations",
+    mod4Title: "Nutrition Essentials",
     mod4Desc:
       "Simple nutrition principles that support muscle growth, recovery, energy, and long-term consistency without obsessing over food.",
     coursesFinalHeadline: "Build the foundation.\nTrain for life.",

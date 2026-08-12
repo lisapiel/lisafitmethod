@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     equipment: b.equipment?.trim(),
     injuries: b.injuries?.trim(),
     whatHaveYouTried,
-    investmentReadiness: b.investmentReadiness?.trim(),
+    coachingOption: b.coachingOption?.trim(),
     startTiming: b.startTiming?.trim(),
   })
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       "days per week": b.daysPerWeek ?? "—",
       equipment: b.equipment ?? "—",
       "injuries / limitations": b.injuries || "None mentioned",
-      "investment readiness": b.investmentReadiness ?? "—",
+      "coaching option": b.coachingOption ?? "—",
       "start timing": b.startTiming ?? "—",
     },
   })
