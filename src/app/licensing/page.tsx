@@ -50,7 +50,7 @@ export default function LicensingPage() {
             <li><strong>Photography</strong> — all photographs appearing on this website, including hero images, portrait photos, and lifestyle photography.</li>
             <li><strong>Video content</strong> — all exercise demonstration videos, coaching videos, and any video content created for Lisa Fit Method products and programs.</li>
             <li><strong>Written content</strong> — all blog articles, course programs, training guides, and instructional text.</li>
-            <li><strong>Branding and design</strong> — the Lisa Fit Method name, logo, visual identity, and site design.</li>
+            <li><strong>Branding and design</strong> — Lisa Fit Method logo artwork, original graphic elements, visual assets, and original site design may be protected by applicable copyright law. The Lisa Fit Method name and other brand identifiers may also be protected under applicable trademark and unfair-competition laws.</li>
             <li><strong>Training programs and materials</strong> — all training programs, nutrition education materials, course modules, curricula, and associated video, written, and instructional content offered through Lisa Fit Method, including current and future products.</li>
           </ul>
 
@@ -105,7 +105,7 @@ export default function LicensingPage() {
           <p>We review all licensing requests individually and reserve the right to decline any request at our sole discretion.</p>
 
           <h2>9. Enforcement</h2>
-          <p>We actively monitor the web for unauthorized use of our content. Unauthorized use of our intellectual property may result in legal action including claims for copyright infringement, which may entitle us to seek statutory damages, actual damages, and attorneys' fees.</p>
+          <p>We may monitor, investigate, and take appropriate action regarding unauthorized use of our content. Unauthorized use may result in legal action and remedies available under applicable law, which may include injunctive relief, actual damages, and, where legally available, statutory damages and attorneys' fees.</p>
 
           <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
             <Link href="/privacy" style={{ fontSize: 13, color: "#a8895e" }}>Privacy Policy</Link>

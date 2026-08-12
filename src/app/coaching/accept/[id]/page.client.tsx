@@ -155,7 +155,7 @@ export default function AcceptClient({
             >
               Assumption of Risk &amp; Liability Waiver
             </a>
-            {" "}and understand that exercise involves inherent risks.
+            {" "}and understand that exercise, including remote/online training, involves inherent risks of injury, illness, or death. I confirm that I have disclosed any known injury, medical condition, physical limitation, pregnancy, or other circumstance relevant to my ability to exercise safely and agree to update Lisa Fit Method if that information changes.
           </span>
         </label>
 

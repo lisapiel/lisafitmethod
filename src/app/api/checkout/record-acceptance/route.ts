@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { recordTermsAcceptance, TERMS_VERSION } from "@/lib/authTokens"
+import { recordTermsAcceptance, TERMS_VERSION, LIABILITY_WAIVER_VERSION } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -45,10 +45,12 @@ export async function POST(req: NextRequest) {
       customerEmail: email,
       product,
       termsVersion: TERMS_VERSION,
+      liabilityWaiverVersion: LIABILITY_WAIVER_VERSION,
       stripePaymentIntentId: paymentIntentId,
       ipAddress,
       userAgent,
       termsUrl: "/terms",
+      liabilityWaiverUrl: "/terms#risk",
     })
   } catch (err) {
     console.error("recordTermsAcceptance failed:", err)

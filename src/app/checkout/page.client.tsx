@@ -93,7 +93,7 @@ function PaymentForm({
     e.preventDefault()
     if (!stripe || !elements) return
     if (!termsAccepted) {
-      setError("Please agree to the Terms of Purchase and Refund Policy before continuing.")
+      setError("Please agree to the Terms of Purchase, Refund Policy, and Assumption of Risk & Liability Waiver before continuing.")
       return
     }
     setProcessing(true)
@@ -194,15 +194,19 @@ function PaymentForm({
           required
         />
         <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6 }}>
-          I agree to the{" "}
+          I have read and agree to the{" "}
           <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
             Terms of Purchase
           </a>
-          {" "}and{" "}
+          {", "}
           <a href="/terms#access-policy" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
             Refund Policy
           </a>
-          .
+          {", and "}
+          <a href="/terms#risk" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
+            Assumption of Risk &amp; Liability Waiver
+          </a>
+          {", and understand that fitness and exercise activities involve inherent risks."}
         </span>
       </label>
 

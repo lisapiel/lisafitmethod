@@ -1315,8 +1315,8 @@ export async function markBundleCreditUsed(email: string, subscriptionId: string
 // do not require a bump. Substantive edits — refund rules, cancellation
 // rights, liability language, arbitration terms, scope of the waiver — MUST
 // bump the version and archive the previous copy (git tag `terms-{version}`).
-export const TERMS_VERSION = "2026-08-12"
-export const LIABILITY_WAIVER_VERSION = "2026-05-23"
+export const TERMS_VERSION = "2026-08-12-v2"
+export const LIABILITY_WAIVER_VERSION = "2026-08-12"
 
 export type AcceptanceKind = "course-purchase" | "coaching-subscription"
 

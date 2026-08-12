@@ -99,8 +99,8 @@ export default function PrivacyPage() {
           <h2>7. Do Not Track</h2>
           <p>Some browsers include a "Do Not Track" (DNT) feature that signals websites not to track your activity. Our Site does not currently respond to browser Do Not Track signals, as there is no universal industry standard for doing so. You may opt out of Google Analytics tracking at any time using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>.</p>
 
-          <h2>8. Children's Privacy</h2>
-          <p>Our site is not directed at children under 13. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us and we will delete it promptly.</p>
+          <h2>8. Age Requirement</h2>
+          <p>Lisa Fit Method's services, accounts, purchases, and coaching are intended for individuals who are at least 18 years old. We do not knowingly permit minors to create accounts, purchase products, or enroll in coaching. If we learn that personal information has been collected from a minor in connection with an account, purchase, or coaching enrollment, we will take reasonable steps to delete it.</p>
 
           <h2>9. International Users</h2>
           <p>Our services are based in the United States. If you are accessing our site from outside the United States, your information will be transferred to and processed in the United States. By using our site, you consent to this transfer.</p>
