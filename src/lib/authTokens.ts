@@ -1303,3 +1303,79 @@ export async function markBundleCreditUsed(email: string, subscriptionId: string
     ExpressionAttributeValues: { ":at": new Date().toISOString(), ":sub": subscriptionId },
   }))
 }
+
+// ── Terms & liability-waiver version tracking + acceptance log ──────────────
+//
+// TERMS_VERSION and LIABILITY_WAIVER_VERSION are version slugs pinned to the
+// substantive text of the corresponding legal documents at any given moment.
+// Bump these values whenever the actual legal wording changes so acceptance
+// records can be traced back to the exact version the customer saw.
+//
+// Bump policy: format `YYYY-MM-DD[-suffix]`. Cosmetic edits (typos, styling)
+// do not require a bump. Substantive edits — refund rules, cancellation
+// rights, liability language, arbitration terms, scope of the waiver — MUST
+// bump the version and archive the previous copy (git tag `terms-{version}`).
+export const TERMS_VERSION = "2026-05-23"
+export const LIABILITY_WAIVER_VERSION = "2026-05-23"
+
+export type AcceptanceKind = "course-purchase" | "coaching-subscription"
+
+export interface TermsAcceptanceRecord {
+  id: string
+  acceptedAt: string
+  kind: AcceptanceKind
+  customerEmail: string
+  termsVersion: string
+  // Populated for coaching acceptances; undefined for course purchases
+  liabilityWaiverVersion?: string
+  // Product identifier — "training" | "nutrition" | "bundle" | "tracker" | "coaching"
+  product: string
+  // Coaching tier text as shown to the customer (e.g. "3-month coaching — $397/month")
+  coachingOption?: string
+  // Amount charged (cents). For coaching, recurringAmountCents mirrors this.
+  amountCents?: number
+  recurringAmountCents?: number
+  // Stripe identifiers so we can cross-reference with Stripe records
+  stripePaymentIntentId?: string
+  stripeCheckoutSessionId?: string
+  stripeSubscriptionId?: string
+  applicationId?: string
+  // Optional network context if it was available in the request flow
+  ipAddress?: string
+  userAgent?: string
+  // Short label of the terms document link the customer saw (e.g. "/terms")
+  termsUrl?: string
+  liabilityWaiverUrl?: string
+}
+
+export async function recordTermsAcceptance(
+  data: Omit<TermsAcceptanceRecord, "id" | "acceptedAt"> & { id?: string; acceptedAt?: string }
+): Promise<TermsAcceptanceRecord> {
+  const db = makeDb()
+  const id = data.id ?? randomBytes(16).toString("hex")
+  const record: TermsAcceptanceRecord = {
+    ...data,
+    id,
+    acceptedAt: data.acceptedAt ?? new Date().toISOString(),
+    customerEmail: data.customerEmail.toLowerCase(),
+  }
+  await db.send(new PutCommand({
+    TableName: TABLE,
+    Item: { userId: `terms_acceptance_${id}`, ...record },
+  }))
+  return record
+}
+
+export async function listAcceptancesForEmail(email: string): Promise<TermsAcceptanceRecord[]> {
+  const db = makeDb()
+  const result = await db.send(new ScanCommand({
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix) AND customerEmail = :email",
+    ExpressionAttributeValues: {
+      ":prefix": "terms_acceptance_",
+      ":email": email.toLowerCase(),
+    },
+  }))
+  return ((result.Items ?? []) as TermsAcceptanceRecord[])
+    .sort((a, b) => b.acceptedAt.localeCompare(a.acceptedAt))
+}

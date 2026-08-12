@@ -74,7 +74,7 @@ export default function TermsPage() {
           <p>If the platform is ever discontinued, notice will be posted on the platform itself for a reasonable period before access ends, giving active users the opportunity to export their training data and download the materials they purchased. Notice posted on the platform is considered sufficient; individual email notification is not guaranteed.</p>
           <p>Your purchase grants a personal, non-exclusive, non-transferable license to access the content for your own use. This license is not assignable and cannot be shared, gifted, or resold.</p>
 
-          <h2>4. Health Disclaimer, Assumption of Risk, and Results</h2>
+          <h2 id="risk">4. Health Disclaimer, Assumption of Risk, and Results</h2>
           <p><strong>Important: Please read this section carefully. By using this Site or purchasing any product, you agree to the terms below.</strong></p>
 
           <h3>Health and medical disclaimer</h3>
@@ -90,8 +90,8 @@ export default function TermsPage() {
           <h2>5. Intellectual Property</h2>
           <p>All content on this Site (including text, images, video, graphics, logos, program design, and code) is the property of Lisa Fit Method or its content suppliers and is protected by United States and international copyright laws. See our <Link href="/licensing">Licensing & Copyright Policy</Link> for details.</p>
 
-          <h2>6. Coaching Services</h2>
-          <p>Coaching services offered through this Site are subject to a separate coaching agreement provided upon acceptance of a coaching application. Submission of a coaching inquiry does not guarantee acceptance. Lisa McPherson reserves the right to accept or decline any coaching application at her sole discretion.</p>
+          <h2 id="coaching">6. Coaching Services</h2>
+          <p>Submission of a coaching inquiry does not guarantee acceptance. Lisa McPherson reserves the right to accept or decline any coaching application at her sole discretion. The specific coaching tier, monthly price, commitment length (if any), and cancellation terms applicable to your enrollment will be disclosed on the payment confirmation page and reiterated in your welcome email. By enrolling, you agree to those terms in addition to the general Terms of Use and the Assumption of Risk and Liability Release above.</p>
 
           <h2>7. Third-Party Links and Services</h2>
           <p>This Site may contain links to third-party websites or services. We are not responsible for the content, privacy practices, or terms of any third-party site. Links do not constitute endorsement.</p>

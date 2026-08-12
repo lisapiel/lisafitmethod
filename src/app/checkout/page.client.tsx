@@ -67,6 +67,7 @@ function PaymentForm({
   finalAmount,
   discountPct,
   product,
+  clientSecret,
   onBack,
   onApplyPromo,
 }: {
@@ -74,6 +75,7 @@ function PaymentForm({
   finalAmount: number
   discountPct: number
   product: Product
+  clientSecret: string
   onBack: () => void
   onApplyPromo: (code: string) => Promise<{ error: string | null }>
 }) {
@@ -85,12 +87,29 @@ function PaymentForm({
   const [promoOpen, setPromoOpen] = useState(false)
   const [promoError, setPromoError] = useState<string | null>(null)
   const [applyingPromo, setApplyingPromo] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!stripe || !elements) return
+    if (!termsAccepted) {
+      setError("Please agree to the Terms of Purchase and Refund Policy before continuing.")
+      return
+    }
     setProcessing(true)
     setError(null)
+    // Record acceptance before confirming payment. Ties the acceptance to
+    // the payment via clientSecret's payment-intent id. Fire-and-forget so
+    // temporary DB blips don't block the customer's payment.
+    fetch("/api/checkout/record-acceptance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        product,
+        clientSecret,
+      }),
+    }).catch(() => { /* server-side webhook can also reconcile */ })
     const { error: confirmError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -166,7 +185,28 @@ function PaymentForm({
 
       {error && <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>{error}</p>}
 
-      <button type="submit" disabled={!stripe || processing} style={{ width: "100%", background: processing ? "#8a7550" : "#c9a96e", color: "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", border: "none", padding: "18px 32px", cursor: processing ? "not-allowed" : "pointer", transition: "background 0.2s ease", marginBottom: 16 }}>
+      <label style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 16, cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => { setTermsAccepted(e.target.checked); if (e.target.checked) setError(null) }}
+          style={{ marginTop: 3, accentColor: "#c9a96e", flexShrink: 0, width: 16, height: 16, cursor: "pointer" }}
+          required
+        />
+        <span style={{ fontSize: 12, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6 }}>
+          I agree to the{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
+            Terms of Purchase
+          </a>
+          {" "}and{" "}
+          <a href="/terms#access-policy" target="_blank" rel="noopener noreferrer" style={{ color: "#c9a96e", textDecoration: "underline" }}>
+            Refund Policy
+          </a>
+          .
+        </span>
+      </label>
+
+      <button type="submit" disabled={!stripe || processing || !termsAccepted} style={{ width: "100%", background: !termsAccepted ? "#3a2f1f" : processing ? "#8a7550" : "#c9a96e", color: !termsAccepted ? "#6a5a3f" : "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", border: "none", padding: "18px 32px", cursor: !termsAccepted || processing ? "not-allowed" : "pointer", transition: "background 0.2s ease", marginBottom: 16 }}>
         {processing ? "Processing…" : isFree ? "Complete Purchase · $0.50" : `Complete Purchase · ${displayAmount}`}
       </button>
 
@@ -565,7 +605,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
             </div>
           ) : email && confirmed && clientSecret ? (
             <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
-              <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} product={selectedProduct} onBack={handleBack} onApplyPromo={handleApplyPromo} />
+              <PaymentForm email={email} finalAmount={finalAmount} discountPct={discountPct} product={selectedProduct} clientSecret={clientSecret} onBack={handleBack} onApplyPromo={handleApplyPromo} />
             </Elements>
           ) : email && !confirmed ? (
             <EmailConfirmStep email={email} onConfirm={handleConfirm} onChange={handleBack} />

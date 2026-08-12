@@ -202,7 +202,12 @@ export default function AdminApplicationsPage() {
                     )}
                     {(app.status === "APPROVED") && app.stripeCheckoutUrl && (
                       <button
-                        onClick={() => copyUrl(app.stripeCheckoutUrl!, app.id)}
+                        onClick={() => {
+                          // Copy the interstitial URL (which requires the two acknowledgements)
+                          // instead of the raw Stripe URL, so DM'd links can't bypass acceptance.
+                          const acceptUrl = `${typeof window !== "undefined" ? window.location.origin : "https://lisafitmethod.com"}/coaching/accept/${app.id}`
+                          copyUrl(acceptUrl, app.id)
+                        }}
                         style={{ background: "transparent", border: `1px solid ${gold}44`, color: gold, padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}
                       >
                         {copiedId === app.id ? "Copied ✓" : "Copy Payment Link"}

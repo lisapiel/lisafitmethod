@@ -311,6 +311,15 @@ export default async function PurchaseSuccessPage({ searchParams }: { searchPara
           </div>
         </div>
       )}
+
+      {/* Terms retention footer — customer can revisit exactly what they agreed to */}
+      <p style={{ marginTop: 40, fontSize: 11, color: "#555", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", textAlign: "center", lineHeight: 1.7 }}>
+        You agreed to the{" "}
+        <Link href="/terms" style={{ color: gold, textDecoration: "underline" }}>Terms of Purchase</Link>
+        {" "}and{" "}
+        <Link href="/terms#access-policy" style={{ color: gold, textDecoration: "underline" }}>Refund Policy</Link>
+        {" "}at checkout. Bookmark this page or save the confirmation email for your records.
+      </p>
     </main>
   )
 }

@@ -277,14 +277,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       stripeCheckoutUrl: checkoutUrl,
     })
 
+    // Send the applicant to our /coaching/accept/[id] interstitial (which
+    // collects the two required acknowledgements) rather than directly to
+    // Stripe. The interstitial reads the stripeCheckoutUrl we just wrote to
+    // the application record and redirects there after acceptance.
+    const acceptUrl = `${baseUrl}/coaching/accept/${id}`
+
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       to: application.email,
       subject: "You're approved — set up your coaching membership",
-      html: approvalEmail(application.name, checkoutUrl),
+      html: approvalEmail(application.name, acceptUrl),
     }).catch((err) => console.error("Approval email failed:", err))
 
-    return NextResponse.json({ ok: true, status: "APPROVED", checkoutUrl })
+    return NextResponse.json({ ok: true, status: "APPROVED", checkoutUrl, acceptUrl })
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 })
