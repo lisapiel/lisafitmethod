@@ -136,19 +136,23 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY ?? "")
     const firstName = displayName.split(" ")[0] || "there"
 
-    let userExists = false
+    // A silently pre-created Cognito account (from the approval flow) sits in
+    // FORCE_CHANGE_PASSWORD with an undelivered temp password — treat that as
+    // "no usable login" so we send the set-password link instead of the
+    // useless "log in with your existing account" email.
+    let hasUsableLogin = false
     try {
-      await cognito.send(new AdminGetUserCommand({
+      const user = await cognito.send(new AdminGetUserCommand({
         UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
         Username: email,
       }))
-      userExists = true
+      hasUsableLogin = user.UserStatus === "CONFIRMED"
     } catch {
-      userExists = false
+      hasUsableLogin = false
     }
 
     try {
-      if (userExists) {
+      if (hasUsableLogin) {
         await resend.emails.send({
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
           to: email,

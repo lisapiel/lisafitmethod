@@ -10,6 +10,7 @@ type Kind =
   | "message-received"
   | "check-in-received"
   | "workout-completed"
+  | "webhook-failure"
 
 interface NotifyPayload {
   kind: Kind
@@ -77,6 +78,7 @@ function labelForKind(k: Kind): string {
     case "message-received": return "New Message"
     case "check-in-received": return "Check-In Received"
     case "workout-completed": return "Workout Completed"
+    case "webhook-failure": return "⚠ Webhook Failure"
   }
 }
 

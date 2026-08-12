@@ -732,18 +732,25 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
     meta: { email },
   }).catch(() => {})
 
-  let userExists = false
+  // Distinguish "confirmed account with a real password" from "silently
+  // pre-created account that was never delivered credentials." The approval
+  // flow always pre-creates the Cognito account with MessageAction: SUPPRESS,
+  // so a new coaching client's account exists but sits in FORCE_CHANGE_PASSWORD
+  // until they set a password. Treat FORCE_CHANGE_PASSWORD as new-user so we
+  // send them the set-password link instead of telling them to log in with
+  // credentials they never received.
+  let hasUsableLogin = false
   try {
-    await cognito.send(new AdminGetUserCommand({
+    const user = await cognito.send(new AdminGetUserCommand({
       UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
       Username: email,
     }))
-    userExists = true
+    hasUsableLogin = user.UserStatus === "CONFIRMED"
   } catch {
-    userExists = false
+    hasUsableLogin = false
   }
 
-  if (userExists) {
+  if (hasUsableLogin) {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       to: email,
@@ -968,6 +975,18 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error)
       console.error("checkout.session.completed failed:", detail)
+      // Fail-loud: paying customers must not silently fall through the cracks.
+      // We return 500 so Stripe retries the webhook, but also notify Lisa
+      // immediately so she can intervene manually if retries don't recover it.
+      notifyAdmin({
+        kind: "webhook-failure",
+        subject: `Webhook provisioning FAILED for ${email}`,
+        headline: `${product ?? "unknown product"} payment succeeded but provisioning threw`,
+        body: `Stripe checkout.session.completed fired for ${email} (session ${session.id}) but provisioning threw an error:\n\n${detail}\n\nStripe will retry the webhook, but if it keeps failing, this customer paid without getting access. Investigate ASAP.`,
+        ctaLabel: "Open Stripe dashboard",
+        ctaHref: `https://dashboard.stripe.com/events/${event.id}`,
+        meta: { email, sessionId: session.id, eventId: event.id, error: detail },
+      }).catch(() => {})
       return NextResponse.json({ error: "Provisioning failed", detail }, { status: 500 })
     }
   }
