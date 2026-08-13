@@ -6,7 +6,7 @@ import { TrackerData } from "@/lib/trackerStorage"
 
 export const dynamic = "force-dynamic"
 
-const TABLE = "lfm-user-progress"
+const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
 function makeDynamo() {
   return DynamoDBDocumentClient.from(

@@ -2,7 +2,7 @@ import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 
-const TABLE = "lfm-user-progress"
+const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
 // Primary admin account (used as canonical coach identity in message threads and access grants)
 export const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"

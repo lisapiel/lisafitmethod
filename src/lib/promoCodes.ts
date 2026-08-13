@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb"
 
-const TABLE = "lfm-user-progress"
+const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 const PROMO_KEY = "__promo_codes__"
 
 export interface PromoCodeEntry {

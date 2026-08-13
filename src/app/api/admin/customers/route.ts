@@ -7,7 +7,7 @@ import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
 import { isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-const TABLE = "lfm-user-progress"
+const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
 export interface CustomerRow {
   email: string

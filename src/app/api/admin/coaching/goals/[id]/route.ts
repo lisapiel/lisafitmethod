@@ -6,7 +6,7 @@ import { DynamoDBDocumentClient, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 
 export const dynamic = "force-dynamic"
 
-const TABLE = "lfm-user-progress"
+const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 function makeDb() {
   return DynamoDBDocumentClient.from(new DynamoDBClient({
     region: process.env.COGNITO_REGION ?? "us-east-2",
