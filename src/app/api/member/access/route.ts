@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess, hasMasterclassAccess } from "@/lib/authTokens"
+import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess, hasMasterclassAccess, isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -31,5 +31,5 @@ export async function GET() {
     hasMasterclassAccess(email),
   ])
 
-  return NextResponse.json({ email, training, nutrition, tracker, coaching, masterclass })
+  return NextResponse.json({ email, training, nutrition, tracker, coaching, masterclass, isAdmin: isAdminEmail(email) })
 }
