@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
-import { ADMIN_EMAIL, listAllCoachingMessages, listCoachingClientRecords } from "@/lib/authTokens"
+import { isAdminEmail, listAllCoachingMessages, listCoachingClientRecords } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -17,7 +17,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     })
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL
+    return callerEmail != null && isAdminEmail(callerEmail)
   } catch {
     return false
   }
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
   // Group by threadId
   const threadMap: Record<string, { messages: typeof allMessages; clientEmail: string }> = {}
   for (const msg of allMessages) {
-    const clientEmail = msg.fromEmail === ADMIN_EMAIL ? msg.toEmail : msg.fromEmail
+    const clientEmail = isAdminEmail(msg.fromEmail) ? msg.toEmail : msg.fromEmail
     if (!threadMap[msg.threadId]) {
       threadMap[msg.threadId] = { messages: [], clientEmail }
     }
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
   const threads = Object.entries(threadMap).map(([threadId, { messages, clientEmail }]) => {
     const sorted = [...messages].sort((a, b) => b.sentAt.localeCompare(a.sentAt))
     const last = sorted[0]
-    const unreadCount = messages.filter((m) => m.fromEmail !== ADMIN_EMAIL && !m.readAt).length
+    const unreadCount = messages.filter((m) => !isAdminEmail(m.fromEmail) && !m.readAt).length
     return {
       threadId,
       clientEmail,

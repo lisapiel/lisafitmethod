@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
-import { revokeCoachingAccess } from "@/lib/authTokens"
+import { revokeCoachingAccess, isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 function makeCognito() {
   return new CognitoIdentityProviderClient({
@@ -26,7 +24,7 @@ export async function POST(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (callerEmail !== ADMIN_EMAIL) {
+    if (!isAdminEmail(callerEmail ?? "")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   } catch {

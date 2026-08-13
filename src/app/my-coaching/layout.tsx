@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasCoachingAccess, getCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION, ADMIN_EMAIL } from "@/lib/authTokens"
+import { hasCoachingAccess, getCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION, isAdminEmail } from "@/lib/authTokens"
 import CoachingClientLayout from "./CoachingLayout.client"
 
 // Lock the viewport for the coaching portal — prevents iOS auto-zoom when a
@@ -39,7 +39,7 @@ export default async function MyCoachingLayout({ children }: { children: React.R
     redirect("/account")
   }
 
-  const isAdmin = (email as string).toLowerCase() === ADMIN_EMAIL
+  const isAdmin = isAdminEmail(email as string)
   let needsReaccept = false
   if (!isAdmin) {
     const versions = await getCoachingAccessVersions(email as string)

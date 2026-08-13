@@ -3,7 +3,7 @@ import {
   CognitoIdentityProviderClient,
   GetUserCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
-import { ADMIN_EMAIL, getCoachingSettings, setCoachingSettings } from "@/lib/authTokens"
+import { isAdminEmail, getCoachingSettings, setCoachingSettings } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -20,7 +20,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     })
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL
+    return callerEmail != null && isAdminEmail(callerEmail)
   } catch {
     return false
   }

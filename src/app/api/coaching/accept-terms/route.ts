@@ -15,7 +15,7 @@ import {
   LIABILITY_WAIVER_VERSION,
   generateAuthToken,
   storeAuthToken,
-  ADMIN_EMAIL,
+  isAdminEmail,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
   }
 
   const email = record.email
-  if (email === ADMIN_EMAIL) {
+  if (isAdminEmail(email)) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 })
   }
 
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
   // Send onboarding email. For CONFIRMED accounts, send portal link.
   // For accounts in FORCE_CHANGE_PASSWORD (pre-created silently), send set-password link.
   // For non-existent accounts, create one first.
-  if (email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(email)) {
     const cognito = makeCognito()
     const resend = new Resend(process.env.RESEND_API_KEY ?? "")
     const firstName = email.split("@")[0]
@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
       if (hasUsableLogin) {
         await resend.emails.send({
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+          replyTo: "contact@lisafitmethod.com",
           to: email,
           subject: "Your coaching portal is ready — Lisa Fit Method",
           html: `<!DOCTYPE html>
@@ -153,6 +154,7 @@ export async function POST(req: NextRequest) {
 
         await resend.emails.send({
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+          replyTo: "contact@lisafitmethod.com",
           to: email,
           subject: "Welcome to 1:1 Coaching — set up your account",
           html: `<!DOCTYPE html>

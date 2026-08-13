@@ -4,8 +4,14 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanComm
 
 const TABLE = "lfm-user-progress"
 
-// Owner account — always has access to everything, excluded from customer analytics
+// Primary admin account (used as canonical coach identity in message threads and access grants)
 export const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
+// All admin accounts — both pass every isAdmin/verifyAdmin check
+export const ADMIN_EMAILS = ["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"] as const
+export function isAdminEmail(email: string): boolean {
+  const lower = email.toLowerCase()
+  return lower === "lisa.p.mcpherson@gmail.com" || lower === "contact@lisafitmethod.com"
+}
 
 export interface AuthToken {
   email: string
@@ -82,7 +88,7 @@ export async function grantTrackerAccess(email: string): Promise<void> {
 }
 
 export async function hasTrackerAccess(email: string): Promise<boolean> {
-  if (email.toLowerCase() === ADMIN_EMAIL) return true
+  if (isAdminEmail(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -105,7 +111,7 @@ export async function grantTrainingAccess(email: string): Promise<void> {
 }
 
 export async function hasTrainingAccess(email: string): Promise<boolean> {
-  if (email.toLowerCase() === ADMIN_EMAIL) return true
+  if (isAdminEmail(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -128,7 +134,7 @@ export async function grantNutritionAccess(email: string): Promise<void> {
 }
 
 export async function hasNutritionAccess(email: string): Promise<boolean> {
-  if (email.toLowerCase() === ADMIN_EMAIL) return true
+  if (isAdminEmail(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -197,7 +203,7 @@ export async function revokeMasterclassAccess(email: string): Promise<void> {
 }
 
 export async function hasMasterclassAccess(email: string): Promise<boolean> {
-  if (email.toLowerCase() === ADMIN_EMAIL) return true
+  if (isAdminEmail(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -229,7 +235,7 @@ export async function grantCoachingAccess(email: string, plan?: string, startDat
 }
 
 export async function hasCoachingAccess(email: string): Promise<boolean> {
-  if (email.toLowerCase() === ADMIN_EMAIL) return true
+  if (isAdminEmail(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(

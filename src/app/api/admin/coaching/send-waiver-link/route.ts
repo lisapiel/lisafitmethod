@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import {
-  ADMIN_EMAIL,
+  isAdminEmail,
   generateWaiverToken,
   storeWaiverToken,
   hasCoachingAccess,
@@ -27,7 +27,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL
+    return callerEmail != null && isAdminEmail(callerEmail)
   } catch {
     return false
   }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Valid email required" }, { status: 400 })
   }
 
-  if (email === ADMIN_EMAIL) {
+  if (isAdminEmail(email)) {
     return NextResponse.json({ error: "Cannot send waiver link to admin account" }, { status: 400 })
   }
 
@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
     to: email,
     subject: "Action required: accept your coaching terms — Lisa Fit Method",
     html: `<!DOCTYPE html>
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
         <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="background:#c8a97e;border-radius:2px;">
           <a href="${acceptUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Review &amp; Accept →</a>
         </td></tr></table>
-        <p style="margin:0;font-size:12px;color:#999;line-height:1.6;">This link expires in 48 hours. If it has expired, please contact us at <a href="mailto:lisafitmethod.course@gmail.com" style="color:#c8a97e;">lisafitmethod.course@gmail.com</a> and we'll send a new one.</p>
+        <p style="margin:0;font-size:12px;color:#999;line-height:1.6;">This link expires in 48 hours. If it has expired, please contact us at <a href="mailto:contact@lisafitmethod.com" style="color:#c8a97e;">contact@lisafitmethod.com</a> and we'll send a new one.</p>
       </td></tr>
     </table>
   </td></tr></table>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
+import { CONTACT_EMAIL } from "@/lib/contact"
 
 const APPSYNC_URL = process.env.APPSYNC_URL ?? "https://kcr4zqjknjerveglimvj5ogi2m.appsync-api.us-east-2.amazonaws.com/graphql"
 const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY ?? "da2-y44brrwzkncnhcjg6wxr23xnve"
@@ -53,8 +54,8 @@ export async function POST(req: Request) {
     }
 
     await resend.emails.send({
-      from: "Lisa Fit Method <onboarding@resend.dev>",
-      to: "lisafitmethod.course@gmail.com",
+      from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      to: CONTACT_EMAIL,
       replyTo: email,
       subject: `New message from ${escape(name)}`,
       html: `

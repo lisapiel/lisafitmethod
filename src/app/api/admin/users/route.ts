@@ -4,10 +4,9 @@ import {
   GetUserCommand,
   ListUsersCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
+import { isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 function makeCognito() {
   return new CognitoIdentityProviderClient({
@@ -31,7 +30,7 @@ export async function GET(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: token }))
     const email = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (email !== ADMIN_EMAIL) {
+    if (!isAdminEmail(email ?? "")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   } catch {
@@ -55,7 +54,7 @@ export async function GET(req: NextRequest) {
 
     for (const user of result.Users ?? []) {
       const email = user.Attributes?.find((a) => a.Name === "email")?.Value
-      if (email && email !== ADMIN_EMAIL) {
+      if (email && !isAdminEmail(email)) {
         users.push({
           email,
           createdAt: user.UserCreateDate?.toISOString() ?? "",

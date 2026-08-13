@@ -2,11 +2,9 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { grantTrainingAccess, grantNutritionAccess } from "@/lib/authTokens"
+import { grantTrainingAccess, grantNutritionAccess, isAdminEmail, ADMIN_EMAIL } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 export async function POST() {
   const email = await runWithAmplifyServerContext({
@@ -21,7 +19,7 @@ export async function POST() {
     },
   })
 
-  if (email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(email ?? "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
   }
 

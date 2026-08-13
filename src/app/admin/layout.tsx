@@ -5,7 +5,7 @@ import { getCurrentUser } from "aws-amplify/auth"
 import { useRouter, usePathname } from "next/navigation"
 import AdminHeader from "@/components/admin/AdminHeader"
 
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
+const ADMIN_EMAILS = ["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -18,7 +18,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (isLoginPage) return
     getCurrentUser()
       .then((user) => {
-        if (user.signInDetails?.loginId === ADMIN_EMAIL) {
+        const loginId = user.signInDetails?.loginId?.toLowerCase() ?? ""
+        if (ADMIN_EMAILS.includes(loginId)) {
           setAuthorized(true)
         } else {
           router.replace("/admin/login")

@@ -4,10 +4,9 @@ import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 const TABLE = "lfm-user-progress"
 
 export interface CustomerRow {
@@ -41,7 +40,7 @@ export async function GET() {
     },
   })
 
-  if (email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(email ?? "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
   }
 
@@ -68,7 +67,7 @@ export async function GET() {
       for (const item of result.Items ?? []) {
         const userId = item.userId as string
         const rowEmail = userId.replace(prefix, "")
-        if (rowEmail === ADMIN_EMAIL) continue
+        if (isAdminEmail(rowEmail)) continue
         customers.push({
           email: rowEmail,
           product,

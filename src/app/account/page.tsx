@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasMasterclassAccess, hasCoachingAccess } from "@/lib/authTokens"
+import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasMasterclassAccess, hasCoachingAccess, isAdminEmail } from "@/lib/authTokens"
 import { AccountClient } from "./page.client"
 
 export const metadata: Metadata = {
@@ -38,7 +38,7 @@ export default async function AccountPage() {
     hasCoachingAccess(emailStr),
   ])
 
-  const isAdmin = emailStr.toLowerCase() === "lisa.p.mcpherson@gmail.com"
+  const isAdmin = isAdminEmail(emailStr)
 
   return <AccountClient email={emailStr} training={training} nutrition={nutrition} tracker={tracker} masterclass={masterclass} coaching={coaching} isAdmin={isAdmin} />
 }

@@ -9,7 +9,7 @@ import {
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
 import {
-  ADMIN_EMAIL,
+  isAdminEmail,
   grantCoachingAccess,
   hasCoachingAccess,
   createCoachingClientRecord,
@@ -40,7 +40,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL
+    return callerEmail != null && isAdminEmail(callerEmail)
   } catch {
     return false
   }
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 5. Send confirmation email (only to non-admin so we don't email Lisa about her own test)
-  if (email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(email)) {
     const cognito = makeCognito()
     const resend = new Resend(process.env.RESEND_API_KEY ?? "")
     const firstName = displayName.split(" ")[0] || "there"
@@ -155,6 +155,7 @@ export async function POST(req: NextRequest) {
       if (hasUsableLogin) {
         await resend.emails.send({
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+          replyTo: "contact@lisafitmethod.com",
           to: email,
           subject: "Your coaching portal is ready — Lisa Fit Method",
           html: `<!DOCTYPE html>
@@ -197,6 +198,7 @@ export async function POST(req: NextRequest) {
 
         await resend.emails.send({
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+          replyTo: "contact@lisafitmethod.com",
           to: email,
           subject: "Welcome to 1:1 Coaching — set up your account",
           html: `<!DOCTYPE html>

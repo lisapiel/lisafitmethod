@@ -9,7 +9,7 @@ import {
 import Stripe from "stripe"
 import { Resend } from "resend"
 import {
-  ADMIN_EMAIL,
+  isAdminEmail,
   getCoachingApplication,
   updateCoachingApplication,
   createCoachingClientRecord,
@@ -39,7 +39,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL
+    return callerEmail != null && isAdminEmail(callerEmail)
   } catch {
     return false
   }
@@ -164,6 +164,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     })
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: application.email,
       subject: "Your coaching application — Lisa Fit Method",
       html: declineEmail(application.name),
@@ -285,6 +286,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: application.email,
       subject: "You're approved — set up your coaching membership",
       html: approvalEmail(application.name, acceptUrl),

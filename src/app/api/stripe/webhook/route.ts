@@ -324,6 +324,7 @@ async function provisionNutritionUser(email: string) {
   if (userExists) {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "Nutrition Foundations: your course is ready",
       html: nutritionAccessGrantedEmail(),
@@ -350,6 +351,7 @@ async function provisionNutritionUser(email: string) {
     await grantNutritionAccess(email)
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "Nutrition Foundations: your course is ready",
       html: nutritionAccessGrantedEmail(),
@@ -363,6 +365,7 @@ async function provisionNutritionUser(email: string) {
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
     to: email,
     subject: "Your Nutrition Foundations course is ready!",
     html: nutritionWelcomeEmail(email, setPasswordUrl),
@@ -373,6 +376,7 @@ async function sendTrackerConfirmationEmail(email: string) {
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
     to: email,
     subject: "Your Workout Tracker is ready!",
     html: `<!DOCTYPE html>
@@ -450,6 +454,7 @@ async function provisionUser(email: string) {
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
     to: email,
     subject: "Your Training Foundations course is ready!",
     html: welcomeEmail(email, setPasswordUrl),
@@ -614,6 +619,7 @@ async function provisionMasterclassUser(
   if (userExists) {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "Welcome to Lisa Fit Method Masterclass",
       html: masterclassWelcomeEmail(email, null),
@@ -645,6 +651,7 @@ async function provisionMasterclassUser(
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
     to: email,
     subject: "Welcome to Lisa Fit Method Masterclass",
     html: masterclassWelcomeEmail(email, setPasswordUrl),
@@ -757,6 +764,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   if (hasUsableLogin) {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "Your coaching portal is ready — Lisa Fit Method",
       html: `<!DOCTYPE html>
@@ -806,6 +814,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
     to: email,
     subject: "Welcome to 1:1 Coaching — set up your account",
     html: `<!DOCTYPE html>
@@ -1080,6 +1089,7 @@ export async function POST(request: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY ?? "")
       await resend.emails.send({
         from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+        replyTo: "contact@lisafitmethod.com",
         to: email,
         subject: "Action needed: Masterclass payment issue",
         html: masterclassDunningEmail(email),
@@ -1090,6 +1100,7 @@ export async function POST(request: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY ?? "")
       await resend.emails.send({
         from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+        replyTo: "contact@lisafitmethod.com",
         to: email,
         subject: "Action needed: Coaching payment issue",
         html: coachingPaymentFailedEmail(email),

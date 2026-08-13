@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
+const ADMIN_EMAILS = ["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"]
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // /my-plan is private to the admin only
-  if (request.nextUrl.pathname.startsWith("/my-plan") && email.toLowerCase() !== ADMIN_EMAIL) {
+  if (request.nextUrl.pathname.startsWith("/my-plan") && !ADMIN_EMAILS.includes(email.toLowerCase())) {
     return NextResponse.redirect(new URL("/account", request.url))
   }
 

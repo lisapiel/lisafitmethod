@@ -5,7 +5,7 @@ import {
   listWorkoutLogRecords,
   listCoachingCheckIns,
   listAllCoachingMessages,
-  ADMIN_EMAIL,
+  isAdminEmail,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
   // Unread = messages where toEmail is coach (Lisa) and no readAt
   const unreadByEmail = new Map<string, number>()
   for (const m of allMessages) {
-    if (m.toEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) continue
+    if (!isAdminEmail(m.toEmail)) continue
     if (m.readAt) continue
     const k = m.fromEmail.toLowerCase()
     unreadByEmail.set(k, (unreadByEmail.get(k) ?? 0) + 1)

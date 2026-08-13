@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
-import { ADMIN_EMAIL, listCoachingMessages, createCoachingMessage, markCoachingMessagesRead } from "@/lib/authTokens"
+import { isAdminEmail, listCoachingMessages, createCoachingMessage, markCoachingMessagesRead } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -17,7 +17,7 @@ async function verifyAdmin(req: NextRequest): Promise<string | null> {
     })
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL ? callerEmail : null
+    return callerEmail != null && isAdminEmail(callerEmail) ? callerEmail : null
   } catch {
     return null
   }

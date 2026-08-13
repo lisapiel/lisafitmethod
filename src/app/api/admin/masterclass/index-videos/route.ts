@@ -3,10 +3,9 @@ import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
+import { isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 const BUCKET = "amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov"
 const REGION = "us-east-2"
 const PREFIX = "masterclass-videos/"
@@ -45,7 +44,7 @@ export async function GET() {
     },
   })
 
-  if (email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(email ?? "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
   }
 

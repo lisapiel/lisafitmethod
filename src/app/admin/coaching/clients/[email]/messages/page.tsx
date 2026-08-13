@@ -9,6 +9,7 @@ const border = "#2a2a2a"
 const cream = "#f0e6d3"
 const muted = "#888"
 const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
+const ADMIN_EMAILS = new Set(["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"])
 
 type Message = {
   id: string
@@ -184,7 +185,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                       <div style={{ flex: 1, height: 1, background: border }} />
                     </div>
                     {group.messages.map((msg) => {
-                      const isCoach = msg.fromEmail.toLowerCase() === COACH_EMAIL
+                      const isCoach = ADMIN_EMAILS.has(msg.fromEmail.toLowerCase())
                       return (
                         <div key={msg.id} style={{ display: "flex", justifyContent: isCoach ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
                           {!isCoach && (

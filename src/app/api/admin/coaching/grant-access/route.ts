@@ -9,11 +9,9 @@ import {
 import Stripe from "stripe"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
-import { grantCoachingAccess, grantNutritionAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord } from "@/lib/authTokens"
+import { grantCoachingAccess, grantNutritionAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord, isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-const ADMIN_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 function makeCognito() {
   return new CognitoIdentityProviderClient({
@@ -191,7 +189,7 @@ export async function POST(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (callerEmail !== ADMIN_EMAIL) {
+    if (!isAdminEmail(callerEmail ?? "")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   } catch {
@@ -279,6 +277,7 @@ export async function POST(req: NextRequest) {
 
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "You're approved — set up your coaching membership",
       html: paymentLinkEmail(firstName, session.url ?? ""),
@@ -298,6 +297,7 @@ export async function POST(req: NextRequest) {
     const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "Welcome to Lisa Fit Method Coaching",
       html: coachingWelcomeEmail(firstName, setPasswordUrl),
@@ -306,6 +306,7 @@ export async function POST(req: NextRequest) {
   } else {
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+      replyTo: "contact@lisafitmethod.com",
       to: email,
       subject: "Your coaching portal is ready",
       html: coachingAccessGrantedEmail(firstName),

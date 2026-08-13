@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import {
-  ADMIN_EMAIL,
+  isAdminEmail,
   getCoachingCheckIn,
   updateCoachingCheckIn,
   createCoachingMessage,
@@ -22,7 +22,7 @@ async function verifyAdmin(req: NextRequest): Promise<string | null> {
     })
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail === ADMIN_EMAIL ? callerEmail : null
+    return callerEmail && isAdminEmail(callerEmail) ? callerEmail : null
   } catch {
     return null
   }
