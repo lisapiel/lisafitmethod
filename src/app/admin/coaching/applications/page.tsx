@@ -64,6 +64,12 @@ export default function AdminApplicationsPage() {
   const [commitments, setCommitments] = useState<Record<string, CommitmentType | "">>({})
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [restartRequests, setRestartRequests] = useState<RestartRequest[]>([])
+  const [restartPrices, setRestartPrices] = useState<Record<string, string>>({})
+  const [restartCommitments, setRestartCommitments] = useState<Record<string, CommitmentType | "">>({})
+  const [approvingRestart, setApprovingRestart] = useState<string | null>(null)
+  const [restartConfirmingId, setRestartConfirmingId] = useState<string | null>(null)
+  const [restartApprovedUrls, setRestartApprovedUrls] = useState<Record<string, string>>({})
+  const [copiedRestartId, setCopiedRestartId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -159,6 +165,38 @@ export default function AdminApplicationsPage() {
     navigator.clipboard.writeText(url).then(() => {
       setCopiedId(id)
       setTimeout(() => setCopiedId(null), 2000)
+    })
+  }
+
+  async function confirmApproveRestart(requestId: string) {
+    setRestartConfirmingId(null)
+    setApprovingRestart(requestId)
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const priceStr = restartPrices[requestId] ?? ""
+      const priceInCents = Math.round(parseFloat(priceStr) * 100)
+      const commitmentType = restartCommitments[requestId] || undefined
+      const res = await fetch("/api/admin/coaching/restart-requests/approve", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId, priceInCents, commitmentType }),
+      })
+      const data = await res.json() as { ok: boolean; acceptUrl?: string; error?: string }
+      if (!data.ok) {
+        alert(data.error ?? "Something went wrong")
+      } else {
+        setRestartApprovedUrls((prev) => ({ ...prev, [requestId]: data.acceptUrl ?? "" }))
+        await load()
+      }
+    } catch { /* handled */ }
+    setApprovingRestart(null)
+  }
+
+  function copyRestartUrl(url: string, id: string) {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedRestartId(id)
+      setTimeout(() => setCopiedRestartId(null), 2000)
     })
   }
 
@@ -439,12 +477,21 @@ export default function AdminApplicationsPage() {
                       <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted }}>{timeAgo(req.submittedAt)}</span>
                     </div>
                   </div>
-                  <Link
-                    href={`/admin/coaching/clients/${encodeURIComponent(req.email)}`}
-                    style={{ background: gold, color: "#111", padding: "8px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, textDecoration: "none", borderRadius: 4, flexShrink: 0 }}
-                  >
-                    View profile to approve →
-                  </Link>
+                  {restartApprovedUrls[req.id] ? (
+                    <button
+                      onClick={() => copyRestartUrl(restartApprovedUrls[req.id], req.id)}
+                      style={{ background: "#5c9e6a", border: "none", color: "#fff", padding: "8px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4, flexShrink: 0 }}
+                    >
+                      {copiedRestartId === req.id ? "Copied ✓" : "Copy Accept Link"}
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/admin/coaching/clients/${encodeURIComponent(req.email)}`}
+                      style={{ color: muted, fontSize: "0.72rem", textDecoration: "none", flexShrink: 0 }}
+                    >
+                      View history →
+                    </Link>
+                  )}
                 </div>
 
                 <div style={{ display: "grid", gap: 10 }}>
@@ -490,12 +537,105 @@ export default function AdminApplicationsPage() {
                       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#888", margin: 0, lineHeight: 1.5 }}>{req.previousCancellationReason}</p>
                     </div>
                   )}
+
+                  {/* Approval form — shown unless already approved this session */}
+                  {!restartApprovedUrls[req.id] && (
+                    <div style={{ borderTop: `1px solid ${border}`, marginTop: 8, paddingTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: gold, margin: 0 }}>Approve with new terms</p>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-start" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                          <span style={{ background: "#0a0a0a", border: `1px solid ${border}`, borderRight: "none", padding: "7px 10px", fontSize: "0.75rem", color: "#555" }}>$</span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={restartPrices[req.id] ?? ""}
+                            onChange={(e) => setRestartPrices((p) => ({ ...p, [req.id]: e.target.value }))}
+                            placeholder="New monthly price"
+                            style={{ background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none", width: 140 }}
+                          />
+                        </div>
+                        <select
+                          value={restartCommitments[req.id] ?? ""}
+                          onChange={(e) => setRestartCommitments((c) => ({ ...c, [req.id]: e.target.value as CommitmentType | "" }))}
+                          style={{ background: "#111", border: `1px solid ${!restartCommitments[req.id] ? "#6b4a20" : border}`, color: restartCommitments[req.id] ? "#f0e6d3" : "#888", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none", cursor: "pointer" }}
+                        >
+                          <option value="">— Commitment —</option>
+                          <option value="THREE_MONTH_MINIMUM">3-month minimum</option>
+                          <option value="MONTH_TO_MONTH">Month-to-month</option>
+                        </select>
+                        <button
+                          onClick={() => {
+                            const priceStr = restartPrices[req.id] ?? ""
+                            const price = parseFloat(priceStr)
+                            if (!price || price < 1) { alert("Enter a monthly price before approving."); return }
+                            if (!restartCommitments[req.id]) { alert("Select a commitment type before approving."); return }
+                            setRestartConfirmingId(req.id)
+                          }}
+                          disabled={approvingRestart === req.id}
+                          style={{ background: gold, border: "none", color: "#111", padding: "7px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}
+                        >
+                          {approvingRestart === req.id ? "Sending…" : "Approve →"}
+                        </button>
+                      </div>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: muted, margin: 0, lineHeight: 1.5 }}>
+                        Old deal is context only — set new price + commitment above. Client receives accept link; you copy it to send.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {/* Restart approval confirmation modal */}
+      {restartConfirmingId && (() => {
+        const req = restartRequests.find((r) => r.id === restartConfirmingId)
+        if (!req) return null
+        const priceStr = restartPrices[restartConfirmingId] ?? ""
+        const price = parseFloat(priceStr) || 0
+        const commitment = restartCommitments[restartConfirmingId]
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 24 }}>
+            <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "2rem", maxWidth: 440, width: "100%" }}>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Confirm Restart Approval</p>
+              <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.4rem", color: "#f0e6d3", margin: "0 0 6px" }}>{req.displayName}</p>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted, margin: "0 0 20px" }}>Former client — existing account will be reactivated, no duplicate account created.</p>
+              <div style={{ background: "#0a0a0a", border: `1px solid #2a2a2a`, borderLeft: `3px solid ${gold}`, padding: "14px 16px", marginBottom: 20, display: "grid", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>New monthly price</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: "#f0e6d3" }}>${price.toFixed(2)}/mo</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>New commitment</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: "#f0e6d3" }}>
+                    {commitment === "THREE_MONTH_MINIMUM" ? "3-month minimum" : "Month-to-month"}
+                  </span>
+                </div>
+                {req.previousPriceInCents != null && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#555" }}>Previous price (reference only)</span>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#555" }}>${(req.previousPriceInCents / 100).toFixed(0)}/mo</span>
+                  </div>
+                )}
+              </div>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#666", lineHeight: 1.6, margin: "0 0 20px" }}>
+                Client will receive a &ldquo;Welcome back&rdquo; email with the accept link. The old coaching price and commitment are history only — these new terms take effect.
+              </p>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setRestartConfirmingId(null)} style={{ flex: 1, background: "transparent", border: `1px solid ${border}`, color: "#888", padding: "10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}>
+                  Go back
+                </button>
+                <button onClick={() => confirmApproveRestart(restartConfirmingId)} style={{ flex: 1, background: gold, border: "none", color: "#111", padding: "10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}>
+                  Confirm &amp; Send Accept Link
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Approval confirmation modal */}
       {confirmingId && (() => {
