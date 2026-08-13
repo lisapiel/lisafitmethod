@@ -14,6 +14,21 @@ const border = "#2a2a2a"
 const cream = "#f0e6d3"
 const muted = "#888"
 
+type RestartRequest = {
+  id: string
+  email: string
+  displayName: string
+  submittedAt: string
+  helpWith: string
+  changedSince: string | null
+  timeline: string
+  previousPriceInCents: number | null
+  previousCommitmentType: string | null
+  previousSubscriptionStartDate: string | null
+  previousCancellationDate: string | null
+  previousCancellationReason: string | null
+}
+
 const STATUS_STYLE: Record<string, { color: string; label: string }> = {
   PENDING: { color: gold, label: "Pending" },
   APPROVED: { color: "#5c9e6a", label: "Approved" },
@@ -48,16 +63,20 @@ export default function AdminApplicationsPage() {
   const [prices, setPrices] = useState<Record<string, string>>({})
   const [commitments, setCommitments] = useState<Record<string, CommitmentType | "">>({})
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [restartRequests, setRestartRequests] = useState<RestartRequest[]>([])
 
   const load = useCallback(async () => {
     try {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString() ?? ""
-      const res = await fetch("/api/admin/coaching/applications", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json() as { applications: EnrichedApplication[] }
-      setApplications(data.applications ?? [])
+      const [appsRes, restartRes] = await Promise.all([
+        fetch("/api/admin/coaching/applications", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/admin/coaching/restart-requests", { headers: { Authorization: `Bearer ${token}` } }),
+      ])
+      const appsData = await appsRes.json() as { applications: EnrichedApplication[] }
+      setApplications(appsData.applications ?? [])
+      const restartData = await restartRes.json() as { requests: RestartRequest[] }
+      setRestartRequests(restartData.requests ?? [])
     } catch { /* handled by layout */ }
     setLoading(false)
   }, [])
@@ -145,6 +164,22 @@ export default function AdminApplicationsPage() {
 
   const filtered = filter === "ALL" ? applications : applications.filter((a) => a.status === filter)
   const pendingCount = applications.filter((a) => a.status === "PENDING").length
+  const totalActionable = pendingCount + restartRequests.length
+
+  function formatPrice(cents: number) {
+    const dollars = cents / 100
+    return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`
+  }
+
+  function formatDate(iso: string) {
+    return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  }
+
+  const timelineLabels: Record<string, string> = {
+    asap: "As soon as possible",
+    "few-weeks": "Within the next few weeks",
+    exploring: "Just exploring for now",
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -157,9 +192,9 @@ export default function AdminApplicationsPage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2.2rem", fontWeight: 700, color: cream, margin: 0 }}>
               Applications
-              {pendingCount > 0 && (
+              {totalActionable > 0 && (
                 <span style={{ marginLeft: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: gold, color: "#111", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 700, verticalAlign: "middle" }}>
-                  {pendingCount}
+                  {totalActionable}
                 </span>
               )}
             </h1>
@@ -377,6 +412,90 @@ export default function AdminApplicationsPage() {
           </div>
         )}
       </div>
+
+      {/* Restart requests section */}
+      {restartRequests.length > 0 && (
+        <div style={{ marginTop: "3rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
+            <h2 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.6rem", fontWeight: 700, color: cream, margin: 0 }}>Restart Requests</h2>
+            <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 24, height: 24, borderRadius: "50%", background: "#d97460", color: "#fff", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700 }}>
+              {restartRequests.length}
+            </span>
+          </div>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted, marginBottom: "1rem" }}>
+            Former clients who want to re-enroll. Go to their client profile to set a new price + commitment and approve.
+          </p>
+          <div style={{ display: "grid", gap: "0.75rem" }}>
+            {restartRequests.map((req) => (
+              <div key={req.id} style={{ background: "#161616", border: `1px solid #4a2a1a`, borderRadius: 8, padding: "1.25rem 1.5rem" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: cream }}>{req.displayName}</span>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: "#d97460", border: `1px solid #d9746044`, padding: "2px 8px", borderRadius: 3 }}>Restart Request</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 12 }}>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted }}>{req.email}</span>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted }}>{timeAgo(req.submittedAt)}</span>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/admin/coaching/clients/${encodeURIComponent(req.email)}`}
+                    style={{ background: gold, color: "#111", padding: "8px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, textDecoration: "none", borderRadius: 4, flexShrink: 0 }}
+                  >
+                    View profile to approve →
+                  </Link>
+                </div>
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: gold, margin: "0 0 3px" }}>What they want help with</p>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: cream, margin: 0, lineHeight: 1.5 }}>{req.helpWith}</p>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8 }}>
+                    <div>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Timeline</p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{timelineLabels[req.timeline] ?? req.timeline}</p>
+                    </div>
+                    {req.previousPriceInCents != null && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Previous price</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{formatPrice(req.previousPriceInCents)}/mo</p>
+                      </div>
+                    )}
+                    {req.previousCommitmentType && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Previous commitment</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>
+                          {req.previousCommitmentType === "THREE_MONTH_MINIMUM" ? "3-month minimum" : "Month-to-month"}
+                        </p>
+                      </div>
+                    )}
+                    {req.previousCancellationDate && (
+                      <div>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Last active through</p>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{formatDate(req.previousCancellationDate)}</p>
+                      </div>
+                    )}
+                  </div>
+                  {req.changedSince && (
+                    <div>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>What&apos;s changed since last time</p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0, lineHeight: 1.5 }}>{req.changedSince}</p>
+                    </div>
+                  )}
+                  {req.previousCancellationReason && (
+                    <div>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Previous cancellation reason</p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#888", margin: 0, lineHeight: 1.5 }}>{req.previousCancellationReason}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Approval confirmation modal */}
       {confirmingId && (() => {

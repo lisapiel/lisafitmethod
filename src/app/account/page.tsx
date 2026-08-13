@@ -44,8 +44,10 @@ export default async function AccountPage() {
 
   const isAdmin = isAdminEmail(emailStr)
 
-  // Fetch coaching client record for billing display (only if they have coaching access)
+  // Fetch coaching client record for billing section and former-client restart flow.
+  // Run for all non-admin users so inactive former clients can see the restart CTA.
   let coachingClient: {
+    status?: string | null
     approvedPriceInCents?: number | null
     commitmentType?: string | null
     commitmentMonths?: number | null
@@ -54,12 +56,15 @@ export default async function AccountPage() {
     stripeSubscriptionId?: string | null
     cancellationScheduledAt?: string | null
     cancellationEffectiveDate?: string | null
+    cancellationReason?: string | null
+    displayName?: string | null
   } | null = null
 
-  if (coaching && !isAdmin) {
+  if (!isAdmin) {
     const record = await getCoachingClientRecord(emailStr).catch(() => null)
-    if (record && (record.status === "ACTIVE" || record.cancellationScheduledAt)) {
+    if (record) {
       coachingClient = {
+        status: record.status ?? null,
         approvedPriceInCents: record.approvedPriceInCents ?? null,
         commitmentType: record.commitmentType ?? null,
         commitmentMonths: record.commitmentMonths ?? null,
@@ -68,6 +73,8 @@ export default async function AccountPage() {
         stripeSubscriptionId: record.stripeSubscriptionId ?? null,
         cancellationScheduledAt: record.cancellationScheduledAt ?? null,
         cancellationEffectiveDate: record.cancellationEffectiveDate ?? null,
+        cancellationReason: record.cancellationReason ?? null,
+        displayName: record.displayName ?? null,
       }
     }
   }

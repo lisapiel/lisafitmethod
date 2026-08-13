@@ -14,6 +14,7 @@ const gold = "#c9a96e"
 const border = "#2a2a2a"
 
 interface CoachingClientData {
+  status?: string | null
   approvedPriceInCents?: number | null
   commitmentType?: string | null
   commitmentMonths?: number | null
@@ -22,6 +23,8 @@ interface CoachingClientData {
   stripeSubscriptionId?: string | null
   cancellationScheduledAt?: string | null
   cancellationEffectiveDate?: string | null
+  cancellationReason?: string | null
+  displayName?: string | null
 }
 
 interface Props {
@@ -356,6 +359,161 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
   )
 }
 
+function InactiveCoachingSection({ client, email }: { client: CoachingClientData; email: string }) {
+  const [step, setStep] = useState<"idle" | "form" | "submitted">("idle")
+  const [helpWith, setHelpWith] = useState("")
+  const [changedSince, setChangedSince] = useState("")
+  const [timeline, setTimeline] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function submitRequest() {
+    setSubmitting(true)
+    setErr(null)
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const res = await fetch("/api/coaching/restart-request", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ helpWith, changedSince: changedSince || undefined, timeline }),
+      })
+      const data = await res.json() as { ok?: boolean; error?: string }
+      if (!res.ok || !data.ok) {
+        setErr(data.error ?? "Something went wrong. Please email contact@lisafitmethod.com.")
+      } else {
+        setStep("submitted")
+      }
+    } catch {
+      setErr("Something went wrong. Please try again.")
+    }
+    setSubmitting(false)
+  }
+
+  return (
+    <div style={{ marginBottom: 40 }}>
+      <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 16 }}>
+        1:1 Coaching
+      </p>
+      <div style={{ background: "#111", border: `1px solid ${border}`, borderLeft: `3px solid ${border}`, padding: "20px 24px" }}>
+
+        {step === "submitted" ? (
+          <div>
+            <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#5c9e6a", marginBottom: 10 }}>
+              Request sent
+            </p>
+            <p style={{ fontSize: "0.8rem", color: "#f0e6d3", margin: "0 0 8px" }}>
+              {client.displayName?.split(" ")[0] ?? "Thanks"}, I&apos;ll be in touch.
+            </p>
+            <p style={{ fontSize: "0.75rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
+              Your request has been sent. I&apos;ll review it and follow up at {email}.
+            </p>
+          </div>
+        ) : step === "form" ? (
+          <div>
+            <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 12 }}>
+              Restart coaching
+            </p>
+
+            {/* Q1 */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: "0.7rem", fontWeight: 600, color: "#aaa", marginBottom: 8, lineHeight: 1.5 }}>
+                What would you like help with this time?
+              </label>
+              <textarea
+                value={helpWith}
+                onChange={(e) => setHelpWith(e.target.value)}
+                placeholder="Goals, focus areas, what you're working towards…"
+                rows={3}
+                style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", resize: "vertical", boxSizing: "border-box" }}
+              />
+            </div>
+
+            {/* Q2 */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: "0.7rem", fontWeight: 600, color: "#aaa", marginBottom: 4, lineHeight: 1.5 }}>
+                Has anything changed since your last coaching period? <span style={{ color: "#555", fontWeight: 400 }}>(optional)</span>
+              </label>
+              <p style={{ fontSize: "0.65rem", color: "#555", margin: "0 0 8px", lineHeight: 1.6 }}>
+                Goals, schedule, equipment, injuries or limitations, anything else relevant.
+              </p>
+              <textarea
+                value={changedSince}
+                onChange={(e) => setChangedSince(e.target.value)}
+                placeholder="Anything you'd like me to know…"
+                rows={2}
+                style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", resize: "vertical", boxSizing: "border-box" }}
+              />
+            </div>
+
+            {/* Q3 */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: "0.7rem", fontWeight: 600, color: "#aaa", marginBottom: 8 }}>
+                When would you like to restart?
+              </label>
+              <div style={{ display: "grid", gap: 6 }}>
+                {[
+                  { value: "asap", label: "As soon as possible" },
+                  { value: "few-weeks", label: "Within the next few weeks" },
+                  { value: "exploring", label: "Just exploring for now" },
+                ].map((opt) => (
+                  <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                    <input
+                      type="radio"
+                      name="restart-timeline"
+                      value={opt.value}
+                      checked={timeline === opt.value}
+                      onChange={(e) => setTimeline(e.target.value)}
+                      style={{ accentColor: gold }}
+                    />
+                    <span style={{ fontSize: "0.75rem", color: "#888" }}>{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {err && <p style={{ fontSize: "0.72rem", color: "#ff9080", marginBottom: 10 }}>{err}</p>}
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button
+                onClick={() => { setStep("idle"); setErr(null) }}
+                style={{ background: "transparent", border: `1px solid ${border}`, color: "#888", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitRequest}
+                disabled={!helpWith.trim() || !timeline || submitting}
+                style={{ background: helpWith.trim() && timeline ? gold : "#333", color: "#0a0a0a", border: "none", padding: "10px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: helpWith.trim() && timeline && !submitting ? "pointer" : "not-allowed", opacity: submitting ? 0.6 : 1 }}
+              >
+                {submitting ? "Sending…" : "Request to restart coaching →"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 8 }}>
+              Coaching inactive
+            </p>
+            <p style={{ fontSize: "0.78rem", color: "#f0e6d3", margin: "0 0 8px" }}>
+              Your Lisa Fit Method account and any products you&apos;ve purchased remain available.
+            </p>
+            <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: "0 0 20px" }}>
+              If you&apos;d like to work together again, click below and I&apos;ll follow up with availability and details. No payment yet — I&apos;ll confirm everything before we start.
+            </p>
+            <button
+              onClick={() => setStep("form")}
+              style={{ background: gold, border: "none", color: "#0a0a0a", padding: "10px 22px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              Restart coaching →
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 interface OwnedProduct {
   id: string
   label: string
@@ -584,8 +742,18 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
           </div>
         )}
 
-        {/* Coaching CTA */}
-        {!coaching && (
+        {/* Former client: inactive coaching — show restart flow */}
+        {!coaching && coachingClient?.status === "INACTIVE" && (
+          <InactiveCoachingSection client={coachingClient} email={email} />
+        )}
+
+        {/* Active coaching — billing section with cancel/reactivate controls */}
+        {coaching && coachingClient && coachingClient.status !== "INACTIVE" && (
+          <CoachingBillingSection client={coachingClient} />
+        )}
+
+        {/* No coaching history — show apply CTA */}
+        {!coaching && !coachingClient && (
           <div style={{ marginBottom: 40 }}>
             <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 16 }}>
               1:1 Coaching
@@ -630,11 +798,6 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
               </Link>
             </div>
           </div>
-        )}
-
-        {/* Coaching & Billing */}
-        {coachingClient && (
-          <CoachingBillingSection client={coachingClient} />
         )}
 
         {/* Upsell shelf */}

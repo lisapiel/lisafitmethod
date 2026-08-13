@@ -1145,9 +1145,35 @@ export async function POST(request: NextRequest) {
     if (subscription.metadata?.product !== "coaching") return NextResponse.json({ received: true })
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
     if (email) {
+      // Revoke coaching portal access (sets coaching_access_.active = false)
       await revokeCoachingAccess(email).catch((err) =>
         console.error("revokeCoachingAccess failed:", err)
       )
+      // Mark coaching client record as INACTIVE and record the effective date
+      await updateCoachingClientRecord(email, {
+        status: "INACTIVE",
+        cancellationEffectiveDate: new Date().toISOString(),
+      }).catch((err) => console.error("updateCoachingClientRecord INACTIVE failed:", err))
+
+      // Notify admin — coaching ended
+      const clientRecord = await getCoachingClientRecord(email).catch(() => null)
+      notifyAdmin({
+        kind: "cancellation",
+        subject: `Coaching ended — ${clientRecord?.displayName ?? email}`,
+        headline: `${clientRecord?.displayName ?? email}'s coaching subscription has ended`,
+        body: [
+          `Email: ${email}`,
+          clientRecord?.approvedPriceInCents
+            ? `Monthly price: $${(clientRecord.approvedPriceInCents / 100).toFixed(clientRecord.approvedPriceInCents % 100 === 0 ? 0 : 2)}/month`
+            : "",
+          `Effective: ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
+          `Stripe subscription: ${subscription.id}`,
+          "Coaching access has been revoked. Cognito account and all purchased products preserved.",
+        ].filter(Boolean).join("\n"),
+        ctaLabel: "View client profile",
+        ctaHref: `https://lisafitmethod.com/admin/coaching/clients/${encodeURIComponent(email)}`,
+        meta: { email, stripeSubscriptionId: subscription.id },
+      }).catch(() => {})
     }
   }
 

@@ -77,6 +77,13 @@ export default function ClientProfilePage() {
   const [commitmentForm, setCommitmentForm] = useState({ commitmentType: "", approvedPriceInCents: "", subscriptionStartDate: "" })
   const [savingCommitment, setSavingCommitment] = useState(false)
   const [commitmentError, setCommitmentError] = useState("")
+  // Admin cancellation
+  const [cancelPreview, setCancelPreview] = useState<{ effectiveDateDisplay: string; effectiveDate: string; stripeSubId: string } | null>(null)
+  const [loadingCancelPreview, setLoadingCancelPreview] = useState(false)
+  const [cancelPreviewError, setCancelPreviewError] = useState("")
+  const [cancelReason, setCancelReason] = useState("")
+  const [submittingCancel, setSubmittingCancel] = useState(false)
+  const [cancelDone, setCancelDone] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -260,6 +267,53 @@ export default function ClientProfilePage() {
       body: JSON.stringify(updates),
     })
     setGoals((prev) => prev.map((g) => g.id === id ? { ...g, currentValue: currentValue !== "" ? Number(currentValue) : g.currentValue, status: status || g.status } : g))
+  }
+
+  async function loadCancelPreview() {
+    setLoadingCancelPreview(true)
+    setCancelPreviewError("")
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const res = await fetch(`/api/admin/coaching/cancel?email=${encodeURIComponent(emailParam)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json() as { ok?: boolean; effectiveDateDisplay?: string; effectiveDate?: string; stripeSubId?: string; error?: string }
+      if (!res.ok || !data.ok) {
+        setCancelPreviewError(data.error ?? "Could not load cancellation preview")
+      } else {
+        setCancelPreview({ effectiveDateDisplay: data.effectiveDateDisplay ?? "", effectiveDate: data.effectiveDate ?? "", stripeSubId: data.stripeSubId ?? "" })
+      }
+    } catch {
+      setCancelPreviewError("Request failed")
+    }
+    setLoadingCancelPreview(false)
+  }
+
+  async function submitCancel() {
+    if (!cancelPreview) return
+    setSubmittingCancel(true)
+    setCancelPreviewError("")
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const res = await fetch("/api/admin/coaching/cancel", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailParam, reason: cancelReason || undefined }),
+      })
+      const data = await res.json() as { ok?: boolean; effectiveDateDisplay?: string; error?: string }
+      if (!res.ok || !data.ok) {
+        setCancelPreviewError(data.error ?? "Cancellation failed")
+      } else {
+        setCancelDone(data.effectiveDateDisplay ?? cancelPreview.effectiveDateDisplay)
+        setCancelPreview(null)
+        setClient((c) => c ? { ...c, cancellationScheduledAt: new Date().toISOString() } : c)
+      }
+    } catch {
+      setCancelPreviewError("Request failed")
+    }
+    setSubmittingCancel(false)
   }
 
   async function saveCommitment() {
@@ -818,6 +872,90 @@ export default function ClientProfilePage() {
           )}
         </SectionCard>
       </div>
+
+      {/* Admin Cancel Coaching */}
+      {client.status === "ACTIVE" && !client.cancellationScheduledAt && !cancelDone && (
+        <div style={{ marginTop: "1rem" }}>
+          <SectionCard title="Cancel Coaching">
+            {!cancelPreview ? (
+              <div>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#666", lineHeight: 1.7, margin: "0 0 16px" }}>
+                  Schedules cancellation at the end of the client&apos;s current billing period. Coaching access remains active through that date; Stripe will not charge again after it.
+                </p>
+                {cancelPreviewError && (
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#d97460", margin: "0 0 12px" }}>{cancelPreviewError}</p>
+                )}
+                <button
+                  onClick={loadCancelPreview}
+                  disabled={loadingCancelPreview}
+                  style={{ background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: loadingCancelPreview ? "not-allowed" : "pointer", opacity: loadingCancelPreview ? 0.6 : 1 }}
+                >
+                  {loadingCancelPreview ? "Loading…" : "Cancel coaching at end of billing period →"}
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ background: "#130d00", border: `1px solid #4a3820`, padding: "14px 16px", marginBottom: 16, borderRadius: 2 }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#c8a97e", margin: "0 0 6px", fontWeight: 600 }}>
+                    Cancellation preview
+                  </p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#f0e6d3", margin: "0 0 4px" }}>
+                    {client.displayName} will retain coaching access through <strong>{cancelPreview.effectiveDateDisplay}</strong>.
+                  </p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888", margin: 0 }}>
+                    No further Stripe payments will be collected after that date.
+                  </p>
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                    Reason (optional — for your records)
+                  </label>
+                  <input
+                    type="text"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="e.g. Client requested, payment issues…"
+                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+                {cancelPreviewError && (
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#d97460", margin: "0 0 10px" }}>{cancelPreviewError}</p>
+                )}
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button
+                    onClick={() => { setCancelPreview(null); setCancelPreviewError(""); setCancelReason("") }}
+                    style={{ background: "transparent", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}
+                  >
+                    Keep coaching
+                  </button>
+                  <button
+                    onClick={submitCancel}
+                    disabled={submittingCancel}
+                    style={{ background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: submittingCancel ? "not-allowed" : "pointer", opacity: submittingCancel ? 0.6 : 1 }}
+                  >
+                    {submittingCancel ? "Scheduling…" : `Confirm — cancel coaching after ${cancelPreview.effectiveDateDisplay}`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </SectionCard>
+        </div>
+      )}
+      {cancelDone && (
+        <div style={{ marginTop: "1rem", background: "#0d1a0d", border: `1px solid #2a4a2a`, padding: "14px 20px" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#5c9e6a", margin: 0 }}>
+            Cancellation scheduled. {client.displayName} retains access through <strong>{cancelDone}</strong>. Client and admin notified.
+          </p>
+        </div>
+      )}
+      {client.cancellationScheduledAt && !cancelDone && (
+        <div style={{ marginTop: "1rem", background: "#111", border: `1px solid ${border}`, padding: "14px 20px" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#888", margin: 0 }}>
+            Cancellation already scheduled
+            {client.cancellationEffectiveDate ? ` — coaching active through ${new Date(client.cancellationEffectiveDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}.
+          </p>
+        </div>
+      )}
 
       {/* Danger zone */}
       <div style={{ marginTop: "2.5rem", border: `1px solid #4a1e1e`, background: "#170a0a", padding: "16px 20px" }}>
