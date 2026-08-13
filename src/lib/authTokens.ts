@@ -262,6 +262,8 @@ export async function revokeCoachingAccess(email: string): Promise<void> {
 
 // ── Coaching applications ─────────────────────────────────────────────────────
 
+export type CommitmentType = "THREE_MONTH_MINIMUM" | "MONTH_TO_MONTH"
+
 export interface CoachingApplication {
   userId: string
   id: string
@@ -290,6 +292,9 @@ export interface CoachingApplication {
   reviewedAt?: string
   stripeCheckoutUrl?: string
   stripeSubscriptionId?: string
+  // Admin-approved business terms (set at approval, authoritative over applicant self-report)
+  approvedPriceInCents?: number
+  approvedCommitmentType?: CommitmentType
 }
 
 export async function submitCoachingApplication(data: {
@@ -438,6 +443,20 @@ export interface CoachingClientRecord {
     fat?: number
     updatedAt: string
   }
+  // Approved business terms — set at admin approval; never derived from price
+  approvedPriceInCents?: number
+  commitmentType?: CommitmentType
+  commitmentMonths?: number
+  stripeSubscriptionId?: string
+  subscriptionStartDate?: string
+  // Scheduling a non-renewal / cancellation
+  cancellationScheduledAt?: string
+  cancellationEffectiveDate?: string
+  cancellationReason?: string
+  cancellationFeedback?: string
+  // True for clients created before the commitment field was introduced;
+  // cancellation self-service is disabled until admin confirms their terms
+  commitmentNeedsConfirmation?: boolean
 }
 
 export async function createCoachingClientRecord(data: CoachingClientRecord): Promise<void> {

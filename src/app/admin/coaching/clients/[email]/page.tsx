@@ -73,6 +73,10 @@ export default function ClientProfilePage() {
   const [showAddGoal, setShowAddGoal] = useState(false)
   const [newGoal, setNewGoal] = useState({ type: "body-composition", label: "", startValue: "", targetValue: "", currentValue: "", unit: "" })
   const [savingGoal, setSavingGoal] = useState(false)
+  // Commitment confirmation (for legacy clients)
+  const [commitmentForm, setCommitmentForm] = useState({ commitmentType: "", approvedPriceInCents: "", subscriptionStartDate: "" })
+  const [savingCommitment, setSavingCommitment] = useState(false)
+  const [commitmentError, setCommitmentError] = useState("")
 
   const load = useCallback(async () => {
     try {
@@ -256,6 +260,43 @@ export default function ClientProfilePage() {
       body: JSON.stringify(updates),
     })
     setGoals((prev) => prev.map((g) => g.id === id ? { ...g, currentValue: currentValue !== "" ? Number(currentValue) : g.currentValue, status: status || g.status } : g))
+  }
+
+  async function saveCommitment() {
+    if (!commitmentForm.commitmentType) return
+    setSavingCommitment(true)
+    setCommitmentError("")
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const body: Record<string, unknown> = {
+        email: emailParam,
+        commitmentType: commitmentForm.commitmentType,
+      }
+      if (commitmentForm.approvedPriceInCents) body.approvedPriceInCents = Number(commitmentForm.approvedPriceInCents)
+      if (commitmentForm.subscriptionStartDate) body.subscriptionStartDate = new Date(commitmentForm.subscriptionStartDate).toISOString()
+      const res = await fetch("/api/admin/coaching/set-commitment", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json() as { ok?: boolean; error?: string }
+      if (!res.ok || !data.ok) {
+        setCommitmentError(data.error ?? "Failed to save commitment")
+      } else {
+        setClient((c) => c ? {
+          ...c,
+          commitmentType: commitmentForm.commitmentType as "THREE_MONTH_MINIMUM" | "MONTH_TO_MONTH",
+          commitmentMonths: commitmentForm.commitmentType === "THREE_MONTH_MINIMUM" ? 3 : 0,
+          commitmentNeedsConfirmation: false,
+          ...(commitmentForm.approvedPriceInCents ? { approvedPriceInCents: Number(commitmentForm.approvedPriceInCents) } : {}),
+          ...(commitmentForm.subscriptionStartDate ? { subscriptionStartDate: new Date(commitmentForm.subscriptionStartDate).toISOString() } : {}),
+        } : c)
+      }
+    } catch {
+      setCommitmentError("Request failed")
+    }
+    setSavingCommitment(false)
   }
 
   useEffect(() => { load() }, [load])
@@ -692,6 +733,91 @@ export default function ClientProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Subscription & Commitment */}
+      <div style={{ marginTop: "1rem" }}>
+        <SectionCard title="Subscription &amp; Commitment">
+          {client.commitmentNeedsConfirmation ? (
+            <div>
+              <div style={{ background: "#130d00", border: `1px solid #4a3820`, padding: "10px 14px", marginBottom: 16, borderRadius: 2 }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#c8a97e", margin: 0 }}>
+                  Commitment type not confirmed for this client. Set it below so they can manage their subscription independently.
+                </p>
+              </div>
+              <div style={{ display: "grid", gap: 10 }}>
+                <div>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                    Commitment type *
+                  </label>
+                  <select
+                    value={commitmentForm.commitmentType}
+                    onChange={(e) => setCommitmentForm((f) => ({ ...f, commitmentType: e.target.value }))}
+                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                  >
+                    <option value="">Select…</option>
+                    <option value="THREE_MONTH_MINIMUM">3-month minimum</option>
+                    <option value="MONTH_TO_MONTH">Month-to-month</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                    Approved price (cents, optional)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 39700"
+                    value={commitmentForm.approvedPriceInCents}
+                    onChange={(e) => setCommitmentForm((f) => ({ ...f, approvedPriceInCents: e.target.value }))}
+                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                    Subscription start date (optional)
+                  </label>
+                  <input
+                    type="date"
+                    value={commitmentForm.subscriptionStartDate}
+                    onChange={(e) => setCommitmentForm((f) => ({ ...f, subscriptionStartDate: e.target.value }))}
+                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+                {commitmentError && (
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#d97460", margin: 0 }}>{commitmentError}</p>
+                )}
+                <button
+                  onClick={saveCommitment}
+                  disabled={!commitmentForm.commitmentType || savingCommitment}
+                  style={{ background: commitmentForm.commitmentType ? gold : "#333", color: "#0a0a0a", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: commitmentForm.commitmentType ? "pointer" : "not-allowed", alignSelf: "start" }}
+                >
+                  {savingCommitment ? "Saving…" : "Confirm commitment"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gap: 12 }}>
+              {[
+                { label: "Price", value: client.approvedPriceInCents ? `$${(client.approvedPriceInCents / 100).toFixed(client.approvedPriceInCents % 100 === 0 ? 0 : 2)}/month` : "—" },
+                { label: "Commitment", value: client.commitmentType === "THREE_MONTH_MINIMUM" ? "3-month minimum" : client.commitmentType === "MONTH_TO_MONTH" ? "Month-to-month" : "—" },
+                { label: "Subscription start", value: formatDate(client.subscriptionStartDate) },
+                {
+                  label: "Commitment ends",
+                  value: client.commitmentType === "THREE_MONTH_MINIMUM" && client.subscriptionStartDate && client.commitmentMonths
+                    ? (() => { const d = new Date(client.subscriptionStartDate); d.setMonth(d.getMonth() + client.commitmentMonths); return formatDate(d.toISOString()) })()
+                    : "—",
+                },
+                { label: "Cancellation scheduled", value: formatDate(client.cancellationScheduledAt) },
+                { label: "Cancellation effective", value: formatDate(client.cancellationEffectiveDate) },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#444", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888" }}>{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+      </div>
 
       {/* Danger zone */}
       <div style={{ marginTop: "2.5rem", border: `1px solid #4a1e1e`, background: "#170a0a", padding: "16px 20px" }}>

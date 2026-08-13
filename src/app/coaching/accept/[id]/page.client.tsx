@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import type { CommitmentType } from "@/lib/authTokens"
 
 const ACCENT = "#c8a97e"
 const ACCENT_DARK = "#a8895e"
@@ -16,30 +17,34 @@ type Props = {
   applicantEmail: string
   coachingOption: string | null
   checkoutUrl: string
+  approvedPriceInCents: number | null
+  approvedCommitmentType: CommitmentType | null
 }
 
-// Parse the coaching option string ("3-month coaching — $397/month" etc.)
-// into a canonical shape for the acceptance disclosure. Falls back to a
-// generic "your monthly coaching subscription" line if the option isn't
-// one of the known tiers.
-function summariseTier(coachingOption: string | null): {
-  headline: string
-  billingLine: string
-} {
-  const opt = (coachingOption ?? "").toLowerCase()
-  if (opt.includes("397") || opt.includes("3-month")) {
+function formatPrice(cents: number) {
+  const dollars = cents / 100
+  return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`
+}
+
+function buildTierDisplay(
+  approvedPriceInCents: number | null,
+  approvedCommitmentType: CommitmentType | null,
+): { headline: string; billingLine: string } {
+  if (approvedPriceInCents && approvedCommitmentType) {
+    const price = formatPrice(approvedPriceInCents)
+    if (approvedCommitmentType === "THREE_MONTH_MINIMUM") {
+      return {
+        headline: `1:1 Coaching · ${price}/month`,
+        billingLine: `recurring billing of ${price}/month, a 3-month minimum commitment, and month-to-month billing thereafter until cancelled`,
+      }
+    }
     return {
-      headline: "3-month coaching · $397/month",
-      billingLine:
-        "recurring billing of $397/month, a 3-month minimum commitment, and month-to-month billing thereafter until cancelled",
+      headline: `1:1 Coaching · ${price}/month`,
+      billingLine: `recurring billing of ${price}/month, billed monthly until cancelled. No minimum commitment.`,
     }
   }
-  if (opt.includes("497") || opt.includes("month-to-month") || opt.includes("month to month")) {
-    return {
-      headline: "Month-to-month coaching · $497/month",
-      billingLine: "recurring billing of $497/month until cancelled",
-    }
-  }
+  // Fallback for applications approved before the commitment field existed.
+  // The billing details will appear on the Stripe payment page.
   return {
     headline: "1:1 Coaching",
     billingLine: "the monthly billing terms shown on the payment page",
@@ -52,8 +57,13 @@ export default function AcceptClient({
   applicantEmail,
   coachingOption,
   checkoutUrl,
+  approvedPriceInCents,
+  approvedCommitmentType,
 }: Props) {
-  const tier = useMemo(() => summariseTier(coachingOption), [coachingOption])
+  const tier = useMemo(
+    () => buildTierDisplay(approvedPriceInCents, approvedCommitmentType),
+    [approvedPriceInCents, approvedCommitmentType],
+  )
   const [termsChecked, setTermsChecked] = useState(false)
   const [waiverChecked, setWaiverChecked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -72,6 +82,8 @@ export default function AcceptClient({
         body: JSON.stringify({
           applicationId,
           coachingOption,
+          approvedPriceInCents,
+          approvedCommitmentType,
         }),
       })
       if (!res.ok) {
@@ -105,14 +117,24 @@ export default function AcceptClient({
           Signed in as <strong style={{ color: "rgba(245,242,238,0.7)" }}>{applicantEmail}</strong>
         </p>
 
-        {/* Tier summary card */}
+        {/* Approved terms card */}
         <div style={{ background: "#161616", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${ACCENT}`, padding: "20px 24px", marginBottom: 32 }}>
           <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: ACCENT, margin: "0 0 8px" }}>
             You&apos;re signing up for
           </p>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 20, fontWeight: 700, color: CREAM, margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: 20, fontWeight: 700, color: CREAM, margin: "0 0 6px" }}>
             {tier.headline}
           </p>
+          {approvedCommitmentType === "THREE_MONTH_MINIMUM" && (
+            <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>
+              3-month minimum commitment, then month-to-month until cancelled.
+            </p>
+          )}
+          {approvedCommitmentType === "MONTH_TO_MONTH" && (
+            <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>
+              Month-to-month. Cancel anytime before your next billing date.
+            </p>
+          )}
         </div>
 
         {/* Checkbox 1 — Coaching Terms */}
@@ -190,11 +212,10 @@ export default function AcceptClient({
         </p>
 
         <p style={{ fontSize: 12, color: "rgba(245,242,238,0.3)", marginTop: 32, textAlign: "center" }}>
-          Wrong tier?{" "}
-          <Link href="mailto:lisa@lisafitmethod.com" style={{ color: ACCENT_DARK, textDecoration: "underline" }}>
-            Reply to my email
+          Questions about your terms?{" "}
+          <Link href="mailto:contact@lisafitmethod.com" style={{ color: ACCENT_DARK, textDecoration: "underline" }}>
+            contact@lisafitmethod.com
           </Link>
-          {" "}and I&apos;ll adjust.
         </p>
       </div>
     </main>

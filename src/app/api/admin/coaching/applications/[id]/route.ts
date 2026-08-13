@@ -14,6 +14,7 @@ import {
   updateCoachingApplication,
   createCoachingClientRecord,
   getBundleCredit,
+  type CommitmentType,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -148,7 +149,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   const { id } = await params
-  const body = await req.json() as { action: "approve" | "decline"; priceInCents?: number }
+  const body = await req.json() as { action: "approve" | "decline"; priceInCents?: number; commitmentType?: CommitmentType }
 
   const application = await getCoachingApplication(id)
   if (!application) {
@@ -176,6 +177,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const priceInCents = body.priceInCents
     if (!priceInCents || priceInCents < 100) {
       return NextResponse.json({ error: "Monthly price is required (minimum $1.00)" }, { status: 400 })
+    }
+    const commitmentType = body.commitmentType
+    if (!commitmentType || !["THREE_MONTH_MINIMUM", "MONTH_TO_MONTH"].includes(commitmentType)) {
+      return NextResponse.json({ error: "Commitment type is required" }, { status: 400 })
     }
 
     // Ensure applicant has a Cognito account (so Stripe can match them later)
@@ -248,6 +253,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         customerEmail: application.email,
         customerName: application.name,
         applicationId: id,
+        coachingCommitmentType: commitmentType,
+        coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
         ...(bundleCouponId ? { bundleCouponId } : {}),
       },
       subscription_data: {
@@ -256,6 +263,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           customerEmail: application.email,
           customerName: application.name,
           applicationId: id,
+          coachingCommitmentType: commitmentType,
+          coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
         },
       },
       success_url: `${baseUrl}/coaching/welcome`,
@@ -264,18 +273,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const checkoutUrl = session.url ?? ""
 
-    // Create client record now so admin can see and prep program before payment completes
+    // Create client record now so admin can see and prep program before payment completes.
+    // Store approved business terms immediately so the acceptance interstitial can read them.
     await createCoachingClientRecord({
       email: application.email,
       displayName: application.name,
       status: "PENDING_PAYMENT",
       goal: application.goals || undefined,
+      approvedPriceInCents: priceInCents,
+      commitmentType,
+      commitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? 3 : 0,
     }).catch((err) => console.error("createCoachingClientRecord failed:", err))
 
     await updateCoachingApplication(id, {
       status: "APPROVED",
       reviewedAt: new Date().toISOString(),
       stripeCheckoutUrl: checkoutUrl,
+      approvedPriceInCents: priceInCents,
+      approvedCommitmentType: commitmentType,
     })
 
     // Send the applicant to our /coaching/accept/[id] interstitial (which

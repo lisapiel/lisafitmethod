@@ -28,6 +28,8 @@ export default async function AcceptPage({ params }: { params: Promise<{ id: str
       applicantEmail={application.email}
       coachingOption={application.coachingOption ?? null}
       checkoutUrl={application.stripeCheckoutUrl}
+      approvedPriceInCents={application.approvedPriceInCents ?? null}
+      approvedCommitmentType={application.approvedCommitmentType ?? null}
     />
   )
 }

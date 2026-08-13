@@ -693,7 +693,7 @@ function coachingPaymentFailedEmail(email: string): string {
 </html>`
 }
 
-async function provisionCoachingSubscriber(email: string, name: string, subscriptionId?: string) {
+async function provisionCoachingSubscriber(email: string, name: string, subscriptionId?: string, commitmentType?: "THREE_MONTH_MINIMUM" | "MONTH_TO_MONTH") {
   const cognito = makeCognito()
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   const firstName = name.split(" ")[0] || "there"
@@ -722,12 +722,34 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
     await markBundleCreditUsed(email, subscriptionId).catch(() => { /* no bundle purchase record — nothing to mark */ })
   }
 
-  // Promote existing PENDING_PAYMENT record to ACTIVE; otherwise create new ACTIVE record
+  // Resolve Stripe subscription start date for commitment window tracking
+  let subscriptionStartDate: string | undefined
+  if (subscriptionId) {
+    try {
+      const stripe = makeStripe()
+      const sub = await stripe.subscriptions.retrieve(subscriptionId)
+      subscriptionStartDate = new Date(sub.start_date * 1000).toISOString()
+    } catch (err) {
+      console.error("provisionCoachingSubscriber: could not retrieve subscription start_date", err)
+    }
+  }
+
+  // Promote existing PENDING_PAYMENT record to ACTIVE; otherwise create new ACTIVE record.
+  // Store commitment fields on the client record — these come from Stripe session metadata
+  // which was populated at admin approval time, never derived from price.
+  const commitmentUpdates = {
+    ...(subscriptionId ? { stripeSubscriptionId: subscriptionId } : {}),
+    ...(subscriptionStartDate ? { subscriptionStartDate } : {}),
+    ...(commitmentType ? {
+      commitmentType,
+      commitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? 3 : 0,
+    } : {}),
+  }
   const wasNew = !preexisting
   if (preexisting) {
-    await updateCoachingClientRecord(email, { status: "ACTIVE" })
+    await updateCoachingClientRecord(email, { status: "ACTIVE", ...commitmentUpdates })
   } else {
-    await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE" })
+    await createCoachingClientRecord({ email, displayName: name, status: "ACTIVE", ...commitmentUpdates })
   }
 
   // Notify Lisa that a new client is active
@@ -967,7 +989,8 @@ export async function POST(request: NextRequest) {
       if (product === "coaching") {
         const name = session.metadata?.customerName ?? ""
         const applicationId = session.metadata?.applicationId ?? ""
-        await provisionCoachingSubscriber(email, name, subscriptionId)
+        const commitmentType = (session.metadata?.coachingCommitmentType ?? "") as "THREE_MONTH_MINIMUM" | "MONTH_TO_MONTH" | ""
+        await provisionCoachingSubscriber(email, name, subscriptionId, commitmentType || undefined)
         if (applicationId) {
           await updateCoachingApplication(applicationId, {
             status: "PAID",

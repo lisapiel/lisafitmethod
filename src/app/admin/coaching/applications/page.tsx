@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import type { CoachingApplication } from "@/lib/authTokens"
+import type { CoachingApplication, CommitmentType } from "@/lib/authTokens"
 
 type EnrichedApplication = CoachingApplication & {
   bundleCredit?: { available: boolean; amountCents: number; expiresAt: string | null; purchasedAt: string | null } | null
@@ -46,6 +46,8 @@ export default function AdminApplicationsPage() {
   const [acting, setActing] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [prices, setPrices] = useState<Record<string, string>>({})
+  const [commitments, setCommitments] = useState<Record<string, CommitmentType | "">>({})
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -62,6 +64,25 @@ export default function AdminApplicationsPage() {
 
   useEffect(() => { load() }, [load])
 
+  // Pre-fill commitment selector from applicant's self-reported coachingOption
+  useEffect(() => {
+    setCommitments((prev) => {
+      const next = { ...prev }
+      for (const app of applications) {
+        if (app.status !== "PENDING" || next[app.id] !== undefined) continue
+        const opt = (app.coachingOption ?? "").toLowerCase()
+        if (opt.includes("3-month") || opt.includes("3 month") || opt.includes("three")) {
+          next[app.id] = "THREE_MONTH_MINIMUM"
+        } else if (opt.includes("month-to-month") || opt.includes("month to month") || opt.includes("flexible") || opt.includes("cancel")) {
+          next[app.id] = "MONTH_TO_MONTH"
+        } else {
+          next[app.id] = ""
+        }
+      }
+      return next
+    })
+  }, [applications])
+
   async function act(id: string, action: "approve" | "decline") {
     if (action === "approve") {
       const priceStr = prices[id] ?? ""
@@ -70,24 +91,47 @@ export default function AdminApplicationsPage() {
         alert("Please enter a monthly price (minimum $1.00) before approving.")
         return
       }
+      if (!commitments[id]) {
+        alert("Please select a commitment type (3-month minimum or Month-to-month) before approving.")
+        return
+      }
+      // Show confirmation step instead of sending immediately
+      setConfirmingId(id)
+      return
     }
     setActing(id)
     try {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString() ?? ""
-      const priceStr = prices[id] ?? ""
-      const priceInCents = priceStr ? Math.round(parseFloat(priceStr) * 100) : undefined
       const res = await fetch(`/api/admin/coaching/applications/${id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ action, priceInCents }),
+        body: JSON.stringify({ action }),
       })
-      const data = await res.json() as { ok: boolean; error?: string; checkoutUrl?: string }
-      if (!data.ok) {
-        alert(data.error ?? "Something went wrong")
-      } else {
-        await load()
-      }
+      const data = await res.json() as { ok: boolean; error?: string }
+      if (!data.ok) alert(data.error ?? "Something went wrong")
+      else await load()
+    } catch { /* handled */ }
+    setActing(null)
+  }
+
+  async function confirmApprove(id: string) {
+    setConfirmingId(null)
+    setActing(id)
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      const priceStr = prices[id] ?? ""
+      const priceInCents = Math.round(parseFloat(priceStr) * 100)
+      const commitmentType = commitments[id] || undefined
+      const res = await fetch(`/api/admin/coaching/applications/${id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve", priceInCents, commitmentType }),
+      })
+      const data = await res.json() as { ok: boolean; error?: string }
+      if (!data.ok) alert(data.error ?? "Something went wrong")
+      else await load()
     } catch { /* handled */ }
     setActing(null)
   }
@@ -164,8 +208,9 @@ export default function AdminApplicationsPage() {
                       </div>
                     </div>
                     {app.status === "PENDING" && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, alignItems: "flex-end" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, alignItems: "flex-end", minWidth: 210 }}>
+                        {/* Monthly price */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 0, width: "100%" }}>
                           <span style={{ background: "#0a0a0a", border: `1px solid ${border}`, borderRight: "none", padding: "7px 10px", fontSize: "0.75rem", color: "#555" }}>$</span>
                           <input
                             type="number"
@@ -174,28 +219,39 @@ export default function AdminApplicationsPage() {
                             value={prices[app.id] ?? ""}
                             onChange={(e) => setPrices((p) => ({ ...p, [app.id]: e.target.value }))}
                             placeholder="Monthly price"
-                            style={{ width: 130, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none" }}
+                            style={{ flex: 1, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none" }}
                           />
                         </div>
                         {app.bundleCredit?.available && prices[app.id] && parseFloat(prices[app.id]) > 0 && (
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.06em" }}>
+                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.06em", alignSelf: "flex-start" }}>
                             First month: ${Math.max(0, parseFloat(prices[app.id]) - app.bundleCredit.amountCents / 100).toFixed(2)}
                           </span>
                         )}
-                        <div style={{ display: "flex", gap: 8 }}>
+                        {/* Commitment selector */}
+                        <select
+                          value={commitments[app.id] ?? ""}
+                          onChange={(e) => setCommitments((c) => ({ ...c, [app.id]: e.target.value as CommitmentType | "" }))}
+                          style={{ width: "100%", background: "#111", border: `1px solid ${!commitments[app.id] ? "#6b4a20" : border}`, color: commitments[app.id] ? "#f0e6d3" : "#888", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none", cursor: "pointer" }}
+                        >
+                          <option value="">— Select commitment —</option>
+                          <option value="THREE_MONTH_MINIMUM">3-month minimum</option>
+                          <option value="MONTH_TO_MONTH">Month-to-month</option>
+                        </select>
+                        {/* Action buttons */}
+                        <div style={{ display: "flex", gap: 8, width: "100%" }}>
                           <button
                             onClick={() => act(app.id, "decline")}
                             disabled={acting === app.id}
-                            style={{ background: "transparent", border: `1px solid ${border}`, color: "#d97460", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}
+                            style={{ flex: "0 0 auto", background: "transparent", border: `1px solid ${border}`, color: "#d97460", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}
                           >
                             Decline
                           </button>
                           <button
                             onClick={() => act(app.id, "approve")}
                             disabled={acting === app.id}
-                            style={{ background: gold, border: "none", color: "#111", padding: "7px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}
+                            style={{ flex: 1, background: gold, border: "none", color: "#111", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}
                           >
-                            {acting === app.id ? "Sending…" : "Approve + Send Payment Link"}
+                            {acting === app.id ? "Sending…" : "Approve →"}
                           </button>
                         </div>
                       </div>
@@ -321,6 +377,52 @@ export default function AdminApplicationsPage() {
           </div>
         )}
       </div>
+
+      {/* Approval confirmation modal */}
+      {confirmingId && (() => {
+        const app = applications.find((a) => a.id === confirmingId)
+        if (!app) return null
+        const priceStr = prices[confirmingId] ?? ""
+        const price = parseFloat(priceStr) || 0
+        const commitment = commitments[confirmingId]
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 24 }}>
+            <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "2rem", maxWidth: 440, width: "100%" }}>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Confirm Approval</p>
+              <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.4rem", color: "#f0e6d3", margin: "0 0 20px" }}>{app.name}</p>
+              <div style={{ background: "#0a0a0a", border: `1px solid #2a2a2a`, borderLeft: `3px solid ${gold}`, padding: "14px 16px", marginBottom: 20, display: "grid", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>Monthly price</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: "#f0e6d3" }}>${price.toFixed(2)}/mo</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>Commitment</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: "#f0e6d3" }}>
+                    {commitment === "THREE_MONTH_MINIMUM" ? "3-month minimum" : "Month-to-month"}
+                  </span>
+                </div>
+                {app.bundleCredit?.available && price > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>First month (after credit)</span>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: gold }}>${Math.max(0, price - app.bundleCredit.amountCents / 100).toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#666", lineHeight: 1.6, margin: "0 0 20px" }}>
+                These terms will be shown on the client&apos;s acceptance screen and stored as their contractual agreement. Double-check before confirming.
+              </p>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setConfirmingId(null)} style={{ flex: 1, background: "transparent", border: `1px solid ${border}`, color: "#888", padding: "10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", cursor: "pointer", borderRadius: 4 }}>
+                  Go back
+                </button>
+                <button onClick={() => confirmApprove(confirmingId)} style={{ flex: 1, background: gold, border: "none", color: "#111", padding: "10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}>
+                  Confirm &amp; Send Payment Link
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
