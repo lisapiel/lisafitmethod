@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const msg = e instanceof Error ? e.message : String(e)
     console.error("AdminSetUserPassword failed:", msg, e instanceof Error ? (e as { name?: string }).name : "")
     if (msg.includes("Password did not conform") || msg.includes("password") || (e instanceof Error && (e as { name?: string }).name === "InvalidPasswordException")) {
-      return NextResponse.json({ error: "Password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol." }, { status: 400 })
+      return NextResponse.json({ error: "Password must be at least 8 characters and include at least one uppercase and one lowercase letter." }, { status: 400 })
     }
     return NextResponse.json({ error: "Failed to set password. Please try again." }, { status: 500 })
   }
