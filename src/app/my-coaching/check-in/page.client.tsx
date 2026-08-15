@@ -345,7 +345,7 @@ export default function CheckInClient() {
                       value={m.label}
                       onChange={(e) => updateMeasurement(idx, { label: e.target.value })}
                       placeholder="e.g. Waist"
-                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
                     />
                     <button
                       type="button"
@@ -363,12 +363,12 @@ export default function CheckInClient() {
                       value={m.value}
                       onChange={(e) => updateMeasurement(idx, { value: e.target.value })}
                       placeholder="e.g. 28.5"
-                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
                     />
                     <select
                       value={m.unit}
                       onChange={(e) => updateMeasurement(idx, { unit: e.target.value })}
-                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+                      style={{ minWidth: 0, background: white, border: `1px solid ${border}`, color: black, padding: "9px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, outline: "none", borderRadius: 4, boxSizing: "border-box" }}
                     >
                       <option value="in">in</option>
                       <option value="cm">cm</option>

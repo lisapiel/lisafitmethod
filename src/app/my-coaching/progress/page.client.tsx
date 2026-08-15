@@ -299,14 +299,54 @@ export default function ProgressClient() {
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.75rem", gap: 12, flexWrap: "wrap" }}>
+      {/* Header — title uses clamp() so the Playfair display size scales down
+          on narrow phones without becoming tiny. */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1rem", gap: 12, flexWrap: "wrap" }}>
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Your</p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: 0 }}>Progress</h1>
+          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: black, margin: 0 }}>Progress</h1>
         </div>
         <Link href="/my-coaching/progress/log" style={{ display: "inline-block", background: black, color: white, padding: "10px 22px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>
           + Log Measurements
+        </Link>
+      </div>
+
+      {/* Secondary destinations — kept accessible after being removed from the
+          mobile bottom nav. Goals conceptually belong under Progress; check-in
+          history is the natural pair to weekly weight/measurement tracking. */}
+      <div style={{
+        display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "1.75rem",
+      }}>
+        <Link
+          href="/my-coaching/goals"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: white, border: `1px solid ${border}`, borderRadius: 999,
+            padding: "8px 14px", textDecoration: "none",
+            fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 600, color: black,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.2" />
+            <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.2" />
+            <circle cx="8" cy="8" r="1" fill="currentColor" />
+          </svg>
+          Goals →
+        </Link>
+        <Link
+          href="/my-coaching/check-in/history"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: white, border: `1px solid ${border}`, borderRadius: 999,
+            padding: "8px 14px", textDecoration: "none",
+            fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 600, color: black,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.2" />
+            <path d="M5 8l2.5 2.5L11 5.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Check-in history →
         </Link>
       </div>
 

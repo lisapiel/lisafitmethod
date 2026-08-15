@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { fetchAuthSession } from "aws-amplify/auth"
-import AccountDropdown from "@/components/AccountDropdown.client"
+import MemberDrawer from "@/components/MemberDrawer.client"
 
 const accent = "#c8a97e"
 const warmWhite = "#faf8f5"
@@ -12,14 +12,23 @@ const black = "#0a0a0a"
 const muted = "#6b6560"
 const border = "#e8e2dc"
 
+// Primary coaching navigation — five items, sized for one-handed thumb reach.
+// Check-In and Goals were removed from this bar; Check-In status now surfaces
+// on Home when a weekly submission is due and Goals live inside Progress.
 const navLinks = [
   { href: "/my-coaching", label: "Home", exact: true, icon: HomeIcon },
   { href: "/my-coaching/workouts", label: "Workouts", icon: DumbellIcon },
   { href: "/my-coaching/nutrition", label: "Nutrition", icon: NutritionIcon },
   { href: "/my-coaching/progress", label: "Progress", icon: ChartIcon },
+  { href: "/my-coaching/messages", label: "Messages", icon: MessageIcon },
+]
+
+// Secondary destinations still on the desktop sidebar so power users don't
+// lose a click; on mobile they're reachable from Home / Progress / the global
+// hamburger menu.
+const secondaryLinks = [
   { href: "/my-coaching/check-in", label: "Check-In", icon: CheckIcon },
   { href: "/my-coaching/goals", label: "Goals", icon: GoalIcon },
-  { href: "/my-coaching/messages", label: "Messages", icon: MessageIcon },
 ]
 
 function HomeIcon() {
@@ -228,6 +237,7 @@ export default function CoachingClientLayout({
   const pathname = usePathname()
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [reacceptDone, setReacceptDone] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   // Hide mobile bottom nav while typing — when an input or textarea is focused,
   // the on-screen keyboard pushes the fixed bottom nav above the keyboard and
@@ -268,25 +278,45 @@ export default function CoachingClientLayout({
           .coaching-mobile-nav { display: none !important; }
           .coaching-sidebar { display: flex !important; }
         }
+        .coaching-hamburger {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 10px 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .coaching-hamburger span {
+          display: block;
+          width: 22px;
+          height: 1.5px;
+          background: ${black};
+          transition: all 0.25s;
+        }
       `}</style>
 
-      {/* Header */}
+      {/* Header — sticky. Uses env(safe-area-inset-top) so the wordmark clears
+          the iPhone status bar / notch when the portal is installed to the
+          Home Screen as a standalone PWA. */}
       <header style={{
         background: "#fff",
         borderBottom: `1px solid ${border}`,
-        height: 58,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 1.5rem",
+        padding: "calc(env(safe-area-inset-top) + 0.5rem) 1rem 0.5rem",
         position: "sticky",
         top: 0,
         zIndex: 100,
+        minHeight: 58,
       }}>
-        <Link href="/my-coaching" style={{ textDecoration: "none" }}>
+        <Link href="/my-coaching" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", flexWrap: "wrap", columnGap: "0.6rem", rowGap: 0, minWidth: 0 }}>
           <span style={{
             fontFamily: "var(--font-playfair), serif",
-            fontSize: "1.1rem",
+            fontSize: "clamp(1rem, 3.6vw, 1.15rem)",
             fontWeight: 700,
             color: black,
             letterSpacing: "0.01em",
@@ -295,22 +325,35 @@ export default function CoachingClientLayout({
           </span>
           <span style={{
             fontFamily: "var(--font-dm-sans), sans-serif",
-            fontSize: "0.65rem",
+            fontSize: "0.6rem",
             fontWeight: 500,
             letterSpacing: "0.15em",
             textTransform: "uppercase",
             color: accent,
-            marginLeft: "0.6rem",
           }}>
             Coaching
           </span>
         </Link>
 
-        <AccountDropdown />
+        <button
+          className="coaching-hamburger"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="lfm-mobile-drawer"
+        >
+          <span style={{ transform: menuOpen ? "rotate(45deg) translate(4px, 5px)" : "none" }} />
+          <span style={{ opacity: menuOpen ? 0 : 1 }} />
+          <span style={{ transform: menuOpen ? "rotate(-45deg) translate(4px, -5px)" : "none" }} />
+        </button>
       </header>
 
+      <MemberDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
+
       <div style={{ display: "flex", flex: 1 }}>
-        {/* Desktop sidebar */}
+        {/* Desktop sidebar — carries the same five primary items as the mobile
+            bottom nav plus Check-In and Goals below a divider, so desktop
+            users keep one-click access without the mobile bar getting crowded. */}
         <nav className="coaching-sidebar" style={{
           width: 220,
           background: "#fff",
@@ -349,16 +392,47 @@ export default function CoachingClientLayout({
               </Link>
             )
           })}
+          <div style={{ height: 1, background: border, margin: "0.75rem 1.5rem" }} />
+          {secondaryLinks.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  padding: "0.75rem 1.5rem",
+                  textDecoration: "none",
+                  color: active ? accent : muted,
+                  background: active ? `${accent}12` : "transparent",
+                  borderLeft: active ? `3px solid ${accent}` : "3px solid transparent",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                  fontSize: "0.85rem",
+                  fontWeight: active ? 600 : 400,
+                  transition: "all 0.15s",
+                }}
+              >
+                <Icon />
+                {label}
+              </Link>
+            )
+          })}
         </nav>
 
-        {/* Main content */}
-        <main style={{ flex: 1, minWidth: 0, padding: "2rem 1.5rem", maxWidth: 900 }}>
+        {/* Main content — page padding scales down on phones so cards can breathe
+            near the screen edges without touching them. maxWidth keeps the
+            reading column comfortable on tablet + desktop. */}
+        <main style={{ flex: 1, minWidth: 0, padding: "clamp(1rem, 3vw, 2rem) clamp(0.9rem, 3.5vw, 1.5rem)", maxWidth: 900, width: "100%" }}>
           {children}
         </main>
       </div>
 
-      {/* Mobile bottom nav — hides when a text input is focused so the
-          on-screen keyboard doesn't push it over the content. */}
+      {/* Mobile bottom nav — five primary items only, sized for comfortable
+          thumb reach. Hides when a text input is focused so the on-screen
+          keyboard doesn't push it over the content. Uses env(safe-area-inset-bottom)
+          so it clears the iPhone Home indicator. */}
       <nav className="coaching-mobile-nav" style={{
         position: "fixed",
         bottom: 0,
@@ -366,8 +440,9 @@ export default function CoachingClientLayout({
         right: 0,
         background: "#fff",
         borderTop: `1px solid ${border}`,
-        padding: "0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom))",
+        padding: "0.5rem 0.25rem calc(0.5rem + env(safe-area-inset-bottom))",
         justifyContent: "space-around",
+        alignItems: "stretch",
         zIndex: 100,
         transform: keyboardOpen ? "translateY(100%)" : "translateY(0)",
         transition: "transform 0.15s ease",
@@ -379,22 +454,30 @@ export default function CoachingClientLayout({
             <Link
               key={href}
               href={href}
+              aria-current={active ? "page" : undefined}
               style={{
+                flex: "1 1 0",
+                minWidth: 0,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "0.25rem",
+                gap: "0.2rem",
                 textDecoration: "none",
                 color: active ? accent : muted,
-                padding: "0.25rem 0.75rem",
+                padding: "0.35rem 0.25rem",
+                WebkitTapHighlightColor: "transparent",
               }}
             >
-              <Icon />
+              <span aria-hidden style={{ display: "inline-flex" }}>
+                <Icon />
+              </span>
               <span style={{
                 fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: "0.6rem",
-                fontWeight: active ? 600 : 400,
-                letterSpacing: "0.04em",
+                fontSize: "0.68rem",
+                fontWeight: active ? 600 : 500,
+                letterSpacing: "0.02em",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
               }}>
                 {label}
               </span>

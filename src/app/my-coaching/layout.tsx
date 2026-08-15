@@ -6,14 +6,12 @@ import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { hasCoachingAccess, getCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION, isAdminEmail } from "@/lib/authTokens"
 import CoachingClientLayout from "./CoachingLayout.client"
 
-// Lock the viewport for the coaching portal — prevents iOS auto-zoom when a
-// user taps a weight/reps input and prevents accidental pinch-zoom on phones
-// while logging a workout. The marketing site keeps the default viewport.
+// Keep accessibility pinch-zoom available for clients who need it. iOS Safari
+// auto-zoom into inputs is prevented at the input level (font-size ≥ 16px on
+// every workout / check-in field) rather than by disabling the whole viewport.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#0a0a0a",
 }
 

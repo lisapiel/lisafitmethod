@@ -258,6 +258,18 @@ export default function MyCoachingHomeClient() {
   const nutritionMissing = !!clientInfo && (clientInfo.heightInches == null || clientInfo.age == null || clientInfo.sex == null)
   const macros = clientInfo ? resolveMacrosFor(clientInfo) : null
 
+  // Check-in status — derived from the same `checkIns` list the rest of the
+  // page already uses. A check-in is "due" if there has been no submission in
+  // the last 7 days (or ever). Immediately after a submission we surface a
+  // small confirmation instead of a large CTA so it doesn't look stale.
+  const checkInStatus = (() => {
+    if (checkIns.length === 0) return { state: "due" as const, daysAgo: null }
+    const latest = [...checkIns].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))[0]
+    const daysAgo = Math.floor((Date.now() - new Date(latest.submittedAt).getTime()) / 86_400_000)
+    if (daysAgo >= 7) return { state: "due" as const, daysAgo }
+    return { state: "done" as const, daysAgo }
+  })()
+
   // Latest logged workout with unread coach feedback
   const latestFeedback = (() => {
     const withFb = logs.filter((l) => l.coachFeedback && l.coachFeedbackAt)
@@ -351,6 +363,50 @@ export default function MyCoachingHomeClient() {
             New note from Lisa on your last workout →
           </span>
         </Link>
+      )}
+
+      {/* ── Weekly check-in status ──────────────────────────────────────
+          Big CTA when due, small confirmation when just submitted. Replaces
+          the permanent Check-In slot the bottom nav used to hold. */}
+      {checkInStatus.state === "due" ? (
+        <Link
+          href="/my-coaching/check-in"
+          style={{
+            display: "flex", alignItems: "center", gap: 12,
+            background: white, border: `1px solid ${accent}`, borderLeft: `4px solid ${accent}`,
+            padding: "14px 16px", borderRadius: 8, marginBottom: "1rem",
+            textDecoration: "none",
+          }}
+        >
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginBottom: 3 }}>
+              Weekly check-in
+            </span>
+            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: black, fontWeight: 600 }}>
+              Your check-in is ready
+            </span>
+          </span>
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: accent, fontWeight: 600, whiteSpace: "nowrap" }}>
+            Complete check-in →
+          </span>
+        </Link>
+      ) : (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+          padding: "8px 12px", marginBottom: "0.75rem",
+          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted,
+        }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span aria-hidden style={{ color: "#5c9e6a", fontWeight: 700 }}>✓</span>
+            Check-in complete
+            {checkInStatus.daysAgo != null && checkInStatus.daysAgo > 0 && (
+              <span style={{ color: "#8a847e" }}>· {checkInStatus.daysAgo}d ago</span>
+            )}
+          </span>
+          <Link href="/my-coaching/check-in/history" style={{ color: accent, textDecoration: "none", fontWeight: 600 }}>
+            View history →
+          </Link>
+        </div>
       )}
 
       {/* ── Nutrition setup nudge ──────────────────────────────────────── */}

@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Lisa Fit Method — Coaching",
-    short_name: "LFM Coaching",
-    description: "1:1 coaching admin and client portal for Lisa Fit Method.",
-    // start_url is where the app opens after install. Admin folks want the
-    // coaching dashboard immediately, so send Lisa there — regular clients
-    // are redirected to /account or /my-coaching by their auth layout so
-    // this doesn't hurt them.
-    start_url: "/admin/coaching",
+    name: "Lisa Fit Method",
+    short_name: "Lisa Fit Method",
+    description: "Training, nutrition, and 1:1 coaching from Lisa Fit Method.",
+    // Home-Screen launch lands in the coaching portal. Coaching clients start
+    // on their Home dashboard; the layout redirects non-coaching visitors to
+    // /account, which is the right entry point for course/tracker/masterclass
+    // owners and admins.
+    start_url: "/my-coaching",
     display: "standalone",
     orientation: "portrait-primary",
     background_color: "#0a0a0a",

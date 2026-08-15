@@ -253,18 +253,59 @@ function WarmupCooldownDisplay({
 }
 
 function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: string; onClose: () => void }) {
+  // Escape closes the modal — matches expected modal-dialog behavior.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose() }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [onClose])
+
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
-      <div style={{ maxWidth: 600, width: "100%" }} onClick={(e) => e.stopPropagation()}>
-        <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.1rem", color: "#f0e6d3", marginBottom: "0.75rem" }}>{name}</p>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${name} demonstration`}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 1000,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px)",
+      }}
+      onClick={onClose}
+    >
+      {/* Corner-X close button — always reachable, even when the video fills
+          the viewport in landscape. */}
+      <button
+        onClick={onClose}
+        aria-label="Close video"
+        style={{
+          position: "absolute",
+          top: "calc(env(safe-area-inset-top) + 12px)",
+          right: 12,
+          width: 40, height: 40, borderRadius: "50%",
+          background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.2)",
+          color: "#f0e6d3", cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 0, zIndex: 1,
+          WebkitTapHighlightColor: "transparent",
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M1.5 1.5l15 15M16.5 1.5l-15 15" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      <div
+        style={{ maxWidth: 720, width: "100%", maxHeight: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1rem, 3.5vw, 1.15rem)", color: "#f0e6d3", margin: "0 44px 0.6rem 0" }}>
+          {name}
+        </p>
         <video
           src={`${CDN}/${encodeURIComponent(videoKey)}`}
           controls autoPlay playsInline
-          style={{ width: "100%", borderRadius: 4, background: "#000" }}
+          style={{ width: "100%", maxHeight: "80vh", borderRadius: 4, background: "#000", objectFit: "contain" }}
         />
-        <button onClick={onClose} style={{ marginTop: 12, background: "none", border: "1px solid #444", color: "#888", padding: "8px 20px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", cursor: "pointer", borderRadius: 3 }}>
-          Close
-        </button>
       </div>
     </div>
   )
@@ -320,7 +361,7 @@ function SetRow({
           placeholder={entry._prevWeight || prescribed.weight || "—"}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
+            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
             fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
           }}
         />
@@ -338,7 +379,7 @@ function SetRow({
           placeholder={entry._prevReps || prescribed.reps || "—"}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
+            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
             fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
           }}
         />
@@ -369,7 +410,7 @@ function SetRow({
           onChange={(e) => onChange({ ...entry, rpe: e.target.value })}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: entry.rpe ? black : "#aaa", padding: "8px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
+            color: entry.rpe ? black : "#aaa", padding: "8px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
             fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
             appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
             backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
