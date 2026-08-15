@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
+import { attachmentUrls } from "@/components/coaching/NutritionComposer.client"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -11,12 +12,21 @@ const muted = "#888"
 const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
 const ADMIN_EMAILS = new Set(["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"])
 
+type NutritionKind = "nutrition-meal" | "nutrition-day" | "nutrition-question"
+const NUTRITION_KIND_LABEL: Record<NutritionKind, string> = {
+  "nutrition-meal": "Nutrition · Meal",
+  "nutrition-day": "Nutrition · Day of eating",
+  "nutrition-question": "Nutrition · Question",
+}
+
 type Message = {
   id: string
   fromEmail: string
   body: string
   sentAt: string
   readAt: string | null
+  kind?: NutritionKind
+  attachmentS3Keys?: string
 }
 
 function formatTime(iso: string) {
@@ -68,6 +78,8 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
           body: m.body as string,
           sentAt: m.sentAt as string,
           readAt: (m.readAt as string | null) ?? null,
+          kind: (m.kind as NutritionKind | undefined) ?? undefined,
+          attachmentS3Keys: (m.attachmentS3Keys as string | undefined) ?? undefined,
         }))
       )
     } catch { /* handled by layout */ }
@@ -186,6 +198,8 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                     </div>
                     {group.messages.map((msg) => {
                       const isCoach = ADMIN_EMAILS.has(msg.fromEmail.toLowerCase())
+                      const images = attachmentUrls(msg.attachmentS3Keys)
+                      const kindLabel = msg.kind ? NUTRITION_KIND_LABEL[msg.kind] : null
                       return (
                         <div key={msg.id} style={{ display: "flex", justifyContent: isCoach ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
                           {!isCoach && (
@@ -207,7 +221,28 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                               whiteSpace: "pre-wrap",
                               wordBreak: "break-word",
                             }}>
-                              {msg.body}
+                              {kindLabel && (
+                                <p style={{
+                                  fontFamily: "var(--font-montserrat), sans-serif",
+                                  fontSize: "0.55rem", fontWeight: 700,
+                                  letterSpacing: "0.16em", textTransform: "uppercase",
+                                  color: isCoach ? "#5a4d2f" : gold,
+                                  margin: "0 0 6px",
+                                }}>
+                                  {kindLabel}
+                                </p>
+                              )}
+                              {images.length > 0 && (
+                                <div style={{ display: "grid", gridTemplateColumns: images.length === 1 ? "1fr" : "repeat(auto-fit, minmax(140px, 1fr))", gap: 6, marginBottom: msg.body ? 8 : 0 }}>
+                                  {images.map((url, i) => (
+                                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "block", borderRadius: 6, overflow: "hidden", background: "rgba(0,0,0,0.35)" }}>
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img src={url} alt="" style={{ width: "100%", display: "block", maxHeight: 360, objectFit: "cover" }} />
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                              {msg.body && <>{msg.body}</>}
                             </div>
                             <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, margin: "3px 4px 0", textAlign: isCoach ? "right" : "left" }}>
                               {formatTime(msg.sentAt)}

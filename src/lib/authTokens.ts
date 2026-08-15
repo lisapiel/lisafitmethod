@@ -523,6 +523,11 @@ export async function listCoachingClientRecords(): Promise<CoachingClientRecord[
 
 // ── Coaching Messages ─────────────────────────────────────────────────────────
 
+// Message kind. Absent/undefined = plain text (unchanged behavior for every
+// existing record on disk). Nutrition submissions carry a specific kind so
+// the UI can render a labelled block on both sides.
+export type CoachingMessageKind = "nutrition-meal" | "nutrition-day" | "nutrition-question"
+
 export interface CoachingMessageRecord {
   id: string
   threadId: string
@@ -531,18 +536,24 @@ export interface CoachingMessageRecord {
   body: string
   sentAt: string
   readAt?: string
+  kind?: CoachingMessageKind
+  // Comma-separated S3 keys for attached images. Same convention as
+  // ClientProgressSnapshot.photoS3Keys — served via the public CDN.
+  attachmentS3Keys?: string
 }
 
 export async function createCoachingMessage(data: Omit<CoachingMessageRecord, "id">): Promise<CoachingMessageRecord> {
   const db = makeDb()
   const id = randomBytes(16).toString("hex")
+  // Undefined properties are stripped so we never write a `kind: undefined`
+  // or `attachmentS3Keys: undefined` attribute onto a record that would
+  // otherwise not carry that field.
   const record: CoachingMessageRecord = { id, ...data }
-  await db.send(
-    new PutCommand({
-      TableName: TABLE,
-      Item: { userId: `coaching_msg_${data.threadId}_${data.sentAt}_${id}`, ...record },
-    })
-  )
+  const item: Record<string, unknown> = { userId: `coaching_msg_${data.threadId}_${data.sentAt}_${id}` }
+  for (const [k, v] of Object.entries(record)) {
+    if (v !== undefined) item[k] = v
+  }
+  await db.send(new PutCommand({ TableName: TABLE, Item: item }))
   return record
 }
 

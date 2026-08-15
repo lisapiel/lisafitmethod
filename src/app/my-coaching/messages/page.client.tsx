@@ -1,12 +1,20 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import { attachmentUrls } from "@/components/coaching/NutritionComposer.client"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
 const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
+
+type NutritionKind = "nutrition-meal" | "nutrition-day" | "nutrition-question"
+const NUTRITION_KIND_LABEL: Record<NutritionKind, string> = {
+  "nutrition-meal": "Nutrition · Meal",
+  "nutrition-day": "Nutrition · Day of eating",
+  "nutrition-question": "Nutrition · Question",
+}
 
 type Message = {
   id: string
@@ -15,6 +23,8 @@ type Message = {
   body: string
   sentAt: string
   readAt: string | null
+  kind?: NutritionKind
+  attachmentS3Keys?: string
 }
 
 function formatTime(iso: string) {
@@ -162,6 +172,8 @@ export default function MessagesClient() {
                 </div>
                 {group.messages.map((msg) => {
                   const isMe = myEmail ? msg.fromEmail.toLowerCase() === myEmail.toLowerCase() : false
+                  const images = attachmentUrls(msg.attachmentS3Keys)
+                  const kindLabel = msg.kind ? NUTRITION_KIND_LABEL[msg.kind] : null
                   return (
                     <div key={msg.id} style={{ display: "flex", justifyContent: isMe ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
                       {!isMe && (
@@ -181,7 +193,28 @@ export default function MessagesClient() {
                           whiteSpace: "pre-wrap",
                           wordBreak: "break-word",
                         }}>
-                          {msg.body}
+                          {kindLabel && (
+                            <p style={{
+                              fontFamily: "var(--font-dm-sans), sans-serif",
+                              fontSize: "0.55rem", fontWeight: 700,
+                              letterSpacing: "0.14em", textTransform: "uppercase",
+                              color: isMe ? accent : accent,
+                              margin: "0 0 6px",
+                            }}>
+                              {kindLabel}
+                            </p>
+                          )}
+                          {images.length > 0 && (
+                            <div style={{ display: "grid", gridTemplateColumns: images.length === 1 ? "1fr" : "repeat(auto-fit, minmax(120px, 1fr))", gap: 6, marginBottom: msg.body ? 8 : 0 }}>
+                              {images.map((url, i) => (
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "block", borderRadius: 6, overflow: "hidden", background: "rgba(0,0,0,0.08)" }}>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={url} alt="" style={{ width: "100%", display: "block", maxHeight: 320, objectFit: "cover" }} />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                          {msg.body && <>{msg.body}</>}
                         </div>
                         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", color: muted, margin: "3px 4px 0", textAlign: isMe ? "right" : "left" }}>
                           {formatTime(msg.sentAt)}

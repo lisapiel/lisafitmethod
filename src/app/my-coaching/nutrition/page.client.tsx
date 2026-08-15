@@ -6,6 +6,7 @@ import { resolveMacrosFor } from "@/lib/nutrition"
 import { RECIPES } from "@/lib/nutritionRecipes"
 import type { Recipe } from "@/components/nutrition/RecipeCard"
 import type { CoachingClientRecord } from "@/lib/authTokens"
+import NutritionComposer from "@/components/coaching/NutritionComposer.client"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -47,9 +48,10 @@ function macroRecipes(): Recipe[] {
 
 interface NutritionClientProps {
   ownsNutritionCourse: boolean
+  email: string
 }
 
-export default function NutritionClient({ ownsNutritionCourse }: NutritionClientProps) {
+export default function NutritionClient({ ownsNutritionCourse, email }: NutritionClientProps) {
   const [loading, setLoading] = useState(true)
   const [state, setState] = useState<Loaded>({ client: null })
 
@@ -196,6 +198,14 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
           </p>
         </div>
       )}
+
+      {/* Nutrition Support — send meal / day-of-eating / question to Lisa.
+          Sits near the personalized target so a client can share what they
+          actually ate in the same visit. Attachments upload to Amplify
+          Storage; the submission lands as a message in the coaching thread. */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <NutritionComposer email={email} />
+      </div>
 
       {/* Weekly-average explainer */}
       <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>

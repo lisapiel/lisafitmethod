@@ -246,6 +246,14 @@ const schema = a.schema({
       body: a.string().required(),
       sentAt: a.string().required(),
       readAt: a.string(),
+      // Optional message kind — absent/undefined is a plain text message.
+      // Nutrition submissions carry "nutrition-meal" / "nutrition-day" /
+      // "nutrition-question" so the UI can render a labelled block.
+      kind: a.string(),
+      // Comma-separated S3 keys for any images attached to this message.
+      // Same convention as ClientProgressSnapshot.photoS3Keys. Public read
+      // via the CloudFront CDN (NEXT_PUBLIC_AMBRISA_CDN_URL).
+      attachmentS3Keys: a.string(),
     })
     .authorization((allow) => [
       allow.authenticated().to(["create", "read", "update", "delete"]),

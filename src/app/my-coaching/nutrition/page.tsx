@@ -28,5 +28,5 @@ export default async function NutritionPage() {
   // "explore" CTA rather than falsely claiming the client owns the course.
   const ownsNutritionCourse = email ? await hasNutritionAccess(email) : false
 
-  return <NutritionClient ownsNutritionCourse={ownsNutritionCourse} />
+  return <NutritionClient ownsNutritionCourse={ownsNutritionCourse} email={email ?? ""} />
 }
