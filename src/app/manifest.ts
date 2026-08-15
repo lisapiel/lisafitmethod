@@ -11,7 +11,6 @@ export default function manifest(): MetadataRoute.Manifest {
     // owners and admins.
     start_url: "/my-coaching",
     display: "standalone",
-    orientation: "portrait-primary",
     background_color: "#0a0a0a",
     theme_color: "#0a0a0a",
     categories: ["fitness", "health", "lifestyle"],
