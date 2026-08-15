@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
@@ -93,6 +93,10 @@ export default function MyCoachingHomeClient() {
   const [logs, setLogs] = useState<WorkoutLog[]>([])
   const [primaryGoal, setPrimaryGoal] = useState<Goal | null>(null)
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
+  // Set to true if the logger persisted an in-progress draft for today's
+  // workout — read from localStorage after nextWorkout resolves. Same key
+  // format the workout page writes: `lfm-workout-draft-<weekNumber>-<dayIndex>`.
+  const [workoutInProgress, setWorkoutInProgress] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -177,20 +181,43 @@ export default function MyCoachingHomeClient() {
     load()
   }, [])
 
+  // Find next uncompleted day. Memoized so the workout-in-progress effect
+  // below has a stable dependency. Only counts workouts logged AGAINST THIS
+  // PROGRAM as completed — when a coach assigns a new program that reuses
+  // week/day labels, previous completions shouldn't skip today.
+  const nextWorkout = useMemo(() => {
+    if (!program) return null
+    const currentProgramLogs = logs.filter((l) => l.programId === program.id)
+    for (const week of program.weeks) {
+      for (let di = 0; di < week.days.length; di++) {
+        const day = week.days[di]
+        const done = currentProgramLogs.some((l) => l.weekNumber === week.weekNumber && l.dayLabel === day.dayLabel)
+        if (!done) return { week, day, dayIndex: di }
+      }
+    }
+    return null
+  }, [program, logs])
+
+  // Detect an in-progress draft for today's workout so the CTA switches from
+  // "Start" to "Continue". No new state system — just reads the same
+  // localStorage key the workout logger writes.
+  useEffect(() => {
+    if (!nextWorkout) { setWorkoutInProgress(false); return }
+    try {
+      const key = `lfm-workout-draft-${nextWorkout.week.weekNumber}-${nextWorkout.dayIndex}`
+      setWorkoutInProgress(typeof window !== "undefined" && localStorage.getItem(key) != null)
+    } catch { setWorkoutInProgress(false) }
+  }, [nextWorkout])
+
   if (loading) return <Spinner />
 
   const firstName = clientInfo?.displayName.split(" ")[0] ?? ""
 
-  // ── Compute outcome-focused metrics ────────────────────────────────────────
+  // ── Compute Home-surfaced metrics ─────────────────────────────────────────
   const startOfWeek = new Date()
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
   startOfWeek.setHours(0, 0, 0, 0)
   const thisWeekLogs = logs.filter((l) => new Date(l.completedAt) >= startOfWeek)
-
-  // Weekly adherence: % of scheduled days completed this week vs. days in current week of program
-  const currentWeekNum = thisWeekLogs[0] ? thisWeekLogs[0].weekNumber : (program?.weeks[0]?.weekNumber ?? 1)
-  const scheduledThisWeek = program?.weeks.find((w) => w.weekNumber === currentWeekNum)?.days.length ?? 0
-  const adherence = scheduledThisWeek > 0 ? Math.min(100, Math.round((thisWeekLogs.length / scheduledThisWeek) * 100)) : 0
 
   // Streak: consecutive ISO weeks ending now with ≥1 workout
   function isoWeekKey(d: Date) {
@@ -205,52 +232,10 @@ export default function MyCoachingHomeClient() {
   const cursor = new Date()
   while (weeksWith.has(isoWeekKey(cursor))) { streak++; cursor.setDate(cursor.getDate() - 7) }
 
-  // Weight trend: latest vs. first check-in weight
+  // Weight trend: latest vs. first check-in weight (used by compact Progress card)
   const weighIns = checkIns.filter((c) => c.weight != null).sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
   const weightDelta = weighIns.length >= 2 ? +(weighIns[weighIns.length - 1].weight! - weighIns[0].weight!).toFixed(1) : null
   const weightUnit = weighIns[0]?.weightUnit ?? clientInfo?.weightUnit?.toLowerCase() ?? "lbs"
-
-  // Latest PR: scan recent workout logs for highest weight×reps per exercise, compare with prior
-  type PRRow = { exerciseId: string; name: string; weight: number; reps: number; delta: number; date: string }
-  const prByEx: Record<string, { best: { weight: number; reps: number; date: string }; prev: { weight: number; reps: number } | null; name: string }> = {}
-  const sortedLogs = [...logs].sort((a, b) => a.completedAt.localeCompare(b.completedAt))
-  for (const log of sortedLogs) {
-    if (!log.setData) continue
-    let sets: Array<{ exerciseId?: string; exerciseName?: string; weight?: string | number; reps?: string | number }> = []
-    try { sets = JSON.parse(log.setData) } catch { continue }
-    for (const s of sets) {
-      const w = Number(s.weight)
-      const r = Number(s.reps)
-      if (!s.exerciseId || !w || !r) continue
-      const cur = prByEx[s.exerciseId]
-      if (!cur) {
-        prByEx[s.exerciseId] = { best: { weight: w, reps: r, date: log.completedAt }, prev: null, name: s.exerciseName ?? "" }
-      } else if (w > cur.best.weight || (w === cur.best.weight && r > cur.best.reps)) {
-        prByEx[s.exerciseId] = { best: { weight: w, reps: r, date: log.completedAt }, prev: cur.best, name: cur.name }
-      }
-    }
-  }
-  const recentPRs: PRRow[] = Object.entries(prByEx)
-    .filter(([, v]) => v.prev !== null && (v.best.weight > v.prev.weight))
-    .map(([id, v]) => ({ exerciseId: id, name: v.name, weight: v.best.weight, reps: v.best.reps, delta: +(v.best.weight - v.prev!.weight).toFixed(1), date: v.best.date }))
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 3)
-
-  // Find next uncompleted day.
-  // Only count workouts logged AGAINST THIS PROGRAM as completed. When a
-  // coach assigns a new program that reuses week/day labels, we don't want
-  // the previous program's completions to skip today's workout.
-  const nextWorkout = program ? (() => {
-    const currentProgramLogs = logs.filter((l) => l.programId === program.id)
-    for (const week of program.weeks) {
-      for (let di = 0; di < week.days.length; di++) {
-        const day = week.days[di]
-        const done = currentProgramLogs.some((l) => l.weekNumber === week.weekNumber && l.dayLabel === day.dayLabel)
-        if (!done) return { week, day, dayIndex: di }
-      }
-    }
-    return null
-  })() : null
 
   const goalPct = primaryGoal ? goalProgressPct(primaryGoal) : null
 
@@ -287,67 +272,32 @@ export default function MyCoachingHomeClient() {
     return { log: newest, dayIndex }
   })()
 
+  // ── Home layout ─────────────────────────────────────────────────────────
+  // Order (deterministic, no scoring engine):
+  //   1. Greeting
+  //   2. New feedback nudge (only if Lisa just left a note — highest signal)
+  //   3. Today's Workout (primary — dark card, Start / Continue / Complete / Rest)
+  //   4. Weekly Check-In (moves above Nutrition when due; small confirmation otherwise)
+  //   5. Nutrition (setup nudge OR compact macro strip)
+  //   6. Progress + Goal (compact merged section)
+  //   7. Message from Lisa (persistent coach note — kept when present)
+  //   8. Message Lisa (fast path to Messages)
   return (
     <div>
-      {/* ── Greeting ────────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: "1.75rem" }}>
+      {/* ── 1. Greeting ─────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: "1.5rem" }}>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, marginBottom: "0.4rem" }}>
           {new Date().toLocaleDateString("en-US", { weekday: "long" })}, {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}
         </p>
-        <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: "0" }}>
+        <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.6rem, 5.5vw, 2rem)", fontWeight: 700, color: black, margin: "0 0 0.35rem", lineHeight: 1.15 }}>
           {firstName ? `Welcome back, ${firstName}.` : "Your Coaching Portal"}
         </h1>
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: 0 }}>
+          Here&apos;s what we&apos;re working on today.
+        </p>
       </div>
 
-      {/* ── Section 1: Primary Goal ─────────────────────────────────────── */}
-      {primaryGoal ? (
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem 1.75rem", marginBottom: "1rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", marginBottom: 14 }}>
-            <div>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>Your Goal</p>
-              <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: black, margin: 0 }}>
-                {primaryGoal.label || primaryGoal.type}
-              </h2>
-            </div>
-            {goalPct !== null && (
-              <div style={{ textAlign: "right" }}>
-                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: goalPct >= 100 ? "#5c9e6a" : accent, margin: 0, lineHeight: 1 }}>{goalPct}%</p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "2px 0 0", letterSpacing: "0.08em" }}>Progress</p>
-              </div>
-            )}
-          </div>
-
-          {goalPct !== null && (
-            <div style={{ height: 6, background: "#f0e8dc", borderRadius: 3, overflow: "hidden", marginBottom: 14 }}>
-              <div style={{ height: "100%", background: goalPct >= 100 ? "#5c9e6a" : accent, width: `${goalPct}%`, borderRadius: 3, transition: "width 0.4s ease" }} />
-            </div>
-          )}
-
-          {(primaryGoal.startValue != null || primaryGoal.currentValue != null || primaryGoal.targetValue != null) && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-              <div>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Start</p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: black, margin: 0 }}>{fmtVal(primaryGoal.startValue, primaryGoal.unit)}</p>
-              </div>
-              <div>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 2px" }}>Current</p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: accent, margin: 0 }}>{fmtVal(primaryGoal.currentValue, primaryGoal.unit)}</p>
-              </div>
-              <div>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Target</p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: black, margin: 0 }}>{fmtVal(primaryGoal.targetValue, primaryGoal.unit)}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : clientInfo?.goal ? (
-        <div style={{ background: `${accent}10`, border: `1px solid ${accent}55`, borderRadius: 8, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>Working toward</p>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>{clientInfo.goal}</p>
-        </div>
-      ) : null}
-
-      {/* ── New feedback nudge ─────────────────────────────────────────── */}
+      {/* ── New feedback nudge — high-signal, top of feed when present ── */}
       {latestFeedback && latestFeedback.dayIndex >= 0 && (
         <Link
           href={`/my-coaching/workouts/${latestFeedback.log.weekNumber}/${latestFeedback.dayIndex}`}
@@ -365,9 +315,67 @@ export default function MyCoachingHomeClient() {
         </Link>
       )}
 
-      {/* ── Weekly check-in status ──────────────────────────────────────
-          Big CTA when due, small confirmation when just submitted. Replaces
-          the permanent Check-In slot the bottom nav used to hold. */}
+      {/* ── 2. Today's Workout (Primary) ─────────────────────────────────
+          Four states:
+          - No program yet: "Lisa is building your program" (unchanged copy)
+          - Workout available + draft in localStorage: Continue Workout
+          - Workout available + no draft: Start Workout
+          - Program complete: rest / phase-complete card
+          Uses existing nextWorkout logic and existing workout routes. */}
+      {!program ? (
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "clamp(1.5rem, 5vw, 2.5rem)", textAlign: "center", marginBottom: "1rem" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fdf6ec", border: `2px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" stroke={accent} strokeWidth="1.5" strokeLinejoin="round" /></svg>
+          </div>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.15rem, 4vw, 1.4rem)", fontWeight: 700, color: black, margin: "0 0 0.75rem" }}>
+            Your program is being prepared
+          </h2>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, maxWidth: 380, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
+            You&apos;ll get an email when your personalised program is ready. In the meantime, send Lisa a message with anything you want her to know.
+          </p>
+          <Link href="/my-coaching/messages" style={{ display: "inline-block", background: accent, color: black, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.08em", textDecoration: "none", borderRadius: 4 }}>
+            Message Lisa
+          </Link>
+        </div>
+      ) : nextWorkout ? (
+        <div style={{ background: black, color: white, borderRadius: 8, padding: "clamp(1.4rem, 4vw, 1.75rem)", marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
+            {workoutInProgress ? "In progress" : "Today’s Workout"}
+          </p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.35rem, 4.8vw, 1.6rem)", fontWeight: 700, color: white, margin: "0 0 8px", lineHeight: 1.2 }}>
+            {nextWorkout.week.label} — {nextWorkout.day.dayLabel}
+          </h2>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: "#d4cfc8", margin: "0 0 18px", lineHeight: 1.5 }}>
+            {nextWorkout.day.exercises.length} exercise{nextWorkout.day.exercises.length !== 1 ? "s" : ""} · ~{Math.max(20, nextWorkout.day.exercises.length * 8)} min
+            {nextWorkout.day.notes ? ` · ${nextWorkout.day.notes}` : ""}
+          </p>
+          <Link
+            href={`/my-coaching/workouts/${nextWorkout.week.weekNumber}/${nextWorkout.dayIndex}`}
+            style={{ display: "inline-block", background: accent, color: black, padding: "14px 32px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.08em", textDecoration: "none", borderRadius: 4 }}
+          >
+            {workoutInProgress ? "Continue Workout →" : "Start Workout →"}
+          </Link>
+        </div>
+      ) : (
+        <div style={{ background: "#fdf9f5", border: `1px solid #f0e8dc`, borderRadius: 8, padding: "clamp(1.4rem, 4vw, 1.75rem)", marginBottom: "1rem", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#5c9e6a", margin: "0 0 8px" }}>
+            Program complete
+          </p>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.15rem, 4vw, 1.3rem)", fontWeight: 700, color: black, margin: "0 0 8px" }}>
+            Workout complete ✓
+          </p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: "0 0 16px" }}>
+            You&apos;ve completed every workout in this program. Lisa will update your program with the next phase soon.
+          </p>
+          <Link href="/my-coaching/messages" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none", fontWeight: 600 }}>
+            Message Lisa →
+          </Link>
+        </div>
+      )}
+
+      {/* ── 3. Weekly Check-In ─────────────────────────────────────────
+          Prominent CTA when due; compact confirmation with history link
+          otherwise. Uses existing checkInStatus derivation from Task 2. */}
       {checkInStatus.state === "due" ? (
         <Link
           href="/my-coaching/check-in"
@@ -392,9 +400,9 @@ export default function MyCoachingHomeClient() {
         </Link>
       ) : (
         <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-          padding: "8px 12px", marginBottom: "0.75rem",
-          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted,
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap",
+          padding: "8px 12px", marginBottom: "1rem",
+          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted,
         }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
             <span aria-hidden style={{ color: "#5c9e6a", fontWeight: 700 }}>✓</span>
@@ -409,102 +417,145 @@ export default function MyCoachingHomeClient() {
         </div>
       )}
 
-      {/* ── Nutrition setup nudge ──────────────────────────────────────── */}
-      {nutritionMissing && (
+      {/* ── 4. Nutrition ──────────────────────────────────────────────
+          Displays the CURRENT stored macro state only. The underlying
+          calorie/macro calculation is intentionally not audited here (Task 4).
+          - Not configured: "Set up your nutrition targets"
+          - Configured: compact strip showing kcal + P/C/F */}
+      {nutritionMissing ? (
         <Link
           href="/my-coaching/setup"
           style={{
-            display: "flex", alignItems: "center", gap: 10,
+            display: "flex", alignItems: "center", gap: 12,
             background: white, border: `1px solid ${accent}`, borderLeft: `4px solid ${accent}`,
             padding: "12px 14px", borderRadius: 8, marginBottom: "1rem",
             textDecoration: "none",
           }}
         >
-          <span style={{ flex: 1 }}>
-            <span style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginBottom: 2 }}>
-              Finish setup
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginBottom: 3 }}>
+              Nutrition
             </span>
-            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: black, fontWeight: 600 }}>
-              Set up your nutrition profile to see your macros →
+            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: black, fontWeight: 600 }}>
+              Set up your nutrition targets
             </span>
           </span>
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: accent, fontWeight: 600, whiteSpace: "nowrap" }}>
+            Set Up Nutrition →
+          </span>
         </Link>
-      )}
-
-      {/* ── Today's macro strip (when resolved) ─────────────────────────── */}
-      {macros && (
+      ) : macros ? (
         <Link
           href="/my-coaching/nutrition"
           style={{
-            display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+            display: "block",
             background: white, border: `1px solid ${border}`,
-            padding: "10px 14px", borderRadius: 8, marginBottom: "1rem",
+            padding: "14px 16px", borderRadius: 8, marginBottom: "1rem",
             textDecoration: "none",
           }}
         >
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent }}>
-            Today · weekly average
-          </span>
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, fontWeight: 700 }}>
-            {macros.calories.toLocaleString()} kcal
-          </span>
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: muted }}>
-            {macros.protein}P · {macros.carbs}C · {macros.fat}F
-          </span>
-          <span style={{ marginLeft: "auto", color: accent, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem" }}>
-            View →
-          </span>
-        </Link>
-      )}
-
-      {/* ── Section 2: Today's Workout (Primary CTA) ────────────────────── */}
-      {!program ? (
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "2.5rem", textAlign: "center", marginBottom: "1rem" }}>
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#fdf6ec", border: `2px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" stroke={accent} strokeWidth="1.5" strokeLinejoin="round" /></svg>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: 0 }}>
+              Nutrition
+            </p>
+            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: accent, fontWeight: 600 }}>
+              View Nutrition →
+            </span>
           </div>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: black, margin: "0 0 0.75rem" }}>
-            Lisa is building your program
-          </h2>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, maxWidth: 380, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
-            You&apos;ll get an email when your personalised program is ready. In the meantime, send Lisa a message with anything you want her to know.
-          </p>
-          <Link href="/my-coaching/messages" style={{ display: "inline-block", background: accent, color: black, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.08em", textDecoration: "none", borderRadius: 4 }}>
-            Message Lisa
-          </Link>
-        </div>
-      ) : nextWorkout ? (
-        <div style={{ background: black, color: white, borderRadius: 8, padding: "1.75rem 1.75rem", marginBottom: "1rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>Today&apos;s Workout</p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: white, margin: "0 0 8px", lineHeight: 1.2 }}>
-            {nextWorkout.week.label} — {nextWorkout.day.dayLabel}
-          </h2>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: "#d4cfc8", margin: "0 0 18px", lineHeight: 1.5 }}>
-            {nextWorkout.day.exercises.length} exercise{nextWorkout.day.exercises.length !== 1 ? "s" : ""} · ~{Math.max(20, nextWorkout.day.exercises.length * 8)} min
-            {nextWorkout.day.notes ? ` · ${nextWorkout.day.notes}` : ""}
-          </p>
-          <Link
-            href={`/my-coaching/workouts/${nextWorkout.week.weekNumber}/${nextWorkout.dayIndex}`}
-            style={{ display: "inline-block", background: accent, color: black, padding: "14px 32px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.08em", textDecoration: "none", borderRadius: 4 }}
-          >
-            Start Workout →
-          </Link>
-        </div>
-      ) : (
-        <div style={{ background: "#fdf9f5", border: `1px solid #f0e8dc`, borderRadius: 8, padding: "1.75rem", marginBottom: "1rem", textAlign: "center" }}>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.3rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>
-            You&apos;ve completed every workout in this program. 🎉
-          </p>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: "0 0 16px" }}>
-            Incredible work. Lisa will update your program with the next phase soon.
-          </p>
-          <Link href="/my-coaching/messages" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none", fontWeight: 600 }}>
-            Message Lisa →
-          </Link>
+          <div style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem 1rem" }}>
+            <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, lineHeight: 1 }}>
+              {macros.calories.toLocaleString()}
+              <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 600, color: muted, marginLeft: 4, letterSpacing: "0.06em" }}>KCAL</span>
+            </span>
+            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, fontWeight: 500 }}>
+              {macros.protein}P · {macros.carbs}C · {macros.fat}F
+            </span>
+          </div>
+        </Link>
+      ) : null}
+
+      {/* ── 5. Progress + Goal (compact) ──────────────────────────────
+          Uses existing computed metrics (thisWeekLogs, streak) plus the
+          existing primaryGoal record. Deliberately restrained — Progress
+          tab owns the full view. */}
+      {(program || primaryGoal || clientInfo?.goal) && (
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.15rem", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: (program || primaryGoal) ? 12 : 0 }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: 0 }}>
+              Progress
+            </p>
+            <Link href="/my-coaching/progress" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: accent, fontWeight: 600, textDecoration: "none" }}>
+              View Progress →
+            </Link>
+          </div>
+          {program && (
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", marginBottom: (primaryGoal || clientInfo?.goal) ? 12 : 0 }}>
+              <div>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: thisWeekLogs.length > 0 ? "#5c9e6a" : black, margin: 0, lineHeight: 1 }}>
+                  {thisWeekLogs.length}
+                </p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", color: muted, margin: "3px 0 0", letterSpacing: "0.08em" }}>
+                  Workouts this week
+                </p>
+              </div>
+              <div>
+                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: streak > 0 ? accent : black, margin: 0, lineHeight: 1 }}>
+                  {streak}{streak > 0 && <span style={{ fontSize: "0.75rem", marginLeft: 4 }}>🔥</span>}
+                </p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", color: muted, margin: "3px 0 0", letterSpacing: "0.08em" }}>
+                  Week streak
+                </p>
+              </div>
+              {weightDelta != null && (
+                <div>
+                  <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: weightDelta < 0 ? "#5c9e6a" : weightDelta > 0 ? "#d97460" : black, margin: 0, lineHeight: 1 }}>
+                    {weightDelta > 0 ? "↑" : weightDelta < 0 ? "↓" : ""}{Math.abs(weightDelta)}
+                    <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 600, color: muted, marginLeft: 4, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                      {weightUnit}
+                    </span>
+                  </p>
+                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", color: muted, margin: "3px 0 0", letterSpacing: "0.08em" }}>
+                    Since start
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          {primaryGoal ? (
+            <div style={{ borderTop: program ? `1px solid ${border}` : "none", paddingTop: program ? 12 : 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>
+                  Current goal
+                </p>
+                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: black, margin: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {primaryGoal.label || primaryGoal.type}
+                  {primaryGoal.currentValue != null && primaryGoal.targetValue != null && (
+                    <span style={{ color: muted, fontWeight: 500 }}>
+                      {" · "}{fmtVal(primaryGoal.currentValue, primaryGoal.unit)} / {fmtVal(primaryGoal.targetValue, primaryGoal.unit)}
+                    </span>
+                  )}
+                </p>
+              </div>
+              {goalPct !== null && (
+                <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1rem", fontWeight: 700, color: goalPct >= 100 ? "#5c9e6a" : accent, whiteSpace: "nowrap" }}>
+                  {goalPct}%
+                </span>
+              )}
+            </div>
+          ) : clientInfo?.goal ? (
+            <div style={{ borderTop: program ? `1px solid ${border}` : "none", paddingTop: program ? 12 : 0 }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>
+                Working toward
+              </p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: black, margin: 0 }}>
+                {clientInfo.goal}
+              </p>
+            </div>
+          ) : null}
         </div>
       )}
 
-      {/* ── Section 3: Message From Lisa ────────────────────────────────── */}
+      {/* ── 6. Message from Lisa (persistent coach note) ─────────────── */}
       {clientInfo?.coachMessage && (
         <div style={{ background: white, border: `1px solid ${accent}55`, borderRadius: 8, padding: "1.4rem 1.6rem", marginBottom: "1rem", position: "relative" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
@@ -526,66 +577,28 @@ export default function MyCoachingHomeClient() {
         </div>
       )}
 
-      {/* ── Section 4: Weekly Snapshot ──────────────────────────────────── */}
-      {program && (
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.4rem 1.6rem", marginBottom: "1rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: muted, margin: "0 0 14px" }}>This Week</p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 16, marginBottom: recentPRs.length > 0 ? 16 : 0 }}>
-            <div>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: thisWeekLogs.length > 0 ? "#5c9e6a" : black, margin: 0, lineHeight: 1 }}>{thisWeekLogs.length}</p>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Workouts done</p>
-            </div>
-            <div>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: adherence >= 80 ? "#5c9e6a" : adherence >= 50 ? accent : black, margin: 0, lineHeight: 1 }}>{adherence}%</p>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Adherence</p>
-            </div>
-            <div>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: streak > 0 ? accent : black, margin: 0, lineHeight: 1 }}>
-                {streak} {streak > 0 && <span style={{ fontSize: "0.9rem" }}>🔥</span>}
-              </p>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Week streak</p>
-            </div>
-            {weightDelta != null && (
-              <div>
-                <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: weightDelta < 0 ? "#5c9e6a" : weightDelta > 0 ? "#d97460" : black, margin: 0, lineHeight: 1 }}>
-                  {weightDelta > 0 ? "↑" : weightDelta < 0 ? "↓" : ""}{Math.abs(weightDelta)}
-                </p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>{weightUnit} since start</p>
-              </div>
-            )}
-          </div>
-
-          {recentPRs.length > 0 && (
-            <div style={{ borderTop: `1px solid ${border}`, paddingTop: 14 }}>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 10px" }}>Recent PRs 💪</p>
-              {recentPRs.map((pr) => (
-                <div key={pr.exerciseId} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "6px 0" }}>
-                  <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black }}>{pr.name}</span>
-                  <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: accent }}>
-                    {pr.weight} × {pr.reps} <span style={{ color: "#5c9e6a", fontWeight: 600 }}>+{pr.delta}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Section 5: Quick Actions ────────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem", marginTop: "0.5rem" }}>
-        {[
-          { href: "/my-coaching/workouts", label: "View Program", icon: "📋" },
-          { href: "/my-coaching/check-in", label: "Submit Check-In", icon: "✍️" },
-          { href: "/my-coaching/progress/log", label: "Log Measurements", icon: "📏" },
-          { href: "/my-coaching/messages", label: "Message Lisa", icon: "💬" },
-        ].map(({ href, label, icon }) => (
-          <Link key={href} href={href} style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.1rem", textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: "1.1rem" }}>{icon}</span>
-            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black }}>{label}</span>
-          </Link>
-        ))}
-      </div>
+      {/* ── 7. Message Lisa (fast path to Messages tab) ──────────────── */}
+      <Link
+        href="/my-coaching/messages"
+        style={{
+          display: "flex", alignItems: "center", gap: 12, justifyContent: "space-between",
+          background: white, border: `1px solid ${border}`, borderRadius: 8,
+          padding: "14px 16px", marginBottom: "1rem",
+          textDecoration: "none",
+        }}
+      >
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginBottom: 3 }}>
+            Message Lisa
+          </span>
+          <span style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: muted, lineHeight: 1.45 }}>
+            Questions about your program, technique, schedule or progress?
+          </span>
+        </span>
+        <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: accent, fontWeight: 600, whiteSpace: "nowrap" }}>
+          Open Messages →
+        </span>
+      </Link>
     </div>
   )
 }
