@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { uploadData } from "aws-amplify/storage"
+import { uploadData, getUrl } from "aws-amplify/storage"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
 const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
-const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
 
 type NutritionKind = "nutrition-meal" | "nutrition-day" | "nutrition-question"
 
@@ -397,13 +396,58 @@ export default function NutritionComposer({ email }: { email: string }) {
   )
 }
 
-// Public helper — turn a comma-separated attachmentS3Keys string into full
-// CDN URLs the message renderers can drop straight into <img> src.
-export function attachmentUrls(attachmentS3Keys?: string): string[] {
-  if (!attachmentS3Keys || !CDN) return []
+// Turn the comma-separated attachmentS3Keys string into an array of S3 keys.
+// Nutrition-message attachments are stored under an authenticated-only prefix,
+// so the renderer must call getUrl() to produce a short-lived signed URL —
+// there is no public CDN URL for these files.
+export function attachmentKeys(attachmentS3Keys?: string): string[] {
+  if (!attachmentS3Keys) return []
   return attachmentS3Keys
     .split(",")
     .map((k) => k.trim())
     .filter((k) => k.length > 0)
-    .map((k) => `${CDN}/${k}`)
+}
+
+// Render a private S3 image via a short-lived signed URL. The URL is generated
+// from the viewer's authenticated Amplify session; a logged-out user cannot
+// produce one. Shown behind a neutral placeholder while the signed URL is
+// being requested, and behind a subtle error state if the request fails.
+export function SignedImage({
+  s3Key,
+  alt = "",
+  style,
+  expiresIn = 3600,
+}: {
+  s3Key: string
+  alt?: string
+  style?: React.CSSProperties
+  expiresIn?: number
+}) {
+  const [url, setUrl] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setUrl(null)
+    setError(false)
+    getUrl({ path: s3Key, options: { expiresIn, validateObjectExistence: false } })
+      .then(({ url }) => { if (!cancelled) setUrl(url.toString()) })
+      .catch(() => { if (!cancelled) setError(true) })
+    return () => { cancelled = true }
+  }, [s3Key, expiresIn])
+
+  if (error) {
+    return (
+      <div style={{ ...style, background: "#f5f2ee", color: muted, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", textAlign: "center", padding: 8 }}>
+        Couldn&apos;t load
+      </div>
+    )
+  }
+  if (!url) {
+    return <div style={{ ...style, background: "#f5f2ee" }} />
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={url} alt={alt} style={style} />
+  )
 }

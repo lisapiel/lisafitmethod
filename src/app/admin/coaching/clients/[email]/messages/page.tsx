@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import { attachmentUrls } from "@/components/coaching/NutritionComposer.client"
+import { attachmentKeys, SignedImage } from "@/components/coaching/NutritionComposer.client"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -198,7 +198,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                     </div>
                     {group.messages.map((msg) => {
                       const isCoach = ADMIN_EMAILS.has(msg.fromEmail.toLowerCase())
-                      const images = attachmentUrls(msg.attachmentS3Keys)
+                      const imageKeys = attachmentKeys(msg.attachmentS3Keys)
                       const kindLabel = msg.kind ? NUTRITION_KIND_LABEL[msg.kind] : null
                       return (
                         <div key={msg.id} style={{ display: "flex", justifyContent: isCoach ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
@@ -232,13 +232,15 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                                   {kindLabel}
                                 </p>
                               )}
-                              {images.length > 0 && (
-                                <div style={{ display: "grid", gridTemplateColumns: images.length === 1 ? "1fr" : "repeat(auto-fit, minmax(140px, 1fr))", gap: 6, marginBottom: msg.body ? 8 : 0 }}>
-                                  {images.map((url, i) => (
-                                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "block", borderRadius: 6, overflow: "hidden", background: "rgba(0,0,0,0.35)" }}>
-                                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                                      <img src={url} alt="" style={{ width: "100%", display: "block", maxHeight: 360, objectFit: "cover" }} />
-                                    </a>
+                              {imageKeys.length > 0 && (
+                                <div style={{ display: "grid", gridTemplateColumns: imageKeys.length === 1 ? "1fr" : "repeat(auto-fit, minmax(140px, 1fr))", gap: 6, marginBottom: msg.body ? 8 : 0 }}>
+                                  {imageKeys.map((k) => (
+                                    <div key={k} style={{ borderRadius: 6, overflow: "hidden", background: "rgba(0,0,0,0.35)", aspectRatio: imageKeys.length === 1 ? "auto" : "4 / 3" }}>
+                                      <SignedImage
+                                        s3Key={k}
+                                        style={{ width: "100%", height: "100%", display: "block", maxHeight: 360, objectFit: "cover" }}
+                                      />
+                                    </div>
                                   ))}
                                 </div>
                               )}

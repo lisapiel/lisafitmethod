@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { attachmentUrls } from "@/components/coaching/NutritionComposer.client"
+import { attachmentKeys, SignedImage } from "@/components/coaching/NutritionComposer.client"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -172,7 +172,7 @@ export default function MessagesClient() {
                 </div>
                 {group.messages.map((msg) => {
                   const isMe = myEmail ? msg.fromEmail.toLowerCase() === myEmail.toLowerCase() : false
-                  const images = attachmentUrls(msg.attachmentS3Keys)
+                  const imageKeys = attachmentKeys(msg.attachmentS3Keys)
                   const kindLabel = msg.kind ? NUTRITION_KIND_LABEL[msg.kind] : null
                   return (
                     <div key={msg.id} style={{ display: "flex", justifyContent: isMe ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
@@ -204,13 +204,15 @@ export default function MessagesClient() {
                               {kindLabel}
                             </p>
                           )}
-                          {images.length > 0 && (
-                            <div style={{ display: "grid", gridTemplateColumns: images.length === 1 ? "1fr" : "repeat(auto-fit, minmax(120px, 1fr))", gap: 6, marginBottom: msg.body ? 8 : 0 }}>
-                              {images.map((url, i) => (
-                                <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "block", borderRadius: 6, overflow: "hidden", background: "rgba(0,0,0,0.08)" }}>
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={url} alt="" style={{ width: "100%", display: "block", maxHeight: 320, objectFit: "cover" }} />
-                                </a>
+                          {imageKeys.length > 0 && (
+                            <div style={{ display: "grid", gridTemplateColumns: imageKeys.length === 1 ? "1fr" : "repeat(auto-fit, minmax(120px, 1fr))", gap: 6, marginBottom: msg.body ? 8 : 0 }}>
+                              {imageKeys.map((k) => (
+                                <div key={k} style={{ borderRadius: 6, overflow: "hidden", background: "rgba(0,0,0,0.08)", aspectRatio: imageKeys.length === 1 ? "auto" : "4 / 3" }}>
+                                  <SignedImage
+                                    s3Key={k}
+                                    style={{ width: "100%", height: "100%", display: "block", maxHeight: 320, objectFit: "cover" }}
+                                  />
+                                </div>
                               ))}
                             </div>
                           )}
