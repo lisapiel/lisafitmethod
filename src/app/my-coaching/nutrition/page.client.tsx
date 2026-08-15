@@ -125,7 +125,7 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
           Nutrition
         </p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.9rem", fontWeight: 700, color: black, margin: 0, lineHeight: 1.2 }}>
-          Your daily target
+          Your starting target
         </h1>
       </div>
 
@@ -133,7 +133,7 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
       <div style={{ background: black, color: white, borderRadius: 8, padding: "1.5rem 1.5rem", marginBottom: "1rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, flexWrap: "wrap", gap: 6 }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: 0 }}>
-            Daily target · Weekly average
+            Starting target · Weekly average
           </p>
           {macros.source === "override" ? (
             <span style={{ background: accent, color: black, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", padding: "3px 8px", borderRadius: 3, textTransform: "uppercase" }}>
@@ -155,9 +155,9 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
           {[
-            { label: "Protein", value: macros.protein, note: "1g per lb" },
-            { label: "Carbs",   value: macros.carbs,   note: "the rest" },
-            { label: "Fat",     value: macros.fat,     note: "0.35g per lb" },
+            { label: "Protein", value: macros.protein },
+            { label: "Carbs",   value: macros.carbs },
+            { label: "Fat",     value: macros.fat },
           ].map((m) => (
             <div key={m.label} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 6, padding: "10px 12px" }}>
               <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", color: accent, textTransform: "uppercase", margin: "0 0 3px" }}>
@@ -166,13 +166,36 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: white, margin: 0, lineHeight: 1 }}>
                 {m.value}<span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: "#a4a09a", marginLeft: 3 }}>g</span>
               </p>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", color: "#7b7770", margin: "3px 0 0" }}>
-                {m.note}
-              </p>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Starting-estimate framing — short, not clinical. Only shown for
+          auto-computed targets; when Lisa has set an explicit target this
+          note would be misleading. */}
+      {macros.source === "auto" && (
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, lineHeight: 1.6, margin: "0 0 1rem", padding: "0 4px" }}>
+          These are starting estimates based on your profile, activity and goal.
+          We can adjust them over time based on your progress, training and feedback.
+        </p>
+      )}
+
+      {/* Low-calorie guardrail note — auto targets never automatically go
+          below 1,200 kcal/day. If the raw estimate would have been lower we
+          clamp to the floor and surface this line. */}
+      {macros.source === "auto" && macros.belowGuard && (
+        <div style={{ background: `${accent}12`, border: `1px solid ${accent}55`, borderRadius: 8, padding: "12px 14px", marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
+            Individual review
+          </p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black, margin: 0, lineHeight: 1.55 }}>
+            Very low calorie targets are best set with individual review.
+            Message Lisa before dropping below this starting point, and consider
+            talking with a qualified nutrition or medical professional if needed.
+          </p>
+        </div>
+      )}
 
       {/* Weekly-average explainer */}
       <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>

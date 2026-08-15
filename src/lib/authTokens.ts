@@ -433,8 +433,8 @@ export interface CoachingClientRecord {
   heightInches?: number
   age?: number
   sex?: "male" | "female"
-  activityLevel?: number        // 1.2 / 1.375 / 1.55 / 1.725 / 1.9
-  nutritionGoal?: "fat-loss" | "maintain" | "muscle-gain"
+  activityLevel?: number        // Current scale: 1.20 / 1.35 / 1.50 / 1.65 / 1.80. Legacy: 1.375 / 1.55 / 1.725 / 1.9 (still valid — remapped to nearest new value by the setup form).
+  nutritionGoal?: "fat-loss" | "recomp" | "maintain" | "muscle-gain"
   // Optional coach-set macro override (takes precedence over auto-computed values)
   customMacros?: {
     calories?: number

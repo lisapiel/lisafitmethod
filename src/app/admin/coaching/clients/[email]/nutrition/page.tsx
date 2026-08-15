@@ -14,9 +14,10 @@ const muted = "#888"
 const green = "#5c9e6a"
 
 const GOAL_LABEL: Record<string, string> = {
-  "fat-loss":    "Fat loss",
+  "fat-loss":    "Fat Loss",
+  "recomp":      "Body Recomposition",
   "maintain":    "Maintain",
-  "muscle-gain": "Muscle gain",
+  "muscle-gain": "Muscle Gain",
 }
 
 type FieldProps = { label: string; children: React.ReactNode }

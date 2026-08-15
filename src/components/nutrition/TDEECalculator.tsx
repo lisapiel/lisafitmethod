@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { computeBMR, computeTDEE, computeMacros, type NutritionGoal } from "@/lib/nutrition"
+import { ACTIVITY_LEVELS, GOAL_META, computeBMR, computeTDEE, computeMacros, type NutritionGoal } from "@/lib/nutrition"
 
 const gold = "#c9a96e"
 const goldDeep = "#a8895e"
@@ -10,39 +10,9 @@ const muted = "#888"
 const dark = "#111"
 const border = "#2a2a2a"
 
-const ACTIVITY_LEVELS = [
-  {
-    value: 1.2,
-    label: "Sedentary",
-    desc: "Desk job, little movement outside of training. Under 5,000 steps/day.",
-  },
-  {
-    value: 1.375,
-    label: "Lightly Active",
-    desc: "Training 2–3x/week + a desk job. 5,000–7,500 steps/day. Most people overestimate here. If you sit most of the day, this is probably you.",
-  },
-  {
-    value: 1.55,
-    label: "Moderately Active",
-    desc: "Training 4–5x/week + active job, or 7,500–10,000 steps/day consistently.",
-  },
-  {
-    value: 1.725,
-    label: "Very Active",
-    desc: "Hard training 6–7x/week or a physically demanding job.",
-  },
-  {
-    value: 1.9,
-    label: "Extremely Active",
-    desc: "Training twice a day, or a very physical job plus daily training.",
-  },
-]
-
-const GOALS: Array<{ value: NutritionGoal; label: string; adjustment: number }> = [
-  { value: "fat-loss", label: "Fat Loss", adjustment: -400 },
-  { value: "maintain", label: "Maintain / Body Recomp", adjustment: 0 },
-  { value: "muscle-gain", label: "Muscle Gain", adjustment: 300 },
-]
+// Consumes the canonical ACTIVITY_LEVELS + GOAL_META from @/lib/nutrition so
+// this public calculator can never drift from the coaching engine's numbers.
+const GOAL_ORDER: NutritionGoal[] = ["fat-loss", "recomp", "maintain", "muscle-gain"]
 
 const inputStyle: React.CSSProperties = {
   display: "block",
@@ -84,7 +54,7 @@ export default function TDEECalculator() {
   const [weightLbs, setWeightLbs] = useState("")
   const [heightFeet, setHeightFeet] = useState("")
   const [heightInches, setHeightInches] = useState("")
-  const [activity, setActivity] = useState<number>(1.375)
+  const [activity, setActivity] = useState<number>(1.35)
   const [goal, setGoal] = useState<NutritionGoal>("fat-loss")
   const [result, setResult] = useState<NutritionProfile | null>(null)
   const [saved, setSaved] = useState(false)
@@ -120,7 +90,7 @@ export default function TDEECalculator() {
     setSaved(true)
   }
 
-  const selectedGoal = GOALS.find((g) => g.value === goal)
+  const selectedGoalLabel = GOAL_META[goal].label
 
   return (
     <div>
@@ -254,34 +224,34 @@ export default function TDEECalculator() {
         <div style={{ marginBottom: "1.5rem" }}>
           <label style={labelStyle}>Your Goal</label>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {GOALS.map((g) => (
-              <button
-                key={g.value}
-                type="button"
-                onClick={() => setGoal(g.value)}
-                style={{
-                  textAlign: "left",
-                  padding: "0.75rem 1rem",
-                  background: goal === g.value ? "rgba(201,169,110,0.1)" : "#1a1a1a",
-                  border: goal === g.value ? `1px solid ${gold}` : `1px solid ${border}`,
-                  color: goal === g.value ? cream : muted,
-                  fontFamily: "var(--font-montserrat), sans-serif",
-                  fontSize: "0.72rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.08em",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                {g.label}
-                <span style={{ fontSize: "0.62rem", fontWeight: 400, color: goal === g.value ? goldDeep : "#555" }}>
-                  {g.adjustment > 0 ? `+${g.adjustment} kcal` : g.adjustment < 0 ? `${g.adjustment} kcal` : "at TDEE"}
-                </span>
-              </button>
-            ))}
+            {GOAL_ORDER.map((value) => {
+              const meta = GOAL_META[value]
+              const isSelected = goal === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setGoal(value)}
+                  style={{
+                    textAlign: "left",
+                    padding: "0.75rem 1rem",
+                    background: isSelected ? "rgba(201,169,110,0.1)" : "#1a1a1a",
+                    border: isSelected ? `1px solid ${gold}` : `1px solid ${border}`,
+                    color: isSelected ? cream : muted,
+                    fontFamily: "var(--font-montserrat), sans-serif",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <span style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.08em", display: "block", color: isSelected ? gold : "#777" }}>
+                    {meta.label}
+                  </span>
+                  <span style={{ fontSize: "0.65rem", lineHeight: 1.5, color: isSelected ? "#b0a090" : "#555" }}>
+                    {meta.desc}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -321,7 +291,7 @@ export default function TDEECalculator() {
         <div style={{ marginTop: 16, background: "#0a0a0a", border: `1px solid ${gold}` }}>
           <div style={{ padding: "1.25rem 1.5rem", borderBottom: `1px solid #1a1a1a` }}>
             <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.25em", textTransform: "uppercase", color: goldDeep, marginBottom: "0.5rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
-              Your Results — {selectedGoal?.label}
+              Your Results — {selectedGoalLabel}
             </p>
             <p style={{ fontSize: "0.72rem", color: muted, fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.5, margin: 0 }}>
               Based on the Mifflin-St Jeor equation. These numbers are estimates, not absolutes. Use them as a starting point and adjust based on your progress over the next 2&ndash;3 weeks.
@@ -331,9 +301,9 @@ export default function TDEECalculator() {
           {/* Key numbers */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", borderBottom: `1px solid #1a1a1a` }}>
             {[
-              { label: "Resting BMR", value: `${Math.round(result.tdee / (ACTIVITY_LEVELS.find(a => a.value === activity)?.value ?? 1.375))} kcal` },
+              { label: "Resting BMR", value: `${Math.round(result.tdee / activity)} kcal` },
               { label: "Your TDEE", value: `${result.tdee} kcal` },
-              { label: "Daily Target", value: `${result.calories} kcal` },
+              { label: "Starting Target", value: `${result.calories} kcal` },
             ].map((stat) => (
               <div key={stat.label} style={{ padding: "1.25rem 1rem", borderRight: `1px solid #1a1a1a` }}>
                 <p style={{ fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#555", marginBottom: "0.35rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
@@ -353,9 +323,9 @@ export default function TDEECalculator() {
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
               {[
-                { label: "Protein", value: `${result.protein}g`, note: "1g per lb bodyweight" },
+                { label: "Protein", value: `${result.protein}g`, note: goal === "fat-loss" || goal === "recomp" ? "~2.0 g/kg bodyweight" : "~1.8 g/kg bodyweight" },
                 { label: "Carbs", value: `${result.carbs}g`, note: "remaining calories" },
-                { label: "Fat", value: `${result.fat}g`, note: "0.35g per lb bodyweight" },
+                { label: "Fat", value: `${result.fat}g`, note: "~30% of calories" },
               ].map((macro) => (
                 <div key={macro.label} style={{ background: "#111", padding: "0.875rem", border: `1px solid ${border}` }}>
                   <p style={{ fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#555", marginBottom: "0.25rem", fontFamily: "var(--font-montserrat), sans-serif" }}>

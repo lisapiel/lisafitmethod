@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     age?: number
     sex?: "male" | "female"
     activityLevel?: number
-    nutritionGoal?: "fat-loss" | "maintain" | "muscle-gain"
+    nutritionGoal?: "fat-loss" | "recomp" | "maintain" | "muscle-gain"
     currentWeight?: number
   }
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Activity level required" }, { status: 400 })
   }
   const goal = body.nutritionGoal
-  if (goal !== "fat-loss" && goal !== "maintain" && goal !== "muscle-gain") {
+  if (goal !== "fat-loss" && goal !== "recomp" && goal !== "maintain" && goal !== "muscle-gain") {
     return NextResponse.json({ error: "Nutrition goal required" }, { status: 400 })
   }
 

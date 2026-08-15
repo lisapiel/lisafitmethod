@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ACTIVITY_LEVELS, type NutritionGoal, type Sex } from "@/lib/nutrition"
+import { ACTIVITY_LEVELS, GOAL_META, remapLegacyActivity, type NutritionGoal, type Sex } from "@/lib/nutrition"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -12,11 +12,10 @@ const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
 
-const GOALS: Array<{ value: NutritionGoal; label: string; desc: string }> = [
-  { value: "fat-loss",    label: "Fat loss",    desc: "Lose body fat while keeping (or building) muscle." },
-  { value: "maintain",    label: "Maintain",    desc: "Body recomposition — same weight, better shape." },
-  { value: "muscle-gain", label: "Muscle gain", desc: "Add muscle. A small surplus, deliberate over-eating." },
-]
+// Goal picker order — Fat Loss first (most common), then the two maintenance-
+// class goals grouped together, then Muscle Gain. Labels + descriptions come
+// from GOAL_META so any UI surface stays in sync.
+const GOAL_ORDER: NutritionGoal[] = ["fat-loss", "recomp", "maintain", "muscle-gain"]
 
 export default function SetupClient() {
   const router = useRouter()
@@ -25,7 +24,7 @@ export default function SetupClient() {
   const [weightLbs, setWeightLbs] = useState("")
   const [heightFeet, setHeightFeet] = useState("")
   const [heightInches, setHeightInches] = useState("")
-  const [activity, setActivity] = useState<number>(1.375)
+  const [activity, setActivity] = useState<number>(1.35)
   const [goal, setGoal] = useState<NutritionGoal>("fat-loss")
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
@@ -45,7 +44,10 @@ export default function SetupClient() {
           setHeightFeet(String(Math.floor(c.heightInches / 12)))
           setHeightInches(String(c.heightInches % 12))
         }
-        if (c.activityLevel) setActivity(c.activityLevel)
+        // Remap legacy activity values (1.375, 1.55, 1.725, 1.9) to the
+        // nearest new value so the correct button pre-selects. The database
+        // record is not touched — that only updates when the client saves.
+        if (c.activityLevel) setActivity(remapLegacyActivity(c.activityLevel) ?? 1.35)
         if (c.nutritionGoal) setGoal(c.nutritionGoal)
         if (c.startingWeight) setWeightLbs(String(c.startingWeight))
       } catch { /* ignore */ }
@@ -232,25 +234,28 @@ export default function SetupClient() {
             Nutrition goal
           </label>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {GOALS.map((g) => (
-              <button
-                key={g.value}
-                type="button"
-                onClick={() => setGoal(g.value)}
-                style={{
-                  textAlign: "left", background: goal === g.value ? `${accent}18` : "transparent",
-                  border: `1px solid ${goal === g.value ? accent : border}`,
-                  padding: "10px 12px", cursor: "pointer", borderRadius: 4,
-                }}
-              >
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", fontWeight: goal === g.value ? 700 : 600, color: black, margin: "0 0 2px" }}>
-                  {g.label}
-                </p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0 }}>
-                  {g.desc}
-                </p>
-              </button>
-            ))}
+            {GOAL_ORDER.map((value) => {
+              const meta = GOAL_META[value]
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setGoal(value)}
+                  style={{
+                    textAlign: "left", background: goal === value ? `${accent}18` : "transparent",
+                    border: `1px solid ${goal === value ? accent : border}`,
+                    padding: "10px 12px", cursor: "pointer", borderRadius: 4,
+                  }}
+                >
+                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", fontWeight: goal === value ? 700 : 600, color: black, margin: "0 0 2px" }}>
+                    {meta.label}
+                  </p>
+                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0, lineHeight: 1.45 }}>
+                    {meta.desc}
+                  </p>
+                </button>
+              )
+            })}
           </div>
         </div>
 
