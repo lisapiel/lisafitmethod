@@ -45,7 +45,11 @@ function macroRecipes(): Recipe[] {
     .slice(0, 6)
 }
 
-export default function NutritionClient() {
+interface NutritionClientProps {
+  ownsNutritionCourse: boolean
+}
+
+export default function NutritionClient({ ownsNutritionCourse }: NutritionClientProps) {
   const [loading, setLoading] = useState(true)
   const [state, setState] = useState<Loaded>({ client: null })
 
@@ -225,19 +229,23 @@ export default function NutritionClient() {
         ))}
       </div>
 
-      {/* Full curriculum CTA */}
+      {/* Access-aware cross-sell — Nutrition Foundations is a separately sold
+          course, not included with coaching. Copy branches on whether the
+          client already owns it. */}
       <div style={{ background: `${accent}12`, border: `1px solid ${accent}55`, borderRadius: 8, padding: "1.25rem 1.5rem", textAlign: "center" }}>
         <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.05rem", fontWeight: 700, color: black, margin: "0 0 6px" }}>
           Want to go deeper?
         </p>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 14px", lineHeight: 1.55 }}>
-          Your coaching subscription includes the full Nutrition Foundations course — 4 modules, meal-prep plans, and the science behind everything above.
+          {ownsNutritionCourse
+            ? "Your Nutrition Foundations course covers the full system behind calories, macros, meal structure and sustainable nutrition habits."
+            : "Nutrition Foundations is my complete self-guided nutrition course covering the fundamentals behind calories, macros, meal structure and sustainable nutrition habits."}
         </p>
         <Link
-          href="/nutrition-foundations"
+          href={ownsNutritionCourse ? "/nutrition-foundations" : "/nutrition"}
           style={{ display: "inline-block", background: accent, color: black, padding: "10px 22px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", fontWeight: 700, textDecoration: "none", borderRadius: 4, letterSpacing: "0.06em" }}
         >
-          Open Nutrition Foundations →
+          {ownsNutritionCourse ? "Open Nutrition Foundations →" : "Explore Nutrition Foundations →"}
         </Link>
       </div>
 
