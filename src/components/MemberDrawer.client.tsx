@@ -5,16 +5,22 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { signOut } from "aws-amplify/auth"
 
-type ProductId = "training" | "nutrition" | "tracker" | "coaching" | "masterclass"
+// Customer-facing product IDs shown in the My Products section. Masterclass
+// is intentionally omitted from this catalog until it's ready to promote —
+// existing Masterclass code, routes, and entitlement records are untouched.
+type ProductId = "training" | "nutrition" | "tracker" | "coaching"
 
 interface AccessState {
   email: string | null
-  training: boolean
-  nutrition: boolean
-  tracker: boolean
-  coaching: boolean
-  masterclass: boolean
   isAdmin: boolean
+  // True ownership only — no admin bypass. Drives Active vs. Available-to-add.
+  // Sourced from /api/member/access `owns` object.
+  owns: {
+    training: boolean
+    nutrition: boolean
+    tracker: boolean
+    coaching: boolean
+  }
 }
 
 const PUBLIC_NAV = [
@@ -34,12 +40,52 @@ const EXPLORE_NAV = [
   { href: "/faq", label: "FAQ" },
 ]
 
-const PORTALS: Array<{ id: ProductId; label: string; href: string }> = [
-  { id: "training", label: "Training Foundations", href: "/training-foundations" },
-  { id: "nutrition", label: "Nutrition Foundations", href: "/nutrition-foundations" },
-  { id: "tracker", label: "Progress Tracker", href: "/my-tracker" },
-  { id: "masterclass", label: "Masterclass", href: "/masterclass" },
-  { id: "coaching", label: "1:1 Coaching", href: "/my-coaching" },
+// Product catalog. `portalHref` = where the user goes when they own it.
+// `salesHref` = existing public sales/info page for buyers to learn more +
+// purchase — we intentionally reuse existing sales pages rather than build
+// new landing surfaces. `offerEligibleForCoachingClient` marks products that
+// can display the "Coaching client offer" badge when the viewer has active
+// coaching. The badge is visual only in this task — the actual promotional
+// price is set on the individual sales page.
+const PRODUCTS: Array<{
+  id: ProductId
+  label: string
+  description: string
+  portalHref: string
+  salesHref: string
+  offerEligibleForCoachingClient?: boolean
+}> = [
+  {
+    id: "training",
+    label: "Training Foundations",
+    description: "4-week beginner strength program.",
+    portalHref: "/training-foundations",
+    salesHref: "/courses#training",
+    offerEligibleForCoachingClient: true,
+  },
+  {
+    id: "nutrition",
+    label: "Nutrition Foundations",
+    description: "Complete self-guided nutrition course.",
+    portalHref: "/nutrition-foundations",
+    salesHref: "/nutrition",
+    offerEligibleForCoachingClient: true,
+  },
+  {
+    id: "tracker",
+    label: "Progress Tracker",
+    description: "Build any program, log every lift.",
+    portalHref: "/my-tracker",
+    salesHref: "/tracker-checkout",
+    offerEligibleForCoachingClient: true,
+  },
+  {
+    id: "coaching",
+    label: "1:1 Coaching",
+    description: "Personalized program, weekly check-ins, direct messaging.",
+    portalHref: "/my-coaching",
+    salesHref: "/coaching",
+  },
 ]
 
 // Full-screen slide-out drawer shown from a hamburger control. Fetches its own
@@ -57,23 +103,20 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
       .then((d) =>
         setAccess({
           email: d.email ?? null,
-          training: !!d.training,
-          nutrition: !!d.nutrition,
-          tracker: !!d.tracker,
-          coaching: !!d.coaching,
-          masterclass: !!d.masterclass,
           isAdmin: !!d.isAdmin,
+          owns: {
+            training: !!d.owns?.training,
+            nutrition: !!d.owns?.nutrition,
+            tracker: !!d.owns?.tracker,
+            coaching: !!d.owns?.coaching,
+          },
         })
       )
       .catch(() =>
         setAccess({
           email: null,
-          training: false,
-          nutrition: false,
-          tracker: false,
-          coaching: false,
-          masterclass: false,
           isAdmin: false,
+          owns: { training: false, nutrition: false, tracker: false, coaching: false },
         })
       )
   }, [])
@@ -95,7 +138,12 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
   }, [open, onClose])
 
   const loggedIn = access?.email != null
-  const ownedPortals = access ? PORTALS.filter((p) => access[p.id]) : []
+  const activeProducts = access ? PRODUCTS.filter((p) => access.owns[p.id]) : []
+  const availableProducts = access ? PRODUCTS.filter((p) => !access.owns[p.id]) : []
+  // A coaching client viewing an unowned product gets a subtle offer badge on
+  // the products that support it. Badge only — the actual promotional price
+  // is set on each product's sales page.
+  const showCoachingOffer = access?.owns.coaching === true
 
   async function handleSignOut() {
     onClose()
@@ -242,6 +290,84 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
           color: rgba(200, 169, 126, 0.45);
           margin: 0 0 4px;
         }
+        .lfm-drawer-subgroup-label {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 0.52rem;
+          font-weight: 600;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: rgba(240, 230, 211, 0.32);
+          margin: 4px 0 2px;
+        }
+        /* My Products rows. Active variant reads as "already yours" (cream
+           label, gold "Open →"). Available variant is dimmer, with a short
+           description under the label + a subtle "Add →" so it never masquerades
+           as owned. */
+        .lfm-drawer-product {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          text-decoration: none;
+          padding: 12px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          transition: background 0.15s;
+        }
+        .lfm-drawer-product-name {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: rgba(240, 230, 211, 0.85);
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          min-width: 0;
+        }
+        .lfm-drawer-product-desc {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 0.7rem;
+          font-weight: 400;
+          color: rgba(240, 230, 211, 0.4);
+          line-height: 1.4;
+        }
+        .lfm-drawer-product-action {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 0.62rem;
+          font-weight: 600;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #c8a97e;
+          flex-shrink: 0;
+          padding-top: 4px;
+          white-space: nowrap;
+        }
+        .lfm-drawer-product--current .lfm-drawer-product-name { color: #c8a97e; }
+        .lfm-drawer-product--available .lfm-drawer-product-name {
+          color: rgba(240, 230, 211, 0.6);
+          font-weight: 400;
+        }
+        .lfm-drawer-product-action--available {
+          color: rgba(200, 169, 126, 0.55);
+          font-weight: 500;
+        }
+        .lfm-drawer-product:hover { background: rgba(255,255,255,0.02); }
+        .lfm-drawer-product:hover .lfm-drawer-product-name { color: #c8a97e; }
+        .lfm-drawer-product:hover .lfm-drawer-product-action { color: #e8c98a; }
+        /* Coaching-client offer chip — small, understated, not a sales popup. */
+        .lfm-drawer-offer-badge {
+          display: inline-block;
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 0.53rem;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #0a0a0a;
+          background: rgba(200, 169, 126, 0.9);
+          padding: 2px 8px;
+          border-radius: 999px;
+          margin-top: 4px;
+          align-self: flex-start;
+        }
         .lfm-drawer-signout {
           background: none;
           border: none;
@@ -323,19 +449,57 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
                 </Link>
               </div>
 
-              {ownedPortals.length > 0 && (
+              {(activeProducts.length > 0 || availableProducts.length > 0) && (
                 <div className="lfm-drawer-section">
                   <p className="lfm-drawer-section-label">My Products</p>
-                  {ownedPortals.map((p) => (
-                    <Link
-                      key={p.id}
-                      href={p.href}
-                      className={`lfm-drawer-link${isActive(p.href) ? " lfm-drawer-link--active" : ""}`}
-                      onClick={onClose}
-                    >
-                      {p.label}
-                    </Link>
-                  ))}
+
+                  {activeProducts.length > 0 && (
+                    <>
+                      <p className="lfm-drawer-subgroup-label">Active</p>
+                      {activeProducts.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={p.portalHref}
+                          className={`lfm-drawer-product${isActive(p.portalHref) ? " lfm-drawer-product--current" : ""}`}
+                          onClick={onClose}
+                        >
+                          <span className="lfm-drawer-product-name">{p.label}</span>
+                          <span className="lfm-drawer-product-action">Open →</span>
+                        </Link>
+                      ))}
+                    </>
+                  )}
+
+                  {availableProducts.length > 0 && (
+                    <>
+                      <p
+                        className="lfm-drawer-subgroup-label"
+                        style={{ marginTop: activeProducts.length > 0 ? 18 : 0 }}
+                      >
+                        Available to add
+                      </p>
+                      {availableProducts.map((p) => {
+                        const showOffer = showCoachingOffer && p.offerEligibleForCoachingClient
+                        return (
+                          <Link
+                            key={p.id}
+                            href={p.salesHref}
+                            className="lfm-drawer-product lfm-drawer-product--available"
+                            onClick={onClose}
+                          >
+                            <span className="lfm-drawer-product-name">
+                              {p.label}
+                              {showOffer && (
+                                <span className="lfm-drawer-offer-badge">Coaching client offer</span>
+                              )}
+                              <span className="lfm-drawer-product-desc">{p.description}</span>
+                            </span>
+                            <span className="lfm-drawer-product-action lfm-drawer-product-action--available">Add →</span>
+                          </Link>
+                        )
+                      })}
+                    </>
+                  )}
                 </div>
               )}
 
