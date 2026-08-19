@@ -136,12 +136,19 @@ function IconLeaf() {
 interface FormState {
   name: string
   email: string
-  trainingExperience: string
   primaryGoal: string
+  primaryGoalOther: string
+  specificOutcome: string
+  trainingExperience: string
+  currentTraining: string
   daysPerWeek: string
+  sessionDuration: string
   equipment: string
+  equipmentDetails: string
   injuries: string
-  whatHaveYouTried: string
+  exercisePreferences: string
+  scheduleConstraints: string
+  whyCoachingNow: string
   coachingOption: string
   startTiming: string
 }
@@ -149,12 +156,19 @@ interface FormState {
 const emptyForm: FormState = {
   name: "",
   email: "",
-  trainingExperience: "",
   primaryGoal: "",
+  primaryGoalOther: "",
+  specificOutcome: "",
+  trainingExperience: "",
+  currentTraining: "",
   daysPerWeek: "",
+  sessionDuration: "",
   equipment: "",
+  equipmentDetails: "",
   injuries: "",
-  whatHaveYouTried: "",
+  exercisePreferences: "",
+  scheduleConstraints: "",
+  whyCoachingNow: "",
   coachingOption: "",
   startTiming: "",
 }
@@ -181,6 +195,31 @@ function Label({ children }: { children: React.ReactNode }) {
     <label style={{ display: "block", fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>
       {children}
     </label>
+  )
+}
+
+function HelperText({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{ fontSize: "var(--text-small)", color: MUTED, margin: "-2px 0 6px", lineHeight: 1.5 }}>
+      {children}
+    </p>
+  )
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{
+      fontSize: "var(--text-eyebrow)",
+      fontWeight: 700,
+      letterSpacing: "0.22em",
+      textTransform: "uppercase",
+      color: ACCENT_DARK,
+      margin: "8px 0 4px",
+      paddingBottom: 10,
+      borderBottom: "1px solid rgba(0,0,0,0.08)",
+    }}>
+      {children}
+    </p>
   )
 }
 
@@ -875,7 +914,10 @@ export default function CoachingClient() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  {/* Q1+Q2: Name + Email */}
+
+                  {/* ── YOUR GOALS ─────────────────────────────────────── */}
+                  <SectionHeading>Your goals</SectionHeading>
+
                   <div className="ch-2col-form">
                     <div>
                       <Label>Full name *</Label>
@@ -887,81 +929,150 @@ export default function CoachingClient() {
                     </div>
                   </div>
 
-                  {/* Q3: Primary goal */}
                   <div>
                     <Label>What is your primary goal? *</Label>
                     <div className="ch-select-wrap">
                       <select required value={form.primaryGoal} onChange={set("primaryGoal")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
-                        <option>Build strength</option>
                         <option>Build muscle</option>
-                        <option>Lose fat or body recomposition</option>
-                        <option>Get my first pull-up or specific skill</option>
-                        <option>Move better and improve mobility</option>
-                        <option>Return after injury or train around limitations</option>
-                        <option>General fitness and health</option>
+                        <option>Lose fat</option>
+                        <option>Body recomposition</option>
+                        <option>Build strength</option>
+                        <option>Improve a specific skill / performance goal</option>
+                        <option>Improve mobility / movement</option>
+                        <option>Return to training / work around limitations</option>
+                        <option>General fitness &amp; health</option>
                         <option>Other</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* Q4: Training experience */}
+                  {form.primaryGoal === "Other" && (
+                    <div>
+                      <Label>Tell me what you want to achieve *</Label>
+                      <textarea required rows={2} value={form.primaryGoalOther} onChange={set("primaryGoalOther")} placeholder="In your own words…" style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                    </div>
+                  )}
+
                   <div>
-                    <Label>How long have you been training consistently? *</Label>
+                    <Label>What would you most like to achieve over the next few months? *</Label>
+                    <HelperText>Tell me what success would look like for you.</HelperText>
+                    <textarea required rows={3} value={form.specificOutcome} onChange={set("specificOutcome")} style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                  </div>
+
+                  {/* ── YOUR TRAINING ──────────────────────────────────── */}
+                  <SectionHeading>Your training</SectionHeading>
+
+                  <div>
+                    <Label>How long have you been training? *</Label>
                     <div className="ch-select-wrap">
                       <select required value={form.trainingExperience} onChange={set("trainingExperience")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
+                        <option>I&apos;m new to structured training</option>
                         <option>Less than 6 months</option>
-                        <option>6 to 12 months</option>
-                        <option>1 to 2 years</option>
-                        <option>3 to 5 years</option>
+                        <option>6–12 months</option>
+                        <option>1–2 years</option>
+                        <option>3–5 years</option>
                         <option>5+ years</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* Q5+Q6: Days + Equipment */}
+                  <div>
+                    <Label>What does your training look like right now? *</Label>
+                    <HelperText>What are you currently doing, how often are you training, and what does a typical week look like?</HelperText>
+                    <textarea required rows={3} value={form.currentTraining} onChange={set("currentTraining")} style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                  </div>
+
                   <div className="ch-2col-form">
                     <div>
-                      <Label>Days per week you can train? *</Label>
+                      <Label>How many days per week do you realistically want to train? *</Label>
                       <div className="ch-select-wrap">
                         <select required value={form.daysPerWeek} onChange={set("daysPerWeek")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                           <option value="">Select…</option>
-                          <option>2 to 3</option>
-                          <option>3 to 4</option>
+                          <option>2</option>
+                          <option>3</option>
                           <option>4</option>
-                          <option>5+</option>
+                          <option>5</option>
+                          <option>6</option>
                         </select>
                       </div>
                     </div>
                     <div>
-                      <Label>Equipment access? *</Label>
+                      <Label>How much time can you realistically spend on each workout? *</Label>
                       <div className="ch-select-wrap">
-                        <select required value={form.equipment} onChange={set("equipment")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
+                        <select required value={form.sessionDuration} onChange={set("sessionDuration")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                           <option value="">Select…</option>
-                          <option>Full commercial gym</option>
-                          <option>Home gym with rack, barbell, and plates</option>
-                          <option>Dumbbells and bench</option>
-                          <option>Dumbbells only</option>
-                          <option>Bodyweight only</option>
+                          <option>30 min</option>
+                          <option>45 min</option>
+                          <option>60 min</option>
+                          <option>75 min</option>
+                          <option>90+ min</option>
                         </select>
                       </div>
                     </div>
                   </div>
 
-                  {/* Q7: Injuries */}
+                  {/* ── YOUR SETUP ─────────────────────────────────────── */}
+                  <SectionHeading>Your setup</SectionHeading>
+
                   <div>
-                    <Label>Any current or past injuries, pain, or limitations I should know about? *</Label>
-                    <textarea required rows={3} value={form.injuries} onChange={set("injuries")} placeholder="None, or describe..." style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                    <Label>Equipment access? *</Label>
+                    <div className="ch-select-wrap">
+                      <select required value={form.equipment} onChange={set("equipment")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
+                        <option value="">Select…</option>
+                        <option>Full commercial gym</option>
+                        <option>Apartment / condo gym</option>
+                        <option>Home gym with rack, barbell &amp; plates</option>
+                        <option>Dumbbells + bench</option>
+                        <option>Dumbbells only</option>
+                        <option>Minimal equipment / bodyweight</option>
+                        <option>Other / limited setup</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {/* Q8: What have you tried */}
+                  {form.equipment && form.equipment !== "Full commercial gym" && (
+                    <div>
+                      <Label>
+                        Anything I should know about your equipment?{form.equipment === "Other / limited setup" ? " *" : ""}
+                      </Label>
+                      <textarea
+                        required={form.equipment === "Other / limited setup"}
+                        rows={2}
+                        value={form.equipmentDetails}
+                        onChange={set("equipmentDetails")}
+                        placeholder={form.equipment === "Other / limited setup" ? "What do you have to work with?" : "Optional — brands, weight ranges, missing pieces, etc."}
+                        style={{ ...inputBase, resize: "vertical" }}
+                        className="ch-input"
+                      />
+                    </div>
+                  )}
+
                   <div>
-                    <Label>What have you tried so far, and what made it hard to stick? *</Label>
-                    <textarea required rows={4} value={form.whatHaveYouTried} onChange={set("whatHaveYouTried")} placeholder="Programs, apps, trainers, anything you've done. And what got in the way." style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                    <Label>Any current or past injuries, pain, movement limitations, or exercises that bother you? *</Label>
+                    <textarea required rows={3} value={form.injuries} onChange={set("injuries")} placeholder="None, or describe…" style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
                   </div>
 
-                  {/* Q9: Coaching option */}
+                  <div>
+                    <Label>Any exercises you love, hate, or would prefer to include or avoid?</Label>
+                    <textarea rows={2} value={form.exercisePreferences} onChange={set("exercisePreferences")} placeholder="Optional" style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                  </div>
+
+                  <div>
+                    <Label>Anything about your schedule I should know?</Label>
+                    <textarea rows={2} value={form.scheduleConstraints} onChange={set("scheduleConstraints")} placeholder="Optional — travel, days you can't train, rotating shifts, etc." style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                  </div>
+
+                  {/* ── COACHING ───────────────────────────────────────── */}
+                  <SectionHeading>Coaching</SectionHeading>
+
+                  <div>
+                    <Label>What made you decide to look for coaching right now? *</Label>
+                    <HelperText>What do you feel you need the most help with?</HelperText>
+                    <textarea required rows={3} value={form.whyCoachingNow} onChange={set("whyCoachingNow")} style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                  </div>
+
                   <div>
                     <Label>Which coaching option are you most interested in? *</Label>
                     <div className="ch-select-wrap">
@@ -974,7 +1085,6 @@ export default function CoachingClient() {
                     </div>
                   </div>
 
-                  {/* Q10: Start timing */}
                   <div>
                     <Label>How soon do you want to start? *</Label>
                     <div className="ch-select-wrap">

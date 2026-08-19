@@ -345,6 +345,15 @@ export interface CoachingApplication {
   whatHaveYouTried?: string
   investmentReadiness?: string
   startTiming?: string
+  // Application form v3 (Aug 2026) — richer intake for program design
+  primaryGoalOther?: string
+  specificOutcome?: string
+  currentTraining?: string
+  sessionDuration?: string
+  equipmentDetails?: string
+  exercisePreferences?: string
+  scheduleConstraints?: string
+  whyCoachingNow?: string
   status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"
   applicationDate: string
   reviewedAt?: string
@@ -373,6 +382,14 @@ export async function submitCoachingApplication(data: {
   whatHaveYouTried?: string
   investmentReadiness?: string
   startTiming?: string
+  primaryGoalOther?: string
+  specificOutcome?: string
+  currentTraining?: string
+  sessionDuration?: string
+  equipmentDetails?: string
+  exercisePreferences?: string
+  scheduleConstraints?: string
+  whyCoachingNow?: string
 }): Promise<string> {
   const db = makeDb()
   const id = randomBytes(16).toString("hex")
@@ -396,8 +413,21 @@ export async function submitCoachingApplication(data: {
     whatHaveYouTried: data.whatHaveYouTried?.trim(),
     investmentReadiness: data.investmentReadiness?.trim(),
     startTiming: data.startTiming?.trim(),
+    primaryGoalOther: data.primaryGoalOther?.trim(),
+    specificOutcome: data.specificOutcome?.trim(),
+    currentTraining: data.currentTraining?.trim(),
+    sessionDuration: data.sessionDuration?.trim(),
+    equipmentDetails: data.equipmentDetails?.trim(),
+    exercisePreferences: data.exercisePreferences?.trim(),
+    scheduleConstraints: data.scheduleConstraints?.trim(),
+    whyCoachingNow: data.whyCoachingNow?.trim(),
     status: "PENDING",
     applicationDate: new Date().toISOString(),
+  }
+  // Strip undefined optional fields so DynamoDB doesn't reject the item.
+  const record = item as unknown as Record<string, unknown>
+  for (const k of Object.keys(record)) {
+    if (record[k] === undefined) delete record[k]
   }
   await db.send(new PutCommand({ TableName: TABLE, Item: item }))
   return id
