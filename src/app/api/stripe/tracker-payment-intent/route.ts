@@ -33,19 +33,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 })
     }
 
-    // Duplicate-purchase gate — refuse a new PaymentIntent if the
-    // authenticated user already owns the tracker. Uses the raw check so
-    // admin auto-grant doesn't accidentally block admin testing (an admin
-    // has no tracker_access record unless they've actually bought it).
+    // Duplicate-purchase gate — refuse a new PaymentIntent if this identity
+    // already owns the tracker. Authoritative identity is the authenticated
+    // Cognito session email when present, otherwise the normalized email
+    // from the guest-checkout form. Raw check bypasses admin auto-grant so
+    // Lisa can still test as an admin who hasn't actually bought it.
     const sessionEmail = await getSessionEmail()
-    if (sessionEmail) {
-      const alreadyOwns = await ownsTrackerRaw(sessionEmail)
-      if (alreadyOwns) {
-        return NextResponse.json(
-          { error: "already-owned", product: "tracker" },
-          { status: 409 }
-        )
-      }
+    const ownershipEmail = sessionEmail ?? email.toLowerCase().trim()
+    const alreadyOwns = await ownsTrackerRaw(ownershipEmail)
+    if (alreadyOwns) {
+      return NextResponse.json(
+        { error: "already-owned", product: "tracker" },
+        { status: 409 }
+      )
     }
 
     // Coaching-client eligibility resolved from the authenticated Cognito

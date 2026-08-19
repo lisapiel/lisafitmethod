@@ -77,17 +77,23 @@ export async function POST(request: NextRequest) {
     const isBundle = product === "bundle"
 
     const sessionEmail = await getSessionEmail()
+    // Authoritative identity for the ownership check: the authenticated
+    // Cognito session email when present, otherwise the normalized email
+    // the buyer typed on the guest-checkout form. Both paths flow through
+    // the same raw entitlement lookup and the same 409 response — no
+    // extra fields, no new error surface for account enumeration.
+    const ownershipEmail = sessionEmail ?? email.toLowerCase().trim()
 
     // ── Duplicate-purchase gate ───────────────────────────────────────────
-    // Refuse to create a PaymentIntent for a product the authenticated user
-    // already owns. Bundle is intentionally exempt — a bundle purchase may
+    // Refuse to create a PaymentIntent for a product this identity already
+    // owns. Bundle is intentionally exempt — a bundle purchase may
     // legitimately happen for someone who already owns Training or Nutrition
     // individually (e.g. to earn the $137 coaching credit). Ownership is
     // resolved via raw checks that skip the admin auto-grant.
-    if (sessionEmail && !isBundle) {
+    if (!isBundle) {
       const alreadyOwns = isNutrition
-        ? await ownsNutritionRaw(sessionEmail)
-        : await ownsTrainingRaw(sessionEmail)
+        ? await ownsNutritionRaw(ownershipEmail)
+        : await ownsTrainingRaw(ownershipEmail)
       if (alreadyOwns) {
         return NextResponse.json(
           { error: "already-owned", product: isNutrition ? "nutrition" : "training" },
@@ -96,8 +102,8 @@ export async function POST(request: NextRequest) {
       }
     }
     // The tracker add-on can't be purchased separately here — same protection.
-    if (sessionEmail && includesTracker && !isNutrition && !isBundle) {
-      const alreadyOwnsTracker = await ownsTrackerRaw(sessionEmail)
+    if (includesTracker && !isNutrition && !isBundle) {
+      const alreadyOwnsTracker = await ownsTrackerRaw(ownershipEmail)
       if (alreadyOwnsTracker) {
         return NextResponse.json(
           { error: "already-owned", product: "tracker" },
