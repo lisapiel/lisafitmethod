@@ -72,17 +72,23 @@ function approvalEmail(name: string, checkoutUrl: string): string {
               </td>
             </tr>
           </table>
-          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Coaching</p>
           <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
-            You're in, ${firstName}.
+            You're in ${firstName} !
           </h1>
-          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-            I've reviewed your application and I'm excited to work with you. Click below to set up your monthly membership and get access to your coaching portal.
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            I just finished reading your application and I'd love to work with you :)
+          </p>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            You already have a goal. My job now is to help you turn it into a plan that actually makes sense for you, your schedule, your experience, your equipment, and where you're starting from.
+          </p>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            No random workouts and no guessing what you should be doing next. I'll give your training structure and make sure the work you're putting in is actually moving you forward.
           </p>
           <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-            Once payment is confirmed, you'll receive an email with your login details and I'll start building your personalised program.
+            Use the link below to review your coaching details and get everything set up. Once your payment goes through, I'll start building your program and you'll get access to your coaching portal.
           </p>
-          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
             <tr>
               <td style="background:#c8a97e;border-radius:2px;">
                 <a href="${checkoutUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
@@ -91,9 +97,11 @@ function approvalEmail(name: string, checkoutUrl: string): string {
               </td>
             </tr>
           </table>
-          <p style="margin:0;font-size:12px;color:#999;">
-            This link is unique to you. Any questions, reply to this email or DM me on Instagram
-            <a href="https://instagram.com/lisafitmethod" style="color:#c8a97e;">@lisafitmethod</a>.
+          <p style="margin:0 0 6px;font-size:14px;color:#4a4a4a;line-height:1.7;">
+            If you have any questions before you start, just reply. This inbox comes straight to me.
+          </p>
+          <p style="margin:20px 0 0;font-size:14px;color:#4a4a4a;font-family:Georgia,'Times New Roman',serif;font-style:italic;">
+            Lisa
           </p>
         </td></tr>
         <tr><td align="center" style="padding-top:24px;">
@@ -303,7 +311,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: application.email,
-      subject: "You're approved — set up your coaching membership",
+      subject: "You're approved for coaching !",
       html: approvalEmail(application.name, acceptUrl),
     }).catch((err) => console.error("Approval email failed:", err))
 

@@ -786,9 +786,9 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: email,
-      subject: "Your coaching portal is ready — Lisa Fit Method",
+      subject: "Your coaching is ready :)",
       html: `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8" /></head>
+<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
     <tr><td align="center">
@@ -797,12 +797,31 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
           <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;">Lisa <span style="color:#c8a97e;">Fit Method</span></span>
         </td></tr>
         <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
-          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
-          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">You're in, ${firstName}.</h1>
-          <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">Payment confirmed — your coaching portal is now active. Log in with your existing account to get started. I'm already working on your program.</p>
-          <table cellpadding="0" cellspacing="0"><tr><td style="background:#c8a97e;border-radius:2px;">
-            <a href="https://lisafitmethod.com/my-coaching" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Open Coaching Portal →</a>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="width:56px;vertical-align:middle;"><img src="https://lisafitmethod.com/lisa-email.jpg" alt="Lisa" width="48" height="48" style="width:48px;height:48px;border-radius:50%;object-fit:cover;display:block;" /></td>
+              <td style="padding-left:14px;vertical-align:middle;"><p style="margin:0;font-size:14px;font-weight:600;color:#1a1a1a;">Lisa McPherson</p><p style="margin:2px 0 0;font-size:12px;color:#888;">Certified Personal Trainer</p></td>
+            </tr>
+          </table>
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Welcome to Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">Let's get to work ${firstName} !</h1>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">Your coaching is active and I'm excited to get started with you.</p>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">From here, my job is to take what you shared in your application and turn it into a plan that actually fits you. Not a list of random hard workouts, but a program with structure, progression, and a reason behind what you're doing.</p>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">Your coaching portal is where we'll keep everything together: your workouts, check-ins, progress, nutrition support, form reviews, and messages with me.</p>
+          <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">I'll start building your program right away using everything you shared in your application, and it'll show up in your portal as soon as it's ready.</p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;"><tr><td style="background:#c8a97e;border-radius:2px;">
+            <a href="https://lisafitmethod.com/my-coaching" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Open My Coaching Portal →</a>
           </td></tr></table>
+          <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;">
+            <tr><td style="background:#faf8f5;border-left:3px solid #c8a97e;padding:16px 18px;">
+              <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#c8a97e;">One Quick Tip</p>
+              <p style="margin:0 0 8px;font-size:15px;color:#4a4a4a;line-height:1.7;">If you haven't already, add Lisa Fit Method to your phone.</p>
+              <p style="margin:0 0 8px;font-size:15px;color:#4a4a4a;line-height:1.7;">On iPhone, open it in Safari, tap Share → Add to Home Screen, make sure Open as Web App is turned on, then tap Add.</p>
+              <p style="margin:0;font-size:15px;color:#4a4a4a;line-height:1.7;">It'll open like an app and makes everything much easier to access when you're training.</p>
+            </td></tr>
+          </table>
+          <p style="margin:0 0 4px;font-size:14px;color:#4a4a4a;line-height:1.7;">Can't wait to get started.</p>
+          <p style="margin:0;font-size:14px;color:#4a4a4a;font-family:Georgia,'Times New Roman',serif;font-style:italic;">Lisa</p>
         </td></tr>
       </table>
     </td></tr>
@@ -836,9 +855,9 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
-    subject: "Welcome to 1:1 Coaching — set up your account",
+    subject: "You're in :) Let's get to work !",
     html: `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8" /></head>
+<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
     <tr><td align="center">
@@ -853,13 +872,34 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
               <td style="padding-left:14px;vertical-align:middle;"><p style="margin:0;font-size:14px;font-weight:600;color:#1a1a1a;">Lisa McPherson</p><p style="margin:2px 0 0;font-size:12px;color:#888;">Certified Personal Trainer</p></td>
             </tr>
           </table>
-          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
-          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">Welcome, ${firstName}. Let's get started.</h1>
-          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">Payment confirmed — I'm so excited to work with you. Set your password to access your coaching portal where you'll find your workouts, check-in forms, and direct messaging with me.</p>
-          <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;"><tr><td style="background:#c8a97e;border-radius:2px;">
-            <a href="${setPasswordUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Set Your Password →</a>
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Welcome to Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">Welcome ${firstName} :)</h1>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">I'm really excited to have you here.</p>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">You've already done the hardest part, deciding you're ready to stop winging it and start training with a plan that actually has a reason behind it.</p>
+          <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">From here, I'll take everything you shared with me and turn it into something built around you. Your goals, your experience, your schedule, your equipment, your limitations, and the way you actually like to train.</p>
+          <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">We'll have structure, we'll track what's working, and we'll adjust as you progress.</p>
+
+          <p style="margin:24px 0 10px;font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#c8a97e;">Next Steps</p>
+          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">Here's what happens next:</p>
+
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#1a1a1a;">1. Set your password</p>
+          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">Use the button below to access your Lisa Fit Method coaching portal. This is where your workouts, check-ins, progress, nutrition support, form reviews, and messages with me all live.</p>
+
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#1a1a1a;">2. I'll build your program</p>
+          <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">I'll start building it right away using everything you shared in your application, and you'll see it directly in your portal as soon as it's ready.</p>
+
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#1a1a1a;">3. Add Lisa Fit Method to your phone</p>
+          <p style="margin:0 0 8px;font-size:15px;color:#4a4a4a;line-height:1.7;">I definitely recommend this. On iPhone, open Lisa Fit Method in Safari, tap Share → Add to Home Screen, make sure Open as Web App is turned on, then tap Add.</p>
+          <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">It'll sit right on your Home Screen and open like an app, which makes it much easier to use when you're training.</p>
+
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="background:#c8a97e;border-radius:2px;">
+            <a href="${setPasswordUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Set My Password →</a>
           </td></tr></table>
-          <p style="margin:0;font-size:12px;color:#999;">This link expires in 48 hours. Email: <strong style="color:#888;">${email}</strong></p>
+
+          <p style="margin:0 0 4px;font-size:12px;color:#999;">This link expires in 48 hours.</p>
+          <p style="margin:0 0 22px;font-size:12px;color:#999;">Email: <strong style="color:#888;">${email}</strong></p>
+          <p style="margin:0 0 4px;font-size:14px;color:#4a4a4a;line-height:1.7;">Can't wait to get started.</p>
+          <p style="margin:0;font-size:14px;color:#4a4a4a;font-family:Georgia,'Times New Roman',serif;font-style:italic;">Lisa</p>
         </td></tr>
       </table>
     </td></tr>
