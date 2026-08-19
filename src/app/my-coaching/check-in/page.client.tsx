@@ -109,54 +109,40 @@ function emailSlug(email: string): string {
 }
 
 // Determine the planned-workout denominator for the client's CURRENT week.
-// Only returns a number when we can determine it with confidence — otherwise
-// undefined so the caller falls back to "X workouts completed since your last
-// check-in" rather than fabricating an X/Y.
+// Planned-workout denominator for the training summary — deliberately
+// conservative. Only returns a number when the completed logs used as the
+// numerator AND the scheduled count used as the denominator can be
+// definitively tied to the SAME single program week.
 //
-// Two confidence paths:
-//   1. Every week in the program has the same non-zero count of workout days
-//      → uniform program, that count is unambiguously "per week".
-//   2. Weeks differ, but we can pinpoint the current week from the client's
-//      logs (earliest week with an uncompleted workout day) → count that
-//      specific week's workouts.
-// If neither path resolves, return undefined.
-function plannedWorkoutsForCurrentPeriod(
+// Both conditions must hold:
+//   1. `relevantLogs` (workouts logged AGAINST this program since the last
+//      check-in) is non-empty and every log carries the SAME weekNumber.
+//   2. That weekNumber maps to a real week in the program with at least one
+//      scheduled workout day.
+//
+// Anything else — no logs yet, logs span multiple program weeks, missing
+// weekNumbers, week not found in program — returns undefined so the UI
+// falls back to "X workouts completed since your last check-in". We do NOT
+// infer "current week" from where the client is in the program, because a
+// client who skipped an earlier workout may keep advancing without that
+// earlier week being complete.
+function plannedWorkoutsForSamePeriod(
   weeks: ProgramWeek[],
-  currentProgramId: string | undefined,
-  logs: WorkoutLogLite[],
+  relevantLogs: WorkoutLogLite[],
 ): number | undefined {
-  if (!weeks.length) return undefined
-  const workoutDayCounts = weeks.map((w) =>
-    (w.days ?? []).filter((d) => (d.exercises?.length ?? 0) > 0).length
+  if (!weeks.length || relevantLogs.length === 0) return undefined
+
+  const weekNumbers = new Set(
+    relevantLogs.map((l) => l.weekNumber).filter((n): n is number => typeof n === "number" && Number.isFinite(n))
   )
-  const nonZeroCounts = workoutDayCounts.filter((c) => c > 0)
-  if (nonZeroCounts.length === 0) return undefined
+  if (weekNumbers.size !== 1) return undefined
+  const weekNum = [...weekNumbers][0]
 
-  // Path 1 — uniform program
-  const allSame = workoutDayCounts.every((c) => c === workoutDayCounts[0])
-  if (allSame && workoutDayCounts[0] > 0) return workoutDayCounts[0]
+  const week = weeks.find((w, i) => (w.weekNumber ?? i + 1) === weekNum)
+  if (!week) return undefined
 
-  // Path 2 — identify the current week from logs of THIS program
-  const relevantLogs = currentProgramId
-    ? logs.filter((l) => l.programId === currentProgramId)
-    : logs
-  const completedKeys = new Set(
-    relevantLogs.map((l) => `${l.weekNumber ?? ""}::${l.dayLabel ?? ""}`)
-  )
-  for (let i = 0; i < weeks.length; i++) {
-    const week = weeks[i]
-    const weekNum = week.weekNumber ?? i + 1
-    const workoutDays = (week.days ?? []).filter((d) => (d.exercises?.length ?? 0) > 0)
-    if (workoutDays.length === 0) continue
-    const anyIncomplete = workoutDays.some((d) => !completedKeys.has(`${weekNum}::${d.dayLabel}`))
-    if (anyIncomplete) {
-      return workoutDays.length
-    }
-  }
-
-  // Every workout in every week is already completed — no meaningful "current
-  // week" left to display as a denominator.
-  return undefined
+  const scheduled = (week.days ?? []).filter((d) => (d.exercises?.length ?? 0) > 0).length
+  return scheduled > 0 ? scheduled : undefined
 }
 
 // Exercises available in the current program, deduplicated by exerciseId+name.
@@ -358,7 +344,9 @@ export default function CheckInClient() {
           })
           setAutoWorkouts({
             completed: relevant.length,
-            planned: plannedWorkoutsForCurrentPeriod(weeks, currentProgramId, logs),
+            // Only publish a denominator when every completion in this period
+            // belongs to a single, identifiable program week. Same-period rule.
+            planned: plannedWorkoutsForSamePeriod(weeks, relevant),
             sinceIso: lastCheckInIso,
           })
         }
