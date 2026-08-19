@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -9,6 +10,8 @@ const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
 
+// Raw check-in point (whatever the client submitted). The chart converts to
+// canonical lb internally so mixed-unit histories still show correct trends.
 type WeightPoint = { date: string; weight: number; unit: string }
 type Snapshot = {
   id: string
@@ -24,45 +27,78 @@ type Snapshot = {
 }
 
 function WeightChart({ data }: { data: WeightPoint[] }) {
-  if (data.length < 2) {
+  // Normalize every entry to canonical lb up front. Any entry that fails
+  // validation (NaN / non-positive) is dropped from the trend without
+  // silently deleting the underlying record — future check-in fixes on the
+  // form + API prevent new bad rows.
+  const points = data
+    .map((d) => ({
+      date: d.date,
+      lbs: toLbs(d.weight, d.unit),
+      submittedUnit: normalizeUnit(d.unit),
+    }))
+    .filter((p): p is { date: string; lbs: number; submittedUnit: WeightUnit } => p.lbs != null)
+
+  // Display unit follows the LATEST valid entry so a client who switched
+  // units sees their most recent choice honored.
+  const displayUnit: WeightUnit = points[points.length - 1]?.submittedUnit ?? "LBS"
+  const latestLbs = points[points.length - 1]?.lbs
+
+  // Insufficient history: still surface Current if we have one usable point,
+  // but never fabricate a Change value. Zero-history is completely empty.
+  if (points.length < 2) {
     return (
-      <div style={{ background: "#faf8f5", borderRadius: 8, padding: "2rem", textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted }}>
-          {data.length === 0 ? "Weight data will appear here once you've submitted check-ins." : "Submit one more check-in to see your trend."}
-        </p>
+      <div>
+        {latestLbs != null && (
+          <div style={{ marginBottom: 12 }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Current</p>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>
+              {fromLbs(latestLbs, displayUnit).toFixed(1)} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{displayUnit === "KG" ? "kg" : "lb"}</span>
+            </p>
+          </div>
+        )}
+        <div style={{ background: "#faf8f5", borderRadius: 8, padding: "1.25rem 1.5rem", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: 0 }}>
+            {points.length === 0
+              ? "Weight data will appear here once you've submitted check-ins."
+              : "Submit one more check-in to see your trend."}
+          </p>
+        </div>
       </div>
     )
   }
 
   const W = 580, H = 130, padX = 40, padY = 18
   const plotW = W - padX * 2, plotH = H - padY * 2
-  const weights = data.map((d) => d.weight)
-  const minW = Math.min(...weights), maxW = Math.max(...weights)
+  // Chart in display-unit space so axis labels match the client's preferred unit.
+  const displayValues = points.map((p) => fromLbs(p.lbs, displayUnit))
+  const minW = Math.min(...displayValues), maxW = Math.max(...displayValues)
   const range = maxW - minW || 1
-  const toX = (i: number) => padX + (i / (data.length - 1)) * plotW
-  const toY = (w: number) => padY + ((maxW - w) / range) * plotH
-  const pathD = data.map((d, i) => `${i === 0 ? "M" : "L"} ${toX(i)} ${toY(d.weight)}`).join(" ")
-  const areaD = `${pathD} L ${toX(data.length - 1)} ${padY + plotH} L ${padX} ${padY + plotH} Z`
-  const latest = data[data.length - 1]
-  const first = data[0]
-  const diff = +(latest.weight - first.weight).toFixed(1)
+  const toX = (i: number) => padX + (i / (points.length - 1)) * plotW
+  const toY = (v: number) => padY + ((maxW - v) / range) * plotH
+  const pathD = displayValues.map((v, i) => `${i === 0 ? "M" : "L"} ${toX(i)} ${toY(v)}`).join(" ")
+  const areaD = `${pathD} L ${toX(points.length - 1)} ${padY + plotH} L ${padX} ${padY + plotH} Z`
+  const firstLbs = points[0].lbs
+  const diffLbs = points[points.length - 1].lbs - firstLbs
+  const diffDisplay = +fromLbs(diffLbs, displayUnit).toFixed(1)
+  const displayUnitLabel = displayUnit === "KG" ? "kg" : "lb"
 
   return (
     <div>
       <div style={{ display: "flex", gap: 28, marginBottom: 16, flexWrap: "wrap" }}>
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Current</p>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{latest.weight} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{latest.unit}</span></p>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{fromLbs(points[points.length - 1].lbs, displayUnit).toFixed(1)} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{displayUnitLabel}</span></p>
         </div>
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Change</p>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: diff < 0 ? "#5c9e6a" : diff > 0 ? "#d97460" : muted, margin: 0 }}>
-            {diff > 0 ? "+" : ""}{diff} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{latest.unit}</span>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: diffDisplay < 0 ? "#5c9e6a" : diffDisplay > 0 ? "#d97460" : muted, margin: 0 }}>
+            {diffDisplay > 0 ? "+" : ""}{diffDisplay} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{displayUnitLabel}</span>
           </p>
         </div>
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Check-ins</p>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{data.length}</p>
+          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{points.length}</p>
         </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, display: "block" }}>
@@ -74,17 +110,17 @@ function WeightChart({ data }: { data: WeightPoint[] }) {
         </defs>
         <path d={areaD} fill="url(#wg-client)" />
         <path d={pathD} fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        {data.map((d, i) => (
-          <circle key={i} cx={toX(i)} cy={toY(d.weight)} r={i === data.length - 1 ? 4 : 3} fill={i === data.length - 1 ? accent : `${accent}88`} />
+        {displayValues.map((v, i) => (
+          <circle key={i} cx={toX(i)} cy={toY(v)} r={i === displayValues.length - 1 ? 4 : 3} fill={i === displayValues.length - 1 ? accent : `${accent}88`} />
         ))}
         <text x={padX} y={H - 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted}>
-          {new Date(data[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {new Date(points[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </text>
         <text x={W - padX} y={H - 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">
-          {new Date(data[data.length - 1].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {new Date(points[points.length - 1].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </text>
-        <text x={padX - 4} y={toY(maxW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{maxW}</text>
-        <text x={padX - 4} y={toY(minW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{minW}</text>
+        <text x={padX - 4} y={toY(maxW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{maxW.toFixed(1)}</text>
+        <text x={padX - 4} y={toY(minW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{minW.toFixed(1)}</text>
       </svg>
     </div>
   )
@@ -253,17 +289,24 @@ export default function ProgressClient() {
             setMilestones((prev) => [...prev, { date: sortedAll[0].submittedAt as string, title: "First check-in submitted", icon: "✍️" }])
           }
           if (ciList.length >= 2) {
-            const start = Number(ciList[0].weight)
-            const last = Number(ciList[ciList.length - 1].weight)
-            const unit = (ciList[0].weightUnit as string) ?? "lbs"
-            const lost = +(start - last).toFixed(1)
-            const thresholds = [5, 10, 15, 20, 25, 30]
-            for (const t of thresholds) {
-              if (lost >= t) {
-                // Find first time the threshold was crossed
-                const crossingPoint = ciList.find((ci) => start - Number(ci.weight) >= t)
-                if (crossingPoint) {
-                  setMilestones((prev) => prev.some((m) => m.title === `Lost first ${t} ${unit}`) ? prev : [...prev, { date: crossingPoint.submittedAt as string, title: `Lost first ${t} ${unit}`, icon: "📉" }])
+            // Milestone comparisons run in canonical lb so a client who
+            // switched units mid-journey doesn't produce a "lost 40 lb"
+            // event just from unit conversion arithmetic.
+            const wt = (ci: Record<string, unknown>) => toLbs(ci.weight as number | string | null, ci.weightUnit as string | null)
+            const startLbs = wt(ciList[0])
+            const lastLbs = wt(ciList[ciList.length - 1])
+            if (startLbs != null && lastLbs != null) {
+              const lostLbs = +(startLbs - lastLbs).toFixed(1)
+              const thresholds = [5, 10, 15, 20, 25, 30]
+              for (const t of thresholds) {
+                if (lostLbs >= t) {
+                  const crossingPoint = ciList.find((ci) => {
+                    const lbs = wt(ci)
+                    return lbs != null && startLbs - lbs >= t
+                  })
+                  if (crossingPoint) {
+                    setMilestones((prev) => prev.some((m) => m.title === `Lost first ${t} lb`) ? prev : [...prev, { date: crossingPoint.submittedAt as string, title: `Lost first ${t} lb`, icon: "📉" }])
+                  }
                 }
               }
             }

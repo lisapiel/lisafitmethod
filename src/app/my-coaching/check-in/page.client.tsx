@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { relativeChange } from "@/lib/weight"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
 const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
+
+// If a newly-entered body weight differs from the most recent recorded
+// weight by 20% or more, show a confirmation modal before submission.
+// Captures obvious typos (125 → 25) without blocking legitimate large
+// changes — the client can always confirm and proceed.
+const PLAUSIBILITY_THRESHOLD = 0.2
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -131,6 +138,9 @@ export default function CheckInClient() {
   const [form, setForm] = useState<FormState>(INITIAL)
   const [saving, setSaving] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  // Last valid weight from prior check-in — drives the plausibility guard.
+  const [lastWeight, setLastWeight] = useState<{ value: number; unit: "LBS" | "KG" } | null>(null)
+  const [showTypoConfirm, setShowTypoConfirm] = useState(false)
 
   useEffect(() => {
     async function init() {
@@ -143,6 +153,19 @@ export default function CheckInClient() {
             (ci: { submittedAt: string }) => new Date(ci.submittedAt) > weekAgo
           )
           if (recent) setAlreadySubmitted(true)
+          // Locate the most recent check-in that actually carries a positive
+          // weight. If none, no comparison baseline exists — first-time
+          // clients skip the typo guard.
+          type CIRaw = { submittedAt: string; weight?: number | string | null; weightUnit?: string | null }
+          const withWeight = (data.checkIns ?? [])
+            .filter((ci: CIRaw) => ci.weight != null && Number(ci.weight) > 0)
+            .sort((a: CIRaw, b: CIRaw) => b.submittedAt.localeCompare(a.submittedAt))
+          if (withWeight[0]) {
+            setLastWeight({
+              value: Number(withWeight[0].weight),
+              unit: withWeight[0].weightUnit === "KG" ? "KG" : "LBS",
+            })
+          }
         }
       } catch { /* layout handles auth */ }
       setLoading(false)
@@ -172,7 +195,27 @@ export default function CheckInClient() {
     return true
   }
 
-  async function submit() {
+  // Plausibility check runs when the user hits Submit. If it fires the modal
+  // opens; the client either edits (returns to step 1) or confirms (which
+  // calls performSubmit() directly, bypassing the check).
+  function submit() {
+    if (!lastWeight || !form.weight.trim()) {
+      performSubmit()
+      return
+    }
+    const change = relativeChange(
+      { value: lastWeight.value, unit: lastWeight.unit },
+      { value: form.weight, unit: form.weightUnit },
+    )
+    if (change != null && change >= PLAUSIBILITY_THRESHOLD) {
+      setShowTypoConfirm(true)
+      return
+    }
+    performSubmit()
+  }
+
+  async function performSubmit() {
+    setShowTypoConfirm(false)
     setSaving(true)
     try {
       const res = await fetch("/api/coaching/check-in", {
@@ -485,6 +528,61 @@ export default function CheckInClient() {
           )}
         </div>
       </div>
+
+      {/* Plausibility confirmation modal — soft guard against typos like 125 → 25.
+          User can still confirm and proceed if the value is really correct. */}
+      {showTypoConfirm && lastWeight && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="typo-confirm-title"
+          style={{
+            position: "fixed", inset: 0, background: "rgba(10,10,10,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "16px", zIndex: 1000,
+          }}
+          onClick={() => setShowTypoConfirm(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: white, borderRadius: 10, maxWidth: 420, width: "100%",
+              padding: "1.5rem 1.5rem 1.25rem",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+            }}
+          >
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>
+              Double-check your weight
+            </p>
+            <h2 id="typo-confirm-title" style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 10px", lineHeight: 1.25 }}>
+              Is that right?
+            </h2>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: black, margin: "0 0 6px", lineHeight: 1.55 }}>
+              Your last check-in was <strong>{lastWeight.value} {lastWeight.unit === "KG" ? "kg" : "lb"}</strong> and you entered{" "}
+              <strong>{form.weight} {form.weightUnit === "KG" ? "kg" : "lb"}</strong>.
+            </p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "0 0 16px", lineHeight: 1.55 }}>
+              If that&apos;s correct, go ahead. If it was a typo, edit it before submitting.
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => { setShowTypoConfirm(false); setStep(1) }}
+                style={{ flex: "1 1 160px", background: "transparent", border: `1px solid ${border}`, color: black, padding: "11px 18px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer", borderRadius: 4 }}
+              >
+                Go back and edit
+              </button>
+              <button
+                type="button"
+                onClick={performSubmit}
+                style={{ flex: "1 1 160px", background: black, color: white, border: "none", padding: "11px 18px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", borderRadius: 4 }}
+              >
+                Yes, that&apos;s correct
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

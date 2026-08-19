@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
+import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -232,10 +233,19 @@ export default function MyCoachingHomeClient() {
   const cursor = new Date()
   while (weeksWith.has(isoWeekKey(cursor))) { streak++; cursor.setDate(cursor.getDate() - 7) }
 
-  // Weight trend: latest vs. first check-in weight (used by compact Progress card)
-  const weighIns = checkIns.filter((c) => c.weight != null).sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
-  const weightDelta = weighIns.length >= 2 ? +(weighIns[weighIns.length - 1].weight! - weighIns[0].weight!).toFixed(1) : null
-  const weightUnit = weighIns[0]?.weightUnit ?? clientInfo?.weightUnit?.toLowerCase() ?? "lbs"
+  // Weight trend for the compact Progress card. Canonicalize each entry to
+  // lb so a mixed lb/kg history doesn't produce a bogus delta; display in
+  // the latest submission's unit so the client sees their preferred unit.
+  const weighInsRaw = checkIns.filter((c) => c.weight != null).sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
+  const weighInsLbs = weighInsRaw
+    .map((c) => ({ lbs: toLbs(c.weight, c.weightUnit), unit: normalizeUnit(c.weightUnit) }))
+    .filter((p): p is { lbs: number; unit: WeightUnit } => p.lbs != null)
+  const displayUnit: WeightUnit = weighInsLbs[weighInsLbs.length - 1]?.unit
+    ?? (clientInfo?.weightUnit === "KG" ? "KG" : "LBS")
+  const weightDelta = weighInsLbs.length >= 2
+    ? +fromLbs(weighInsLbs[weighInsLbs.length - 1].lbs - weighInsLbs[0].lbs, displayUnit).toFixed(1)
+    : null
+  const weightUnit = displayUnit === "KG" ? "kg" : "lb"
 
   const goalPct = primaryGoal ? goalProgressPct(primaryGoal) : null
 

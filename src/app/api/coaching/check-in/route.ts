@@ -46,11 +46,22 @@ export async function POST(req: NextRequest) {
     }))
     .filter((m) => m.label && m.value)
 
+  // Weight sanitation: parse to number, refuse NaN / non-positive / silly-large
+  // values. A stored NaN would poison every Progress chart downstream; a
+  // stored zero would render as "0 lb since start". Silent drop if invalid —
+  // the rest of the check-in still saves. The client-side form has its own
+  // typo confirmation for values that parse but look wildly off.
+  let parsedWeight: number | undefined
+  if (body.weight != null && body.weight !== "") {
+    const n = parseFloat(String(body.weight))
+    if (Number.isFinite(n) && n > 0 && n < 2000) parsedWeight = n
+  }
+
   const checkIn = await createCoachingCheckIn({
     clientEmail: email.toLowerCase(),
     submittedAt: new Date().toISOString(),
     status: "PENDING",
-    ...(body.weight != null && { weight: parseFloat(body.weight) }),
+    ...(parsedWeight != null && { weight: parsedWeight }),
     ...(body.weightUnit && { weightUnit: body.weightUnit }),
     ...(body.sleepQuality && { sleepQuality: body.sleepQuality }),
     ...(body.energyLevel && { energyLevel: body.energyLevel }),
@@ -80,7 +91,7 @@ export async function POST(req: NextRequest) {
     ctaHref: "https://lisafitmethod.com/admin/coaching/check-ins",
     meta: {
       client: email,
-      weight: body.weight != null ? `${body.weight} ${body.weightUnit || ""}` : null,
+      weight: parsedWeight != null ? `${parsedWeight} ${body.weightUnit || ""}` : null,
       "training performance": body.trainingPerformance ? `${body.trainingPerformance}/5` : null,
       "nutrition adherence": body.nutritionAdherence ? `${body.nutritionAdherence}/5` : null,
     },
