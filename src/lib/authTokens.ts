@@ -609,8 +609,20 @@ export interface CoachingCheckInRecord {
   clientEmail: string
   submittedAt: string
   status: "PENDING" | "REVIEWED"
+  // Marks the check-in as the redesigned schema. Absent/undefined = legacy
+  // (pre-v2) submission — the admin review UI renders those with the old
+  // fields intact and never rewrites them.
+  schemaVersion?: number
+
+  // ── Progress (shared across schema versions) ──────────────────────────────
   weight?: number
   weightUnit?: "LBS" | "KG"
+  // Optional body measurements captured during the check-in.
+  // Stored as JSON string: Array<{ label, value, unit }>
+  measurementSnapshot?: string
+
+  // ── Legacy 1–5 ratings — kept for backward compat on historical records.
+  //    NEW (v2) check-ins do NOT write these.
   sleepQuality?: number
   energyLevel?: number
   hungerLevel?: number
@@ -623,23 +635,59 @@ export interface CoachingCheckInRecord {
   struggles?: string
   questionsForCoach?: string
   additionalNotes?: string
+
+  // ── v2: Training ──────────────────────────────────────────────────────────
+  // Read-only snapshot of what the platform observed at submission time.
+  // Derived from workout logs — never written back to any workout record.
+  workoutsCompleted?: number
+  workoutsPlanned?: number   // absent if the current program doesn't provide a reliable weekly denominator
+  trainingRating?: number    // 1–5
+  trainingWins?: string
+  trainingChallenges?: string
+
+  // ── v2: Attention flags ───────────────────────────────────────────────────
+  painReported?: boolean
+  painNotes?: string
+
+  // ── v2: Form review request + attached videos ─────────────────────────────
+  formReviewRequested?: boolean
+  // JSON string: Array<{ exercise: string, note: string, videoKeys: string[] }>
+  // Video keys live under the private media/coaching-form-reviews/* prefix.
+  formReviews?: string
+
+  // ── v2: Recovery ──────────────────────────────────────────────────────────
+  // Sleep/energy/stress reuse the legacy fields above; recoveryRating is new.
+  recoveryRating?: number   // 1–5, soreness/recovery
+
+  // ── v2: Nutrition ─────────────────────────────────────────────────────────
+  nutritionStatus?: "on-track" | "mostly-on-track" | "mixed" | "struggled" | "not-focusing"
+  nutritionHelp?: string
+
+  // ── v2: Weekly reflection ────────────────────────────────────────────────
+  weeklyWin?: string
+  weeklyChallenge?: string
+  // Comma-separated list of adjustment areas the client wants Lisa to consider:
+  //   "exercises" | "volume-intensity" | "schedule" | "nutrition" | "recovery" | "other" | "none"
+  adjustmentAreas?: string
+  adjustmentNotes?: string
+  questionForLisa?: string
+
+  // ── Coach review (unchanged) ─────────────────────────────────────────────
   coachFeedback?: string
   reviewedAt?: string
-  // Optional body measurements captured during the check-in.
-  // Stored as JSON string: Array<{ label, value, unit }>
-  measurementSnapshot?: string
 }
 
 export async function createCoachingCheckIn(data: Omit<CoachingCheckInRecord, "id">): Promise<CoachingCheckInRecord> {
   const db = makeDb()
   const id = randomBytes(16).toString("hex")
   const record: CoachingCheckInRecord = { id, ...data }
-  await db.send(
-    new PutCommand({
-      TableName: TABLE,
-      Item: { userId: `coaching_checkin_${id}`, ...record },
-    })
-  )
+  // Strip undefined properties so a v2 check-in doesn't write
+  // `hungerLevel: undefined` (and similar) onto its DynamoDB item.
+  const item: Record<string, unknown> = { userId: `coaching_checkin_${id}` }
+  for (const [k, v] of Object.entries(record)) {
+    if (v !== undefined) item[k] = v
+  }
+  await db.send(new PutCommand({ TableName: TABLE, Item: item }))
   return record
 }
 

@@ -11,6 +11,15 @@ export const storage = defineStorage({
     "media/nutrition-messages/*": [
       allow.authenticated.to(["read", "write", "delete"]),
     ],
+    // Client-submitted form-review videos attached to a weekly check-in.
+    // Same privacy model as nutrition-messages: authenticated only, served
+    // via signed URLs, never through the public CDN. The live S3 bucket
+    // policy (three explicit allows for blog/photos/videos) already denies
+    // guest read on any other media/* prefix, so this prefix inherits
+    // private-by-default at the S3 layer.
+    "media/coaching-form-reviews/*": [
+      allow.authenticated.to(["read", "write", "delete"]),
+    ],
     "media/videos/*": [
       allow.guest.to(["read"]),
       allow.authenticated.to(["read", "write", "delete"]),

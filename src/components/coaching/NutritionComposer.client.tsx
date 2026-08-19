@@ -408,6 +408,48 @@ export function attachmentKeys(attachmentS3Keys?: string): string[] {
     .filter((k) => k.length > 0)
 }
 
+// Render a private S3 video via a short-lived signed URL. Same auth story as
+// SignedImage. Uses the browser's native <video> so an authenticated viewer
+// can play form-review clips inline in the admin without downloading.
+export function SignedVideo({
+  s3Key,
+  style,
+  controls = true,
+  expiresIn = 3600,
+}: {
+  s3Key: string
+  style?: React.CSSProperties
+  controls?: boolean
+  expiresIn?: number
+}) {
+  const [url, setUrl] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setUrl(null)
+    setError(false)
+    getUrl({ path: s3Key, options: { expiresIn, validateObjectExistence: false } })
+      .then(({ url }) => { if (!cancelled) setUrl(url.toString()) })
+      .catch(() => { if (!cancelled) setError(true) })
+    return () => { cancelled = true }
+  }, [s3Key, expiresIn])
+
+  if (error) {
+    return (
+      <div style={{ ...style, background: "#111", color: muted, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", padding: 12 }}>
+        Couldn&apos;t load video
+      </div>
+    )
+  }
+  if (!url) {
+    return <div style={{ ...style, background: "#111" }} />
+  }
+  return (
+    <video src={url} controls={controls} playsInline preload="metadata" style={style} />
+  )
+}
+
 // Render a private S3 image via a short-lived signed URL. The URL is generated
 // from the viewer's authenticated Amplify session; a logged-out user cannot
 // produce one. Shown behind a neutral placeholder while the signed URL is

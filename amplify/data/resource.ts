@@ -215,8 +215,12 @@ const schema = a.schema({
       clientEmail: a.string().required(),
       submittedAt: a.string().required(),
       status: a.enum(["PENDING", "REVIEWED"]),
+      // Absent/undefined = legacy schema. 2 = redesigned schema. Rendered
+      // differently in the admin review UI; historical records untouched.
+      schemaVersion: a.integer(),
       weight: a.float(),
       weightUnit: a.enum(["LBS", "KG"]),
+      // Legacy v1 ratings — kept for backward-compat rendering.
       sleepQuality: a.integer(),
       energyLevel: a.integer(),
       hungerLevel: a.integer(),
@@ -231,6 +235,30 @@ const schema = a.schema({
       additionalNotes: a.string(),
       measurementSnapshot: a.string(),
       photoS3Keys: a.string(),
+      // v2 — Training
+      workoutsCompleted: a.integer(),
+      workoutsPlanned: a.integer(),
+      trainingRating: a.integer(),
+      trainingWins: a.string(),
+      trainingChallenges: a.string(),
+      // v2 — Attention
+      painReported: a.boolean(),
+      painNotes: a.string(),
+      // v2 — Form review (video keys live under media/coaching-form-reviews/*)
+      formReviewRequested: a.boolean(),
+      formReviews: a.string(),
+      // v2 — Recovery (sleep/energy/stress reuse legacy fields; recovery is new)
+      recoveryRating: a.integer(),
+      // v2 — Nutrition
+      nutritionStatus: a.string(),
+      nutritionHelp: a.string(),
+      // v2 — Weekly review
+      weeklyWin: a.string(),
+      weeklyChallenge: a.string(),
+      adjustmentAreas: a.string(),
+      adjustmentNotes: a.string(),
+      questionForLisa: a.string(),
+      // Coach review
       coachFeedback: a.string(),
       reviewedAt: a.string(),
     })
