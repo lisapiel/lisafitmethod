@@ -880,11 +880,11 @@ export default function CoachingClient() {
               <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: ACCENT_DARK, marginBottom: 14 }}>
                 What happens next
               </p>
-              <ol style={{ paddingLeft: 0, listStyle: "none", counterReset: "steps", margin: "0 0 32px" }}>
+              <ol style={{ paddingLeft: 0, listStyle: "none", counterReset: "steps", margin: "0 0 12px" }}>
                 {[
-                  "I read your application. Personally, within 48 hours.",
-                  "If it’s a fit, we book a short call and I map out your plan.",
-                  "You decide. No pressure either way.",
+                  "I personally review your application within 48 hours.",
+                  "If it’s a fit, I’ll email you with the next steps to get started.",
+                  "Once you join, I’ll build your personalized program and we get started.",
                 ].map((item, i) => (
                   <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 12 }}>
                     <span style={{
@@ -897,6 +897,9 @@ export default function CoachingClient() {
                   </li>
                 ))}
               </ol>
+              <p style={{ fontSize: "var(--text-small)", color: MUTED, lineHeight: 1.6, margin: "0 0 32px" }}>
+                Prefer to talk first? We can always schedule a call, but it&apos;s completely optional.
+              </p>
 
               <Link href="/courses" className="ch-link">
                 Prefer a self-guided approach? The Complete Foundations Bundle ($137) is a great place to start. Upgrade to coaching within 90 days and the full $137 credits toward your first coaching month →
@@ -949,8 +952,8 @@ export default function CoachingClient() {
 
                   {form.primaryGoal === "Other" && (
                     <div>
-                      <Label>Tell me what you want to achieve *</Label>
-                      <textarea required rows={2} value={form.primaryGoalOther} onChange={set("primaryGoalOther")} placeholder="In your own words…" style={{ ...inputBase, resize: "vertical" }} className="ch-input" />
+                      <Label>What is your primary goal? *</Label>
+                      <input required type="text" value={form.primaryGoalOther} onChange={set("primaryGoalOther")} placeholder="In a few words…" style={inputBase} className="ch-input" />
                     </div>
                   )}
 
@@ -1017,7 +1020,7 @@ export default function CoachingClient() {
                   <SectionHeading>Your setup</SectionHeading>
 
                   <div>
-                    <Label>Equipment access? *</Label>
+                    <Label>Where will you do most of your training? *</Label>
                     <div className="ch-select-wrap">
                       <select required value={form.equipment} onChange={set("equipment")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input">
                         <option value="">Select…</option>
