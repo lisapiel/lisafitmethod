@@ -4,6 +4,7 @@ import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { getCurrentUser } from "aws-amplify/auth"
+import { TRACKER_PRICE_DISPLAY, COACHING_CLIENT_TRACKER_DISPLAY } from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
 
@@ -56,7 +57,7 @@ const ctaButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 }
 
-function PaymentForm({ email, clientSecret, onBack }: { email: string; clientSecret: string; onBack: () => void }) {
+function PaymentForm({ email, clientSecret, onBack, priceDisplay }: { email: string; clientSecret: string; onBack: () => void; priceDisplay: string }) {
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = useState<string | null>(null)
@@ -134,7 +135,7 @@ function PaymentForm({ email, clientSecret, onBack }: { email: string; clientSec
         disabled={!stripe || processing || !termsAccepted}
         style={{ ...ctaButtonStyle, background: !termsAccepted ? "#3a2f1f" : processing ? "#8a7550" : "#c9a96e", color: !termsAccepted ? "#6a5a3f" : "#0a0a0a", cursor: !termsAccepted || processing ? "not-allowed" : "pointer", marginBottom: 16 }}
       >
-        {processing ? "Processing…" : "Complete Purchase · $27"}
+        {processing ? "Processing…" : `Complete Purchase · ${priceDisplay}`}
       </button>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "#555", fontSize: 11, fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em" }}>
@@ -156,6 +157,10 @@ export function TrackerCheckoutClient() {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
+  // Coaching-client eligibility — display-only. The tracker PaymentIntent
+  // route independently re-checks against the authenticated session before
+  // charging. A tampered UI can't force a discount.
+  const [coachingClient, setCoachingClient] = useState(false)
 
   // Pre-fill email if logged in
   useEffect(() => {
@@ -167,6 +172,17 @@ export function TrackerCheckoutClient() {
       })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/member/access")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (!cancelled && d?.offers?.coachingClient?.eligible) setCoachingClient(true) })
+      .catch(() => { /* defaults to regular price */ })
+    return () => { cancelled = true }
+  }, [])
+
+  const priceDisplay = coachingClient ? COACHING_CLIENT_TRACKER_DISPLAY : TRACKER_PRICE_DISPLAY
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -251,10 +267,18 @@ export function TrackerCheckoutClient() {
             <em>Own yours for $27. Forever.</em>
           </h1>
 
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "24px 0 12px", paddingBottom: 0 }}>
-            <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>$27</span>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, margin: "24px 0 12px", paddingBottom: 0, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 40, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>{priceDisplay}</span>
+            {coachingClient && (
+              <span style={{ fontSize: 16, color: "#666", textDecoration: "line-through", fontFamily: "var(--font-montserrat), sans-serif" }}>$27</span>
+            )}
             <span style={{ fontSize: 12, color: "#666" }}>one-time · no subscription · ever</span>
           </div>
+          {coachingClient && (
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a96e", margin: "0 0 8px" }}>
+              Your coaching client price
+            </p>
+          )}
           <p style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 0, paddingBottom: 24, borderBottom: "1px solid #1a1a1a" }}>
             Add it to your phone home screen and it opens like a native app.{" "}
             <Link href="/terms#access-policy" style={{ color: "#a8895e", textDecoration: "underline", textUnderlineOffset: 2 }}>
@@ -297,7 +321,7 @@ export function TrackerCheckoutClient() {
             </div>
           ) : email && confirmed && clientSecret ? (
             <Elements key={clientSecret} stripe={stripePromise} options={{ clientSecret, appearance: stripeAppearance }}>
-              <PaymentForm email={email} clientSecret={clientSecret} onBack={handleBack} />
+              <PaymentForm email={email} clientSecret={clientSecret} onBack={handleBack} priceDisplay={priceDisplay} />
             </Elements>
           ) : email && !confirmed ? (
             <div>

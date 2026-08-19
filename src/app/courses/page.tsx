@@ -4,6 +4,7 @@ import { getPublishedVideoUrl, getPublishedPhotoUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
+import CoachingClientPriceBadge from "@/components/CoachingClientPriceBadge.client"
 import {
   COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_DISPLAY,
@@ -107,6 +108,15 @@ export default async function CoursesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/</g, "\\u003c") }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }} />
     <main style={{ background: "#0a0a0a", color: "#f5f2ee", fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
+      {/* Coaching-client price banners — invisible unless the viewer has
+          active coaching. Both Training + Tracker have their own preferred
+          prices; Nutrition Foundations is cross-linked to /nutrition, so its
+          badge lives on that dedicated sales page. */}
+      <div style={{ padding: "24px 20px 0", background: "#f5f2ee" }}>
+        <CoachingClientPriceBadge product="training" />
+        <CoachingClientPriceBadge product="tracker" />
+      </div>
+
       <style>{`
         :root {
           --accent: ${accent};

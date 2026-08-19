@@ -4,7 +4,18 @@ import { fetchAuthSession } from "aws-amplify/auth/server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess, hasMasterclassAccess, isAdminEmail } from "@/lib/authTokens"
+import {
+  hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess, hasMasterclassAccess,
+  isAdminEmail, ownsCoachingRaw,
+} from "@/lib/authTokens"
+import {
+  COURSE_PRICE_CENTS, COURSE_PRICE_DISPLAY,
+  NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY,
+  TRACKER_PRICE_CENTS, TRACKER_PRICE_DISPLAY,
+  COACHING_CLIENT_TRAINING_CENTS, COACHING_CLIENT_TRAINING_DISPLAY,
+  COACHING_CLIENT_NUTRITION_CENTS, COACHING_CLIENT_NUTRITION_DISPLAY,
+  COACHING_CLIENT_TRACKER_CENTS, COACHING_CLIENT_TRACKER_DISPLAY,
+} from "@/lib/pricing"
 
 export const dynamic = "force-dynamic"
 
@@ -39,19 +50,6 @@ async function ownsRecord(prefix: string, email: string): Promise<boolean> {
   }
 }
 
-async function ownsCoaching(email: string): Promise<boolean> {
-  try {
-    const db = makeDb()
-    const result = await db.send(
-      new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })
-    )
-    if (!result.Item) return false
-    return result.Item.active === true
-  } catch {
-    return false
-  }
-}
-
 export async function GET() {
   const email = await runWithAmplifyServerContext({
     nextServerContext: { cookies },
@@ -70,6 +68,12 @@ export async function GET() {
       email: null,
       training: false, nutrition: false, tracker: false, coaching: false, masterclass: false,
       owns: { training: false, nutrition: false, tracker: false, coaching: false, masterclass: false },
+      offers: {
+        coachingClient: {
+          eligible: false,
+          training: null, nutrition: null, tracker: null,
+        },
+      },
       isAdmin: false,
     })
   }
@@ -81,6 +85,11 @@ export async function GET() {
   //    working exactly as before.
   //  - owns.*: raw customer entitlement, no admin bypass. Used by the
   //    hamburger drawer to render true ownership vs. available-to-add.
+  //  - offers.coachingClient: the same raw check drives client-price
+  //    eligibility so the drawer + sales pages can render preferred pricing
+  //    without duplicating logic. Pricing is authoritative on the server
+  //    (Stripe PaymentIntent routes re-check ownsCoachingRaw) — this payload
+  //    is display metadata only.
   const [training, nutrition, tracker, coaching, masterclass, ownsTraining, ownsNutrition, ownsTracker, ownsCoachingReal, ownsMasterclass] = await Promise.all([
     hasTrainingAccess(email),
     hasNutritionAccess(email),
@@ -90,9 +99,18 @@ export async function GET() {
     ownsRecord("training_access", email),
     ownsRecord("nutrition_access", email),
     ownsRecord("tracker_access", email),
-    ownsCoaching(email),
+    ownsCoachingRaw(email),
     ownsRecord("masterclass_access", email),
   ])
+
+  const coachingClientEligible = ownsCoachingReal
+  const productOffer = (
+    regularCents: number, regularDisplay: string,
+    clientCents: number, clientDisplay: string,
+  ) => coachingClientEligible ? {
+    regularCents, regularDisplay,
+    clientCents, clientDisplay,
+  } : null
 
   return NextResponse.json({
     email,
@@ -103,6 +121,14 @@ export async function GET() {
       tracker: ownsTracker,
       coaching: ownsCoachingReal,
       masterclass: ownsMasterclass,
+    },
+    offers: {
+      coachingClient: {
+        eligible: coachingClientEligible,
+        training: productOffer(COURSE_PRICE_CENTS, COURSE_PRICE_DISPLAY, COACHING_CLIENT_TRAINING_CENTS, COACHING_CLIENT_TRAINING_DISPLAY),
+        nutrition: productOffer(NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, COACHING_CLIENT_NUTRITION_CENTS, COACHING_CLIENT_NUTRITION_DISPLAY),
+        tracker: productOffer(TRACKER_PRICE_CENTS, TRACKER_PRICE_DISPLAY, COACHING_CLIENT_TRACKER_CENTS, COACHING_CLIENT_TRACKER_DISPLAY),
+      },
     },
     isAdmin: isAdminEmail(email),
   })

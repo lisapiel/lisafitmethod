@@ -34,3 +34,15 @@ export const COACHING_MTM_CENTS = 49700
 export const COACHING_3MONTH_DISPLAY = "$397"
 export const COACHING_MTM_DISPLAY = "$497"
 export const COACHING_FROM_DISPLAY = "$397/month"
+
+// ── Active coaching client price ──────────────────────────────────────────
+// Preferred one-time pricing for customers whose coaching_access record is
+// currently active. Enforced server-side in the Stripe PaymentIntent routes
+// against the authenticated session — never trust a client-supplied flag.
+// These prices do NOT apply to the Complete Foundations Bundle.
+export const COACHING_CLIENT_TRAINING_CENTS = 7700
+export const COACHING_CLIENT_TRAINING_DISPLAY = "$77"
+export const COACHING_CLIENT_NUTRITION_CENTS = 5700
+export const COACHING_CLIENT_NUTRITION_DISPLAY = "$57"
+export const COACHING_CLIENT_TRACKER_CENTS = 1700
+export const COACHING_CLIENT_TRACKER_DISPLAY = "$17"

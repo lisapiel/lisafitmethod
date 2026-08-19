@@ -248,6 +248,24 @@ export async function hasCoachingAccess(email: string): Promise<boolean> {
   }
 }
 
+// Raw active-coaching check with NO admin auto-grant. Use this anywhere the
+// question is "is this person actually paying for coaching right now?" —
+// specifically for coaching-client promotional pricing eligibility and for
+// the drawer's My Products Active/Available split. Admin capability must
+// never trigger the coaching-client price.
+export async function ownsCoachingRaw(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })
+    )
+    if (!result.Item) return false
+    return result.Item.active === true
+  } catch {
+    return false
+  }
+}
+
 export async function revokeCoachingAccess(email: string): Promise<void> {
   const db = makeDb()
   await db.send(

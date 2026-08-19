@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { fetchSiteSettings } from "@/lib/siteSettings"
+import CoachingClientPriceBadge from "@/components/CoachingClientPriceBadge.client"
 import {
   NUTRITION_COURSE_PRICE_DISPLAY,
   NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
@@ -119,6 +120,13 @@ export default async function NutritionPage() {
           --heading-scale: ${hs}; --body-scale: ${bs};
         }
       `}</style>
+
+      {/* Coaching-client price banner — only renders for authenticated active
+          coaching clients. Sits on the light strip between the header and the
+          dark hero so it reads as a personalized account note, not marketing. */}
+      <div style={{ padding: "24px 20px 0" }}>
+        <CoachingClientPriceBadge product="nutrition" />
+      </div>
 
       {/* HERO */}
       <section style={{ background: "#0a0a0a", padding: "120px 80px 100px" }} className="nutrition-hero">

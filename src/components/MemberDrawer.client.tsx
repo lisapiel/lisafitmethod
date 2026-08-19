@@ -10,6 +10,12 @@ import { signOut } from "aws-amplify/auth"
 // existing Masterclass code, routes, and entitlement records are untouched.
 type ProductId = "training" | "nutrition" | "tracker" | "coaching"
 
+interface ProductOffer {
+  regularCents: number
+  regularDisplay: string
+  clientCents: number
+  clientDisplay: string
+}
 interface AccessState {
   email: string | null
   isAdmin: boolean
@@ -20,6 +26,14 @@ interface AccessState {
     nutrition: boolean
     tracker: boolean
     coaching: boolean
+  }
+  // Server-computed coaching-client offer prices. Present only when the
+  // viewer has active coaching. Display-only — pricing is enforced by the
+  // Stripe PaymentIntent routes independently.
+  clientOffers: {
+    training: ProductOffer | null
+    nutrition: ProductOffer | null
+    tracker: ProductOffer | null
   }
 }
 
@@ -110,6 +124,11 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
             tracker: !!d.owns?.tracker,
             coaching: !!d.owns?.coaching,
           },
+          clientOffers: {
+            training: d.offers?.coachingClient?.training ?? null,
+            nutrition: d.offers?.coachingClient?.nutrition ?? null,
+            tracker: d.offers?.coachingClient?.tracker ?? null,
+          },
         })
       )
       .catch(() =>
@@ -117,6 +136,7 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
           email: null,
           isAdmin: false,
           owns: { training: false, nutrition: false, tracker: false, coaching: false },
+          clientOffers: { training: null, nutrition: null, tracker: null },
         })
       )
   }, [])
@@ -353,6 +373,26 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
         .lfm-drawer-product:hover { background: rgba(255,255,255,0.02); }
         .lfm-drawer-product:hover .lfm-drawer-product-name { color: #c8a97e; }
         .lfm-drawer-product:hover .lfm-drawer-product-action { color: #e8c98a; }
+        /* Client-price line — sits above the product description; small so it
+           doesn't dominate the row. Regular price rendered strikethrough. */
+        .lfm-drawer-product-price {
+          font-family: var(--font-dm-sans), sans-serif;
+          font-size: 0.72rem;
+          color: rgba(240, 230, 211, 0.7);
+          display: inline-flex;
+          gap: 6px;
+          align-items: baseline;
+          margin-top: 4px;
+        }
+        .lfm-drawer-product-price strong {
+          color: #e8c98a;
+          font-weight: 700;
+        }
+        .lfm-drawer-product-price-was {
+          color: rgba(240, 230, 211, 0.35);
+          text-decoration: line-through;
+          font-size: 0.65rem;
+        }
         /* Coaching-client offer chip — small, understated, not a sales popup. */
         .lfm-drawer-offer-badge {
           display: inline-block;
@@ -480,6 +520,12 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
                       </p>
                       {availableProducts.map((p) => {
                         const showOffer = showCoachingOffer && p.offerEligibleForCoachingClient
+                        // Only training / nutrition / tracker have client offers
+                        // (coaching itself doesn't discount itself). Lookup on
+                        // the ProductId, safely narrowed with a type predicate.
+                        const offer = showOffer && (p.id === "training" || p.id === "nutrition" || p.id === "tracker")
+                          ? access?.clientOffers[p.id]
+                          : null
                         return (
                           <Link
                             key={p.id}
@@ -491,6 +537,12 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
                               {p.label}
                               {showOffer && (
                                 <span className="lfm-drawer-offer-badge">Coaching client offer</span>
+                              )}
+                              {offer && (
+                                <span className="lfm-drawer-product-price">
+                                  <strong>{offer.clientDisplay}</strong>
+                                  <span className="lfm-drawer-product-price-was">{offer.regularDisplay}</span>
+                                </span>
                               )}
                               <span className="lfm-drawer-product-desc">{p.description}</span>
                             </span>

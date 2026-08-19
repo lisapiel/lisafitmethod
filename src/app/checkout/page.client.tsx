@@ -1,5 +1,5 @@
 "use client"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
@@ -8,6 +8,9 @@ import {
   NUTRITION_COURSE_PRICE_CENTS, NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
   BUNDLE_PRICE_CENTS, BUNDLE_PRICE_DISPLAY, BUNDLE_INDIVIDUAL_TOTAL_DISPLAY, BUNDLE_SAVINGS_DISPLAY,
   TRACKER_PRICE_CENTS, TRACKER_PRICE_DISPLAY,
+  COACHING_CLIENT_TRAINING_CENTS, COACHING_CLIENT_TRAINING_DISPLAY,
+  COACHING_CLIENT_NUTRITION_CENTS, COACHING_CLIENT_NUTRITION_DISPLAY,
+  COACHING_CLIENT_TRACKER_CENTS, COACHING_CLIENT_TRACKER_DISPLAY,
 } from "@/lib/pricing"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
@@ -46,17 +49,27 @@ const PRODUCTS = [
   },
 ]
 
-function basePriceCents(product: Product | null): number {
+// Bundle is NEVER eligible for coaching-client pricing — coaching credit is
+// its separate acquisition mechanic. Training and Nutrition each swap in the
+// coaching-client cents amount when clientPrice=true.
+function basePriceCents(product: Product | null, clientPrice = false): number {
   if (!product) return 0
   if (product === "bundle") return BUNDLE_PRICE_CENTS
-  if (product === "nutrition") return NUTRITION_COURSE_PRICE_CENTS
-  return COURSE_PRICE_CENTS
+  if (product === "nutrition") return clientPrice ? COACHING_CLIENT_NUTRITION_CENTS : NUTRITION_COURSE_PRICE_CENTS
+  return clientPrice ? COACHING_CLIENT_TRAINING_CENTS : COURSE_PRICE_CENTS
 }
 
-function displayTotal(product: Product | null, withTracker: boolean): string {
+function trackerAddOnCents(clientPrice = false): number {
+  return clientPrice ? COACHING_CLIENT_TRACKER_CENTS : TRACKER_PRICE_CENTS
+}
+function trackerAddOnDisplay(clientPrice = false): string {
+  return clientPrice ? COACHING_CLIENT_TRACKER_DISPLAY : TRACKER_PRICE_DISPLAY
+}
+
+function displayTotal(product: Product | null, withTracker: boolean, clientPrice = false): string {
   if (!product && !withTracker) return "—"
-  if (!product) return TRACKER_PRICE_DISPLAY
-  const total = basePriceCents(product) + (withTracker ? TRACKER_PRICE_CENTS : 0)
+  if (!product) return trackerAddOnDisplay(clientPrice)
+  const total = basePriceCents(product, clientPrice) + (withTracker ? trackerAddOnCents(clientPrice) : 0)
   return `$${(total / 100).toFixed(0)}`
 }
 
@@ -310,10 +323,29 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
   const [finalAmount, setFinalAmount] = useState(basePriceCents(initialProduct ?? null))
   const [loadingIntent, setLoadingIntent] = useState(false)
   const [intentError, setIntentError] = useState<string | null>(null)
+  // Coaching-client eligibility — display-only. The Stripe PaymentIntent
+  // route independently re-checks the raw coaching_access record against the
+  // authenticated session before charging, so a tampered UI can't force a
+  // discount. This state is just to show the correct price + client-price
+  // chip pre-checkout.
+  const [coachingClient, setCoachingClient] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/member/access")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (!cancelled && d?.offers?.coachingClient?.eligible) setCoachingClient(true) })
+      .catch(() => { /* ignore — defaults to false = regular pricing */ })
+    return () => { cancelled = true }
+  }, [])
 
   const paymentStarted = !!clientSecret
   const nothingSelected = !selectedProduct
   const isBundle = selectedProduct === "bundle"
+  // Bundle is never eligible for the coaching-client price. Everywhere below
+  // that reads "should this display show client pricing?" combines the raw
+  // eligibility with product-specific eligibility.
+  const useClientPriceForSelected = coachingClient && selectedProduct !== null && selectedProduct !== "bundle"
 
   // Toggle: clicking a selected card deselects it
   const handleSelectProduct = (p: Product) => {
@@ -322,7 +354,8 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
     setClientSecret(null)
     setDiscountPct(0)
     setConfirmed(false)
-    setFinalAmount(basePriceCents(next) + (includesTracker ? TRACKER_PRICE_CENTS : 0))
+    const eligible = coachingClient && next !== null && next !== "bundle"
+    setFinalAmount(basePriceCents(next, eligible) + (includesTracker ? trackerAddOnCents(eligible) : 0))
   }
 
   const handleToggleTracker = () => {
@@ -331,7 +364,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
     setIncludesTracker(next)
     setClientSecret(null)
     setConfirmed(false)
-    setFinalAmount(basePriceCents(selectedProduct) + (next ? TRACKER_PRICE_CENTS : 0))
+    setFinalAmount(basePriceCents(selectedProduct, useClientPriceForSelected) + (next ? trackerAddOnCents(useClientPriceForSelected) : 0))
   }
 
   const handleEmailNext = useCallback((submittedEmail: string, submittedName: string) => {
@@ -358,14 +391,14 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
       }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (basePriceCents(selectedProduct) + (includesTracker ? TRACKER_PRICE_CENTS : 0)))
+      setFinalAmount(data.finalAmount ?? (basePriceCents(selectedProduct, useClientPriceForSelected) + (includesTracker ? trackerAddOnCents(useClientPriceForSelected) : 0)))
     } catch {
       setIntentError("Something went wrong. Please try again.")
       setEmail(null); setConfirmed(false)
     } finally {
       setLoadingIntent(false)
     }
-  }, [email, name, includesTracker, selectedProduct, memberDiscount])
+  }, [email, name, includesTracker, selectedProduct, memberDiscount, useClientPriceForSelected])
 
   const handleApplyPromo = useCallback(async (promoCode: string): Promise<{ error: string | null }> => {
     if (!selectedProduct) return { error: "No product selected." }
@@ -379,18 +412,18 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
       if (!res.ok) return { error: data.error === "Invalid promo code" ? "That promo code isn't valid. Please check and try again." : "Something went wrong." }
       setClientSecret(data.clientSecret!)
       setDiscountPct(data.discountPct ?? 0)
-      setFinalAmount(data.finalAmount ?? (basePriceCents(selectedProduct) + (includesTracker ? TRACKER_PRICE_CENTS : 0)))
+      setFinalAmount(data.finalAmount ?? (basePriceCents(selectedProduct, useClientPriceForSelected) + (includesTracker ? trackerAddOnCents(useClientPriceForSelected) : 0)))
       return { error: null }
     } catch {
       return { error: "Something went wrong." }
     }
-  }, [email, name, includesTracker, selectedProduct, memberDiscount])
+  }, [email, name, includesTracker, selectedProduct, memberDiscount, useClientPriceForSelected])
 
   const handleBack = useCallback(() => {
     setEmail(null); setName(null); setConfirmed(false)
     setClientSecret(null); setDiscountPct(0)
-    setFinalAmount(basePriceCents(selectedProduct) + (includesTracker ? TRACKER_PRICE_CENTS : 0))
-  }, [selectedProduct, includesTracker])
+    setFinalAmount(basePriceCents(selectedProduct, useClientPriceForSelected) + (includesTracker ? trackerAddOnCents(useClientPriceForSelected) : 0))
+  }, [selectedProduct, includesTracker, useClientPriceForSelected])
 
   const stripeAppearance = {
     theme: "night" as const,
@@ -496,6 +529,11 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
           {PRODUCTS.map((p) => {
             const isSelected = selectedProduct === p.id
             const isDisabled = isBundle && p.id !== "bundle"
+            const eligibleForClientPrice = coachingClient && (p.id === "training" || p.id === "nutrition")
+            const displayPrice = eligibleForClientPrice
+              ? (p.id === "training" ? COACHING_CLIENT_TRAINING_DISPLAY : COACHING_CLIENT_NUTRITION_DISPLAY)
+              : p.price
+            const displayWas = eligibleForClientPrice ? p.price : p.was
             // Visual class logic
             let cardClass = "product-card"
             if (isSelected) cardClass += " product-card--selected"
@@ -519,10 +557,15 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
                       {p.name}
                     </p>
                     <p style={{ fontSize: 11, color: isSelected ? "rgba(240,230,211,0.5)" : "#555", lineHeight: 1.4 }}>{p.tagline}</p>
+                    {eligibleForClientPrice && (
+                      <p style={{ fontSize: 9, color: "#c9a96e", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 6 }}>
+                        Coaching client price
+                      </p>
+                    )}
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0, marginLeft: 16 }}>
-                    <p style={{ fontSize: 22, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>{p.price}</p>
-                    <p style={{ fontSize: 11, color: "#444", textDecoration: "line-through", marginTop: 2 }}>{p.was}</p>
+                    <p style={{ fontSize: 22, fontWeight: 700, color: "#c9a96e", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>{displayPrice}</p>
+                    <p style={{ fontSize: 11, color: "#444", textDecoration: "line-through", marginTop: 2 }}>{displayWas}</p>
                   </div>
                 </div>
 
@@ -567,7 +610,10 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
                 <p style={{ fontSize: 11, color: "#555" }}>Log every workout. Beat last week.</p>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <p style={{ fontSize: 16, fontWeight: 700, color: includesTracker ? "#c9a96e" : "#666", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>+{TRACKER_PRICE_DISPLAY}</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: includesTracker ? "#c9a96e" : "#666", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1 }}>+{trackerAddOnDisplay(coachingClient)}</p>
+                {coachingClient && (
+                  <p style={{ fontSize: 10, color: "#666", textDecoration: "line-through", marginTop: 2, lineHeight: 1 }}>+{TRACKER_PRICE_DISPLAY}</p>
+                )}
                 <p style={{ fontSize: 9, color: "#444", letterSpacing: "0.06em", marginTop: 3 }}>
                   {includesTracker ? "● Added" : "Add →"}
                 </p>
@@ -580,7 +626,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
             <span style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#444" }}>Order total</span>
             <div style={{ textAlign: "right" }}>
               <span style={{ fontSize: 24, fontWeight: 700, color: selectedProduct || includesTracker ? "#c9a96e" : "#333", fontFamily: "var(--font-montserrat), sans-serif" }}>
-                {displayTotal(selectedProduct, includesTracker)}
+                {displayTotal(selectedProduct, includesTracker, useClientPriceForSelected || (!selectedProduct && coachingClient))}
               </span>
               {(selectedProduct || includesTracker) && (
                 <span style={{ fontSize: 10, color: "#444", marginLeft: 8, letterSpacing: "0.08em" }}>one-time</span>
