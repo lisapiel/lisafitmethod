@@ -855,7 +855,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
-    subject: "You're in :) Let's get to work !",
+    subject: "You're in :) Let's get to work!",
     html: `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">

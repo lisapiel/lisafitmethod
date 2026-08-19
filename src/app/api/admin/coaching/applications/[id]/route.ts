@@ -311,7 +311,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: application.email,
-      subject: "You're approved for coaching !",
+      subject: "You're approved for coaching",
       html: approvalEmail(application.name, acceptUrl),
     }).catch((err) => console.error("Approval email failed:", err))
 
