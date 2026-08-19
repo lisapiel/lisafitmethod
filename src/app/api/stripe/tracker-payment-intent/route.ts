@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 import Stripe from "stripe"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { ownsCoachingRaw } from "@/lib/authTokens"
+import { ownsCoachingRaw, ownsTrackerRaw } from "@/lib/authTokens"
 import { COACHING_CLIENT_TRACKER_CENTS } from "@/lib/pricing"
 
 export const dynamic = "force-dynamic"
@@ -33,10 +33,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 })
     }
 
-    // Eligibility resolved from the authenticated Cognito session — the
-    // buyer's typed email is irrelevant for pricing. Admin auto-grant is
-    // bypassed via ownsCoachingRaw.
+    // Duplicate-purchase gate — refuse a new PaymentIntent if the
+    // authenticated user already owns the tracker. Uses the raw check so
+    // admin auto-grant doesn't accidentally block admin testing (an admin
+    // has no tracker_access record unless they've actually bought it).
     const sessionEmail = await getSessionEmail()
+    if (sessionEmail) {
+      const alreadyOwns = await ownsTrackerRaw(sessionEmail)
+      if (alreadyOwns) {
+        return NextResponse.json(
+          { error: "already-owned", product: "tracker" },
+          { status: 409 }
+        )
+      }
+    }
+
+    // Coaching-client eligibility resolved from the authenticated Cognito
+    // session — the buyer's typed email is irrelevant for pricing. Admin
+    // auto-grant is bypassed via ownsCoachingRaw.
     const coachingClientEligible = sessionEmail != null ? await ownsCoachingRaw(sessionEmail) : false
     const amount = coachingClientEligible ? COACHING_CLIENT_TRACKER_CENTS : TRACKER_PRICE_CENTS
 

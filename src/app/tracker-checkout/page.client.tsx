@@ -161,6 +161,9 @@ export function TrackerCheckoutClient() {
   // route independently re-checks against the authenticated session before
   // charging. A tampered UI can't force a discount.
   const [coachingClient, setCoachingClient] = useState(false)
+  // True ownership — swaps the payment form for an "already owned" panel.
+  // Server also refuses with 409 if a request slips through.
+  const [ownsTracker, setOwnsTracker] = useState(false)
 
   // Pre-fill email if logged in
   useEffect(() => {
@@ -177,8 +180,12 @@ export function TrackerCheckoutClient() {
     let cancelled = false
     fetch("/api/member/access")
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (!cancelled && d?.offers?.coachingClient?.eligible) setCoachingClient(true) })
-      .catch(() => { /* defaults to regular price */ })
+      .then((d) => {
+        if (cancelled || !d) return
+        if (d.offers?.coachingClient?.eligible) setCoachingClient(true)
+        if (d.owns?.tracker === true) setOwnsTracker(true)
+      })
+      .catch(() => { /* defaults to no ownership + regular price */ })
     return () => { cancelled = true }
   }, [])
 
@@ -315,7 +322,25 @@ export function TrackerCheckoutClient() {
             Complete your purchase
           </p>
 
-          {loadingIntent ? (
+          {ownsTracker ? (
+            /* Owner short-circuit: never render the payment form for a user
+               who already owns the tracker. Server also 409s if anything
+               slips through the UI. */
+            <div style={{ paddingTop: 20, textAlign: "center" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#5c9e6a", marginBottom: 12 }}>
+                Already owned
+              </p>
+              <p style={{ fontSize: 15, color: "#f0e6d3", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 24 }}>
+                You already own <strong>Progress Tracker</strong>. No need to buy it again.
+              </p>
+              <Link
+                href="/my-tracker"
+                style={{ display: "inline-block", background: "#c9a96e", color: "#0a0a0a", padding: "14px 28px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", textDecoration: "none" }}
+              >
+                Open Progress Tracker →
+              </Link>
+            </div>
+          ) : loadingIntent ? (
             <div style={{ padding: "48px 0", textAlign: "center", color: "#555", fontSize: 13, letterSpacing: "0.1em" }}>
               Preparing secure payment…
             </div>

@@ -20,38 +20,105 @@ interface AccessOffers {
     tracker: OfferShape | null
   }
 }
+interface AccessResponse {
+  offers?: AccessOffers
+  owns?: { training?: boolean; nutrition?: boolean; tracker?: boolean }
+}
 
 const CHECKOUT_PATH: Record<ProductKey, string> = {
   training: "/checkout?product=training",
   nutrition: "/checkout?product=nutrition",
   tracker: "/tracker-checkout",
 }
+const PORTAL_PATH: Record<ProductKey, string> = {
+  training: "/training-foundations",
+  nutrition: "/nutrition-foundations",
+  tracker: "/my-tracker",
+}
+const PRODUCT_LABEL: Record<ProductKey, string> = {
+  training: "Training Foundations",
+  nutrition: "Nutrition Foundations",
+  tracker: "Progress Tracker",
+}
 
-// Subtle, restrained badge that appears only for authenticated active
-// coaching clients on the public sales pages. Pricing is display-only — the
-// server-side Stripe PaymentIntent routes independently re-check the raw
-// coaching_access record from the authenticated session before charging.
+// Subtle, restrained badge on the public sales pages. Renders in one of three
+// states based on the authenticated viewer:
+//   - Not eligible / logged out: nothing at all (public sees the regular
+//     hero price on the rest of the page).
+//   - Eligible + doesn't own the product: "Your coaching client price"
+//     with the discount + purchase CTA.
+//   - Already owns the product: "You already own X — Open →" state, never
+//     a purchase CTA. Ownership check uses the raw entitlement (no admin
+//     auto-grant) via /api/member/access `owns.*`.
 export default function CoachingClientPriceBadge({ product }: { product: ProductKey }) {
-  const [offer, setOffer] = useState<OfferShape | null>(null)
+  const [state, setState] = useState<
+    | { kind: "hidden" }
+    | { kind: "offer"; offer: OfferShape }
+    | { kind: "owned" }
+  >({ kind: "hidden" })
 
   useEffect(() => {
     let cancelled = false
     fetch("/api/member/access")
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => {
+      .then((d: AccessResponse | null) => {
         if (cancelled) return
-        const offers = d?.offers as AccessOffers | undefined
-        if (offers?.coachingClient?.eligible) {
-          const o = offers.coachingClient[product]
-          if (o) setOffer(o)
+        if (d?.owns?.[product] === true) {
+          setState({ kind: "owned" })
+          return
+        }
+        if (d?.offers?.coachingClient?.eligible) {
+          const o = d.offers.coachingClient[product]
+          if (o) setState({ kind: "offer", offer: o })
         }
       })
-      .catch(() => { /* silent — logged-out / non-eligible sees regular pricing */ })
+      .catch(() => { /* silent — logged-out sees regular hero pricing */ })
     return () => { cancelled = true }
   }, [product])
 
-  if (!offer) return null
+  if (state.kind === "hidden") return null
 
+  if (state.kind === "owned") {
+    return (
+      <div style={{
+        background: "rgba(92, 158, 106, 0.08)",
+        border: "1px solid rgba(92, 158, 106, 0.35)",
+        borderRadius: 6,
+        padding: "14px 18px",
+        margin: "0 auto 20px",
+        maxWidth: 560,
+        textAlign: "center",
+      }}>
+        <p style={{
+          fontFamily: "var(--font-montserrat), 'Helvetica Neue', sans-serif",
+          fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase",
+          color: "#5c9e6a", margin: "0 0 6px",
+        }}>
+          You already own this
+        </p>
+        <p style={{
+          fontFamily: "var(--font-montserrat), 'Helvetica Neue', sans-serif",
+          fontSize: 15, color: "#1a1a1a", margin: "0 0 10px", lineHeight: 1.5,
+        }}>
+          You already own <strong>{PRODUCT_LABEL[product]}</strong>.
+        </p>
+        <Link
+          href={PORTAL_PATH[product]}
+          style={{
+            display: "inline-block", background: "#0a0a0a", color: "#f5f2ee",
+            padding: "8px 20px",
+            fontFamily: "var(--font-montserrat), 'Helvetica Neue', sans-serif",
+            fontSize: 11, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase",
+            textDecoration: "none", borderRadius: 3,
+          }}
+        >
+          Open {PRODUCT_LABEL[product]} →
+        </Link>
+      </div>
+    )
+  }
+
+  const { offer } = state
   return (
     <div style={{
       background: "rgba(201, 169, 110, 0.08)",

@@ -266,6 +266,46 @@ export async function ownsCoachingRaw(email: string): Promise<boolean> {
   }
 }
 
+// Raw ownership checks for the three separately sold one-time products.
+// These bypass the admin auto-grant so the duplicate-purchase gate on the
+// PaymentIntent routes doesn't accidentally block an admin from testing
+// checkouts or, conversely, over-report ownership. A user "owns" the product
+// once their access record exists — same semantics the drawer's Active
+// split already uses via /api/member/access.
+export async function ownsTrainingRaw(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `training_access_${email.toLowerCase()}` } })
+    )
+    return !!result.Item
+  } catch {
+    return false
+  }
+}
+export async function ownsNutritionRaw(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `nutrition_access_${email.toLowerCase()}` } })
+    )
+    return !!result.Item
+  } catch {
+    return false
+  }
+}
+export async function ownsTrackerRaw(email: string): Promise<boolean> {
+  try {
+    const db = makeDb()
+    const result = await db.send(
+      new GetCommand({ TableName: TABLE, Key: { userId: `tracker_access_${email.toLowerCase()}` } })
+    )
+    return !!result.Item
+  } catch {
+    return false
+  }
+}
+
 export async function revokeCoachingAccess(email: string): Promise<void> {
   const db = makeDb()
   await db.send(

@@ -329,13 +329,26 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
   // discount. This state is just to show the correct price + client-price
   // chip pre-checkout.
   const [coachingClient, setCoachingClient] = useState(false)
+  // Real ownership for each of the three products, sourced from the raw
+  // /api/member/access `owns` object. Used to block duplicate purchases on
+  // the UI side (server also refuses with 409). Bundle is never blocked
+  // from purchase based on individual ownership.
+  const [owns, setOwns] = useState({ training: false, nutrition: false, tracker: false })
 
   useEffect(() => {
     let cancelled = false
     fetch("/api/member/access")
       .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (!cancelled && d?.offers?.coachingClient?.eligible) setCoachingClient(true) })
-      .catch(() => { /* ignore — defaults to false = regular pricing */ })
+      .then((d) => {
+        if (cancelled || !d) return
+        if (d.offers?.coachingClient?.eligible) setCoachingClient(true)
+        setOwns({
+          training: !!d.owns?.training,
+          nutrition: !!d.owns?.nutrition,
+          tracker: !!d.owns?.tracker,
+        })
+      })
+      .catch(() => { /* defaults to no ownership + regular price */ })
     return () => { cancelled = true }
   }, [])
 
@@ -346,6 +359,12 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
   // that reads "should this display show client pricing?" combines the raw
   // eligibility with product-specific eligibility.
   const useClientPriceForSelected = coachingClient && selectedProduct !== null && selectedProduct !== "bundle"
+  // True when the selected product is one the user already owns. Bundle is
+  // exempt — an existing training/nutrition owner may still legitimately
+  // buy the bundle (e.g. to earn the coaching credit).
+  const alreadyOwnsSelected = selectedProduct === "training" ? owns.training
+    : selectedProduct === "nutrition" ? owns.nutrition
+    : false
 
   // Toggle: clicking a selected card deselects it
   const handleSelectProduct = (p: Product) => {
@@ -528,8 +547,11 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
           {/* Product cards */}
           {PRODUCTS.map((p) => {
             const isSelected = selectedProduct === p.id
-            const isDisabled = isBundle && p.id !== "bundle"
-            const eligibleForClientPrice = coachingClient && (p.id === "training" || p.id === "nutrition")
+            // Bundle exemption preserved: bundle is never blocked based on
+            // owning training or nutrition individually (Bundle credit rule).
+            const isOwned = (p.id === "training" && owns.training) || (p.id === "nutrition" && owns.nutrition)
+            const isDisabled = (isBundle && p.id !== "bundle") || isOwned
+            const eligibleForClientPrice = coachingClient && (p.id === "training" || p.id === "nutrition") && !isOwned
             const displayPrice = eligibleForClientPrice
               ? (p.id === "training" ? COACHING_CLIENT_TRAINING_DISPLAY : COACHING_CLIENT_NUTRITION_DISPLAY)
               : p.price
@@ -570,7 +592,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
                 </div>
 
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 10 }}>
-                  {isDisabled ? (
+                  {isDisabled && !isOwned ? (
                     <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>✓ Included in bundle</span>
                   ) : (
                     p.includes.map((item) => (
@@ -580,19 +602,40 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-                  <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.3)", padding: "3px 8px" }}>
-                    {p.badge}
-                  </span>
-                  {isSelected
-                    ? <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>● Selected</span>
-                    : <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.1em" }}>Select →</span>
-                  }
+                  {isOwned ? (
+                    <>
+                      <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#5c9e6a", border: "1px solid rgba(92,158,106,0.4)", padding: "3px 8px" }}>
+                        Already owned
+                      </span>
+                      <Link
+                        href={p.id === "training" ? "/training-foundations" : "/nutrition-foundations"}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em", textDecoration: "none" }}
+                      >
+                        Open {p.name} →
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#c9a96e", border: "1px solid rgba(201,169,110,0.3)", padding: "3px 8px" }}>
+                        {p.badge}
+                      </span>
+                      {isSelected
+                        ? <span style={{ fontSize: 10, color: "#c9a96e", letterSpacing: "0.1em" }}>● Selected</span>
+                        : <span style={{ fontSize: 10, color: "#555", letterSpacing: "0.1em" }}>Select →</span>
+                      }
+                    </>
+                  )}
                 </div>
               </div>
             )
           })}
 
-          {/* Tracker add-on */}
+          {/* Tracker add-on — hidden when the user already owns it, so an owner
+              can't accidentally re-purchase it as part of a course checkout.
+              Server also refuses with 409 if the client sends `includesTracker`
+              for an owned account. */}
+          {!owns.tracker && (
           <div style={{ marginTop: 20 }}>
             <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#444", marginBottom: 10 }}>
               Optional add-on
@@ -620,6 +663,7 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
               </div>
             </div>
           </div>
+          )}
 
           {/* Order total */}
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid #1a1a1a", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -648,6 +692,25 @@ export function CheckoutClient({ product: initialProduct, memberDiscount = false
               <p style={{ fontSize: 13, color: "#444", fontFamily: "var(--font-montserrat), sans-serif", letterSpacing: "0.05em", lineHeight: 1.8 }}>
                 Select a course on the left<br />to continue.
               </p>
+            </div>
+          ) : alreadyOwnsSelected ? (
+            /* Owner short-circuit: never load the payment form for a product
+               the user already owns. Server also 409s if a request slips
+               through. Bundle is exempt at the alreadyOwnsSelected level
+               above — no bundle rule is affected here. */
+            <div style={{ paddingTop: 40, textAlign: "center" }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#5c9e6a", marginBottom: 12 }}>
+                Already owned
+              </p>
+              <p style={{ fontSize: 15, color: "#f0e6d3", fontFamily: "var(--font-montserrat), sans-serif", lineHeight: 1.6, marginBottom: 24, maxWidth: 320, margin: "0 auto 24px" }}>
+                You already own <strong>{selectedProduct === "training" ? "Training Foundations" : "Nutrition Foundations"}</strong>. No need to buy it again.
+              </p>
+              <Link
+                href={selectedProduct === "training" ? "/training-foundations" : "/nutrition-foundations"}
+                style={{ display: "inline-block", background: "#c9a96e", color: "#0a0a0a", padding: "14px 28px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", textDecoration: "none" }}
+              >
+                Open {selectedProduct === "training" ? "Training Foundations" : "Nutrition Foundations"} →
+              </Link>
             </div>
           ) : loadingIntent ? (
             <div style={{ padding: "48px 0", textAlign: "center", color: "#555", fontSize: 13, letterSpacing: "0.1em" }}>

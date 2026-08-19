@@ -4,7 +4,10 @@ import Stripe from "stripe"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { getPromoCodes } from "@/lib/promoCodes"
-import { hasTrainingAccess, hasNutritionAccess, ownsCoachingRaw } from "@/lib/authTokens"
+import {
+  hasTrainingAccess, hasNutritionAccess,
+  ownsCoachingRaw, ownsTrainingRaw, ownsNutritionRaw, ownsTrackerRaw,
+} from "@/lib/authTokens"
 import {
   NUTRITION_COURSE_PRICE_CENTS,
   BUNDLE_PRICE_CENTS,
@@ -73,11 +76,40 @@ export async function POST(request: NextRequest) {
     const isNutrition = product === "nutrition"
     const isBundle = product === "bundle"
 
+    const sessionEmail = await getSessionEmail()
+
+    // ── Duplicate-purchase gate ───────────────────────────────────────────
+    // Refuse to create a PaymentIntent for a product the authenticated user
+    // already owns. Bundle is intentionally exempt — a bundle purchase may
+    // legitimately happen for someone who already owns Training or Nutrition
+    // individually (e.g. to earn the $137 coaching credit). Ownership is
+    // resolved via raw checks that skip the admin auto-grant.
+    if (sessionEmail && !isBundle) {
+      const alreadyOwns = isNutrition
+        ? await ownsNutritionRaw(sessionEmail)
+        : await ownsTrainingRaw(sessionEmail)
+      if (alreadyOwns) {
+        return NextResponse.json(
+          { error: "already-owned", product: isNutrition ? "nutrition" : "training" },
+          { status: 409 }
+        )
+      }
+    }
+    // The tracker add-on can't be purchased separately here — same protection.
+    if (sessionEmail && includesTracker && !isNutrition && !isBundle) {
+      const alreadyOwnsTracker = await ownsTrackerRaw(sessionEmail)
+      if (alreadyOwnsTracker) {
+        return NextResponse.json(
+          { error: "already-owned", product: "tracker" },
+          { status: 409 }
+        )
+      }
+    }
+
     // ── Coaching-client pricing eligibility ──────────────────────────────
     // Determined SERVER-SIDE from the authenticated Cognito session, never
     // from anything the client sends. Admin auto-grant is deliberately
     // bypassed (ownsCoachingRaw). The Bundle is excluded per business rule.
-    const sessionEmail = await getSessionEmail()
     const coachingClientEligible = sessionEmail != null && !isBundle
       ? await ownsCoachingRaw(sessionEmail)
       : false
