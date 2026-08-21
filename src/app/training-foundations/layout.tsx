@@ -1,60 +1,41 @@
-"use client"
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+import { fetchAuthSession } from "aws-amplify/auth/server"
+import { runWithAmplifyServerContext } from "@/lib/amplify-server"
+import { hasTrainingAccess } from "@/lib/authTokens"
+import TrainingFoundationsShell from "./TrainingFoundationsShell.client"
 
-import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
-import CourseHeader from "@/components/training/CourseHeader"
-import CourseSidebar from "@/components/training/CourseSidebar"
-import { CourseProgressProvider } from "@/components/training/CourseProgressContext"
+// Server-side entitlement gate. Middleware only enforces authentication —
+// this layout enforces product ownership so a logged-in user without a
+// training purchase can't reach the course modules by pasting the URL.
+// hasTrainingAccess admin-bypasses via isAdminEmail, so authorized
+// admins still get in. Unowned users are routed to the training
+// purchase page rather than the public homepage.
+//
+// The existing course-shell UI (header, sidebar, scroll area, progress
+// context) is a client component; this server layout gates access and
+// then delegates rendering to it.
+export default async function TrainingFoundationsLayout({ children }: { children: React.ReactNode }) {
+  const email = await runWithAmplifyServerContext({
+    nextServerContext: { cookies },
+    operation: async (contextSpec): Promise<string | null> => {
+      try {
+        const session = await fetchAuthSession(contextSpec)
+        return (session.tokens?.idToken?.payload?.email as string | undefined) ?? null
+      } catch {
+        return null
+      }
+    },
+  })
 
-export default function TrainingFoundationsLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const pathname = usePathname()
+  if (!email) {
+    redirect("/login?redirect=/training-foundations")
+  }
 
-  // Reset scroll position when navigating to a new page
-  useEffect(() => {
-    const el = document.querySelector(".course-scroll-area")
-    if (el) el.scrollTop = 0
-  }, [pathname])
+  const hasAccess = await hasTrainingAccess(email as string)
+  if (!hasAccess) {
+    redirect("/checkout?product=training")
+  }
 
-  return (
-    <CourseProgressProvider>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100dvh",
-          overflow: "hidden",
-          background: "#0a0a0a",
-          color: "#f0e6d3",
-          fontFamily: "var(--font-montserrat), sans-serif",
-          fontWeight: 300,
-          lineHeight: 1.35,
-        }}
-      >
-        <CourseHeader onMenuToggle={() => setSidebarOpen((v) => !v)} />
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <CourseSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              scrollbarWidth: "thin",
-            }}
-            className="course-scroll-area"
-          >
-            <style>{`
-              .course-scroll-area::-webkit-scrollbar { width: 4px; }
-              .course-scroll-area::-webkit-scrollbar-thumb { background: #2a2a2a; }
-              .course-scroll-area [id] { scroll-margin-top: 1rem; }
-              @media (max-width: 768px) {
-                .course-scroll-area { padding-top: 3.5rem; }
-                .course-scroll-area [id] { scroll-margin-top: 4.5rem; }
-              }
-            `}</style>
-            {children}
-          </div>
-        </div>
-      </div>
-    </CourseProgressProvider>
-  )
+  return <TrainingFoundationsShell>{children}</TrainingFoundationsShell>
 }
