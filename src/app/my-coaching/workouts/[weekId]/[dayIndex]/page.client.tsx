@@ -64,6 +64,11 @@ type PrevSetData = Array<{ exerciseId: string; setNumber: number; weight: string
 
 type ExerciseInfo = {
   name: string
+  // videoS3Key resolved from the canonical exercise library. Takes
+  // precedence over the videoS3Key that was copied into the program's
+  // weeks JSON at save time — older or bulk-created programs may have
+  // missing/stale embedded keys, and the library is the source of truth.
+  videoS3Key: string
   primaryMuscle: string | null
   secondaryMuscles: string[]
   equipment: string[]
@@ -71,6 +76,15 @@ type ExerciseInfo = {
   execution: string | null
   coachingCues: string[]
   commonMistakes: string[]
+}
+
+// Canonical library first; fall back to the embedded program value so a
+// coach who intentionally overrode the video (or a program built before
+// the library backfill) still renders. Returns an empty string when
+// neither source has a key — callers gate their thumbnail/play button
+// on the returned value being truthy.
+function videoKeyFor(ex: { exerciseId: string; videoS3Key: string }, info?: ExerciseInfo): string {
+  return info?.videoS3Key || ex.videoS3Key || ""
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -185,10 +199,14 @@ function WarmupCooldownDisplay({
   label,
   data,
   onVideoClick,
+  resolveVideoKey,
 }: {
   label: "Warmup" | "Cooldown"
   data: WarmupCooldown
   onVideoClick: (key: string, name: string) => void
+  // Resolver so warm-up/cool-down thumbnails pick up the canonical
+  // library video even when the program's embedded videoS3Key is empty.
+  resolveVideoKey: (ex: { exerciseId: string; videoS3Key: string }) => string
 }) {
   const hasContent = data.notes || data.exercises.length > 0
   const [open, setOpen] = useState(true)
@@ -231,19 +249,21 @@ function WarmupCooldownDisplay({
 
           {data.exercises.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {data.exercises.map((ex, i) => (
+              {data.exercises.map((ex, i) => {
+                const videoKey = resolveVideoKey(ex)
+                return (
                 <div
                   key={i}
                   style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 10px", background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6 }}
                 >
                   <div
-                    onClick={() => ex.videoS3Key && onVideoClick(ex.videoS3Key, ex.name)}
-                    style={{ width: 42, height: 42, borderRadius: 4, overflow: "hidden", background: "#f0ede8", flexShrink: 0, cursor: ex.videoS3Key ? "pointer" : "default", position: "relative" }}
+                    onClick={() => videoKey && onVideoClick(videoKey, ex.name)}
+                    style={{ width: 42, height: 42, borderRadius: 4, overflow: "hidden", background: "#f0ede8", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
                   >
-                    {ex.videoS3Key ? (
+                    {videoKey ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={cdnThumb(ex.videoS3Key)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={cdnThumb(videoKey)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.18)" }}>
                           <div style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>
@@ -268,7 +288,8 @@ function WarmupCooldownDisplay({
                     )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
@@ -655,7 +676,10 @@ function SupersetBlock({
           )
         })}
       </div>
-      {group.exercises.map(({ index, ex }, gi) => (
+      {group.exercises.map(({ index, ex }, gi) => {
+        const exInfo = info[ex.exerciseId]
+        const videoKey = videoKeyFor(ex, exInfo)
+        return (
         <div key={index} style={{ marginBottom: gi === group.exercises.length - 1 ? 0 : 8 }}>
           <p style={{
             fontFamily: "var(--font-dm-sans), sans-serif",
@@ -668,13 +692,15 @@ function SupersetBlock({
             ex={ex}
             exIdx={index}
             sets={(setMaps[index] ?? []) as ExtendedSetEntry[]}
-            info={info[ex.exerciseId]}
+            info={exInfo}
+            videoKey={videoKey}
             onSetChange={(si, updated) => onSetChange(index, si, updated)}
-            onVideoClick={() => ex.videoS3Key && onVideoClick(ex.videoS3Key, ex.name)}
+            onVideoClick={() => videoKey && onVideoClick(videoKey, ex.name)}
             onRpeInfoClick={onRpeInfoClick}
           />
         </div>
-      ))}
+        )
+      })}
       {restLabel && (
         <p style={{
           fontFamily: "var(--font-dm-sans), sans-serif",
@@ -692,6 +718,7 @@ function ExerciseBlock({
   ex,
   sets,
   info,
+  videoKey,
   onSetChange,
   onVideoClick,
   onRpeInfoClick,
@@ -700,6 +727,9 @@ function ExerciseBlock({
   exIdx?: number
   sets: ExtendedSetEntry[]
   info?: ExerciseInfo
+  // Library-resolved video key. Caller runs videoKeyFor(ex, info) so
+  // this component doesn't have to know about the resolution rule.
+  videoKey: string
   onSetChange: (setIdx: number, updated: SetEntry) => void
   onVideoClick: () => void
   onRpeInfoClick?: () => void
@@ -713,13 +743,13 @@ function ExerciseBlock({
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", background: allDone ? "#f8fdf8" : "transparent", borderBottom: `1px solid ${allDone ? "#d4ead4" : border}` }}>
         {/* Thumbnail */}
         <div
-          onClick={ex.videoS3Key ? onVideoClick : undefined}
-          style={{ width: 52, height: 52, borderRadius: 6, overflow: "hidden", background: "#f5f2ee", flexShrink: 0, cursor: ex.videoS3Key ? "pointer" : "default", position: "relative" }}
+          onClick={videoKey ? onVideoClick : undefined}
+          style={{ width: 52, height: 52, borderRadius: 6, overflow: "hidden", background: "#f5f2ee", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
         >
-          {ex.videoS3Key ? (
+          {videoKey ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cdnThumb(ex.videoS3Key)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={cdnThumb(videoKey)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.15)" }}>
                 <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>
@@ -960,8 +990,15 @@ export default function WorkoutLoggerClient() {
       setSetMap(initialMap)
       setReady(true)
 
-      // Fetch exercise info (instructions, cues, mistakes) for each exercise in this day
-      const ids = Array.from(new Set(targetDay.exercises.map((e) => e.exerciseId).filter(Boolean)))
+      // Fetch exercise info (instructions, cues, mistakes, canonical videoS3Key)
+      // for EVERY exercise on the day — warm-up, main, and cool-down. The
+      // library-provided videoS3Key is used at render time so a program
+      // saved without an embedded key still plays.
+      const ids = Array.from(new Set([
+        ...(targetDay.warmup?.exercises ?? []).map((e) => e.exerciseId),
+        ...targetDay.exercises.map((e) => e.exerciseId),
+        ...(targetDay.cooldown?.exercises ?? []).map((e) => e.exerciseId),
+      ].filter(Boolean)))
       if (ids.length > 0) {
         try {
           const infoRes = await fetch("/api/coaching/exercise-info", {
@@ -1180,6 +1217,7 @@ export default function WorkoutLoggerClient() {
           label="Warmup"
           data={day.warmup}
           onVideoClick={(key, name) => setVideoModal({ key, name })}
+          resolveVideoKey={(ex) => videoKeyFor(ex, exerciseInfo[ex.exerciseId])}
         />
       )}
 
@@ -1212,15 +1250,18 @@ export default function WorkoutLoggerClient() {
           }
           // Solo exercise (or a "group" of one — treat as solo).
           const { index: i, ex } = g.exercises[0]
+          const exInfo = exerciseInfo[ex.exerciseId]
+          const videoKey = videoKeyFor(ex, exInfo)
           return (
             <ExerciseBlock
               key={`solo-${i}`}
               ex={ex}
               exIdx={i}
               sets={(setMap[i] ?? []) as ExtendedSetEntry[]}
-              info={exerciseInfo[ex.exerciseId]}
+              info={exInfo}
+              videoKey={videoKey}
               onSetChange={(si, updated) => updateSet(i, si, updated)}
-              onVideoClick={() => ex.videoS3Key && setVideoModal({ key: ex.videoS3Key, name: ex.name })}
+              onVideoClick={() => videoKey && setVideoModal({ key: videoKey, name: ex.name })}
               onRpeInfoClick={() => setShowRpeInfo(true)}
             />
           )
@@ -1233,6 +1274,7 @@ export default function WorkoutLoggerClient() {
           label="Cooldown"
           data={day.cooldown}
           onVideoClick={(key, name) => setVideoModal({ key, name })}
+          resolveVideoKey={(ex) => videoKeyFor(ex, exerciseInfo[ex.exerciseId])}
         />
       )}
 

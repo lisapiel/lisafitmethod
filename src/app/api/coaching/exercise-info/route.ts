@@ -6,8 +6,12 @@ import { getExerciseRecord } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
-// POST { ids: string[] } → { exercises: Record<id, { name, primaryMuscle, execution, coachingCues[], commonMistakes[] }> }
+// POST { ids: string[] } → { exercises: Record<id, { name, videoS3Key, primaryMuscle, execution, coachingCues[], commonMistakes[] }> }
 // Returns only client-safe fields (no admin-only notes).
+// videoS3Key is included so the client workout page can resolve the video
+// from the canonical library at render time, rather than relying on the
+// videoS3Key that was copied into the program's `weeks` JSON at save time
+// (which can be missing/stale on older or bulk-created programs).
 export async function POST(req: NextRequest) {
   const email = await runWithAmplifyServerContext({
     nextServerContext: { cookies },
@@ -27,6 +31,7 @@ export async function POST(req: NextRequest) {
 
   const out: Record<string, {
     name: string
+    videoS3Key: string
     primaryMuscle: string | null
     secondaryMuscles: string[]
     equipment: string[]
@@ -46,6 +51,7 @@ export async function POST(req: NextRequest) {
     }
     out[id] = {
       name: ex.name,
+      videoS3Key: ex.videoS3Key ?? "",
       primaryMuscle: ex.primaryMuscle ?? null,
       secondaryMuscles: parseArr(ex.secondaryMuscles),
       equipment: parseArr(ex.equipment),
