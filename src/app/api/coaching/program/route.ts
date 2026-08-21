@@ -3,6 +3,7 @@ import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { getCoachingClientRecord, getProgramRecord } from "@/lib/authTokens"
+import { hydrateProgramVideos } from "@/lib/programHydration"
 
 export const dynamic = "force-dynamic"
 
@@ -29,6 +30,11 @@ export async function GET() {
     return NextResponse.json({ program: null, client })
   }
 
-  const program = await getProgramRecord(client.currentProgramId)
+  const rawProgram = await getProgramRecord(client.currentProgramId)
+  // Resolve exercise videos from the canonical library before responding
+  // so every downstream renderer (runner, workouts list, admin views)
+  // sees a working videoS3Key even for programs whose embedded value
+  // was empty or stale at save time.
+  const program = await hydrateProgramVideos(rawProgram)
   return NextResponse.json({ program, client })
 }
