@@ -6,13 +6,21 @@ export const dynamic = "force-dynamic"
 
 type CustomMacros = { calories?: number; protein?: number; carbs?: number; fat?: number }
 
-// Sanity ceilings for coach-typed overrides. These bracket the plausible
-// physiological range for any adult client (well above elite-athlete
-// upper ends), and exist to catch obvious data-entry mistakes — the
-// extra digit, the missing decimal, the units mix-up — before they get
-// persisted as a nutrition target. Values are hard upper bounds; the
-// PATCH refuses to save anything larger.
-const MACRO_MAX = { calories: 6000, protein: 400, carbs: 900, fat: 300 } as const
+// Sanity ceilings for coach-typed overrides. Tight enough to catch an
+// obvious data-entry mistake (extra digit, missing decimal, unit slip),
+// loose enough to allow a legitimately high target for a large athlete.
+//
+// Rough references for the protein number: a 250 lb (113 kg) client on
+// fat-loss at 2.0 g/kg lands at ~227 g. A 300 lb (136 kg) client on
+// fat-loss at 2.0 g/kg lands at ~272 g. A cap at 300 g accepts every
+// automatic calculation this codebase produces for any weight inside
+// the 60–500 lb plausibility band, plus headroom for a coach who wants
+// to push above the auto number.
+//
+// Values are strict upper bounds — the PATCH refuses to save anything
+// greater. Anything caught here is almost always a typo, not a
+// physiological maximum.
+const MACRO_MAX = { calories: 5000, protein: 300, carbs: 700, fat: 250 } as const
 
 function coerceNumber(v: unknown): number | undefined {
   const n = Number(v)
