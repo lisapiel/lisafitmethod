@@ -190,14 +190,16 @@ export default async function CoursesPage() {
         @media (max-width: 768px) { .final-cta { padding: 80px 28px; } }
       `}</style>
 
-      {/* VIDEO — dark */}
-      {trailerUrl && (
-        <section style={{ background: "#000" }}>
-          <div className="courses-video-band">
-            <VideoPlayer src={trailerUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-          </div>
-        </section>
-      )}
+      {/* VIDEO — dark. Container is unconditional so the page can never
+          jump from the intro straight to the training section on mobile
+          when the trailer URL is transiently empty. */}
+      <section style={{ background: "#000" }}>
+        <VideoPlayer
+          src={trailerUrl || ""}
+          poster="/hero.png"
+          className="courses-video-band"
+        />
+      </section>
 
       {/* INTRO — LIGHT */}
       <section style={{ background: "#faf8f5" }}>

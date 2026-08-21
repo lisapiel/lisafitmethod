@@ -216,11 +216,15 @@ export default async function HomePage() {
           }
         `}</style>
 
-        {trailerUrl && (
-          <div className="home-video-band">
-            <VideoPlayer src={trailerUrl} poster={heroUrl || undefined} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-          </div>
-        )}
+        {/* Hero video band. Unconditionally rendered so the container's
+            dimensions are always reserved on the page — even if the trailer
+            URL is empty or the video errors, the poster fills the band and
+            the layout never collapses. */}
+        <VideoPlayer
+          src={trailerUrl || ""}
+          poster={heroUrl || "/hero.png"}
+          className="home-video-band"
+        />
 
         <div className="home-hero-row">
           <div className="home-hero-content">
