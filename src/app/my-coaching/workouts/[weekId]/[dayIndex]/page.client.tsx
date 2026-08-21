@@ -26,6 +26,31 @@ type ProgramExercise = {
   tempo: string
   coachNotes: string
   metric?: "reps" | "time"
+  // Optional grouping token — adjacent exercises sharing the same id
+  // render inside one SupersetBlock. Absent for legacy programs.
+  supersetGroupId?: string
+}
+
+// Contiguous run of program exercises that share a supersetGroupId.
+// Runs of length 1 are still returned (solo exercises), so callers can
+// walk the returned array without a second branching path.
+type SupersetGroup = {
+  id: string | null
+  exercises: Array<{ index: number; ex: ProgramExercise }>
+}
+
+function groupSupersets(exercises: ProgramExercise[]): SupersetGroup[] {
+  const groups: SupersetGroup[] = []
+  exercises.forEach((ex, index) => {
+    const gid = ex.supersetGroupId ?? null
+    const last = groups[groups.length - 1]
+    if (gid && last && last.id === gid) {
+      last.exercises.push({ index, ex })
+    } else {
+      groups.push({ id: gid, exercises: [{ index, ex }] })
+    }
+  })
+  return groups
 }
 
 type WarmupCooldown = { notes: string; exercises: ProgramExercise[] }
@@ -538,6 +563,131 @@ function ExerciseInfoCard({ info }: { info: ExerciseInfo | undefined }) {
   )
 }
 
+// Superset wrapper card. Renders 2+ exercises that share a supersetGroupId
+// as one visual unit, but each nested ExerciseBlock keeps its own set
+// logging — nothing is coalesced. Round progress dots derive from the
+// per-exercise completed flags in `setMaps`; a round counts as complete
+// when every exercise in the group either has its set marked done OR the
+// exercise has fewer prescribed sets than that round number (so unequal
+// set counts round-out correctly). The "rest" hint below the round dots
+// is a text cue, not a countdown timer — this codebase has no existing
+// rest timer to interoperate with, so the SupersetBlock deliberately
+// avoids introducing one.
+function SupersetBlock({
+  group,
+  setMaps,
+  info,
+  onSetChange,
+  onVideoClick,
+  onRpeInfoClick,
+}: {
+  group: SupersetGroup
+  setMaps: ExerciseSetMap
+  info: Record<string, ExerciseInfo>
+  onSetChange: (exIdx: number, setIdx: number, updated: SetEntry) => void
+  onVideoClick: (key: string, name: string) => void
+  onRpeInfoClick: () => void
+}) {
+  const letters = ["A", "B", "C", "D", "E", "F"]
+  const rounds = Math.max(
+    ...group.exercises.map(({ ex }) => parseSetsCount(ex.sets))
+  )
+  // Rest hint comes from the LAST exercise in the group by convention —
+  // that's the between-round rest, since A → B (→ C) are performed
+  // back-to-back with no rest between them.
+  const restLabel = group.exercises[group.exercises.length - 1].ex.rest || ""
+
+  function isRoundComplete(roundIdx: number): boolean {
+    return group.exercises.every(({ index, ex }) => {
+      // If this exercise has fewer sets than the current round, treat it
+      // as satisfied — the other exercise(s) simply continue solo.
+      if (roundIdx >= parseSetsCount(ex.sets)) return true
+      const s = setMaps[index]?.[roundIdx]
+      return !!s?.completed
+    })
+  }
+
+  return (
+    <div
+      style={{
+        background: white,
+        border: `2px solid ${accent}`,
+        borderRadius: 8,
+        padding: "16px 18px 18px",
+        marginBottom: "1rem",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
+        <p style={{
+          fontFamily: "var(--font-dm-sans), sans-serif",
+          fontSize: "0.65rem", fontWeight: 700,
+          letterSpacing: "0.22em", textTransform: "uppercase",
+          color: accent, margin: 0,
+        }}>
+          Superset · {rounds} round{rounds !== 1 ? "s" : ""}
+        </p>
+        <p style={{
+          fontFamily: "var(--font-dm-sans), sans-serif",
+          fontSize: "0.7rem", color: muted, margin: 0,
+        }}>
+          {letters.slice(0, group.exercises.length).join(" → ")} back-to-back, then rest
+        </p>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+        {Array.from({ length: rounds }).map((_, ri) => {
+          const done = isRoundComplete(ri)
+          return (
+            <span
+              key={ri}
+              style={{
+                fontFamily: "var(--font-dm-sans), sans-serif",
+                fontSize: "0.7rem", fontWeight: 600,
+                color: done ? "#5c9e6a" : muted,
+                letterSpacing: "0.06em",
+                padding: "3px 12px",
+                border: `1px solid ${done ? "#5c9e6a" : border}`,
+                borderRadius: 999,
+                background: done ? "#f0faf0" : "transparent",
+              }}
+            >
+              Round {ri + 1}{done ? " ✓" : ""}
+            </span>
+          )
+        })}
+      </div>
+      {group.exercises.map(({ index, ex }, gi) => (
+        <div key={index} style={{ marginBottom: gi === group.exercises.length - 1 ? 0 : 8 }}>
+          <p style={{
+            fontFamily: "var(--font-dm-sans), sans-serif",
+            fontSize: "0.7rem", fontWeight: 700,
+            color: accent, margin: "0 0 4px", letterSpacing: "0.14em",
+          }}>
+            {letters[gi]}
+          </p>
+          <ExerciseBlock
+            ex={ex}
+            exIdx={index}
+            sets={(setMaps[index] ?? []) as ExtendedSetEntry[]}
+            info={info[ex.exerciseId]}
+            onSetChange={(si, updated) => onSetChange(index, si, updated)}
+            onVideoClick={() => ex.videoS3Key && onVideoClick(ex.videoS3Key, ex.name)}
+            onRpeInfoClick={onRpeInfoClick}
+          />
+        </div>
+      ))}
+      {restLabel && (
+        <p style={{
+          fontFamily: "var(--font-dm-sans), sans-serif",
+          fontSize: "0.72rem", color: muted, textAlign: "center",
+          margin: "6px 0 0",
+        }}>
+          Rest {restLabel} between rounds
+        </p>
+      )}
+    </div>
+  )
+}
+
 function ExerciseBlock({
   ex,
   sets,
@@ -777,7 +927,10 @@ export default function WorkoutLoggerClient() {
       // client's in-progress inputs (weight/reps/RPE/completed) on top.
       // We keep the _prevWeight/_prevReps hints from the fresh init and only
       // pull the user's typed values from the draft.
-      const currentSignature = targetDay.exercises.map((e) => e.exerciseId).join("|")
+      // Signature captures the exerciseId AND the supersetGroupId so a coach
+      // regrouping exercises into (or out of) a superset invalidates any
+      // in-progress draft rather than restoring it under a mismatched layout.
+      const currentSignature = targetDay.exercises.map((e) => `${e.exerciseId}:${e.supersetGroupId ?? ""}`).join("|")
       const draft = readWorkoutDraft(draftKey)
       if (draft && draft.exerciseSignature === currentSignature) {
         for (const [idxStr, draftSets] of Object.entries(draft.setMap)) {
@@ -834,7 +987,7 @@ export default function WorkoutLoggerClient() {
   // "already completed" branch fires.
   useEffect(() => {
     if (!ready || saved || alreadyLogged || !day) return
-    const signature = day.exercises.map((e) => e.exerciseId).join("|")
+    const signature = day.exercises.map((e) => `${e.exerciseId}:${e.supersetGroupId ?? ""}`).join("|")
     try {
       // Strip the hint fields (_prevWeight / _prevReps) — they're derived
       // from the server, no need to persist them locally.
@@ -1037,22 +1190,41 @@ export default function WorkoutLoggerClient() {
         </p>
       )}
 
-      {/* Exercise blocks */}
+      {/* Exercise blocks — grouped by supersetGroupId so any adjacent run
+          of same-group exercises renders as one SupersetBlock. Solo
+          exercises fall through to the existing ExerciseBlock unchanged. */}
       {day.exercises.length === 0 ? (
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted }}>No exercises for this day.</p>
       ) : (
-        day.exercises.map((ex, i) => (
-          <ExerciseBlock
-            key={i}
-            ex={ex}
-            exIdx={i}
-            sets={(setMap[i] ?? []) as ExtendedSetEntry[]}
-            info={exerciseInfo[ex.exerciseId]}
-            onSetChange={(si, updated) => updateSet(i, si, updated)}
-            onVideoClick={() => ex.videoS3Key && setVideoModal({ key: ex.videoS3Key, name: ex.name })}
-            onRpeInfoClick={() => setShowRpeInfo(true)}
-          />
-        ))
+        groupSupersets(day.exercises).map((g, gi) => {
+          if (g.id && g.exercises.length >= 2) {
+            return (
+              <SupersetBlock
+                key={`ss-${g.id}-${gi}`}
+                group={g}
+                setMaps={setMap}
+                info={exerciseInfo}
+                onSetChange={updateSet}
+                onVideoClick={(key, name) => setVideoModal({ key, name })}
+                onRpeInfoClick={() => setShowRpeInfo(true)}
+              />
+            )
+          }
+          // Solo exercise (or a "group" of one — treat as solo).
+          const { index: i, ex } = g.exercises[0]
+          return (
+            <ExerciseBlock
+              key={`solo-${i}`}
+              ex={ex}
+              exIdx={i}
+              sets={(setMap[i] ?? []) as ExtendedSetEntry[]}
+              info={exerciseInfo[ex.exerciseId]}
+              onSetChange={(si, updated) => updateSet(i, si, updated)}
+              onVideoClick={() => ex.videoS3Key && setVideoModal({ key: ex.videoS3Key, name: ex.name })}
+              onRpeInfoClick={() => setShowRpeInfo(true)}
+            />
+          )
+        })
       )}
 
       {/* Cooldown (read-only, collapsible) */}
