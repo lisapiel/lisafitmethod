@@ -67,10 +67,35 @@ const invalidMessages: Record<InvalidReason, { heading: string; body: string }> 
   },
 }
 
+// Safe-redirect helper — only accepts a same-site absolute path. Rejects
+// protocol-relative "//evil.tld" and any absolute URL, so an attacker
+// can't turn the set-password link into an open-redirect vector.
+function sanitizeRedirect(raw: string | null): string {
+  if (!raw) return "/account"
+  if (raw[0] !== "/") return "/account"
+  if (raw.startsWith("//") || raw.startsWith("/\\")) return "/account"
+  // Reserve a light path allowlist matching the destinations we actually
+  // emit from server-side welcome emails. Anything else falls back to
+  // /account so a landing typo or old link never dead-ends.
+  const allowed = [
+    "/my-coaching",
+    "/training-foundations",
+    "/nutrition-foundations",
+    "/my-tracker",
+    "/masterclass",
+    "/account",
+  ]
+  if (allowed.some((p) => raw === p || raw.startsWith(p + "/") || raw.startsWith(p + "?"))) {
+    return raw
+  }
+  return "/account"
+}
+
 export function SetPasswordClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token") ?? ""
+  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"))
 
   const [state, setState] = useState<State>("loading")
   const [tokenType, setTokenType] = useState<TokenType>("setup")
@@ -113,13 +138,16 @@ export function SetPasswordClient() {
       const data = await res.json() as { email?: string; error?: string }
       if (!res.ok) { setError(data.error ?? "Something went wrong."); return }
 
-      // Auto-sign in with the new password
+      // Auto-sign in with the new password and route to the product the
+      // welcome email was actually about (from ?redirect=). Falls back to
+      // /account so a coaching client is never dropped into a course they
+      // don't own.
       const result = await signIn({ username: data.email!, password })
       if (result.isSignedIn) {
-        router.push("/training-foundations")
+        router.push(redirectTarget)
       } else {
-        // Signed in but needs further steps — just redirect to login
-        router.push("/login")
+        // Signed in but needs further steps — preserve the target through login.
+        router.push(`/login?redirect=${encodeURIComponent(redirectTarget)}`)
       }
     } catch {
       setError("Something went wrong. Please try again.")
@@ -191,7 +219,7 @@ export function SetPasswordClient() {
             </h1>
             <p style={{ fontSize: 13, color: "#666", lineHeight: 1.7, marginBottom: 32 }}>
               {tokenType === "setup"
-                ? "Choose a password for your account and you'll be taken straight to your course."
+                ? "Choose a password for your account and you'll be taken straight in."
                 : "Enter a new password for your account."}
               {" "}At least 8 characters.
             </p>

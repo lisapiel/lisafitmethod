@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { getCoachingApplication } from "@/lib/authTokens"
 import AcceptClient from "./page.client"
 
@@ -15,8 +15,17 @@ export default async function AcceptPage({ params }: { params: Promise<{ id: str
   const application = await getCoachingApplication(id)
   if (!application) notFound()
 
+  // Already-paid: the interstitial has served its purpose. Send the client
+  // to their coaching portal so a click on the original approval email
+  // after payment can't dead-end at a 404. /my-coaching's layout will
+  // route the client through /login?redirect=/my-coaching if they aren't
+  // signed in yet, then straight into the portal after auth.
+  if (application.status === "PAID") {
+    redirect("/my-coaching")
+  }
+
   // Only APPROVED applications with a live Stripe checkout URL can proceed.
-  // DECLINED / PENDING / already-PAID applications should not land here.
+  // DECLINED / PENDING applications shouldn't land here.
   if (application.status !== "APPROVED" || !application.stripeCheckoutUrl) {
     notFound()
   }

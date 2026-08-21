@@ -49,6 +49,22 @@ export const MIN_CALORIE_FLOOR = 1200
 const KG_PER_LB = 0.453592
 const CM_PER_IN = 2.54
 
+// Sanity band for adult body weight in POUNDS. Anything outside this range
+// almost certainly indicates a data-entry mistake (or a value stored as
+// KG rather than LBS), which is exactly how absurd macro numbers get
+// produced. Guardrails downstream return null rather than silently
+// computing on garbage. Range is intentionally generous — covers the
+// same 80–500 lb band the setup form already validates against.
+export const MIN_WEIGHT_LBS = 60
+export const MAX_WEIGHT_LBS = 500
+
+export function isPlausibleWeightLbs(weightLbs: number | undefined | null): weightLbs is number {
+  return typeof weightLbs === "number"
+    && Number.isFinite(weightLbs)
+    && weightLbs >= MIN_WEIGHT_LBS
+    && weightLbs <= MAX_WEIGHT_LBS
+}
+
 export function lbsToKg(lbs: number): number { return lbs * KG_PER_LB }
 export function inchesToCm(inches: number): number { return inches * CM_PER_IN }
 
@@ -134,6 +150,12 @@ export function resolveMacrosFor(
   ) {
     return null
   }
+  // Guardrail: weight must be a plausible adult-in-lbs value. If a value
+  // was stored in kg by mistake, or a data entry landed outside the sane
+  // band, refuse to compute rather than emit a bogus target (which is
+  // how a client saw ~350 g protein). The UI already handles a null
+  // return as "setup incomplete" and prompts the client to re-check.
+  if (!isPlausibleWeightLbs(weight)) return null
   const goal: NutritionGoal = client.nutritionGoal ?? "maintain"
   const bmr = computeBMR({ sex: client.sex, weightLbs: weight, heightInches: client.heightInches, age: client.age })
   const tdee = computeTDEE(bmr, client.activityLevel)

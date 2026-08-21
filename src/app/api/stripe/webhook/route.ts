@@ -361,7 +361,7 @@ async function provisionNutritionUser(email: string) {
 
   const token = generateAuthToken()
   await storeAuthToken(token, email, "setup")
-  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/nutrition-foundations")}`
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
@@ -449,7 +449,7 @@ async function provisionUser(email: string) {
 
   const token = generateAuthToken()
   await storeAuthToken(token, email, "setup")
-  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/training-foundations")}`
 
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
   await resend.emails.send({
@@ -647,7 +647,7 @@ async function provisionMasterclassUser(
 
   const token = generateAuthToken()
   await storeAuthToken(token, email, "setup")
-  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/masterclass")}`
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
@@ -849,7 +849,11 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
 
   const token = generateAuthToken()
   await storeAuthToken(token, email, "setup")
-  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}`
+  // ?redirect= carries the product-specific portal so the set-password
+  // page lands the client where they actually purchased, instead of the
+  // hardcoded /training-foundations fallback that dropped Isaac into a
+  // course he hadn't bought.
+  const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/my-coaching")}`
 
   await resend.emails.send({
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",

@@ -6,10 +6,26 @@ export const dynamic = "force-dynamic"
 
 type CustomMacros = { calories?: number; protein?: number; carbs?: number; fat?: number }
 
+// Sanity ceilings for coach-typed overrides. These bracket the plausible
+// physiological range for any adult client (well above elite-athlete
+// upper ends), and exist to catch obvious data-entry mistakes — the
+// extra digit, the missing decimal, the units mix-up — before they get
+// persisted as a nutrition target. Values are hard upper bounds; the
+// PATCH refuses to save anything larger.
+const MACRO_MAX = { calories: 6000, protein: 400, carbs: 900, fat: 300 } as const
+
 function coerceNumber(v: unknown): number | undefined {
   const n = Number(v)
   if (!Number.isFinite(n) || n <= 0) return undefined
   return Math.round(n)
+}
+
+function macroOutOfRange(cm: { calories?: number; protein?: number; carbs?: number; fat?: number }): string | null {
+  if (cm.calories != null && cm.calories > MACRO_MAX.calories) return `Calories ${cm.calories} exceeds the ${MACRO_MAX.calories} kcal safety ceiling. Double-check the number.`
+  if (cm.protein != null && cm.protein > MACRO_MAX.protein) return `Protein ${cm.protein}g exceeds the ${MACRO_MAX.protein}g safety ceiling. Double-check the number.`
+  if (cm.carbs != null && cm.carbs > MACRO_MAX.carbs) return `Carbs ${cm.carbs}g exceeds the ${MACRO_MAX.carbs}g safety ceiling. Double-check the number.`
+  if (cm.fat != null && cm.fat > MACRO_MAX.fat) return `Fat ${cm.fat}g exceeds the ${MACRO_MAX.fat}g safety ceiling. Double-check the number.`
+  return null
 }
 
 // PATCH — admin sets/clears the coach macro override for a client.
@@ -44,6 +60,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ em
   if (allEmpty) {
     await updateCoachingClientRecord(email, { customMacros: undefined })
     return NextResponse.json({ ok: true, customMacros: null })
+  }
+
+  // Sanity-check before persisting so an accidental extra digit (350 vs.
+  // 35) or unit slip never becomes a stored macro target.
+  const rangeError = macroOutOfRange(cleaned)
+  if (rangeError) {
+    return NextResponse.json({ error: rangeError }, { status: 400 })
   }
 
   const updatedAt = new Date().toISOString()
