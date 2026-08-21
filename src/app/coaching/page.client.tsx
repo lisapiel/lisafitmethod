@@ -280,7 +280,24 @@ export default function CoachingClient() {
     <main style={{ background: CREAM, color: TEXT, fontFamily: "var(--font-dm-sans), sans-serif", overflowX: "hidden" }}>
       <style>{`
         .ch-hero      { padding: 96px 64px 80px; }
-        .ch-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; max-width: 1160px; margin: 0 auto; }
+        /* Desktop hero grid: text stacked (title + body) in the left column,
+           photo spanning both rows on the right so the image occupies the
+           same visual footprint the previous two-column layout did.
+           On mobile the three children reflow to title → photo → body,
+           which is the ordering Lisa requested. */
+        .ch-hero-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: auto 1fr;
+          column-gap: 72px;
+          row-gap: 32px;
+          align-items: start;
+          max-width: 1160px;
+          margin: 0 auto;
+        }
+        .ch-hero-title       { grid-column: 1; grid-row: 1; }
+        .ch-hero-body        { grid-column: 1; grid-row: 2; }
+        .ch-hero-photo-wrap  { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
         .ch-section   { padding: 100px 64px; }
         .ch-narrow    { max-width: 1160px; margin: 0 auto; }
         .ch-2col      { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
@@ -291,8 +308,10 @@ export default function CoachingClient() {
 
         @media (max-width: 900px) {
           .ch-hero      { padding: 80px 24px 64px; }
-          .ch-hero-grid { grid-template-columns: 1fr; gap: 48px; }
-          .ch-hero-photo-wrap { }
+          .ch-hero-grid { grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 32px; }
+          .ch-hero-title      { grid-column: 1; grid-row: 1; }
+          .ch-hero-photo-wrap { grid-column: 1; grid-row: 2; align-self: auto; }
+          .ch-hero-body       { grid-column: 1; grid-row: 3; }
           .ch-section   { padding: 72px 24px; }
           .ch-2col      { grid-template-columns: 1fr; gap: 48px; }
           .ch-4col      { grid-template-columns: repeat(2, 1fr); }
@@ -372,15 +391,43 @@ export default function CoachingClient() {
       <section style={{ background: "#0a0a0a" }} className="ch-hero">
         <div className="ch-hero-grid">
 
-          {/* Text left */}
-          <div>
+          {/* Title block — eyebrow + headline. Sits above the photo on mobile. */}
+          <div className="ch-hero-title">
             <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: ACCENT, marginBottom: 24 }}>
               Online 1:1 Coaching
             </p>
-            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h1)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 28 }}>
+            <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-h1)", fontWeight: 900, color: "#f5f2ee", lineHeight: 1.08, marginBottom: 0 }}>
               Stronger body. <span style={{ color: ACCENT }}>Better movement. For life.</span>
             </h1>
-            <p style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.72)", lineHeight: 1.7, marginBottom: 40, maxWidth: 560 }}>
+          </div>
+
+          {/* Photo — desktop right column, mobile between title and body. */}
+          <div className="ch-hero-photo-wrap" style={{ position: "relative" }}>
+            <div style={{ background: "#1a1a1a", overflow: "hidden" }}>
+              <Image
+                src="/lisa-coaching-hero.jpg"
+                alt="Lisa McPherson, certified personal trainer"
+                width={998} height={1388}
+                style={{ width: "100%", height: "auto", display: "block" }}
+                priority
+              />
+            </div>
+            {/* Quote card */}
+            <div style={{
+              position: "absolute", bottom: 32, left: -24, right: 24,
+              background: "rgba(10,10,10,0.55)", backdropFilter: "blur(8px)",
+              padding: "24px 28px", borderLeft: `3px solid ${ACCENT}`,
+            }}>
+              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-small)", color: "rgba(240,230,211,0.88)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
+                &ldquo;I&apos;ve had to rebuild my body from injury. Now I help you build yours with strength, structure, and smarter training.&rdquo;
+              </p>
+              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa M</p>
+            </div>
+          </div>
+
+          {/* Body block — supporting text, benefit grid, CTAs. */}
+          <div className="ch-hero-body">
+            <p style={{ fontSize: "var(--text-body)", color: "rgba(240,230,211,0.72)", lineHeight: 1.7, marginTop: 28, marginBottom: 40, maxWidth: 560 }}>
               Personalized 1:1 coaching for people who want to build real strength, improve their body composition, and move better. You bring the effort. I bring the plan, the feedback, and the accountability.
             </p>
 
@@ -402,30 +449,6 @@ export default function CoachingClient() {
             <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
               <a href="#apply" className="ch-btn-primary">Apply for 1:1 Coaching</a>
               <a href="#experience" className="ch-btn-outline">Learn more ↓</a>
-            </div>
-          </div>
-
-          {/* Photo right */}
-          <div className="ch-hero-photo-wrap" style={{ position: "relative" }}>
-            <div style={{ background: "#1a1a1a", overflow: "hidden" }}>
-              <Image
-                src="/lisa-coaching-hero.jpg"
-                alt="Lisa McPherson, certified personal trainer"
-                width={998} height={1388}
-                style={{ width: "100%", height: "auto", display: "block" }}
-                priority
-              />
-            </div>
-            {/* Quote card */}
-            <div style={{
-              position: "absolute", bottom: 32, left: -24, right: 24,
-              background: "rgba(10,10,10,0.55)", backdropFilter: "blur(8px)",
-              padding: "24px 28px", borderLeft: `3px solid ${ACCENT}`,
-            }}>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "var(--text-small)", color: "rgba(240,230,211,0.88)", fontStyle: "italic", lineHeight: 1.65, margin: "0 0 12px" }}>
-                &ldquo;I&apos;ve had to rebuild my body from injury. Now I help you build yours with strength, structure, and smarter training.&rdquo;
-              </p>
-              <p style={{ fontSize: "var(--text-small)", fontWeight: 600, letterSpacing: "0.12em", color: ACCENT, margin: 0 }}>Lisa M</p>
             </div>
           </div>
         </div>
