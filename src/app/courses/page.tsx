@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getPublishedVideoUrl, getPublishedPhotoUrl, derivePosterUrl } from "@/lib/mediaClient"
+import { getPublishedVideoUrl, getPublishedPhotoUrl, derivePosterUrl, heroTrailerUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
@@ -198,8 +198,8 @@ export default async function CoursesPage() {
           right image instead of a black rectangle or wrong photo. */}
       <section style={{ background: "#000" }}>
         <VideoPlayer
-          src={trailerUrl || ""}
-          poster={derivePosterUrl(trailerUrl)}
+          src={heroTrailerUrl(trailerUrl)}
+          poster={derivePosterUrl(heroTrailerUrl(trailerUrl))}
           className="courses-video-band"
         />
       </section>

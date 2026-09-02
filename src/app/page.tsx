@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getPublishedPhotoUrl, getPublishedVideoUrl, derivePosterUrl } from "@/lib/mediaClient"
+import { getPublishedPhotoUrl, getPublishedVideoUrl, derivePosterUrl, heroTrailerUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
@@ -225,8 +225,8 @@ export default async function HomePage() {
             container renders a dark #0a0a0a background behind the poster
             in case the poster itself fails to load. */}
         <VideoPlayer
-          src={trailerUrl || ""}
-          poster={derivePosterUrl(trailerUrl)}
+          src={heroTrailerUrl(trailerUrl)}
+          poster={derivePosterUrl(heroTrailerUrl(trailerUrl))}
           className="home-video-band"
         />
 

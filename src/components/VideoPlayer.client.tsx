@@ -106,6 +106,26 @@ export default function VideoPlayer({
     v.addEventListener("ended", onEnded)
     v.addEventListener("error", onError)
 
+    // Catch up state from the live DOM element.
+    //
+    // COLD-LOAD BUG this fixes: on a full page load the <video> element
+    // arrives in the SSR HTML with all the right attributes (autoplay,
+    // muted, playsinline, src) and the browser starts native autoplay
+    // immediately after parsing — usually BEFORE React hydration
+    // attaches our `playing` listener. The event fires without a
+    // handler, so isPlaying stays false, the poster stays on top at
+    // opacity 1, and the video plays silently underneath — indistinguishable
+    // from "paused with a poster". SPA navigation doesn't hit this
+    // because the element is created fresh after useEffect ran.
+    //
+    // We check the DOM's authoritative state here and sync React state
+    // to match. HAVE_CURRENT_DATA (2) is enough to know playback is
+    // truly under way; higher readyStates also pass.
+    if (!v.paused && v.readyState >= 2 /* HAVE_CURRENT_DATA */) {
+      setIsPlaying(true)
+      setAutoplayBlocked(false)
+    }
+
     // If the video is already sufficiently loaded (cached from an
     // earlier visit, or preload got there first), attempt immediately.
     // Otherwise wait for `canplay` — the first event that guarantees

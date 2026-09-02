@@ -52,6 +52,22 @@ export async function getPublishedVideoUrl(slot: string): Promise<string | null>
   return items.find((i) => i.assignedTo === slot)?.url ?? null
 }
 
+// Deterministic fallback URL for the homepage / courses hero trailer.
+// The AppSync CMS lookup (getPublishedVideoUrl("lp_trailer")) is the
+// primary source so the trailer can be swapped in the admin, but a
+// public marketing page can never be allowed to render a <video> with
+// no src just because a transient CMS fetch missed. Callers should
+// use `heroTrailerUrl(cmsUrl)` below rather than the raw CMS return.
+// URL points at the same optimized H.264 asset in the Amplify media
+// bucket that the CMS assigns to the "lp_trailer" slot today; overwriting
+// that S3 key updates both the CMS path and this fallback simultaneously.
+export const HERO_TRAILER_FALLBACK_URL =
+  "https://amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov.s3.us-east-2.amazonaws.com/media/videos/lp_trailer.mp4"
+
+export function heroTrailerUrl(cmsUrl: string | null | undefined): string {
+  return cmsUrl && cmsUrl.length > 0 ? cmsUrl : HERO_TRAILER_FALLBACK_URL
+}
+
 // Derive the companion poster URL for a hero video by swapping the .mp4
 // extension for .jpg. Matches the co-located naming convention used for
 // exercise videos (name.mp4 / name.jpg) and lets the hero use a matching
