@@ -7,6 +7,12 @@ import {
   MASTERCLASS_6MONTH_PER_MONTH_DISPLAY,
   MASTERCLASS_ANNUAL_PER_MONTH_DISPLAY,
 } from "@/lib/pricing"
+import { assertMasterclassPublicVisible } from "@/lib/productGates"
+
+// Do not statically pre-render — the visibility gate needs to check the
+// current session on every request so admins + real Masterclass owners
+// aren't served a cached "redirect" response.
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Masterclass | Lisa Fit Method",
@@ -96,7 +102,9 @@ const FAQ = [
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
-export default function MasterclassInfoPage() {
+export default async function MasterclassInfoPage() {
+  // Hide from non-admin, non-owner visitors while the launch flag is off.
+  await assertMasterclassPublicVisible()
   return (
     <main style={{ background: "#0a0a0a", color: "#f0e6d3", minHeight: "100vh", fontFamily: "var(--font-montserrat), sans-serif" }}>
 

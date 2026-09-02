@@ -396,15 +396,21 @@ export default function AdminApplicationsPage() {
                     )}
                   </div>
 
-                  {/* Bundle-credit status callout — shown for every pending
-                      application so the coach immediately knows whether a
-                      credit will apply to the commitment they're about to
-                      approve. Only 3-month commitments consume the credit
-                      server-side; the callout wording reflects the currently-
-                      selected commitment. */}
-                  {app.status === "PENDING" && (() => {
+                  {/* Bundle-credit status callout — shown for EVERY application
+                      (pending, approved, paid, declined, historical) so the
+                      coach can see the applicant's bundle/credit posture at a
+                      glance whenever they reopen the record.
+                       - Pending: actionable wording tied to the currently-
+                         selected commitment (will apply / won't apply / pick
+                         3-month to apply).
+                       - Non-pending: factual wording only — never implies a
+                         credit will still be applied to an already-completed
+                         application.
+                      Bundle credit itself is 3-month-only and server-enforced. */}
+                  {(() => {
                     const b = app.history?.bundle
                     const selected = commitments[app.id]
+                    const isPending = app.status === "PENDING"
                     if (!b || !b.purchased) {
                       return (
                         <div style={{ background: "#111", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.04em" }}>
@@ -420,11 +426,19 @@ export default function AdminApplicationsPage() {
                         <div style={{ background: "#1a1512", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.04em" }}>
                           {usedText}
                           {b.purchasedAt && <span style={{ color: "#555" }}> · Purchased {formatDate(b.purchasedAt)}</span>}
+                          {b.usedAt && <span style={{ color: "#555" }}> · Used {formatDate(b.usedAt)}</span>}
                         </div>
                       )
                     }
-                    // Available: fmt for 3-month vs m2m distinctly
-                    const willApply = selected === "THREE_MONTH_MINIMUM"
+                    // Purchased + available (credit not yet consumed, not yet expired).
+                    const willApply = isPending && selected === "THREE_MONTH_MINIMUM"
+                    const actionalLine = isPending
+                      ? (selected === "THREE_MONTH_MINIMUM"
+                          ? "Will apply on approval → first invoice reduced by $" + (b.amountCents / 100).toFixed(0)
+                          : selected === "MONTH_TO_MONTH"
+                            ? "Not applied — month-to-month coaching isn't eligible"
+                            : "Select 3-month commitment to apply this credit")
+                      : "Applies to 3-month coaching only · not yet used"
                     return (
                       <div style={{
                         background: willApply ? "rgba(92,158,106,0.10)" : "rgba(201,169,110,0.10)",
@@ -434,17 +448,13 @@ export default function AdminApplicationsPage() {
                         fontFamily: "var(--font-montserrat), sans-serif",
                       }}>
                         <p style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: willApply ? "#7bc48c" : gold, margin: "0 0 4px" }}>
-                          🟢 ${(b.amountCents / 100).toFixed(0)} Bundle Credit Available
+                          🟢 ${(b.amountCents / 100).toFixed(0)} Bundle Credit {isPending ? "Available" : "On File"}
                         </p>
                         <p style={{ fontSize: "0.68rem", color: cream, margin: "0 0 2px", lineHeight: 1.55 }}>
                           Purchased {b.purchasedAt ? formatDate(b.purchasedAt) : "—"} · Eligible through {b.expiresAt ? formatDate(b.expiresAt) : "—"} · Applies to 3-month coaching only
                         </p>
                         <p style={{ fontSize: "0.65rem", color: willApply ? "#7bc48c" : "#c78e5a", margin: 0, fontWeight: 600, letterSpacing: "0.04em" }}>
-                          {selected === "THREE_MONTH_MINIMUM"
-                            ? "Will apply on approval → first invoice reduced by $" + (b.amountCents / 100).toFixed(0)
-                            : selected === "MONTH_TO_MONTH"
-                              ? "Not applied — month-to-month coaching isn't eligible"
-                              : "Select 3-month commitment to apply this credit"}
+                          {actionalLine}
                         </p>
                       </div>
                     )
