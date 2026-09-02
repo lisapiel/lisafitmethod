@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
+import { getPublishedPhotoUrl, getPublishedVideoUrl, derivePosterUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
@@ -217,16 +217,16 @@ export default async function HomePage() {
         `}</style>
 
         {/* Hero video band. Unconditionally rendered so the container's
-            dimensions are always reserved on the page. No poster is
-            passed — /hero.png is a different photo (Lisa's portrait
-            elsewhere on the page) and briefly flashing it before the
-            video started looked worse than showing nothing. VideoPlayer
-            renders a dark #0a0a0a background during the load window,
-            which matches the hero's own visual language; the browser
-            paints the video's first frame into the <video> element as
-            soon as media data arrives. */}
+            dimensions are always reserved on the page. Poster is a still
+            frame extracted from the actual trailer (co-located as
+            lp_trailer.jpg beside lp_trailer.mp4), so the load window
+            shows a matching image instead of the wrong photo, and the
+            hand-off to the playing video is seamless. VideoPlayer's
+            container renders a dark #0a0a0a background behind the poster
+            in case the poster itself fails to load. */}
         <VideoPlayer
           src={trailerUrl || ""}
+          poster={derivePosterUrl(trailerUrl)}
           className="home-video-band"
         />
 

@@ -52,6 +52,17 @@ export async function getPublishedVideoUrl(slot: string): Promise<string | null>
   return items.find((i) => i.assignedTo === slot)?.url ?? null
 }
 
+// Derive the companion poster URL for a hero video by swapping the .mp4
+// extension for .jpg. Matches the co-located naming convention used for
+// exercise videos (name.mp4 / name.jpg) and lets the hero use a matching
+// still frame without introducing a second media-asset architecture.
+// Returns undefined when input is null/empty so callers can pass the
+// result straight into VideoPlayer's optional `poster` prop.
+export function derivePosterUrl(videoUrl: string | null | undefined): string | undefined {
+  if (!videoUrl) return undefined
+  return videoUrl.replace(/\.mp4(\?.*)?$/i, ".jpg$1")
+}
+
 // ─── Exercise Video (Masterclass) ─────────────────────────────────────────────
 
 export type ExerciseVideoItem = {

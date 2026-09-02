@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getPublishedVideoUrl, getPublishedPhotoUrl } from "@/lib/mediaClient"
+import { getPublishedVideoUrl, getPublishedPhotoUrl, derivePosterUrl } from "@/lib/mediaClient"
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
@@ -192,15 +192,14 @@ export default async function CoursesPage() {
 
       {/* VIDEO — dark. Container is unconditional so the page can never
           jump from the intro straight to the training section on mobile
-          when the trailer URL is transiently empty. No poster passed —
-          /hero.png is a different image and briefly flashing it before
-          the video started reads as broken. The dark #0a0a0a
-          container background handles the load window; the browser
-          paints the video's first frame in the <video> element itself
-          once media data arrives. */}
+          when the trailer URL is transiently empty. Poster is the
+          co-located still frame (lp_trailer.jpg beside lp_trailer.mp4),
+          matching the actual video content so the load window shows the
+          right image instead of a black rectangle or wrong photo. */}
       <section style={{ background: "#000" }}>
         <VideoPlayer
           src={trailerUrl || ""}
+          poster={derivePosterUrl(trailerUrl)}
           className="courses-video-band"
         />
       </section>
