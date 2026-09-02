@@ -217,12 +217,16 @@ export default async function HomePage() {
         `}</style>
 
         {/* Hero video band. Unconditionally rendered so the container's
-            dimensions are always reserved on the page — even if the trailer
-            URL is empty or the video errors, the poster fills the band and
-            the layout never collapses. */}
+            dimensions are always reserved on the page. No poster is
+            passed — /hero.png is a different photo (Lisa's portrait
+            elsewhere on the page) and briefly flashing it before the
+            video started looked worse than showing nothing. VideoPlayer
+            renders a dark #0a0a0a background during the load window,
+            which matches the hero's own visual language; the browser
+            paints the video's first frame into the <video> element as
+            soon as media data arrives. */}
         <VideoPlayer
           src={trailerUrl || ""}
-          poster={heroUrl || "/hero.png"}
           className="home-video-band"
         />
 

@@ -192,11 +192,15 @@ export default async function CoursesPage() {
 
       {/* VIDEO — dark. Container is unconditional so the page can never
           jump from the intro straight to the training section on mobile
-          when the trailer URL is transiently empty. */}
+          when the trailer URL is transiently empty. No poster passed —
+          /hero.png is a different image and briefly flashing it before
+          the video started reads as broken. The dark #0a0a0a
+          container background handles the load window; the browser
+          paints the video's first frame in the <video> element itself
+          once media data arrives. */}
       <section style={{ background: "#000" }}>
         <VideoPlayer
           src={trailerUrl || ""}
-          poster="/hero.png"
           className="courses-video-band"
         />
       </section>
