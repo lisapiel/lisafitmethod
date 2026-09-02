@@ -239,21 +239,36 @@ function PaymentForm({
 
 function EmailStep({ onNext }: { onNext: (email: string, name: string) => void }) {
   const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [nameError, setNameError] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!firstName.trim()) { setNameError("Please enter your first name."); return }
+    const first = firstName.trim()
+    const last = lastName.trim()
+    if (!first) { setNameError("Please enter your first name."); return }
+    if (!last) { setNameError("Please enter your last name."); return }
     if (!email || !email.includes("@")) { setEmailError("Please enter a valid email address."); return }
-    onNext(email.trim().toLowerCase(), firstName.trim())
+    // Backend + Stripe accept a single `name` string; join first + last with a
+    // space so existing customerName consumers (webhook, receipts, admin
+    // records, historical purchases) keep the same shape.
+    onNext(email.trim().toLowerCase(), `${first} ${last}`)
   }
 
   return (
     <form onSubmit={handleContinue}>
-      <label style={labelStyle}>First Name</label>
-      <input type="text" value={firstName} onChange={(e) => { setFirstName(e.target.value); setNameError(null) }} placeholder="Your first name" required style={inputStyle} autoComplete="given-name" />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div>
+          <label style={labelStyle}>First Name</label>
+          <input type="text" value={firstName} onChange={(e) => { setFirstName(e.target.value); setNameError(null) }} placeholder="First" required style={inputStyle} autoComplete="given-name" />
+        </div>
+        <div>
+          <label style={labelStyle}>Last Name</label>
+          <input type="text" value={lastName} onChange={(e) => { setLastName(e.target.value); setNameError(null) }} placeholder="Last" required style={inputStyle} autoComplete="family-name" />
+        </div>
+      </div>
       {nameError && <p style={{ color: "#ff6b6b", fontSize: 13, marginBottom: 16, fontFamily: "var(--font-montserrat), sans-serif" }}>{nameError}</p>}
       <label style={labelStyle}>Email Address</label>
       <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setEmailError(null) }} placeholder="you@example.com" required style={inputStyle} autoComplete="email" />

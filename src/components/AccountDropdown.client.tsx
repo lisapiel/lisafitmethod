@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { signOut } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
+import { MASTERCLASS_CUSTOMER_VISIBLE } from "@/lib/productVisibility"
 
 const gold = "#c9a96e"
 
@@ -16,11 +17,16 @@ interface AccessState {
   masterclass: boolean
 }
 
+// Product portal list. Masterclass is included only when the customer
+// launch flag is on; today it's hidden from every customer-facing
+// surface. Backend routes + entitlement records are untouched.
 const PORTALS = [
   { id: "training" as const, label: "Training Foundations", href: "/training-foundations", upgradeHref: "/checkout" },
   { id: "nutrition" as const, label: "Nutrition Foundations", href: "/nutrition-foundations", upgradeHref: "/checkout" },
   { id: "coaching" as const, label: "1:1 Coaching", href: "/my-coaching", upgradeHref: "/coaching" },
-  { id: "masterclass" as const, label: "Masterclass", href: "/masterclass", upgradeHref: "/masterclass" },
+  ...(MASTERCLASS_CUSTOMER_VISIBLE
+    ? [{ id: "masterclass" as const, label: "Masterclass", href: "/masterclass", upgradeHref: "/masterclass" }]
+    : []),
   { id: "tracker" as const, label: "Progress Tracker", href: "/my-tracker", upgradeHref: "/account/courses/tracker" },
 ]
 

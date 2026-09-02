@@ -4,6 +4,7 @@ import {
   GetUserCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { listCoachingApplications, getBundleCredit, isAdminEmail } from "@/lib/authTokens"
+import { getCustomerHistory } from "@/lib/customerHistory"
 
 export const dynamic = "force-dynamic"
 
@@ -31,10 +32,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const applications = await listCoachingApplications()
-  // Enrich with bundleCredit so the queue can show a "Bundle credit $137" pill
+  // Enrich each application with:
+  //   - bundleCredit — legacy pill data (kept for back-compat with any consumer
+  //     that already reads it)
+  //   - history — full customer purchase/history summary so the coach can see
+  //     at a glance what the applicant has already purchased before approving.
   const enriched = await Promise.all(applications.map(async (app) => {
-    const bundleCredit = await getBundleCredit(app.email).catch(() => null)
-    return { ...app, bundleCredit }
+    const [bundleCredit, history] = await Promise.all([
+      getBundleCredit(app.email).catch(() => null),
+      getCustomerHistory(app.email).catch(() => null),
+    ])
+    return { ...app, bundleCredit, history }
   }))
   return NextResponse.json({ applications: enriched })
 }

@@ -843,7 +843,7 @@ export default function CoachingClient() {
               },
               {
                 q: "Is there a smaller way to start before committing to coaching?",
-                a: "Yes. The Complete Foundations Bundle ($137) is the best place to start. If you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month.",
+                a: "Yes. The Complete Foundations Bundle ($137) is the best place to start. If you upgrade to 3-month 1:1 coaching within 90 days, the full $137 credits toward your first coaching month. The bundle credit applies to the 3-month coaching option only, not to month-to-month coaching.",
               },
               {
                 q: "Do you coach nutrition too?",
@@ -925,7 +925,7 @@ export default function CoachingClient() {
               </p>
 
               <Link href="/courses" className="ch-link">
-                Prefer a self-guided approach? The Complete Foundations Bundle ($137) is a great place to start. Upgrade to coaching within 90 days and the full $137 credits toward your first coaching month →
+                Prefer a self-guided approach? The Complete Foundations Bundle ($137) is a great place to start. Upgrade to 3-month coaching within 90 days and the full $137 will be credited toward your first coaching month →
               </Link>
             </div>
 
@@ -1141,7 +1141,7 @@ export default function CoachingClient() {
                         Bundle credit found ✓
                       </p>
                       <p style={{ fontSize: "var(--text-small)", color: TEXT, margin: 0, lineHeight: 1.5 }}>
-                        We&apos;ll credit your <strong>${(bundleCredit.amountCents / 100).toFixed(0)}</strong> bundle purchase toward your first month of coaching if you&apos;re approved.
+                        Choose the <strong>3-month coaching option</strong> below and your <strong>${(bundleCredit.amountCents / 100).toFixed(0)}</strong> bundle credit will be applied to your first coaching month. Month-to-month coaching isn&apos;t eligible for the bundle credit.
                       </p>
                     </div>
                   )}

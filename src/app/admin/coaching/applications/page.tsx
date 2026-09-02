@@ -5,8 +5,40 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { CoachingApplication, CommitmentType } from "@/lib/authTokens"
 
+// Standard monthly prices in whole dollars per commitment. Auto-fills the
+// price input when the coach picks a commitment. The coach can still type
+// a custom value — auto-fill only replaces the price when it's empty or
+// still matches the OTHER commitment's default (i.e., the coach hasn't
+// intentionally overridden anything).
+const STANDARD_PRICE_DOLLARS: Record<CommitmentType, number> = {
+  THREE_MONTH_MINIMUM: 397,
+  MONTH_TO_MONTH:      497,
+}
+const STANDARD_PRICE_STRINGS = new Set(
+  Object.values(STANDARD_PRICE_DOLLARS).map(String)
+)
+function nextPriceForCommitmentChange(currentPriceStr: string, newCommitment: CommitmentType): string {
+  const trimmed = currentPriceStr.trim()
+  // Empty OR still matches one of the standard defaults → safe to
+  // replace with the new commitment's standard. Anything else is a
+  // real coach override, leave it alone.
+  if (trimmed === "" || STANDARD_PRICE_STRINGS.has(trimmed)) {
+    return String(STANDARD_PRICE_DOLLARS[newCommitment])
+  }
+  return currentPriceStr
+}
+
+type CustomerHistoryPayload = {
+  training:    { purchased: boolean; grantedAt: string | null }
+  nutrition:   { purchased: boolean; grantedAt: string | null }
+  tracker:     { purchased: boolean; grantedAt: string | null }
+  masterclass: { purchased: boolean; grantedAt: string | null }
+  coaching:    { hasEverEnrolled: boolean; status: string | null; approvedPriceInCents: number | null; commitmentType: string | null; subscriptionStartDate: string | null; cancellationDate: string | null }
+  bundle:      { purchased: boolean; purchasedAt: string | null; expiresAt: string | null; usedAt: string | null; usedForSubscriptionId: string | null; amountCents: number; available: boolean }
+}
 type EnrichedApplication = CoachingApplication & {
   bundleCredit?: { available: boolean; amountCents: number; expiresAt: string | null; purchasedAt: string | null } | null
+  history?: CustomerHistoryPayload | null
 }
 
 const gold = "#c9a96e"
@@ -89,23 +121,37 @@ export default function AdminApplicationsPage() {
 
   useEffect(() => { load() }, [load])
 
-  // Pre-fill commitment selector from applicant's self-reported coachingOption
+  // Pre-fill commitment selector from applicant's self-reported coachingOption,
+  // and also seed the price input with the standard for that commitment so
+  // the coach doesn't have to type it every time. Coach can still override.
   useEffect(() => {
+    const seededPrices: Record<string, string> = {}
     setCommitments((prev) => {
       const next = { ...prev }
       for (const app of applications) {
         if (app.status !== "PENDING" || next[app.id] !== undefined) continue
         const opt = (app.coachingOption ?? "").toLowerCase()
+        let seeded: CommitmentType | "" = ""
         if (opt.includes("3-month") || opt.includes("3 month") || opt.includes("three")) {
-          next[app.id] = "THREE_MONTH_MINIMUM"
+          seeded = "THREE_MONTH_MINIMUM"
         } else if (opt.includes("month-to-month") || opt.includes("month to month") || opt.includes("flexible") || opt.includes("cancel")) {
-          next[app.id] = "MONTH_TO_MONTH"
-        } else {
-          next[app.id] = ""
+          seeded = "MONTH_TO_MONTH"
         }
+        next[app.id] = seeded
+        if (seeded) seededPrices[app.id] = String(STANDARD_PRICE_DOLLARS[seeded])
       }
       return next
     })
+    if (Object.keys(seededPrices).length > 0) {
+      setPrices((prev) => {
+        const next = { ...prev }
+        for (const [id, val] of Object.entries(seededPrices)) {
+          // Never overwrite an already-typed price.
+          if (next[id] === undefined || next[id] === "") next[id] = val
+        }
+        return next
+      })
+    }
   }, [applications])
 
   async function act(id: string, action: "approve" | "decline") {
@@ -303,7 +349,13 @@ export default function AdminApplicationsPage() {
                         {/* Commitment selector */}
                         <select
                           value={commitments[app.id] ?? ""}
-                          onChange={(e) => setCommitments((c) => ({ ...c, [app.id]: e.target.value as CommitmentType | "" }))}
+                          onChange={(e) => {
+                            const nextCommitment = e.target.value as CommitmentType | ""
+                            setCommitments((c) => ({ ...c, [app.id]: nextCommitment }))
+                            if (nextCommitment === "THREE_MONTH_MINIMUM" || nextCommitment === "MONTH_TO_MONTH") {
+                              setPrices((p) => ({ ...p, [app.id]: nextPriceForCommitmentChange(p[app.id] ?? "", nextCommitment) }))
+                            }
+                          }}
                           style={{ width: "100%", background: "#111", border: `1px solid ${!commitments[app.id] ? "#6b4a20" : border}`, color: commitments[app.id] ? "#f0e6d3" : "#888", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none", cursor: "pointer" }}
                         >
                           <option value="">— Select commitment —</option>
@@ -343,6 +395,94 @@ export default function AdminApplicationsPage() {
                       </button>
                     )}
                   </div>
+
+                  {/* Bundle-credit status callout — shown for every pending
+                      application so the coach immediately knows whether a
+                      credit will apply to the commitment they're about to
+                      approve. Only 3-month commitments consume the credit
+                      server-side; the callout wording reflects the currently-
+                      selected commitment. */}
+                  {app.status === "PENDING" && (() => {
+                    const b = app.history?.bundle
+                    const selected = commitments[app.id]
+                    if (!b || !b.purchased) {
+                      return (
+                        <div style={{ background: "#111", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.04em" }}>
+                          No active bundle coaching credit
+                        </div>
+                      )
+                    }
+                    const usedText = b.usedAt
+                      ? "Bundle coaching credit already used"
+                      : (b.available ? null : "Bundle purchased previously — 90-day coaching credit expired")
+                    if (usedText) {
+                      return (
+                        <div style={{ background: "#1a1512", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.04em" }}>
+                          {usedText}
+                          {b.purchasedAt && <span style={{ color: "#555" }}> · Purchased {formatDate(b.purchasedAt)}</span>}
+                        </div>
+                      )
+                    }
+                    // Available: fmt for 3-month vs m2m distinctly
+                    const willApply = selected === "THREE_MONTH_MINIMUM"
+                    return (
+                      <div style={{
+                        background: willApply ? "rgba(92,158,106,0.10)" : "rgba(201,169,110,0.10)",
+                        border: `1px solid ${willApply ? "#5c9e6a" : gold}`,
+                        borderLeft: `4px solid ${willApply ? "#5c9e6a" : gold}`,
+                        padding: "10px 14px", marginBottom: 10,
+                        fontFamily: "var(--font-montserrat), sans-serif",
+                      }}>
+                        <p style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: willApply ? "#7bc48c" : gold, margin: "0 0 4px" }}>
+                          🟢 ${(b.amountCents / 100).toFixed(0)} Bundle Credit Available
+                        </p>
+                        <p style={{ fontSize: "0.68rem", color: cream, margin: "0 0 2px", lineHeight: 1.55 }}>
+                          Purchased {b.purchasedAt ? formatDate(b.purchasedAt) : "—"} · Eligible through {b.expiresAt ? formatDate(b.expiresAt) : "—"} · Applies to 3-month coaching only
+                        </p>
+                        <p style={{ fontSize: "0.65rem", color: willApply ? "#7bc48c" : "#c78e5a", margin: 0, fontWeight: 600, letterSpacing: "0.04em" }}>
+                          {selected === "THREE_MONTH_MINIMUM"
+                            ? "Will apply on approval → first invoice reduced by $" + (b.amountCents / 100).toFixed(0)
+                            : selected === "MONTH_TO_MONTH"
+                              ? "Not applied — month-to-month coaching isn't eligible"
+                              : "Select 3-month commitment to apply this credit"}
+                        </p>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Customer history — everything this email has ever bought.
+                      Resolved from the same DDB access records that gate
+                      access; nothing is denormalized. */}
+                  {app.history && (() => {
+                    const h = app.history
+                    const rows: Array<{ label: string; detail: string }> = []
+                    if (h.bundle.purchased) rows.push({ label: "Complete Foundations Bundle", detail: `${h.bundle.purchasedAt ? `Purchased ${formatDate(h.bundle.purchasedAt)}` : "Purchased"}${h.bundle.usedAt ? " · credit used" : ""}` })
+                    if (h.training.purchased)  rows.push({ label: "Training Foundations",  detail: h.training.grantedAt  ? `Access granted ${formatDate(h.training.grantedAt)}`  : "Access granted" })
+                    if (h.nutrition.purchased) rows.push({ label: "Nutrition Foundations", detail: h.nutrition.grantedAt ? `Access granted ${formatDate(h.nutrition.grantedAt)}` : "Access granted" })
+                    if (h.tracker.purchased)   rows.push({ label: "Progress Tracker",       detail: h.tracker.grantedAt   ? `Access granted ${formatDate(h.tracker.grantedAt)}`   : "Access granted" })
+                    if (h.coaching.hasEverEnrolled) {
+                      const bits = [h.coaching.status ?? "coaching"]
+                      if (h.coaching.approvedPriceInCents != null) bits.push(`${formatPrice(h.coaching.approvedPriceInCents)}/mo`)
+                      if (h.coaching.commitmentType) bits.push(h.coaching.commitmentType === "THREE_MONTH_MINIMUM" ? "3-month" : "month-to-month")
+                      if (h.coaching.subscriptionStartDate) bits.push(`start ${formatDate(h.coaching.subscriptionStartDate)}`)
+                      if (h.coaching.cancellationDate) bits.push(`cancelled ${formatDate(h.coaching.cancellationDate)}`)
+                      rows.push({ label: "Previous / current 1:1 Coaching", detail: bits.join(" · ") })
+                    }
+                    if (rows.length === 0) return null
+                    return (
+                      <div style={{ background: "#0e0e0e", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10 }}>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>
+                          Customer History
+                        </p>
+                        {rows.map((r, i) => (
+                          <p key={i} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: cream, margin: "2px 0", lineHeight: 1.5 }}>
+                            <span style={{ color: "#bbb" }}>{r.label}</span>
+                            <span style={{ color: "#666" }}> — {r.detail}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )
+                  })()}
 
                   {/* Application details */}
                   <div style={{ display: "grid", gap: 10 }}>
@@ -601,7 +741,13 @@ export default function AdminApplicationsPage() {
                         </div>
                         <select
                           value={restartCommitments[req.id] ?? ""}
-                          onChange={(e) => setRestartCommitments((c) => ({ ...c, [req.id]: e.target.value as CommitmentType | "" }))}
+                          onChange={(e) => {
+                            const nextCommitment = e.target.value as CommitmentType | ""
+                            setRestartCommitments((c) => ({ ...c, [req.id]: nextCommitment }))
+                            if (nextCommitment === "THREE_MONTH_MINIMUM" || nextCommitment === "MONTH_TO_MONTH") {
+                              setRestartPrices((p) => ({ ...p, [req.id]: nextPriceForCommitmentChange(p[req.id] ?? "", nextCommitment) }))
+                            }
+                          }}
                           style={{ background: "#111", border: `1px solid ${!restartCommitments[req.id] ? "#6b4a20" : border}`, color: restartCommitments[req.id] ? "#f0e6d3" : "#888", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none", cursor: "pointer" }}
                         >
                           <option value="">— Commitment —</option>

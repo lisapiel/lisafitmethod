@@ -137,7 +137,7 @@ function declineEmail(name: string): string {
             Thank you so much for your interest in 1:1 coaching. Unfortunately I'm at capacity right now and I'm not able to take on new clients at this time.
           </p>
           <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-            I'll keep your application on file and reach out if a spot opens up. In the meantime, my courses and Masterclass membership are available at
+            I'll keep your application on file and reach out if a spot opens up. In the meantime, my courses are available at
             <a href="https://lisafitmethod.com" style="color:#c8a97e;">lisafitmethod.com</a>.
           </p>
           <p style="margin:0;font-size:15px;color:#1a1a1a;line-height:1.7;">
@@ -221,20 +221,48 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const stripe = makeStripe()
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lisafitmethod.com"
 
-    // If the applicant bought the bundle within the credit window, create a
-    // one-time Stripe coupon for the bundle credit and apply it to the first
-    // invoice. Second month onwards is full price.
+    // Bundle credit — one-time first-invoice discount.
+    //
+    //   ELIGIBILITY (server-enforced, all three must hold):
+    //     1. A Complete Foundations Bundle purchase exists for this email
+    //        within the last 90 days (getBundleCredit → available=true).
+    //     2. The bundle credit has not already been consumed.
+    //     3. The APPROVED coaching commitment is THREE_MONTH_MINIMUM.
+    //        Month-to-month coaching NEVER gets the bundle credit.
+    //
+    //   BILLING SHAPE (Stripe):
+    //     The subscription's recurring price stays at priceInCents (i.e.
+    //     the coach-approved monthly amount, standard or overridden).
+    //     The coupon has duration:"once" and is attached to the Checkout
+    //     Session via top-level `discounts` — Stripe applies it to
+    //     invoice #1 only. Every subsequent invoice bills at the full
+    //     recurring priceInCents. This is NOT a permanent price cut.
+    //
+    //   USAGE MARKING:
+    //     The coupon is created at approval time, but the bundle-purchase
+    //     record is NOT marked used here. `markBundleCreditUsed` fires
+    //     from the Stripe webhook only after a real subscription payment
+    //     succeeds (in provisionCoachingSubscriber), so approvals that
+    //     never convert don't consume the credit.
     const credit = await getBundleCredit(application.email)
+    const bundleEligible =
+      credit.available &&
+      credit.amountCents > 0 &&
+      commitmentType === "THREE_MONTH_MINIMUM"
     let bundleCouponId: string | null = null
-    if (credit.available && credit.amountCents > 0) {
+    if (bundleEligible) {
       try {
         const coupon = await stripe.coupons.create({
           amount_off: Math.min(credit.amountCents, priceInCents),
           currency: "usd",
-          duration: "once",
+          duration: "once",                          // first invoice ONLY
           max_redemptions: 1,
           name: "Bundle credit",
-          metadata: { applicantEmail: application.email, applicationId: id },
+          metadata: {
+            applicantEmail: application.email,
+            applicationId: id,
+            coachingCommitmentType: commitmentType,  // for the paper trail
+          },
         })
         bundleCouponId = coupon.id
       } catch (err) {
