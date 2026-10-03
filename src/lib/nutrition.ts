@@ -7,33 +7,57 @@ export type NutritionGoal = "fat-loss" | "recomp" | "maintain" | "muscle-gain"
 export type Sex = "male" | "female"
 
 // Activity multipliers applied to Mifflin–St Jeor BMR to estimate TDEE.
-// The values are starting estimates; a client can move up or down as real
-// data comes in. Labels are short for the setup UI; the description explains
-// both structured training AND daily lifestyle activity so a client picks
-// correctly rather than only counting workouts.
+//
+// Values were tuned down (Oct 2026) from the previous 1.20/1.35/1.50/1.65/1.80
+// scale because the old numbers consistently over-estimated real-world energy
+// expenditure for coaching clients — self-reported activity is a known over-
+// estimator, and when the recomp goal multiplied by a generous activity
+// multiplier produced "maintenance" targets, real clients did not lose fat.
+// The current scale sits in the conservative end of the practitioner range
+// (1.2–1.9) that still accounts for differences in training density and
+// non-exercise activity. Legacy stored values from the previous scale are
+// re-mapped at compute time via `canonicalActivityLevel` so existing clients
+// pick up the new semantics without record modification.
 export const ACTIVITY_LEVELS = [
   { value: 1.20, key: "sedentary", label: "Sedentary",         desc: "Mostly seated lifestyle, little structured exercise." },
-  { value: 1.35, key: "light",     label: "Lightly Active",    desc: "Mostly seated/light daily activity + ~1–3 training sessions/week." },
-  { value: 1.50, key: "moderate",  label: "Moderately Active", desc: "Regular movement + ~3–5 training sessions/week." },
-  { value: 1.65, key: "active",    label: "Very Active",       desc: "Training ~5–6 days/week and/or a physically active lifestyle or job." },
-  { value: 1.80, key: "athlete",   label: "Highly Active",     desc: "Hard/frequent training plus a very active lifestyle or job." },
+  { value: 1.30, key: "light",     label: "Lightly Active",    desc: "Mostly seated/light daily activity + ~1–3 training sessions/week." },
+  { value: 1.42, key: "moderate",  label: "Moderately Active", desc: "Regular movement + ~3–5 training sessions/week." },
+  { value: 1.55, key: "active",    label: "Very Active",       desc: "Training ~5–6 days/week and/or a physically active lifestyle or job." },
+  { value: 1.70, key: "athlete",   label: "Highly Active",     desc: "Hard/frequent training plus a very active lifestyle or job." },
 ] as const
 
 // Calorie multiplier per goal. Multiplicative (not fixed ± kcal), so a
 // smaller client gets a smaller absolute deficit/surplus in kcal terms.
+//
+// Oct 2026 recalibration — in particular, `recomp` no longer equals
+// maintenance. A client who selects "Body Recomposition" wants to see
+// gradual fat loss while retaining/building muscle; if they wanted pure
+// maintenance they'd pick `maintain`. The previous recomp = 1.00 was the
+// single biggest reason real coaching clients were being prescribed
+// numbers that worked against the goal they chose.
 const GOAL_CALORIE_MULTIPLIER: Record<NutritionGoal, number> = {
-  "fat-loss": 0.88,     // ~12% deficit — conservative, supports adherence + strength
-  "recomp": 1.00,       // approximately estimated maintenance
-  "maintain": 1.00,     // approximately estimated maintenance
-  "muscle-gain": 1.07,  // ~7% surplus — controlled starting surplus
+  "fat-loss":    0.85, // ~15% deficit — supports steady loss while preserving training quality
+  "recomp":      0.93, // ~7% deficit — mild but non-zero; recomp works at a slight deficit
+  "maintain":    1.00, // true maintenance
+  "muscle-gain": 1.08, // ~8% surplus — controlled starting surplus
 }
 
-// Protein g per kg of body weight. Fat loss and recomposition prioritize
-// protein more heavily for muscle retention / body-composition change.
+// Protein g per kg of body weight.
+//
+// Oct 2026 recalibration — pulled down from 2.0/2.0/1.8/1.8 to 1.8/1.8/1.6/1.8.
+// The old 2.0 g/kg of *total* body weight produced inflated protein targets
+// for heavier clients carrying noticeable body fat (e.g. a 230 lb client was
+// being prescribed ~210 g protein, more than their lean tissue actually
+// needs). 1.8 g/kg across the fat-loss/recomp/muscle-gain goals still
+// comfortably exceeds the research minimum (~1.6 g/kg) for muscle
+// retention and growth in resistance-trained adults. Maintenance is slightly
+// lower (1.6 g/kg) because the goal doesn't require maximizing muscle
+// synthesis. If we later add a body-composition input, protein can scale
+// off estimated lean body mass instead of total weight.
 const GOAL_PROTEIN_G_PER_KG: Record<NutritionGoal, number> = {
-  "fat-loss": 2.0,
-  "recomp": 2.0,
-  "maintain": 1.8,
+  "fat-loss":    1.8,
+  "recomp":      1.8,
+  "maintain":    1.6,
   "muscle-gain": 1.8,
 }
 
@@ -158,7 +182,14 @@ export function resolveMacrosFor(
   if (!isPlausibleWeightLbs(weight)) return null
   const goal: NutritionGoal = client.nutritionGoal ?? "maintain"
   const bmr = computeBMR({ sex: client.sex, weightLbs: weight, heightInches: client.heightInches, age: client.age })
-  const tdee = computeTDEE(bmr, client.activityLevel)
+  // Canonicalize the stored activityLevel at compute time. If a client was
+  // seeded under the pre-Oct-2026 scale (1.35/1.50/1.65/1.80) or the even
+  // older 5-level scale (1.375/1.55/1.725/1.9), their stored value is remapped
+  // to the current scale's semantically-equivalent multiplier so the new
+  // formula applies to them without us rewriting their record. New sign-ups
+  // save current-scale values directly.
+  const activity = canonicalActivityLevel(client.activityLevel) ?? client.activityLevel
+  const tdee = computeTDEE(bmr, activity)
   const macros = computeMacros({ tdee, goal, weightLbs: weight })
   return { ...macros, source: "auto" }
 }
@@ -180,28 +211,41 @@ export function activityLabel(multiplier?: number): string | null {
 // so any surface that shows the goal picks up the same wording.
 export const GOAL_META: Record<NutritionGoal, { label: string; desc: string }> = {
   "fat-loss":    { label: "Fat Loss",           desc: "Reduce body fat while supporting strength and muscle retention." },
-  "recomp":      { label: "Body Recomposition", desc: "Build muscle while gradually reducing body fat. Scale weight may change very little." },
+  "recomp":      { label: "Body Recomposition", desc: "Build muscle while gradually reducing body fat using a small calorie deficit. Expect slow, steady recomposition rather than fast scale change." },
   "maintain":    { label: "Maintain",           desc: "Maintain your current body weight while supporting training and recovery." },
   "muscle-gain": { label: "Muscle Gain",        desc: "Support muscle growth with a small, controlled calorie surplus." },
 }
 
-// Maps legacy activityLevel values that a client record may still carry from
-// the old five-level scale (1.375, 1.55, 1.725, 1.9) to the corresponding
-// new value. Preserves label intent — legacy "Very Active" (1.725) maps to
-// new "Very Active" (1.65), not to "Highly Active" — since the client's
-// original label choice best represents their intent.
-//
-// Used ONLY by the setup form so a returning client sees the right button
-// pre-selected. Never rewrites the database — the old value stays on disk
-// until the client explicitly saves the form.
+// Legacy-activity remap used both by `resolveMacrosFor` (so compute-time
+// uses the current scale regardless of what's stored) and by the setup
+// form (so a returning client sees the right button pre-selected).
+// Maps:
+//   - Pre-Oct 2026 scale 1.35 / 1.50 / 1.65 / 1.80 → current 1.30 / 1.42 / 1.55 / 1.70
+//   - Pre-recalibration 5-level scale 1.375 / 1.55 / 1.725 / 1.9 → current
+//     equivalent (label-matched, not nearest-numeric).
+// Preserves client intent: whichever label they picked, they end up on the
+// current-scale multiplier for that same label. Never rewrites the database;
+// legacy values stay on disk until the client re-saves the setup form.
 const LEGACY_ACTIVITY_MAP: Record<string, number> = {
-  "1.375": 1.35, // Lightly Active → Lightly Active
-  "1.55":  1.50, // Moderately Active → Moderately Active
-  "1.725": 1.65, // Very Active → Very Active
-  "1.9":   1.80, // Extremely Active → Highly Active
+  // Pre-recalibration 5-level scale (very old)
+  "1.375": 1.30,
+  "1.55":  1.42,
+  "1.725": 1.55,
+  "1.9":   1.70,
+  // Pre-Oct-2026 scale
+  "1.35":  1.30,
+  "1.50":  1.42,
+  "1.65":  1.55,
+  "1.80":  1.70,
+  "1.5":   1.42, // tolerates stored values that dropped the trailing zero
+  "1.8":   1.70,
 }
-export function remapLegacyActivity(stored?: number): number | undefined {
+export function canonicalActivityLevel(stored?: number): number | undefined {
   if (stored == null) return stored
-  const legacy = LEGACY_ACTIVITY_MAP[String(stored)]
-  return legacy ?? stored
+  // Current-scale values stay as-is.
+  if (ACTIVITY_LEVELS.some((a) => Math.abs(a.value - stored) < 0.001)) return stored
+  const mapped = LEGACY_ACTIVITY_MAP[String(stored)]
+  return mapped ?? stored
 }
+// Legacy export name kept so callers (setup form) don't break on the rename.
+export const remapLegacyActivity = canonicalActivityLevel

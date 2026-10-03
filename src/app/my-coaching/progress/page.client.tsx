@@ -281,7 +281,26 @@ export default function ProgressClient() {
           const ciList = allCheckIns
             .filter((ci) => ci.weight)
             .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
-          setWeightData(ciList.map((ci) => ({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" })))
+          // Chart series = startingWeight (if any) PRE-pended, then check-ins.
+          // Prepends only when the starting weight predates the first check-in,
+          // so we don't invent a point in the middle. Dated at
+          // subscriptionStartDate / createdAt, falling back to startDate on
+          // the progress payload if that's what the API exposes.
+          const series: Array<{ date: string; weight: number; unit: string }> = []
+          const progClient = progRes.status === "fulfilled" ? progRes.value.client : null
+          const startingWeight = progClient?.startingWeight
+          const startingUnit   = (progClient?.weightUnit as string | undefined) ?? "LBS"
+          const seedDate       = progClient?.subscriptionStartDate ?? progClient?.createdAt ?? startDate
+          if (startingWeight != null && seedDate) {
+            const firstCiDate = ciList[0]?.submittedAt as string | undefined
+            if (!firstCiDate || seedDate <= firstCiDate) {
+              series.push({ date: seedDate, weight: Number(startingWeight), unit: startingUnit })
+            }
+          }
+          for (const ci of ciList) {
+            series.push({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" })
+          }
+          setWeightData(series)
 
           // Additional milestones from weight check-ins
           const sortedAll = [...allCheckIns].sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
@@ -313,25 +332,66 @@ export default function ProgressClient() {
           }
         }
 
-        if (snapshotsRes.status === "fulfilled") {
-          const snaps: Array<Record<string, unknown>> = snapshotsRes.value.snapshots ?? []
-          setSnapshots(
-            snaps
-              .sort((a, b) => (b.snapshotDate as string).localeCompare(a.snapshotDate as string))
-              .map((s) => ({
-                id: s.id as string,
-                snapshotDate: s.snapshotDate as string,
-                weight: s.weight != null ? Number(s.weight) : null,
-                weightUnit: (s.weightUnit as string | null) ?? null,
-                waist: s.waist != null ? Number(s.waist) : null,
-                hips: s.hips != null ? Number(s.hips) : null,
-                chest: s.chest != null ? Number(s.chest) : null,
-                arm: s.arm != null ? Number(s.arm) : null,
-                thigh: s.thigh != null ? Number(s.thigh) : null,
-                notes: (s.notes as string | null) ?? null,
-              }))
-          )
+        // Measurement history = ProgressSnapshotRecord entries ∪ parsed
+        // measurementSnapshot JSON from check-ins. The structured check-in
+        // fields (Waist/Hips/Chest/Thigh/Arm) land in the free-form snapshot
+        // under known labels; this merges them into the same timeline so
+        // the client sees everything they've logged, newest first, without
+        // schema duplication.
+        const snapsRaw: Array<Record<string, unknown>> = snapshotsRes.status === "fulfilled" ? (snapshotsRes.value.snapshots ?? []) : []
+        const snapRows: Snapshot[] = snapsRaw.map((s) => ({
+          id: s.id as string,
+          snapshotDate: s.snapshotDate as string,
+          weight: s.weight != null ? Number(s.weight) : null,
+          weightUnit: (s.weightUnit as string | null) ?? null,
+          waist: s.waist != null ? Number(s.waist) : null,
+          hips:  s.hips  != null ? Number(s.hips)  : null,
+          chest: s.chest != null ? Number(s.chest) : null,
+          arm:   s.arm   != null ? Number(s.arm)   : null,
+          thigh: s.thigh != null ? Number(s.thigh) : null,
+          notes: (s.notes as string | null) ?? null,
+        }))
+
+        const checkInRows: Snapshot[] = []
+        if (checkInsRes.status === "fulfilled") {
+          const all: Array<Record<string, unknown>> = checkInsRes.value.checkIns ?? []
+          for (const ci of all) {
+            const raw = ci.measurementSnapshot
+            if (typeof raw !== "string" || !raw) continue
+            let entries: Array<{ label: string; value: string; unit: string }> = []
+            try {
+              const parsed = JSON.parse(raw)
+              if (Array.isArray(parsed)) {
+                entries = parsed.filter((m): m is { label: string; value: string; unit: string } =>
+                  m && typeof m === "object" && typeof m.label === "string" && typeof m.value === "string"
+                )
+              }
+            } catch { /* skip malformed row */ continue }
+            if (entries.length === 0) continue
+            const row: Snapshot = {
+              id: `ci-${ci.id as string}`,
+              snapshotDate: ci.submittedAt as string,
+              weight: null, weightUnit: null,
+              waist: null, hips: null, chest: null, arm: null, thigh: null, notes: null,
+            }
+            for (const e of entries) {
+              const l = e.label.trim().toLowerCase()
+              const n = Number(e.value)
+              if (!Number.isFinite(n) || n <= 0) continue
+              if (l.includes("waist")) row.waist = n
+              else if (l.includes("hip")) row.hips = n
+              else if (l.includes("chest")) row.chest = n
+              else if (l.includes("thigh") || l.includes("leg")) row.thigh = n
+              else if (l === "arm" || l.startsWith("arm ") || l.includes(" arm") || l.includes("bicep")) row.arm = n
+            }
+            if (row.waist || row.hips || row.chest || row.arm || row.thigh) checkInRows.push(row)
+          }
         }
+
+        setSnapshots(
+          [...snapRows, ...checkInRows]
+            .sort((a, b) => b.snapshotDate.localeCompare(a.snapshotDate))
+        )
       } catch { /* handled by layout */ }
       setLoading(false)
     }
