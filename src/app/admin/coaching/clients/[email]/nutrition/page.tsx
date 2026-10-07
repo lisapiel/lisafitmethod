@@ -12,6 +12,7 @@ import { toLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
 import {
   buildDailyTotals, summarizePeriod, summarizeWeight, periodWindow,
+  generateCoachInsights, compareWeeks,
   type DailyTotals, type MacroTarget, type WeightPoint,
 } from "@/lib/nutritionAnalytics"
 
@@ -243,6 +244,7 @@ export default function AdminClientNutritionPage() {
   }), [logs, window.from, window.to, currentTarget])
 
   const summary = useMemo(() => summarizePeriod({ dailies, today: todayKey }), [dailies, todayKey])
+  const weekly = useMemo(() => compareWeeks({ logs, today: todayKey, currentTarget }), [logs, todayKey, currentTarget])
 
   // Weight points — reuse Progress source of truth, read via canonical toLbs.
   const weightPoints: WeightPoint[] = useMemo(() => {
@@ -267,6 +269,7 @@ export default function AdminClientNutritionPage() {
 
   const weightTrend = useMemo(() => summarizeWeight(weightPoints), [weightPoints])
   const displayUnit: WeightUnit = normalizeUnit(client?.weightUnit)
+  const insights = useMemo(() => generateCoachInsights({ summary, weight: weightTrend, currentTarget }), [summary, weightTrend, currentTarget])
 
   const measurementHistory: MeasurementRow[] = useMemo(() => {
     const rows: MeasurementRow[] = []
@@ -606,6 +609,82 @@ export default function AdminClientNutritionPage() {
           <MiniLine points={weightSeries} color={cream} label="Weight (lb)" />
         </div>
       </div>
+
+      {/* D. Coach insights ─────────────────────────────────────────────── */}
+      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>
+          Coach insights
+        </p>
+        <div>
+          {insights.map((i) => {
+            const toneColor = i.tone === "watch" ? "#e8a662" : i.tone === "positive" ? green : muted
+            const dot = i.tone === "watch" ? "●" : i.tone === "positive" ? "✓" : "·"
+            return (
+              <div key={i.key} style={{ borderTop: `1px solid ${border}`, padding: "10px 0" }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: cream, margin: 0, lineHeight: 1.5 }}>
+                  <span style={{ color: toneColor, marginRight: 8, fontWeight: 700 }}>{dot}</span>
+                  {i.headline}
+                </p>
+                {i.detail && (
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, margin: "4px 0 0 18px", lineHeight: 1.5 }}>
+                    {i.detail}
+                  </p>
+                )}
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, margin: "4px 0 0 18px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  {i.confidence} confidence
+                </p>
+              </div>
+            )
+          })}
+        </div>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, margin: "12px 0 0", lineHeight: 1.5, fontStyle: "italic" }}>
+          Decision support only. Nothing here automatically changes a client&apos;s target.
+        </p>
+      </div>
+
+      {/* Weekly comparison ────────────────────────────────────────────── */}
+      {(weekly.thisWeek.avg || weekly.previousWeek.avg) && (
+        <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
+            This week vs previous week
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+                This week ({weekly.thisWeek.from} → {weekly.thisWeek.to})
+              </p>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, margin: "0 0 2px", fontWeight: 600 }}>
+                {weekly.thisWeek.avg ? `${fmtKcal(weekly.thisWeek.avg.calories)} kcal` : "No logs"}
+              </p>
+              {weekly.thisWeek.avg && (
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted, margin: 0 }}>
+                  {weekly.thisWeek.avg.protein}g protein · {weekly.thisWeek.loggedDays} days logged
+                </p>
+              )}
+            </div>
+            <div>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+                Previous week ({weekly.previousWeek.from} → {weekly.previousWeek.to})
+              </p>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, margin: "0 0 2px", fontWeight: 600 }}>
+                {weekly.previousWeek.avg ? `${fmtKcal(weekly.previousWeek.avg.calories)} kcal` : "No logs"}
+              </p>
+              {weekly.previousWeek.avg && (
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted, margin: 0 }}>
+                  {weekly.previousWeek.avg.protein}g protein · {weekly.previousWeek.loggedDays} days logged
+                </p>
+              )}
+            </div>
+          </div>
+          {(weekly.caloriesDelta != null || weekly.proteinDelta != null || weekly.loggingDelta !== 0) && (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted, margin: "12px 0 0", lineHeight: 1.5 }}>
+              Δ {weekly.caloriesDelta != null ? `${fmtDelta(weekly.caloriesDelta)} kcal/day` : ""}
+              {weekly.proteinDelta != null ? ` · ${fmtDelta(weekly.proteinDelta)}g protein/day` : ""}
+              {weekly.loggingDelta !== 0 ? ` · ${fmtDelta(weekly.loggingDelta)} days logged` : ""}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Measurements summary (reads from Progress source — read-only) ──── */}
       {latestMeasurements.length > 0 && (

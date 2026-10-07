@@ -9,7 +9,7 @@ import type { CoachingClientRecord, NutritionLogRecord } from "@/lib/authTokens"
 import NutritionComposer from "@/components/coaching/NutritionComposer.client"
 import LogFoodModal from "@/components/coaching/LogFoodModal.client"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
-import { buildDailyTotals, summarizePeriod, type DailyTotals, type MacroTarget } from "@/lib/nutritionAnalytics"
+import { buildDailyTotals, summarizePeriod, recentRepeatedMeals, type DailyTotals, type MacroTarget, type RepeatedMeal } from "@/lib/nutritionAnalytics"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -58,7 +58,11 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   const [loading, setLoading] = useState(true)
   const [state, setState] = useState<Loaded>({ client: null })
   const [logs, setLogs] = useState<NutritionLogRecord[]>([])
-  const [logOpen, setLogOpen] = useState<{ open: boolean; mealType?: "breakfast" | "lunch" | "dinner" | "snack" }>({ open: false })
+  const [logOpen, setLogOpen] = useState<{
+    open: boolean
+    mealType?: "breakfast" | "lunch" | "dinner" | "snack"
+    prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType">>
+  }>({ open: false })
   const [expandToday, setExpandToday] = useState(false)
 
   const loadLogs = useCallback(async () => {
@@ -118,6 +122,10 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
     for (const l of todayLogs) if (l.mealType) set.add(l.mealType)
     return set
   }, [todayLogs])
+
+  // Recent/repeated meals — top 4 from the last 14 days (we already fetched
+  // those). Each becomes a one-tap re-log button.
+  const repeats = useMemo<RepeatedMeal[]>(() => recentRepeatedMeals(logs, { limit: 4 }), [logs])
 
   if (loading) {
     return (
@@ -317,10 +325,55 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
         </div>
       </div>
 
+      {/* Recent / repeated meals — one-tap re-log of common foods */}
+      {repeats.length > 0 && (
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 10px" }}>
+            Recent meals
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 8 }}>
+            {repeats.map((r) => (
+              <button
+                key={r.key}
+                onClick={() => setLogOpen({
+                  open: true,
+                  mealType: r.mealType,
+                  prefill: {
+                    calories: r.calories, protein: r.protein, carbs: r.carbs, fat: r.fat,
+                    description: r.description, mealType: r.mealType,
+                  },
+                })}
+                style={{
+                  background: "#fff", border: `1px solid ${border}`, color: black,
+                  padding: "10px 12px", borderRadius: 6, cursor: "pointer",
+                  textAlign: "left",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                }}
+              >
+                <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 2px" }}>
+                  {r.mealType ?? "Log"} · ×{r.count}
+                </p>
+                <p style={{ fontSize: "0.82rem", fontWeight: 600, color: black, margin: "0 0 2px", lineHeight: 1.3 }}>
+                  {r.description ? r.description : `${r.calories} kcal · ${r.protein}g P`}
+                </p>
+                {r.description && (
+                  <p style={{ fontSize: "0.7rem", color: muted, margin: 0 }}>
+                    {r.calories} kcal · {r.protein}g P
+                    {r.carbs != null ? ` · ${r.carbs}g C` : ""}
+                    {r.fat != null ? ` · ${r.fat}g F` : ""}
+                  </p>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <LogFoodModal
         open={logOpen.open}
         onClose={() => setLogOpen({ open: false })}
         initialMealType={logOpen.mealType}
+        prefill={logOpen.prefill}
         onLogged={() => { loadLogs() }}
       />
 
