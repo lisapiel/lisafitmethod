@@ -29,7 +29,7 @@
 import type { NutritionLogRecord } from "./authTokens"
 import type { ResolvedMacros } from "./nutrition"
 import { addDaysToKey, daysBetweenKeys, keyRange, type LocalDateKey } from "./localDate"
-import { toCm, fromCm, normalizeLengthUnit, type LengthUnit } from "./length"
+import { toCm, fromCm, parseLengthUnit, type LengthUnit } from "./length"
 
 // ─── Named thresholds / constants ───────────────────────────────────────────
 //
@@ -551,12 +551,17 @@ export function measurementChanges(args: {
     return d >= from && d <= to
   })
   // Normalize every valid reading to centimetres and group per label.
+  // Readings whose unit cannot be parsed (missing, unknown, or an
+  // incompatible token) are DROPPED — we never guess a unit. If a label
+  // ends up with fewer than 2 valid readings after this filter, the row
+  // is not emitted at all (same ≥2 rule as before).
   type Normalized = { date: string; cm: number; sourceUnit: LengthUnit }
   const byLabel = new Map<string, Normalized[]>()
   for (const r of inWindow) {
-    const cm = toCm(r.value, r.unit)
+    const sourceUnit = parseLengthUnit(r.unit)
+    if (sourceUnit == null) continue
+    const cm = toCm(r.value, sourceUnit)
     if (cm == null) continue
-    const sourceUnit = normalizeLengthUnit(r.unit)
     const entry: Normalized = { date: r.date, cm, sourceUnit }
     const arr = byLabel.get(r.label)
     if (arr) arr.push(entry); else byLabel.set(r.label, [entry])

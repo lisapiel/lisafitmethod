@@ -12,21 +12,36 @@ export type LengthUnit = "in" | "cm"
 
 const CM_PER_IN = 2.54
 
-// Accept common unit spellings. Defaults to "in" because the UI's
-// measurement rows default to inches and most legacy snapshots are in
-// inches too.
-export function normalizeLengthUnit(unit?: string | null): LengthUnit {
-  const u = (unit ?? "").toLowerCase().trim()
+// Strict parse: returns a known unit or `null` for anything missing /
+// unknown / incompatible. Use this when the caller must drop a reading
+// rather than guess (analytics). Historical records that pre-date the
+// per-row unit toggle may well have no `unit` field at all — in that case
+// we exclude the comparison instead of silently assuming inches.
+export function parseLengthUnit(unit?: string | null): LengthUnit | null {
+  if (unit == null) return null
+  const u = String(unit).toLowerCase().trim()
+  if (u === "") return null
   if (u === "cm" || u === "cms" || u === "centimeter" || u === "centimeters") return "cm"
-  return "in"
+  if (u === "in" || u === "ins" || u === "inch" || u === "inches" || u === '"') return "in"
+  return null
 }
 
-// Convert any (value, unit) pair to centimetres. Returns null if the value
-// isn't a positive finite number so callers can safely skip it in aggregates.
+// Lenient fallback — used by UI code (setup form, check-in form) where
+// the user-visible selector defaults to inches anyway. NEVER call this
+// from analytics; use `parseLengthUnit` and drop the reading on null.
+export function normalizeLengthUnit(unit?: string | null): LengthUnit {
+  return parseLengthUnit(unit) ?? "in"
+}
+
+// Convert a (value, unit) pair to centimetres. Returns null when the value
+// isn't a positive finite number OR when the unit cannot be parsed, so
+// analytics callers can safely skip the reading in aggregates.
 export function toCm(value: number | string | null | undefined, unit?: string | null): number | null {
   const n = typeof value === "number" ? value : parseFloat(String(value ?? ""))
   if (!Number.isFinite(n) || n <= 0) return null
-  return normalizeLengthUnit(unit) === "cm" ? n : n * CM_PER_IN
+  const parsed = parseLengthUnit(unit)
+  if (parsed == null) return null
+  return parsed === "cm" ? n : n * CM_PER_IN
 }
 
 // Convert centimetres → target unit for display.
