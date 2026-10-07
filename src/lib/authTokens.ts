@@ -595,6 +595,27 @@ export async function updateCoachingClientRecord(email: string, updates: Partial
   )
 }
 
+// Dedicated REMOVE for a single top-level attribute on a coaching client
+// record. Used by the coach nutrition override "Reset" path (the generic
+// updater above has to pass a non-undefined value for every attribute, so
+// clearing an attribute requires an explicit REMOVE expression).
+// Kept scoped to a short allowlist so this never accidentally becomes a
+// general-purpose attribute-nuker.
+export async function clearCoachingClientField(
+  email: string,
+  field: "customMacros",
+): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_client_${email.toLowerCase()}` },
+      UpdateExpression: `REMOVE #f`,
+      ExpressionAttributeNames: { "#f": field },
+    })
+  )
+}
+
 export async function listCoachingClientRecords(): Promise<CoachingClientRecord[]> {
   const db = makeDb()
   const result = await db.send(
@@ -1649,4 +1670,128 @@ export async function markWaiverTokenUsed(token: string): Promise<void> {
       ExpressionAttributeValues: { ":true": true },
     })
   )
+}
+
+// ── Nutrition logs ────────────────────────────────────────────────────────────
+//
+// Structured per-day nutrition entries written by the client.
+//
+// One record per `(clientEmail, date, id)` tuple. "date" is a plain
+// YYYY-MM-DD key in the client's own timezone (see src/lib/localDate.ts).
+// Server trusts the client's submitted date and stores it verbatim — it is
+// not derived from a server clock. This matters for late-night logging and
+// clients in time zones distant from us-east-2.
+//
+// `targetAtLog` snapshots the ACTIVE coach target that was in effect at the
+// moment of logging. This lets historical adherence be calculated against
+// the then-current target even if the coach later changes it.
+//
+// Backwards compatible — a brand-new DDB prefix (`nutrition_log_`) sharing
+// the same single table. No schema migration, no change to existing records.
+export type NutritionLogKind = "quick" | "meal"
+export type NutritionLogMealType = "breakfast" | "lunch" | "dinner" | "snack"
+export interface NutritionLogRecord {
+  id: string
+  clientEmail: string
+  date: string          // YYYY-MM-DD, client-local
+  timeZone?: string     // IANA, e.g. "America/New_York" — context for `date`
+  loggedAt: string      // ISO timestamp when written
+  kind: NutritionLogKind
+  mealType?: NutritionLogMealType
+  description?: string
+  calories: number
+  protein: number
+  carbs?: number
+  fat?: number
+  // Snapshot of the ACTIVE coach target when this log was created. Only used
+  // for historical adherence; the current effective target is read live from
+  // the client record. Omitted when the client's target could not be resolved
+  // at log time (missing body data etc.).
+  targetAtLog?: { calories: number; protein: number; carbs: number; fat: number }
+  // Source free-text when the entry originated from a description (reserved
+  // for the future description-based estimator). Preserved verbatim.
+  sourceText?: string
+  updatedAt?: string
+}
+
+export async function createNutritionLog(
+  data: Omit<NutritionLogRecord, "id" | "loggedAt"> & { id?: string; loggedAt?: string }
+): Promise<NutritionLogRecord> {
+  const db = makeDb()
+  const id = data.id ?? randomBytes(16).toString("hex")
+  const loggedAt = data.loggedAt ?? new Date().toISOString()
+  const record: NutritionLogRecord = {
+    ...data,
+    id,
+    clientEmail: data.clientEmail.toLowerCase(),
+    loggedAt,
+  }
+  await db.send(
+    new PutCommand({
+      TableName: TABLE,
+      Item: { userId: `nutrition_log_${id}`, ...record },
+    })
+  )
+  return record
+}
+
+export async function getNutritionLog(id: string): Promise<NutritionLogRecord | null> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `nutrition_log_${id}` } })
+  )
+  if (!result.Item) return null
+  return result.Item as NutritionLogRecord
+}
+
+export async function listNutritionLogsForClient(
+  clientEmail: string,
+  opts?: { fromDate?: string; toDate?: string }
+): Promise<NutritionLogRecord[]> {
+  const db = makeDb()
+  const result = await db.send(
+    new ScanCommand({
+      TableName: TABLE,
+      FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
+      ExpressionAttributeValues: { ":prefix": "nutrition_log_", ":email": clientEmail.toLowerCase() },
+    })
+  )
+  const all = (result.Items ?? []) as NutritionLogRecord[]
+  const filtered = all.filter((r) => {
+    if (opts?.fromDate && r.date < opts.fromDate) return false
+    if (opts?.toDate && r.date > opts.toDate) return false
+    return true
+  })
+  return filtered.sort((a, b) => b.loggedAt.localeCompare(a.loggedAt))
+}
+
+export async function updateNutritionLog(id: string, updates: Partial<NutritionLogRecord>): Promise<void> {
+  const db = makeDb()
+  const sets: string[] = []
+  const values: Record<string, unknown> = {}
+  const names: Record<string, string> = {}
+  // Note: id, clientEmail, loggedAt are immutable from the client. updatedAt
+  // stamp is set by the API route.
+  for (const [k, v] of Object.entries(updates)) {
+    if (k === "id" || k === "clientEmail" || k === "loggedAt") continue
+    if (v === undefined) continue // never emit SET on an undefined
+    sets.push(`#${k} = :${k}`)
+    values[`:${k}`] = v
+    names[`#${k}`] = k
+  }
+  if (sets.length === 0) return
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `nutrition_log_${id}` },
+      UpdateExpression: `SET ${sets.join(", ")}`,
+      ExpressionAttributeNames: names,
+      ExpressionAttributeValues: values,
+    })
+  )
+}
+
+export async function deleteNutritionLog(id: string): Promise<void> {
+  const db = makeDb()
+  await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: `nutrition_log_${id}` } }))
 }

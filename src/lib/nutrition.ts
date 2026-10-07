@@ -164,6 +164,10 @@ export function resolveMacrosFor(
   currentWeightLbs?: number
 ): ResolvedMacros | null {
   const c = client.customMacros
+  // A coach override is only honoured when all four macros are present.
+  // Partial overrides are rejected at the write path (see
+  // src/app/api/admin/coaching/clients/[email]/nutrition/route.ts) so that
+  // the active target is always internally consistent.
   if (c && c.calories != null && c.protein != null && c.carbs != null && c.fat != null) {
     return { calories: c.calories, protein: c.protein, carbs: c.carbs, fat: c.fat, belowGuard: false, source: "override" }
   }
@@ -203,8 +207,30 @@ export function formatHeight(inches: number): string {
 
 export function activityLabel(multiplier?: number): string | null {
   if (multiplier == null) return null
-  const found = ACTIVITY_LEVELS.find((a) => Math.abs(a.value - multiplier) < 0.001)
+  // Legacy stored multipliers must resolve to their current-scale label.
+  // Without this remap, admin screens render "—" for every client seeded
+  // before the Oct 2026 recalibration even though the compute path handles
+  // them correctly.
+  const canonical = canonicalActivityLevel(multiplier) ?? multiplier
+  const found = ACTIVITY_LEVELS.find((a) => Math.abs(a.value - canonical) < 0.001)
   return found?.label ?? null
+}
+
+// Validates coach-entered macros against their calorie target.
+// If all four macros are present AND they contradict the calorie total by
+// more than `tolerancePct` (default 7%), returns a human-readable error so
+// the UI can refuse to save silent nonsense (e.g. 2600 kcal + 50g P / 50g C
+// / 20g F = 580 kcal actual). Rounding slack is baked into the tolerance.
+export function validateMacroCalorieConsistency(input: {
+  calories?: number; protein?: number; carbs?: number; fat?: number
+}, tolerancePct = 0.07): string | null {
+  const { calories, protein, carbs, fat } = input
+  if (calories == null || protein == null || carbs == null || fat == null) return null
+  const macroKcal = protein * 4 + carbs * 4 + fat * 9
+  const drift = Math.abs(macroKcal - calories)
+  const allowed = Math.max(60, calories * tolerancePct) // 60 kcal absolute floor for small targets
+  if (drift <= allowed) return null
+  return `Macros add up to ${Math.round(macroKcal)} kcal but calorie target is ${calories} kcal (${Math.round(drift)} kcal off, more than ${Math.round(tolerancePct * 100)}% tolerance).`
 }
 
 // Client-facing goal labels + coaching copy. Kept alongside the numeric model

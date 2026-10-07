@@ -1,12 +1,15 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
 import { RECIPES } from "@/lib/nutritionRecipes"
 import type { Recipe } from "@/components/nutrition/RecipeCard"
-import type { CoachingClientRecord } from "@/lib/authTokens"
+import type { CoachingClientRecord, NutritionLogRecord } from "@/lib/authTokens"
 import NutritionComposer from "@/components/coaching/NutritionComposer.client"
+import LogFoodModal from "@/components/coaching/LogFoodModal.client"
+import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
+import { buildDailyTotals, summarizePeriod, type DailyTotals, type MacroTarget } from "@/lib/nutritionAnalytics"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -54,6 +57,22 @@ interface NutritionClientProps {
 export default function NutritionClient({ ownsNutritionCourse, email }: NutritionClientProps) {
   const [loading, setLoading] = useState(true)
   const [state, setState] = useState<Loaded>({ client: null })
+  const [logs, setLogs] = useState<NutritionLogRecord[]>([])
+  const [logOpen, setLogOpen] = useState<{ open: boolean; mealType?: "breakfast" | "lunch" | "dinner" | "snack" }>({ open: false })
+  const [expandToday, setExpandToday] = useState(false)
+
+  const loadLogs = useCallback(async () => {
+    try {
+      // Fetch last 14 days so we have enough context for TODAY + THIS WEEK + a short history.
+      const today = localDateKey()
+      const from = addDaysToKey(today, -13)
+      const res = await fetch(`/api/coaching/nutrition-logs?from=${from}&to=${today}`)
+      if (res.ok) {
+        const data = await res.json() as { logs: NutritionLogRecord[] }
+        setLogs(data.logs ?? [])
+      }
+    } catch { /* ignore — UI falls back to empty state */ }
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -64,15 +83,41 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
           setState(data)
         }
       } catch { /* ignore */ }
+      await loadLogs()
       setLoading(false)
     }
     load()
-  }, [])
+  }, [loadLogs])
 
   const macros = useMemo(() => {
     if (!state.client) return null
     return resolveMacrosFor(state.client)
   }, [state.client])
+
+  const todayKey: LocalDateKey = localDateKey()
+  const weekFrom = addDaysToKey(todayKey, -6)
+  const currentTarget: MacroTarget | undefined = useMemo(
+    () => (macros ? { calories: macros.calories, protein: macros.protein, carbs: macros.carbs, fat: macros.fat } : undefined),
+    [macros],
+  )
+
+  const todayLogs = useMemo(() => logs.filter((l) => l.date === todayKey), [logs, todayKey])
+  const todayTotals: DailyTotals | null = useMemo(() => {
+    if (!macros) return null
+    const [row] = buildDailyTotals({ logs: todayLogs, from: todayKey, to: todayKey, currentTarget })
+    return row ?? null
+  }, [todayLogs, todayKey, currentTarget, macros])
+
+  const weekSummary = useMemo(() => {
+    const dailies = buildDailyTotals({ logs, from: weekFrom, to: todayKey, currentTarget })
+    return summarizePeriod({ dailies, today: todayKey })
+  }, [logs, weekFrom, todayKey, currentTarget])
+
+  const mealsLoggedToday = useMemo(() => {
+    const set = new Set<string>()
+    for (const l of todayLogs) if (l.mealType) set.add(l.mealType)
+    return set
+  }, [todayLogs])
 
   if (loading) {
     return (
@@ -127,15 +172,18 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
           Nutrition
         </p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.9rem", fontWeight: 700, color: black, margin: 0, lineHeight: 1.2 }}>
-          Your starting target
+          Today
         </h1>
       </div>
 
-      {/* Hero macro card */}
-      <div style={{ background: black, color: white, borderRadius: 8, padding: "1.5rem 1.5rem", marginBottom: "1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, flexWrap: "wrap", gap: 6 }}>
+      {/* TODAY — intake vs target. Calories + Protein are the stronger
+          hierarchy. Carbs + Fat are secondary. Source badge mirrors the
+          admin "Set by Lisa / Auto" wording so there is no ambiguity about
+          whose target the client is following. */}
+      <div style={{ background: black, color: white, borderRadius: 8, padding: "1.5rem 1.5rem", marginBottom: "0.75rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: 0 }}>
-            Starting target · Weekly average
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
           </p>
           {macros.source === "override" ? (
             <span style={{ background: accent, color: black, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", padding: "3px 8px", borderRadius: 3, textTransform: "uppercase" }}>
@@ -147,31 +195,134 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
             </span>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
           <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2.4rem", fontWeight: 700, lineHeight: 1 }}>
-            {macros.calories.toLocaleString()}
+            {(todayTotals?.calories ?? 0).toLocaleString()}
           </span>
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: "#c9c4bd" }}>
-            kcal
+          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.95rem", color: "#c9c4bd" }}>
+            / {macros.calories.toLocaleString()} kcal
           </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.95rem", color: "#c9c4bd", margin: "0 0 14px" }}>
+          <strong style={{ color: white }}>{todayTotals?.protein ?? 0}</strong> / {macros.protein}g protein
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
           {[
-            { label: "Protein", value: macros.protein },
-            { label: "Carbs",   value: macros.carbs },
-            { label: "Fat",     value: macros.fat },
+            { label: "Carbs", have: todayTotals?.carbs ?? 0, target: macros.carbs },
+            { label: "Fat",   have: todayTotals?.fat ?? 0,   target: macros.fat },
           ].map((m) => (
-            <div key={m.label} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 6, padding: "10px 12px" }}>
+            <div key={m.label} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 6, padding: "9px 12px" }}>
               <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", color: accent, textTransform: "uppercase", margin: "0 0 3px" }}>
                 {m.label}
               </p>
-              <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: white, margin: 0, lineHeight: 1 }}>
-                {m.value}<span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: "#a4a09a", marginLeft: 3 }}>g</span>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: white, margin: 0 }}>
+                <strong>{m.have}</strong> <span style={{ color: "#a4a09a" }}>/ {m.target}g</span>
               </p>
             </div>
           ))}
         </div>
       </div>
+
+      {/* +LOG FOOD + Meal checklist. The checklist shortcuts straight into
+          the structured modal with the right mealType preselected so a
+          repeated breakfast is seconds to log. */}
+      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "0.75rem" }}>
+        <button
+          onClick={() => setLogOpen({ open: true })}
+          style={{
+            width: "100%", background: black, color: white, border: "none",
+            padding: "14px 20px", fontFamily: "var(--font-dm-sans), sans-serif",
+            fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.08em",
+            textTransform: "uppercase", borderRadius: 4, cursor: "pointer",
+            marginBottom: 12,
+          }}
+        >
+          + Log food
+        </button>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+          {(["breakfast", "lunch", "dinner", "snack"] as const).map((mt) => {
+            const done = mealsLoggedToday.has(mt)
+            return (
+              <button
+                key={mt}
+                onClick={() => setLogOpen({ open: true, mealType: mt })}
+                style={{
+                  background: done ? `${accent}18` : "#fff",
+                  border: `1px solid ${done ? accent : border}`,
+                  color: done ? black : muted,
+                  padding: "9px 4px",
+                  fontFamily: "var(--font-dm-sans), sans-serif",
+                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
+                  textTransform: "uppercase", borderRadius: 4, cursor: "pointer",
+                }}
+              >
+                {done ? "✓ " : ""}{mt}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Today's logged entries */}
+      {todayLogs.length > 0 && (
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "0.75rem" }}>
+          <button
+            onClick={() => setExpandToday((v) => !v)}
+            style={{ background: "none", border: "none", color: muted, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", padding: 0, marginBottom: expandToday ? 10 : 0 }}
+          >
+            {expandToday ? "Hide" : `View today's ${todayLogs.length} entr${todayLogs.length === 1 ? "y" : "ies"}`}
+          </button>
+          {expandToday && (
+            <div>
+              {[...todayLogs].sort((a, b) => a.loggedAt.localeCompare(b.loggedAt)).map((l) => (
+                <div key={l.id} style={{ borderTop: `1px solid ${border}`, padding: "8px 0", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black }}>
+                  <span style={{ color: accent, textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.1em", fontWeight: 700, marginRight: 8 }}>
+                    {l.mealType ?? l.kind}
+                  </span>
+                  <strong>{l.calories} kcal</strong> · {l.protein}g P
+                  {l.carbs != null ? ` · ${l.carbs}g C` : ""}
+                  {l.fat != null ? ` · ${l.fat}g F` : ""}
+                  {l.description ? <span style={{ color: muted }}> — {l.description}</span> : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* THIS WEEK summary — simple 7-day average + days-logged. */}
+      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "1rem" }}>
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 10px" }}>
+          This week
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+          <div>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Avg kcal</p>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>
+              {weekSummary.avg ? weekSummary.avg.calories.toLocaleString() : "—"}
+            </p>
+          </div>
+          <div>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Avg protein</p>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>
+              {weekSummary.avg ? `${weekSummary.avg.protein}g` : "—"}
+            </p>
+          </div>
+          <div>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Days logged</p>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>
+              {weekSummary.loggedDays} / {weekSummary.expectedDays}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <LogFoodModal
+        open={logOpen.open}
+        onClose={() => setLogOpen({ open: false })}
+        initialMealType={logOpen.mealType}
+        onLogged={() => { loadLogs() }}
+      />
 
       {/* Starting-estimate framing — short, not clinical. Only shown for
           auto-computed targets; when Lisa has set an explicit target this
