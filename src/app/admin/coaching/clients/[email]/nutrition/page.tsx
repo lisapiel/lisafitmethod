@@ -12,8 +12,8 @@ import { toLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
 import {
   buildDailyTotals, summarizePeriod, summarizeWeight, periodWindow,
-  generateCoachInsights, compareWeeks,
-  type DailyTotals, type MacroTarget, type WeightPoint,
+  generateCoachInsights, compareWeeks, measurementChanges,
+  type DailyTotals, type MacroTarget, type WeightPoint, type MeasurementChange,
 } from "@/lib/nutritionAnalytics"
 
 const gold = "#c9a96e"
@@ -300,6 +300,13 @@ export default function AdminClientNutritionPage() {
     for (const m of measurementHistory) if (!byLabel.has(m.label)) byLabel.set(m.label, m)
     return Array.from(byLabel.values())
   }, [measurementHistory])
+
+  // Measurement change scoped to the selected timeframe. Reuses the same
+  // merged measurementHistory the Latest card uses — no duplicate records.
+  const measurementChangeRows: MeasurementChange[] = useMemo(() => {
+    const rows = measurementHistory.map((m) => ({ date: m.date, label: m.label, value: m.value, unit: m.unit }))
+    return measurementChanges({ rows, from: window.from, to: window.to })
+  }, [measurementHistory, window.from, window.to])
 
   async function saveOverride() {
     setSaving(true)
@@ -686,7 +693,47 @@ export default function AdminClientNutritionPage() {
         </div>
       )}
 
-      {/* Measurements summary (reads from Progress source — read-only) ──── */}
+      {/* Measurement change (reads from Progress source — read-only) ──── */}
+      {measurementChangeRows.length > 0 && (
+        <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: 0 }}>
+              Measurement change
+            </p>
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.08em" }}>
+              {window.from} → {window.to}
+            </span>
+          </div>
+          <div>
+            {measurementChangeRows.map((r) => {
+              const toneColor = r.tone === "down" ? green : r.tone === "up" ? "#e8a662" : muted
+              const sign = r.deltaValue > 0 ? "+" : ""
+              return (
+                <div key={r.label} style={{ borderTop: `1px solid ${border}`, padding: "8px 0", display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: muted, minWidth: 70 }}>
+                    {r.label}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", color: cream }}>
+                    {r.startValue} → {r.endValue} {r.unit}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: toneColor, fontWeight: 700, marginLeft: "auto" }}>
+                    {r.tone === "flat" ? "no change" : `${sign}${r.deltaValue.toFixed(1)} ${r.unit}`}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                    {r.readings} readings
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, margin: "10px 0 0" }}>
+            Full measurement history lives on the <Link href={`/admin/coaching/clients/${encodeURIComponent(emailParam)}/progress`} style={{ color: gold, textDecoration: "none" }}>Progress page</Link>.
+          </p>
+        </div>
+      )}
+
+      {/* Latest measurements — single-reading labels fall through to this
+          summary so we still surface what was captured. */}
       {latestMeasurements.length > 0 && (
         <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>
@@ -697,9 +744,6 @@ export default function AdminClientNutritionPage() {
               <Chip key={m.label} label={m.label}>{m.value}{m.unit}</Chip>
             ))}
           </div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, margin: "10px 0 0" }}>
-            Full measurement history lives on the <Link href={`/admin/coaching/clients/${encodeURIComponent(emailParam)}/progress`} style={{ color: gold, textDecoration: "none" }}>Progress page</Link>.
-          </p>
         </div>
       )}
 

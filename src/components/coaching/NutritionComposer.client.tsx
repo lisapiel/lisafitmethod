@@ -10,28 +10,24 @@ const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
 
-type NutritionKind = "nutrition-meal" | "nutrition-day" | "nutrition-question"
-
-const KIND_OPTIONS: Array<{ value: NutritionKind; label: string; hint: string; placeholder: string }> = [
-  {
-    value: "nutrition-meal",
-    label: "Meal",
-    hint: "Share a single meal you ate or plan to eat.",
-    placeholder: "Anything you want me to look at?",
-  },
-  {
-    value: "nutrition-day",
-    label: "Day of eating",
-    hint: "Share your full day — photos, a written summary, or a screenshot of a tracker.",
-    placeholder: "What you ate, roughly when, and anything you want feedback on.",
-  },
-  {
-    value: "nutrition-question",
-    label: "Question",
-    hint: "Protein, meal timing, hunger, hitting your targets — anything nutrition.",
-    placeholder: "e.g. Am I eating enough protein on training days?",
-  },
-]
+// The composer used to carry three kinds (`nutrition-meal` / `nutrition-day`
+// / `nutrition-question`). As of 2026-10-06 the composer is QUESTION-ONLY —
+// the Meal / Day of Eating modes were removed so that actual intake can only
+// be captured through the structured NutritionLogRecord path (+ Log Food).
+// Having both paths produced two sources of truth and left the dashboard
+// averages/adherence/history incomplete.
+//
+// The CoachingMessageKind union still carries the legacy values because
+// historical messages (CoachingMessageRecord) on existing threads must keep
+// rendering with their original kind labels. Rendering code in
+// /admin/coaching/clients/[email]/messages and /my-coaching/messages still
+// knows how to label those historical records. No existing records are
+// modified; no new `nutrition-meal` / `nutrition-day` messages can be created.
+const COMPOSER_KIND = "nutrition-question" as const
+const COMPOSER_PLACEHOLDER =
+  "e.g. Am I eating enough protein on training days? Any photos or context are fine."
+const COMPOSER_HINT =
+  "Food you've actually eaten belongs in Log Food (above). Use this for questions, feedback requests, or anything else nutrition-related."
 
 // Reasonable upload guardrails. iPhone JPEGs are typically 2–5 MB.
 const MAX_ATTACHMENTS = 6
@@ -63,7 +59,6 @@ function randomId(): string {
 }
 
 export default function NutritionComposer({ email }: { email: string }) {
-  const [kind, setKind] = useState<NutritionKind>("nutrition-meal")
   const [text, setText] = useState("")
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [phase, setPhase] = useState<Phase>("idle")
@@ -76,7 +71,6 @@ export default function NutritionComposer({ email }: { email: string }) {
     for (const a of attachments) URL.revokeObjectURL(a.previewUrl)
   }, [attachments])
 
-  const currentKindMeta = KIND_OPTIONS.find((k) => k.value === kind)!
   const anyUploading = attachments.some((a) => a.uploading)
   const canSubmit = !anyUploading && phase !== "submitting" && (text.trim().length > 0 || attachments.some((a) => a.s3Key))
 
@@ -159,7 +153,7 @@ export default function NutritionComposer({ email }: { email: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           body: text.trim(),
-          kind,
+          kind: COMPOSER_KIND,
           attachmentS3Keys: uploadedKeys,
         }),
       })
@@ -230,51 +224,17 @@ export default function NutritionComposer({ email }: { email: string }) {
   return (
     <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.25rem" }}>
       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
-        Nutrition Support
+        Ask Lisa
       </p>
       <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.1rem, 3.5vw, 1.25rem)", fontWeight: 700, color: black, margin: "0 0 6px", lineHeight: 1.25 }}>
-        Send your nutrition to Lisa
+        Nutrition questions &amp; feedback
       </h2>
       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 16px", lineHeight: 1.55 }}>
-        Share a meal, a day of eating, or a question and I&apos;ll help you make practical adjustments around your goals and training.
+        {COMPOSER_HINT}
       </p>
 
-      {/* Kind selector */}
-      <div role="radiogroup" aria-label="What are you sharing" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-        {KIND_OPTIONS.map((opt) => {
-          const active = kind === opt.value
-          return (
-            <button
-              key={opt.value}
-              role="radio"
-              aria-checked={active}
-              type="button"
-              onClick={() => setKind(opt.value)}
-              style={{
-                flex: "1 1 auto", minWidth: 0,
-                background: active ? black : "transparent",
-                border: `1px solid ${active ? black : border}`,
-                color: active ? white : black,
-                padding: "10px 14px",
-                fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: "0.78rem", fontWeight: active ? 700 : 600,
-                letterSpacing: "0.04em",
-                borderRadius: 4, cursor: "pointer",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              {opt.label}
-            </button>
-          )
-        })}
-      </div>
-      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, margin: "0 0 12px", lineHeight: 1.5 }}>
-        {currentKindMeta.hint}
-      </p>
-
-      {/* Attachments — hidden for question type since text is the point */}
-      {kind !== "nutrition-question" && (
-        <div style={{ marginBottom: 12 }}>
+      {/* Attachments — questions can still include optional photos/context */}
+      <div style={{ marginBottom: 12 }}>
           {attachments.length > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", gap: 8, marginBottom: 10 }}>
               {attachments.map((att) => (
@@ -347,14 +307,13 @@ export default function NutritionComposer({ email }: { email: string }) {
               </button>
             </>
           )}
-        </div>
-      )}
+      </div>
 
       {/* Text */}
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder={currentKindMeta.placeholder}
+        placeholder={COMPOSER_PLACEHOLDER}
         rows={3}
         style={{
           width: "100%", boxSizing: "border-box",

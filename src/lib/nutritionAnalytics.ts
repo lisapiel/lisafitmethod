@@ -30,6 +30,48 @@ import type { NutritionLogRecord } from "./authTokens"
 import type { ResolvedMacros } from "./nutrition"
 import { addDaysToKey, daysBetweenKeys, keyRange, type LocalDateKey } from "./localDate"
 
+// ─── Named thresholds / constants ───────────────────────────────────────────
+//
+// Centralised so they can be tuned in one place rather than scattered across
+// the UI. Every rule is deterministic. These are NOT learned, NOT model-
+// driven; they are templates triggered by explicit conditions.
+
+export const ANALYTICS_THRESHOLDS = {
+  // Period adherence buckets (fractions of logged days).
+  LOGGING_SPARSE_BELOW: 0.5,
+  LOGGING_STRONG_AT_OR_ABOVE: 0.85,
+  // Minimum logged days before calorie/protein insights fire.
+  MIN_LOGGED_DAYS_FOR_MACRO_INSIGHT: 7,
+  // Confidence staircase for calorie/protein coverage.
+  COVERAGE_HIGH_LOGGED_DAYS: 14,
+  COVERAGE_MODERATE_LOGGED_DAYS: 7,
+  // Calorie delta buckets (fractions of target).
+  CAL_ON_TARGET_PCT: 0.03,  // ±3% → on target
+  CAL_WINDOW_FOR_DAILY_SCORE: 0.07, // ±7% → on target for individual-day scoring
+  // Protein thresholds.
+  PROTEIN_SHORTFALL_WATCH_GRAMS: 15,
+  PROTEIN_SHORTFALL_MATERIAL_GRAMS: 25,
+  PROTEIN_DAYS_MET_POSITIVE_FRACTION: 0.7,
+  PROTEIN_MET_DAILY_FRACTION: 0.95, // intake ≥ 95% of target counts as "met"
+  // Weight trend confidence.
+  WEIGHT_HIGH_CONFIDENCE_SPAN_DAYS: 21,
+  WEIGHT_HIGH_CONFIDENCE_MIN_POINTS: 4,
+  WEIGHT_MODERATE_CONFIDENCE_SPAN_DAYS: 10,
+  WEIGHT_MODERATE_CONFIDENCE_MIN_POINTS: 2,
+  // Weight trend narrative — rate per week in lb.
+  WEIGHT_STABLE_ABS_LBS_PER_WEEK: 0.2, // under this → "stable"
+  WEIGHT_NEUTRAL_ABS_LBS_PER_WEEK: 0.3, // under this → tone "neutral"
+  // Measurement change — minimum absolute delta to surface (per unit).
+  MEASUREMENT_MIN_DELTA_IN: 0.3,
+  MEASUREMENT_MIN_DELTA_CM: 0.5,
+  // Recent-meal grouping.
+  REPEAT_MEAL_LIMIT_DEFAULT: 5,
+  REPEAT_MEAL_DESCRIPTION_KEY_LEN: 40,
+  REPEAT_MEAL_KCAL_BUCKET: 10,  // group logs within ±5 kcal of each other
+  REPEAT_MEAL_PROTEIN_BUCKET: 5,
+  REPEAT_MEAL_MIN_KCAL: 50,
+} as const
+
 export type MacroTarget = Pick<ResolvedMacros, "calories" | "protein" | "carbs" | "fat">
 
 export interface DailyTotals {
@@ -134,14 +176,14 @@ export function summarizePeriod(args: {
     let under = 0, on = 0, over = 0, met = 0
     for (const d of withTarget) {
       const t = d.target!
-      // Calorie "on target" window: within ±7% of target.
+      // Calorie "on target" window: within ±CAL_WINDOW_FOR_DAILY_SCORE.
       const kcalDelta = d.calories - t.calories
       const kcalPct = Math.abs(kcalDelta) / Math.max(1, t.calories)
-      if (kcalPct <= 0.07) on += 1
+      if (kcalPct <= ANALYTICS_THRESHOLDS.CAL_WINDOW_FOR_DAILY_SCORE) on += 1
       else if (kcalDelta < 0) under += 1
       else over += 1
-      // Protein "met" when ≥ 95% of target (rounding tolerance).
-      if (d.protein >= t.protein * 0.95) met += 1
+      // Protein "met" when ≥ PROTEIN_MET_DAILY_FRACTION of target.
+      if (d.protein >= t.protein * ANALYTICS_THRESHOLDS.PROTEIN_MET_DAILY_FRACTION) met += 1
     }
     calBuckets = { underTarget: under, onTarget: on, overTarget: over }
     proteinMet = { met }
@@ -199,10 +241,11 @@ export function summarizeWeight(points: WeightPoint[]): WeightTrend {
   if (sorted.length < 2) return { first, latest, totalChangeLbs: 0, ratePerWeekLbs: null, confidence: "low" }
   const spanDays = daysBetweenKeys(first.date.slice(0, 10) as LocalDateKey, latest.date.slice(0, 10) as LocalDateKey)
   const ratePerWeekLbs = spanDays >= 7 ? (totalChangeLbs / spanDays) * 7 : null
+  const T = ANALYTICS_THRESHOLDS
   const confidence: WeightTrend["confidence"] =
-    spanDays >= 21 && sorted.length >= 4
+    spanDays >= T.WEIGHT_HIGH_CONFIDENCE_SPAN_DAYS && sorted.length >= T.WEIGHT_HIGH_CONFIDENCE_MIN_POINTS
       ? "high"
-      : spanDays >= 10 && sorted.length >= 2
+      : spanDays >= T.WEIGHT_MODERATE_CONFIDENCE_SPAN_DAYS && sorted.length >= T.WEIGHT_MODERATE_CONFIDENCE_MIN_POINTS
         ? "moderate"
         : "low"
   return { first, latest, totalChangeLbs, ratePerWeekLbs, confidence }
@@ -238,14 +281,17 @@ export function generateCoachInsights(args: {
 }): CoachInsight[] {
   const { summary, weight, currentTarget } = args
   const insights: CoachInsight[] = []
+  const T = ANALYTICS_THRESHOLDS
   const loggedDays = summary.loggedDays
   const coverageConfidence: InsightConfidence =
-    loggedDays >= 14 ? "high" : loggedDays >= 7 ? "moderate" : "low"
+    loggedDays >= T.COVERAGE_HIGH_LOGGED_DAYS ? "high"
+      : loggedDays >= T.COVERAGE_MODERATE_LOGGED_DAYS ? "moderate"
+        : "low"
 
   // Logging adherence framing — always worth noting.
   if (summary.expectedDays >= 4) {
     const ad = summary.loggingAdherence
-    if (ad < 0.5) {
+    if (ad < T.LOGGING_SPARSE_BELOW) {
       insights.push({
         key: "log-sparse",
         tone: "watch",
@@ -253,7 +299,7 @@ export function generateCoachInsights(args: {
         detail: "Everything below is based on fewer days than ideal — consider nudging consistency before changing the plan.",
         confidence: "high",
       })
-    } else if (ad >= 0.85) {
+    } else if (ad >= T.LOGGING_STRONG_AT_OR_ABOVE) {
       insights.push({
         key: "log-strong",
         tone: "positive",
@@ -264,10 +310,10 @@ export function generateCoachInsights(args: {
   }
 
   // Calorie average vs target.
-  if (summary.avg && currentTarget && loggedDays >= 7) {
+  if (summary.avg && currentTarget && loggedDays >= T.MIN_LOGGED_DAYS_FOR_MACRO_INSIGHT) {
     const delta = summary.avg.calories - currentTarget.calories
     const pctOff = Math.abs(delta) / Math.max(1, currentTarget.calories)
-    if (pctOff <= 0.03) {
+    if (pctOff <= T.CAL_ON_TARGET_PCT) {
       insights.push({
         key: "cal-on",
         tone: "positive",
@@ -294,22 +340,22 @@ export function generateCoachInsights(args: {
   }
 
   // Protein average + days target met.
-  if (summary.avg && currentTarget && loggedDays >= 7) {
+  if (summary.avg && currentTarget && loggedDays >= T.MIN_LOGGED_DAYS_FOR_MACRO_INSIGHT) {
     const met = summary.macroAdherence.protein?.met ?? 0
     const metFrac = pct(met, loggedDays)
     const proDelta = summary.avg.protein - currentTarget.protein
     const proShortfall = currentTarget.protein - summary.avg.protein
-    if (proShortfall >= 15) {
+    if (proShortfall >= T.PROTEIN_SHORTFALL_WATCH_GRAMS) {
       insights.push({
         key: "pro-under",
         tone: "watch",
         headline: `Protein averaged ${summary.avg.protein}g vs ${currentTarget.protein}g target — ${met} of ${loggedDays} days reached target.`,
-        detail: proShortfall >= 25
+        detail: proShortfall >= T.PROTEIN_SHORTFALL_MATERIAL_GRAMS
           ? "Material shortfall — worth a conversation about meal structure or protein sources."
           : "Within range on most days but trending low — a small nudge may close the gap.",
         confidence: coverageConfidence,
       })
-    } else if (metFrac >= 0.7) {
+    } else if (metFrac >= T.PROTEIN_DAYS_MET_POSITIVE_FRACTION) {
       insights.push({
         key: "pro-good",
         tone: "positive",
@@ -327,9 +373,9 @@ export function generateCoachInsights(args: {
     const dir = rate > 0 ? "+" : ""
     insights.push({
       key: "weight-trend",
-      tone: abs < 0.3 ? "neutral" : "positive",
+      tone: abs < T.WEIGHT_NEUTRAL_ABS_LBS_PER_WEEK ? "neutral" : "positive",
       headline: `Weight trend ≈ ${dir}${rate.toFixed(1)} lb/wk.`,
-      detail: abs < 0.2
+      detail: abs < T.WEIGHT_STABLE_ABS_LBS_PER_WEEK
         ? `Stable — ${weight.latest.lbs.toFixed(1)} lb now vs ${weight.first.lbs.toFixed(1)} lb at start of window.`
         : `${weight.first.lbs.toFixed(1)} → ${weight.latest.lbs.toFixed(1)} lb across the window.`,
       confidence: weight.confidence,
@@ -342,7 +388,7 @@ export function generateCoachInsights(args: {
       tone: "neutral",
       headline: loggedDays === 0
         ? "No nutrition logs yet in this window."
-        : `Need at least 7 logged days for calorie/protein insights (currently ${loggedDays}).`,
+        : `Need at least ${T.MIN_LOGGED_DAYS_FOR_MACRO_INSIGHT} logged days for calorie/protein insights (currently ${loggedDays}).`,
       confidence: "low",
     })
   }
@@ -417,13 +463,14 @@ export interface RepeatedMeal {
 }
 
 export function recentRepeatedMeals(logs: NutritionLogRecord[], opts?: { limit?: number }): RepeatedMeal[] {
-  const limit = opts?.limit ?? 5
+  const T = ANALYTICS_THRESHOLDS
+  const limit = opts?.limit ?? T.REPEAT_MEAL_LIMIT_DEFAULT
   const groups = new Map<string, RepeatedMeal>()
   for (const l of logs) {
-    if (!l.calories || l.calories < 50) continue
-    const descKey = (l.description ?? "").trim().toLowerCase().slice(0, 40)
-    const roundedKcal = Math.round(l.calories / 10) * 10
-    const roundedProt = Math.round(l.protein / 5) * 5
+    if (!l.calories || l.calories < T.REPEAT_MEAL_MIN_KCAL) continue
+    const descKey = (l.description ?? "").trim().toLowerCase().slice(0, T.REPEAT_MEAL_DESCRIPTION_KEY_LEN)
+    const roundedKcal = Math.round(l.calories / T.REPEAT_MEAL_KCAL_BUCKET) * T.REPEAT_MEAL_KCAL_BUCKET
+    const roundedProt = Math.round(l.protein / T.REPEAT_MEAL_PROTEIN_BUCKET) * T.REPEAT_MEAL_PROTEIN_BUCKET
     const key = `${l.mealType ?? "any"}|${roundedKcal}|${roundedProt}|${descKey}`
     const existing = groups.get(key)
     if (existing) {
@@ -446,4 +493,88 @@ export function recentRepeatedMeals(logs: NutritionLogRecord[], opts?: { limit?:
   return Array.from(groups.values())
     .sort((a, b) => (b.count - a.count) || b.mostRecentAt.localeCompare(a.mostRecentAt))
     .slice(0, limit)
+}
+
+// ─── Measurement change ─────────────────────────────────────────────────────
+//
+// Deterministic diff between the earliest and the latest measurement reading
+// per label within a date window. Reads from the exact rows the dedicated
+// Progress page already surfaces (admin side feeds in a flat
+// MeasurementRow[] built from ProgressSnapshotRecord + CoachingCheckInRecord
+// measurementSnapshot). Progress page itself is unchanged.
+//
+// Rules:
+//   - Needs ≥ 2 readings for the same label inside the window to emit a row.
+//     Labels with only 1 reading are silently dropped (no spurious deltas).
+//   - "No change" rows are kept so the coach can see at a glance that we
+//     measured and nothing moved.
+//   - Delta threshold (MEASUREMENT_MIN_DELTA_*) suppresses visually noisy
+//     ±0.1 in / ±0.2 cm rows that are inside measurement noise.
+//   - Unit from the latest reading wins — if a client switched measurement
+//     unit mid-period we show the latest unit in the display and don't try
+//     to convert (that's a bigger decision than analytics should make).
+
+export interface MeasurementReading {
+  date: string          // YYYY-MM-DD or ISO prefix — only used for sort/filter
+  label: string         // e.g. "Waist"
+  value: number
+  unit: string          // "in" | "cm"
+}
+
+export type MeasurementChangeTone = "down" | "up" | "flat"
+export interface MeasurementChange {
+  label: string
+  startValue: number
+  endValue: number
+  unit: string
+  deltaValue: number    // endValue - startValue, same unit
+  tone: MeasurementChangeTone
+  readings: number      // how many readings informed this row
+}
+
+export function measurementChanges(args: {
+  rows: MeasurementReading[]
+  from: LocalDateKey
+  to: LocalDateKey
+}): MeasurementChange[] {
+  const { rows, from, to } = args
+  const T = ANALYTICS_THRESHOLDS
+  const inWindow = rows.filter((r) => {
+    const d = r.date.slice(0, 10)
+    return d >= from && d <= to
+  })
+  const byLabel = new Map<string, MeasurementReading[]>()
+  for (const r of inWindow) {
+    if (!Number.isFinite(r.value)) continue
+    const arr = byLabel.get(r.label)
+    if (arr) arr.push(r); else byLabel.set(r.label, [r])
+  }
+  const out: MeasurementChange[] = []
+  for (const [label, arr] of byLabel) {
+    if (arr.length < 2) continue
+    const sorted = [...arr].sort((a, b) => a.date.localeCompare(b.date))
+    const first = sorted[0]
+    const last = sorted[sorted.length - 1]
+    const delta = last.value - first.value
+    const unit = last.unit || first.unit || ""
+    const noiseFloor = unit === "cm" ? T.MEASUREMENT_MIN_DELTA_CM : T.MEASUREMENT_MIN_DELTA_IN
+    const abs = Math.abs(delta)
+    const tone: MeasurementChangeTone = abs < noiseFloor ? "flat" : delta < 0 ? "down" : "up"
+    out.push({
+      label,
+      startValue: first.value,
+      endValue: last.value,
+      unit,
+      deltaValue: delta,
+      tone,
+      readings: sorted.length,
+    })
+  }
+  // Stable, scannable ordering — biggest absolute change first (down and up
+  // both count), then flat rows at the bottom.
+  return out.sort((a, b) => {
+    if (a.tone === "flat" && b.tone !== "flat") return 1
+    if (b.tone === "flat" && a.tone !== "flat") return -1
+    return Math.abs(b.deltaValue) - Math.abs(a.deltaValue)
+  })
 }
