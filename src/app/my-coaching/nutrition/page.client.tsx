@@ -62,8 +62,10 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
     open: boolean
     mealType?: "breakfast" | "lunch" | "dinner" | "snack"
     prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType">>
+    editLogId?: string
   }>({ open: false })
   const [expandToday, setExpandToday] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadLogs = useCallback(async () => {
     try {
@@ -126,6 +128,28 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   // Recent/repeated meals — top 4 from the last 14 days (we already fetched
   // those). Each becomes a one-tap re-log button.
   const repeats = useMemo<RepeatedMeal[]>(() => recentRepeatedMeals(logs, { limit: 4 }), [logs])
+
+  // Delete a log the authed client owns. Confirms, then DELETEs, then reloads
+  // so TODAY totals + THIS WEEK averages + Recent Meals all pick up the
+  // change in one pass. The admin Nutrition page reads the same records so
+  // it reflects the deletion automatically.
+  const deleteLog = useCallback(async (logId: string, label: string) => {
+    if (typeof window !== "undefined" && !window.confirm(`Delete ${label}? This cannot be undone.`)) return
+    setDeletingId(logId)
+    try {
+      const res = await fetch(`/api/coaching/nutrition-logs/${encodeURIComponent(logId)}`, { method: "DELETE" })
+      if (!res.ok) {
+        let message = `Server returned ${res.status}`
+        try { const data = await res.json() as { error?: string }; if (data?.error) message = data.error } catch {}
+        if (typeof window !== "undefined") window.alert(`Delete failed: ${message}`)
+      } else {
+        await loadLogs()
+      }
+    } catch (err) {
+      if (typeof window !== "undefined") window.alert(`Delete failed: ${err instanceof Error ? err.message : "Network error"}`)
+    }
+    setDeletingId(null)
+  }, [loadLogs])
 
   if (loading) {
     return (
@@ -282,17 +306,59 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
           </button>
           {expandToday && (
             <div>
-              {[...todayLogs].sort((a, b) => a.loggedAt.localeCompare(b.loggedAt)).map((l) => (
-                <div key={l.id} style={{ borderTop: `1px solid ${border}`, padding: "8px 0", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black }}>
-                  <span style={{ color: accent, textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.1em", fontWeight: 700, marginRight: 8 }}>
-                    {l.mealType ?? l.kind}
-                  </span>
-                  <strong>{l.calories} kcal</strong> · {l.protein}g P
-                  {l.carbs != null ? ` · ${l.carbs}g C` : ""}
-                  {l.fat != null ? ` · ${l.fat}g F` : ""}
-                  {l.description ? <span style={{ color: muted }}> — {l.description}</span> : null}
-                </div>
-              ))}
+              {[...todayLogs].sort((a, b) => a.loggedAt.localeCompare(b.loggedAt)).map((l) => {
+                const label = l.description || `${l.mealType ?? l.kind} · ${l.calories} kcal`
+                const busy = deletingId === l.id
+                return (
+                  <div key={l.id} style={{ borderTop: `1px solid ${border}`, padding: "10px 0", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black }}>
+                    <div>
+                      <span style={{ color: accent, textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.1em", fontWeight: 700, marginRight: 8 }}>
+                        {l.mealType ?? l.kind}
+                      </span>
+                      <strong>{l.calories} kcal</strong> · {l.protein}g P
+                      {l.carbs != null ? ` · ${l.carbs}g C` : ""}
+                      {l.fat != null ? ` · ${l.fat}g F` : ""}
+                      {l.description ? <span style={{ color: muted }}> — {l.description}</span> : null}
+                    </div>
+                    <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setLogOpen({
+                          open: true,
+                          editLogId: l.id,
+                          mealType: l.mealType,
+                          prefill: {
+                            calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat,
+                            description: l.description, mealType: l.mealType,
+                          },
+                        })}
+                        disabled={busy}
+                        style={{
+                          background: "transparent", border: `1px solid ${border}`, color: black,
+                          padding: "4px 10px", borderRadius: 4, cursor: busy ? "wait" : "pointer",
+                          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem",
+                          fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteLog(l.id, label)}
+                        disabled={busy}
+                        style={{
+                          background: "transparent", border: `1px solid #e2c2c2`, color: "#a53333",
+                          padding: "4px 10px", borderRadius: 4, cursor: busy ? "wait" : "pointer",
+                          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem",
+                          fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                        }}
+                      >
+                        {busy ? "Deleting…" : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
@@ -374,6 +440,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
         onClose={() => setLogOpen({ open: false })}
         initialMealType={logOpen.mealType}
         prefill={logOpen.prefill}
+        editLogId={logOpen.editLogId}
         onLogged={() => { loadLogs() }}
       />
 

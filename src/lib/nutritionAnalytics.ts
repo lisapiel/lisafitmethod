@@ -29,6 +29,7 @@
 import type { NutritionLogRecord } from "./authTokens"
 import type { ResolvedMacros } from "./nutrition"
 import { addDaysToKey, daysBetweenKeys, keyRange, type LocalDateKey } from "./localDate"
+import { toCm, fromCm, normalizeLengthUnit, type LengthUnit } from "./length"
 
 // ─── Named thresholds / constants ───────────────────────────────────────────
 //
@@ -508,17 +509,22 @@ export function recentRepeatedMeals(logs: NutritionLogRecord[], opts?: { limit?:
 //     Labels with only 1 reading are silently dropped (no spurious deltas).
 //   - "No change" rows are kept so the coach can see at a glance that we
 //     measured and nothing moved.
-//   - Delta threshold (MEASUREMENT_MIN_DELTA_*) suppresses visually noisy
-//     ±0.1 in / ±0.2 cm rows that are inside measurement noise.
-//   - Unit from the latest reading wins — if a client switched measurement
-//     unit mid-period we show the latest unit in the display and don't try
-//     to convert (that's a bigger decision than analytics should make).
+//   - All comparison happens in a canonical unit (centimetres) so a client
+//     who switched the per-row in/cm toggle mid-period doesn't produce
+//     garbage deltas (e.g. 38 in → 94 cm actually = ~96.5 cm → 94 cm = −2.5 cm,
+//     NOT +56). Historical records are never rewritten — the toCm/fromCm
+//     helpers from src/lib/length.ts only canonicalise at compute time.
+//   - Display unit = the latest reading's unit (or the caller-supplied
+//     `preferredUnit`), to match what the client last chose.
+//   - Noise floor (MEASUREMENT_MIN_DELTA_IN / _CM) is applied in the display
+//     unit so the threshold matches what the coach sees — a ±0.3 in note
+//     is noise in inches whether or not the stored row was in cm.
 
 export interface MeasurementReading {
   date: string          // YYYY-MM-DD or ISO prefix — only used for sort/filter
   label: string         // e.g. "Waist"
   value: number
-  unit: string          // "in" | "cm"
+  unit: string          // "in" | "cm" (anything else normalizes to "in")
 }
 
 export type MeasurementChangeTone = "down" | "up" | "flat"
@@ -526,8 +532,8 @@ export interface MeasurementChange {
   label: string
   startValue: number
   endValue: number
-  unit: string
-  deltaValue: number    // endValue - startValue, same unit
+  unit: LengthUnit      // the display unit of startValue/endValue/deltaValue
+  deltaValue: number    // endValue - startValue, in `unit`
   tone: MeasurementChangeTone
   readings: number      // how many readings informed this row
 }
@@ -536,18 +542,24 @@ export function measurementChanges(args: {
   rows: MeasurementReading[]
   from: LocalDateKey
   to: LocalDateKey
+  preferredUnit?: LengthUnit        // override the "latest reading wins" default
 }): MeasurementChange[] {
-  const { rows, from, to } = args
+  const { rows, from, to, preferredUnit } = args
   const T = ANALYTICS_THRESHOLDS
   const inWindow = rows.filter((r) => {
     const d = r.date.slice(0, 10)
     return d >= from && d <= to
   })
-  const byLabel = new Map<string, MeasurementReading[]>()
+  // Normalize every valid reading to centimetres and group per label.
+  type Normalized = { date: string; cm: number; sourceUnit: LengthUnit }
+  const byLabel = new Map<string, Normalized[]>()
   for (const r of inWindow) {
-    if (!Number.isFinite(r.value)) continue
+    const cm = toCm(r.value, r.unit)
+    if (cm == null) continue
+    const sourceUnit = normalizeLengthUnit(r.unit)
+    const entry: Normalized = { date: r.date, cm, sourceUnit }
     const arr = byLabel.get(r.label)
-    if (arr) arr.push(r); else byLabel.set(r.label, [r])
+    if (arr) arr.push(entry); else byLabel.set(r.label, [entry])
   }
   const out: MeasurementChange[] = []
   for (const [label, arr] of byLabel) {
@@ -555,17 +567,23 @@ export function measurementChanges(args: {
     const sorted = [...arr].sort((a, b) => a.date.localeCompare(b.date))
     const first = sorted[0]
     const last = sorted[sorted.length - 1]
-    const delta = last.value - first.value
-    const unit = last.unit || first.unit || ""
-    const noiseFloor = unit === "cm" ? T.MEASUREMENT_MIN_DELTA_CM : T.MEASUREMENT_MIN_DELTA_IN
-    const abs = Math.abs(delta)
-    const tone: MeasurementChangeTone = abs < noiseFloor ? "flat" : delta < 0 ? "down" : "up"
+    // Display unit: caller preference wins, otherwise follow the latest
+    // reading's own unit so the number matches what the client last entered.
+    const displayUnit: LengthUnit = preferredUnit ?? last.sourceUnit
+    const startValue = round1(fromCm(first.cm, displayUnit))
+    const endValue = round1(fromCm(last.cm, displayUnit))
+    // Delta is computed from the rounded display values so the printed
+    // start/end/delta always reconcile exactly (end − start === delta).
+    const deltaValue = round1(endValue - startValue)
+    const noiseFloor = displayUnit === "cm" ? T.MEASUREMENT_MIN_DELTA_CM : T.MEASUREMENT_MIN_DELTA_IN
+    const absDelta = Math.abs(deltaValue)
+    const tone: MeasurementChangeTone = absDelta < noiseFloor ? "flat" : deltaValue < 0 ? "down" : "up"
     out.push({
       label,
-      startValue: first.value,
-      endValue: last.value,
-      unit,
-      deltaValue: delta,
+      startValue,
+      endValue,
+      unit: displayUnit,
+      deltaValue,
       tone,
       readings: sorted.length,
     })
@@ -577,4 +595,8 @@ export function measurementChanges(args: {
     if (b.tone === "flat" && a.tone !== "flat") return -1
     return Math.abs(b.deltaValue) - Math.abs(a.deltaValue)
   })
+}
+
+function round1(n: number): number {
+  return Math.round(n * 10) / 10
 }

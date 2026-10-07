@@ -18,11 +18,16 @@ export interface LogFoodModalProps {
   onClose: () => void
   onLogged: (log: NutritionLogRecord) => void
   initialMealType?: MealType
-  // Allow caller to prefill a quick-add for a repeat meal (phase 2). Unused in phase 1.
+  // Prefill the form from a prior entry (repeat-meal shortcut, or editing).
   prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType">>
+  // When set, the modal is in EDIT mode: Save PATCHes this existing record
+  // rather than creating a new one. The date / timeZone / targetAtLog of the
+  // original record are preserved server-side (the PATCH route only accepts
+  // mutable fields). Prevents the modal from ever producing a duplicate log.
+  editLogId?: string
 }
 
-export default function LogFoodModal({ open, onClose, onLogged, initialMealType, prefill }: LogFoodModalProps) {
+export default function LogFoodModal({ open, onClose, onLogged, initialMealType, prefill, editLogId }: LogFoodModalProps) {
   const [mode, setMode] = useState<Mode>(initialMealType ? "meal" : "quick")
   const [mealType, setMealType] = useState<MealType>(initialMealType ?? "breakfast")
   const [calories, setCalories] = useState("")
@@ -35,8 +40,12 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
 
   useEffect(() => {
     if (!open) return
-    setMode(initialMealType ? "meal" : "quick")
-    setMealType(initialMealType ?? "breakfast")
+    // In EDIT mode, honour whatever mealType the saved record had — including
+    // "no mealType" (a saved Quick Add). The caller passes the record's
+    // mealType via `prefill.mealType` and we respect that.
+    const effectiveMealType = (prefill?.mealType as MealType | undefined) ?? initialMealType
+    setMode(effectiveMealType ? "meal" : "quick")
+    setMealType(effectiveMealType ?? "breakfast")
     setCalories(prefill?.calories != null ? String(prefill.calories) : "")
     setProtein(prefill?.protein != null ? String(prefill.protein) : "")
     setCarbs(prefill?.carbs != null ? String(prefill.carbs) : "")
@@ -75,6 +84,41 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
       setSaving(false)
       return
     }
+    // EDIT mode — PATCH the existing record so no duplicate log is created.
+    // Only mutable fields are sent; date / timeZone / loggedAt / targetAtLog
+    // stay as they were when the log was originally written.
+    if (editLogId) {
+      const patchBody: Record<string, unknown> = {
+        calories: Math.round(kcal),
+        protein: Math.round(pro),
+        description: description.trim() || "",
+      }
+      if (mode === "meal") patchBody.mealType = mealType
+      if (carbsN != null) patchBody.carbs = Math.round(carbsN)
+      if (fatN != null) patchBody.fat = Math.round(fatN)
+      try {
+        const res = await fetch(`/api/coaching/nutrition-logs/${encodeURIComponent(editLogId)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patchBody),
+        })
+        if (res.ok) {
+          const data = await res.json() as { log: NutritionLogRecord }
+          onLogged(data.log)
+          onClose()
+        } else {
+          let message = `Server returned ${res.status}`
+          try { const data = await res.json() as { error?: string }; if (data?.error) message = data.error } catch {}
+          setError(message)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Network error.")
+      }
+      setSaving(false)
+      return
+    }
+
+    // CREATE mode — new log.
     const timeZone = resolveTimeZone()
     const date = localDateKey(new Date(), timeZone)
     const body = {
@@ -108,10 +152,11 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
     setSaving(false)
   }
 
+  const isEdit = !!editLogId
   return (
     <div
       role="dialog"
-      aria-label="Log food"
+      aria-label={isEdit ? "Edit food log" : "Log food"}
       style={{
         position: "fixed", inset: 0, background: "rgba(10,10,10,0.55)",
         display: "flex", alignItems: "flex-end", justifyContent: "center",
@@ -129,7 +174,7 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
           <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.3rem", fontWeight: 700, color: black, margin: 0 }}>
-            Log food
+            {isEdit ? "Edit log" : "Log food"}
           </h2>
           <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "1.4rem", color: muted, cursor: "pointer", lineHeight: 1 }} aria-label="Close">×</button>
         </div>
@@ -214,7 +259,7 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
               borderRadius: 4, cursor: saving ? "wait" : "pointer",
             }}
           >
-            {saving ? "Saving…" : "Save log"}
+            {saving ? "Saving…" : isEdit ? "Update log" : "Save log"}
           </button>
           <button
             onClick={onClose}
