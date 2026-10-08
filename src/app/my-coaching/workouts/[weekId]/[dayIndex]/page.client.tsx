@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { expandedWeeks } from "@/lib/programExpansion"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -868,8 +869,14 @@ export default function WorkoutLoggerClient() {
 
       if (!prog) { setLoading(false); return }
 
-      let weeks: ProgramWeek[] = []
-      try { weeks = JSON.parse(prog.weeks as string) as ProgramWeek[] } catch { /* empty */ }
+      // Use the shared expander so a rotation-style program (durationWeeks
+      // > stored weeks) can resolve the URL /workouts/<N>/<i> for any N in
+      // [1, durationWeeks] by cycling the stored week definitions. For
+      // traditional multi-week programs the expander is a pass-through.
+      const weeks: ProgramWeek[] = expandedWeeks({
+        weeks: prog.weeks as string,
+        durationWeeks: typeof prog.durationWeeks === "number" ? prog.durationWeeks : undefined,
+      }) as ProgramWeek[]
 
       const targetWeek = weeks.find((w) => w.weekNumber === weekId) ?? null
       const targetDay = targetWeek?.days[dayIndex] ?? null

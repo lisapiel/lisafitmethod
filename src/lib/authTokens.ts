@@ -956,10 +956,19 @@ export interface CoachingProgramRecord {
   clientEmail?: string
   isTemplate?: boolean
   status?: "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
-  weeks: string // JSON string
+  weeks: string // JSON string: Array<{ weekNumber, label, days: Array<ProgramDay> }>
   notes?: string
   createdAt?: string
   updatedAt?: string
+  // Total weeks the client should see for this program. When set and larger
+  // than the number of explicit weeks stored in `weeks`, the client renders a
+  // repeating-rotation program — the stored week array is cycled to fill
+  // additional weeks. When absent or ≤ stored week count, the client renders
+  // exactly the stored weeks (previous behaviour). Completion is still keyed
+  // per (programId, weekNumber, dayLabel) so Week N's completion state is
+  // independent of Week 1's — fixes the "Phase III rotation shows one Week 1
+  // tab and then Program Complete" bug for 4-day rotations.
+  durationWeeks?: number
 }
 
 export async function createProgramRecord(data: Omit<CoachingProgramRecord, "id" | "createdAt"> & { id?: string }): Promise<CoachingProgramRecord> {
@@ -1015,6 +1024,26 @@ export async function updateProgramRecord(id: string, updates: Partial<CoachingP
       UpdateExpression: expr.expression,
       ExpressionAttributeNames: expr.names,
       ExpressionAttributeValues: expr.values,
+    })
+  )
+}
+
+// Dedicated REMOVE for an allowlisted top-level attribute on a program
+// record. Used by the admin program editor to clear `durationWeeks` back
+// to "use the authored week count" without passing undefined through the
+// generic marshaller. Allowlisted to prevent accidental attribute nuking.
+export async function clearProgramField(
+  id: string,
+  field: "durationWeeks",
+): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_program_${id}` },
+      UpdateExpression: `REMOVE #f SET #updatedAt = :updatedAt`,
+      ExpressionAttributeNames: { "#f": field, "#updatedAt": "updatedAt" },
+      ExpressionAttributeValues: { ":updatedAt": new Date().toISOString() },
     })
   )
 }

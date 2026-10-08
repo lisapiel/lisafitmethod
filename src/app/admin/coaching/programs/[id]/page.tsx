@@ -37,6 +37,12 @@ export default function EditProgramPage() {
   const [programNotes, setProgramNotes] = useState("")
   const [programStatus, setProgramStatus] = useState<ProgramStatus>("DRAFT")
   const [clientEmail, setClientEmail] = useState<string | null>(null)
+  // Optional "repeat for N weeks" count. Empty = use the stored week count
+  // as-is (traditional multi-week program). Any number > the stored week
+  // count turns this into a rotation: the stored weeks are cycled on the
+  // client. Each cycled week still gets its own weekNumber + its own
+  // completion state via (programId, weekNumber, dayLabel).
+  const [durationWeeksInput, setDurationWeeksInput] = useState<string>("")
   const [weeks, setWeeks] = useState<ProgramWeek[]>([emptyWeek(1)])
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
@@ -64,6 +70,7 @@ export default function EditProgramPage() {
             setProgramNotes(p.notes ?? "")
             setProgramStatus((p.status ?? "DRAFT") as ProgramStatus)
             setClientEmail(p.clientEmail ?? null)
+            setDurationWeeksInput(typeof p.durationWeeks === "number" ? String(p.durationWeeks) : "")
             try { setWeeks(JSON.parse(p.weeks) as ProgramWeek[]) } catch { /* keep default */ }
           }
         }
@@ -152,6 +159,22 @@ export default function EditProgramPage() {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString()
       if (!token) { setError("Not authenticated"); setSaving(false); return }
+      // Parse durationWeeks: empty string → explicit null so the server
+      // REMOVE's the attribute (clearing an existing rotation back to
+      // "use authored week count"). Positive integer 1..52 → number.
+      // Values outside the range are refused rather than silently clamped.
+      let durationWeeks: number | null
+      const raw = durationWeeksInput.trim()
+      if (raw === "") {
+        durationWeeks = null
+      } else {
+        const n = Number(raw)
+        if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 52) {
+          setError("Repeat for N weeks must be an integer between 1 and 52, or blank.")
+          setSaving(false); return
+        }
+        durationWeeks = n
+      }
       const res = await fetch(`/api/admin/coaching/programs/${id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -160,6 +183,7 @@ export default function EditProgramPage() {
           status: programStatus,
           weeks: JSON.stringify(weeks),
           notes: programNotes || undefined,
+          durationWeeks,
         }),
       })
       if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000) } else { setError("Failed to save.") }
@@ -216,6 +240,29 @@ export default function EditProgramPage() {
             <option value="DRAFT">Draft</option><option value="ACTIVE">Active</option><option value="COMPLETED">Completed</option><option value="ARCHIVED">Archived</option>
           </select>
         </div>
+      </div>
+
+      {/* Repeat-for-N-weeks (rotation). Blank = client sees exactly the
+          number of weeks you authored below (traditional program). Setting
+          this to a number larger than the authored week count turns the
+          program into a repeating rotation — each client-facing week gets
+          its own completion state. */}
+      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "16px 24px", marginBottom: "1.5rem", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+        <div>
+          <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", display: "block", marginBottom: 6 }}>Repeat for N weeks</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={durationWeeksInput}
+            onChange={(e) => setDurationWeeksInput(e.target.value.replace(/[^\d]/g, ""))}
+            placeholder={`blank = ${weeks.length}`}
+            style={{ width: 110, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none" }}
+          />
+        </div>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "#888", margin: 0, lineHeight: 1.55, flex: "1 1 240px" }}>
+          Leave blank for a traditional program with the exact {weeks.length} week{weeks.length === 1 ? "" : "s"} you&apos;ve authored below.
+          Set to a number greater than {weeks.length} for a rotation — the client sees that many weeks and each one cycles through the authored week{weeks.length === 1 ? "" : "s"}. Completion is tracked per week independently.
+        </p>
       </div>
 
       {/* Week tabs */}

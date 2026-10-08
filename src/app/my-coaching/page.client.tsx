@@ -5,6 +5,7 @@ import { fetchUserAttributes } from "aws-amplify/auth"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
 import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
+import { expandedWeeks } from "@/lib/programExpansion"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -135,9 +136,17 @@ export default function MyCoachingHomeClient() {
             })
           }
           if (prog) {
-            try {
-              setProgram({ id: prog.id, name: prog.name, weeks: JSON.parse(prog.weeks) as ProgramWeek[] })
-            } catch { /* invalid JSON */ }
+            // Expand rotation-style programs so `nextWorkout` iterates every
+            // week the client is scheduled to see, not just the stored
+            // template week(s). Pass-through for traditional multi-week
+            // programs.
+            const weeks = expandedWeeks({
+              weeks: prog.weeks,
+              durationWeeks: typeof prog.durationWeeks === "number" ? prog.durationWeeks : undefined,
+            }) as ProgramWeek[]
+            if (weeks.length > 0) {
+              setProgram({ id: prog.id, name: prog.name, weeks })
+            }
           }
         }
 

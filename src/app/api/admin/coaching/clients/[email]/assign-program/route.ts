@@ -44,6 +44,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ema
     status: "ACTIVE",
     weeks: source.weeks,
     notes: source.notes,
+    // Carry rotation length from the template so the assigned client-copy
+    // matches the template's week progression. Omitted when the template
+    // has no durationWeeks (preserves traditional multi-week behaviour).
+    ...(typeof source.durationWeeks === "number" ? { durationWeeks: source.durationWeeks } : {}),
   })
 
   await updateCoachingClientRecord(email, { currentProgramId: copy.id })

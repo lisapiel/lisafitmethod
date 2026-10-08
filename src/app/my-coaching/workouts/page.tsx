@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { expandedWeeks } from "@/lib/programExpansion"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -64,7 +65,14 @@ export default function WorkoutsPage() {
 
         setProgramName(prog.name as string)
         setProgramNotes((prog.notes as string) ?? "")
-        try { setWeeks(JSON.parse(prog.weeks as string) as ProgramWeek[]) } catch { /* empty */ }
+        // Expand through the shared helper so rotation-style programs
+        // (durationWeeks > stored week count) render the full week picker
+        // and each week carries its own completion state. For traditional
+        // multi-week programs the helper is a no-op pass-through.
+        setWeeks(expandedWeeks({
+          weeks: prog.weeks as string,
+          durationWeeks: typeof prog.durationWeeks === "number" ? prog.durationWeeks : undefined,
+        }) as ProgramWeek[])
       } catch { /* handled by layout */ }
       setLoading(false)
     }
