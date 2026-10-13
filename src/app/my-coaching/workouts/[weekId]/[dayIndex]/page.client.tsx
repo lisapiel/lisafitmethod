@@ -873,30 +873,19 @@ export default function WorkoutLoggerClient() {
       // > stored weeks) can resolve the URL /workouts/<N>/<i> for any N in
       // [1, durationWeeks] by cycling the stored week definitions. For
       // traditional multi-week programs the expander is a pass-through.
+      // Resolve the target week strictly from the authoritative stored
+      // program state. `durationWeeks` (when present) + the stored week
+      // count define exactly which URLs are valid; anything beyond that
+      // must fail safely rather than get synthesised. This prevents a
+      // malformed or hand-edited URL from fabricating access to an
+      // unassigned week, which would also let a client POST a workout
+      // log outside the configured program duration.
       const storedDurationWeeks = typeof prog.durationWeeks === "number" ? prog.durationWeeks : undefined
-      const primaryWeeks: ProgramWeek[] = expandedWeeks({
+      const weeks: ProgramWeek[] = expandedWeeks({
         weeks: prog.weeks as string,
         durationWeeks: storedDurationWeeks,
       }) as ProgramWeek[]
-      let targetWeek = primaryWeeks.find((w) => w.weekNumber === weekId) ?? null
-
-      // Defensive fallback for the "list page knows about Week N but the
-      // runner's first expansion doesn't" edge case. This happens when
-      // the stored program's `durationWeeks` was raised after the client
-      // cached an older program response, or when the admin saved an
-      // explicit durationWeeks but the API response is served from a
-      // stale cache. If the requested weekId is a plausible rotation
-      // index (1..52) and we have a non-empty stored week array, re-
-      // expand with a durationWeeks large enough to include this weekId
-      // and look up again. Logging/completion is still keyed by
-      // weekNumber + dayLabel so Week N's history stays independent.
-      if (!targetWeek && Number.isFinite(weekId) && weekId >= 1 && weekId <= 52) {
-        const fallback = expandedWeeks({
-          weeks: prog.weeks as string,
-          durationWeeks: Math.max(storedDurationWeeks ?? 0, weekId),
-        }) as ProgramWeek[]
-        targetWeek = fallback.find((w) => w.weekNumber === weekId) ?? null
-      }
+      const targetWeek = weeks.find((w) => w.weekNumber === weekId) ?? null
       const targetDay = targetWeek?.days[dayIndex] ?? null
       setWeek(targetWeek)
       setDay(targetDay)
