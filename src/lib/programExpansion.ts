@@ -96,8 +96,33 @@ export function expandedWeeks(program: ProgramForExpansion): ExpandedWeek[] {
       label: source.label && !/^week\s/i.test(source.label)
         ? `Week ${i + 1} · ${source.label}`
         : `Week ${i + 1}`,
-      days: source.days,
+      // DEEP CLONE every day for each virtual week. The rotation output
+      // used to share `source.days` across all N virtual weeks by
+      // reference — if any downstream code (React effect, hydration pass,
+      // group-by builder) accidentally mutated `day.exercises`, `.warmup`,
+      // or `.cooldown`, that mutation would propagate to every other
+      // virtual week sharing the same object graph. Cloning here means
+      // each week owns its own day/exercise/warmup/cooldown objects, so
+      // Week N's render can never corrupt Week N+1's content. The clone
+      // is week-local (small, bounded by day/exercise count), so this is
+      // cheap even for a 52-week × 7-day expansion.
+      days: cloneDays(source.days),
     })
   }
   return out
+}
+
+// Cheap structural clone for program day arrays. Uses JSON round-trip
+// because the stored shape is already JSON-safe (nothing in a program day
+// is a Date, Map, Set, function, or circular reference — just strings,
+// numbers, booleans, arrays, and plain objects). structuredClone is also
+// available in modern runtimes but has slightly uneven ESLint recognition;
+// JSON round-trip is explicit, dependency-free, and bulletproof here.
+function cloneDays(days: ExpandedDay[] | undefined): ExpandedDay[] {
+  if (!Array.isArray(days)) return []
+  try {
+    return JSON.parse(JSON.stringify(days)) as ExpandedDay[]
+  } catch {
+    return days.slice()
+  }
 }
