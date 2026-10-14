@@ -1,192 +1,378 @@
-import { TestimonialsCarousel } from "@/components/TestimonialsCarousel.client"
-import type { Testimonial } from "@/components/TestimonialsCarousel.client"
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
+import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
+import { fetchSiteSettings } from "@/lib/siteSettings"
+import type { TestimonialRecord } from "@/app/api/admin/testimonials/route"
 
-const COACHING_TESTIMONIALS: Testimonial[] = [
-  {
-    id: "c1",
-    name: "Sophie T.",
-    context: "Interior designer, 43",
-    tag: "1:1 Coaching",
-    stars: 5,
-    quote: "I convinced myself for years that I had started too late. Lisa's response to my first check-in made me realize how much that belief was holding me back. She never treats age as a limitation. Eight months in I feel stronger than I did at 30 and I finally understand how my body actually works.",
-    initials: "ST",
-    date: "Jan 2026",
-    dateIso: "2026-01-10",
-  },
-  {
-    id: "c3",
-    name: "Rachel B.",
-    context: "Lawyer, 48",
-    tag: "1:1 Coaching",
-    stars: 5,
-    quote: "I came after a back injury that had me scared to lift heavy again. I almost cancelled my first call because I thought coaching was for people younger and further along than me. Lisa built the whole program around what my body could handle and slowly expanded from there. Six months later I deadlifted my own bodyweight.",
-    initials: "RB",
-    date: "Dec 2025",
-    dateIso: "2025-12-15",
-  },
-  {
-    id: "c4",
-    name: "Marc-Antoine B.",
-    context: "Project manager, 36",
-    tag: "1:1 Coaching",
-    stars: 5,
-    quote: "The check-ins are what keep me honest. Knowing she is actually going to review my week means I show up even when I do not feel like it. She catches things before I even know to be frustrated about them. That level of attention is what makes the difference.",
-    initials: "MB",
-    date: "Mar 2026",
-    dateIso: "2026-03-01",
-  },
-  {
-    id: "c5",
-    name: "Leah H.",
-    context: "Teacher, 45",
-    tag: "1:1 Coaching",
-    stars: 5,
-    quote: "I was 45 when I started and the gym felt like a place for other people. Lisa made me feel like it was built exactly for me. She designed everything around my schedule, my limitations, and my actual goals. Three months in I was already more confident than I had been in years.",
-    initials: "LH",
-    date: "Nov 2025",
-    dateIso: "2025-11-20",
-  },
-  {
-    id: "c6",
-    name: "Camille R.",
-    context: "Pharmacist, 51",
-    tag: "1:1 Coaching",
-    stars: 5,
-    quote: "I had a lot of reasons why coaching would not work for me at 51. Lisa basically dismantled every single one. She does not use age as an excuse to go easy, but she also does not ignore what your body actually needs. The program felt genuinely built for where I was.",
-    initials: "CR",
-    date: "Jan 2026",
-    dateIso: "2026-01-25",
-  },
-]
-
-const COURSE_TESTIMONIALS: Testimonial[] = [
-  {
-    id: "t1",
-    name: "Jennifer S.",
-    context: "Registered nurse, 37",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "I bought two other fitness programs before this one and quit both by week three. This is the first one I actually finished. And then repeated. The structure is clear, the explanations make sense, and I never once felt like I was guessing what to do next.",
-    initials: "JS",
-    date: "Feb 2026",
-    dateIso: "2026-02-10",
-  },
-  {
-    id: "t2",
-    name: "Isabelle F.",
-    context: "Elementary school teacher, 44",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "I joined a gym at 44 with zero idea what I was doing. I was the person standing near the weights hoping nobody would notice me. This program gave me a system I could walk in and follow every single time. I have not felt lost in the gym since.",
-    initials: "IF",
-    date: "Jan 2026",
-    dateIso: "2026-01-15",
-  },
-  {
-    id: "t5",
-    name: "Maya L.",
-    context: "UX researcher, 29",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "What got me was how detailed the coaching cues are. Lisa does not just show you the movement, she explains what you should feel, what to watch for, and what it means when something is off. I also asked a question by email and got a real thorough answer. That does not happen with most online programs.",
-    initials: "ML",
-    date: "Apr 2026",
-    dateIso: "2026-04-01",
-  },
-  {
-    id: "t6",
-    name: "Simon B.",
-    context: "Accountant, 46",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "At 46 my main worry was hurting myself rather than making progress. Every exercise in this program comes with clear form cues and notes on what not to do. I felt safe the whole way through. My hips move better than they have in a decade.",
-    initials: "SB",
-    date: "Feb 2026",
-    dateIso: "2026-02-20",
-  },
-  {
-    id: "t8",
-    name: "Laura O.",
-    context: "Graphic designer, 34",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "I bought the bundle and it was absolutely the right call. Having the nutrition piece alongside the training answered all the questions I had been guessing at for years. Everything clicked faster when both were working together.",
-    initials: "LO",
-    date: "Jan 2026",
-    dateIso: "2026-01-20",
-  },
-  {
-    id: "t9",
-    name: "Thomas G.",
-    context: "Project manager, 47",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "I had been going to the gym on and off for years and never had much to show for it. This program showed me in the first two weeks what I had been missing. By the end of the month I could see real changes. That had genuinely never happened to me before.",
-    initials: "TG",
-    date: "Nov 2025",
-    dateIso: "2025-11-15",
-  },
-  {
-    id: "t10",
-    name: "Priya M.",
-    context: "Physiotherapy student, 27",
-    tag: "Training Foundations",
-    stars: 5,
-    quote: "I study movement for a living and the quality of the coaching cues here genuinely impressed me. Lisa knows exactly what she is talking about and explains it in a way that is clear without talking down to you. I recommend this to clients who are just getting started.",
-    initials: "PM",
-    date: "Apr 2026",
-    dateIso: "2026-04-15",
-  },
-]
-
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
-      <span style={{ flex: 1, height: 1, background: "rgba(168,137,94,0.2)", display: "block" }} />
-      <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#a8895e", fontFamily: "var(--font-dm-sans), sans-serif", whiteSpace: "nowrap" }}>
-        {label}
-      </span>
-      <span style={{ flex: 1, height: 1, background: "rgba(168,137,94,0.2)", display: "block" }} />
-    </div>
-  )
+async function getPublishedTestimonials(): Promise<TestimonialRecord[]> {
+  try {
+    const db = DynamoDBDocumentClient.from(
+      new DynamoDBClient({
+        region: process.env.COGNITO_REGION ?? "us-east-2",
+        credentials: {
+          accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
+          secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
+        },
+      })
+    )
+    const result = await db.send(
+      new ScanCommand({
+        TableName: process.env.DYNAMODB_TABLE ?? "lfm-user-progress",
+        FilterExpression: "begins_with(userId, :prefix) AND #s = :published",
+        ExpressionAttributeNames: { "#s": "status" },
+        ExpressionAttributeValues: { ":prefix": "testimonial_", ":published": "published" },
+      })
+    )
+    return (result.Items ?? [])
+      .map((item) => item as Record<string, unknown>)
+      .filter((item) => typeof item.id === "string")
+      .map((item) => ({
+        id: item.id as string,
+        clientName: (item.clientName as string) ?? "",
+        clientDescription: (item.clientDescription as string) ?? "",
+        type: (item.type as "transformation" | "experience") ?? "experience",
+        headline: (item.headline as string) ?? "",
+        writtenTestimonial: (item.writtenTestimonial as string) ?? "",
+        featuredQuote: (item.featuredQuote as string) ?? "",
+        metrics: (item.metrics as TestimonialRecord["metrics"]) ?? [],
+        photoSlotBefore: (item.photoSlotBefore as string) ?? "",
+        photoSlotProgress: (item.photoSlotProgress as string) ?? "",
+        photoSlotPortrait: (item.photoSlotPortrait as string) ?? "",
+        videoSlot: (item.videoSlot as string) ?? "",
+        displayOrder: (item.displayOrder as number) ?? 0,
+        status: "published" as const,
+        createdAt: (item.createdAt as string) ?? "",
+        updatedAt: (item.updatedAt as string) ?? "",
+      } satisfies TestimonialRecord))
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+  } catch {
+    return []
+  }
 }
 
-export function TestimonialsSection() {
+export async function TestimonialsSection() {
+  const [testimonials, settings] = await Promise.all([
+    getPublishedTestimonials(),
+    fetchSiteSettings(),
+  ])
+
+  if (testimonials.length === 0) return null
+
+  const allSlots = new Set<string>()
+  for (const t of testimonials) {
+    if (t.photoSlotBefore) allSlots.add(t.photoSlotBefore)
+    if (t.photoSlotProgress) allSlots.add(t.photoSlotProgress)
+    if (t.photoSlotPortrait) allSlots.add(t.photoSlotPortrait)
+    if (t.videoSlot) allSlots.add(t.videoSlot)
+  }
+
+  const mediaMap: Record<string, string | null> = {}
+  await Promise.all(
+    [...allSlots].map(async (slot) => {
+      const isVideo = slot.startsWith("testimonial_") && testimonials.some((t) => t.videoSlot === slot)
+      if (isVideo) {
+        mediaMap[slot] = await getPublishedVideoUrl(slot)
+      } else {
+        mediaMap[slot] = await getPublishedPhotoUrl(slot)
+      }
+    })
+  )
+
+  const crops = settings.crops
+
   return (
     <section
-      style={{ background: "var(--off-white, #f5f2ee)", padding: "100px 80px" }}
-      className="testimonials-v2"
-      aria-label="Student and client testimonials"
+      style={{ background: "var(--off-white, #f5f2ee)", padding: "100px 48px" }}
+      className="testimonials-real"
+      aria-label="Client testimonials"
     >
       <style>{`
         @media (max-width: 768px) {
-          .testimonials-v2 { padding: 72px 24px !important; }
+          .testimonials-real { padding: 72px 20px !important; }
+          .testimonial-transformation-grid { flex-direction: column !important; }
+          .testimonial-photos-row { flex-direction: column !important; }
+          .testimonial-metrics-row { gap: 12px !important; }
+          .testimonial-metric-tile { flex: 1 1 calc(50% - 6px) !important; min-width: 0 !important; }
+          .testimonial-experience-inner { flex-direction: column !important; }
+        }
+        @media (max-width: 480px) {
+          .testimonial-metric-tile { flex: 1 1 100% !important; }
         }
       `}</style>
 
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        {/* Section header */}
         <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase", color: "#a8895e", marginBottom: 16, fontFamily: "var(--font-dm-sans), sans-serif" }}>
+          <p style={{
+            fontSize: 11, fontWeight: 500, letterSpacing: "0.25em", textTransform: "uppercase",
+            color: "#a8895e", marginBottom: 14, fontFamily: "var(--font-dm-sans), sans-serif",
+          }}>
             Real results
           </p>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "calc(clamp(32px, 3.5vw, 48px) * var(--heading-scale, 1))", fontWeight: 700, color: "#0a0a0a", lineHeight: 1.15, margin: "0 auto 16px" }}>
-            What people are saying.
+          <h2 style={{
+            fontFamily: "var(--font-playfair), serif",
+            fontSize: "calc(clamp(28px, 3.2vw, 44px) * var(--heading-scale, 1))",
+            fontWeight: 700, color: "#0a0a0a", lineHeight: 1.15, margin: "0 auto 16px",
+          }}>
+            Real People. Real Progress.
           </h2>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "calc(15px * var(--body-scale, 1))", color: "#6b6560", maxWidth: 400, margin: "0 auto", lineHeight: 1.65 }}>
-            From people who showed up, did the work, and actually changed how they move and feel.
+          <p style={{
+            fontFamily: "var(--font-dm-sans), sans-serif",
+            fontSize: "calc(15px * var(--body-scale, 1))",
+            color: "#6b6560", maxWidth: 460, margin: "0 auto", lineHeight: 1.65,
+          }}>
+            Real progress starts with a plan that fits your life. Here&rsquo;s what personalized training can look like.
           </p>
         </div>
 
-        <SectionDivider label="1:1 Coaching" />
-        <div style={{ marginBottom: 56 }}>
-          <TestimonialsCarousel testimonials={COACHING_TESTIMONIALS} />
+        {/* Testimonial cards */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
+          {testimonials.map((t) =>
+            t.type === "transformation"
+              ? <TransformationCard key={t.id} t={t} mediaMap={mediaMap} crops={crops} />
+              : <ExperienceCard key={t.id} t={t} mediaMap={mediaMap} crops={crops} />
+          )}
         </div>
-
-        <SectionDivider label="Courses" />
-        <TestimonialsCarousel testimonials={COURSE_TESTIMONIALS} />
       </div>
     </section>
   )
 }
 
-export { COURSE_TESTIMONIALS, COACHING_TESTIMONIALS }
+type CropsType = Awaited<ReturnType<typeof fetchSiteSettings>>["crops"]
+
+function TransformationCard({
+  t,
+  mediaMap,
+  crops,
+}: {
+  t: TestimonialRecord
+  mediaMap: Record<string, string | null>
+  crops: CropsType
+}) {
+  const videoUrl = t.videoSlot ? (mediaMap[t.videoSlot] ?? null) : null
+  const beforeUrl = t.photoSlotBefore ? (mediaMap[t.photoSlotBefore] ?? null) : null
+  const progressUrl = t.photoSlotProgress ? (mediaMap[t.photoSlotProgress] ?? null) : null
+  const videoCrop = crops.testimonial_gino_video ?? "center 30%"
+  const beforeCrop = (crops as Record<string, string>)[t.photoSlotBefore ?? ""] ?? "center 20%"
+  const progressCrop = (crops as Record<string, string>)[t.photoSlotProgress ?? ""] ?? "center 20%"
+
+  const hasMedia = videoUrl || beforeUrl || progressUrl
+
+  return (
+    <article
+      style={{
+        background: "#fff",
+        border: "1px solid rgba(168,137,94,0.12)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        className="testimonial-transformation-grid"
+        style={{ display: "flex", alignItems: "stretch" }}
+      >
+        {/* Left: media column */}
+        {hasMedia && (
+          <div style={{ flexShrink: 0, width: 340, background: "#0a0a0a", position: "relative" }}>
+            {/* Video */}
+            {videoUrl && (
+              <div style={{ position: "relative", width: "100%", paddingBottom: "133.33%", overflow: "hidden" }}>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video
+                  src={videoUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  style={{
+                    position: "absolute", inset: 0, width: "100%", height: "100%",
+                    objectFit: "cover", objectPosition: videoCrop,
+                    background: "#0a0a0a",
+                  }}
+                />
+              </div>
+            )}
+            {/* Before / Progress photos */}
+            {(beforeUrl || progressUrl) && (
+              <div
+                className="testimonial-photos-row"
+                style={{ display: "flex", gap: 2, padding: videoUrl ? "2px 0 0" : 0 }}
+              >
+                {beforeUrl && (
+                  <div style={{ flex: 1, position: "relative" }}>
+                    <div style={{ position: "relative", paddingBottom: "133.33%", overflow: "hidden" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={beforeUrl}
+                        alt={`${t.clientName} — before coaching`}
+                        style={{
+                          position: "absolute", inset: 0, width: "100%", height: "100%",
+                          objectFit: "cover", objectPosition: beforeCrop,
+                        }}
+                      />
+                      <div style={{
+                        position: "absolute", bottom: 8, left: 8,
+                        background: "rgba(10,10,10,0.72)", color: "#f0e6d3",
+                        fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem",
+                        fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase",
+                        padding: "4px 8px",
+                      }}>
+                        Before coaching
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {progressUrl && (
+                  <div style={{ flex: 1, position: "relative" }}>
+                    <div style={{ position: "relative", paddingBottom: "133.33%", overflow: "hidden" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={progressUrl}
+                        alt={`${t.clientName} — 3 months into coaching`}
+                        style={{
+                          position: "absolute", inset: 0, width: "100%", height: "100%",
+                          objectFit: "cover", objectPosition: progressCrop,
+                        }}
+                      />
+                      <div style={{
+                        position: "absolute", bottom: 8, left: 8,
+                        background: "rgba(10,10,10,0.72)", color: "#f0e6d3",
+                        fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem",
+                        fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase",
+                        padding: "4px 8px",
+                      }}>
+                        3 months in
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Right: content */}
+        <div style={{ flex: 1, padding: "40px 36px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          {t.headline && (
+            <h3 style={{
+              fontFamily: "var(--font-playfair), serif",
+              fontSize: "calc(clamp(18px, 1.6vw, 24px) * var(--heading-scale, 1))",
+              fontWeight: 700, color: "#0a0a0a", lineHeight: 1.25, marginBottom: 20,
+            }}>
+              {t.headline}
+            </h3>
+          )}
+
+          {/* Metrics */}
+          {t.metrics.length > 0 && (
+            <div
+              className="testimonial-metrics-row"
+              style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 24 }}
+            >
+              {t.metrics.map((m, i) => (
+                <div
+                  key={i}
+                  className="testimonial-metric-tile"
+                  style={{
+                    flex: "1 1 calc(33% - 9px)", minWidth: 90,
+                    background: "#f5f2ee", border: "1px solid rgba(168,137,94,0.15)",
+                    padding: "14px 16px", textAlign: "center",
+                  }}
+                >
+                  <p style={{
+                    fontFamily: "var(--font-playfair), serif",
+                    fontSize: "1.35rem", fontWeight: 700, color: "#0a0a0a", marginBottom: 2, lineHeight: 1,
+                  }}>
+                    {m.value}
+                  </p>
+                  <p style={{
+                    fontFamily: "var(--font-dm-sans), sans-serif",
+                    fontSize: "0.65rem", color: "#6b6560", fontWeight: 500, letterSpacing: "0.08em",
+                  }}>
+                    {m.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Featured quote */}
+          {t.featuredQuote && (
+            <blockquote style={{
+              fontFamily: "var(--font-playfair), serif",
+              fontSize: "calc(clamp(14px, 1.1vw, 17px) * var(--body-scale, 1))",
+              fontStyle: "italic", color: "#1a1a1a", lineHeight: 1.65,
+              borderLeft: "2px solid #c8a97e", paddingLeft: 20,
+              margin: "0 0 20px",
+            }}>
+              &ldquo;{t.featuredQuote}&rdquo;
+            </blockquote>
+          )}
+
+          {/* Attribution */}
+          <p style={{
+            fontFamily: "var(--font-dm-sans), sans-serif",
+            fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: "#a8895e",
+          }}>
+            {t.clientName}{t.clientDescription ? ` | ${t.clientDescription}` : ""}
+          </p>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function ExperienceCard({
+  t,
+  mediaMap,
+  crops,
+}: {
+  t: TestimonialRecord
+  mediaMap: Record<string, string | null>
+  crops: CropsType
+}) {
+  const portraitUrl = t.photoSlotPortrait ? (mediaMap[t.photoSlotPortrait] ?? null) : null
+  const portraitCrop = (crops as Record<string, string>)[t.photoSlotPortrait ?? ""] ?? "center 20%"
+
+  return (
+    <article
+      style={{
+        background: "#fff",
+        border: "1px solid rgba(168,137,94,0.12)",
+        padding: "40px 44px",
+        maxWidth: 840,
+      }}
+    >
+      <div className="testimonial-experience-inner" style={{ display: "flex", gap: 36, alignItems: "center" }}>
+        {portraitUrl && (
+          <div style={{ flexShrink: 0, width: 120, height: 120, borderRadius: "50%", overflow: "hidden" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={portraitUrl}
+              alt={`${t.clientName}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: portraitCrop }}
+            />
+          </div>
+        )}
+        <div style={{ flex: 1 }}>
+          {t.featuredQuote && (
+            <blockquote style={{
+              fontFamily: "var(--font-playfair), serif",
+              fontSize: "calc(clamp(15px, 1.2vw, 18px) * var(--body-scale, 1))",
+              fontStyle: "italic", color: "#1a1a1a", lineHeight: 1.65,
+              margin: "0 0 18px",
+            }}>
+              &ldquo;{t.featuredQuote}&rdquo;
+            </blockquote>
+          )}
+          <p style={{
+            fontFamily: "var(--font-dm-sans), sans-serif",
+            fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: "#a8895e",
+          }}>
+            {t.clientName}{t.clientDescription ? ` | ${t.clientDescription}` : ""}
+          </p>
+        </div>
+      </div>
+    </article>
+  )
+}

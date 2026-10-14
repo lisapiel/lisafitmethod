@@ -109,17 +109,23 @@ export const VIDEO_SLOTS: Record<string, string> = {
 
   // ── Landing Page ─────────────────────────────────────────────────────────
   lp_trailer:            "",
+
+  // ── Client Testimonials ───────────────────────────────────────────────────
+  testimonial_gino:      "",
 }
 
 export const PHOTO_SLOTS: Record<string, string> = {
-  hero:          "Landing page hero image",
-  banner:        "Landing page banner (wide/horizontal)",
-  testimonials:  "Testimonials screenshot",
-  module1_cover: "Module 1 cover photo",
-  module2_cover: "Module 2 cover photo",
-  module3_cover: "Module 3 cover photo",
-  module4_cover: "Module 4 cover photo",
-  about_bio:     "About / bio photo",
+  hero:                      "Landing page hero image",
+  banner:                    "Landing page banner (wide/horizontal)",
+  testimonials:              "Testimonials screenshot",
+  module1_cover:             "Module 1 cover photo",
+  module2_cover:             "Module 2 cover photo",
+  module3_cover:             "Module 3 cover photo",
+  module4_cover:             "Module 4 cover photo",
+  about_bio:                 "About / bio photo",
+  testimonial_gino_before:   "Gino: before photo (taken before coaching began)",
+  testimonial_gino_progress: "Gino: progress photo (taken ~3 months in)",
+  testimonial_gaby_portrait: "Gabriela: gym photo",
 }
 
 export type VideoSlotKey = keyof typeof VIDEO_SLOTS
@@ -215,4 +221,6 @@ export const VIDEO_SLOT_LABELS: Record<string, string> = {
   m3c_cd_childs_pose:    "Child's Pose",
 
   lp_trailer:            "Landing Page Trailer Video",
+
+  testimonial_gino:      "Gino – Video Testimonial",
 }

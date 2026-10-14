@@ -675,6 +675,63 @@ export default function DesignPage() {
         </div>
       </div>
 
+      {/* 2b. Testimonial Photos & Video Crops */}
+      <div style={sectionStyle}>
+        <SectionHeader
+          title="Testimonial Photo Crops"
+          onReset={() => setCrops((c) => ({
+            ...c,
+            testimonial_gino_before: DEFAULTS.crops.testimonial_gino_before,
+            testimonial_gino_progress: DEFAULTS.crops.testimonial_gino_progress,
+            testimonial_gaby_portrait: DEFAULTS.crops.testimonial_gaby_portrait,
+            testimonial_gino_video: DEFAULTS.crops.testimonial_gino_video,
+          }))}
+        />
+        <p
+          style={{
+            fontFamily: "var(--font-montserrat), sans-serif",
+            fontSize: "0.6rem",
+            color: "#555",
+            marginBottom: 24,
+          }}
+        >
+          Set the focal point for client testimonial photos. Upload photos first in the Photos section, then set the crop here.
+          For Gino&rsquo;s video: drag the dot up to reduce empty ceiling space and frame his face more prominently.
+        </p>
+        <div style={gridStyle}>
+          {[
+            { key: "testimonial_gino_before" as const, label: "Gino – Before photo", h: 320 },
+            { key: "testimonial_gino_progress" as const, label: "Gino – 3 months in", h: 320 },
+            { key: "testimonial_gaby_portrait" as const, label: "Gabriela – Gym photo", h: 320 },
+          ].map(({ key, label, h }) => (
+            <CropTool
+              key={key}
+              label={label}
+              photoUrl={photos[key]}
+              value={crops[key]}
+              onChange={(v) => setCrops({ ...crops, [key]: v })}
+              heightPx={h}
+            />
+          ))}
+        </div>
+        <div style={{ marginTop: 20, borderTop: `1px solid ${border}`, paddingTop: 20 }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: gold, marginBottom: 12, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            Gino – Video framing
+          </p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", marginBottom: 16 }}>
+            Drag the focal point to reframe the video. Moving the dot upward trims empty ceiling space and centers on Gino&rsquo;s face.
+            Current: <span style={{ color: gold, fontFamily: "monospace" }}>{crops.testimonial_gino_video}</span>
+          </p>
+          <CropTool
+            label="Gino video crop (drag dot to set framing)"
+            photoUrl={undefined}
+            value={crops.testimonial_gino_video}
+            onChange={(v) => setCrops({ ...crops, testimonial_gino_video: v })}
+            heightPx={200}
+          />
+        </div>
+      </div>
+
       {/* 3. Home Page Text */}
       <div style={sectionStyle}>
         <SectionHeader

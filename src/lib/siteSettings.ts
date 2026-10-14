@@ -3,6 +3,10 @@ export type SiteSettings = {
     hero: string
     about_bio: string
     banner: string
+    testimonial_gino_before: string
+    testimonial_gino_progress: string
+    testimonial_gaby_portrait: string
+    testimonial_gino_video: string
   }
   typography: {
     headingScale: number
@@ -68,6 +72,10 @@ export const DEFAULTS: SiteSettings = {
     hero: "center 15%",
     about_bio: "center 8%",
     banner: "center 30%",
+    testimonial_gino_before: "center 20%",
+    testimonial_gino_progress: "center 20%",
+    testimonial_gaby_portrait: "center 20%",
+    testimonial_gino_video: "center 30%",
   },
   typography: {
     headingScale: 1.0,

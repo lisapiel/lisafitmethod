@@ -14,6 +14,11 @@ type Asset = { assignedTo: string; url?: string | null; isPublished: boolean; ti
 
 const GROUPS: { label: string; where: string; keys: string[] }[] = [
   {
+    label: "Client Testimonials",
+    where: "These videos appear in the Testimonials section on the public homepage. Upload as MP4 for full browser compatibility. MOV files will play in Safari but not in Chrome or Firefox — convert to MP4 first for cross-browser support.",
+    keys: ["testimonial_gino"],
+  },
+  {
     label: "Landing Page: Home (lisafitmethod.com)",
     where: "This video appears on the PUBLIC home page, below the 'What's inside' section: visible to everyone before they buy. Must be uploaded as MP4. MOV files will not play in Chrome or Firefox.",
     keys: ["lp_trailer"],

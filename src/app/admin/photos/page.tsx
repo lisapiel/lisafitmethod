@@ -12,6 +12,16 @@ type Asset = { assignedTo: string; url?: string | null; isPublished: boolean; ti
 
 const GROUPS: { label: string; where: string; keys: string[]; labels: Record<string, string> }[] = [
   {
+    label: "Client Testimonials",
+    where: "Photos displayed in the Testimonials section on the public homepage. Upload portrait-orientation photos. Use the Design panel to set the crop / focal point for each photo.",
+    keys: ["testimonial_gino_before", "testimonial_gino_progress", "testimonial_gaby_portrait"],
+    labels: {
+      testimonial_gino_before: "Gino – Before coaching",
+      testimonial_gino_progress: "Gino – 3 months in",
+      testimonial_gaby_portrait: "Gabriela – Gym photo",
+    },
+  },
+  {
     label: "Landing Page: Home (lisafitmethod.com)",
     where: "These photos appear on the public home page that visitors see before buying.",
     keys: ["hero", "banner", "testimonials"],

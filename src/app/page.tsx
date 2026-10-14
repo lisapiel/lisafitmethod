@@ -4,7 +4,7 @@ import { getPublishedPhotoUrl, getPublishedVideoUrl, derivePosterUrl, heroTraile
 import { fetchSiteSettings } from "@/lib/siteSettings"
 import VideoPlayer from "@/components/VideoPlayer.client"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
-import { TestimonialsSection, COURSE_TESTIMONIALS, COACHING_TESTIMONIALS } from "@/components/TestimonialsSection"
+import { TestimonialsSection } from "@/components/TestimonialsSection"
 import {
   COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_DISPLAY,
@@ -102,20 +102,6 @@ export default async function HomePage() {
         courseMode: "online",
         instructor: { "@type": "Person", name: "Lisa McPherson" },
       },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "5",
-        ratingCount: String(COURSE_TESTIMONIALS.length),
-        bestRating: "5",
-        worstRating: "1",
-      },
-      review: COURSE_TESTIMONIALS.map((r) => ({
-        "@type": "Review",
-        author: { "@type": "Person", name: r.name },
-        reviewRating: { "@type": "Rating", ratingValue: String(r.stars), bestRating: "5" },
-        reviewBody: r.quote,
-        datePublished: r.dateIso,
-      })),
     },
     {
       "@context": "https://schema.org",
@@ -124,20 +110,6 @@ export default async function HomePage() {
       description: "Personalized online coaching with Lisa McPherson: custom programming, form review, and weekly check-ins tailored to your goals and schedule.",
       provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
       url: "https://lisafitmethod.com/coaching",
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "5",
-        ratingCount: String(COACHING_TESTIMONIALS.length),
-        bestRating: "5",
-        worstRating: "1",
-      },
-      review: COACHING_TESTIMONIALS.map((r) => ({
-        "@type": "Review",
-        author: { "@type": "Person", name: r.name },
-        reviewRating: { "@type": "Rating", ratingValue: String(r.stars), bestRating: "5" },
-        reviewBody: r.quote,
-        datePublished: r.dateIso,
-      })),
     },
   ]
 
