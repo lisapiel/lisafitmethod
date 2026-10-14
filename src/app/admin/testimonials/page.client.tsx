@@ -71,12 +71,29 @@ export default function AdminTestimonialsClient() {
     setTimeout(() => setToast(null), 4000)
   }
 
-  const loadTestimonials = useCallback(async () => {
+  const loadTestimonials = useCallback(async (seedIfEmpty = false) => {
     setLoading(true)
     try {
       const res = await apiFetch("/api/admin/testimonials")
       const data = await res.json() as { testimonials: TestimonialRecord[] }
-      setTestimonials(data.testimonials ?? [])
+      const list = data.testimonials ?? []
+
+      if (seedIfEmpty && list.length === 0) {
+        // First visit — auto-populate with real client content
+        const seedRes = await apiFetch("/api/admin/testimonials/seed", { method: "POST" })
+        if (seedRes.ok) {
+          const seeded = await seedRes.json() as { seeded: boolean }
+          if (seeded.seeded) {
+            const res2 = await apiFetch("/api/admin/testimonials")
+            const data2 = await res2.json() as { testimonials: TestimonialRecord[] }
+            setTestimonials(data2.testimonials ?? [])
+            showToast("Client stories loaded — both are in Draft. Review, then click Publish when ready.")
+            return
+          }
+        }
+      }
+
+      setTestimonials(list)
     } catch {
       showToast("Failed to load testimonials.")
     } finally {
@@ -84,7 +101,7 @@ export default function AdminTestimonialsClient() {
     }
   }, [])
 
-  useEffect(() => { void loadTestimonials() }, [loadTestimonials])
+  useEffect(() => { void loadTestimonials(true) }, [loadTestimonials])
 
   function openNew() {
     setEditing({ ...empty, id: "", createdAt: "", updatedAt: "" })
@@ -215,17 +232,33 @@ export default function AdminTestimonialsClient() {
             Manage client testimonials for the public homepage. Only published testimonials appear on the site.
           </p>
         </div>
-        <button
-          onClick={openNew}
-          style={{
-            background: gold, color: "#0a0a0a", border: "none",
-            fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem",
-            fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase",
-            padding: "11px 22px", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
-          }}
-        >
-          + Add Testimonial
-        </button>
+        <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+          <a
+            href="/admin/testimonials/preview"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: "none", border: `1px solid ${gold}`, color: gold,
+              fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem",
+              fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase",
+              padding: "11px 22px", cursor: "pointer", whiteSpace: "nowrap", textDecoration: "none",
+              display: "inline-flex", alignItems: "center",
+            }}
+          >
+            Preview
+          </a>
+          <button
+            onClick={openNew}
+            style={{
+              background: gold, color: "#0a0a0a", border: "none",
+              fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem",
+              fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase",
+              padding: "11px 22px", cursor: "pointer", whiteSpace: "nowrap",
+            }}
+          >
+            + Add
+          </button>
+        </div>
       </div>
 
       {toast && (
