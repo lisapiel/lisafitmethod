@@ -3,10 +3,22 @@
 import Link from "next/link"
 import { useState } from "react"
 
-type Direction = "a" | "b"
+type Direction = "a" | "b" | "c"
 type Device = "desktop" | "mobile"
 
 const DIRECTIONS: Record<Direction, { name: string; tag: string; blurb: string; notes: string[] }> = {
+  c: {
+    name: "Direction C",
+    tag: "Combined",
+    blurb:
+      "Light and dark in one page, with the live copy intact. Dark grounds carry the cinematic beats (hero, bundle, closing); light grounds carry the reading (story, courses, questions, guides). Every tone change is a designed seam, and the navigation inverts itself against whatever section sits behind it.",
+    notes: [
+      "Playfair Display + DM Sans — the brand's own fonts",
+      "Only the documented brand tokens: black, off-white, warm-white, accent",
+      "Production homepage copy, verbatim and checked by script",
+      "Questions become an accordion: nothing removed, revealed one at a time",
+    ],
+  },
   a: {
     name: "Direction A",
     tag: "Atelier",
@@ -14,9 +26,9 @@ const DIRECTIONS: Record<Direction, { name: string; tag: string; blurb: string; 
       "Light, editorial, print-led. Warm paper ground, Playfair Display set very large with tight leading, hairline rules, and a numbered section structure. The film arrives as a cinematic plate inset to the page gutter rather than as a background.",
     notes: [
       "Playfair Display + DM Sans",
-      "Warm paper #f7f4ef, ink #121110, gold used only as hairlines and small caps",
+      "Warm paper, ink, gold used only as hairlines and small caps",
       "Movement library presented as a hoverable index with a sticky plate",
-      "Reads as a magazine feature: calm, confident, lots of air",
+      "Earlier exploration — rewrote more copy than approved",
     ],
   },
   b: {
@@ -26,9 +38,9 @@ const DIRECTIONS: Record<Direction, { name: string; tag: string; blurb: string; 
       "Dark, cinematic, luxury. Full-bleed 100vh film opening, a pinned statement panel the page scrolls through, Cormorant Garamond display type, gold light, and a horizontal film rail for the movement library.",
     notes: [
       "Cormorant Garamond + Montserrat",
-      "Near-black #08080a with gold #c9a96e and a fine film grain",
+      "Near-black with gold and a fine film grain",
       "Movement library presented as a horizontal reel that wakes on hover",
-      "Reads as a brand film: moodier, more immersive, more premium-luxury",
+      "Earlier exploration — rewrote more copy than approved",
     ],
   },
 }
@@ -39,7 +51,7 @@ const DEVICE_SIZES: Record<Device, { w: number; h: number; label: string }> = {
 }
 
 export default function PreviewConsoleClient() {
-  const [dir, setDir] = useState<Direction>("a")
+  const [dir, setDir] = useState<Direction>("c")
   const [device, setDevice] = useState<Device>("desktop")
   const [frameKey, setFrameKey] = useState(0)
 
@@ -75,7 +87,7 @@ export default function PreviewConsoleClient() {
         .pv-safety ul { margin: 0; padding-left: 18px; list-style: disc; }
         .pv-safety li { font-size: 0.84rem; line-height: 1.8; color: rgba(232,230,227,0.72); }
         .pv-safety code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 3px; }
-        .pv-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
+        .pv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
         .pv-card {
           border: 1px solid rgba(255,255,255,0.12); background: #1b1b1e; padding: 26px 28px;
           display: flex; flex-direction: column; border-radius: 4px;
@@ -120,18 +132,17 @@ export default function PreviewConsoleClient() {
           border: 0; display: block; background: #fff;
           box-shadow: 0 30px 80px -40px rgba(0,0,0,0.9);
         }
-        @media (max-width: 900px) {
-          .pv-cards { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 1100px) { .pv-cards { grid-template-columns: 1fr; } }
       `}</style>
 
       <div className="pv-console-inner">
         <p className="pv-console-kicker">Internal review · not published</p>
         <h1 className="pv-console-h1">Homepage redesign — two directions</h1>
         <p className="pv-console-lede">
-          Two complete, working homepage prototypes built on your real video, photography, copy and prices. Open either
-          one full-screen, or compare them in the frame below at desktop and phone size. Nothing here is live, and
-          nothing has been deployed.
+          Three working homepage prototypes built on your real video, photography and prices. Direction C is the
+          current one: light and dark combined, with your production copy preserved word for word. A and B are the
+          earlier explorations, kept for comparison. Open any of them full-screen, or compare them in the frame below
+          at desktop and phone size. Nothing here is live, and nothing has been deployed.
         </p>
 
         <section className="pv-safety">
@@ -157,7 +168,7 @@ export default function PreviewConsoleClient() {
         </section>
 
         <div className="pv-cards">
-          {(["a", "b"] as Direction[]).map((key) => {
+          {(["c", "a", "b"] as Direction[]).map((key) => {
             const d = DIRECTIONS[key]
             return (
               <article key={key} className="pv-card" data-active={dir === key}>
@@ -195,7 +206,7 @@ export default function PreviewConsoleClient() {
         <div className="pv-toolbar">
           <span className="pv-toolbar-label">Direction</span>
           <div className="pv-seg">
-            {(["a", "b"] as Direction[]).map((key) => (
+            {(["c", "a", "b"] as Direction[]).map((key) => (
               <button key={key} type="button" data-on={dir === key} onClick={() => setDir(key)}>
                 {DIRECTIONS[key].tag}
               </button>

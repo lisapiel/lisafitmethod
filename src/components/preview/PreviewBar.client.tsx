@@ -8,11 +8,19 @@ import { useEffect, useState } from "react"
 // Only exists on /preview routes. It is the one piece of chrome that is not
 // part of either design — it's the harness Lisa reviews through, so it stays
 // visually neutral and collapses out of the way on scroll-down.
+type Direction = "a" | "b" | "c"
+
+const LABELS: Record<Direction, string> = {
+  a: "A \u00b7 Atelier",
+  b: "B \u00b7 Nocturne",
+  c: "C \u00b7 Combined",
+}
+
 export default function PreviewBar({
   current,
   tone = "dark",
 }: {
-  current: "a" | "b"
+  current: Direction
   tone?: "dark" | "light"
 }) {
   const [hidden, setHidden] = useState(false)
@@ -44,8 +52,7 @@ export default function PreviewBar({
   }, [])
 
   const isDark = tone === "dark"
-  const other = current === "a" ? "b" : "a"
-  const otherLabel = current === "a" ? "Direction B · Nocturne" : "Direction A · Atelier"
+  const others = (["a", "b", "c"] as Direction[]).filter((d) => d !== current)
 
   return (
     <div
@@ -93,24 +100,27 @@ export default function PreviewBar({
         >
           Prototype
         </span>
-        <Link
-          href={`/preview/${other}`}
-          style={{
-            fontFamily: "var(--font-dm-sans), sans-serif",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "#0a0a0a",
-            background: "#c9a96e",
-            textDecoration: "none",
-            padding: "9px 16px",
-            borderRadius: 999,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {otherLabel}
-        </Link>
+        {others.map((d) => (
+          <Link
+            key={d}
+            href={`/preview/${d}`}
+            style={{
+              fontFamily: "var(--font-dm-sans), sans-serif",
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#0a0a0a",
+              background: "#c9a96e",
+              textDecoration: "none",
+              padding: "9px 14px",
+              borderRadius: 999,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {LABELS[d]}
+          </Link>
+        ))}
         <Link
           href="/preview"
           style={{
