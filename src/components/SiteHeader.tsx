@@ -7,6 +7,8 @@ import AccountDropdown from "./AccountDropdown.client"
 import MemberDrawer from "./MemberDrawer.client"
 
 const HIDDEN_PREFIXES = [
+  // Design prototype at /preview ships its own navigation per direction.
+  "/preview",
   "/admin",
   "/training-foundations",
   "/nutrition-foundations",

@@ -62,27 +62,27 @@ export const STORY_TIMELINE = [
   {
     marker: "Engineering",
     title: "Two master's degrees",
-    body: "Grew up in France. Engineering degrees in France and Canada — renewable energy and energy efficiency. Spent her twenties building a career, not a body.",
+    body: "I grew up in France and got two engineering degrees — one in France, one in Canada in renewable energy and energy efficiency. I spent most of my twenties building a career, not a body.",
   },
   {
     marker: "The plateau",
-    title: "Years of effort, nowhere to show it",
-    body: "Classes, cardio, group workouts in Australia. Consistent, hard-working, and going nowhere. Years of effort without anything to show for it.",
+    title: "Years of effort, nothing to show for it",
+    body: "Classes, cardio, group workouts in Australia. I was consistent, I worked hard, and I went nowhere. Years of effort without anything to show for it.",
   },
   {
     marker: "Structure",
-    title: "Miami, and the thing she'd been missing",
-    body: "Strength training taken seriously for the first time. Progressive overload. Real programming. Her body started changing in a way it never had before.",
+    title: "Miami, and the thing I'd been missing",
+    body: "I started taking strength training seriously for the first time. Structure. Progressive overload. Real programming. My body started changing in a way it never had before.",
   },
   {
     marker: "The injury",
     title: "Almost a year of serious pain",
-    body: "Load added before the foundation could support it. Warm-ups skipped, mobility ignored. Her back gave out — the kind of pain that makes getting out of bed uncomfortable.",
+    body: "I kept adding weight before I had the foundation to support it. Warm-ups felt like a waste of time, mobility wasn't on my radar. Eventually my back gave out — the kind of pain that makes getting out of bed uncomfortable.",
   },
   {
     marker: "The rebuild",
     title: "Certified, pain-free, stronger",
-    body: "Movement mechanics, warm-up protocols, mobility, real programming logic — relearned from scratch. She became a certified personal trainer to genuinely understand what she'd been skipping.",
+    body: "I rebuilt everything: movement mechanics, warm-up protocols, mobility, real programming logic. I became a certified personal trainer because I needed to genuinely understand what I'd been skipping.",
   },
 ]
 
@@ -91,15 +91,15 @@ export const STORY_PULLQUOTE = "I'm an engineer by training — I think in syste
 export const STORY_CREDS = [
   {
     label: "Certified & Evidence-Based",
-    body: "Formally trained in movement, programming, and corrective exercise. An engineering background that approaches fitness through systems, structure, and intelligent progression.",
+    body: "Formally trained in movement, programming, and corrective exercise. My background in engineering taught me to approach fitness through systems, structure, and intelligent progression.",
   },
   {
     label: "Rebuilt Through Injury",
-    body: "Not just studied. Rebuilt — her own body, after serious back pain. She knows what it feels like when training stops working, and what it takes to come back stronger.",
+    body: "I didn't just study this. I had to rebuild my own body after serious back pain. I know what it feels like when training stops working — and what it takes to come back stronger.",
   },
   {
     label: "Real-World Coaching",
-    body: "No gimmicks. No random workouts. Intelligent training focused on movement quality, long-term progress, and building a body that actually lasts.",
+    body: "No gimmicks. No random workouts. Just intelligent training focused on movement quality, long-term progress, and building a body that actually lasts.",
   },
 ]
 
@@ -326,3 +326,25 @@ export const CLOSING = {
   titleEm: "Start training with someone who actually knows your body.",
   body: "Apply for 1:1 coaching and get a fully custom program, weekly check-ins, and real accountability from someone who will actually be there.",
 }
+
+// Direction B's pinned statement panel. Each beat is a compression of a claim
+// the live site already makes — the method, the structure, the tracking, the
+// longevity — set large enough to be read one at a time.
+export const STATEMENTS = [
+  {
+    big: "Structure over intensity.",
+    small: "Most people don't need a harder workout. They need a plan where the effort actually accumulates.",
+  },
+  {
+    big: "Movement before load.",
+    small: "Five foundational patterns, taught properly, before anything heavy goes on the bar.",
+  },
+  {
+    big: "Your numbers, written down.",
+    small: "Sets, reps, and weight tracked inside the program, so progression is a decision rather than a guess.",
+  },
+  {
+    big: "A body built to last.",
+    small: "Run the program once, repeat it stronger, and keep building from your own numbers for years.",
+  },
+]

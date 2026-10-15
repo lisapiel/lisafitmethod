@@ -77,7 +77,6 @@ export function Reveal({
   delay = 0,
   duration = 1000,
   threshold = 0.18,
-  as: Tag = "div",
   className,
   style,
 }: {
@@ -86,17 +85,15 @@ export function Reveal({
   delay?: number
   duration?: number
   threshold?: number
-  as?: "div" | "span" | "section" | "li" | "p" | "figure"
   className?: string
   style?: React.CSSProperties
 }) {
   const reduced = usePrefersReducedMotion()
-  const { ref, inView } = useInView<HTMLElement>(threshold)
+  const { ref, inView } = useInView<HTMLDivElement>(threshold)
   const show = inView || reduced
 
   return (
-    <Tag
-      // @ts-expect-error polymorphic ref — HTMLElement is safe for all Tag variants
+    <div
       ref={ref}
       className={className}
       style={{
@@ -110,7 +107,7 @@ export function Reveal({
       }}
     >
       {children}
-    </Tag>
+    </div>
   )
 }
 

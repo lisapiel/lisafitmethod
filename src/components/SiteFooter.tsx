@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { DEFAULTS, S3_SETTINGS_URL } from "@/lib/siteSettings"
 
-const HIDDEN_PREFIXES = ["/admin", "/training-foundations"]
+const HIDDEN_PREFIXES = ["/admin", "/training-foundations", "/preview"]
 const DEFAULT_TAGLINE = DEFAULTS.text.footerTagline
 
 export default function SiteFooter() {
