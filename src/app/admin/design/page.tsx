@@ -425,12 +425,9 @@ export default function DesignPage() {
         .then((r) => (r.ok ? (r.json() as Promise<SiteSettings>) : null))
         .catch(() => null)
       const settings: SiteSettings = {
-        crops: {
-          ...crops,
-          // Preserve video framing from S3 — managed by the Videos page framing tool, not here
-          testimonial_gino_video: current?.crops?.testimonial_gino_video ?? DEFAULTS.crops.testimonial_gino_video,
-          testimonial_gino_video_zoom: current?.crops?.testimonial_gino_video_zoom ?? DEFAULTS.crops.testimonial_gino_video_zoom,
-        },
+        crops: { ...crops },
+        // Preserve video crops managed by the VideoFramingTool — not editable on this page
+        videoCrops: current?.videoCrops,
         typography,
         colors,
         text,

@@ -1,3 +1,12 @@
+export type VideoCrop = {
+  x: number       // normalized left edge (0–1 of video natural width)
+  y: number       // normalized top edge (0–1 of video natural height)
+  w: number       // normalized crop width (0–1)
+  h: number       // normalized crop height (0–1)
+  ar: string      // selected AR label, e.g. "3:4"
+  videoAR: number // VW/VH of original video
+}
+
 export type SiteSettings = {
   crops: {
     hero: string
@@ -6,9 +15,8 @@ export type SiteSettings = {
     testimonial_gino_before: string
     testimonial_gino_progress: string
     testimonial_gaby_portrait: string
-    testimonial_gino_video: string
-    testimonial_gino_video_zoom: string
   }
+  videoCrops?: Record<string, VideoCrop>
   typography: {
     headingScale: number
     bodyScale: number
@@ -76,8 +84,6 @@ export const DEFAULTS: SiteSettings = {
     testimonial_gino_before: "center 20%",
     testimonial_gino_progress: "center 20%",
     testimonial_gaby_portrait: "center 20%",
-    testimonial_gino_video: "center 30%",
-    testimonial_gino_video_zoom: "1",
   },
   typography: {
     headingScale: 1.0,
@@ -189,6 +195,33 @@ function deepMerge<T extends object>(base: T, override: unknown): T {
     }
   }
   return result
+}
+
+// Returns inline CSS for a <video> element inside an overflow:hidden container.
+// The video is scaled and positioned so that the crop region fills the container exactly.
+// containerAR = containerWidth / containerHeight (default 3/4 = portrait testimonial card)
+export function computeVideoCropCSS(
+  crop: VideoCrop,
+  containerAR = 3 / 4
+): {
+  position: "absolute"
+  width: string
+  height: string
+  top: string
+  left: string
+  objectFit: "fill"
+  display: "block"
+} {
+  const r = containerAR / (crop.videoAR * crop.w)
+  return {
+    position: "absolute",
+    width: `${100 / crop.w}%`,
+    height: `${r * 100}%`,
+    top: `${-crop.y * r * 100}%`,
+    left: `${(-crop.x / crop.w) * 100}%`,
+    objectFit: "fill",
+    display: "block",
+  }
 }
 
 export async function fetchSiteSettings(): Promise<SiteSettings> {

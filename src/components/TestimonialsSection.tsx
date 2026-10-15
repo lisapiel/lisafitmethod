@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
-import { fetchSiteSettings } from "@/lib/siteSettings"
+import { fetchSiteSettings, computeVideoCropCSS } from "@/lib/siteSettings"
 import type { TestimonialRecord } from "@/app/api/admin/testimonials/route"
 
 async function getPublishedTestimonials(): Promise<TestimonialRecord[]> {
@@ -129,7 +129,7 @@ export async function TestimonialsSection() {
         <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
           {testimonials.map((t) =>
             t.type === "transformation"
-              ? <TransformationCard key={t.id} t={t} mediaMap={mediaMap} crops={crops} />
+              ? <TransformationCard key={t.id} t={t} mediaMap={mediaMap} crops={crops} videoCrops={settings.videoCrops} />
               : <ExperienceCard key={t.id} t={t} mediaMap={mediaMap} crops={crops} />
           )}
         </div>
@@ -139,21 +139,24 @@ export async function TestimonialsSection() {
 }
 
 type CropsType = Awaited<ReturnType<typeof fetchSiteSettings>>["crops"]
+type VideoCropsType = Awaited<ReturnType<typeof fetchSiteSettings>>["videoCrops"]
 
 function TransformationCard({
   t,
   mediaMap,
   crops,
+  videoCrops,
 }: {
   t: TestimonialRecord
   mediaMap: Record<string, string | null>
   crops: CropsType
+  videoCrops?: VideoCropsType
 }) {
   const videoUrl = t.videoSlot ? (mediaMap[t.videoSlot] ?? null) : null
   const beforeUrl = t.photoSlotBefore ? (mediaMap[t.photoSlotBefore] ?? null) : null
   const progressUrl = t.photoSlotProgress ? (mediaMap[t.photoSlotProgress] ?? null) : null
-  const videoCrop = crops.testimonial_gino_video ?? "center 30%"
-  const videoZoom = parseFloat((crops as Record<string, string>).testimonial_gino_video_zoom ?? "1") || 1
+  const savedVideoCrop = videoCrops?.[t.videoSlot ?? ""]
+  const videoCropStyle = savedVideoCrop ? computeVideoCropCSS(savedVideoCrop, 3 / 4) : null
   const beforeCrop = (crops as Record<string, string>)[t.photoSlotBefore ?? ""] ?? "center 20%"
   const progressCrop = (crops as Record<string, string>)[t.photoSlotProgress ?? ""] ?? "center 20%"
 
@@ -183,11 +186,9 @@ function TransformationCard({
                   controls
                   playsInline
                   preload="metadata"
-                  style={{
+                  style={videoCropStyle ?? {
                     position: "absolute", inset: 0, width: "100%", height: "100%",
-                    objectFit: "cover", objectPosition: videoCrop,
-                    background: "#0a0a0a",
-                    ...(videoZoom !== 1 && { transform: `scale(${videoZoom})`, transformOrigin: videoCrop }),
+                    objectFit: "cover", background: "#0a0a0a",
                   }}
                 />
               </div>
