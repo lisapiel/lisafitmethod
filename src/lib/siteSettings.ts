@@ -205,22 +205,23 @@ export function computeVideoCropCSS(
   containerAR = 3 / 4
 ): {
   position: "absolute"
-  width: string
   height: string
+  aspectRatio: string
   top: string
   left: string
-  objectFit: "fill"
-  display: "block"
+  objectFit: "contain"
 } {
+  // r = scale factor: how many container-heights tall the full video renders
+  // aspectRatio lets the browser derive width = height * videoAR (no floating-point width mismatch)
+  // objectFit:contain preserves proportions; since the element AR = videoAR there are no letterbox bars
   const r = containerAR / (crop.videoAR * crop.w)
   return {
     position: "absolute",
-    width: `${100 / crop.w}%`,
     height: `${r * 100}%`,
+    aspectRatio: String(crop.videoAR),
     top: `${-crop.y * r * 100}%`,
     left: `${(-crop.x / crop.w) * 100}%`,
-    objectFit: "fill",
-    display: "block",
+    objectFit: "contain",
   }
 }
 
