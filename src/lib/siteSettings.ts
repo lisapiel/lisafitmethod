@@ -198,7 +198,9 @@ function deepMerge<T extends object>(base: T, override: unknown): T {
 }
 
 // Returns inline CSS for a <video> element inside an overflow:hidden container.
-// The video is scaled and positioned so that the crop region fills the container exactly.
+// The crop region is scaled to fill the container in one dimension and centered in the other.
+// When cropAR = containerAR (e.g. 3:4 crop in a 3:4 card) the crop fills edge-to-edge exactly.
+// When they differ, the crop is centered; adjacent video fills any gap on the constrained axis.
 // containerAR = containerWidth / containerHeight (default 3/4 = portrait testimonial card)
 export function computeVideoCropCSS(
   crop: VideoCrop,
@@ -211,17 +213,33 @@ export function computeVideoCropCSS(
   left: string
   objectFit: "contain"
 } {
-  // r = scale factor: how many container-heights tall the full video renders
-  // aspectRatio lets the browser derive width = height * videoAR (no floating-point width mismatch)
-  // objectFit:contain preserves proportions; since the element AR = videoAR there are no letterbox bars
-  const r = containerAR / (crop.videoAR * crop.w)
-  return {
-    position: "absolute",
-    height: `${r * 100}%`,
-    aspectRatio: String(crop.videoAR),
-    top: `${-crop.y * r * 100}%`,
-    left: `${(-crop.x / crop.w) * 100}%`,
-    objectFit: "contain",
+  // Physical AR of the selected crop region in actual pixels
+  const cropAR = (crop.w * crop.videoAR) / crop.h
+
+  if (cropAR >= containerAR) {
+    // Crop is wider than or equal to the container: scale so crop.w fills the container width,
+    // then center the crop vertically. For landscape videos (videoAR > 1) this is the common path.
+    const q = containerAR / (crop.videoAR * crop.w)
+    return {
+      position: "absolute",
+      height: `${q * 100}%`,
+      aspectRatio: String(crop.videoAR),
+      top: `${50 - (crop.y + crop.h / 2) * q * 100}%`,
+      left: `${(-crop.x / crop.w) * 100}%`,
+      objectFit: "contain",
+    }
+  } else {
+    // Crop is taller than the container: scale so crop.h fills the container height,
+    // then center the crop horizontally.
+    const s = crop.videoAR / (crop.h * containerAR)
+    return {
+      position: "absolute",
+      height: `${100 / crop.h}%`,
+      aspectRatio: String(crop.videoAR),
+      top: `${(-crop.y / crop.h) * 100}%`,
+      left: `${50 - (crop.x + crop.w / 2) * s * 100}%`,
+      objectFit: "contain",
+    }
   }
 }
 

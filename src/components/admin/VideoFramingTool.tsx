@@ -38,13 +38,10 @@ type DragState = {
 }
 
 function defaultCropFor(videoAR: number, targetAR = 3 / 4): CropRect {
-  const w = 1
+  let w = 1
   let h = w * videoAR / targetAR
-  if (h > 1) {
-    h = 1
-    return { x: (1 - w * videoAR / targetAR) / 2, y: 0, w: targetAR / videoAR, h: 1 }
-  }
-  return { x: 0, y: (1 - h) / 2, w, h }
+  if (h > 1) { h = 1; w = targetAR / videoAR }
+  return { x: (1 - w) / 2, y: (1 - h) / 2, w, h }
 }
 
 export function VideoFramingTool({ slot, videoUrl }: { slot: string; videoUrl: string }) {
@@ -194,9 +191,9 @@ export function VideoFramingTool({ slot, videoUrl }: { slot: string; videoUrl: s
     const cy = crop.y + crop.h / 2
     let newW = crop.w
     let newH = newW * cVAR / targetAR
-    if (newH > 1) { newH = 1; newW = cVAR / targetAR }
-    newW = Math.min(newW, 1)
-    newH = Math.min(newH, 1)
+    if (newH > 1) { newH = 1; newW = targetAR / cVAR }
+    if (newW > 1) { newW = 1; newH = cVAR / targetAR }
+    newW = Math.max(newW, MIN_CROP_W)
     const newX = clamp(cx - newW / 2, 0, 1 - newW)
     const newY = clamp(cy - newH / 2, 0, 1 - newH)
     setCrop({ x: newX, y: newY, w: newW, h: newH })
