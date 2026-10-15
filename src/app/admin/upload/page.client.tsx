@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import UploadProgress from "@/components/admin/UploadProgress"
+import { VideoFramingTool, FRAMING_SLOTS } from "@/components/admin/VideoFramingTool"
 import type { Schema } from "@/lib/amplifyConfig"
 import { VIDEO_SLOT_LABELS, PHOTO_SLOTS } from "@/lib/videoSlots"
 
@@ -286,6 +287,11 @@ export default function UploadPageClient({ slot, type }: Props) {
                 </button>
               </div>
             </div>
+          )}
+
+          {/* Video framing tool — only for slots that support it */}
+          {type === "VIDEO" && asset?.url && slot in FRAMING_SLOTS && (
+            <VideoFramingTool slot={slot} videoUrl={asset.url} />
           )}
 
           {/* Upload area */}

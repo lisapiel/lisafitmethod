@@ -7,6 +7,7 @@ export type SiteSettings = {
     testimonial_gino_progress: string
     testimonial_gaby_portrait: string
     testimonial_gino_video: string
+    testimonial_gino_video_zoom: string
   }
   typography: {
     headingScale: number
@@ -76,6 +77,7 @@ export const DEFAULTS: SiteSettings = {
     testimonial_gino_progress: "center 20%",
     testimonial_gaby_portrait: "center 20%",
     testimonial_gino_video: "center 30%",
+    testimonial_gino_video_zoom: "1",
   },
   typography: {
     headingScale: 1.0,

@@ -427,8 +427,9 @@ export default function DesignPage() {
       const settings: SiteSettings = {
         crops: {
           ...crops,
-          // Preserve video crop from S3 — managed by the Videos page framing tool
+          // Preserve video framing from S3 — managed by the Videos page framing tool, not here
           testimonial_gino_video: current?.crops?.testimonial_gino_video ?? DEFAULTS.crops.testimonial_gino_video,
+          testimonial_gino_video_zoom: current?.crops?.testimonial_gino_video_zoom ?? DEFAULTS.crops.testimonial_gino_video_zoom,
         },
         typography,
         colors,
@@ -698,7 +699,6 @@ export default function DesignPage() {
             testimonial_gino_before: DEFAULTS.crops.testimonial_gino_before,
             testimonial_gino_progress: DEFAULTS.crops.testimonial_gino_progress,
             testimonial_gaby_portrait: DEFAULTS.crops.testimonial_gaby_portrait,
-            testimonial_gino_video: DEFAULTS.crops.testimonial_gino_video,
           }))}
         />
         <p

@@ -153,6 +153,7 @@ function TransformationCard({
   const beforeUrl = t.photoSlotBefore ? (mediaMap[t.photoSlotBefore] ?? null) : null
   const progressUrl = t.photoSlotProgress ? (mediaMap[t.photoSlotProgress] ?? null) : null
   const videoCrop = crops.testimonial_gino_video ?? "center 30%"
+  const videoZoom = parseFloat((crops as Record<string, string>).testimonial_gino_video_zoom ?? "1") || 1
   const beforeCrop = (crops as Record<string, string>)[t.photoSlotBefore ?? ""] ?? "center 20%"
   const progressCrop = (crops as Record<string, string>)[t.photoSlotProgress ?? ""] ?? "center 20%"
 
@@ -186,6 +187,7 @@ function TransformationCard({
                     position: "absolute", inset: 0, width: "100%", height: "100%",
                     objectFit: "cover", objectPosition: videoCrop,
                     background: "#0a0a0a",
+                    ...(videoZoom !== 1 && { transform: `scale(${videoZoom})`, transformOrigin: videoCrop }),
                   }}
                 />
               </div>
