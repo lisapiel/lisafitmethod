@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { generateClient } from "aws-amplify/data"
 import SlotCard from "@/components/admin/SlotCard"
+import { VideoFramingTool } from "@/components/admin/VideoFramingTool"
 import type { Schema } from "@/lib/amplifyConfig"
 import { VIDEO_SLOTS, VIDEO_SLOT_LABELS } from "@/lib/videoSlots"
 
@@ -11,6 +12,11 @@ const border = "#2a2a2a"
 const courseNote = "Course video: appears inside the Training Foundations program for paid members."
 
 type Asset = { assignedTo: string; url?: string | null; isPublished: boolean; title: string }
+
+// Map from video slot key → crop settings key for slots that have framing controls
+const VIDEO_FRAMING_CROP_KEY: Partial<Record<string, "testimonial_gino_video">> = {
+  testimonial_gino: "testimonial_gino_video",
+}
 
 const GROUPS: { label: string; where: string; keys: string[] }[] = [
   {
@@ -135,6 +141,15 @@ export default function AdminVideosPage() {
               />
             ))}
           </div>
+          {/* Framing tools for slots that support crop/reposition */}
+          {group.keys.map((key) => {
+            const cropKey = VIDEO_FRAMING_CROP_KEY[key]
+            const videoUrl = assetMap[key]?.url
+            if (!cropKey || !videoUrl) return null
+            return (
+              <VideoFramingTool key={`framing-${key}`} cropKey={cropKey} videoUrl={videoUrl} />
+            )
+          })}
         </div>
       ))}
 

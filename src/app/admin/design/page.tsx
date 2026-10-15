@@ -418,8 +418,22 @@ export default function DesignPage() {
 
   async function handleSave() {
     setSaving(true)
-    const settings: SiteSettings = { crops, typography, colors, text }
     try {
+      // Read current S3 settings first so this save never clobbers values managed
+      // by other pages (e.g. video crop set via the Videos page framing tool).
+      const current = await fetch(S3_SETTINGS_URL, { cache: "no-store" })
+        .then((r) => (r.ok ? (r.json() as Promise<SiteSettings>) : null))
+        .catch(() => null)
+      const settings: SiteSettings = {
+        crops: {
+          ...crops,
+          // Preserve video crop from S3 — managed by the Videos page framing tool
+          testimonial_gino_video: current?.crops?.testimonial_gino_video ?? DEFAULTS.crops.testimonial_gino_video,
+        },
+        typography,
+        colors,
+        text,
+      }
       await uploadData({
         path: "media/settings.json",
         data: new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" }),
@@ -715,20 +729,14 @@ export default function DesignPage() {
           ))}
         </div>
         <div style={{ marginTop: 20, borderTop: `1px solid ${border}`, paddingTop: 20 }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: gold, marginBottom: 12, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: gold, marginBottom: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>
             Gino – Video framing
           </p>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", marginBottom: 16 }}>
-            Drag the focal point to reframe the video. Moving the dot upward trims empty ceiling space and centers on Gino&rsquo;s face.
-            Current: <span style={{ color: gold, fontFamily: "monospace" }}>{crops.testimonial_gino_video}</span>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", lineHeight: 1.6 }}>
+            Video framing is managed directly on the{" "}
+            <a href="/admin/videos" style={{ color: gold, textDecoration: "underline" }}>Videos page</a>
+            {" "}— scroll to Client Testimonials, then use the framing tool below Gino&rsquo;s slot. That editor shows the actual video so you can see exactly what visitors will see.
           </p>
-          <CropTool
-            label="Gino video crop (drag dot to set framing)"
-            photoUrl={undefined}
-            value={crops.testimonial_gino_video}
-            onChange={(v) => setCrops({ ...crops, testimonial_gino_video: v })}
-            heightPx={200}
-          />
         </div>
       </div>
 
