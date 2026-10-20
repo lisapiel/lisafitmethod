@@ -13,7 +13,6 @@ import { StylesD } from "@/components/preview/d/StylesD"
 import { ToneShift, PhotoBand } from "@/components/preview/d/FlowD"
 import NavD from "@/components/preview/d/NavD.client"
 import HeroD from "@/components/preview/d/HeroD.client"
-import { PathD } from "@/components/preview/d/PathD"
 import { StoryD } from "@/components/preview/d/StoryD"
 import { CoursesD } from "@/components/preview/d/CoursesD"
 import { BundleD } from "@/components/preview/d/BundleD"
@@ -66,20 +65,28 @@ export default async function PreviewDirectionDPage() {
         {/* Dark: the opening. */}
         <HeroD trailerSrc={trailerSrc} posterSrc={derivePosterUrl(trailerSrc)} />
 
-        {/* Into the light, and it stays there for most of the page. */}
+        {/* Into the light, and it stays there for most of the page. The hero
+            already carries both pathways, both buttons and both prices, so
+            the page goes straight from it into the story. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
-        <PathD />
         <StoryD
           portraitUrl={heroPhotoUrl ?? portraitUrl}
           portraitCrop={heroPhotoUrl ? "center 35%" : settings.crops.about_bio}
         />
         <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} />
-        {bannerUrl && (
-          <PhotoBand src={bannerUrl} alt="Lisa Fit Method" objectPosition={settings.crops.banner} />
-        )}
 
-        {/* Dark: the offer. */}
+        {/* Dark from here to the end of the offer: the gradient, the banner
+            and the bundle run together with no light band between them. */}
         <ToneShift from={WARM_WHITE} to={BLACK} />
+        {bannerUrl && (
+          <PhotoBand
+            src={bannerUrl}
+            alt="Lisa Fit Method"
+            objectPosition={settings.crops.banner}
+            tone="dark"
+            aspect="3 / 1"
+          />
+        )}
         <BundleD coursePrice={coursePrice} />
 
         {/* Light again for the clients and the questions. */}

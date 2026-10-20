@@ -123,16 +123,25 @@ if (!prodUrl || !protoUrl) {
 // Phrases the prototype is allowed to add, declared in a file rather than
 // buried in this script, so every intentional addition is reviewable in one
 // place. Anything added but NOT listed there is reported as a copy change.
-const additionsArg = rest.find((a) => a.startsWith("--additions="))
-let declaredAdditions = []
-if (additionsArg) {
-  const file = additionsArg.slice("--additions=".length)
-  declaredAdditions = (await import("node:fs")).readFileSync(file, "utf8")
+const fs = await import("node:fs")
+const readList = (flag) => {
+  const arg = rest.find((a) => a.startsWith(flag))
+  if (!arg) return []
+  return fs
+    .readFileSync(arg.slice(flag.length), "utf8")
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l && !l.startsWith("#"))
     .map((l) => normalise(l))
 }
+
+const declaredAdditions = readList("--additions=")
+
+// Production copy the prototype is allowed NOT to have, because its section
+// was removed on purpose. Declared in a file for the same reason as the
+// additions: a removal should be something someone signed off, not something
+// that quietly stopped appearing.
+const declaredRemovals = readList("--removals=")
 
 const [prodHtml, protoHtml] = await Promise.all([fetchText(prodUrl), fetchText(protoUrl)])
 const prodRuns = textRuns(prodHtml)
@@ -144,7 +153,9 @@ const protoBlob = normalise(protoRuns.join(" "))
 const prodCounts = phraseCounts(prodRuns)
 const protoCounts = phraseCounts(protoRuns)
 
-const missingFromPrototype = [...prodCounts.keys()].filter((p) => !protoCounts.has(p))
+const missingRaw = [...prodCounts.keys()].filter((p) => !protoCounts.has(p))
+const approvedRemovals = missingRaw.filter((p) => declaredRemovals.includes(p))
+const missingFromPrototype = missingRaw.filter((p) => !declaredRemovals.includes(p))
 const addedRaw = [...protoCounts.keys()].filter((p) => !prodCounts.has(p))
 const chrome = addedRaw.filter((p) => PROTOTYPE_CHROME.includes(p))
 const intentional = addedRaw.filter((p) => !PROTOTYPE_CHROME.includes(p) && declaredAdditions.includes(p))
@@ -154,6 +165,13 @@ const addedInPrototype = addedRaw.filter(
 
 console.log(`production : ${prodRuns.length} text runs, ${prodCounts.size} distinct`)
 console.log(`prototype  : ${protoRuns.length} text runs, ${protoCounts.size} distinct`)
+
+if (approvedRemovals.length > 0) {
+  console.log(`\napproved removals, declared: ${approvedRemovals.length} phrase(s)`)
+  for (const phrase of approvedRemovals) {
+    console.log(`   - "${phrase.length > 110 ? phrase.slice(0, 110) + "\u2026" : phrase}"`)
+  }
+}
 
 if (intentional.length > 0) {
   console.log(`\nintentional additions, declared and approved: ${intentional.length} phrase(s)`)

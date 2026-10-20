@@ -31,33 +31,46 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
 
 // A full-bleed photograph that drifts against the scroll.
 //
-// Height is capped rather than purely proportional so that on a very wide
-// display the band does not become a thin letterbox strip that slices the
-// subject in half.
+// Two modes, because the two photographs on this page have opposite needs.
+// Without `aspect` the band is a fixed slice — right for a tall image you
+// only want a window onto. With `aspect` the band keeps the image's own
+// proportions down to the smallest screen, which is what a wide banner
+// needs: forced into a fixed-height band on a phone it would be cropped to
+// under half its width and lose the wordmark. A max height still stops it
+// becoming a billboard on an ultrawide display.
 export function PhotoBand({
   src,
   alt,
   objectPosition,
   tone = "light",
+  aspect,
 }: {
   src: string
   alt: string
   objectPosition: string
   tone?: "light" | "dark"
+  aspect?: string
 }) {
   return (
     <section className={tone === "dark" ? "pv-d-dark" : "pv-d-light"} data-tone={tone}>
       <style>{`
         .pv-d-band { height: clamp(300px, 46vh, 520px); }
-        @media (max-width: 768px) { .pv-d-band { height: 72vw; } }
+        .pv-d-band--aspect { height: auto; max-height: clamp(320px, 46vh, 560px); }
+        @media (max-width: 768px) {
+          .pv-d-band { height: 72vw; }
+          .pv-d-band--aspect { height: auto; max-height: none; }
+        }
       `}</style>
-      <div className="pv-d-band">
+      <div
+        className={aspect ? "pv-d-band pv-d-band--aspect" : "pv-d-band"}
+        style={aspect ? { aspectRatio: aspect } : undefined}
+      >
         <ParallaxMedia
           src={src}
           alt={alt}
           objectPosition={objectPosition}
           aspect="auto"
-          shift={13}
+          shift={aspect ? 0 : 13}
           hoverZoom={false}
           frameStyle={{ aspectRatio: "auto", height: "100%" }}
           sizes="100vw"

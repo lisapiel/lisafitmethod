@@ -1,0 +1,14 @@
+# Production homepage copy that Direction D deliberately does not render.
+#
+# The "Choose how you want to start." section was removed at Lisa's
+# instruction: the hero already presents both pathways, both buttons and both
+# prices, so repeating the choice one screen later was redundant.
+#
+# Restoring it is one line in src/app/preview/d/page.tsx — the component is
+# still in the tree at src/components/preview/d/PathD.tsx.
+Choose how you want to start.
+Self-Guided Courses
+Training and nutrition education you can follow at your own pace.
+Explore Courses →
+A custom plan, weekly check-ins, form feedback, and direct support.
+Explore Coaching →

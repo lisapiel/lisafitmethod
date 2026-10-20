@@ -65,6 +65,14 @@ export const GINO_VIDEO = {
   poster: "/preview/gino-testimonial.jpg",
 }
 
+// Gabriela's photograph, supplied by Lisa. Rotated upright, metadata
+// stripped and resized to 900x1200 — a true 3:4, so the portrait plate
+// crops nothing.
+export const GABY_PHOTO = {
+  src: "/preview/gaby-testimonial.jpg",
+  alt: "Gabriela, Lisa Fit Method training client",
+}
+
 // FLAGS — for review, not resolved unilaterally.
 //
 // 1. Gabriela's quote. The saved record is a lightly cleaned version of her

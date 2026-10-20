@@ -1,38 +1,64 @@
+import { ParallaxMedia } from "../ParallaxMedia.client"
 import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
 import SquareVideo from "./SquareVideo.client"
-import { GABRIELA, GINO, GINO_VIDEO, TESTIMONIALS_HEAD } from "./testimonialContent"
+import { GABY_PHOTO, GABRIELA, GINO, GINO_VIDEO, TESTIMONIALS_HEAD } from "./testimonialContent"
 
-// Clients — an editorial feature, not a review widget.
+// Clients — two accounts of the same thing, set as one editorial spread.
 //
-// Composition: Gino is the anchor. His square video holds the left column and
-// everything beside it is set to the video's own edges — the results row sits
-// flush under his headline, the quote hangs off a gold rule, and his longer
-// message sits beneath at body size. Three figures, one row, the same figure
-// treatment the bundle uses, so the numbers read as part of the page rather
-// than a stats widget.
+// The structure that keeps it from reading as stacked cards is alternation:
+// Gino's square film holds the left, Gabriela's portrait answers it from the
+// right, and her block rises into the space beside the end of his. There is
+// no rule between them and no second section heading — the eye crosses from
+// one to the other diagonally, which is what makes a magazine spread feel
+// continuous where a column of boxes does not.
 //
-// Gabriela follows as a single wide pull quote. With no photograph she is
-// composed as typography on purpose — a measured column, a gold rule and her
-// attribution — so nothing is missing rather than something being absent. If
-// a portrait arrives later it drops into the optional column below without
-// the rest of the section changing.
-export function TestimonialsD({ gabyPortraitUrl = null }: { gabyPortraitUrl?: string | null }) {
+// Gino stays the anchor: his plate is half again the size of hers, and his
+// results sit in a single compact strip rather than a stack of tiles, so the
+// numbers read as one line of evidence instead of three separate panels.
+//
+// Every word in both testimonials is the approved text, unchanged.
+export function TestimonialsD() {
   return (
     <section className="pv-d-clients pv-d-light pv-d-section" data-tone="light" id="clients">
       <style>{`
+        .pv-d-clients { overflow: hidden; }
+
         .pv-d-gino {
-          display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
-          gap: clamp(28px, 4.4vw, 76px); align-items: start;
+          display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1fr);
+          gap: clamp(28px, 4.2vw, 72px); align-items: start;
         }
         .pv-d-gino-head { margin-bottom: var(--d-step-3); max-width: 18ch; }
-        .pv-d-gino-figures { grid-template-columns: repeat(3, 1fr); margin-bottom: var(--d-step-4); }
+
+        /* One strip, not three tiles. Tight vertical padding and a shared
+           baseline keep the figures compact at every width — they never
+           become a stack of cards on a phone. */
+        .pv-d-results {
+          display: grid; grid-template-columns: repeat(3, auto); justify-content: start;
+          border-top: 1px solid var(--d-rule); border-bottom: 1px solid var(--d-rule);
+          margin-bottom: var(--d-step-4);
+        }
+        .pv-d-result { padding: var(--d-step-2) clamp(14px, 1.6vw, 26px) var(--d-step-2) 0; }
+        .pv-d-result + .pv-d-result {
+          border-left: 1px solid var(--d-rule); padding-left: clamp(14px, 1.6vw, 26px);
+        }
+        .pv-d-result-value {
+          display: block; font-family: var(--font-playfair), serif; font-weight: 500;
+          font-size: clamp(0.98rem, 1.5vw, 1.5rem); line-height: 1.1;
+          color: var(--d-accent-dark); white-space: nowrap;
+        }
+        .pv-d-result-label {
+          display: block; margin-top: 5px; font-family: var(--font-dm-sans), sans-serif;
+          font-size: clamp(8px, 0.62vw, 9.5px); font-weight: 500; letter-spacing: 0.18em;
+          text-transform: uppercase; color: var(--d-muted); white-space: nowrap;
+        }
+
         .pv-d-gino-quote {
           font-family: var(--font-playfair), serif; font-style: italic; font-weight: 400;
           font-size: clamp(1.18rem, 1.85vw, 1.65rem); line-height: 1.52; color: var(--d-text);
           border-left: 2px solid var(--d-accent); padding-left: var(--d-step-3);
           margin: 0 0 var(--d-step-3); max-width: 42ch;
         }
-        .pv-d-gino-written {
+        .pv-d-written {
           font-family: var(--font-dm-sans), sans-serif; font-weight: 300; font-size: 0.9rem;
           line-height: 1.82; color: var(--d-muted); margin: 0 0 var(--d-step-3); max-width: 54ch;
         }
@@ -40,39 +66,40 @@ export function TestimonialsD({ gabyPortraitUrl = null }: { gabyPortraitUrl?: st
           font-style: normal; font-family: var(--font-dm-sans), sans-serif; font-size: 10px;
           font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--d-accent-dark);
         }
+
+        /* Gabriela answers from the other side and rides up into the space
+           left beside Gino's closing lines — the diagonal that stops the two
+           testimonials reading as two rows. */
         .pv-d-gaby {
-          margin-top: var(--d-step-5); padding-top: var(--d-step-5);
-          border-top: 1px solid var(--d-rule);
-          display: grid; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1fr);
-          gap: clamp(24px, 4vw, 72px); align-items: start;
+          display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.52fr);
+          gap: clamp(28px, 4.2vw, 72px); align-items: center;
+          margin-top: clamp(44px, 5vw, 92px);
         }
-        .pv-d-gaby[data-has-portrait="false"] { grid-template-columns: minmax(0, 0.22fr) minmax(0, 1fr); }
-        .pv-d-gaby-rail { padding-top: 6px; }
-        .pv-d-gaby-portrait {
-          width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 50%;
-          background: var(--d-off-white);
-        }
-        .pv-d-gaby-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .pv-d-gaby-rule { width: 54px; margin-bottom: var(--d-step-3); }
         .pv-d-gaby-quote {
           font-family: var(--font-playfair), serif; font-style: italic; font-weight: 400;
-          font-size: clamp(1.12rem, 1.75vw, 1.52rem); line-height: 1.5; color: var(--d-text);
+          font-size: clamp(1.12rem, 1.72vw, 1.5rem); line-height: 1.5; color: var(--d-text);
           margin: 0 0 var(--d-step-3); max-width: 44ch;
         }
-        .pv-d-gaby-written {
-          font-family: var(--font-dm-sans), sans-serif; font-weight: 300; font-size: 0.9rem;
-          line-height: 1.82; color: var(--d-muted); margin: 0 0 var(--d-step-3); max-width: 52ch;
+        .pv-d-gaby-plate { position: relative; }
+        .pv-d-gaby-plate::after {
+          content: ""; position: absolute; top: 18px; left: 18px; right: -18px; bottom: -18px;
+          border: 1px solid rgba(168,137,94,0.32); pointer-events: none;
         }
+
         @media (max-width: 960px) {
           .pv-d-gino { grid-template-columns: 1fr; gap: var(--d-step-4); }
-          .pv-d-gaby, .pv-d-gaby[data-has-portrait="false"] { grid-template-columns: 1fr; gap: var(--d-step-3); }
-          .pv-d-gaby-rail { max-width: 120px; }
-        }
-        @media (max-width: 560px) {
-          .pv-d-gino-figures { grid-template-columns: 1fr; }
-          .pv-d-gino-figures .pv-d-figure + .pv-d-figure {
-            border-left: none; padding-left: 0;
-            border-top: 1px solid var(--d-rule); padding-top: var(--d-step-3);
+          .pv-d-gaby {
+            grid-template-columns: 1fr; gap: var(--d-step-4);
+            margin-top: var(--d-step-5);
           }
+          .pv-d-gaby-text { order: 2; }
+          .pv-d-gaby-plate { order: 1; max-width: 300px; }
+          .pv-d-gaby-plate::after { top: 12px; left: 12px; right: -12px; bottom: -12px; }
+        }
+        @media (max-width: 420px) {
+          .pv-d-result { padding-right: 10px; }
+          .pv-d-result + .pv-d-result { padding-left: 10px; }
         }
       `}</style>
 
@@ -101,17 +128,17 @@ export function TestimonialsD({ gabyPortraitUrl = null }: { gabyPortraitUrl?: st
             <Reveal variant="up" delay={120} duration={1100}>
               <h3 className="pv-d-display pv-d-h3 pv-d-gino-head">{GINO.headline}</h3>
             </Reveal>
-            <Reveal variant="up" delay={200} className="pv-d-figures pv-d-gino-figures">
+            <Reveal variant="up" delay={200} className="pv-d-results">
               {GINO.metrics.map((m) => (
-                <div key={m.label} className="pv-d-figure">
-                  <span className="pv-d-figure-value">{m.value}</span>
-                  <span className="pv-d-figure-label">{m.label}</span>
+                <div key={m.label} className="pv-d-result">
+                  <span className="pv-d-result-value">{m.value}</span>
+                  <span className="pv-d-result-label">{m.label}</span>
                 </div>
               ))}
             </Reveal>
             <Reveal variant="up" delay={280} duration={1100}>
               <blockquote className="pv-d-gino-quote">&ldquo;{GINO.quote}&rdquo;</blockquote>
-              <p className="pv-d-gino-written">{GINO.written}</p>
+              <p className="pv-d-written">{GINO.written}</p>
               <cite className="pv-d-cite">
                 {GINO.name} &middot; {GINO.descriptor}
               </cite>
@@ -119,23 +146,27 @@ export function TestimonialsD({ gabyPortraitUrl = null }: { gabyPortraitUrl?: st
           </div>
         </div>
 
-        <div className="pv-d-gaby" data-has-portrait={Boolean(gabyPortraitUrl)}>
-          <div className="pv-d-gaby-rail">
-            {gabyPortraitUrl ? (
-              <div className="pv-d-gaby-portrait">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={gabyPortraitUrl} alt={GABRIELA.name} />
-              </div>
-            ) : (
+        <div className="pv-d-gaby">
+          <Reveal variant="up" duration={1150} className="pv-d-gaby-text">
+            <div className="pv-d-gaby-rule">
               <DrawRule color="rgba(168,137,94,0.55)" />
-            )}
-          </div>
-          <Reveal variant="up" duration={1100}>
+            </div>
             <blockquote className="pv-d-gaby-quote">&ldquo;{GABRIELA.quote}&rdquo;</blockquote>
-            <p className="pv-d-gaby-written">{GABRIELA.written}</p>
+            <p className="pv-d-written">{GABRIELA.written}</p>
             <cite className="pv-d-cite">
               {GABRIELA.name} &middot; {GABRIELA.descriptor}
             </cite>
+          </Reveal>
+
+          <Reveal variant="fade" duration={1300} className="pv-d-gaby-plate">
+            <ParallaxMedia
+              src={GABY_PHOTO.src}
+              alt={GABY_PHOTO.alt}
+              objectPosition="center 30%"
+              aspect="3 / 4"
+              shift={10}
+              sizes="(max-width: 960px) 300px, 30vw"
+            />
           </Reveal>
         </div>
       </div>

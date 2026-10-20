@@ -38,6 +38,12 @@ export function ParallaxMedia({
   // as authored when it sits in the middle of the viewport.
   const offset = reduced ? 0 : (progress - 0.5) * shift
 
+  // The overscan exists only to give the drift somewhere to travel. With no
+  // drift it must be zero: an oversized layer makes `cover` fill a taller box
+  // than the frame, which silently crops a wide image horizontally — the way
+  // a 3:1 banner loses its wordmark on a phone.
+  const bleed = shift === 0 ? 0 : 9
+
   return (
     <div
       ref={ref}
@@ -56,10 +62,10 @@ export function ParallaxMedia({
           position: "absolute",
           left: 0,
           right: 0,
-          top: "-9%",
-          height: "118%",
+          top: `-${bleed}%`,
+          height: `${100 + bleed * 2}%`,
           transform: `translate3d(0, ${offset}%, 0)`,
-          willChange: "transform",
+          willChange: bleed ? "transform" : "auto",
         }}
       >
         <Image
