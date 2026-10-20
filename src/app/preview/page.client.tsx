@@ -3,10 +3,22 @@
 import Link from "next/link"
 import { useState } from "react"
 
-type Direction = "a" | "b" | "c"
+type Direction = "a" | "b" | "c" | "d"
 type Device = "desktop" | "mobile"
 
 const DIRECTIONS: Record<Direction, { name: string; tag: string; blurb: string; notes: string[] }> = {
+  d: {
+    name: "Direction D",
+    tag: "Current",
+    blurb:
+      "Roughly three quarters light. Dark is held back for the three moments that earn it \u2014 the opening film, the bundle, and the closing ask \u2014 while the story, courses, clients and questions all read on paper. One spacing scale, one section opening and one figure treatment run the length of the page, and the navigation inverts against whatever sits behind it.",
+    notes: [
+      "Playfair Display + DM Sans, brand tokens only",
+      "Production homepage copy, verbatim and checked by script",
+      "Adds the Gino and Gabriela testimonials before the final CTA",
+      "Gino's video is a true 1:1 square \u2014 no bars, no recrop, any viewport",
+    ],
+  },
   c: {
     name: "Direction C",
     tag: "Combined",
@@ -51,7 +63,7 @@ const DEVICE_SIZES: Record<Device, { w: number; h: number; label: string }> = {
 }
 
 export default function PreviewConsoleClient() {
-  const [dir, setDir] = useState<Direction>("c")
+  const [dir, setDir] = useState<Direction>("d")
   const [device, setDevice] = useState<Device>("desktop")
   const [frameKey, setFrameKey] = useState(0)
 
@@ -87,7 +99,7 @@ export default function PreviewConsoleClient() {
         .pv-safety ul { margin: 0; padding-left: 18px; list-style: disc; }
         .pv-safety li { font-size: 0.84rem; line-height: 1.8; color: rgba(232,230,227,0.72); }
         .pv-safety code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 3px; }
-        .pv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+        .pv-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 40px; }
         .pv-card {
           border: 1px solid rgba(255,255,255,0.12); background: #1b1b1e; padding: 26px 28px;
           display: flex; flex-direction: column; border-radius: 4px;
@@ -139,10 +151,10 @@ export default function PreviewConsoleClient() {
         <p className="pv-console-kicker">Internal review · not published</p>
         <h1 className="pv-console-h1">Homepage redesign — two directions</h1>
         <p className="pv-console-lede">
-          Three working homepage prototypes built on your real video, photography and prices. Direction C is the
-          current one: light and dark combined, with your production copy preserved word for word. A and B are the
-          earlier explorations, kept for comparison. Open any of them full-screen, or compare them in the frame below
-          at desktop and phone size. Nothing here is live, and nothing has been deployed.
+          Four working homepage prototypes built on your real video, photography and prices. Direction D is the
+          current one. A, B and C are the earlier explorations, kept for comparison. Open any of them full-screen, or
+          compare them in the frame below at desktop and phone size. Nothing here is live, and nothing has been
+          deployed.
         </p>
 
         <section className="pv-safety">
@@ -168,7 +180,7 @@ export default function PreviewConsoleClient() {
         </section>
 
         <div className="pv-cards">
-          {(["c", "a", "b"] as Direction[]).map((key) => {
+          {(["d", "c", "a", "b"] as Direction[]).map((key) => {
             const d = DIRECTIONS[key]
             return (
               <article key={key} className="pv-card" data-active={dir === key}>
@@ -206,7 +218,7 @@ export default function PreviewConsoleClient() {
         <div className="pv-toolbar">
           <span className="pv-toolbar-label">Direction</span>
           <div className="pv-seg">
-            {(["c", "a", "b"] as Direction[]).map((key) => (
+            {(["d", "c", "a", "b"] as Direction[]).map((key) => (
               <button key={key} type="button" data-on={dir === key} onClick={() => setDir(key)}>
                 {DIRECTIONS[key].tag}
               </button>

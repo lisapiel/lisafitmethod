@@ -56,6 +56,10 @@ export function textRuns(html) {
   s = s.replace(/<script[\s\S]*?<\/script>/gi, " ")
   s = s.replace(/<style[\s\S]*?<\/style>/gi, " ")
   s = s.replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+  // React separates adjacent text nodes with an empty comment. Those must
+  // close up to nothing, or every "<mark>{value}" pair reads as two words
+  // with a space wedged between them. Other comments still become a space.
+  s = s.replace(/<!--\s*-->/g, "")
   s = s.replace(/<!--[\s\S]*?-->/g, " ")
   s = s.replace(/<[^>]+>/g, TAG_BREAK)
   return s
@@ -110,10 +114,24 @@ function report(label, missing, blob) {
   return real
 }
 
-const [, , prodUrl, protoUrl] = process.argv
+const [, , prodUrl, protoUrl, ...rest] = process.argv
 if (!prodUrl || !protoUrl) {
-  console.error("usage: node scripts/compare-copy.mjs <production-url> <prototype-url>")
+  console.error("usage: node scripts/compare-copy.mjs <production-url> <prototype-url> [--additions=file]")
   process.exit(2)
+}
+
+// Phrases the prototype is allowed to add, declared in a file rather than
+// buried in this script, so every intentional addition is reviewable in one
+// place. Anything added but NOT listed there is reported as a copy change.
+const additionsArg = rest.find((a) => a.startsWith("--additions="))
+let declaredAdditions = []
+if (additionsArg) {
+  const file = additionsArg.slice("--additions=".length)
+  declaredAdditions = (await import("node:fs")).readFileSync(file, "utf8")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"))
+    .map((l) => normalise(l))
 }
 
 const [prodHtml, protoHtml] = await Promise.all([fetchText(prodUrl), fetchText(protoUrl)])
@@ -129,10 +147,20 @@ const protoCounts = phraseCounts(protoRuns)
 const missingFromPrototype = [...prodCounts.keys()].filter((p) => !protoCounts.has(p))
 const addedRaw = [...protoCounts.keys()].filter((p) => !prodCounts.has(p))
 const chrome = addedRaw.filter((p) => PROTOTYPE_CHROME.includes(p))
-const addedInPrototype = addedRaw.filter((p) => !PROTOTYPE_CHROME.includes(p))
+const intentional = addedRaw.filter((p) => !PROTOTYPE_CHROME.includes(p) && declaredAdditions.includes(p))
+const addedInPrototype = addedRaw.filter(
+  (p) => !PROTOTYPE_CHROME.includes(p) && !declaredAdditions.includes(p)
+)
 
 console.log(`production : ${prodRuns.length} text runs, ${prodCounts.size} distinct`)
 console.log(`prototype  : ${protoRuns.length} text runs, ${protoCounts.size} distinct`)
+
+if (intentional.length > 0) {
+  console.log(`\nintentional additions, declared and approved: ${intentional.length} phrase(s)`)
+  for (const phrase of intentional) {
+    console.log(`   + "${phrase.length > 110 ? phrase.slice(0, 110) + "\u2026" : phrase}"`)
+  }
+}
 
 if (chrome.length > 0) {
   console.log(`\nexcluded as review chrome (not part of either design): ${chrome.map((c) => `"${c}"`).join(", ")}`)

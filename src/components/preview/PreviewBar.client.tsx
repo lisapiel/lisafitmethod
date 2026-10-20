@@ -8,12 +8,13 @@ import { useEffect, useState } from "react"
 // Only exists on /preview routes. It is the one piece of chrome that is not
 // part of either design — it's the harness Lisa reviews through, so it stays
 // visually neutral and collapses out of the way on scroll-down.
-type Direction = "a" | "b" | "c"
+type Direction = "a" | "b" | "c" | "d"
 
 const LABELS: Record<Direction, string> = {
   a: "A \u00b7 Atelier",
   b: "B \u00b7 Nocturne",
   c: "C \u00b7 Combined",
+  d: "D",
 }
 
 export default function PreviewBar({
@@ -52,7 +53,7 @@ export default function PreviewBar({
   }, [])
 
   const isDark = tone === "dark"
-  const others = (["a", "b", "c"] as Direction[]).filter((d) => d !== current)
+  const others = (["d", "c", "a", "b"] as Direction[]).filter((d) => d !== current)
 
   return (
     <div
