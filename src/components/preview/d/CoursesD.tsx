@@ -28,18 +28,31 @@ export function CoursesD({
           font-size: clamp(1.05rem, 1.5vw, 1.4rem); color: var(--d-accent-dark);
           margin: var(--d-step-2) auto 0; max-width: 46ch;
         }
-        .pv-d-cards { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 28px); }
-        .pv-d-card {
-          position: relative; background: #fff; border: 1px solid var(--d-rule);
-          padding: var(--d-step-5) var(--d-step-4); display: flex; flex-direction: column;
-          transition: transform 760ms cubic-bezier(0.16,1,0.3,1), border-color 760ms ease, box-shadow 760ms ease;
+        .pv-d-cards {
+          display: grid; grid-template-columns: 1fr 1fr;
+          gap: clamp(18px, 2.4vw, 36px); align-items: start;
         }
+        /* The second sheet sits lower than the first. A pair of rectangles
+           at identical height reads as a comparison table; offsetting one
+           makes it a composition without costing any clarity. */
+        .pv-d-cards > *:nth-child(2) { margin-top: clamp(0px, 4vw, 56px); }
+        .pv-d-card {
+          position: relative; display: flex; flex-direction: column;
+          padding: var(--d-step-5) var(--d-step-4);
+          background: rgba(255,255,255,0.74);
+          backdrop-filter: blur(16px) saturate(1.1);
+          -webkit-backdrop-filter: blur(16px) saturate(1.1);
+          border: 1px solid rgba(168,137,94,0.28);
+          box-shadow: 0 30px 70px -52px rgba(26,26,26,0.5);
+          transition: transform 760ms cubic-bezier(0.16,1,0.3,1), border-color 760ms ease, box-shadow 760ms ease, background 760ms ease;
+        }
+        .pv-d-card:hover { background: rgba(255,255,255,0.86); }
         .pv-d-card::before {
           content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
           background: var(--d-accent-dark); transform: scaleX(0); transform-origin: left;
           transition: transform 900ms cubic-bezier(0.16,1,0.3,1);
         }
-        .pv-d-card:hover { transform: translateY(-7px); border-color: rgba(26,26,26,0.2); box-shadow: 0 34px 66px -46px rgba(26,26,26,0.5); }
+        .pv-d-card:hover { transform: translateY(-7px); border-color: rgba(168,137,94,0.5); box-shadow: 0 40px 80px -46px rgba(26,26,26,0.55); }
         .pv-d-card:hover::before { transform: scaleX(1); }
         .pv-d-card-title { margin: var(--d-step-2) 0 var(--d-step-3); max-width: 26ch; }
         .pv-d-card-points { list-style: none; margin: 0 0 var(--d-step-4); padding: 0; flex: 1; }
@@ -50,6 +63,7 @@ export function CoursesD({
           font-size: 0.875rem; line-height: 1.66; color: var(--d-muted);
         }
         .pv-d-card-point:last-child { border-bottom: 1px solid rgba(26,26,26,0.08); }
+        .pv-d-courses { padding-bottom: 0; }
         .pv-d-card-point span { color: var(--d-accent-dark); }
         .pv-d-price { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: var(--d-step-3); }
         .pv-d-price-now {
@@ -70,10 +84,13 @@ export function CoursesD({
           margin: var(--d-step-2) 0 0; font-family: var(--font-dm-sans), sans-serif;
           font-weight: 300; font-size: 11.5px; line-height: 1.7; color: rgba(26,26,26,0.42);
         }
-        @media (max-width: 900px) { .pv-d-cards { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) {
+          .pv-d-cards { grid-template-columns: 1fr; }
+          .pv-d-cards > *:nth-child(2) { margin-top: 0; }
+        }
       `}</style>
 
-      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.2} position="center 40%" />}
+      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.58} position="center 45%" scrim="edges" />}
       <div className="pv-d-inner pv-d-above">
         <div className="pv-d-open pv-d-open--centre">
           <p className="pv-d-eyebrow">{COURSES_HEAD.eyebrow}</p>
@@ -125,7 +142,7 @@ export function CoursesD({
 
       </div>
 
-      <div className="pv-d-above">
+      <div className="pv-d-above" style={{ marginTop: "var(--d-section)" }}>
         <MovementReelD urls={movementUrls} />
       </div>
     </section>

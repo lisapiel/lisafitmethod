@@ -43,27 +43,6 @@ export function StoryD({
           font-size: clamp(0.95rem, 1.05vw, 1.0625rem); line-height: 1.86;
           color: var(--d-muted); margin: 0 0 var(--d-step-3); max-width: 62ch;
         }
-        .pv-d-quote {
-          position: relative;
-          margin: var(--d-step-5) auto 0; max-width: var(--d-max);
-          padding: var(--d-step-5) 0 0; border-top: 1px solid var(--d-rule);
-          text-align: center;
-        }
-        .pv-d-quote-mark {
-          display: block; font-family: var(--font-playfair), serif;
-          font-size: clamp(3.4rem, 7.5vw, 6.4rem); line-height: 0.6;
-          color: rgba(168,137,94,0.3); user-select: none; margin-bottom: 0.1em;
-        }
-        .pv-d-quote-text {
-          font-family: var(--font-playfair), serif; font-style: italic; font-weight: 400;
-          font-size: clamp(1.4rem, 3vw, 2.6rem); line-height: 1.34;
-          color: var(--d-text); max-width: 26ch; margin: 0 auto; text-wrap: balance;
-        }
-        .pv-d-quote-cite {
-          display: block; margin-top: var(--d-step-3); font-style: normal;
-          font-family: var(--font-dm-sans), sans-serif; font-size: 10px; font-weight: 600;
-          letter-spacing: 0.26em; text-transform: uppercase; color: var(--d-accent-dark);
-        }
         @media (max-width: 960px) {
           .pv-d-story-grid { grid-template-columns: 1fr; gap: var(--d-step-5); }
           .pv-d-story-plates { max-width: 480px; }
@@ -119,15 +98,6 @@ export function StoryD({
         </div>
       </div>
 
-      <figure className="pv-d-quote">
-        <span className="pv-d-quote-mark" aria-hidden="true">
-          &ldquo;
-        </span>
-        <blockquote className="pv-d-quote-text">
-          <RevealLines lines={[STORY.quote]} />
-        </blockquote>
-        <cite className="pv-d-quote-cite">{STORY.cite}</cite>
-      </figure>
     </section>
   )
 }

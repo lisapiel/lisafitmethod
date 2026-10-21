@@ -92,30 +92,39 @@ export function PhotoBand({
   )
 }
 
-// A supporting photograph set behind a section, far enough back that it reads
-// as atmosphere rather than as an image.
+// A supporting photograph set behind a section.
 //
-// Two layers do the work: the photograph at low opacity, and a flat wash of
-// the section's own ground over it. The wash is what guarantees contrast —
-// without it the brightest part of a sunlit photograph will eventually meet
-// the smallest type on the page. Lisa's own photographs stay the subject
-// everywhere; this is only ever depth behind them.
+// The earlier version laid a flat wash over the whole image, which protects
+// text everywhere and therefore also erases the photograph everywhere. This
+// version shapes the protection instead: the scrim is dense where the words
+// sit and clears toward the edges, so the equipment, the travertine and the
+// light stay legible while the type keeps its contrast. Lisa's own
+// photographs are still the subject; this is the room they sit in.
 export function Atmosphere({
   src,
   tone,
   opacity,
   position = "center",
+  scrim = "center",
 }: {
   src: string
   tone: "light" | "dark"
   opacity?: number
   position?: string
+  scrim?: "center" | "left" | "right" | "flat" | "edges"
 }) {
-  const strength = opacity ?? (tone === "dark" ? 0.3 : 0.16)
-  const wash =
-    tone === "dark"
-      ? "linear-gradient(to bottom, rgba(10,10,10,0.82) 0%, rgba(10,10,10,0.74) 40%, rgba(10,10,10,0.9) 100%)"
-      : "linear-gradient(to bottom, rgba(250,248,245,0.9) 0%, rgba(250,248,245,0.84) 42%, rgba(250,248,245,0.95) 100%)"
+  const strength = opacity ?? (tone === "dark" ? 0.4 : 0.55)
+  const ground = tone === "dark" ? "10,10,10" : "250,248,245"
+
+  // Each shape keeps roughly 80% ground behind the copy and falls away to
+  // around 25% where there is nothing to read.
+  const scrims: Record<string, string> = {
+    center: `radial-gradient(ellipse 78% 72% at 50% 50%, rgba(${ground},0.9) 0%, rgba(${ground},0.82) 45%, rgba(${ground},0.42) 78%, rgba(${ground},0.26) 100%)`,
+    left: `linear-gradient(to right, rgba(${ground},0.93) 0%, rgba(${ground},0.86) 42%, rgba(${ground},0.5) 72%, rgba(${ground},0.24) 100%)`,
+    right: `linear-gradient(to left, rgba(${ground},0.93) 0%, rgba(${ground},0.88) 48%, rgba(${ground},0.54) 76%, rgba(${ground},0.28) 100%)`,
+    edges: `linear-gradient(to bottom, rgba(${ground},0.9) 0%, rgba(${ground},0.46) 30%, rgba(${ground},0.46) 70%, rgba(${ground},0.9) 100%)`,
+    flat: `linear-gradient(to bottom, rgba(${ground},0.86), rgba(${ground},0.86))`,
+  }
 
   return (
     <div aria-hidden="true" style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -126,7 +135,7 @@ export function Atmosphere({
         sizes="100vw"
         style={{ objectFit: "cover", objectPosition: position, opacity: strength }}
       />
-      <div style={{ position: "absolute", inset: 0, background: wash }} />
+      <div style={{ position: "absolute", inset: 0, background: scrims[scrim] }} />
     </div>
   )
 }

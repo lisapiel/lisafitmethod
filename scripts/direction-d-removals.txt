@@ -17,3 +17,8 @@ Explore Coaching →
 # "Self-guided training and nutrition courses designed to help you learn,
 #  apply, and progress with structure."
 Everything I had to learn the hard way, organized into a system.
+#
+# The story's pull quote, removed 21 Oct: Lisa wants exactly one personal
+# statement on the homepage, and that is the one after the hero.
+“
+Your body isn't the problem. The plan is.

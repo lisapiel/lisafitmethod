@@ -2,7 +2,7 @@
 # project or supplied directly by Lisa. Nothing here is written by me.
 #
 # ── Lisa's statement (supplied 20 Oct) ───────────────────────────────────
-You can do a hundred hard workouts, but if they're random, they won't take you very far. Real progress comes from having a plan, and a plan that actually fits you.
+Hard work without direction can leave you frustrated, unmotivated, and stuck at a plateau. A plan that fits you, adapts to you, and progresses with you makes all the difference.
 #
 # ── Courses subcopy (supplied 20 Oct, replaces the previous line) ────────
 Self-guided training and nutrition courses designed to help you learn, apply, and progress with structure.
@@ -30,7 +30,7 @@ back squat
 Gabriela
 Training Client
 Gabriela · Training Client
-“I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines, and it's so cool to do this knowing that you created it. It makes me that much more motivated and excited. This is exactly what I needed.”
+“I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines. It makes me that much more motivated and excited. This is exactly what I needed.”
 “I especially love how helpful the demo videos are for understanding the movements, and I love being able to track everything.”
 #
 # ── Video caption and review-only dimension readout ──────────────────────
@@ -39,3 +39,24 @@ Gino, video testimonial
 1:1
 ·
 ,
+#
+# ── 1:1 Coaching section, restored at Lisa's request ─────────────────────
+# Every line is her own wording from src/lib/siteSettings.ts DEFAULTS, which
+# already runs the /coaching page. Transcribed verbatim.
+By application
+Coaching built around you.
+Coaching is designed for people serious about building strength, improving movement quality, and creating long-term results. I keep coaching intentionally limited so every client gets real attention, detailed feedback, and programming that evolves as they progress.
+01
+Custom programming
+Training built specifically for your goals, experience level, schedule, equipment, and recovery capacity. Updated as you progress so your body keeps adapting instead of plateauing.
+02
+Form review & feedback
+Send me videos of your lifts and I'll break down your technique with detailed cues and corrections so you understand not just what to change, but why.
+03
+Check-ins & adjustments
+Weekly check-ins to adjust your training, recovery, workload, or nutrition before small issues become setbacks. Real coaching means adapting as your body evolves.
+04
+Direct access to me
+Questions between check-ins? Message me directly. No outsourced coaching or automated replies — just real guidance when you need it.
+$397/month
+No commitment required to apply.

@@ -16,6 +16,7 @@ import HeroD from "@/components/preview/d/HeroD.client"
 import { StatementD } from "@/components/preview/d/StatementD"
 import { StoryD } from "@/components/preview/d/StoryD"
 import { CoursesD } from "@/components/preview/d/CoursesD"
+import { CoachingD } from "@/components/preview/d/CoachingD"
 import { BundleD } from "@/components/preview/d/BundleD"
 import { TestimonialsD } from "@/components/preview/d/TestimonialsD"
 import FaqD from "@/components/preview/d/FaqD.client"
@@ -37,12 +38,14 @@ const OFF_WHITE = "#f5f2ee"
 // Supporting backdrops supplied by Lisa. Used sparingly and heavily washed:
 // her own photographs stay the subject everywhere on the page.
 const BG_LIGHT = "/preview/bg-light.jpg"
+const BG_STUDIO = "/preview/bg-studio.jpg"
+const BG_DUMBBELLS = "/preview/bg-dumbbells.jpg"
+const BG_ARCH = "/preview/bg-arch.jpg"
 const BG_LIGHT_2 = "/preview/bg-light-2.jpg"
 const BG_DARK = "/preview/bg-dark.jpg"
 const BG_DARK_2 = "/preview/bg-dark-2.jpg"
 
 // Lisa's own images already in the repo, used as foreground photography.
-const LISA_SECOND_PORTRAIT = "/lisa-coaching-about.jpg"
 const LISA_FLEX = "/lisa-coaching-hero.jpg"
 
 const REEL_SLOTS = [
@@ -74,24 +77,27 @@ export default async function PreviewDirectionDPage() {
       <NavD />
 
       <main>
-        {/* Dark: the opening. */}
+        {/* 1. Hero — film, headline, both routes, both prices. */}
         <HeroD trailerSrc={trailerSrc} posterSrc={derivePosterUrl(trailerSrc)} />
 
-        {/* Out of the film and straight onto paper, where Lisa's own
-            statement takes the slot the duplicated pathways section used to
-            occupy. It is the first calm beat after the hero. */}
+        {/* 2. Lisa's statement — the single personal note on the page. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
-        <StatementD backdrop={BG_LIGHT_2} />
+        <StatementD backdrop={BG_STUDIO} />
+
+        {/* 3. Why this exists — her story and her first portrait. */}
         <StoryD
           portraitUrl={heroPhotoUrl ?? portraitUrl}
           portraitCrop={heroPhotoUrl ? "center 35%" : settings.crops.about_bio}
           backdrop={BG_LIGHT}
         />
-        <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} backdrop={BG_LIGHT_2} />
 
-        {/* Dark from here to the end of the offer: the gradient, the banner
-            and the bundle run together with no light band between them. */}
-        <ToneShift from={WARM_WHITE} to={BLACK} />
+        {/* 4. The courses — two sheets, then the movement reel, then the
+            bundle. The reel is full bleed and runs straight into the dark,
+            so it carries the transition instead of needing one. */}
+        <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} backdrop={BG_DUMBBELLS} />
+        <BundleD coursePrice={coursePrice} portraitUrl={LISA_FLEX} backdrop={BG_DARK_2} />
+
+        {/* 5. The banner, still on the dark run. */}
         {bannerUrl && (
           <PhotoBand
             src={bannerUrl}
@@ -101,18 +107,20 @@ export default async function PreviewDirectionDPage() {
             aspect="3 / 1"
           />
         )}
-        <BundleD coursePrice={coursePrice} portraitUrl={LISA_FLEX} backdrop={BG_DARK_2} />
 
-        {/* Light again for the clients and the questions. */}
-        <ToneShift from={BLACK} to={WARM_WHITE} />
+        {/* 6. 1:1 Coaching — what working with her actually involves. */}
+        <ToneShift from={BLACK} to={OFF_WHITE} />
+        <CoachingD portraitUrl={portraitUrl ?? "/lisa-coaching-about.jpg"} backdrop={BG_ARCH} />
+
+        {/* 7. Real results, 8. Common questions. */}
         <TestimonialsD backdrop={BG_LIGHT_2} />
-        <FaqD portraitUrl={portraitUrl ?? LISA_SECOND_PORTRAIT} backdrop={BG_LIGHT} />
+        <FaqD />
 
-        {/* Dark: the closing ask. */}
+        {/* 9. Ready to start. */}
         <ToneShift from={OFF_WHITE} to={BLACK} />
         <FinalCtaD backdrop={BG_DARK} />
 
-        {/* And out on paper. */}
+        {/* 10. Free guides, then the footer. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
         <div data-tone="light">
           <FreeGuideTeaser />
