@@ -174,7 +174,8 @@ export default function PreviewNutritionPage() {
         </Reveal>
       </PageHeroD>
 
-      <ToneShift from="dark" to="light" />
+      {/* The section below is the alt ground, so the band must land on it. */}
+      <ToneShift from="dark" to="light-alt" />
 
       <SectionD alt label="What you get" backdrop={BG_LIGHT} opacity={0.18} scrim="edges">
         <div className="pv-d-get-grid">

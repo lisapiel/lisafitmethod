@@ -135,6 +135,12 @@ export default function PreviewCoachingPage() {
         }
         .pv-d-co-apply { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(36px, 5vw, 90px); align-items: start; }
         @media (max-width: 960px) { .pv-d-co-apply { grid-template-columns: 1fr; gap: var(--d-step-5); } }
+        /* The application is far taller than the column beside it, so the
+           intro sticks rather than leaving most of the page's left half
+           empty while the reader works down the form. */
+        @media (min-width: 961px) {
+          .pv-d-co-apply-intro { position: sticky; top: 118px; }
+        }
         .pv-d-co-next { list-style: none; margin: var(--d-step-3) 0 var(--d-step-3); padding: 0; counter-reset: s; }
         .pv-d-co-next li {
           display: flex; gap: 14px; align-items: flex-start; margin-bottom: var(--d-step-2);
@@ -368,7 +374,7 @@ export default function PreviewCoachingPage() {
 
       <SectionD id="apply" label="Apply for coaching">
         <div className="pv-d-co-apply">
-          <div>
+          <div className="pv-d-co-apply-intro">
             <OpenD
               eyebrow={CO_APPLY.eyebrow}
               lines={[CO_APPLY.heading]}

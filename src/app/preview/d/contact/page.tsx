@@ -19,61 +19,60 @@ export default function PreviewContactPage() {
   return (
     <PageShellD>
       <style>{`
-        .pv-d-contact-grid {
-          display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-          gap: clamp(36px, 5vw, 96px); align-items: start;
+        /* Contact is a two-element page: a greeting and a form. At the full
+           hero height it read as a large empty room, so the opening is
+           shortened here and carries the invitation and the Instagram link
+           rather than leaving them to rattle around below it. Scoped to this
+           page: every other page keeps the standard opening. */
+        .pv-d-contact-page .pv-d-phero {
+          padding-top: clamp(118px, 14vh, 168px);
+          padding-bottom: clamp(52px, 6vw, 84px);
         }
-        @media (max-width: 860px) { .pv-d-contact-grid { grid-template-columns: 1fr; gap: var(--d-step-5); } }
+        .pv-d-contact-page .pv-d-section { padding-top: clamp(56px, 6vw, 92px); }
         .pv-d-contact-social {
-          display: inline-flex; align-items: center; gap: 11px;
+          display: inline-flex; align-items: center; gap: 11px; margin-top: var(--d-step-4);
           font-family: var(--font-dm-sans), sans-serif; font-size: 0.88rem; font-weight: 500;
-          color: var(--d-accent-dark); text-decoration: none;
-          border-bottom: 1px solid rgba(168,137,94,0.35); padding-bottom: 3px;
+          color: var(--d-accent); text-decoration: none;
+          border-bottom: 1px solid rgba(200,169,126,0.35); padding-bottom: 3px;
           transition: color 420ms ease;
         }
-        .pv-d-contact-social:hover { color: var(--d-text); }
+        .pv-d-contact-social:hover { color: var(--d-off-white); }
         .pv-d-contact-social-icon { font-size: 1.1rem; }
-        .pv-d-contact-aside {
-          font-family: var(--font-dm-sans), sans-serif; font-weight: 300;
-          font-size: clamp(0.95rem, 1.1vw, 1.05rem); line-height: 1.85;
-          color: var(--d-muted); margin: 0 0 var(--d-step-4); max-width: 44ch;
-        }
+        .pv-d-contact-form { max-width: 760px; }
       `}</style>
 
-      <PageHeroD
-        eyebrow="Get in touch"
-        headingLines={["Questions?", <i key="em">I&apos;m here.</i>]}
-        backdrop={BG_ARCH}
-      />
-
-      <ToneShift from="dark" to="light" />
-
-      <SectionD label="Contact" backdrop={BG_LIGHT} opacity={0.16} scrim="right">
-        <div className="pv-d-contact-grid">
-          <div>
-            <Reveal variant="up">
-              <p className="pv-d-contact-aside">
-                Whether it&apos;s about the course, coaching, or just a question about training, feel
-                free to reach out. I&apos;ll get back to you within 48 hours.
-              </p>
-              <a
-                href="https://instagram.com/lisafitmethod"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pv-d-contact-social"
-              >
-                <span className="pv-d-contact-social-icon" aria-hidden="true">
-                  📸
-                </span>
-                @lisafitmethod on Instagram
-              </a>
-            </Reveal>
-          </div>
-          <Reveal variant="up" delay={140}>
-            <ContactFormD />
+      <div className="pv-d-contact-page">
+        <PageHeroD
+          eyebrow="Get in touch"
+          headingLines={["Questions?", <i key="em">I&apos;m here.</i>]}
+          lede="Whether it's about the course, coaching, or just a question about training, feel free to reach out. I'll get back to you within 48 hours."
+          backdrop={BG_ARCH}
+        >
+          <Reveal variant="up" delay={240}>
+            <a
+              href="https://instagram.com/lisafitmethod"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pv-d-contact-social"
+            >
+              <span className="pv-d-contact-social-icon" aria-hidden="true">
+                📸
+              </span>
+              @lisafitmethod on Instagram
+            </a>
           </Reveal>
-        </div>
-      </SectionD>
+        </PageHeroD>
+
+        <ToneShift from="dark" to="light" />
+
+        <SectionD label="Send a message" backdrop={BG_LIGHT} opacity={0.16} scrim="right">
+          <Reveal variant="up">
+            <div className="pv-d-contact-form">
+              <ContactFormD />
+            </div>
+          </Reveal>
+        </SectionD>
+      </div>
     </PageShellD>
   )
 }

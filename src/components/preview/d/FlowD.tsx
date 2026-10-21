@@ -15,7 +15,16 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
   // styling it had last and can sit cream-on-light — or ink-on-dark — for the
   // length of the band. Halving it flips the bar at the gradient's midpoint,
   // which is where the ground actually changes hands.
-  const isDark = (colour: string) => colour.trim().toLowerCase() === "#0a0a0a"
+  // Accepts either a ground colour or the name of one. Passing the tone name
+  // is the obvious thing to reach for, and silently produced an invalid
+  // gradient and two mislabelled halves, so both spellings are understood.
+  const GROUND: Record<string, string> = {
+    dark: "#0a0a0a",
+    light: "#faf8f5",
+    "light-alt": "#f5f2ee",
+  }
+  const resolve = (colour: string) => GROUND[colour.trim().toLowerCase()] ?? colour
+  const isDark = (colour: string) => resolve(colour).trim().toLowerCase() === "#0a0a0a"
   const half = (colour: string) => (isDark(colour) ? "dark" : "light")
 
   return (
@@ -24,7 +33,7 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
       style={{
         position: "relative",
         height: "clamp(80px, 9vw, 150px)",
-        background: `linear-gradient(to bottom, ${from} 0%, ${to} 100%)`,
+        background: `linear-gradient(to bottom, ${resolve(from)} 0%, ${resolve(to)} 100%)`,
         display: "flex",
         alignItems: "center",
         padding: "0 var(--d-gutter)",
