@@ -1,10 +1,7 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 
-import { FAQ_CATEGORIES, type FaqCategory } from "./content"
-import { GOLD_LINK } from "./linkStyle"
-
-const linkStyle = GOLD_LINK
+import { FAQ_CATEGORIES } from "./content"
 
 export const metadata: Metadata = {
   title: "FAQ | Common Questions About The Lisa Fit Method",

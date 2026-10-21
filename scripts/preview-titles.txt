@@ -8,3 +8,7 @@ faq | common questions about the lisa fit method | lisa fit method
 contact | lisa fit method | lisa fit method
 the 5 foundation movements: free preview | lisa fit method
 free nutrition guide: the 5 principles that actually work | lisa fit method
+#
+# Direction D draws list markers with CSS ::before rather than as a text
+# span, so the arrow glyph stops appearing as page text. Decoration, not copy.
+→
