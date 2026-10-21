@@ -12,3 +12,8 @@ Training and nutrition education you can follow at your own pace.
 Explore Courses →
 A custom plan, weekly check-ins, form feedback, and direct support.
 Explore Coaching →
+#
+# Courses subcopy, replaced at Lisa's instruction on 20 Oct with:
+# "Self-guided training and nutrition courses designed to help you learn,
+#  apply, and progress with structure."
+Everything I had to learn the hard way, organized into a system.

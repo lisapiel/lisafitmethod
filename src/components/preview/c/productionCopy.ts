@@ -104,7 +104,9 @@ export const STORY = {
 export const COURSES_HEAD = {
   eyebrow: "The Courses",
   heading: "Train at your own pace.",
-  sub: "Everything I had to learn the hard way, organized into a system.",
+  // Replaced at Lisa's instruction, 20 Oct. The previous line was
+  // "Everything I had to learn the hard way, organized into a system."
+  sub: "Self-guided training and nutrition courses designed to help you learn, apply, and progress with structure.",
 }
 
 export const COURSES = [

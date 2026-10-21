@@ -18,6 +18,14 @@
 // TWO DIFFERENCES WERE FOUND against the wording quoted in the brief, and are
 // flagged rather than silently resolved — see FLAGS at the bottom.
 
+// A statement from Lisa, supplied 20 Oct. Rendered as something she says —
+// attributed, set as a quote — rather than as a strapline.
+export const LISA_STATEMENT = {
+  quote:
+    "Without a plan, you're doing 100 random workouts. With one, you're building one long progression. Same effort, completely different results.",
+  attribution: "Lisa McPherson, CPT",
+}
+
 export const TESTIMONIALS_HEAD = {
   // from TestimonialsSection.tsx
   eyebrow: "Real results",
@@ -46,15 +54,13 @@ export const GINO = {
 }
 
 export const GABRIELA = {
-  // seed route: clientName is "Gabriela". The brief calls her Gaby — see FLAGS.
   name: "Gabriela",
   descriptor: "Training Client",
-  // seed route: featuredQuote, verbatim.
+  // Wording supplied by Lisa, 20 Oct. Replaces the earlier saved record: the
+  // line praising Lisa personally is removed and the substance about the
+  // programme is kept. Rendered exactly as given, with no em dashes.
   quote:
-    "I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines — and it's so cool to do this knowing that you created it. It just makes me that much more motivated and excited. This is exactly what I needed.",
-  // seed route: writtenTestimonial, verbatim.
-  written:
-    "I especially love how you demo the movements and can track everything. I just quit CrossFit for good so I'm going to be using it a whole lot more.",
+    "I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines, and it makes me even more motivated and excited. This is exactly what I needed. I especially love how helpful the videos are for understanding the movements, and I like being able to track everything. I just quit CrossFit for good, so I'm going to be using it a lot more.",
 }
 
 // The square export lives in public/preview/ and is produced by
@@ -75,22 +81,10 @@ export const GABY_PHOTO = {
 
 // FLAGS — for review, not resolved unilaterally.
 //
-// 1. Gabriela's quote. The saved record is a lightly cleaned version of her
-//    voice message. The brief quotes her raw words:
-//      raw   "...it's so cool to do this knowing that you created it cause it
-//             just makes me that much more like inclined to do it and be
-//             motivated and like get excited about it"
-//      saved "...it's so cool to do this knowing that you created it. It just
-//             makes me that much more motivated and excited."
-//      raw   "Thank you so much because this is exactly what I needed."
-//      saved "This is exactly what I needed."
-//    The saved version is rendered, because the brief asks for the approved
-//    wording to be preserved. Swapping to the raw transcript is a one-line
-//    change to `quote` above.
+// 1. Her name. The saved record and this module say "Gabriela"; Lisa has
+//    called her "Gaby" in conversation. "Gabriela" is rendered, with a comma
+//    before the descriptor as instructed. Change `name` above to switch.
 //
-// 2. Her name. Saved record says "Gabriela"; the brief says "Gaby". The saved
-//    name is rendered. Change `name` above to switch.
-//
-// 3. Gino's waist figure. The brief frames it as 38 inches to ~34 inches; the
+// 2. Gino's waist figure. Lisa has framed it as 38 inches to ~34 inches; the
 //    saved metric says "4 inches off waist", which is the same change stated
 //    differently. The saved wording is rendered.

@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
+import { Atmosphere } from "./FlowD"
 import { FINAL, FOOTER } from "../c/productionCopy"
 
 // The closing ask, and the footer that carries it out.
 // Both are the live wording, unchanged.
-export function FinalCtaD() {
+export function FinalCtaD({ backdrop }: { backdrop?: string }) {
   return (
     <section className="pv-d-final pv-d-dark pv-d-section" data-tone="dark">
       <style>{`
@@ -32,8 +33,9 @@ export function FinalCtaD() {
         .pv-d-final-alt a:hover { color: var(--d-accent); }
       `}</style>
 
+      {backdrop && <Atmosphere src={backdrop} tone="dark" opacity={0.26} position="center 45%" />}
       <div className="pv-d-final-glow" aria-hidden="true" />
-      <div className="pv-d-final-inner">
+      <div className="pv-d-final-inner pv-d-above">
         <div className="pv-d-open pv-d-open--centre" style={{ marginBottom: 0 }}>
           <p className="pv-d-eyebrow">{FINAL.eyebrow}</p>
           <div className="pv-d-open-rule">

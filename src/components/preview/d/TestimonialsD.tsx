@@ -78,8 +78,8 @@ export function TestimonialsD() {
         .pv-d-gaby-rule { width: 54px; margin-bottom: var(--d-step-3); }
         .pv-d-gaby-quote {
           font-family: var(--font-playfair), serif; font-style: italic; font-weight: 400;
-          font-size: clamp(1.12rem, 1.72vw, 1.5rem); line-height: 1.5; color: var(--d-text);
-          margin: 0 0 var(--d-step-3); max-width: 44ch;
+          font-size: clamp(1.02rem, 1.42vw, 1.26rem); line-height: 1.62; color: var(--d-text);
+          margin: 0 0 var(--d-step-3); max-width: 48ch;
         }
         .pv-d-gaby-plate { position: relative; }
         .pv-d-gaby-plate::after {
@@ -140,7 +140,7 @@ export function TestimonialsD() {
               <blockquote className="pv-d-gino-quote">&ldquo;{GINO.quote}&rdquo;</blockquote>
               <p className="pv-d-written">{GINO.written}</p>
               <cite className="pv-d-cite">
-                {GINO.name} &middot; {GINO.descriptor}
+                {GINO.name}, {GINO.descriptor}
               </cite>
             </Reveal>
           </div>
@@ -152,9 +152,8 @@ export function TestimonialsD() {
               <DrawRule color="rgba(168,137,94,0.55)" />
             </div>
             <blockquote className="pv-d-gaby-quote">&ldquo;{GABRIELA.quote}&rdquo;</blockquote>
-            <p className="pv-d-written">{GABRIELA.written}</p>
             <cite className="pv-d-cite">
-              {GABRIELA.name} &middot; {GABRIELA.descriptor}
+              {GABRIELA.name}, {GABRIELA.descriptor}
             </cite>
           </Reveal>
 

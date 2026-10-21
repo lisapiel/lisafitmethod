@@ -60,6 +60,10 @@ export function StylesD() {
       }
 
       .pv-d-section { padding: var(--d-section) var(--d-gutter); }
+      /* Content that sits over an Atmosphere layer. An absolutely positioned
+         backdrop paints above static in-flow content, so anything in front of
+         one has to be positioned too. */
+      .pv-d-above { position: relative; z-index: 2; }
       .pv-d-inner { max-width: var(--d-max); margin: 0 auto; }
 
       /* ── Section openings ─────────────────────────────────────────────

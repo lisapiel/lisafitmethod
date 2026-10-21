@@ -13,7 +13,15 @@ import { STORY } from "../c/productionCopy"
 // The pull quote stays on black inside the light section. It is the one
 // dark accent in the middle of the page, and it earns its place: it is the
 // sentence the whole section is building to.
-export function StoryD({ portraitUrl, portraitCrop }: { portraitUrl: string | null; portraitCrop: string }) {
+export function StoryD({
+  portraitUrl,
+  portraitCrop,
+  secondaryUrl,
+}: {
+  portraitUrl: string | null
+  portraitCrop: string
+  secondaryUrl?: string
+}) {
   const [lead, ...rest] = STORY.paragraphs
 
   return (
@@ -23,7 +31,12 @@ export function StoryD({ portraitUrl, portraitCrop }: { portraitUrl: string | nu
           display: grid; grid-template-columns: minmax(0, 0.68fr) minmax(0, 1fr);
           gap: clamp(32px, 5vw, 88px); align-items: start;
         }
-        .pv-d-story-plate { position: sticky; top: 100px; }
+        /* Two plates, staggered. One portrait centred in a column is a
+           picture; two offset against each other start to read as a spread,
+           which is most of what stops this section feeling static. */
+        .pv-d-story-plate-sub {
+          width: 64%; margin-left: auto; margin-top: var(--d-step-3);
+        }
         .pv-d-story-lead {
           font-family: var(--font-dm-sans), sans-serif; font-weight: 300;
           font-size: clamp(1.08rem, 1.42vw, 1.34rem); line-height: 1.68;
@@ -57,7 +70,8 @@ export function StoryD({ portraitUrl, portraitCrop }: { portraitUrl: string | nu
         }
         @media (max-width: 960px) {
           .pv-d-story-grid { grid-template-columns: 1fr; gap: var(--d-step-5); }
-          .pv-d-story-plate { position: static; max-width: 460px; }
+          .pv-d-story-plates { max-width: 480px; }
+          .pv-d-story-plate-sub { width: 62%; }
         }
       `}</style>
 
@@ -75,8 +89,8 @@ export function StoryD({ portraitUrl, portraitCrop }: { portraitUrl: string | nu
         <div className="pv-d-story-grid">
           <div>
             {portraitUrl && (
-              <Reveal variant="fade" duration={1300}>
-                <div className="pv-d-story-plate">
+              <div className="pv-d-story-plates">
+                <Reveal variant="fade" duration={1300}>
                   <ParallaxMedia
                     src={portraitUrl}
                     alt="Lisa McPherson, Certified Personal Trainer"
@@ -85,8 +99,20 @@ export function StoryD({ portraitUrl, portraitCrop }: { portraitUrl: string | nu
                     shift={12}
                     sizes="(max-width: 960px) 100vw, 34vw"
                   />
-                </div>
-              </Reveal>
+                </Reveal>
+                {secondaryUrl && (
+                  <Reveal variant="up" delay={160} duration={1300} className="pv-d-story-plate-sub">
+                    <ParallaxMedia
+                      src={secondaryUrl}
+                      alt="Lisa McPherson training"
+                      objectPosition="center 22%"
+                      aspect="4 / 5"
+                      shift={9}
+                      sizes="(max-width: 960px) 60vw, 24vw"
+                    />
+                  </Reveal>
+                )}
+              </div>
             )}
           </div>
 

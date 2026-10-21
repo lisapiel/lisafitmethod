@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { ParallaxMedia } from "../ParallaxMedia.client"
 import { DrawRule } from "../Reveal.client"
 
@@ -9,10 +10,19 @@ import { DrawRule } from "../Reveal.client"
 // paced rather than abrupt. One component, used at every tone change on the
 // page, which is also what keeps the rhythm even.
 export function ToneShift({ from, to, rule = true }: { from: string; to: string; rule?: boolean }) {
+  // The band is split into two tone halves. Without them the navigation has
+  // nothing to sample while it crosses a transition, so it holds whichever
+  // styling it had last and can sit cream-on-light — or ink-on-dark — for the
+  // length of the band. Halving it flips the bar at the gradient's midpoint,
+  // which is where the ground actually changes hands.
+  const isDark = (colour: string) => colour.trim().toLowerCase() === "#0a0a0a"
+  const half = (colour: string) => (isDark(colour) ? "dark" : "light")
+
   return (
     <div
       aria-hidden="true"
       style={{
+        position: "relative",
         height: "clamp(80px, 9vw, 150px)",
         background: `linear-gradient(to bottom, ${from} 0%, ${to} 100%)`,
         display: "flex",
@@ -20,8 +30,10 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
         padding: "0 var(--d-gutter)",
       }}
     >
+      <div data-tone={half(from)} style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%" }} />
+      <div data-tone={half(to)} style={{ position: "absolute", top: "50%", left: 0, right: 0, height: "50%" }} />
       {rule && (
-        <div style={{ width: "100%", maxWidth: "var(--d-max)", margin: "0 auto" }}>
+        <div style={{ position: "relative", width: "100%", maxWidth: "var(--d-max)", margin: "0 auto" }}>
           <DrawRule color="rgba(200,169,126,0.32)" origin="center" duration={1600} />
         </div>
       )}
@@ -77,5 +89,44 @@ export function PhotoBand({
         />
       </div>
     </section>
+  )
+}
+
+// A supporting photograph set behind a section, far enough back that it reads
+// as atmosphere rather than as an image.
+//
+// Two layers do the work: the photograph at low opacity, and a flat wash of
+// the section's own ground over it. The wash is what guarantees contrast —
+// without it the brightest part of a sunlit photograph will eventually meet
+// the smallest type on the page. Lisa's own photographs stay the subject
+// everywhere; this is only ever depth behind them.
+export function Atmosphere({
+  src,
+  tone,
+  opacity,
+  position = "center",
+}: {
+  src: string
+  tone: "light" | "dark"
+  opacity?: number
+  position?: string
+}) {
+  const strength = opacity ?? (tone === "dark" ? 0.3 : 0.16)
+  const wash =
+    tone === "dark"
+      ? "linear-gradient(to bottom, rgba(10,10,10,0.82) 0%, rgba(10,10,10,0.74) 40%, rgba(10,10,10,0.9) 100%)"
+      : "linear-gradient(to bottom, rgba(250,248,245,0.9) 0%, rgba(250,248,245,0.84) 42%, rgba(250,248,245,0.95) 100%)"
+
+  return (
+    <div aria-hidden="true" style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes="100vw"
+        style={{ objectFit: "cover", objectPosition: position, opacity: strength }}
+      />
+      <div style={{ position: "absolute", inset: 0, background: wash }} />
+    </div>
   )
 }

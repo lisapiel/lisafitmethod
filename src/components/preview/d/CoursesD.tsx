@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
 import MovementReelD from "./MovementReelD.client"
+import { Atmosphere } from "./FlowD"
 import { COURSES, COURSES_HEAD, PRICES } from "../c/productionCopy"
 
 // The two courses.
@@ -10,7 +11,15 @@ import { COURSES, COURSES_HEAD, PRICES } from "../c/productionCopy"
 // shared by both cards, benefit rows separated by hairlines rather than
 // bullets, and a strip of real course footage underneath so the "50+
 // exercise videos" line has something to stand on.
-export function CoursesD({ coursePrice, movementUrls }: { coursePrice: string; movementUrls: string[] }) {
+export function CoursesD({
+  coursePrice,
+  movementUrls,
+  backdrop,
+}: {
+  coursePrice: string
+  movementUrls: string[]
+  backdrop?: string
+}) {
   return (
     <section className="pv-d-courses pv-d-light pv-d-section" data-tone="light" id="courses">
       <style>{`
@@ -64,7 +73,8 @@ export function CoursesD({ coursePrice, movementUrls }: { coursePrice: string; m
         @media (max-width: 900px) { .pv-d-cards { grid-template-columns: 1fr; } }
       `}</style>
 
-      <div className="pv-d-inner">
+      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.2} position="center 40%" />}
+      <div className="pv-d-inner pv-d-above">
         <div className="pv-d-open pv-d-open--centre">
           <p className="pv-d-eyebrow">{COURSES_HEAD.eyebrow}</p>
           <div className="pv-d-open-rule">

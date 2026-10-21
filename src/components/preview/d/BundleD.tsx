@@ -1,5 +1,7 @@
 import Link from "next/link"
+import { ParallaxMedia } from "../ParallaxMedia.client"
 import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
+import { Atmosphere } from "./FlowD"
 import { BUNDLE, PRICES } from "../c/productionCopy"
 
 // The bundle — the page's mid-point dark moment.
@@ -7,7 +9,15 @@ import { BUNDLE, PRICES } from "../c/productionCopy"
 // The two value lines are rendered with the page's shared figure treatment,
 // the same one the testimonial results use later, so numbers never look like
 // a different component dropped in. Copy is the live section verbatim.
-export function BundleD({ coursePrice }: { coursePrice: string }) {
+export function BundleD({
+  coursePrice,
+  portraitUrl,
+  backdrop,
+}: {
+  coursePrice: string
+  portraitUrl?: string
+  backdrop?: string
+}) {
   return (
     <section className="pv-d-bundle pv-d-dark pv-d-section" data-tone="dark" aria-label="Foundations Bundle">
       <style>{`
@@ -24,13 +34,18 @@ export function BundleD({ coursePrice }: { coursePrice: string }) {
           background: var(--d-accent); padding: 4px 9px;
         }
         .pv-d-bundle-grid {
-          display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(0, 0.78fr);
-          gap: clamp(32px, 5vw, 80px); align-items: end;
+          display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.62fr);
+          gap: clamp(32px, 5vw, 76px); align-items: center;
         }
+        .pv-d-bundle-portrait { position: relative; }
+        .pv-d-bundle-portrait::after {
+          content: ""; position: absolute; top: -18px; right: -18px; bottom: 18px; left: 18px;
+          border: 1px solid rgba(200,169,126,0.28); pointer-events: none;
+        }
+        .pv-d-bundle-buy { margin-top: var(--d-step-4); }
         .pv-d-bundle-body { max-width: 60ch; margin-bottom: var(--d-step-4); }
         .pv-d-bundle-figures { grid-template-columns: 1fr 1fr; max-width: 440px; }
-        .pv-d-bundle-price { text-align: right; }
-        .pv-d-bundle-price-row { display: flex; align-items: baseline; gap: 18px; justify-content: flex-end; flex-wrap: wrap; margin-bottom: var(--d-step-2); }
+        .pv-d-bundle-price-row { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-bottom: var(--d-step-2); }
         .pv-d-bundle-now {
           font-family: var(--font-playfair), serif; font-weight: 500;
           font-size: clamp(3rem, 5.2vw, 4.4rem); color: var(--d-accent); line-height: 0.88;
@@ -66,14 +81,15 @@ export function BundleD({ coursePrice }: { coursePrice: string }) {
         }
         @media (max-width: 900px) {
           .pv-d-bundle-grid { grid-template-columns: 1fr; gap: var(--d-step-5); align-items: start; }
-          .pv-d-bundle-price { text-align: left; }
-          .pv-d-bundle-price-row { justify-content: flex-start; }
           .pv-d-bundle-figures { max-width: none; }
+          .pv-d-bundle-portrait { max-width: 340px; }
+          .pv-d-bundle-portrait::after { top: -12px; right: -12px; bottom: 12px; left: 12px; }
         }
       `}</style>
 
+      {backdrop && <Atmosphere src={backdrop} tone="dark" opacity={0.24} position="center 60%" />}
       <div className="pv-d-bundle-glow" aria-hidden="true" />
-      <div className="pv-d-inner pv-d-bundle-inner">
+      <div className="pv-d-inner pv-d-bundle-inner pv-d-above">
         <div className="pv-d-open">
           <div className="pv-d-bundle-badges">
             <p className="pv-d-eyebrow">{BUNDLE.eyebrow}</p>
@@ -105,19 +121,32 @@ export function BundleD({ coursePrice }: { coursePrice: string }) {
                 <span className="pv-d-figure-label">{BUNDLE.tileNutritionLabel}</span>
               </div>
             </Reveal>
+
+            <Reveal variant="up" delay={260} className="pv-d-bundle-buy">
+              <div className="pv-d-bundle-price-row">
+                <span className="pv-d-bundle-was">{PRICES.bundleTotal}</span>
+                <span className="pv-d-bundle-now">{PRICES.bundleNow}</span>
+              </div>
+              <p className="pv-d-bundle-saves">{BUNDLE.savings}</p>
+              <Link href={BUNDLE.href} className="pv-d-btn pv-d-btn--gold">
+                <span>{BUNDLE.cta}</span>
+              </Link>
+              <p className="pv-d-bundle-note">{BUNDLE.note}</p>
+            </Reveal>
           </div>
 
-          <Reveal variant="up" delay={260} className="pv-d-bundle-price">
-            <div className="pv-d-bundle-price-row">
-              <span className="pv-d-bundle-was">{PRICES.bundleTotal}</span>
-              <span className="pv-d-bundle-now">{PRICES.bundleNow}</span>
-            </div>
-            <p className="pv-d-bundle-saves">{BUNDLE.savings}</p>
-            <Link href={BUNDLE.href} className="pv-d-btn pv-d-btn--gold">
-              <span>{BUNDLE.cta}</span>
-            </Link>
-            <p className="pv-d-bundle-note">{BUNDLE.note}</p>
-          </Reveal>
+          {portraitUrl && (
+            <Reveal variant="fade" duration={1300} className="pv-d-bundle-portrait">
+              <ParallaxMedia
+                src={portraitUrl}
+                alt="Lisa McPherson, Certified Personal Trainer"
+                objectPosition="center 18%"
+                aspect="4 / 5"
+                shift={10}
+                sizes="(max-width: 900px) 340px, 34vw"
+              />
+            </Reveal>
+          )}
         </div>
 
         <p className="pv-d-bundle-upsell">

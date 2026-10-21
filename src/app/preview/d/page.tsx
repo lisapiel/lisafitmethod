@@ -13,6 +13,7 @@ import { StylesD } from "@/components/preview/d/StylesD"
 import { ToneShift, PhotoBand } from "@/components/preview/d/FlowD"
 import NavD from "@/components/preview/d/NavD.client"
 import HeroD from "@/components/preview/d/HeroD.client"
+import { StatementD } from "@/components/preview/d/StatementD"
 import { StoryD } from "@/components/preview/d/StoryD"
 import { CoursesD } from "@/components/preview/d/CoursesD"
 import { BundleD } from "@/components/preview/d/BundleD"
@@ -32,6 +33,15 @@ export const metadata: Metadata = {
 const BLACK = "#0a0a0a"
 const WARM_WHITE = "#faf8f5"
 const OFF_WHITE = "#f5f2ee"
+
+// Supporting backdrops supplied by Lisa. Used sparingly and heavily washed:
+// her own photographs stay the subject everywhere on the page.
+const BG_LIGHT = "/preview/bg-light.jpg"
+const BG_DARK = "/preview/bg-dark.jpg"
+
+// Lisa's own images already in the repo, used as foreground photography.
+const LISA_SECOND_PORTRAIT = "/lisa-coaching-about.jpg"
+const LISA_FLEX = "/lisa-coaching-hero.jpg"
 
 const REEL_SLOTS = [
   "m1_goblet_squat",
@@ -65,15 +75,17 @@ export default async function PreviewDirectionDPage() {
         {/* Dark: the opening. */}
         <HeroD trailerSrc={trailerSrc} posterSrc={derivePosterUrl(trailerSrc)} />
 
-        {/* Into the light, and it stays there for most of the page. The hero
-            already carries both pathways, both buttons and both prices, so
-            the page goes straight from it into the story. */}
+        {/* Out of the film and straight onto paper, where Lisa's own
+            statement takes the slot the duplicated pathways section used to
+            occupy. It is the first calm beat after the hero. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
+        <StatementD backdrop={BG_LIGHT} />
         <StoryD
           portraitUrl={heroPhotoUrl ?? portraitUrl}
           portraitCrop={heroPhotoUrl ? "center 35%" : settings.crops.about_bio}
+          secondaryUrl={portraitUrl ?? LISA_SECOND_PORTRAIT}
         />
-        <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} />
+        <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} backdrop={BG_LIGHT} />
 
         {/* Dark from here to the end of the offer: the gradient, the banner
             and the bundle run together with no light band between them. */}
@@ -87,7 +99,7 @@ export default async function PreviewDirectionDPage() {
             aspect="3 / 1"
           />
         )}
-        <BundleD coursePrice={coursePrice} />
+        <BundleD coursePrice={coursePrice} portraitUrl={LISA_FLEX} backdrop={BG_DARK} />
 
         {/* Light again for the clients and the questions. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
@@ -96,7 +108,7 @@ export default async function PreviewDirectionDPage() {
 
         {/* Dark: the closing ask. */}
         <ToneShift from={OFF_WHITE} to={BLACK} />
-        <FinalCtaD />
+        <FinalCtaD backdrop={BG_DARK} />
 
         {/* And out on paper. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
