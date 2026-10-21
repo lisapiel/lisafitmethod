@@ -10,12 +10,16 @@ export function PageHeroD({
   headingLines,
   lede,
   backdrop,
+  className,
   children,
 }: {
   eyebrow: string
   headingLines: React.ReactNode[]
   lede?: string
   backdrop?: string
+  // Lets a page opt its opening into a page-specific treatment without
+  // affecting any other page that uses this hero.
+  className?: string
   children?: React.ReactNode
 }) {
   return (
@@ -39,7 +43,7 @@ export function PageHeroD({
 
       {backdrop && <Atmosphere src={backdrop} tone="dark" opacity={0.34} position="center 45%" scrim="left" />}
 
-      <div className="pv-d-phero-inner pv-d-above">
+      <div className={`pv-d-phero-inner pv-d-above${className ? " " + className : ""}`}>
         <p className="pv-d-eyebrow">{eyebrow}</p>
         <div className="pv-d-open-rule">
           <DrawRule color="rgba(200,169,126,0.5)" />

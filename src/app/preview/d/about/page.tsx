@@ -87,6 +87,15 @@ export default async function PreviewAboutPage() {
         .pv-d-cred p { font-family: var(--font-dm-sans), sans-serif; font-weight: 300; font-size: 0.9rem; line-height: 1.78; color: var(--d-muted); margin: 0; }
         .pv-d-ig { position: relative; overflow: hidden; text-align: center; }
         .pv-d-ig-inner { position: relative; max-width: 860px; margin: 0 auto; }
+        @media (max-width: 760px) {
+          .pv-d-about-hero-centre { text-align: center; }
+          .pv-d-about-hero-centre .pv-d-open-rule { margin-left: auto; margin-right: auto; }
+          .pv-d-about-hero-centre .pv-d-phero-h1 { margin-left: auto; margin-right: auto; }
+          /* The standfirst keeps its left edge: several centred lines of body
+             copy are markedly harder to read than a centred heading. */
+          .pv-d-about-hero-centre .pv-d-phero-lede { text-align: left; }
+          .pv-d-about-portrait { margin-left: auto; margin-right: auto; }
+        }
         @media (max-width: 960px) {
           .pv-d-about-grid { grid-template-columns: 1fr; gap: var(--d-step-5); }
           .pv-d-about-plate { position: static; max-width: 460px; }
@@ -101,6 +110,7 @@ export default async function PreviewAboutPage() {
         headingLines={t.aboutHeroHeadline.replace(/\\n/g, "\n").split("\n")}
         lede={t.aboutHeroSubtext}
         backdrop="/preview/bg-dark-2.jpg"
+        className="pv-d-about-hero-centre"
       >
         <Reveal variant="fade" duration={1200}>
           <div className="pv-d-about-portrait" style={{ marginTop: "var(--d-step-4)", marginBottom: 0 }}>

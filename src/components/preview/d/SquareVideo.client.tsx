@@ -19,25 +19,17 @@ export default function SquareVideo({
   src,
   poster,
   label,
-  altSrc,
-  altPoster,
 }: {
   src: string
   poster?: string
   label: string
-  // An alternative cut of the same clip, offered as a review-only A/B
-  // toggle. When omitted the control does not render at all.
-  altSrc?: string
-  altPoster?: string
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [started, setStarted] = useState(false)
   const [playing, setPlaying] = useState(false)
   const [ratio, setRatio] = useState<{ w: number; h: number } | null>(null)
-  const [useAlt, setUseAlt] = useState(false)
-
-  const activeSrc = useAlt && altSrc ? altSrc : src
-  const activePoster = useAlt && altPoster ? altPoster : poster
+  const activeSrc = src
+  const activePoster = poster
 
   const squareSource = !ratio || ratio.w === ratio.h
 
@@ -92,24 +84,6 @@ export default function SquareVideo({
           font-family: var(--font-dm-sans), sans-serif; font-size: 10px; font-weight: 500;
           letter-spacing: 0.2em; text-transform: uppercase; color: rgba(26,26,26,0.38);
         }
-        /* Review-only control. Not part of the design; it exists so the two
-           colour versions can be compared in place. */
-        .pv-d-sq-ab {
-          display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-          margin-top: 10px; padding: 6px; border: 1px dashed rgba(168,137,94,0.5);
-          background: rgba(168,137,94,0.07);
-        }
-        .pv-d-sq-ab-label {
-          font-family: var(--font-dm-sans), sans-serif; font-size: 8.5px; font-weight: 700;
-          letter-spacing: 0.2em; text-transform: uppercase; color: rgba(26,26,26,0.5); padding: 0 6px;
-        }
-        .pv-d-sq-ab button {
-          font-family: var(--font-dm-sans), sans-serif; font-size: 9.5px; font-weight: 600;
-          letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
-          padding: 7px 12px; border: none; background: transparent; color: rgba(26,26,26,0.62);
-          transition: background 320ms ease, color 320ms ease;
-        }
-        .pv-d-sq-ab button[data-on="true"] { background: var(--d-accent-dark); color: #fff; }
         .pv-d-sq-warn {
           margin-top: 10px; padding: 11px 14px;
           border: 1px dashed rgba(168,137,94,0.6); background: rgba(168,137,94,0.08);
@@ -159,17 +133,6 @@ export default function SquareVideo({
         <span>{ratio ? `${ratio.w}×${ratio.h}` : "1:1"}</span>
       </figcaption>
 
-      {altSrc && (
-        <div className="pv-d-sq-ab">
-          <span className="pv-d-sq-ab-label">Review only</span>
-          <button type="button" data-on={!useAlt} onClick={() => { setUseAlt(false); setStarted(false) }}>
-            Colour corrected
-          </button>
-          <button type="button" data-on={useAlt} onClick={() => { setUseAlt(true); setStarted(false) }}>
-            Original
-          </button>
-        </div>
-      )}
 
       {!squareSource && ratio && (
         <p className="pv-d-sq-warn">

@@ -130,8 +130,6 @@ export function TestimonialsD({ backdrop }: { backdrop?: string }) {
             <SquareVideo
               src={GINO_VIDEO.src}
               poster={GINO_VIDEO.poster}
-              altSrc={GINO_VIDEO.originalSrc}
-              altPoster={GINO_VIDEO.originalPoster}
               label={`${GINO.name}, video testimonial`}
             />
           </Reveal>
