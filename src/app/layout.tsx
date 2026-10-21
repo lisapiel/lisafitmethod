@@ -51,9 +51,15 @@ export const metadata: Metadata = {
     siteName: "Lisa Fit Method",
     type: "website",
     locale: "en_US",
+    url: "/",
+    // A static file, not a generated route. The previous og:image was built
+    // per request by next/og: a 670KB PNG that Apple's link previewer could
+    // time out on, and a card that fails once is cached as a blank card.
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
   },
   twitter: {
     card: "summary_large_image",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Lisa Fit Method" }],
   },
   appleWebApp: {
     capable: true,

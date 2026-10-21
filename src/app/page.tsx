@@ -8,10 +8,26 @@ export const metadata: Metadata = {
   title: "Lisa Fit Method | Train the Right Way",
   description:
     "A complete strength training foundation for beginners and returners. Learn proper form, follow a structured program, track your progress, and build a body that actually lasts.",
+  // Next replaces the parent openGraph object rather than merging into it,
+  // so a page that sets any openGraph field drops siteName, type and locale
+  // unless it restates them. That is why the homepage, of all pages, was
+  // serving no og:type and no og:url.
   openGraph: {
     title: "Lisa Fit Method | Train the Right Way",
     description: "A complete strength training foundation for beginners and returners. Proper movement, real structure, and a body built to last.",
+    url: "https://lisafitmethod.com/",
+    siteName: "Lisa Fit Method",
+    type: "website",
+    locale: "en_US",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lisa Fit Method | Train the Right Way",
+    description: "A complete strength training foundation for beginners and returners. Proper movement, real structure, and a body built to last.",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Lisa Fit Method" }],
+  },
+  alternates: { canonical: "https://lisafitmethod.com/" },
 }
 
 export default async function HomePage() {
