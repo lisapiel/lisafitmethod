@@ -37,7 +37,9 @@ const OFF_WHITE = "#f5f2ee"
 // Supporting backdrops supplied by Lisa. Used sparingly and heavily washed:
 // her own photographs stay the subject everywhere on the page.
 const BG_LIGHT = "/preview/bg-light.jpg"
+const BG_LIGHT_2 = "/preview/bg-light-2.jpg"
 const BG_DARK = "/preview/bg-dark.jpg"
+const BG_DARK_2 = "/preview/bg-dark-2.jpg"
 
 // Lisa's own images already in the repo, used as foreground photography.
 const LISA_SECOND_PORTRAIT = "/lisa-coaching-about.jpg"
@@ -79,13 +81,13 @@ export default async function PreviewDirectionDPage() {
             statement takes the slot the duplicated pathways section used to
             occupy. It is the first calm beat after the hero. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
-        <StatementD backdrop={BG_LIGHT} />
+        <StatementD backdrop={BG_LIGHT_2} />
         <StoryD
           portraitUrl={heroPhotoUrl ?? portraitUrl}
           portraitCrop={heroPhotoUrl ? "center 35%" : settings.crops.about_bio}
-          secondaryUrl={portraitUrl ?? LISA_SECOND_PORTRAIT}
+          backdrop={BG_LIGHT}
         />
-        <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} backdrop={BG_LIGHT} />
+        <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} backdrop={BG_LIGHT_2} />
 
         {/* Dark from here to the end of the offer: the gradient, the banner
             and the bundle run together with no light band between them. */}
@@ -99,12 +101,12 @@ export default async function PreviewDirectionDPage() {
             aspect="3 / 1"
           />
         )}
-        <BundleD coursePrice={coursePrice} portraitUrl={LISA_FLEX} backdrop={BG_DARK} />
+        <BundleD coursePrice={coursePrice} portraitUrl={LISA_FLEX} backdrop={BG_DARK_2} />
 
         {/* Light again for the clients and the questions. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
-        <TestimonialsD />
-        <FaqD />
+        <TestimonialsD backdrop={BG_LIGHT_2} />
+        <FaqD portraitUrl={portraitUrl ?? LISA_SECOND_PORTRAIT} backdrop={BG_LIGHT} />
 
         {/* Dark: the closing ask. */}
         <ToneShift from={OFF_WHITE} to={BLACK} />

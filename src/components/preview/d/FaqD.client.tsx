@@ -2,7 +2,9 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { RevealLines, DrawRule } from "../Reveal.client"
+import { ParallaxMedia } from "../ParallaxMedia.client"
+import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
+import { Atmosphere } from "./FlowD"
 import { FAQS, FAQ_HEAD } from "../c/productionCopy"
 
 // Common questions.
@@ -11,13 +13,33 @@ import { FAQS, FAQ_HEAD } from "../c/productionCopy"
 // It is revealed one panel at a time because four long answers arriving at
 // once this late in the page is a density problem, and the layout is the
 // right place to solve it.
-export default function FaqD() {
+export default function FaqD({
+  portraitUrl,
+  backdrop,
+}: {
+  portraitUrl?: string
+  backdrop?: string
+}) {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
     <section className="pv-d-faq pv-d-light-alt pv-d-section" data-tone="light" id="faq">
       <style>{`
         .pv-d-faq-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+        .pv-d-faq-grid {
+          display: grid; grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr);
+          gap: clamp(30px, 4.6vw, 80px); align-items: start;
+        }
+        .pv-d-faq-plate { position: sticky; top: 104px; }
+        .pv-d-faq-plate::after {
+          content: ""; position: absolute; top: 18px; left: -18px; right: 18px; bottom: -18px;
+          border: 1px solid rgba(168,137,94,0.3); pointer-events: none;
+        }
+        @media (max-width: 960px) {
+          .pv-d-faq-grid { grid-template-columns: 1fr; gap: var(--d-step-4); }
+          .pv-d-faq-plate { position: static; max-width: 320px; }
+          .pv-d-faq-plate::after { top: 12px; left: -12px; right: 12px; bottom: -12px; }
+        }
         .pv-d-faq-row { border-bottom: 1px solid var(--d-rule); }
         .pv-d-faq-row:first-of-type { border-top: 1px solid var(--d-rule); }
         .pv-d-faq-btn {
@@ -46,7 +68,8 @@ export default function FaqD() {
         }
       `}</style>
 
-      <div className="pv-d-inner">
+      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.16} position="center 50%" />}
+      <div className="pv-d-inner pv-d-above">
         <div className="pv-d-open pv-d-faq-head">
           <div>
             <p className="pv-d-eyebrow">{FAQ_HEAD.eyebrow}</p>
@@ -65,6 +88,21 @@ export default function FaqD() {
           </Link>
         </div>
 
+        <div className="pv-d-faq-grid">
+          {portraitUrl && (
+            <Reveal variant="fade" duration={1300} className="pv-d-faq-plate">
+              <ParallaxMedia
+                src={portraitUrl}
+                alt="Lisa McPherson, Certified Personal Trainer"
+                objectPosition="center 18%"
+                aspect="3 / 4"
+                shift={11}
+                sizes="(max-width: 960px) 320px, 28vw"
+              />
+            </Reveal>
+          )}
+
+          <div>
         {FAQS.map((item, i) => {
           const isOpen = open === i
           return (
@@ -94,6 +132,8 @@ export default function FaqD() {
             </div>
           )
         })}
+          </div>
+        </div>
       </div>
     </section>
   )

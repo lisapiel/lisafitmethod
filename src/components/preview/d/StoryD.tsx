@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ParallaxMedia } from "../ParallaxMedia.client"
 import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
+import { Atmosphere } from "./FlowD"
 import { STORY } from "../c/productionCopy"
 
 // The story, set as a feature.
@@ -16,11 +17,11 @@ import { STORY } from "../c/productionCopy"
 export function StoryD({
   portraitUrl,
   portraitCrop,
-  secondaryUrl,
+  backdrop,
 }: {
   portraitUrl: string | null
   portraitCrop: string
-  secondaryUrl?: string
+  backdrop?: string
 }) {
   const [lead, ...rest] = STORY.paragraphs
 
@@ -31,12 +32,7 @@ export function StoryD({
           display: grid; grid-template-columns: minmax(0, 0.68fr) minmax(0, 1fr);
           gap: clamp(32px, 5vw, 88px); align-items: start;
         }
-        /* Two plates, staggered. One portrait centred in a column is a
-           picture; two offset against each other start to read as a spread,
-           which is most of what stops this section feeling static. */
-        .pv-d-story-plate-sub {
-          width: 64%; margin-left: auto; margin-top: var(--d-step-3);
-        }
+        .pv-d-story-plate { position: sticky; top: 100px; }
         .pv-d-story-lead {
           font-family: var(--font-dm-sans), sans-serif; font-weight: 300;
           font-size: clamp(1.08rem, 1.42vw, 1.34rem); line-height: 1.68;
@@ -75,7 +71,8 @@ export function StoryD({
         }
       `}</style>
 
-      <div className="pv-d-inner">
+      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.12} position="center 30%" />}
+      <div className="pv-d-inner pv-d-above">
         <div className="pv-d-open">
           <p className="pv-d-eyebrow">{STORY.eyebrow}</p>
           <div className="pv-d-open-rule">
@@ -89,8 +86,8 @@ export function StoryD({
         <div className="pv-d-story-grid">
           <div>
             {portraitUrl && (
-              <div className="pv-d-story-plates">
-                <Reveal variant="fade" duration={1300}>
+              <Reveal variant="fade" duration={1300}>
+                <div className="pv-d-story-plate">
                   <ParallaxMedia
                     src={portraitUrl}
                     alt="Lisa McPherson, Certified Personal Trainer"
@@ -99,20 +96,8 @@ export function StoryD({
                     shift={12}
                     sizes="(max-width: 960px) 100vw, 34vw"
                   />
-                </Reveal>
-                {secondaryUrl && (
-                  <Reveal variant="up" delay={160} duration={1300} className="pv-d-story-plate-sub">
-                    <ParallaxMedia
-                      src={secondaryUrl}
-                      alt="Lisa McPherson training"
-                      objectPosition="center 22%"
-                      aspect="4 / 5"
-                      shift={9}
-                      sizes="(max-width: 960px) 60vw, 24vw"
-                    />
-                  </Reveal>
-                )}
-              </div>
+                </div>
+              </Reveal>
             )}
           </div>
 

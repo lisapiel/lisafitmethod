@@ -21,7 +21,7 @@ export default function MovementReelD({ urls }: { urls: string[] }) {
       <style>{`
         .pv-d-reel {
           display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px;
-          margin-top: var(--d-step-5);
+          margin: var(--d-step-5) calc(-1 * var(--d-gutter)) 0;
         }
         .pv-d-reel-plate {
           position: relative; overflow: hidden; aspect-ratio: 3 / 4; background: var(--d-black);

@@ -22,7 +22,7 @@
 // attributed, set as a quote — rather than as a strapline.
 export const LISA_STATEMENT = {
   quote:
-    "Without a plan, you're doing 100 random workouts. With one, you're building one long progression. Same effort, completely different results.",
+    "You can do a hundred hard workouts, but if they're random, they won't take you very far. Real progress comes from having a plan, and a plan that actually fits you.",
   attribution: "Lisa McPherson, CPT",
 }
 
@@ -56,11 +56,13 @@ export const GINO = {
 export const GABRIELA = {
   name: "Gabriela",
   descriptor: "Training Client",
-  // Wording supplied by Lisa, 20 Oct. Replaces the earlier saved record: the
-  // line praising Lisa personally is removed and the substance about the
-  // programme is kept. Rendered exactly as given, with no em dashes.
+  // Wording supplied by Lisa, 21 Oct, as two paragraphs. Rendered exactly as
+  // given. No em dashes. See FLAGS: the first paragraph still contains the
+  // line about Lisa having created the programme.
   quote:
-    "I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines, and it makes me even more motivated and excited. This is exactly what I needed. I especially love how helpful the videos are for understanding the movements, and I like being able to track everything. I just quit CrossFit for good, so I'm going to be using it a lot more.",
+    "I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines, and it's so cool to do this knowing that you created it. It makes me that much more motivated and excited. This is exactly what I needed.",
+  quoteSecond:
+    "I especially love how helpful the demo videos are for understanding the movements, and I love being able to track everything.",
 }
 
 // The square export lives in public/preview/ and is produced by
@@ -81,9 +83,12 @@ export const GABY_PHOTO = {
 
 // FLAGS — for review, not resolved unilaterally.
 //
-// 1. Her name. The saved record and this module say "Gabriela"; Lisa has
-//    called her "Gaby" in conversation. "Gabriela" is rendered, with a comma
-//    before the descriptor as instructed. Change `name` above to switch.
+// 1. Gabriela's first paragraph. The brief says to exclude anything that
+//    sounds like she is praising Lisa personally, but the wording supplied
+//    in the same brief contains "it's so cool to do this knowing that you
+//    created it" — the exact line removed on 20 Oct for that reason. The
+//    supplied wording is rendered, since it is the explicit instruction.
+//    Deleting that clause is a one-line change to `quote` above.
 //
 // 2. Gino's waist figure. Lisa has framed it as 38 inches to ~34 inches; the
 //    saved metric says "4 inches off waist", which is the same change stated

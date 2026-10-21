@@ -2,7 +2,7 @@
 # project or supplied directly by Lisa. Nothing here is written by me.
 #
 # ── Lisa's statement (supplied 20 Oct) ───────────────────────────────────
-Without a plan, you're doing 100 random workouts. With one, you're building one long progression. Same effort, completely different results.
+You can do a hundred hard workouts, but if they're random, they won't take you very far. Real progress comes from having a plan, and a plan that actually fits you.
 #
 # ── Courses subcopy (supplied 20 Oct, replaces the previous line) ────────
 Self-guided training and nutrition courses designed to help you learn, apply, and progress with structure.
@@ -15,7 +15,7 @@ Real progress starts with a plan that fits your life. Here’s what personalized
 # ── Gino — src/app/api/admin/testimonials/seed/route.ts, verbatim ────────
 Gino
 Online Coaching Client
-Gino, Online Coaching Client
+Gino · Online Coaching Client
 From random workouts to a routine that sticks.
 “Biggest change honestly is that it's a routine now, not a grind. The structure you built is what made it stick.”
 I'm at ~210, down 30 pounds, waist is a 34 (pushing 33), and I'm five days into Phase III training almost every day. I'm logging every meal, hitting 150g+ protein most days, and my recovery and cardio are way better than when we started. My back squats went from 90 lbs to 225 lbs.
@@ -29,8 +29,9 @@ back squat
 # ── Gabriela — wording supplied by Lisa 20 Oct, replacing the saved record
 Gabriela
 Training Client
-Gabriela, Training Client
-“I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines, and it makes me even more motivated and excited. This is exactly what I needed. I especially love how helpful the videos are for understanding the movements, and I like being able to track everything. I just quit CrossFit for good, so I'm going to be using it a lot more.”
+Gabriela · Training Client
+“I really love the workout. It's kicking my butt and I've been sore all week. I'm learning a lot of these machines, and it's so cool to do this knowing that you created it. It makes me that much more motivated and excited. This is exactly what I needed.”
+“I especially love how helpful the demo videos are for understanding the movements, and I love being able to track everything.”
 #
 # ── Video caption and review-only dimension readout ──────────────────────
 Gino, video testimonial

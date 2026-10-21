@@ -1,5 +1,6 @@
 import { ParallaxMedia } from "../ParallaxMedia.client"
 import { Reveal, RevealLines, DrawRule } from "../Reveal.client"
+import { Atmosphere } from "./FlowD"
 import SquareVideo from "./SquareVideo.client"
 import { GABY_PHOTO, GABRIELA, GINO, GINO_VIDEO, TESTIMONIALS_HEAD } from "./testimonialContent"
 
@@ -17,7 +18,7 @@ import { GABY_PHOTO, GABRIELA, GINO, GINO_VIDEO, TESTIMONIALS_HEAD } from "./tes
 // numbers read as one line of evidence instead of three separate panels.
 //
 // Every word in both testimonials is the approved text, unchanged.
-export function TestimonialsD() {
+export function TestimonialsD({ backdrop }: { backdrop?: string }) {
   return (
     <section className="pv-d-clients pv-d-light pv-d-section" data-tone="light" id="clients">
       <style>{`
@@ -81,6 +82,10 @@ export function TestimonialsD() {
           font-size: clamp(1.02rem, 1.42vw, 1.26rem); line-height: 1.62; color: var(--d-text);
           margin: 0 0 var(--d-step-3); max-width: 48ch;
         }
+        .pv-d-gaby-quote--second {
+          font-size: clamp(0.95rem, 1.18vw, 1.08rem); line-height: 1.7;
+          color: var(--d-muted); max-width: 46ch;
+        }
         .pv-d-gaby-plate { position: relative; }
         .pv-d-gaby-plate::after {
           content: ""; position: absolute; top: 18px; left: 18px; right: -18px; bottom: -18px;
@@ -103,7 +108,8 @@ export function TestimonialsD() {
         }
       `}</style>
 
-      <div className="pv-d-inner">
+      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.15} position="center 35%" />}
+      <div className="pv-d-inner pv-d-above">
         <div className="pv-d-open pv-d-open--centre">
           <p className="pv-d-eyebrow">{TESTIMONIALS_HEAD.eyebrow}</p>
           <div className="pv-d-open-rule">
@@ -140,7 +146,7 @@ export function TestimonialsD() {
               <blockquote className="pv-d-gino-quote">&ldquo;{GINO.quote}&rdquo;</blockquote>
               <p className="pv-d-written">{GINO.written}</p>
               <cite className="pv-d-cite">
-                {GINO.name}, {GINO.descriptor}
+                {GINO.name} &middot; {GINO.descriptor}
               </cite>
             </Reveal>
           </div>
@@ -152,8 +158,11 @@ export function TestimonialsD() {
               <DrawRule color="rgba(168,137,94,0.55)" />
             </div>
             <blockquote className="pv-d-gaby-quote">&ldquo;{GABRIELA.quote}&rdquo;</blockquote>
+            <blockquote className="pv-d-gaby-quote pv-d-gaby-quote--second">
+              &ldquo;{GABRIELA.quoteSecond}&rdquo;
+            </blockquote>
             <cite className="pv-d-cite">
-              {GABRIELA.name}, {GABRIELA.descriptor}
+              {GABRIELA.name} &middot; {GABRIELA.descriptor}
             </cite>
           </Reveal>
 

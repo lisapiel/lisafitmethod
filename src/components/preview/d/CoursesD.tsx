@@ -123,6 +123,9 @@ export function CoursesD({
           })}
         </div>
 
+      </div>
+
+      <div className="pv-d-above">
         <MovementReelD urls={movementUrls} />
       </div>
     </section>
