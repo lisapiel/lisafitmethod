@@ -1,55 +1,45 @@
 // 1:1 Coaching content.
 //
-// PROVENANCE: every line is Lisa's own wording from src/lib/siteSettings.ts
-// DEFAULTS — the copy that already runs the /coaching page — transcribed
-// verbatim. Nothing here is newly written.
-//
-// One deliberate omission is flagged at the bottom.
+// PROVENANCE: the introduction and all four numbered benefits are the wording
+// Lisa supplied on 21 Oct, transcribed verbatim. They replace the earlier
+// siteSettings copy, which described the coaching but not the platform the
+// client actually works in.
 import { COACHING_FROM_DISPLAY } from "@/lib/pricing"
 
 export const COACHING = {
   eyebrow: "By application",
-  // siteSettings: coachingHeroHeadline
   heading: "Coaching built around you.",
-  // siteSettings: coachingHeroSubtext, first two sentences. See FLAG.
   body:
-    "Coaching is designed for people serious about building strength, improving movement quality, and creating long-term results. I keep coaching intentionally limited so every client gets real attention, detailed feedback, and programming that evolves as they progress.",
+    "Coaching is designed for people serious about building strength, improving movement quality, and creating long-term results. I keep my coaching intentionally limited so every client gets a genuinely personalized experience. Your training, nutrition, progress, and feedback all come together in one place, with me guiding and adjusting your plan as you go.",
   price: COACHING_FROM_DISPLAY,
-  // siteSettings: coachingFormSubtext, closing sentence
   note: "No commitment required to apply.",
   cta: "Apply for Coaching",
   href: "/coaching#apply",
 }
 
-// siteSettings: coachingFeature1-4 Title and Body, verbatim.
 export const COACHING_PILLARS = [
   {
     index: "01",
-    title: "Custom programming",
+    title: "A program built around you",
     body:
-      "Training built specifically for your goals, experience level, schedule, equipment, and recovery capacity. Updated as you progress so your body keeps adapting instead of plateauing.",
+      "Your training is designed for your goals, experience, schedule, equipment, and limitations. No generic templates. Your program evolves as you progress, so you're always working toward something.",
   },
   {
     index: "02",
-    title: "Form review & feedback",
+    title: "Your entire training in one place",
     body:
-      "Send me videos of your lifts and I'll break down your technique with detailed cues and corrections so you understand not just what to change, but why.",
+      "Your own coaching platform gives you structured workouts, exercise demonstration videos, and built-in tracking for weights, reps, and performance. You can see what you did last time, measure your progress, and train with confidence.",
   },
   {
     index: "03",
-    title: "Check-ins & adjustments",
+    title: "Training, nutrition & progress together",
     body:
-      "Weekly check-ins to adjust your training, recovery, workload, or nutrition before small issues become setbacks. Real coaching means adapting as your body evolves.",
+      "Nutrition targets, food logging, progress tracking, and weekly check-ins all in one place. I use that information to understand what's working, what isn't, and when your plan needs adjusting.",
   },
   {
     index: "04",
-    title: "Direct access to me",
+    title: "Real coaching, directly from me",
     body:
-      "Questions between check-ins? Message me directly. No outsourced coaching or automated replies — just real guidance when you need it.",
+      "You're not handed a program and left to figure everything out. You can message me, send videos for form feedback, ask questions, and get personalized guidance as you progress. You're working with me, not an automated system.",
   },
 ]
-
-// FLAG: coachingHeroSubtext ends "Fill out the form below and I'll personally
-// review your application." That sentence is dropped here because there is no
-// form on the homepage — the section links to /coaching#apply instead. Say the
-// word if you would rather it stayed and pointed at the coaching page.

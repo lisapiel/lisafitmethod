@@ -40,23 +40,23 @@ Gino, video testimonial
 ·
 ,
 #
-# ── 1:1 Coaching section, restored at Lisa's request ─────────────────────
-# Every line is her own wording from src/lib/siteSettings.ts DEFAULTS, which
-# already runs the /coaching page. Transcribed verbatim.
+# ── 1:1 Coaching section ─────────────────────────────────────────────────
+# Introduction and all four numbered benefits are the wording Lisa supplied
+# on 21 Oct, verbatim.
 By application
 Coaching built around you.
-Coaching is designed for people serious about building strength, improving movement quality, and creating long-term results. I keep coaching intentionally limited so every client gets real attention, detailed feedback, and programming that evolves as they progress.
+Coaching is designed for people serious about building strength, improving movement quality, and creating long-term results. I keep my coaching intentionally limited so every client gets a genuinely personalized experience. Your training, nutrition, progress, and feedback all come together in one place, with me guiding and adjusting your plan as you go.
 01
-Custom programming
-Training built specifically for your goals, experience level, schedule, equipment, and recovery capacity. Updated as you progress so your body keeps adapting instead of plateauing.
+A program built around you
+Your training is designed for your goals, experience, schedule, equipment, and limitations. No generic templates. Your program evolves as you progress, so you're always working toward something.
 02
-Form review & feedback
-Send me videos of your lifts and I'll break down your technique with detailed cues and corrections so you understand not just what to change, but why.
+Your entire training in one place
+Your own coaching platform gives you structured workouts, exercise demonstration videos, and built-in tracking for weights, reps, and performance. You can see what you did last time, measure your progress, and train with confidence.
 03
-Check-ins & adjustments
-Weekly check-ins to adjust your training, recovery, workload, or nutrition before small issues become setbacks. Real coaching means adapting as your body evolves.
+Training, nutrition & progress together
+Nutrition targets, food logging, progress tracking, and weekly check-ins all in one place. I use that information to understand what's working, what isn't, and when your plan needs adjusting.
 04
-Direct access to me
-Questions between check-ins? Message me directly. No outsourced coaching or automated replies — just real guidance when you need it.
+Real coaching, directly from me
+You're not handed a program and left to figure everything out. You can message me, send videos for form feedback, ask questions, and get personalized guidance as you progress. You're working with me, not an automated system.
 $397/month
 No commitment required to apply.

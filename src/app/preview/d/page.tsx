@@ -10,7 +10,7 @@ import { fetchSiteSettings } from "@/lib/siteSettings"
 import FreeGuideTeaser from "@/components/FreeGuideTeaser.client"
 import PreviewBar from "@/components/preview/PreviewBar.client"
 import { StylesD } from "@/components/preview/d/StylesD"
-import { ToneShift, PhotoBand } from "@/components/preview/d/FlowD"
+import { ToneShift } from "@/components/preview/d/FlowD"
 import NavD from "@/components/preview/d/NavD.client"
 import HeroD from "@/components/preview/d/HeroD.client"
 import { StatementD } from "@/components/preview/d/StatementD"
@@ -58,9 +58,8 @@ const REEL_SLOTS = [
 ]
 
 export default async function PreviewDirectionDPage() {
-  const [heroPhotoUrl, bannerUrl, portraitUrl, trailerUrl, reelUrls, settings] = await Promise.all([
+  const [heroPhotoUrl, portraitUrl, trailerUrl, reelUrls, settings] = await Promise.all([
     getPublishedPhotoUrl("hero"),
-    getPublishedPhotoUrl("banner"),
     getPublishedPhotoUrl("about_bio"),
     getPublishedVideoUrl("lp_trailer"),
     getPublishedVideoUrls(REEL_SLOTS),
@@ -91,36 +90,27 @@ export default async function PreviewDirectionDPage() {
           backdrop={BG_LIGHT}
         />
 
-        {/* 4. The courses — two sheets, then the movement reel, then the
-            bundle. The reel is full bleed and runs straight into the dark,
-            so it carries the transition instead of needing one. */}
+        {/* 4. The courses, then the bundle they add up to. Training carries
+            its own movement footage now, so the standalone reel and the
+            standalone banner are both gone and the three products read as
+            one collection. */}
         <CoursesD coursePrice={coursePrice} movementUrls={orderedReel} backdrop={BG_DUMBBELLS} />
+        <ToneShift from={WARM_WHITE} to={BLACK} />
         <BundleD coursePrice={coursePrice} portraitUrl={LISA_FLEX} backdrop={BG_DARK_2} />
 
-        {/* 5. The banner, still on the dark run. */}
-        {bannerUrl && (
-          <PhotoBand
-            src={bannerUrl}
-            alt="Lisa Fit Method"
-            objectPosition={settings.crops.banner}
-            tone="dark"
-            aspect="3 / 1"
-          />
-        )}
-
-        {/* 6. 1:1 Coaching — what working with her actually involves. */}
+        {/* 5. 1:1 Coaching — what working with her actually involves. */}
         <ToneShift from={BLACK} to={OFF_WHITE} />
         <CoachingD portraitUrl={portraitUrl ?? "/lisa-coaching-about.jpg"} backdrop={BG_ARCH} />
 
-        {/* 7. Real results, 8. Common questions. */}
+        {/* 6. Real results, 7. Common questions. */}
         <TestimonialsD backdrop={BG_LIGHT_2} />
         <FaqD />
 
-        {/* 9. Ready to start. */}
+        {/* 8. Ready to start. */}
         <ToneShift from={OFF_WHITE} to={BLACK} />
         <FinalCtaD backdrop={BG_DARK} />
 
-        {/* 10. Free guides, then the footer. */}
+        {/* 9. Free guides, then the footer. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />
         <div data-tone="light">
           <FreeGuideTeaser />

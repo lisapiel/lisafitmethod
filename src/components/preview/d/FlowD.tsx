@@ -122,7 +122,7 @@ export function Atmosphere({
     center: `radial-gradient(ellipse 78% 72% at 50% 50%, rgba(${ground},0.9) 0%, rgba(${ground},0.82) 45%, rgba(${ground},0.42) 78%, rgba(${ground},0.26) 100%)`,
     left: `linear-gradient(to right, rgba(${ground},0.93) 0%, rgba(${ground},0.86) 42%, rgba(${ground},0.5) 72%, rgba(${ground},0.24) 100%)`,
     right: `linear-gradient(to left, rgba(${ground},0.93) 0%, rgba(${ground},0.88) 48%, rgba(${ground},0.54) 76%, rgba(${ground},0.28) 100%)`,
-    edges: `linear-gradient(to bottom, rgba(${ground},0.9) 0%, rgba(${ground},0.46) 30%, rgba(${ground},0.46) 70%, rgba(${ground},0.9) 100%)`,
+    edges: `linear-gradient(to bottom, rgba(${ground},0.92) 0%, rgba(${ground},0.66) 26%, rgba(${ground},0.66) 74%, rgba(${ground},0.92) 100%)`,
     flat: `linear-gradient(to bottom, rgba(${ground},0.86), rgba(${ground},0.86))`,
   }
 
