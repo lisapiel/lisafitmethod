@@ -40,6 +40,28 @@ Gino, video testimonial
 ·
 ,
 #
+# ── Course showcases, refined 21 Oct ────────────────────────────────────
+# Shorter benefit structure replacing the previous feature lists. Checked
+# against what each course actually ships.
+Train with structure. See your progress.
+Learn the fundamental movement patterns, follow a structured training program, and track your progress so every workout builds on the last.
+Master the foundations
+Learn proper movement patterns and technique, with a focus on building strength, stability, and control.
+Follow a structured program
+Progressive workouts with warm-ups, core and glute training, and clear guidance on how to improve over time.
+See your progress
+Exercise demonstration videos and a built-in workout tracker to record weights, reps, and performance.
+Also includes Module 4: Nutrition Essentials, full warm-ups and cool-downs, progression guidance, and ongoing access.
+Eat to support your training. Without overthinking it.
+Understand what your body needs, build a nutrition strategy that fits your goals, and learn how to make it sustainable in real life.
+Understand your body
+Learn the foundations of nutrition and how to make informed decisions about what you eat.
+Build your nutrition blueprint
+Use the interactive calorie and macro calculator to establish personalized starting targets.
+Turn knowledge into action
+Follow a flexible 4-week meal plan that scales to your calorie needs, with practical guidance to help you stay consistent.
+Includes eating out, supplements, and troubleshooting guides, plus references and resources. One-time payment, buy once, access anytime.
+#
 # ── 1:1 Coaching section ─────────────────────────────────────────────────
 # Introduction and all four numbered benefits are the wording Lisa supplied
 # on 21 Oct, verbatim.

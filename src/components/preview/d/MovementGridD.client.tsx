@@ -3,41 +3,66 @@
 import MovementVideo from "../MovementVideo.client"
 import { useInView } from "../Reveal.client"
 
-// Real clips from the Training Foundations library, arranged as a grid beside
-// the course they belong to.
+// Real footage from the Training Foundations library, composed rather than
+// tiled.
 //
-// DELIBERATELY TEXT-FREE. The course already promises "50+ exercise videos";
-// these show them rather than adding a word. Each plate mounts its clip only
-// once it scrolls into view, so six never load at once.
+// Six equal squares read as a contact sheet: nothing is the subject, so the
+// eye skims it. One large plate with two supporting clips reads as a lead
+// image with detail shots, which is how a magazine would run the same three
+// frames. On a phone the lead stays full width and the pair sit beneath it,
+// so the movement is still legible instead of being three thumbnails.
+//
+// DELIBERATELY TEXT-FREE. The course promises exercise demonstration videos;
+// these are them. Each plate mounts its clip only once it is in view.
 export default function MovementGridD({ urls }: { urls: string[] }) {
-  const shown = urls.slice(0, 6)
-  if (shown.length === 0) return null
+  const [lead, ...rest] = urls
+  const supporting = rest.slice(0, 2)
+  if (!lead) return null
 
   return (
     <div className="pv-d-mgrid" role="presentation">
       <style>{`
-        .pv-d-mgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
-        .pv-d-mgrid-plate {
-          position: relative; overflow: hidden; aspect-ratio: 3 / 4; background: var(--d-black);
+        .pv-d-mgrid {
+          display: grid;
+          grid-template-columns: 1.32fr 1fr;
+          grid-template-rows: auto auto;
+          gap: clamp(6px, 0.7vw, 11px);
         }
-        .pv-d-mgrid-plate::after {
+        .pv-d-mgrid-lead { grid-row: span 2; }
+        .pv-d-mplate {
+          position: relative; overflow: hidden; background: var(--d-black);
+          box-shadow: 0 26px 60px -44px rgba(26,26,26,0.7);
+        }
+        .pv-d-mplate--lead { aspect-ratio: 3 / 4; }
+        .pv-d-mplate--small { aspect-ratio: 4 / 3; }
+        .pv-d-mplate::after {
           content: ""; position: absolute; inset: 0; pointer-events: none;
-          background: linear-gradient(to top, rgba(10,10,10,0.34), transparent 58%);
+          background: linear-gradient(to top, rgba(10,10,10,0.3), transparent 56%);
+          transition: opacity 700ms ease;
         }
-        @media (max-width: 960px) { .pv-d-mgrid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 560px) { .pv-d-mgrid { grid-template-columns: repeat(2, 1fr); } }
+        .pv-d-mplate:hover::after { opacity: 0.4; }
+        @media (max-width: 760px) {
+          .pv-d-mgrid { grid-template-columns: 1fr 1fr; }
+          .pv-d-mgrid-lead { grid-row: auto; grid-column: span 2; }
+          .pv-d-mplate--lead { aspect-ratio: 4 / 3; }
+          .pv-d-mplate--small { aspect-ratio: 1 / 1; }
+        }
       `}</style>
-      {shown.map((url) => (
-        <Plate key={url} url={url} />
+
+      <div className="pv-d-mgrid-lead">
+        <Plate url={lead} variant="lead" />
+      </div>
+      {supporting.map((url) => (
+        <Plate key={url} url={url} variant="small" />
       ))}
     </div>
   )
 }
 
-function Plate({ url }: { url: string }) {
+function Plate({ url, variant }: { url: string; variant: "lead" | "small" }) {
   const { ref, inView } = useInView<HTMLDivElement>(0.3)
   return (
-    <div ref={ref} className="pv-d-mgrid-plate">
+    <div ref={ref} className={`pv-d-mplate pv-d-mplate--${variant}`}>
       <MovementVideo src={url} mounted={inView} active={inView} label="" />
     </div>
   )
