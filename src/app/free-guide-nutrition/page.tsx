@@ -1,6 +1,5 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
-import NutritionGuideClient from "./page.client"
+import { FreeGuideNutritionPageD } from "@/components/site/FreeGuideNutritionPageD"
 
 export const metadata: Metadata = {
   title: "Free Nutrition Guide: The 5 Principles That Actually Work",
@@ -18,9 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default function NutritionGuidePage() {
-  return (
-    <Suspense>
-      <NutritionGuideClient />
-    </Suspense>
-  )
+  return <FreeGuideNutritionPageD />
 }

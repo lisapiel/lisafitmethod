@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import ContactClient from "./page.client"
+import { ContactPageD } from "@/components/site/ContactPageD"
 
 export const metadata: Metadata = {
   title: "Contact | Lisa Fit Method",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function ContactPage() {
-  return <ContactClient />
+  return <ContactPageD />
 }

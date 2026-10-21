@@ -24,7 +24,7 @@ export const FAQ_CTA = {
         "For people who want to build real strength, learn correct technique, and finally follow a program that makes sense. 50+ exercise videos, a structured 4-week program, progressive overload guidance, and built-in workout tracking.",
       cta: "Get Training Foundations",
       href: "/checkout?product=training",
-      secondary: "See what’s included →",
+      secondary: "See what's included →",
       secondaryHref: "/courses",
     },
     {
@@ -34,7 +34,7 @@ export const FAQ_CTA = {
         "For people who want to understand nutrition for fat loss, muscle building, or both. TDEE calculator, 4-week meal plan, macro education, and real-world strategies for eating well without obsessing over food.",
       cta: "Get Nutrition Foundations",
       href: "/checkout?product=nutrition",
-      secondary: "See what’s included →",
+      secondary: "See what's included →",
       secondaryHref: "/nutrition",
     },
     {

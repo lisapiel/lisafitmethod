@@ -1,6 +1,5 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
-import FreeGuideClient from "./page.client"
+import { FreeGuidePageD } from "@/components/site/FreeGuidePageD"
 
 export const metadata: Metadata = {
   title: "The 5 Foundation Movements: Free Preview",
@@ -18,9 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default function FreeGuidePage() {
-  return (
-    <Suspense>
-      <FreeGuideClient />
-    </Suspense>
-  )
+  return <FreeGuidePageD />
 }

@@ -1,7 +1,6 @@
 import { StylesD } from "./StylesD"
 import NavD from "./NavD.client"
 import { FooterD } from "./ClosingD"
-import PreviewBar from "../PreviewBar.client"
 
 // The Direction D frame every public page sits inside: the design tokens,
 // the tone-aware navigation and the footer. Pages supply only their own
@@ -14,7 +13,6 @@ export function PageShellD({ children }: { children: React.ReactNode }) {
       <NavD />
       <main>{children}</main>
       <FooterD />
-      <PreviewBar current="d" tone="dark" />
     </div>
   )
 }

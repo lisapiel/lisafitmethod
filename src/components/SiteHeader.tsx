@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import AccountDropdown from "./AccountDropdown.client"
 import MemberDrawer from "./MemberDrawer.client"
+import { usesOwnChrome } from "@/components/siteChrome"
 
 const HIDDEN_PREFIXES = [
   // Design prototype at /preview ships its own navigation per direction.
@@ -42,6 +43,8 @@ export default function SiteHeader() {
   }, [])
 
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null
+  // Direction D pages carry their own navigation and footer.
+  if (usesOwnChrome(pathname)) return null
 
   const close = () => setMenuOpen(false)
 

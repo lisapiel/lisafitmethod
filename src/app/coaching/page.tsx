@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import CoachingClient from "./page.client"
+import { CoachingPageD } from "@/components/site/CoachingPageD"
 
 export const metadata: Metadata = {
   title: "Online 1:1 Coaching | Lisa Fit Method",
@@ -19,19 +19,5 @@ export const metadata: Metadata = {
 }
 
 export default function CoachingPage() {
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://lisafitmethod.com" },
-      { "@type": "ListItem", position: 2, name: "Coaching", item: "https://lisafitmethod.com/coaching" },
-    ],
-  }
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd).replace(/</g, "\\u003c") }} />
-      <CoachingClient />
-    </>
-  )
+  return <CoachingPageD />
 }

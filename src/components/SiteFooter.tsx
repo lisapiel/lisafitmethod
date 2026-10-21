@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { DEFAULTS, S3_SETTINGS_URL } from "@/lib/siteSettings"
+import { usesOwnChrome } from "@/components/siteChrome"
 
 const HIDDEN_PREFIXES = ["/admin", "/training-foundations", "/preview"]
 const DEFAULT_TAGLINE = DEFAULTS.text.footerTagline
@@ -23,6 +24,8 @@ export default function SiteFooter() {
   }, [])
 
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null
+  // Direction D pages carry their own navigation and footer.
+  if (usesOwnChrome(pathname)) return null
 
   return (
     <footer
