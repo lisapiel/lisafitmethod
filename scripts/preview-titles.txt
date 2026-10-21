@@ -1,14 +1,5 @@
-# Production <title> values, which each preview replaces with a
-# "Direction D Preview" title so a prototype can never be mistaken for the
-# live page. Page content itself is unaffected.
-courses | lisa fit method | lisa fit method
-nutrition foundations - lisa fit method | lisa fit method
-online 1:1 coaching | lisa fit method | lisa fit method
-faq | common questions about the lisa fit method | lisa fit method
-contact | lisa fit method | lisa fit method
-the 5 foundation movements: free preview | lisa fit method
-free nutrition guide: the 5 principles that actually work | lisa fit method
+# Production copy the Direction D previews deliberately do not render as text.
 #
-# Direction D draws list markers with CSS ::before rather than as a text
-# span, so the arrow glyph stops appearing as page text. Decoration, not copy.
+# Direction D draws list markers with CSS ::before rather than as a text span,
+# so the arrow glyph stops appearing as page text. Decoration, not copy.
 →

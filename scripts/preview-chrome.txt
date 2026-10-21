@@ -1,20 +1,12 @@
-# Review chrome and the Direction D preview page titles. None of this is page
-# content: the prototype selector belongs to the preview console, and the
-# titles carry a "Direction D Preview" suffix precisely so a preview can never
-# be mistaken for the live page. Both disappear in the production build.
+# Review chrome: the prototype selector, which belongs to the preview console
+# and disappears in the production build. Page titles are no longer listed
+# here, because compare-copy now excludes the document title on both sides.
 prototype
 console
 a · atelier
 b · nocturne
 c · combined
 →
-courses — direction d preview | lisa fit method
-nutrition foundations — direction d preview | lisa fit method
-coaching — direction d preview | lisa fit method
-faq — direction d preview | lisa fit method
-contact — direction d preview | lisa fit method
-free training guide — direction d preview | lisa fit method
-free nutrition guide — direction d preview | lisa fit method
 # The seven /coaching FAQ answers.
 #
 # These are not new copy: they are the same answers the live page holds, from

@@ -53,6 +53,9 @@ export function textRuns(html) {
   // visible page copy, and the prototype is deliberately titled as a
   // prototype, so the comparison starts at <body>.
   s = s.replace(/<head[\s\S]*?<\/head>/i, " ")
+  // Next renders the document title into the body, so stripping <head> is
+  // not enough to keep it out of the comparison.
+  s = s.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, " ")
   s = s.replace(/<script[\s\S]*?<\/script>/gi, " ")
   s = s.replace(/<style[\s\S]*?<\/style>/gi, " ")
   s = s.replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
@@ -124,16 +127,19 @@ if (!prodUrl || !protoUrl) {
 // buried in this script, so every intentional addition is reviewable in one
 // place. Anything added but NOT listed there is reported as a copy change.
 const fs = await import("node:fs")
-const readList = (flag) => {
-  const arg = rest.find((a) => a.startsWith(flag))
-  if (!arg) return []
-  return fs
-    .readFileSync(arg.slice(flag.length), "utf8")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith("#"))
-    .map((l) => normalise(l))
-}
+// The flag may be repeated, so a page can combine a shared declaration file
+// with its own; reading only the first one silently ignored the rest.
+const readList = (flag) =>
+  rest
+    .filter((a) => a.startsWith(flag))
+    .flatMap((arg) =>
+      fs
+        .readFileSync(arg.slice(flag.length), "utf8")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith("#"))
+        .map((l) => normalise(l))
+    )
 
 const declaredAdditions = readList("--additions=")
 

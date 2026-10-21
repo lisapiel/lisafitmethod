@@ -24,6 +24,22 @@ const PAIRS = [
   ["/", "/preview/d"],
 ]
 
+// Every article, not just one: the article template has to hold for all of
+// them, and a template is only proven by the piece that breaks it.
+const ARTICLES = [
+  "why-you-plateau-in-the-gym",
+  "core-training-mistakes",
+  "why-random-workouts-dont-work",
+  "beginner-gym-mistakes",
+  "progressive-overload-explained",
+  "how-to-build-a-workout-routine",
+  "online-personal-trainer-for-women",
+  "how-to-hip-hinge",
+  "back-pain-and-the-gym",
+  "strength-training-for-women-beginners",
+]
+for (const slug of ARTICLES) PAIRS.push([`/blog/${slug}`, `/preview/d/blog/${slug}`])
+
 let failed = 0
 for (const [prod, proto] of PAIRS) {
   const args = [
