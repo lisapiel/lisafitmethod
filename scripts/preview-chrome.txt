@@ -15,3 +15,18 @@ faq — direction d preview | lisa fit method
 contact — direction d preview | lisa fit method
 free training guide — direction d preview | lisa fit method
 free nutrition guide — direction d preview | lisa fit method
+# The seven /coaching FAQ answers.
+#
+# These are not new copy: they are the same answers the live page holds, from
+# the same source. The live page mounts an answer only while its row is open,
+# so a closed answer is absent from the HTML entirely. Direction D keeps every
+# answer in the document and hides it with CSS, which is what lets the row
+# animate and what makes the answers readable to search engines and to a
+# screen reader walking the page. Listed here so the diff stays at zero.
+You work directly with me, not an algorithm and not an assigned trainer from a pool. I personally review every workout and every check-in, I adjust your program based on what's actually working, and I keep my roster small on purpose so every client gets my full attention.
+Yes. The Complete Foundations Bundle ($137) is the best place to start. If you upgrade to 3-month 1:1 coaching within 90 days, the full $137 credits toward your first coaching month. The bundle credit applies to the 3-month coaching option only, not to month-to-month coaching.
+Yes. Every client gets personalized nutrition targets and weekly check-in support. No rigid meal plans, just clear targets that actually work around your real life.
+Tell me about it in the application. Working around injuries is a big part of what I do. We train what we can, build up what we can’t yet, and I’ll tell you honestly if something needs a medical professional first.
+Most of my clients train 3 to 4 days a week and spend about five minutes on their Sunday check-in. Your program is built around your schedule, not the other way around.
+Honestly? You’ll feel the difference in a few weeks. Visible change usually takes about 12 weeks of consistent work. That’s why the primary tier starts with a 3-month commitment. I don’t take clients for outcomes I can’t deliver.
+I personally read your application within 48 hours. If I think I can help, we get on a short call, I map out how I’d coach you, and you decide. If I’m not the right fit, I’ll tell you that too.
