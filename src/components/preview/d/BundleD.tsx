@@ -79,10 +79,17 @@ export function BundleD({
             border-top: 1px solid var(--d-rule-dark); padding-top: var(--d-step-3);
           }
         }
+        /* Mobile only: the bundle follows the same order as the two
+           courses above it — heading, portrait, description, value, price.
+           Desktop keeps the portrait beside the copy, untouched. */
         @media (max-width: 900px) {
-          .pv-d-bundle-grid { grid-template-columns: 1fr; gap: var(--d-step-5); align-items: start; }
-          .pv-d-bundle-figures { max-width: none; }
-          .pv-d-bundle-portrait { max-width: 340px; }
+          .pv-d-bundle-grid { grid-template-columns: 1fr; gap: var(--d-step-4); align-items: start; }
+          .pv-d-bundle-left { display: contents; }
+          .pv-d-bundle-portrait { order: 1; max-width: 340px; }
+          .pv-d-bundle-copy { order: 2; }
+          .pv-d-bundle-figures { order: 3; max-width: none; }
+          .pv-d-bundle-buy { order: 4; margin-top: 0; }
+          .pv-d-bundle-copy .pv-d-bundle-body { margin-bottom: 0; }
           .pv-d-bundle-portrait::after { top: -12px; right: -12px; bottom: 12px; left: 12px; }
         }
       `}</style>
@@ -104,8 +111,8 @@ export function BundleD({
         </div>
 
         <div className="pv-d-bundle-grid">
-          <div>
-            <Reveal variant="up" delay={120}>
+          <div className="pv-d-bundle-left">
+            <Reveal className="pv-d-bundle-copy" variant="up" delay={120}>
               <p className="pv-d-body pv-d-bundle-body">{BUNDLE.body}</p>
             </Reveal>
             <Reveal variant="up" delay={200} className="pv-d-figures pv-d-bundle-figures">
@@ -143,7 +150,15 @@ export function BundleD({
                 objectPosition="center 18%"
                 aspect="4 / 5"
                 shift={10}
-                sizes="(max-width: 900px) 340px, 34vw"
+                sizes="(max-width: 900px) 92vw, 34vw"
+                // On a phone the browser selects the 3840w candidate for this
+                // one file and then never completes the load, so the portrait
+                // stayed blank while every other image on the page was fine.
+                // Forcing a smaller variant by hand loads instantly, so the
+                // candidate is the problem, not the file or the server. The
+                // source is only 998x1388 and renders at most ~430px wide
+                // here, so serving it unprocessed is both reliable and cheap.
+                unoptimized
               />
             </Reveal>
           )}

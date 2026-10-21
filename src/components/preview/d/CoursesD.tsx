@@ -56,7 +56,6 @@ export function CoursesD({
           display: grid; grid-template-columns: 42px 1fr; gap: clamp(12px, 1.4vw, 20px);
           padding: clamp(15px, 1.7vw, 22px) 0; border-top: 1px solid rgba(26,26,26,0.13);
         }
-        .pv-d-benefit:last-of-type { border-bottom: 1px solid rgba(26,26,26,0.13); }
         .pv-d-benefit-num {
           font-family: var(--font-playfair), serif; font-size: clamp(0.95rem, 1.2vw, 1.12rem);
           color: var(--d-accent-dark); line-height: 1.5;
@@ -129,10 +128,27 @@ export function CoursesD({
           background: linear-gradient(to bottom, rgba(250,248,245,0.2) 0%, rgba(250,248,245,0.04) 42%, rgba(250,248,245,0.3) 100%);
         }
 
+        /* ── mobile and small tablet ─────────────────────────────────────
+           Every offer tells its story in the same order once the columns
+           stack: label and headline, then its media, then the explanation,
+           then the price. Without this the courses ended on their media and
+           the next one opened with its own, so two large images met with
+           nothing between them.
+
+           Setting display to contents on the text column dissolves it, so its
+           three parts become grid items in their own right and can be ordered
+           around the media. Desktop never sees any of this. */
         @media (max-width: 960px) {
           .pv-d-cshow--training,
           .pv-d-cshow--nutrition { grid-template-columns: 1fr; gap: var(--d-step-4); }
-          .pv-d-cshow--nutrition .pv-d-nphoto { order: -1; }
+          .pv-d-ctext { display: contents; }
+          .pv-d-chead { order: 1; }
+          .pv-d-cmedia, .pv-d-nphoto { order: 2; }
+          .pv-d-cbody { order: 3; }
+          .pv-d-cbuy-group { order: 4; }
+          /* The grid gap now provides the separation these margins used to. */
+          .pv-d-chead .pv-d-cshow-title { margin-bottom: 0; }
+          .pv-d-cbuy-group .pv-d-cbuy { margin-top: 0; }
           .pv-d-nphoto-frame { aspect-ratio: 5 / 4; }
         }
       `}</style>
@@ -155,26 +171,31 @@ export function CoursesD({
 
         {/* Training Foundations */}
         <div className="pv-d-cshow pv-d-cshow--training">
-          <div>
-            <Reveal variant="up" duration={1050}>
+          <div className="pv-d-ctext">
+            <Reveal className="pv-d-chead" variant="up" duration={1050}>
               <p className="pv-d-eyebrow">{TRAINING.eyebrow}</p>
               <h3 className="pv-d-cshow-title">{TRAINING.heading}</h3>
-              <p className="pv-d-cshow-intro">{TRAINING.intro}</p>
             </Reveal>
 
-            {TRAINING.benefits.map((benefit, i) => (
-              <Reveal key={benefit.index} className="pv-d-benefit" variant="up" delay={i * 80} duration={1000}>
-                <span className="pv-d-benefit-num" aria-hidden="true">
-                  {benefit.index}
-                </span>
-                <div>
-                  <h4>{benefit.title}</h4>
-                  <p>{benefit.body}</p>
-                </div>
+            <div className="pv-d-cbody">
+              <Reveal variant="up" duration={1050}>
+                <p className="pv-d-cshow-intro">{TRAINING.intro}</p>
               </Reveal>
-            ))}
 
-            <Reveal variant="up" delay={120}>
+              {TRAINING.benefits.map((benefit, i) => (
+                <Reveal key={benefit.index} className="pv-d-benefit" variant="up" delay={i * 80} duration={1000}>
+                  <span className="pv-d-benefit-num" aria-hidden="true">
+                    {benefit.index}
+                  </span>
+                  <div>
+                    <h4>{benefit.title}</h4>
+                    <p>{benefit.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal className="pv-d-cbuy-group" variant="up" delay={120}>
               <div className="pv-d-cbuy">
                 <div className="pv-d-cprice">
                   <span className="pv-d-cprice-was">{TRAINING.priceWas}</span>
@@ -195,7 +216,7 @@ export function CoursesD({
             </Reveal>
           </div>
 
-          <Reveal variant="fade" duration={1250}>
+          <Reveal className="pv-d-cmedia" variant="fade" duration={1250}>
             <MovementGridD urls={movementUrls} />
           </Reveal>
         </div>
@@ -214,26 +235,31 @@ export function CoursesD({
             </div>
           </Reveal>
 
-          <div>
-            <Reveal variant="up" duration={1050}>
+          <div className="pv-d-ctext">
+            <Reveal className="pv-d-chead" variant="up" duration={1050}>
               <p className="pv-d-eyebrow">{NUTRITION.eyebrow}</p>
               <h3 className="pv-d-cshow-title">{NUTRITION.heading}</h3>
-              <p className="pv-d-cshow-intro">{NUTRITION.intro}</p>
             </Reveal>
 
-            {NUTRITION.benefits.map((benefit, i) => (
-              <Reveal key={benefit.index} className="pv-d-benefit" variant="up" delay={i * 80} duration={1000}>
-                <span className="pv-d-benefit-num" aria-hidden="true">
-                  {benefit.index}
-                </span>
-                <div>
-                  <h4>{benefit.title}</h4>
-                  <p>{benefit.body}</p>
-                </div>
+            <div className="pv-d-cbody">
+              <Reveal variant="up" duration={1050}>
+                <p className="pv-d-cshow-intro">{NUTRITION.intro}</p>
               </Reveal>
-            ))}
 
-            <Reveal variant="up" delay={120}>
+              {NUTRITION.benefits.map((benefit, i) => (
+                <Reveal key={benefit.index} className="pv-d-benefit" variant="up" delay={i * 80} duration={1000}>
+                  <span className="pv-d-benefit-num" aria-hidden="true">
+                    {benefit.index}
+                  </span>
+                  <div>
+                    <h4>{benefit.title}</h4>
+                    <p>{benefit.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal className="pv-d-cbuy-group" variant="up" delay={120}>
               <div className="pv-d-cbuy">
                 <div className="pv-d-cprice">
                   <span className="pv-d-cprice-was">{NUTRITION.priceWas}</span>

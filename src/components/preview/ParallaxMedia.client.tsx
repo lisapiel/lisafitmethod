@@ -20,6 +20,7 @@ export function ParallaxMedia({
   hoverZoom = true,
   priority = false,
   sizes = "(max-width: 900px) 100vw, 50vw",
+  unoptimized,
 }: {
   src: string
   alt: string
@@ -30,6 +31,9 @@ export function ParallaxMedia({
   hoverZoom?: boolean
   priority?: boolean
   sizes?: string
+  // Opt a single image out of the image optimizer. Optional and undefined by
+  // default, so every existing caller renders exactly as before.
+  unoptimized?: boolean
 }) {
   const reduced = usePrefersReducedMotion()
   const { ref, progress } = useScrollProgress<HTMLDivElement>()
@@ -74,6 +78,7 @@ export function ParallaxMedia({
           fill
           sizes={sizes}
           priority={priority}
+          unoptimized={unoptimized}
           style={{ objectFit: "cover", objectPosition }}
         />
       </div>
