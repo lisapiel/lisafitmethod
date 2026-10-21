@@ -69,8 +69,15 @@ export const GABRIELA = {
 // scripts/prepare-testimonial-video.mjs. It is intentionally a plain static
 // file: no CMS lookup, no admin dependency.
 export const GINO_VIDEO = {
-  src: "/preview/gino-testimonial.mp4",
-  poster: "/preview/gino-testimonial.jpg",
+  // Colour-corrected version. The original upload is HLG / BT.2020 — iPhone
+  // HDR — and browsers render it through a Rec.709 curve, which is what made
+  // it look pale and grey. This one is converted to BT.709 properly and
+  // tagged as such.
+  src: "/preview/gino-testimonial-graded.mp4",
+  poster: "/preview/gino-testimonial-graded.jpg",
+  // The untouched original, kept for side-by-side review.
+  originalSrc: "/preview/gino-testimonial.mp4",
+  originalPoster: "/preview/gino-testimonial.jpg",
 }
 
 // Gabriela's photograph, supplied by Lisa. Rotated upright, metadata
