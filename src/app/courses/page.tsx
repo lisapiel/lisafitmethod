@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Courses | Lisa Fit Method",
     description: "Two structured courses. Training Foundations and Nutrition Foundations. One-time payment, yours to keep.",
-    images: [{ url: "/hero.png", width: 1200, height: 800 }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
   },
 }
 

@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       authors: ["Lisa McPherson"],
       images: post.coverImage
         ? [{ url: post.coverImage, width: 1200, height: 630 }]
-        : [{ url: "/hero.png", width: 1200, height: 800 }],
+        : [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
     },
   }
 }

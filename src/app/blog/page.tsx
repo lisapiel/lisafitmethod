@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Blog |Lisa Fit Method",
     description: "Strength training tips and advice for women, by certified personal trainer Lisa McPherson.",
-    images: [{ url: "/hero.png", width: 1200, height: 800 }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
   },
 }
 
