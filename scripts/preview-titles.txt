@@ -3,3 +3,10 @@
 # Direction D draws list markers with CSS ::before rather than as a text span,
 # so the arrow glyph stops appearing as page text. Decoration, not copy.
 →
+#
+# Removed at Lisa's request, 21 Oct 2026: two decorative glyphs beside her
+# Instagram handle that she found out of place. The links and their text are
+# unchanged. The arrow lives in the shared footer copy, so it is gone from
+# every page's footer rather than from the Contact page alone.
+📸
+@lisafitmethod ↗

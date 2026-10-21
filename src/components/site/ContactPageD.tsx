@@ -31,7 +31,6 @@ export function ContactPageD() {
           transition: color 420ms ease;
         }
         .pv-d-contact-social:hover { color: var(--d-off-white); }
-        .pv-d-contact-social-icon { font-size: 1.1rem; }
         .pv-d-contact-form { max-width: 760px; }
       `}</style>
 
@@ -49,9 +48,6 @@ export function ContactPageD() {
               rel="noopener noreferrer"
               className="pv-d-contact-social"
             >
-              <span className="pv-d-contact-social-icon" aria-hidden="true">
-                📸
-              </span>
               @lisafitmethod on Instagram
             </a>
           </Reveal>

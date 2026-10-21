@@ -212,7 +212,7 @@ export const FOOTER = {
   wordmark: "Lisa Fit Method",
   tagline:
     "Strength training built on movement quality, real structure, smart progression, and a body that lasts.",
-  instagram: "@lisafitmethod ↗",
+  instagram: "@lisafitmethod",
   instagramHref: "https://instagram.com/lisafitmethod",
   siteLabel: "Site",
   siteLinks: [

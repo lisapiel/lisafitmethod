@@ -56,14 +56,26 @@ export default function SquareVideo({
           position: absolute; inset: 0; width: 100%; height: 100%;
           object-fit: cover; object-position: center; display: block;
         }
-        .pv-d-sq-poster { transition: opacity 620ms ease; }
-        .pv-d-sq[data-started="true"] .pv-d-sq-poster { opacity: 0; pointer-events: none; }
+        /* data-started is set on .pv-d-sq-frame, not on the figure. These
+           two rules used to be written against .pv-d-sq instead, which
+           matches nothing: the poster therefore never faded and never
+           dropped its pointer events, so once playback began the audio ran
+           while a still first frame sat on top of the moving picture, and
+           the poster swallowed every click aimed at the video's controls —
+           which is why the video could not be paused. */
+        .pv-d-sq-poster {
+          transition: opacity 620ms ease;
+          /* Decorative and aria-hidden: it must never take a click, in any
+             state. The pause bug came from this being conditional. */
+          pointer-events: none;
+        }
+        .pv-d-sq-frame[data-started="true"] .pv-d-sq-poster { opacity: 0; }
         .pv-d-sq-veil {
           position: absolute; inset: 0; pointer-events: none;
           background: linear-gradient(to top, rgba(10,10,10,0.3), transparent 52%);
           transition: opacity 620ms ease;
         }
-        .pv-d-sq[data-started="true"] .pv-d-sq-veil { opacity: 0; }
+        .pv-d-sq-frame[data-started="true"] .pv-d-sq-veil { opacity: 0; }
         .pv-d-sq-play {
           position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
           width: 84px; height: 84px; border-radius: 50%; padding: 0; cursor: pointer;
