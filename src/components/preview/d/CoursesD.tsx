@@ -149,7 +149,22 @@ export function CoursesD({
           /* The grid gap now provides the separation these margins used to. */
           .pv-d-chead .pv-d-cshow-title { margin-bottom: 0; }
           .pv-d-cbuy-group .pv-d-cbuy { margin-top: 0; }
+          /* Line the price and its buttons up with the benefit copy above
+             them rather than with the section edge. The benefits are a
+             42px number column plus the grid gap, so the same offset puts
+             this block on the same left edge as the text it belongs to. */
+          .pv-d-cbuy-group { padding-left: calc(42px + clamp(12px, 1.4vw, 20px)); }
           .pv-d-nphoto-frame { aspect-ratio: 5 / 4; }
+          /* An even feather all round. The radial was sized for the wider
+             desktop box and the wash was a top-to-bottom gradient, so on a
+             phone the picture dissolved unevenly and greyed off below. */
+          .pv-d-nphoto-frame {
+            -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 0%, #000 52%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0) 100%);
+            mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 0%, #000 52%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0) 100%);
+          }
+          .pv-d-nphoto-wash {
+            background: radial-gradient(ellipse 74% 74% at 50% 50%, rgba(250,248,245,0) 40%, rgba(250,248,245,0.22) 100%);
+          }
         }
       `}</style>
 

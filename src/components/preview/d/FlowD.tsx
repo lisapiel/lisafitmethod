@@ -32,7 +32,11 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
       aria-hidden="true"
       style={{
         position: "relative",
-        height: "clamp(80px, 9vw, 150px)",
+        // The band is a slow dissolve between two grounds. Its 80px floor
+        // was most of a phone screen of empty gradient between sections, so
+        // the floor is lower; 9vw still governs from roughly 490px up, which
+        // leaves tablet and desktop exactly as they were.
+        height: "clamp(42px, 9vw, 150px)",
         background: `linear-gradient(to bottom, ${resolve(from)} 0%, ${resolve(to)} 100%)`,
         display: "flex",
         alignItems: "center",

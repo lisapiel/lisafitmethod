@@ -30,7 +30,14 @@ export function CoachingD({ portraitUrl, backdrop }: { portraitUrl: string; back
           content: ""; position: absolute; top: 20px; left: -20px; right: 20px; bottom: -20px;
           border: 1px solid rgba(168,137,94,0.34); pointer-events: none;
         }
-        .pv-d-coach-lede { max-width: 54ch; margin-bottom: var(--d-step-4); }
+        .pv-d-coach-lede {
+          max-width: 54ch; margin-bottom: var(--d-step-4);
+          /* This paragraph was near-black over the strongest backdrop on the
+             page, which read as harsh beside the muted body text directly
+             under it. Softened so the intro sits on the photograph the way
+             the rest of the section does. Size, weight and layout unchanged. */
+          color: rgba(26,26,26,0.74);
+        }
         .pv-d-pillar {
           display: grid; grid-template-columns: 46px 1fr; gap: clamp(14px, 1.8vw, 26px);
           padding: clamp(18px, 2.1vw, 26px) 0; border-top: 1px solid var(--d-rule);
@@ -60,8 +67,16 @@ export function CoachingD({ portraitUrl, backdrop }: { portraitUrl: string; back
         }
         @media (max-width: 960px) {
           .pv-d-coach-grid { grid-template-columns: 1fr; gap: var(--d-step-5); }
-          .pv-d-coach-plate { position: static; max-width: 420px; }
-          .pv-d-coach-plate::after { top: 14px; left: -14px; right: 14px; bottom: -14px; }
+          /* relative, not static. The frame below is absolutely positioned,
+             so turning the plate static let it escape to .pv-d-inner and be
+             drawn as a ~1985px box around the whole section — the long
+             border running past the numbered steps down to the price. */
+          .pv-d-coach-plate { position: relative; max-width: 420px; }
+          /* The offset frame is a two-column device: once the layout stacks
+             it was drawn 8px from the left edge and 36px from the right,
+             which made the whole section read as shifted even though every
+             other element is centred at 22px. Centred on the photo here. */
+          .pv-d-coach-plate::after { top: -12px; left: -12px; right: -12px; bottom: -12px; }
         }
       `}</style>
 

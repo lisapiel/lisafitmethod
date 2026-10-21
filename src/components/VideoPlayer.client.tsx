@@ -4,8 +4,8 @@ import { useRef, useEffect, useState } from "react"
 // Hero video player. Stable DOM structure:
 //
 //   <container>              ← always rendered at parent-supplied size
-//     [<img poster>]         ← only when a real poster is supplied
-//     <video>                ← autoplay muted playsinline; opacity 1 once playing
+//     <video>                ← autoplay muted playsinline; always opaque
+//     [<img poster>]         ← on top of the video, fades off once playing
 //     [<button>]             ← manual Play only when autoplay is genuinely denied
 //   </container>
 //
@@ -176,30 +176,6 @@ export default function VideoPlayer({
         ...style,
       }}
     >
-      {poster && (
-        // Poster layer. Only mounted when a real poster URL is
-        // supplied — DO NOT pass /hero.png here as a placeholder, it's
-        // a different photo and flashes the wrong image. Callers that
-        // don't have a video-matching poster should simply omit this
-        // prop; the container's dark background handles the load window.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={poster}
-          alt=""
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-            opacity: isPlaying ? 0 : 1,
-            transition: "opacity 0.4s ease",
-          }}
-        />
-      )}
-
       {src && (
         // Video layer. No `poster` attribute — that triggers iOS's
         // native play-button overlay which was the earlier
@@ -226,9 +202,40 @@ export default function VideoPlayer({
             height: "100%",
             objectFit: "cover",
             display: "block",
-            opacity: isPlaying ? 1 : 0,
-            transition: "opacity 0.4s ease",
+            // Always opaque. This used to be `isPlaying ? 1 : 0`, which
+            // left the element fully transparent until playback began —
+            // and WebKit refuses to start autoplay on a video it treats
+            // as not visible, so on iOS the attempt was rejected and the
+            // manual Play button appeared instead. The poster now sits
+            // on top and fades off it, which looks identical.
+            opacity: 1,
             pointerEvents: "none",
+          }}
+        />
+      )}
+
+      {/* Rendered after the video so it paints on top of it: the video
+          underneath stays opaque, and this fades away to reveal it. */}
+      {poster && (
+        // Poster layer. Only mounted when a real poster URL is
+        // supplied — DO NOT pass /hero.png here as a placeholder, it's
+        // a different photo and flashes the wrong image. Callers that
+        // don't have a video-matching poster should simply omit this
+        // prop; the container's dark background handles the load window.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={poster}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+            opacity: isPlaying ? 0 : 1,
+            transition: "opacity 0.4s ease",
           }}
         />
       )}

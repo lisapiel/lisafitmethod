@@ -73,11 +73,13 @@ export function BundleD({
         }
         .pv-d-bundle-upsell a:hover { color: var(--d-accent); }
         @media (max-width: 480px) {
-          .pv-d-bundle-figures { grid-template-columns: 1fr; }
-          .pv-d-bundle-figures .pv-d-figure + .pv-d-figure {
-            border-left: none; padding-left: 0;
-            border-top: 1px solid var(--d-rule-dark); padding-top: var(--d-step-3);
-          }
+          /* The two course values stay side by side on a phone, with the
+             bundle price underneath them. Stacking them left the right half
+             of the panel empty and pushed the price a screen further down. */
+          .pv-d-bundle-figures { grid-template-columns: 1fr 1fr; gap: 0; }
+          .pv-d-bundle-figures .pv-d-figure { padding-right: 12px; }
+          .pv-d-bundle-figures .pv-d-figure + .pv-d-figure { padding-left: 14px; }
+          .pv-d-bundle-figures .pv-d-figure-label { letter-spacing: 0.12em; }
         }
         /* Mobile only: the bundle follows the same order as the two
            courses above it — heading, portrait, description, value, price.
