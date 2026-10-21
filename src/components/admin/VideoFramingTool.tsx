@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { uploadData } from "aws-amplify/storage"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { S3_SETTINGS_URL, DEFAULTS, computeVideoCropCSS, type SiteSettings, type VideoCrop } from "@/lib/siteSettings"
 
 const gold = "#c9a96e"
@@ -203,6 +203,10 @@ export function VideoFramingTool({ slot, videoUrl }: { slot: string; videoUrl: s
     if (!crop || videoAR <= 0) return
     setSaving(true)
     try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString()
+      if (!token) throw new Error("Not signed in")
+
       const current = await fetch(S3_SETTINGS_URL, { cache: "no-store" })
         .then((r) => (r.ok ? (r.json() as Promise<SiteSettings>) : null))
         .catch(() => null)
@@ -213,14 +217,23 @@ export function VideoFramingTool({ slot, videoUrl }: { slot: string; videoUrl: s
         ...(current ?? DEFAULTS),
         videoCrops: { ...(current?.videoCrops ?? {}), [slot]: videoCrop },
       }
-      await uploadData({
-        path: "media/settings.json",
-        data: new Blob([JSON.stringify(merged, null, 2)], { type: "application/json" }),
-        options: { contentType: "application/json" },
-      }).result
+
+      const res = await fetch("/api/admin/save-settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(merged),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({} as Record<string, unknown>))
+        throw new Error((err.error as string | undefined) ?? `HTTP ${res.status}`)
+      }
+
       showToast("Framing saved — changes appear on the site within 60 seconds.", true)
-    } catch {
-      showToast("Save failed — please try again.", false)
+    } catch (err) {
+      showToast(`Save failed: ${err instanceof Error ? err.message : String(err)}`, false)
     } finally {
       setSaving(false)
     }

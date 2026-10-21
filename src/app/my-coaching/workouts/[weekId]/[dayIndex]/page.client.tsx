@@ -63,6 +63,21 @@ type ExerciseSetMap = Record<number, SetEntry[]> // keyed by exercise index
 
 type PrevSetData = Array<{ exerciseId: string; setNumber: number; weight: string; reps: string; rpe: string; completed: boolean }>
 
+// Per-exercise summary of the client's PREVIOUS logged performance for this
+// exercise. Derived from the most recent workout log that contains any set
+// for the exerciseId, scanned across all programs so progressive overload
+// stays visible when a coach reuses an exercise in a new program.
+// `sessionRpe` is the overall RPE recorded on THAT log — the log the sets
+// came from — not the overall RPE of the newest workout. The runner labels
+// this unambiguously as "Previous session RPE" because overallRpe is a
+// workout-wide number, not per-exercise.
+type PrevExerciseSummary = {
+  sets: PrevSetData
+  sessionRpe?: number
+  completedAt?: string
+}
+type PrevByExercise = Record<string, PrevExerciseSummary>
+
 type ExerciseInfo = {
   name: string
   // videoS3Key resolved from the canonical exercise library. Takes
@@ -131,7 +146,15 @@ function initSets(ex: ProgramExercise, prevData?: PrevSetData): SetEntry[] {
   const count = parseSetsCount(ex.sets)
   return Array.from({ length: count }, (_, i) => {
     const prev = prevData?.find((p) => p.exerciseId === ex.exerciseId && p.setNumber === i + 1)
-    return { weight: "", reps: "", rpe: "", completed: false, _prevWeight: prev?.weight ?? "", _prevReps: prev?.reps ?? "" } as SetEntry & { _prevWeight: string; _prevReps: string }
+    // Hints are stored on the entry so the SetRow can read them from the
+    // same shape it edits. They're stripped before persistence (see the
+    // draft-save effect) so the hint fields never leak into the log.
+    return {
+      weight: "", reps: "", rpe: "", completed: false,
+      _prevWeight: prev?.weight ?? "",
+      _prevReps: prev?.reps ?? "",
+      _prevRpe: prev?.rpe ?? "",
+    } as SetEntry & { _prevWeight: string; _prevReps: string; _prevRpe: string }
   })
 }
 
@@ -358,7 +381,7 @@ function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: strin
   )
 }
 
-type ExtendedSetEntry = SetEntry & { _prevWeight?: string; _prevReps?: string }
+type ExtendedSetEntry = SetEntry & { _prevWeight?: string; _prevReps?: string; _prevRpe?: string }
 
 function SetRow({
   setNum,
@@ -434,7 +457,7 @@ function SetRow({
 
       {/* RPE (dropdown with info icon) */}
       <div>
-        {hint("")}
+        {hint(entry._prevRpe ?? "")}
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
           <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase" }}>RPE</span>
           <button
@@ -599,6 +622,8 @@ function SupersetBlock({
   group,
   setMaps,
   info,
+  prevByExercise,
+  weightUnit,
   onSetChange,
   onVideoClick,
   onRpeInfoClick,
@@ -606,6 +631,8 @@ function SupersetBlock({
   group: SupersetGroup
   setMaps: ExerciseSetMap
   info: Record<string, ExerciseInfo>
+  prevByExercise: PrevByExercise
+  weightUnit: "LBS" | "KG"
   onSetChange: (exIdx: number, setIdx: number, updated: SetEntry) => void
   onVideoClick: (key: string, name: string) => void
   onRpeInfoClick: () => void
@@ -695,6 +722,8 @@ function SupersetBlock({
             sets={(setMaps[index] ?? []) as ExtendedSetEntry[]}
             info={exInfo}
             videoKey={videoKey}
+            prev={prevByExercise[ex.exerciseId]}
+            weightUnit={weightUnit}
             onSetChange={(si, updated) => onSetChange(index, si, updated)}
             onVideoClick={() => videoKey && onVideoClick(videoKey, ex.name)}
             onRpeInfoClick={onRpeInfoClick}
@@ -720,6 +749,8 @@ function ExerciseBlock({
   sets,
   info,
   videoKey,
+  prev,
+  weightUnit,
   onSetChange,
   onVideoClick,
   onRpeInfoClick,
@@ -731,12 +762,36 @@ function ExerciseBlock({
   // Library-resolved video key. Caller runs videoKeyFor(ex, info) so
   // this component doesn't have to know about the resolution rule.
   videoKey: string
+  // Previous-performance summary for THIS exercise — comes from the most
+  // recent prior log that captured any set for this exerciseId, across
+  // all programs. May be undefined (no prior performance → no comparison
+  // rendered).
+  prev?: PrevExerciseSummary
+  // Client's preferred display unit — appended to the summary so "185"
+  // reads as "185 lb" / "185 kg". Values are kept as-is; nothing is
+  // converted.
+  weightUnit: "LBS" | "KG"
   onSetChange: (setIdx: number, updated: SetEntry) => void
   onVideoClick: () => void
   onRpeInfoClick?: () => void
 }) {
   const completedCount = sets.filter((s) => s.completed).length
   const allDone = completedCount === sets.length
+
+  // Build the "Last session" summary line. Only rendered when at least
+  // one previous set has a non-empty weight OR non-empty reps — otherwise
+  // the line is noise (e.g. the client logged completion without numbers).
+  const prevSummary = (() => {
+    if (!prev || prev.sets.length === 0) return null
+    const sorted = [...prev.sets].sort((a, b) => a.setNumber - b.setNumber)
+    const anyWeight = sorted.some((s) => s.weight)
+    const anyReps = sorted.some((s) => s.reps)
+    if (!anyWeight && !anyReps) return null
+    const weightsLine = sorted.map((s) => s.weight || "—").join(" / ")
+    const repsLine = sorted.map((s) => s.reps || "—").join(" / ")
+    const unitShort = weightUnit === "KG" ? "kg" : "lb"
+    return { weightsLine, repsLine, unitShort, sessionRpe: prev.sessionRpe, anyWeight }
+  })()
 
   return (
     <div style={{ background: white, border: `1px solid ${allDone ? "#c8e6c8" : border}`, borderRadius: 8, marginBottom: "1rem", overflow: "hidden" }}>
@@ -790,6 +845,31 @@ function ExerciseBlock({
         </div>
       </div>
 
+      {/* Last-session summary — compact "Last time: 185 / 185 / 180 lb × 10 / 10 / 8 · Previous session RPE 7".
+          Pulled live from CoachingWorkoutLogRecord.setData for this exerciseId; the per-set hint strip
+          below each weight/reps/RPE input stays as the micro, set-by-set reference. */}
+      {prevSummary && (
+        <div style={{
+          padding: "10px 18px",
+          background: "#fdfbf7",
+          borderBottom: `1px solid ${border}`,
+          fontFamily: "var(--font-dm-sans), sans-serif",
+          fontSize: "0.72rem",
+          color: muted,
+          lineHeight: 1.5,
+        }}>
+          <span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginRight: 8 }}>
+            Last time
+          </span>
+          <strong style={{ color: black, fontWeight: 600 }}>{prevSummary.weightsLine}{prevSummary.anyWeight ? ` ${prevSummary.unitShort}` : ""}</strong>
+          <span style={{ margin: "0 6px" }}>×</span>
+          <strong style={{ color: black, fontWeight: 600 }}>{prevSummary.repsLine}</strong>
+          {prevSummary.sessionRpe != null && (
+            <span style={{ marginLeft: 10 }}>· Previous session RPE <strong style={{ color: black, fontWeight: 600 }}>{prevSummary.sessionRpe}</strong></span>
+          )}
+        </div>
+      )}
+
       {/* Set rows */}
       <div style={{ padding: "4px 18px 12px" }}>
         {/* Column headers */}
@@ -840,6 +920,14 @@ export default function WorkoutLoggerClient() {
   const [alreadyLogged, setAlreadyLogged] = useState(false)
   const [existingFeedback, setExistingFeedback] = useState<{ text: string; at: string } | null>(null)
   const [showRpeInfo, setShowRpeInfo] = useState(false)
+  // Per-exercise summary of the client's last logged performance for the
+  // exercises on this day. Keyed by exerciseId. Rendered by each
+  // ExerciseBlock as a one-line "Last time …" strip at the top of the card.
+  const [prevByExercise, setPrevByExercise] = useState<PrevByExercise>({})
+  // Client's preferred display unit for weights, pulled from the coaching
+  // client record. Only used for display labelling — stored log values are
+  // never converted.
+  const [clientWeightUnit, setClientWeightUnit] = useState<"LBS" | "KG">("LBS")
   // Set once initial load finishes and the workout is ready to accept edits.
   // Used to gate the draft-save effect so we don't overwrite a saved draft
   // with an empty setMap during the initial render.
@@ -865,6 +953,11 @@ export default function WorkoutLoggerClient() {
       if (programRes.status === "fulfilled") {
         prog = programRes.value.program
         if (prog?.id) setProgramId(prog.id as string)
+        // Pull the client's preferred weight unit from the SAME /api/coaching/program
+        // response (it already returns both). "LBS" is the historical default.
+        const clientRec = programRes.value.client as Record<string, unknown> | undefined
+        const unit = clientRec?.weightUnit as string | undefined
+        setClientWeightUnit(unit === "KG" ? "KG" : "LBS")
       }
 
       if (!prog) { setLoading(false); return }
@@ -948,17 +1041,33 @@ export default function WorkoutLoggerClient() {
         }
 
         const hintsByExercise: PrevSetData = []
+        // Also build the per-exercise summary consumed by each ExerciseBlock's
+        // "Last time …" header. The session RPE + completedAt attach to the
+        // SAME log the sets came from — critical because overallRpe belongs
+        // to the workout a set was logged in, not the most recent workout.
+        const summaryByExercise: PrevByExercise = {}
         for (const ex of targetDay.exercises) {
+          if (!ex.exerciseId) continue
           for (const log of logsNewestFirst) {
             const sets = parseLogSets(log)
             const forThisExercise = sets.filter((s) => s.exerciseId === ex.exerciseId)
             if (forThisExercise.length > 0) {
-              hintsByExercise.push(...forThisExercise)
+              const sorted = [...forThisExercise].sort((a, b) => a.setNumber - b.setNumber)
+              hintsByExercise.push(...sorted)
+              if (!summaryByExercise[ex.exerciseId]) {
+                const rawRpe = log.overallRpe
+                summaryByExercise[ex.exerciseId] = {
+                  sets: sorted,
+                  sessionRpe: typeof rawRpe === "number" ? rawRpe : undefined,
+                  completedAt: typeof log.completedAt === "string" ? (log.completedAt as string) : undefined,
+                }
+              }
               break
             }
           }
         }
         prevSetData = hintsByExercise
+        setPrevByExercise(summaryByExercise)
       }
 
       // Init set map — start from prescribed sets with last-week hints...
@@ -1256,6 +1365,8 @@ export default function WorkoutLoggerClient() {
                 group={g}
                 setMaps={setMap}
                 info={exerciseInfo}
+                prevByExercise={prevByExercise}
+                weightUnit={clientWeightUnit}
                 onSetChange={updateSet}
                 onVideoClick={(key, name) => setVideoModal({ key, name })}
                 onRpeInfoClick={() => setShowRpeInfo(true)}
@@ -1274,6 +1385,8 @@ export default function WorkoutLoggerClient() {
               sets={(setMap[i] ?? []) as ExtendedSetEntry[]}
               info={exInfo}
               videoKey={videoKey}
+              prev={prevByExercise[ex.exerciseId]}
+              weightUnit={clientWeightUnit}
               onSetChange={(si, updated) => updateSet(i, si, updated)}
               onVideoClick={() => videoKey && setVideoModal({ key: videoKey, name: ex.name })}
               onRpeInfoClick={() => setShowRpeInfo(true)}
