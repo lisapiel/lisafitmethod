@@ -97,19 +97,15 @@ export function CoachingPageD() {
            only a quarter of the frame shows and the crop lands on her face,
            losing the photograph entirely. It is set as an upright plate
            instead, which keeps her in frame from face to thigh and still
-           reads as a transition because of the space either side of it. */
+           reads as a transition because of the space either side of it.
+           Unfaded, for the same reason as the portrait above. */
         .pv-d-co-band-frame {
           position: relative; width: clamp(240px, 46vw, 520px); aspect-ratio: 3 / 4; overflow: hidden;
-          -webkit-mask-image: radial-gradient(ellipse 66% 72% at 50% 50%, #000 0%, #000 46%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0) 100%);
-          mask-image: radial-gradient(ellipse 66% 72% at 50% 50%, #000 0%, #000 46%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0) 100%);
+          box-shadow: 0 26px 56px -34px rgba(26,26,26,0.5);
         }
         .pv-d-co-band-frame img {
           width: 100%; height: 100%; display: block;
           object-fit: cover; object-position: center 28%;
-        }
-        .pv-d-co-band-wash {
-          position: absolute; inset: 0; pointer-events: none;
-          background: linear-gradient(to bottom, rgba(250,248,245,0.26) 0%, rgba(250,248,245,0.04) 44%, rgba(250,248,245,0.32) 100%);
         }
         @media (max-width: 760px) {
           .pv-d-co-band-frame { width: min(78vw, 360px); }
@@ -169,14 +165,15 @@ export function CoachingPageD() {
         }
         .pv-d-co-about { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(34px, 5vw, 86px); align-items: start; }
         @media (max-width: 900px) { .pv-d-co-about { grid-template-columns: 1fr; gap: var(--d-step-4); } }
+        /* No feathered edge on Lisa's own photographs. The radial mask that
+           used to sit here washed the picture out towards its edges, which
+           is the opposite of what a portrait wants. The framing comes from
+           the crop and a restrained lift instead, matching the platform
+           captures above. The food still keeps its feather — that treatment
+           was approved for the nutrition imagery specifically. */
         .pv-d-co-portrait {
           position: relative; aspect-ratio: 3 / 4; overflow: hidden;
-          /* Feathered on the same curve as the nutrition still and the
-             transition plate, so the three photographs on the site sit in
-             the page the same way. The flexing portrait has a busier
-             background than the one it replaced and needs the softer edge. */
-          -webkit-mask-image: radial-gradient(ellipse 66% 72% at 50% 46%, #000 0%, #000 48%, rgba(0,0,0,0.5) 78%, rgba(0,0,0,0) 100%);
-          mask-image: radial-gradient(ellipse 66% 72% at 50% 46%, #000 0%, #000 48%, rgba(0,0,0,0.5) 78%, rgba(0,0,0,0) 100%);
+          box-shadow: 0 24px 52px -34px rgba(26,26,26,0.55);
         }
         .pv-d-co-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; display: block; }
         .pv-d-co-p {
@@ -362,7 +359,6 @@ export function CoachingPageD() {
                 height={1786}
                 sizes="(max-width: 900px) 100vw, 1180px"
               />
-              <span className="pv-d-co-band-wash" aria-hidden="true" />
             </div>
           </Reveal>
         </div>

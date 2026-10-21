@@ -178,6 +178,13 @@ export function TestimonialsD({ backdrop }: { backdrop?: string }) {
               aspect="3 / 4"
               shift={10}
               sizes="(max-width: 960px) 300px, 30vw"
+              // The browser picks the 3840w candidate for this file whatever
+              // `sizes` says, and then never finishes the load, so the plate
+              // stayed empty on a phone. Same fault, and same fix, as the
+              // bundle portrait on the homepage. The source is 900x1200 and
+              // renders about 300px wide, so serving it unprocessed is both
+              // reliable and smaller than the variant it was asking for.
+              unoptimized
             />
           </Reveal>
         </div>

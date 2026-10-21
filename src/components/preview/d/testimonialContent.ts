@@ -75,9 +75,10 @@ export const GINO_VIDEO = {
   // tagged as such.
   src: "/preview/gino-testimonial-graded.mp4",
   poster: "/preview/gino-testimonial-graded.jpg",
-  // The untouched original, kept for side-by-side review.
-  originalSrc: "/preview/gino-testimonial.mp4",
-  originalPoster: "/preview/gino-testimonial.jpg",
+  // The untouched original is kept on disk as the backup of the source
+  // footage but is deliberately not shipped: the review toggle that played it
+  // side by side is gone, so pointing production at a file it does not have
+  // would just be another broken reference waiting to happen.
 }
 
 // Gabriela's photograph, supplied by Lisa. Rotated upright, metadata

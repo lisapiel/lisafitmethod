@@ -1,13 +1,12 @@
+# These two are the UNGRADED original of Gino's testimonial, kept locally as
+# the backup of the source footage. Nothing renders them: the site plays
+# gino-testimonial-graded.mp4, the BT.709 colour-corrected export.
+#
+# Everything else in this folder MUST be committed. It is not scratch: the
+# backgrounds, the nutrition still, Gaby's photo and the graded video are the
+# live site's own assets. They were all listed here while Direction D was a
+# throwaway prototype, which meant Amplify built without them and every one
+# of them 404'd in production even though the local previews looked perfect.
+# Do not add live assets to this file.
 gino-testimonial.mp4
 gino-testimonial.jpg
-gino-testimonial-graded.mp4
-gino-testimonial-graded.jpg
-gaby-testimonial.jpg
-bg-light.jpg
-bg-light-2.jpg
-bg-dark.jpg
-bg-dark-2.jpg
-bg-arch.jpg
-bg-dumbbells.jpg
-bg-studio.jpg
-nutrition-bowl.jpg
