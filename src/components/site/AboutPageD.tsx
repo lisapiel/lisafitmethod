@@ -83,9 +83,16 @@ export async function AboutPageD() {
           .pv-d-about-hero-centre { text-align: center; }
           .pv-d-about-hero-centre .pv-d-open-rule { margin-left: auto; margin-right: auto; }
           .pv-d-about-hero-centre .pv-d-phero-h1 { margin-left: auto; margin-right: auto; }
-          /* The standfirst keeps its left edge: several centred lines of body
-             copy are markedly harder to read than a centred heading. */
-          .pv-d-about-hero-centre .pv-d-phero-lede { text-align: left; }
+          /* The standfirst is centred with the rest of the opening. Centred
+             body copy needs a shorter measure than ranged-left copy before
+             the ragged edges start to hurt, so the line length is pulled in
+             here rather than inheriting the 62ch default. */
+          .pv-d-about-hero-centre .pv-d-phero-lede {
+            text-align: center;
+            max-width: 34ch;
+            margin-left: auto;
+            margin-right: auto;
+          }
           .pv-d-about-portrait { margin-left: auto; margin-right: auto; }
         }
         @media (max-width: 960px) {

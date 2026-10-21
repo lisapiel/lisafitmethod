@@ -39,6 +39,8 @@ const BG_LIGHT_2 = "/preview/bg-light-2.jpg"
 const BG_STUDIO = "/preview/bg-studio.jpg"
 const BG_DARK = "/preview/bg-dark.jpg"
 const BG_DARK_2 = "/preview/bg-dark-2.jpg"
+// The same file the approved homepage uses for its nutrition showcase.
+const NUTRITION_PHOTO = "/preview/nutrition-bowl.jpg"
 
 export async function CoursesPageD() {
   const [trailerUrl, testimonialsUrl, settings] = await Promise.all([
@@ -72,8 +74,51 @@ export async function CoursesPageD() {
           padding-bottom: 3px; transition: color 420ms ease;
         }
         .pv-d-jumps a:hover { color: var(--d-accent); }
-        .pv-d-trailer { width: 100%; height: 62vh; min-height: 320px; overflow: hidden; background: #111; }
-        @media (max-width: 768px) { .pv-d-trailer { height: 56vw; min-height: 220px; } }
+        /* The training footage, framed rather than full-bleed. It used to be a
+           62vh band directly under the hero, which interrupted the page
+           before a visitor had been told what the course teaches. It now sits
+           after the modules, sized to the content column and set off by a
+           corner bracket so it reads as a plate in the page. */
+        .pv-d-showcase { position: relative; margin-top: var(--d-step-5); }
+        .pv-d-showcase::before {
+          content: ""; position: absolute; top: -12px; left: -12px;
+          width: 38%; height: 54%; pointer-events: none;
+          border-top: 1px solid rgba(168,137,94,0.38);
+          border-left: 1px solid rgba(168,137,94,0.38);
+        }
+        .pv-d-showcase::after {
+          content: ""; position: absolute; right: -12px; bottom: -12px;
+          width: 38%; height: 54%; pointer-events: none;
+          border-right: 1px solid rgba(168,137,94,0.38);
+          border-bottom: 1px solid rgba(168,137,94,0.38);
+        }
+        .pv-d-showcase-video {
+          position: relative; width: 100%; aspect-ratio: 16 / 9;
+          overflow: hidden; background: #111;
+        }
+        @media (max-width: 600px) {
+          /* The brackets sit in the page gutter, which is at its narrowest
+             here, so they come off rather than risk the page scrolling. */
+          .pv-d-showcase::before, .pv-d-showcase::after { display: none; }
+          .pv-d-showcase-video { aspect-ratio: 4 / 3; }
+        }
+        /* The nutrition still from the homepage, with the same feathered
+           treatment so the two pages present it identically. */
+        .pv-d-nutshot { position: relative; margin-top: var(--d-step-5); }
+        .pv-d-nutshot-frame {
+          position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden;
+          /* Radial sizes are radii, not diameters. These sit just outside the
+             box so the frame dissolves into the cream while the bowl itself
+             stays at full strength. */
+          -webkit-mask-image: radial-gradient(ellipse 64% 72% at 50% 50%, #000 0%, #000 44%, rgba(0,0,0,0.5) 74%, rgba(0,0,0,0) 100%);
+          mask-image: radial-gradient(ellipse 64% 72% at 50% 50%, #000 0%, #000 44%, rgba(0,0,0,0.5) 74%, rgba(0,0,0,0) 100%);
+        }
+        .pv-d-nutshot-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 56%; display: block; }
+        .pv-d-nutshot-wash {
+          position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(to bottom, rgba(250,248,245,0.2) 0%, rgba(250,248,245,0.04) 42%, rgba(250,248,245,0.3) 100%);
+        }
+        @media (max-width: 600px) { .pv-d-nutshot-frame { aspect-ratio: 5 / 4; } }
         .pv-d-testimonial-shot { max-width: 900px; margin: 0 auto; }
         .pv-d-testimonial-shot img { width: 100%; height: auto; display: block; }
         .pv-d-tracker-grid {
@@ -152,15 +197,6 @@ export async function CoursesPageD() {
         </Reveal>
       </PageHeroD>
 
-      {/* The trailer keeps its own black band, as on the live page. */}
-      <section style={{ background: "#000" }} data-tone="dark" aria-label="Course trailer">
-        <VideoPlayer
-          src={heroTrailerUrl(trailerUrl)}
-          poster={derivePosterUrl(heroTrailerUrl(trailerUrl))}
-          className="pv-d-trailer"
-        />
-      </section>
-
       <ToneShift from="dark" to="light" />
 
       <SectionD id="training" label="Training Foundations" backdrop={BG_DUMBBELLS} opacity={0.16} scrim="right">
@@ -171,6 +207,17 @@ export async function CoursesPageD() {
           maxWidth="18ch"
         />
         <ModuleRailD modules={TRAINING_MODULES} label={INSIDE_LABEL} />
+
+        {/* The movements, demonstrated — after the reader knows what the
+            course teaches and before they are asked to buy. */}
+        <Reveal variant="fade" duration={1200} className="pv-d-showcase">
+          <VideoPlayer
+            src={heroTrailerUrl(trailerUrl)}
+            poster={derivePosterUrl(heroTrailerUrl(trailerUrl))}
+            className="pv-d-showcase-video"
+          />
+        </Reveal>
+
         <div className="pv-d-offer-foot">
           <PriceBlockD
             now={`$${t.coursePrice}`}
@@ -183,27 +230,6 @@ export async function CoursesPageD() {
         </div>
       </SectionD>
 
-      {testimonialsUrl && (
-        <SectionD alt label="Testimonials" backdrop={BG_LIGHT_2} opacity={0.18} scrim="edges">
-          <OpenD
-            eyebrow={TESTIMONIAL_BAND.eyebrow}
-            lines={[TESTIMONIAL_BAND.headingLine1, <i key="em">{TESTIMONIAL_BAND.headingLine2}</i>]}
-            centre
-          />
-          <Reveal variant="fade" duration={1200}>
-            <div className="pv-d-testimonial-shot">
-              <Image
-                src={testimonialsUrl}
-                alt={TESTIMONIAL_BAND.alt}
-                width={1800}
-                height={1200}
-                sizes="(max-width: 900px) 92vw, 900px"
-              />
-            </div>
-          </Reveal>
-        </SectionD>
-      )}
-
       <SectionD id="nutrition" label="Nutrition Foundations" backdrop={BG_LIGHT} opacity={0.2} scrim="left">
         <OpenD
           eyebrow={NUTRITION.eyebrow}
@@ -212,6 +238,23 @@ export async function CoursesPageD() {
           maxWidth="18ch"
         />
         <ModuleRailD modules={NUTRITION_MODULES} label={INSIDE_LABEL} />
+
+        {/* The same photograph the homepage uses, with the same feathered
+            edge, so Nutrition carries its own image rather than running as
+            an unbroken column of type. */}
+        <Reveal variant="fade" duration={1300} className="pv-d-nutshot">
+          <div className="pv-d-nutshot-frame">
+            <Image
+              src={NUTRITION_PHOTO}
+              alt="A balanced meal built around protein and whole foods"
+              width={1600}
+              height={1200}
+              sizes="(max-width: 900px) 92vw, 1180px"
+            />
+            <span className="pv-d-nutshot-wash" aria-hidden="true" />
+          </div>
+        </Reveal>
+
         <div className="pv-d-offer-foot">
           <PriceBlockD
             now={NUTRITION_COURSE_PRICE_DISPLAY}
@@ -259,6 +302,27 @@ export async function CoursesPageD() {
       </SectionD>
 
       <ToneShift from="dark" to="light" />
+
+      {testimonialsUrl && (
+        <SectionD alt label="Testimonials" backdrop={BG_LIGHT_2} opacity={0.18} scrim="edges">
+          <OpenD
+            eyebrow={TESTIMONIAL_BAND.eyebrow}
+            lines={[TESTIMONIAL_BAND.headingLine1, <i key="em">{TESTIMONIAL_BAND.headingLine2}</i>]}
+            centre
+          />
+          <Reveal variant="fade" duration={1200}>
+            <div className="pv-d-testimonial-shot">
+              <Image
+                src={testimonialsUrl}
+                alt={TESTIMONIAL_BAND.alt}
+                width={1800}
+                height={1200}
+                sizes="(max-width: 900px) 92vw, 900px"
+              />
+            </div>
+          </Reveal>
+        </SectionD>
+      )}
 
       <SectionD label="Progress Tracker add-on">
         <div className="pv-d-tracker-head">

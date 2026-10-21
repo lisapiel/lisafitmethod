@@ -42,11 +42,14 @@ export const CO_EXPERIENCE = {
   ],
   link: "See how it works →",
   linkHref: "#how",
+  // Real pixel dimensions, because three of these are tall phone captures and
+  // the fourth is a near-square card: the layout is built around that
+  // difference rather than forcing all four into one shape.
   shots: [
-    { src: "/portal-mobile-home.jpg", alt: "The coaching platform home screen" },
-    { src: "/portal-mobile-workout.jpg", alt: "A workout open in the coaching platform" },
-    { src: "/portal-mobile-program.jpg", alt: "A training program in the coaching platform" },
-    { src: "/portal-mobile-howto.jpg", alt: "An exercise how-to card in the coaching platform" },
+    { src: "/portal-mobile-home.jpg", alt: "The coaching platform home screen", w: 1164, h: 2357 },
+    { src: "/portal-mobile-workout.jpg", alt: "A workout open in the coaching platform", w: 1204, h: 2352 },
+    { src: "/portal-mobile-program.jpg", alt: "A training program in the coaching platform", w: 1205, h: 2432 },
+    { src: "/portal-mobile-howto.jpg", alt: "An exercise how-to card in the coaching platform", w: 1061, h: 994 },
   ],
 }
 

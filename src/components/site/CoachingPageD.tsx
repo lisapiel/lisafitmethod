@@ -28,6 +28,10 @@ const BG_LIGHT = "/preview/bg-light.jpg"
 const BG_LIGHT_2 = "/preview/bg-light-2.jpg"
 const BG_STUDIO = "/preview/bg-studio.jpg"
 const BG_DARK = "/preview/bg-dark.jpg"
+// The abs photograph moves up the page as a transition band; About Me takes
+// the flexing portrait, which is the same file the homepage bundle uses.
+const TRANSITION_PHOTO = "/lisa-coaching-about.jpg"
+const ABOUT_PHOTO = "/lisa-coaching-hero.jpg"
 
 export function CoachingPageD() {
   return (
@@ -57,10 +61,59 @@ export function CoachingPageD() {
         }
         .pv-d-co-exp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(34px, 5vw, 86px); align-items: start; }
         @media (max-width: 900px) { .pv-d-co-exp { grid-template-columns: 1fr; gap: var(--d-step-5); } }
-        .pv-d-co-shots { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 1.6vw, 22px); }
-        .pv-d-co-shot { position: relative; overflow: hidden; background: #efeae2; }
+        /* Three of these captures are tall phone screens and the fourth is a
+           near-square card. A plain 2x2 grid made that mismatch read as a
+           hole under the square, so the four are set as two interlocking
+           columns instead: the taller column runs full height, the shorter
+           one is dropped so it sits against the middle of its neighbour, and
+           the square is treated as what it is — a detail lifted out of the
+           app rather than a fourth whole screen. Nothing is cropped. */
+        .pv-d-co-shots { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 1.6vw, 22px); align-items: start; }
+        .pv-d-co-shots-col { display: flex; flex-direction: column; gap: clamp(12px, 1.6vw, 22px); }
+        .pv-d-co-shots-col--drop { margin-top: clamp(38px, 8vw, 132px); }
+        .pv-d-co-shot {
+          position: relative; overflow: hidden; background: #efeae2;
+          box-shadow: 0 20px 44px -30px rgba(26,26,26,0.55);
+        }
         .pv-d-co-shot img { width: 100%; height: auto; display: block; }
-        .pv-d-co-shot:nth-child(2), .pv-d-co-shot:nth-child(3) { margin-top: clamp(16px, 3vw, 44px); }
+        .pv-d-co-shot--card {
+          box-shadow: 0 26px 52px -26px rgba(26,26,26,0.5);
+          outline: 1px solid rgba(168,137,94,0.3); outline-offset: -1px;
+        }
+        @media (max-width: 560px) {
+          /* The drop costs more than it gives once the columns are this
+             narrow, and it pushes the last card well below the fold. */
+          .pv-d-co-shots-col--drop { margin-top: 0; }
+        }
+        /* A transition band between how we coach and how coaching works.
+           The photograph is feathered into the page with the same radial
+           mask the nutrition still uses, so it reads as part of the paper
+           rather than a block dropped between two sections. The crop keeps
+           her face and torso in frame; object-position does the work so the
+           file itself is untouched. */
+        .pv-d-co-band { position: relative; padding: clamp(18px, 3vw, 46px) var(--d-gutter); }
+        .pv-d-co-band-inner { max-width: var(--d-max); margin: 0 auto; display: flex; justify-content: center; }
+        /* A standing portrait cannot survive a wide letterbox slice: at 16:7
+           only a quarter of the frame shows and the crop lands on her face,
+           losing the photograph entirely. It is set as an upright plate
+           instead, which keeps her in frame from face to thigh and still
+           reads as a transition because of the space either side of it. */
+        .pv-d-co-band-frame {
+          position: relative; width: clamp(240px, 46vw, 520px); aspect-ratio: 3 / 4; overflow: hidden;
+          -webkit-mask-image: radial-gradient(ellipse 66% 72% at 50% 50%, #000 0%, #000 46%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0) 100%);
+          mask-image: radial-gradient(ellipse 66% 72% at 50% 50%, #000 0%, #000 46%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0) 100%);
+        }
+        .pv-d-co-band-frame img {
+          width: 100%; height: 100%; display: block;
+          object-fit: cover; object-position: center 28%;
+        }
+        .pv-d-co-band-wash {
+          position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(to bottom, rgba(250,248,245,0.26) 0%, rgba(250,248,245,0.04) 44%, rgba(250,248,245,0.32) 100%);
+        }
+        @media (max-width: 760px) {
+          .pv-d-co-band-frame { width: min(78vw, 360px); }
+        }
         .pv-d-co-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(26px, 3.4vw, 58px); }
         @media (max-width: 880px) { .pv-d-co-grid3 { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 580px) { .pv-d-co-grid3 { grid-template-columns: 1fr; gap: var(--d-step-3); } }
@@ -118,8 +171,12 @@ export function CoachingPageD() {
         @media (max-width: 900px) { .pv-d-co-about { grid-template-columns: 1fr; gap: var(--d-step-4); } }
         .pv-d-co-portrait {
           position: relative; aspect-ratio: 3 / 4; overflow: hidden;
-          -webkit-mask-image: radial-gradient(ellipse 70% 76% at 50% 48%, #000 60%, transparent 100%);
-          mask-image: radial-gradient(ellipse 70% 76% at 50% 48%, #000 60%, transparent 100%);
+          /* Feathered on the same curve as the nutrition still and the
+             transition plate, so the three photographs on the site sit in
+             the page the same way. The flexing portrait has a busier
+             background than the one it replaced and needs the softer edge. */
+          -webkit-mask-image: radial-gradient(ellipse 66% 72% at 50% 46%, #000 0%, #000 48%, rgba(0,0,0,0.5) 78%, rgba(0,0,0,0) 100%);
+          mask-image: radial-gradient(ellipse 66% 72% at 50% 46%, #000 0%, #000 48%, rgba(0,0,0,0.5) 78%, rgba(0,0,0,0) 100%);
         }
         .pv-d-co-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; display: block; }
         .pv-d-co-p {
@@ -227,9 +284,28 @@ export function CoachingPageD() {
           </div>
           <Reveal variant="fade" duration={1300}>
             <div className="pv-d-co-shots">
-              {CO_EXPERIENCE.shots.map((s) => (
-                <div key={s.src} className="pv-d-co-shot">
-                  <Image src={s.src} alt={s.alt} width={600} height={1200} sizes="(max-width: 900px) 44vw, 22vw" />
+              {[
+                { items: [CO_EXPERIENCE.shots[0], CO_EXPERIENCE.shots[2]], drop: false },
+                { items: [CO_EXPERIENCE.shots[1], CO_EXPERIENCE.shots[3]], drop: true },
+              ].map((col, ci) => (
+                <div
+                  key={ci}
+                  className={`pv-d-co-shots-col${col.drop ? " pv-d-co-shots-col--drop" : ""}`}
+                >
+                  {col.items.map((shot) => (
+                    <div
+                      key={shot.src}
+                      className={`pv-d-co-shot${shot.w > shot.h ? " pv-d-co-shot--card" : ""}`}
+                    >
+                      <Image
+                        src={shot.src}
+                        alt={shot.alt}
+                        width={shot.w}
+                        height={shot.h}
+                        sizes="(max-width: 900px) 44vw, 22vw"
+                      />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -273,6 +349,24 @@ export function CoachingPageD() {
           </div>
         </div>
       </SectionD>
+
+      {/* Editorial transition into how coaching works. */}
+      <div className="pv-d-co-band" data-tone="light" aria-hidden="false">
+        <div className="pv-d-co-band-inner">
+          <Reveal variant="fade" duration={1400}>
+            <div className="pv-d-co-band-frame">
+              <Image
+                src={TRANSITION_PHOTO}
+                alt="Lisa McPherson"
+                width={1022}
+                height={1786}
+                sizes="(max-width: 900px) 100vw, 1180px"
+              />
+              <span className="pv-d-co-band-wash" aria-hidden="true" />
+            </div>
+          </Reveal>
+        </div>
+      </div>
 
       <SectionD id="how" alt label="How coaching works" backdrop={BG_STUDIO} opacity={0.12} scrim="left">
         <OpenD eyebrow={CO_STEPS.eyebrow} lines={[CO_STEPS.heading]} maxWidth="18ch" />
@@ -337,11 +431,18 @@ export function CoachingPageD() {
           <Reveal variant="fade" duration={1300}>
             <div className="pv-d-co-portrait">
               <Image
-                src="/lisa-coaching-about.jpg"
+                src={ABOUT_PHOTO}
                 alt={CO_ABOUT.photoAlt}
-                width={900}
-                height={1200}
+                width={998}
+                height={1388}
                 sizes="(max-width: 900px) 92vw, 34vw"
+                // On a phone the browser picks the 3840w candidate for this
+                // one file and then never finishes the load, which is what
+                // left the homepage bundle portrait blank until it was
+                // served unprocessed. The source is only 998x1388 and renders
+                // at most ~430px wide, so serving it as-is is both reliable
+                // and cheaper than the processed variant.
+                unoptimized
               />
             </div>
           </Reveal>
