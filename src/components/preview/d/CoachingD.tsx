@@ -71,7 +71,11 @@ export function CoachingD({ portraitUrl, backdrop }: { portraitUrl: string; back
              so turning the plate static let it escape to .pv-d-inner and be
              drawn as a ~1985px box around the whole section — the long
              border running past the numbered steps down to the price. */
-          .pv-d-coach-plate { position: relative; max-width: 420px; }
+          /* top: auto matters as much as the position. The desktop rule is
+             sticky with top 104px, so switching to relative without clearing
+             top left the photograph shifted 104px down over the paragraph
+             below it. Static used to ignore top; relative does not. */
+          .pv-d-coach-plate { position: relative; top: auto; max-width: 420px; }
           /* The offset frame is a two-column device: once the layout stacks
              it was drawn 8px from the left edge and 36px from the right,
              which made the whole section read as shifted even though every

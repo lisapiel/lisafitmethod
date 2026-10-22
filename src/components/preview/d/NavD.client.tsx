@@ -143,7 +143,7 @@ export default function NavD() {
 
       <nav className="pv-d-nav" data-nav-tone={tone} data-condensed={condensed} aria-label="Main">
         <div className="pv-d-nav-inner">
-          <Link href="/preview/d" className="pv-d-nav-mark">
+          <Link href="/" className="pv-d-nav-mark">
             {HEADER.wordmark}
           </Link>
           <div className="pv-d-nav-links">

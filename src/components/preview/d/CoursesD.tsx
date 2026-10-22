@@ -155,16 +155,23 @@ export function CoursesD({
              this block on the same left edge as the text it belongs to. */
           .pv-d-cbuy-group { padding-left: calc(42px + clamp(12px, 1.4vw, 20px)); }
           .pv-d-nphoto-frame { aspect-ratio: 5 / 4; }
-          /* An even feather all round. The radial was sized for the wider
-             desktop box and the wash was a top-to-bottom gradient, so on a
-             phone the picture dissolved unevenly and greyed off below. */
+          /* An even feather on all four edges. A radial mask cannot do this:
+             it fades the corners first and leaves the top and bottom edges
+             hard, which is the vignette this replaces. Two linear gradients,
+             one per axis, multiplied together give each edge the same soft
+             run and no corner darkening. The wash is dropped — it was the
+             grey cast over the picture. */
           .pv-d-nphoto-frame {
-            -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 0%, #000 52%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0) 100%);
-            mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 0%, #000 52%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image:
+              linear-gradient(to right, transparent 0%, #000 11%, #000 89%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, #000 11%, #000 89%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-image:
+              linear-gradient(to right, transparent 0%, #000 11%, #000 89%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, #000 11%, #000 89%, transparent 100%);
+            mask-composite: intersect;
           }
-          .pv-d-nphoto-wash {
-            background: radial-gradient(ellipse 74% 74% at 50% 50%, rgba(250,248,245,0) 40%, rgba(250,248,245,0.22) 100%);
-          }
+          .pv-d-nphoto-wash { background: none; }
         }
       `}</style>
 

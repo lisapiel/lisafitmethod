@@ -50,7 +50,11 @@ export default function HeroD({ trailerSrc, posterSrc }: { trailerSrc: string; p
         .pv-d-hero-inner {
           position: relative; z-index: 4; flex: 1;
           display: flex; flex-direction: column; justify-content: flex-end;
-          padding: clamp(112px, 14vh, 164px) var(--d-gutter) clamp(56px, 7vw, 96px);
+          /* The bottom floor is what left a run of empty dark between the
+             last line of hero copy and the section under it. 7vw still
+             governs from about 460px up, so tablet and desktop keep the
+             spacing they have. Nothing inside the hero moves. */
+          padding: clamp(112px, 14vh, 164px) var(--d-gutter) clamp(32px, 7vw, 96px);
         }
         .pv-d-hero-grid { max-width: var(--d-max); margin: 0 auto; width: 100%; }
         .pv-d-hero-h1 {

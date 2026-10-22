@@ -16,7 +16,40 @@ const SERVER_KEYS = [
   "AMBRISA_CDN_URL",
 ]
 
+// Public pages that must never be served from a stale cache after a deploy.
+// Next gives an ISR page Cache-Control: s-maxage=<revalidate>,
+// stale-while-revalidate=31535940 — a full year of permitted staleness. Both
+// CloudFront and Safari honour that, so a returning visitor got the previous
+// build's HTML on first paint and the new one only on a later request. That is
+// why the homepage looked old when opened directly but current after
+// navigating back to it. These routes keep the same 60s freshness window and
+// cap the stale window to a minute.
+const CACHED_PAGES = [
+  "/",
+  "/about",
+  "/courses",
+  "/nutrition",
+  "/coaching",
+  "/faq",
+  "/contact",
+  "/blog",
+  "/blog/:slug",
+  "/free-guide",
+  "/free-guide-nutrition",
+]
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return CACHED_PAGES.map((source) => ({
+      source,
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
+        },
+      ],
+    }))
+  },
   images: {
     remotePatterns: [
       {

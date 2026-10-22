@@ -60,6 +60,12 @@ export function StylesD() {
       }
 
       .pv-d-section { padding: var(--d-section) var(--d-gutter); }
+
+      /* The dissolve between two grounds. Its height lives here rather than
+         inline so a phone can have its own, where a band sized by 9vw was a
+         visible stripe of empty gradient between sections. */
+      .pv-d-toneshift { height: clamp(42px, 9vw, 150px); }
+      @media (max-width: 600px) { .pv-d-toneshift { height: 24px; } }
       /* Content that sits over an Atmosphere layer. An absolutely positioned
          backdrop paints above static in-flow content, so anything in front of
          one has to be positioned too. */
