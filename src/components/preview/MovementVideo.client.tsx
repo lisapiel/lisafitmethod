@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { onFirstGesture } from "./firstGesture"
+import { useAutoplayStalled } from "./useAutoplayStalled"
 
 // One movement clip from the Training Foundations library.
 //
@@ -15,9 +16,15 @@ import { onFirstGesture } from "./firstGesture"
 // a poster, so using the attribute put an iOS play button on every clip. A
 // layer above the video that fades out once playback starts shows the same
 // frame with none of that, and is the treatment the hero already uses.
+//
+// That same layer carries `animatedPoster` when the clip turns out not to be
+// playing. Swapping the src is what keeps the animation off the wire in the
+// normal case: it is only ever set once autoplay has actually failed, so a
+// visitor whose video plays never requests it.
 export default function MovementVideo({
   src,
   poster,
+  animatedPoster,
   mounted,
   active,
   label,
@@ -25,6 +32,7 @@ export default function MovementVideo({
 }: {
   src: string
   poster?: string
+  animatedPoster?: string
   mounted: boolean
   active: boolean
   label: string
@@ -32,6 +40,8 @@ export default function MovementVideo({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playing, setPlaying] = useState(false)
+  const [refused, setRefused] = useState(false)
+  const stalled = useAutoplayStalled(videoRef, mounted && active, playing)
 
   useEffect(() => {
     const v = videoRef.current
@@ -49,7 +59,15 @@ export default function MovementVideo({
       const el = videoRef.current
       if (!el || !el.paused) return
       const p = el.play()
-      if (p && typeof p.then === "function") p.catch(() => {})
+      if (p && typeof p.then === "function") {
+        p.catch((err: unknown) => {
+          const name = err && typeof err === "object" && "name" in err ? (err as { name: string }).name : ""
+          // The one error that means the browser is refusing on policy
+          // grounds. Low Power Mode reports it straight away, so the clip can
+          // switch to its animation without waiting out the stall timers.
+          if (name === "NotAllowedError") setRefused(true)
+        })
+      }
     }
 
     attempt()
@@ -58,6 +76,8 @@ export default function MovementVideo({
     // its still frame until they tap the clip itself.
     return onFirstGesture(attempt)
   }, [active, mounted])
+
+  const stillSrc = !playing && (refused || stalled) && animatedPoster ? animatedPoster : poster
 
   return (
     <>
@@ -75,7 +95,10 @@ export default function MovementVideo({
             controls={false}
             disablePictureInPicture
             aria-label={`${label} demonstration`}
-            onPlaying={() => setPlaying(true)}
+            onPlaying={() => {
+              setPlaying(true)
+              setRefused(false)
+            }}
             onPause={() => setPlaying(false)}
             style={{
               position: "absolute",
@@ -89,10 +112,10 @@ export default function MovementVideo({
               pointerEvents: "none",
             }}
           />
-          {poster && (
+          {stillSrc && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={poster}
+              src={stillSrc}
               alt=""
               aria-hidden="true"
               style={{

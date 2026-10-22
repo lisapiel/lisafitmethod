@@ -1,6 +1,7 @@
 "use client"
 import { useRef, useEffect, useState } from "react"
 import { onFirstGesture } from "./preview/firstGesture"
+import { useAutoplayStalled } from "./preview/useAutoplayStalled"
 
 // Hero video player. Stable DOM structure:
 //
@@ -38,17 +39,24 @@ import { onFirstGesture } from "./preview/firstGesture"
 export default function VideoPlayer({
   src,
   poster,
+  animatedPoster,
   className,
   style,
 }: {
   src: string
   poster?: string
+  // Shown in place of the still, and only once this video turns out not to
+  // be playing — iOS Low Power Mode refuses video autoplay outright, and an
+  // image is not subject to that policy. Left unset, the poster behaves
+  // exactly as it always has and the animation is never requested.
+  animatedPoster?: string
   className?: string
   style?: React.CSSProperties
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [autoplayBlocked, setAutoplayBlocked] = useState(false)
+  const stalled = useAutoplayStalled(videoRef, !!src, isPlaying)
 
   useEffect(() => {
     const v = videoRef.current
@@ -181,6 +189,7 @@ export default function VideoPlayer({
   }
 
   const showManualPlay = autoplayBlocked && !isPlaying && !!src
+  const stillSrc = !isPlaying && (autoplayBlocked || stalled) && animatedPoster ? animatedPoster : poster
 
   return (
     <div
@@ -232,7 +241,7 @@ export default function VideoPlayer({
 
       {/* Rendered after the video so it paints on top of it: the video
           underneath stays opaque, and this fades away to reveal it. */}
-      {poster && (
+      {stillSrc && (
         // Poster layer. Only mounted when a real poster URL is
         // supplied — DO NOT pass /hero.png here as a placeholder, it's
         // a different photo and flashes the wrong image. Callers that
@@ -240,7 +249,7 @@ export default function VideoPlayer({
         // prop; the container's dark background handles the load window.
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={poster}
+          src={stillSrc}
           alt=""
           aria-hidden="true"
           style={{

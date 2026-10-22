@@ -1,6 +1,7 @@
 "use client"
 
 import MovementVideo from "../MovementVideo.client"
+import { animatedPosterFor } from "../animatedPoster"
 import { useInView } from "../Reveal.client"
 
 // Real footage from the Training Foundations library, composed rather than
@@ -77,7 +78,14 @@ function Plate({ url, variant }: { url: string; variant: "lead" | "small" }) {
   const { ref, inView } = useInView<HTMLDivElement>(0.3)
   return (
     <div ref={ref} className={`pv-d-mplate pv-d-mplate--${variant}`}>
-      <MovementVideo src={url} poster={posterFor(url)} mounted={inView} active={inView} label="" />
+      <MovementVideo
+        src={url}
+        poster={posterFor(url)}
+        animatedPoster={animatedPosterFor(url)}
+        mounted={inView}
+        active={inView}
+        label=""
+      />
     </div>
   )
 }

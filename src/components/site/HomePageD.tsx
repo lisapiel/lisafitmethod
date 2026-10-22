@@ -14,6 +14,7 @@ import NavD from "@/components/preview/d/NavD.client"
 import HeroD from "@/components/preview/d/HeroD.client"
 import { StatementD } from "@/components/preview/d/StatementD"
 import { StoryD } from "@/components/preview/d/StoryD"
+import { animatedPosterFor } from "@/components/preview/animatedPoster"
 import { CoursesD } from "@/components/preview/d/CoursesD"
 import { CoachingD } from "@/components/preview/d/CoachingD"
 import { BundleD } from "@/components/preview/d/BundleD"
@@ -67,7 +68,11 @@ export async function HomePageD() {
 
       <main>
         {/* 1. Hero — film, headline, both routes, both prices. */}
-        <HeroD trailerSrc={trailerSrc} posterSrc={derivePosterUrl(trailerSrc)} />
+        <HeroD
+          trailerSrc={trailerSrc}
+          posterSrc={derivePosterUrl(trailerSrc)}
+          animatedPosterSrc={animatedPosterFor(trailerSrc)}
+        />
 
         {/* 2. Lisa's statement — the single personal note on the page. */}
         <ToneShift from={BLACK} to={WARM_WHITE} />

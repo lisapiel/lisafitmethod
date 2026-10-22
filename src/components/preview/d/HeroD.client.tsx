@@ -15,7 +15,15 @@ import { HERO } from "../c/productionCopy"
 // upward keeps the framing intact from laptop to ultrawide.
 //
 // Copy is the live hero, word for word.
-export default function HeroD({ trailerSrc, posterSrc }: { trailerSrc: string; posterSrc?: string }) {
+export default function HeroD({
+  trailerSrc,
+  posterSrc,
+  animatedPosterSrc,
+}: {
+  trailerSrc: string
+  posterSrc?: string
+  animatedPosterSrc?: string
+}) {
   const reduced = usePrefersReducedMotion()
   const p = useTopScroll(880)
 
@@ -104,7 +112,12 @@ export default function HeroD({ trailerSrc, posterSrc }: { trailerSrc: string; p
         className="pv-d-hero-film"
         style={{ transform: `scale(${zoom})`, transition: reduced ? "none" : "transform 200ms linear" }}
       >
-        <VideoPlayer src={trailerSrc} poster={posterSrc} style={{ width: "100%", height: "100%" }} />
+        <VideoPlayer
+          src={trailerSrc}
+          poster={posterSrc}
+          animatedPoster={animatedPosterSrc}
+          style={{ width: "100%", height: "100%" }}
+        />
       </div>
       <div
         className="pv-d-hero-scrim"
