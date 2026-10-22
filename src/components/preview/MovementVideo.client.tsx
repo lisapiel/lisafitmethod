@@ -57,6 +57,11 @@ export default function MovementVideo({
           // ground showing — the black rectangles on iOS, where Safari limits
           // how many videos it will decode at once.
           poster={poster}
+          // autoPlay, muted and playsInline together are what WebKit checks
+          // before it will start an inline clip on its own. The hero has had
+          // all three and plays; these had only the last two and relied on a
+          // play() call from an effect, which iOS routinely declines.
+          autoPlay
           muted
           loop
           playsInline
