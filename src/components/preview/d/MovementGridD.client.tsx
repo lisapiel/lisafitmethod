@@ -59,11 +59,25 @@ export default function MovementGridD({ urls }: { urls: string[] }) {
   )
 }
 
+// A still frame for each clip, committed under public/posters with the same
+// basename as the video. It is what the plate shows when the browser will not
+// decode the clip — which is every one of them on iOS past its limit on
+// simultaneous video. A clip without a matching still simply has no poster,
+// which is the behaviour this replaces, so nothing regresses.
+function posterFor(url: string): string | undefined {
+  const file = url.split("/").pop()
+  if (!file) return undefined
+  const name = file.replace(/\.[a-z0-9]+$/i, "")
+  return KNOWN_POSTERS.has(name) ? `/posters/${name}.jpg` : undefined
+}
+
+const KNOWN_POSTERS = new Set(["m1_goblet_squat", "m1_hip_hinge", "m2_rdl"])
+
 function Plate({ url, variant }: { url: string; variant: "lead" | "small" }) {
   const { ref, inView } = useInView<HTMLDivElement>(0.3)
   return (
     <div ref={ref} className={`pv-d-mplate pv-d-mplate--${variant}`}>
-      <MovementVideo src={url} mounted={inView} active={inView} label="" />
+      <MovementVideo src={url} poster={posterFor(url)} mounted={inView} active={inView} label="" />
     </div>
   )
 }

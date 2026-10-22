@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 // One movement clip from the Training Foundations library.
 //
@@ -11,19 +11,20 @@ import { useEffect, useRef, useState } from "react"
 // which is also the resting state of the design rather than a placeholder.
 export default function MovementVideo({
   src,
+  poster,
   mounted,
   active,
   label,
   objectPosition = "center",
 }: {
   src: string
+  poster?: string
   mounted: boolean
   active: boolean
   label: string
   objectPosition?: string
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     const v = videoRef.current
@@ -51,6 +52,11 @@ export default function MovementVideo({
         <video
           ref={videoRef}
           src={src}
+          // Without a poster there is nothing to paint until a frame has been
+          // decoded, so a clip that cannot autoplay leaves the plate's dark
+          // ground showing — the black rectangles on iOS, where Safari limits
+          // how many videos it will decode at once.
+          poster={poster}
           muted
           loop
           playsInline
@@ -58,7 +64,6 @@ export default function MovementVideo({
           controls={false}
           disablePictureInPicture
           aria-label={`${label} demonstration`}
-          onCanPlay={() => setReady(true)}
           style={{
             position: "absolute",
             inset: 0,
@@ -66,9 +71,13 @@ export default function MovementVideo({
             height: "100%",
             objectFit: "cover",
             objectPosition,
-            opacity: ready ? 1 : 0,
+            // Always opaque. This was gated on a canplay that never fires if
+            // the browser declines to decode the clip, which left the element
+            // permanently invisible on top of the dark plate. The poster is
+            // what covers the load window now.
+            opacity: 1,
             transform: active ? "scale(1)" : "scale(1.04)",
-            transition: "opacity 600ms ease, transform 1200ms cubic-bezier(0.16, 1, 0.3, 1)",
+            transition: "transform 1200ms cubic-bezier(0.16, 1, 0.3, 1)",
             pointerEvents: "none",
           }}
         />
