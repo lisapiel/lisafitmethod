@@ -188,7 +188,13 @@ export default function VideoPlayer({
     }
   }
 
-  const showManualPlay = autoplayBlocked && !isPlaying && !!src
+  // A video with an animated fallback never offers a manual control. There is
+  // nothing left for one to do: the section already appears to move, and the
+  // first touch anywhere on the page starts the real video. It also used to
+  // flash on an ordinary load — a play() attempt is refused in the moment
+  // before native autoplay succeeds, which set autoplayBlocked just long
+  // enough to paint the button and then clear it.
+  const showManualPlay = autoplayBlocked && !isPlaying && !!src && !animatedPoster
   const stillSrc = !isPlaying && (autoplayBlocked || stalled) && animatedPoster ? animatedPoster : poster
 
   return (
