@@ -1,5 +1,6 @@
 "use client"
 import { useRef, useEffect, useState } from "react"
+import { onFirstGesture } from "./preview/firstGesture"
 
 // Hero video player. Stable DOM structure:
 //
@@ -136,8 +137,23 @@ export default function VideoPlayer({
       v.addEventListener("canplay", attemptPostReadinessPlay, { once: true })
     }
 
+    // Autoplay refused is not the end of it. iOS blocks it outright in Low
+    // Power Mode, and one gesture anywhere in the document lifts that for
+    // the whole document — which is why this video starts after the visitor
+    // taps a link and comes back, a Next app being a single document. Retry
+    // on that first touch so a cold visit behaves the same way.
+    const stopGestureWatch = onFirstGesture(() => {
+      const el = videoRef.current
+      if (!el || !el.paused) return
+      el.muted = true
+      el.defaultMuted = true
+      const p = el.play()
+      if (p && typeof p.then === "function") p.catch(() => {})
+    })
+
     return () => {
       cancelled = true
+      stopGestureWatch()
       v.removeEventListener("playing", onPlaying)
       v.removeEventListener("pause", onPause)
       v.removeEventListener("ended", onEnded)
