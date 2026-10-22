@@ -1,15 +1,17 @@
 import Image from "next/image"
 import { ParallaxMedia } from "../ParallaxMedia.client"
-import { DrawRule } from "../Reveal.client"
 
 // The seam between two grounds.
 //
 // A tone change that happens on a hard edge reads as two pages stapled
-// together. Here the ground gradients across a generous band and a hairline
-// draws itself through the middle as the reader arrives, so the change is
-// paced rather than abrupt. One component, used at every tone change on the
-// page, which is also what keeps the rhythm even.
-export function ToneShift({ from, to, rule = true }: { from: string; to: string; rule?: boolean }) {
+// together, so the ground gradients across a band instead. One component,
+// used at every tone change on the page, which is also what keeps the
+// rhythm even.
+//
+// A hairline used to draw itself through the middle of the band. On a phone,
+// where the band is only a couple of dozen pixels tall, it did not read as a
+// flourish — it read as exactly the ruled line the fade is meant to avoid.
+export function ToneShift({ from, to }: { from: string; to: string }) {
   // The band is split into two tone halves. Without them the navigation has
   // nothing to sample while it crosses a transition, so it holds whichever
   // styling it had last and can sit cream-on-light — or ink-on-dark — for the
@@ -33,7 +35,7 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
       className="pv-d-toneshift"
       style={{
         position: "relative",
-        background: `linear-gradient(to bottom, ${resolve(from)} 0%, ${resolve(to)} 100%)`,
+        background: easedBlend(resolve(from), resolve(to)),
         display: "flex",
         alignItems: "center",
         padding: "0 var(--d-gutter)",
@@ -41,12 +43,56 @@ export function ToneShift({ from, to, rule = true }: { from: string; to: string;
     >
       <div data-tone={half(from)} style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%" }} />
       <div data-tone={half(to)} style={{ position: "absolute", top: "50%", left: 0, right: 0, height: "50%" }} />
-      {rule && (
-        <div style={{ position: "relative", width: "100%", maxWidth: "var(--d-max)", margin: "0 auto" }}>
-          <DrawRule color="rgba(200,169,126,0.32)" origin="center" duration={1600} />
-        </div>
-      )}
     </div>
+  )
+}
+
+// A two-stop gradient runs at one constant slope and then stops dead where
+// it meets each flat ground. Those two corners are changes in slope, and the
+// eye finds them the way it finds any edge — which is why the band still
+// showed a seam at the top and another at the bottom, the very thing it is
+// there to prevent.
+//
+// Sampling a smoothstep curve instead lets the ramp leave one ground and
+// arrive at the other tangentially, so there is no corner to catch on at
+// either end. It also gathers the visible change into the middle of the
+// band, which is what makes the fade read as shorter and softer without
+// taking any height out of the page.
+function easedBlend(from: string, to: string): string {
+  const a = toRgb(from)
+  const b = toRgb(to)
+  if (!a || !b) return `linear-gradient(to bottom, ${from} 0%, ${to} 100%)`
+
+  const stops: string[] = []
+  for (let i = 0; i <= BLEND_STEPS; i++) {
+    const t = i / BLEND_STEPS
+    const eased = t * t * (3 - 2 * t)
+    const c = a.map((channel, k) => Math.round(channel + (b[k] - channel) * eased))
+    stops.push(`rgb(${c[0]},${c[1]},${c[2]}) ${((t * 100).toFixed(1))}%`)
+  }
+  return `linear-gradient(to bottom, ${stops.join(", ")})`
+}
+
+const BLEND_STEPS = 16
+
+function toRgb(colour: string): [number, number, number] | null {
+  const hex = colour.trim().replace("#", "")
+  const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex
+  if (!/^[0-9a-f]{6}$/i.test(full)) return null
+  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)) as [number, number, number]
+}
+
+// How far a backdrop takes to settle onto its ground at each edge. Long
+// enough that the settling itself is not visible, short enough that it only
+// touches the margin of the photograph.
+const LANDING = "30px"
+
+function landing(ground: string): string {
+  return (
+    `linear-gradient(to bottom, ` +
+    `rgb(${ground}) 0px, rgba(${ground},0.72) 7px, rgba(${ground},0.3) 16px, rgba(${ground},0) ${LANDING}, ` +
+    `rgba(${ground},0) calc(100% - ${LANDING}), rgba(${ground},0.3) calc(100% - 16px), ` +
+    `rgba(${ground},0.72) calc(100% - 7px), rgb(${ground}) 100%)`
   )
 }
 
@@ -145,6 +191,14 @@ export function Atmosphere({
         style={{ objectFit: "cover", objectPosition: position, opacity: strength }}
       />
       <div style={{ position: "absolute", inset: 0, background: scrims[scrim] }} />
+      {/* A section carrying a photograph has to end on its own ground
+          colour. Without this it ends on whatever the photograph was doing
+          there — a warm near-black rather than the flat one — and the tone
+          band that follows starts from a colour the section never reached,
+          so the join shows as the very line the band exists to prevent. A
+          short landing at the top and bottom settles the picture onto the
+          ground before the edge arrives. */}
+      <div style={{ position: "absolute", inset: 0, background: landing(ground) }} />
     </div>
   )
 }

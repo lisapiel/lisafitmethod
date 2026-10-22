@@ -118,7 +118,26 @@ export async function CoursesPageD() {
           position: absolute; inset: 0; pointer-events: none;
           background: linear-gradient(to bottom, rgba(250,248,245,0.2) 0%, rgba(250,248,245,0.04) 42%, rgba(250,248,245,0.3) 100%);
         }
-        @media (max-width: 600px) { .pv-d-nutshot-frame { aspect-ratio: 5 / 4; } }
+        @media (max-width: 960px) {
+          .pv-d-nutshot-frame { aspect-ratio: 5 / 4; }
+          /* The same even feather the homepage uses. A radial mask fades the
+             corners first and leaves the top and bottom edges hard, which is
+             the vignette this replaces. Two linear gradients, one per axis,
+             multiplied together give each edge the same soft run and no
+             corner darkening. The wash goes with it, as it does there — it
+             was the grey cast over the picture. */
+          .pv-d-nutshot-frame {
+            -webkit-mask-image:
+              linear-gradient(to right, transparent 0%, #000 11%, #000 89%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, #000 11%, #000 89%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-image:
+              linear-gradient(to right, transparent 0%, #000 11%, #000 89%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, #000 11%, #000 89%, transparent 100%);
+            mask-composite: intersect;
+          }
+          .pv-d-nutshot-wash { background: none; }
+        }
         .pv-d-testimonial-shot { max-width: 900px; margin: 0 auto; }
         .pv-d-testimonial-shot img { width: 100%; height: auto; display: block; }
         .pv-d-tracker-grid {

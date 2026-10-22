@@ -42,7 +42,7 @@ export function StatementD({ backdrop }: { backdrop?: string }) {
         }
       `}</style>
 
-      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.26} position="center 58%" />}
+      {backdrop && <Atmosphere src={backdrop} tone="light" opacity={0.17} position="center 58%" />}
 
       <figure className="pv-d-statement-inner pv-d-above">
         <span className="pv-d-statement-mark" aria-hidden="true">

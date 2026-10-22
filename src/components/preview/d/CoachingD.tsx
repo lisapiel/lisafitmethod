@@ -56,6 +56,11 @@ export function CoachingD({ portraitUrl, backdrop }: { portraitUrl: string; back
         .pv-d-coach-foot {
           display: flex; align-items: flex-end; justify-content: space-between;
           gap: var(--d-step-3); flex-wrap: wrap; margin-top: var(--d-step-4);
+          /* Line the price, its note and the button up with the pillar copy
+             above rather than with the column edge. Each pillar is a 46px
+             number column plus the grid gap, so the same offset puts this
+             block on the left edge of the text it belongs to. */
+          padding-left: calc(46px + clamp(14px, 1.8vw, 26px));
         }
         .pv-d-coach-price {
           font-family: var(--font-playfair), serif; font-weight: 500;
