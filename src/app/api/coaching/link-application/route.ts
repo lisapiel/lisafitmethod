@@ -3,6 +3,7 @@ import { getCoachingApplication, updateCoachingApplication, getCoachingClientRec
 import { getSessionUser } from "@/lib/sessionUser"
 import { resolveInvitationAccess } from "@/lib/coachingInvitation"
 import { linkEmailToAccount } from "@/lib/accountLinks"
+import { consumeInvitationToken } from "@/lib/invitationTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -11,9 +12,15 @@ export const dynamic = "force-dynamic"
 // This is the deliberate, person-confirmed alternative to the old behaviour,
 // which silently created a second account whenever someone applied under an
 // address we had not seen. Nothing here matches on names, and nothing happens
-// without both proofs: the caller is authenticated as the account that will
-// own the application, and they hold the invitation that was emailed to the
-// applicant address.
+// without both proofs:
+//
+//   1. the caller is authenticated as the account that will own it, and
+//   2. they present the single-use token from the email we sent to the
+//      applicant address.
+//
+// Knowing an application id is deliberately not enough. An id can be read over
+// someone's shoulder or forwarded; on its own it would let any signed-in
+// visitor attach another person's approved terms to their own account.
 export async function POST(req: NextRequest) {
   const user = await getSessionUser()
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 })
@@ -24,7 +31,9 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
-  const applicationId = (body as { applicationId?: string }).applicationId?.trim() ?? ""
+  const b = body as { applicationId?: string; token?: string }
+  const applicationId = b.applicationId?.trim() ?? ""
+  const token = b.token?.trim() ?? ""
   if (!applicationId) return NextResponse.json({ error: "applicationId required" }, { status: 400 })
 
   const application = await getCoachingApplication(applicationId)
@@ -40,6 +49,24 @@ export async function POST(req: NextRequest) {
   }
 
   const applicantEmail = application.email.trim().toLowerCase()
+
+  // Proof the caller received the approval email. Spent before anything is
+  // written, so two racing requests cannot both link.
+  const spent = await consumeInvitationToken(token, applicationId, "account-link")
+  if (!spent.valid) {
+    return NextResponse.json(
+      {
+        error: "Open the link in your approval email to connect this invitation to your account.",
+        reason: spent.reason,
+        needsToken: true,
+      },
+      { status: 403 },
+    )
+  }
+  if (spent.token.email !== applicantEmail) {
+    return NextResponse.json({ error: "This link does not match the invitation" }, { status: 403 })
+  }
+
   const linkedAt = new Date().toISOString()
 
   try {

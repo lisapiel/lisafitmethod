@@ -32,10 +32,10 @@ export default function CoachingWelcomePage() {
           You&apos;re in.
         </h1>
         <p style={{ fontSize: 16, color: "rgba(245,242,238,0.65)", lineHeight: 1.7, marginBottom: 16 }}>
-          Payment confirmed. You&apos;ll receive an email shortly with your login details.
+          Payment confirmed. We&apos;re finishing your setup now.
         </p>
         <p style={{ fontSize: 15, color: "rgba(245,242,238,0.5)", lineHeight: 1.7, marginBottom: 40 }}>
-          Once your account is set up, you&apos;ll have access to your coaching portal where you&apos;ll find your program, progress tracking, check-ins, and direct messaging with Lisa.
+          Your coaching portal — program, progress tracking, check-ins and direct messaging with Lisa — appears on your account as soon as Stripe confirms the payment. That usually takes a few seconds.
         </p>
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
           <Link

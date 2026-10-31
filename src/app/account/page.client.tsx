@@ -34,8 +34,14 @@ interface Props {
   tracker: boolean
   masterclass: boolean
   coaching: boolean
+  invitation?: {
+    applicationId: string
+    status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"
+    applicantEmail: string
+  } | null
   isAdmin: boolean
   coachingClient?: CoachingClientData | null
+  justPaid?: boolean
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -532,7 +538,65 @@ interface UpsellProduct {
   featured?: boolean
 }
 
-export function AccountClient({ email, training, nutrition, tracker, masterclass, coaching, isAdmin, coachingClient }: Props) {
+// Where an enrolment stands, and the one action that moves it along.
+//
+// Reads the application's own status rather than introducing a second notion
+// of progress, so there is nothing here that can disagree with the admin view.
+function CoachingEnrolmentSection({
+  invitation,
+  justPaid,
+}: {
+  invitation?: { applicationId: string; status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"; applicantEmail: string } | null
+  justPaid?: boolean
+}) {
+  const gold = "#c9a96e"
+  const border = "#2a2a2a"
+
+  const copy = {
+    PENDING: {
+      label: "Application Pending",
+      body: "Your coaching application is with Lisa. You'll get an email as soon as she's reviewed it.",
+      cta: null as { href: string; text: string } | null,
+    },
+    APPROVED: {
+      label: "Complete Enrollment",
+      body: "You're approved. Confirm your acknowledgements and payment to start — your place is held until you do.",
+      cta: invitation ? { href: `/coaching/accept/${invitation.applicationId}`, text: "Complete Enrollment →" } : null,
+    },
+    PAID: {
+      label: "Finalising Enrollment",
+      body: "Payment received. We're waiting on confirmation from Stripe — this usually takes a few seconds. Refresh this page in a moment and your coaching will be here.",
+      cta: null as { href: string; text: string } | null,
+    },
+    DECLINED: { label: "", body: "", cta: null as { href: string; text: string } | null },
+  }[justPaid ? "PAID" : (invitation?.status ?? "PAID")]
+
+  return (
+    <div style={{ marginBottom: 40 }}>
+      <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 16 }}>
+        1:1 Coaching
+      </p>
+      <div style={{ background: "#111", border: `1px solid ${border}`, borderLeft: `3px solid ${gold}`, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 6 }}>
+            {copy.label}
+          </p>
+          <p style={{ fontSize: "0.75rem", color: "#888", lineHeight: 1.6, margin: 0 }}>{copy.body}</p>
+        </div>
+        {copy.cta && (
+          <Link
+            href={copy.cta.href}
+            style={{ display: "inline-block", background: gold, color: "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", padding: "0.65rem 1.25rem", whiteSpace: "nowrap" }}
+          >
+            {copy.cta.text}
+          </Link>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function AccountClient({ email, training, nutrition, tracker, masterclass, coaching, isAdmin, coachingClient, invitation, justPaid }: Props) {
 
   const owned: OwnedProduct[] = []
   if (coaching) {
@@ -752,8 +816,13 @@ export function AccountClient({ email, training, nutrition, tracker, masterclass
           <CoachingBillingSection client={coachingClient} />
         )}
 
+        {/* Enrolment in progress — the way back in without the email */}
+        {!coaching && (invitation || justPaid) && invitation?.status !== "DECLINED" && (
+          <CoachingEnrolmentSection invitation={invitation} justPaid={justPaid} />
+        )}
+
         {/* No coaching history — show apply CTA */}
-        {!coaching && !coachingClient && (
+        {!coaching && !coachingClient && !invitation && (
           <div style={{ marginBottom: 40 }}>
             <p style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: "#555", marginBottom: 16 }}>
               1:1 Coaching

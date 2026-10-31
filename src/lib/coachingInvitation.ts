@@ -1,4 +1,4 @@
-import type { CoachingApplication } from "@/lib/authTokens"
+import { listCoachingApplications, type CoachingApplication } from "@/lib/authTokens"
 import { resolveOwnerEmail } from "@/lib/accountLinks"
 import type { SessionUser } from "@/lib/sessionUser"
 
@@ -40,4 +40,63 @@ export async function resolveInvitationAccess(
   }
 
   return "linkable"
+}
+
+
+export type InvitationSummary = {
+  applicationId: string
+  status: CoachingApplication["status"]
+  applicantEmail: string
+  approvedPriceInCents?: number
+  approvedCommitmentType?: CoachingApplication["approvedCommitmentType"]
+}
+
+// The coaching application this account owns, if any.
+//
+// Ownership is checked first, then the applicant address, then any address
+// linked to this account — so someone who applied under a second address sees
+// their enrolment on the dashboard of the account they actually sign in to.
+//
+// Only one application is returned: whichever is furthest along, so a stray
+// older application cannot mask a live one.
+const STAGE: Record<string, number> = { PAID: 4, APPROVED: 3, PENDING: 2, DECLINED: 1 }
+
+export async function findCoachingInvitationForAccount(
+  email: string,
+  linkedEmails: string[] = [],
+  // Swappable so the selection rule can be exercised without the database.
+  loadApplications: () => Promise<CoachingApplication[]> = listCoachingApplications,
+): Promise<InvitationSummary | null> {
+  const owner = email.trim().toLowerCase()
+  const mine = new Set([owner, ...linkedEmails.map((e) => e.trim().toLowerCase())])
+
+  let applications: CoachingApplication[]
+  try {
+    applications = await loadApplications()
+  } catch {
+    return null
+  }
+
+  const candidates = applications.filter((app) => {
+    const explicitOwner = app.ownerEmail?.trim().toLowerCase()
+    if (explicitOwner) return mine.has(explicitOwner)
+    return mine.has(app.email.trim().toLowerCase())
+  })
+  if (candidates.length === 0) return null
+
+  candidates.sort((a, b) => {
+    const byStage = (STAGE[b.status] ?? 0) - (STAGE[a.status] ?? 0)
+    if (byStage !== 0) return byStage
+    return (b.applicationDate ?? "").localeCompare(a.applicationDate ?? "")
+  })
+  const best = candidates[0]
+  if (best.status === "DECLINED") return null
+
+  return {
+    applicationId: best.id,
+    status: best.status,
+    applicantEmail: best.email,
+    approvedPriceInCents: best.approvedPriceInCents,
+    approvedCommitmentType: best.approvedCommitmentType,
+  }
 }

@@ -447,18 +447,33 @@ export async function submitCoachingApplication(data: {
   return id
 }
 
-export async function listCoachingApplications(): Promise<CoachingApplication[]> {
+// A scan returns at most 1MB of the table and then stops, handing back a
+// cursor. Reading only the first page silently loses rows — and because the
+// filter is applied after that 1MB is read, the rows lost are not even the
+// last ones written. An application that fell off the end was missing from
+// this list while sitting perfectly intact in the table.
+async function scanAllByPrefix<T>(prefix: string): Promise<T[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_app_" },
-    })
-  )
-  return ((result.Items ?? []) as CoachingApplication[]).sort(
-    (a, b) => b.applicationDate.localeCompare(a.applicationDate)
-  )
+  const items: T[] = []
+  let startKey: Record<string, unknown> | undefined
+  do {
+    const result = await db.send(
+      new ScanCommand({
+        TableName: TABLE,
+        FilterExpression: "begins_with(userId, :prefix)",
+        ExpressionAttributeValues: { ":prefix": prefix },
+        ...(startKey ? { ExclusiveStartKey: startKey } : {}),
+      })
+    )
+    items.push(...((result.Items ?? []) as T[]))
+    startKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+  } while (startKey)
+  return items
+}
+
+export async function listCoachingApplications(): Promise<CoachingApplication[]> {
+  const applications = await scanAllByPrefix<CoachingApplication>("coaching_app_")
+  return applications.sort((a, b) => (b.applicationDate ?? "").localeCompare(a.applicationDate ?? ""))
 }
 
 export async function getCoachingApplication(id: string): Promise<CoachingApplication | null> {

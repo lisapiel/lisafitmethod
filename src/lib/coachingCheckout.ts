@@ -1,5 +1,8 @@
 import Stripe from "stripe"
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb"
 import {
+  getCoachingApplication,
   getCoachingClientRecord,
   getBundleCredit,
   updateCoachingApplication,
@@ -8,6 +11,54 @@ import {
 
 function makeStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
+}
+
+const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
+
+function makeDb() {
+  return DynamoDBDocumentClient.from(
+    new DynamoDBClient({
+      region: process.env.COGNITO_REGION ?? "us-east-2",
+      credentials: {
+        accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
+      },
+    }),
+  )
+}
+
+// Only one request at a time may mint a session for an application.
+//
+// Reusing an open session makes repeated clicks safe, but two requests landing
+// in the same instant both find nothing to reuse and both create one. Two open
+// sessions mean two ways to pay, and a customer who returns to an old tab
+// could complete both. The winner of this claim mints; everyone else waits and
+// picks up what the winner wrote.
+const MINT_LOCK_MS = 30_000
+
+async function claimMintLock(applicationId: string): Promise<boolean> {
+  const now = Date.now()
+  try {
+    await makeDb().send(new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_app_${applicationId}` },
+      UpdateExpression: "SET checkoutLockUntil = :until",
+      ConditionExpression: "attribute_not_exists(checkoutLockUntil) OR checkoutLockUntil < :now",
+      ExpressionAttributeValues: { ":until": now + MINT_LOCK_MS, ":now": now },
+    }))
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function releaseMintLock(applicationId: string): Promise<void> {
+  await makeDb().send(new UpdateCommand({
+    TableName: TABLE,
+    Key: { userId: `coaching_app_${applicationId}` },
+    UpdateExpression: "SET checkoutLockUntil = :zero",
+    ExpressionAttributeValues: { ":zero": 0 },
+  })).catch(() => { /* the lock expires on its own */ })
 }
 
 // A Checkout Session is a receipt-in-waiting, not an invitation.
@@ -166,7 +217,27 @@ export async function prepareCoachingCheckout(input: {
     return { kind: "checkout", url: decision.url, sessionId: application.stripeCheckoutSessionId ?? "", reused: true }
   }
 
-  // 4. Nothing live, nothing paid: mint a new session on the approved terms.
+  // Nothing live, nothing paid: mint a new session on the approved terms —
+  // but only one request gets to do it.
+  if (!(await claimMintLock(application.id))) {
+    // Someone else is minting right now. Wait for them rather than opening a
+    // competing session, then read back what they produced.
+    for (let attempt = 0; attempt < 8; attempt++) {
+      await new Promise((r) => setTimeout(r, 400))
+      const fresh = await getCoachingApplication(application.id).catch(() => null)
+      const sid = fresh?.stripeCheckoutSessionId
+      if (sid && sid !== application.stripeCheckoutSessionId) {
+        try {
+          const made = await stripe.checkout.sessions.retrieve(sid)
+          if (made.status === "open" && made.url) {
+            return { kind: "checkout", url: made.url, sessionId: made.id, reused: true }
+          }
+        } catch { /* fall through and mint our own */ }
+      }
+    }
+  }
+
+
   const priceInCents = application.approvedPriceInCents
   const commitmentType = application.approvedCommitmentType
   if (!priceInCents || !commitmentType) {
@@ -212,6 +283,12 @@ export async function prepareCoachingCheckout(input: {
     ...(bundleCouponId ? { bundleCouponId } : {}),
   }
 
+  // Close the session being replaced, so an application never has two open
+  // ways to pay sitting in two different browser tabs.
+  if (application.stripeCheckoutSessionId && existingSession?.status === "open") {
+    await stripe.checkout.sessions.expire(application.stripeCheckoutSessionId).catch(() => {})
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     payment_method_types: ["card"],
@@ -228,11 +305,17 @@ export async function prepareCoachingCheckout(input: {
     ...(bundleCouponId ? { discounts: [{ coupon: bundleCouponId }] } : {}),
     metadata,
     subscription_data: { metadata },
-    success_url: `${baseUrl}/coaching/welcome`,
+    // Back to their own dashboard, which shows enrolment finishing and then
+    // opens the coaching portal once Stripe confirms.
+    success_url: `${baseUrl}/account?enrolled=1`,
     cancel_url: `${baseUrl}/coaching/accept/${application.id}`,
     // Stripe's own ceiling is 24 hours. The link that survives is the
     // invitation, not this.
     expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+  }, {
+    // Second net under the lock: if two creates do get through, Stripe itself
+    // returns one session rather than two.
+    idempotencyKey: `coaching-checkout-${application.id}-${Math.floor(Date.now() / 600_000)}`,
   })
 
   if (!session.url) throw new Error("Stripe returned a session without a URL")
@@ -244,5 +327,6 @@ export async function prepareCoachingCheckout(input: {
     ...(bundleCouponId ? { bundleCouponId } : {}),
   }).catch((err) => console.error("updateCoachingApplication (checkout session) failed:", err))
 
+  await releaseMintLock(application.id)
   return { kind: "checkout", url: session.url, sessionId: session.id, reused: false }
 }

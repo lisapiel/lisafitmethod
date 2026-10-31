@@ -11,6 +11,7 @@ import {
   createCoachingClientRecord,
   type CommitmentType,
 } from "@/lib/authTokens"
+import { generateInvitationToken, storeInvitationToken } from "@/lib/invitationTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -82,9 +83,7 @@ function approvalEmail(name: string, checkoutUrl: string): string {
           <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
             <tr>
               <td style="background:#c8a97e;border-radius:2px;">
-                <a href="${checkoutUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">
-                  Set Up My Coaching →
-                </a>
+                <a href="${checkoutUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Complete Enrollment &rarr;</a>
               </td>
             </tr>
           </table>
@@ -222,7 +221,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     // collects the two required acknowledgements) rather than directly to
     // Stripe. The interstitial reads the stripeCheckoutUrl we just wrote to
     // the application record and redirects there after acceptance.
-    const acceptUrl = `${baseUrl}/coaching/accept/${id}`
+    // The link carries a single-use token. That is what lets someone with no
+    // account choose a password on the spot instead of being sent a second
+    // email, and what proves — to anyone whose courses are under a different
+    // address — that they are the person the offer was made to.
+    const inviteToken = generateInvitationToken()
+    await storeInvitationToken({ token: inviteToken, applicationId: id, email: application.email })
+    const acceptUrl = `${baseUrl}/coaching/accept/${id}?t=${inviteToken}`
 
     await resend.emails.send({
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",

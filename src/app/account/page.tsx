@@ -7,6 +7,8 @@ import {
   hasMasterclassAccess, hasCoachingAccess, isAdminEmail,
   getCoachingClientRecord,
 } from "@/lib/authTokens"
+import { findCoachingInvitationForAccount } from "@/lib/coachingInvitation"
+import { getAccountLink } from "@/lib/accountLinks"
 import { AccountClient } from "./page.client"
 
 export const metadata: Metadata = {
@@ -15,7 +17,16 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ enrolled?: string }>
+}) {
+  // Stripe sends them straight back here. For the few seconds before the
+  // webhook lands, the application still reads APPROVED, and without this the
+  // dashboard would invite someone who has just paid to pay again.
+  const { enrolled } = await searchParams
+  const justPaid = enrolled === "1"
   const email = await runWithAmplifyServerContext({
     nextServerContext: { cookies },
     operation: async (contextSpec): Promise<string | null> => {
@@ -43,6 +54,27 @@ export default async function AccountPage() {
   ])
 
   const isAdmin = isAdminEmail(emailStr)
+
+  // An approved-but-unpaid applicant needs a way back into enrolment that
+  // does not depend on still having the email. Without this the dashboard
+  // showed them nothing at all — or, before they were reviewed, invited them
+  // to apply a second time.
+  const sessionSub = await runWithAmplifyServerContext({
+    nextServerContext: { cookies },
+    operation: async (contextSpec): Promise<string> => {
+      try {
+        const session = await fetchAuthSession(contextSpec)
+        const sub = session.tokens?.idToken?.payload?.sub
+        return typeof sub === "string" ? sub : ""
+      } catch {
+        return ""
+      }
+    },
+  })
+  const link = sessionSub ? await getAccountLink(sessionSub).catch(() => null) : null
+  const invitation = isAdmin
+    ? null
+    : await findCoachingInvitationForAccount(emailStr, link?.aliasEmails ?? []).catch(() => null)
 
   // Fetch coaching client record for billing section and former-client restart flow.
   // Run for all non-admin users so inactive former clients can see the restart CTA.
@@ -89,6 +121,8 @@ export default async function AccountPage() {
       coaching={coaching}
       isAdmin={isAdmin}
       coachingClient={coachingClient}
+      invitation={invitation}
+      justPaid={justPaid}
     />
   )
 }

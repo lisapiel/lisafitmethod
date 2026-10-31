@@ -704,6 +704,29 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   // welcome emails, no duplicate admin notifications.
   const preexisting = await getCoachingClientRecord(email)
   if (preexisting?.status === "ACTIVE") {
+    // A second, DIFFERENT subscription for someone already active means two
+    // payments got through — two tabs, two sessions, or a webhook replay that
+    // is not a replay. Provisioning is already correct, so nothing changes
+    // here, but this must never pass silently: somebody is being billed twice
+    // and only a human can decide which subscription to cancel.
+    if (
+      subscriptionId &&
+      preexisting.stripeSubscriptionId &&
+      preexisting.stripeSubscriptionId !== subscriptionId
+    ) {
+      console.error(
+        `DUPLICATE coaching subscription for ${email}: ${preexisting.stripeSubscriptionId} already active, ${subscriptionId} just paid`,
+      )
+      notifyAdmin({
+        kind: "duplicate-subscription",
+        subject: `DUPLICATE subscription for ${email}`,
+        headline: `${email} now has two coaching subscriptions`,
+        body: `Already active on ${preexisting.stripeSubscriptionId}, and ${subscriptionId} has just been paid.\n\nTheir access is fine — nothing was changed. One of these needs cancelling and probably refunding. The older one is usually the keeper.`,
+        ctaLabel: "Open in Stripe",
+        ctaHref: `https://dashboard.stripe.com/subscriptions/${subscriptionId}`,
+        meta: { email, existing: preexisting.stripeSubscriptionId, duplicate: subscriptionId },
+      }).catch(() => {})
+    }
     // Still refresh bundle-credit-used marker in case the first pass missed it
     if (subscriptionId) {
       await markBundleCreditUsed(email, subscriptionId).catch(() => { /* no bundle purchase — nothing to mark */ })
