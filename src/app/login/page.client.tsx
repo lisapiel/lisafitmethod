@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn, confirmSignIn, fetchAuthSession, signOut } from "aws-amplify/auth"
@@ -46,10 +46,40 @@ const submitStyle: React.CSSProperties = {
   marginTop: 8,
 }
 
+// A session is only worth acting on if it still has an ID token with time
+// left. Amplify hands back a session object either way, and treating the empty
+// one as "signed in" is what used to bounce people into a protected page that
+// immediately bounced them back here.
+async function usableSession(): Promise<boolean> {
+  try {
+    const session = await fetchAuthSession()
+    const exp = session.tokens?.idToken?.payload?.exp
+    if (typeof exp !== "number") return false
+    return exp * 1000 > Date.now() + 30_000
+  } catch {
+    return false
+  }
+}
+
+function isAlreadySignedIn(err: unknown): boolean {
+  const name = err && typeof err === "object" && "name" in err ? String((err as { name: unknown }).name) : ""
+  const message = err instanceof Error ? err.message : ""
+  return name === "UserAlreadyAuthenticatedException" || message.includes("There is already a signed in user")
+}
+
+// Only ever send people to a path on this site.
+function safeRedirect(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account"
+  return raw
+}
+
 export function LoginClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect") ?? "/account"
+  const redirect = safeRedirect(searchParams.get("redirect"))
+  // One automatic recovery per page load. Without a bound, a stale record that
+  // will not clear turns into an endless sign-in/sign-out cycle.
+  const recovered = useRef(false)
 
   const [step, setStep] = useState<Step>("credentials")
   const [email, setEmail] = useState("")
@@ -60,29 +90,66 @@ export function LoginClient() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetchAuthSession().then((session) => {
-      if (session.tokens) router.push(redirect)
-    }).catch(() => {})
+    let cancelled = false
+    usableSession().then((ok) => {
+      if (!cancelled && ok) router.replace(redirect)
+    })
+    return () => { cancelled = true }
   }, [redirect, router])
+
+  // Don't hand someone to a protected page until the session is genuinely
+  // readable, or they just bounce back here. Cookies are written as part of
+  // sign-in; this gives that a moment to settle, and gives up rather than
+  // looping.
+  const goToRedirect = async () => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (await usableSession()) {
+        router.replace(redirect)
+        return
+      }
+      await new Promise((r) => setTimeout(r, 250))
+    }
+    setError("Signed in, but your session didn't stick. Please try once more.")
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
+    const credentials = { username: email.trim().toLowerCase(), password }
+
     try {
-      const result = await signIn({ username: email.trim().toLowerCase(), password })
+      let result
+      try {
+        result = await signIn(credentials)
+      } catch (err) {
+        // A stale auth record from an expired refresh token makes Amplify
+        // refuse to sign in at all. Clearing it and going straight back in is
+        // the whole recovery — the previous version cleared it and then asked
+        // the visitor to type everything again, and because the next attempt
+        // succeeded and left a fresh record behind, the attempt after that
+        // refused for the same reason and revoked those new tokens. That is
+        // the loop Alanna could not get out of: nine good sign-ins, each one
+        // signed straight back out.
+        //
+        // Nothing is signed out after a sign-in succeeds, and this runs at
+        // most once per page load.
+        if (!isAlreadySignedIn(err) || recovered.current) throw err
+        recovered.current = true
+        await signOut().catch(() => {})
+        result = await signIn(credentials)
+      }
 
       if (result.nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED") {
         setStep("new-password")
       } else if (result.isSignedIn) {
-        router.push(redirect)
+        await goToRedirect()
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Sign in failed."
-      if (message.includes("There is already a signed in user")) {
-        await signOut()
-        setError("Previous session cleared. Please sign in again.")
+      if (isAlreadySignedIn(err)) {
+        setError("We couldn't clear a previous session. Please close this tab, reopen the site and try once more.")
       } else if (message.includes("Incorrect username or password")) {
         setError("Incorrect email or password.")
       } else if (message.includes("User does not exist")) {
@@ -112,7 +179,7 @@ export function LoginClient() {
     try {
       const result = await confirmSignIn({ challengeResponse: newPassword })
       if (result.isSignedIn) {
-        router.push(redirect)
+        await goToRedirect()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to set password.")

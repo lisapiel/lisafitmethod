@@ -359,6 +359,20 @@ export interface CoachingApplication {
   reviewedAt?: string
   stripeCheckoutUrl?: string
   stripeSubscriptionId?: string
+  // The Lisa Fit Method account that owns this application. `email` stays as
+  // the address the person applied under — it is part of the record and the
+  // legal acceptance refers to it — while ownership can be pointed at the
+  // account they actually sign in to. Unset means the two are the same.
+  ownerEmail?: string
+  ownerSub?: string
+  linkedAt?: string
+  linkedMethod?: "coaching-invitation" | "admin-correction"
+  // Tracks the live Checkout Session so a repeated Process Payment reuses it
+  // instead of opening a second one, and so a session that has already been
+  // paid is never handed out again.
+  stripeCheckoutSessionId?: string
+  stripeCheckoutExpiresAt?: string
+  bundleCouponId?: string
   // Admin-approved business terms (set at approval, authoritative over applicant self-report)
   approvedPriceInCents?: number
   approvedCommitmentType?: CommitmentType

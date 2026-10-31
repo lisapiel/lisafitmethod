@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { CommitmentType } from "@/lib/authTokens"
 
 const ACCENT = "#c8a97e"
@@ -14,9 +15,9 @@ const BORDER = "rgba(200,169,126,0.25)"
 type Props = {
   applicationId: string
   applicantName: string
-  applicantEmail: string
-  coachingOption: string | null
-  checkoutUrl: string
+  // The account this will be billed to and provisioned on — the signed-in
+  // user, not a string carried over from the application form.
+  accountEmail: string
   approvedPriceInCents: number | null
   approvedCommitmentType: CommitmentType | null
 }
@@ -54,12 +55,11 @@ function buildTierDisplay(
 export default function AcceptClient({
   applicationId,
   applicantName,
-  applicantEmail,
-  coachingOption,
-  checkoutUrl,
+  accountEmail,
   approvedPriceInCents,
   approvedCommitmentType,
 }: Props) {
+  const router = useRouter()
   const tier = useMemo(
     () => buildTierDisplay(approvedPriceInCents, approvedCommitmentType),
     [approvedPriceInCents, approvedCommitmentType],
@@ -71,28 +71,44 @@ export default function AcceptClient({
 
   const canContinue = termsChecked && waiverChecked && !submitting
 
+  // The Stripe session is minted by this call, not read from a field written
+  // weeks ago, so the URL we send people to is always one that is open.
   async function handleContinue() {
     if (!canContinue) return
     setSubmitting(true)
     setError(null)
     try {
-      const res = await fetch("/api/coaching/record-acceptance", {
+      const res = await fetch("/api/coaching/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           applicationId,
-          coachingOption,
-          approvedPriceInCents,
-          approvedCommitmentType,
+          termsAccepted: termsChecked,
+          waiverAccepted: waiverChecked,
         }),
       })
+      const data = (await res.json()) as {
+        kind?: "checkout" | "already-active" | "awaiting-activation"
+        url?: string
+        error?: string
+      }
       if (!res.ok) {
-        setError("Something went wrong. Please try again or contact lisa@lisafitmethod.com.")
+        setError(data.error ?? "Something went wrong. Please try again or contact contact@lisafitmethod.com.")
         setSubmitting(false)
         return
       }
-      // Full-page redirect to Stripe's hosted checkout.
-      window.location.href = checkoutUrl
+      // Already paying, or paid moments ago and the webhook is still landing.
+      // Either way, sending them to Stripe again would risk a second charge.
+      if (data.kind === "already-active" || data.kind === "awaiting-activation") {
+        router.push("/my-coaching")
+        return
+      }
+      if (data.kind === "checkout" && data.url) {
+        window.location.href = data.url
+        return
+      }
+      setError("Something went wrong. Please try again.")
+      setSubmitting(false)
     } catch {
       setError("Something went wrong. Please try again.")
       setSubmitting(false)
@@ -114,7 +130,7 @@ export default function AcceptClient({
           Two quick acknowledgements before we hand you to secure Stripe checkout.
         </p>
         <p style={{ fontSize: 13, color: "rgba(245,242,238,0.4)", marginBottom: 40 }}>
-          Signed in as <strong style={{ color: "rgba(245,242,238,0.7)" }}>{applicantEmail}</strong>
+          Signed in as <strong style={{ color: "rgba(245,242,238,0.7)" }}>{accountEmail}</strong>
         </p>
 
         {/* Approved terms card */}

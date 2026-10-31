@@ -16,6 +16,8 @@ const tracked = new Set(execFileSync("git", ["ls-files", "public"], { encoding: 
 const refs = new Map()
 for (const file of src) {
   if (!/\.(tsx?|mjs)$/.test(file)) continue
+  // git still lists a file that has been deleted but not yet committed.
+  if (!fs.existsSync(file)) continue
   const text = fs.readFileSync(file, "utf8")
   for (const m of text.matchAll(/["'`](\/[A-Za-z0-9/._-]+\.(?:jpg|jpeg|png|webp|avif|svg|mp4|webm|mov|ico|woff2?))["'`]/g)) {
     if (!refs.has(m[1])) refs.set(m[1], new Set())

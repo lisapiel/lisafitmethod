@@ -381,7 +381,7 @@ export default function AdminApplicationsPage() {
                         </div>
                       </div>
                     )}
-                    {(app.status === "APPROVED") && app.stripeCheckoutUrl && (
+                    {app.status === "APPROVED" && (
                       <button
                         onClick={() => {
                           // Copy the interstitial URL (which requires the two acknowledgements)

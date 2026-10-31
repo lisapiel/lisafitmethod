@@ -2,26 +2,17 @@ import { NextRequest, NextResponse } from "next/server"
 import {
   CognitoIdentityProviderClient,
   GetUserCommand,
-  AdminCreateUserCommand,
-  AdminGetUserCommand,
-  UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
-import Stripe from "stripe"
 import { Resend } from "resend"
 import {
   isAdminEmail,
   getCoachingApplication,
   updateCoachingApplication,
   createCoachingClientRecord,
-  getBundleCredit,
   type CommitmentType,
 } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
-
-function makeStripe() {
-  return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
-}
 
 function makeCognito() {
   return new CognitoIdentityProviderClient({
@@ -191,123 +182,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Commitment type is required" }, { status: 400 })
     }
 
-    // Ensure applicant has a Cognito account (so Stripe can match them later)
-    const cognito = makeCognito()
-    try {
-      await cognito.send(new AdminGetUserCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-        Username: application.email,
-      }))
-    } catch {
-      // Create the account now — they'll set their password after payment
-      try {
-        await cognito.send(new AdminCreateUserCommand({
-          UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-          Username: application.email,
-          UserAttributes: [
-            { Name: "email", Value: application.email },
-            { Name: "email_verified", Value: "true" },
-          ],
-          TemporaryPassword: `Lfm${Math.random().toString(36).slice(2, 8)}!`,
-          MessageAction: "SUPPRESS",
-        }))
-      } catch (err) {
-        if (!(err instanceof UsernameExistsException)) {
-          console.error("Cognito account creation failed:", err)
-        }
-      }
-    }
+    // No account is created here any more. Approval used to silently mint a
+    // Cognito user for the application address with a suppressed random
+    // password, which produced accounts nobody could ever sign in to — and a
+    // second account for anyone who applied under a different address from the
+    // one their courses were on. The applicant now chooses how to get a login
+    // on the acceptance page: sign in to the account they already have, or ask
+    // for a set-password link.
 
-    const stripe = makeStripe()
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lisafitmethod.com"
 
-    // Bundle credit — one-time first-invoice discount.
-    //
-    //   ELIGIBILITY (server-enforced, all three must hold):
-    //     1. A Complete Foundations Bundle purchase exists for this email
-    //        within the last 90 days (getBundleCredit → available=true).
-    //     2. The bundle credit has not already been consumed.
-    //     3. The APPROVED coaching commitment is THREE_MONTH_MINIMUM.
-    //        Month-to-month coaching NEVER gets the bundle credit.
-    //
-    //   BILLING SHAPE (Stripe):
-    //     The subscription's recurring price stays at priceInCents (i.e.
-    //     the coach-approved monthly amount, standard or overridden).
-    //     The coupon has duration:"once" and is attached to the Checkout
-    //     Session via top-level `discounts` — Stripe applies it to
-    //     invoice #1 only. Every subsequent invoice bills at the full
-    //     recurring priceInCents. This is NOT a permanent price cut.
-    //
-    //   USAGE MARKING:
-    //     The coupon is created at approval time, but the bundle-purchase
-    //     record is NOT marked used here. `markBundleCreditUsed` fires
-    //     from the Stripe webhook only after a real subscription payment
-    //     succeeds (in provisionCoachingSubscriber), so approvals that
-    //     never convert don't consume the credit.
-    const credit = await getBundleCredit(application.email)
-    const bundleEligible =
-      credit.available &&
-      credit.amountCents > 0 &&
-      commitmentType === "THREE_MONTH_MINIMUM"
-    let bundleCouponId: string | null = null
-    if (bundleEligible) {
-      try {
-        const coupon = await stripe.coupons.create({
-          amount_off: Math.min(credit.amountCents, priceInCents),
-          currency: "usd",
-          duration: "once",                          // first invoice ONLY
-          max_redemptions: 1,
-          name: "Bundle credit",
-          metadata: {
-            applicantEmail: application.email,
-            applicationId: id,
-            coachingCommitmentType: commitmentType,  // for the paper trail
-          },
-        })
-        bundleCouponId = coupon.id
-      } catch (err) {
-        console.error("Stripe coupon create failed:", err)
-      }
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      customer_email: application.email,
-      line_items: [{
-        price_data: {
-          currency: "usd",
-          product_data: { name: "1:1 Coaching — Lisa Fit Method" },
-          unit_amount: priceInCents,
-          recurring: { interval: "month" },
-        },
-        quantity: 1,
-      }],
-      ...(bundleCouponId ? { discounts: [{ coupon: bundleCouponId }] } : {}),
-      metadata: {
-        product: "coaching",
-        customerEmail: application.email,
-        customerName: application.name,
-        applicationId: id,
-        coachingCommitmentType: commitmentType,
-        coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
-        ...(bundleCouponId ? { bundleCouponId } : {}),
-      },
-      subscription_data: {
-        metadata: {
-          product: "coaching",
-          customerEmail: application.email,
-          customerName: application.name,
-          applicationId: id,
-          coachingCommitmentType: commitmentType,
-          coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
-        },
-      },
-      success_url: `${baseUrl}/coaching/welcome`,
-      cancel_url: `${baseUrl}/coaching`,
-    })
-
-    const checkoutUrl = session.url ?? ""
+    // The Stripe Checkout Session is NOT created here. Stripe expires a
+    // session 24 hours after it is made, and freezing its URL onto the
+    // application turned every approval into a 24-hour offer: anyone who paid
+    // later landed on "You're all done here", which reads as though they had
+    // already paid. The session is minted when someone actually goes to pay,
+    // and the approved terms below are what it is built from.
 
     // Create client record now so admin can see and prep program before payment completes.
     // Store approved business terms immediately so the acceptance interstitial can read them.
@@ -324,7 +214,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     await updateCoachingApplication(id, {
       status: "APPROVED",
       reviewedAt: new Date().toISOString(),
-      stripeCheckoutUrl: checkoutUrl,
       approvedPriceInCents: priceInCents,
       approvedCommitmentType: commitmentType,
     })
@@ -343,7 +232,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       html: approvalEmail(application.name, acceptUrl),
     }).catch((err) => console.error("Approval email failed:", err))
 
-    return NextResponse.json({ ok: true, status: "APPROVED", checkoutUrl, acceptUrl })
+    return NextResponse.json({ ok: true, status: "APPROVED", acceptUrl })
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 })

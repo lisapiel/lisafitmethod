@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 import { getCoachingApplication } from "@/lib/authTokens"
+import { getSessionUser } from "@/lib/sessionUser"
+import { applicationOwnerEmail, resolveInvitationAccess } from "@/lib/coachingInvitation"
 import AcceptClient from "./page.client"
+import AcceptGate from "./AcceptGate.client"
 
 export const dynamic = "force-dynamic"
 
@@ -10,33 +13,74 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+// The invitation, and the only thing that decides whether it is still good,
+// is the application record. It has no expiry: an approved offer stays open
+// until it is declined or paid, so an approval email opened weeks later still
+// works. What used to gate this page was the presence of a Stripe checkout
+// URL minted at approval time, which quietly turned every invitation into a
+// 24-hour one.
 export default async function AcceptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const application = await getCoachingApplication(id)
   if (!application) notFound()
 
-  // Already-paid: the interstitial has served its purpose. Send the client
-  // to their coaching portal so a click on the original approval email
-  // after payment can't dead-end at a 404. /my-coaching's layout will
-  // route the client through /login?redirect=/my-coaching if they aren't
-  // signed in yet, then straight into the portal after auth.
   if (application.status === "PAID") {
     redirect("/my-coaching")
   }
-
-  // Only APPROVED applications with a live Stripe checkout URL can proceed.
-  // DECLINED / PENDING applications shouldn't land here.
-  if (application.status !== "APPROVED" || !application.stripeCheckoutUrl) {
+  if (application.status !== "APPROVED") {
     notFound()
+  }
+
+  const invitedEmail = application.email
+  const ownerEmail = applicationOwnerEmail(application)
+  const firstName = application.name.split(" ")[0] || "there"
+
+  // Signing in is now required before the acknowledgements can be made. They
+  // are a legal record naming a person, and this page was reachable by anyone
+  // holding the link.
+  const user = await getSessionUser()
+  if (!user) {
+    return (
+      <AcceptGate
+        variant="signed-out"
+        applicationId={id}
+        firstName={firstName}
+        invitedEmail={invitedEmail}
+      />
+    )
+  }
+
+  const access = await resolveInvitationAccess(application, user)
+
+  if (access === "linkable") {
+    return (
+      <AcceptGate
+        variant="link"
+        applicationId={id}
+        firstName={firstName}
+        invitedEmail={invitedEmail}
+        sessionEmail={user.email}
+      />
+    )
+  }
+
+  if (access === "foreign") {
+    return (
+      <AcceptGate
+        variant="foreign"
+        applicationId={id}
+        firstName={firstName}
+        invitedEmail={ownerEmail}
+        sessionEmail={user.email}
+      />
+    )
   }
 
   return (
     <AcceptClient
       applicationId={application.id}
       applicantName={application.name}
-      applicantEmail={application.email}
-      coachingOption={application.coachingOption ?? null}
-      checkoutUrl={application.stripeCheckoutUrl}
+      accountEmail={user.email}
       approvedPriceInCents={application.approvedPriceInCents ?? null}
       approvedCommitmentType={application.approvedCommitmentType ?? null}
     />

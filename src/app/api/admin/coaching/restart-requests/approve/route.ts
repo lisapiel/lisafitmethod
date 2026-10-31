@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb"
-import Stripe from "stripe"
 import { Resend } from "resend"
 import {
   isAdminEmail,
@@ -33,10 +32,6 @@ function makeCognito() {
       secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
     },
   })
-}
-
-function makeStripe() {
-  return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
 }
 
 async function verifyAdmin(req: NextRequest): Promise<boolean> {
@@ -153,49 +148,15 @@ export async function POST(req: NextRequest) {
   const email = String(restartRequest.email)
   const displayName = String(restartRequest.displayName)
 
-  // Create a new application record — this powers the /coaching/accept/:id interstitial.
-  // The accept page reads status APPROVED + stripeCheckoutUrl from this record.
+  // Create a new application record — this powers the /coaching/accept/:id
+  // interstitial, which reads status APPROVED from this record.
   const applicationId = randomBytes(12).toString("hex")
 
-  const stripe = makeStripe()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lisafitmethod.com"
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    payment_method_types: ["card"],
-    customer_email: email,
-    line_items: [{
-      price_data: {
-        currency: "usd",
-        product_data: { name: "1:1 Coaching — Lisa Fit Method" },
-        unit_amount: priceInCents,
-        recurring: { interval: "month" },
-      },
-      quantity: 1,
-    }],
-    metadata: {
-      product: "coaching",
-      customerEmail: email,
-      customerName: displayName,
-      applicationId,
-      coachingCommitmentType: commitmentType,
-      coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
-    },
-    subscription_data: {
-      metadata: {
-        product: "coaching",
-        customerEmail: email,
-        customerName: displayName,
-        applicationId,
-        coachingCommitmentType: commitmentType,
-        coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
-      },
-    },
-    success_url: `${baseUrl}/coaching/welcome`,
-    cancel_url: `${baseUrl}/account`,
-  })
-
-  const checkoutUrl = session.url ?? ""
+  // No Checkout Session here either — same reason as a first-time approval.
+  // It is minted when the returning client actually goes to pay, so a restart
+  // invitation stays good however long they take to act on it.
   const acceptUrl = `${baseUrl}/coaching/accept/${applicationId}`
 
   // Store the application record so the accept interstitial can read it.
@@ -210,7 +171,6 @@ export async function POST(req: NextRequest) {
       status: "APPROVED",
       applicationDate: new Date().toISOString(),
       reviewedAt: new Date().toISOString(),
-      stripeCheckoutUrl: checkoutUrl,
       approvedPriceInCents: priceInCents,
       approvedCommitmentType: commitmentType,
     },
@@ -236,5 +196,5 @@ export async function POST(req: NextRequest) {
     html: approvalEmail(displayName, acceptUrl),
   }).catch((err) => console.error("Restart approval email failed:", err))
 
-  return NextResponse.json({ ok: true, acceptUrl, checkoutUrl })
+  return NextResponse.json({ ok: true, acceptUrl })
 }
