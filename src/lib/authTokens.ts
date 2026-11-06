@@ -603,6 +603,35 @@ export async function createCoachingClientRecord(data: CoachingClientRecord): Pr
   )
 }
 
+// Create if they are new, merge if they are not.
+//
+// createCoachingClientRecord writes the whole item, which is correct for a
+// client who does not exist yet and destructive for one who does: admitting an
+// existing client through the admin form replaced their record wholesale and
+// took their programme assignment, nutrition profile, start date and starting
+// weight with it. Only the fields actually supplied are written here, and an
+// already-active client is never pushed back to awaiting payment.
+export async function upsertCoachingClientRecord(data: CoachingClientRecord): Promise<"created" | "merged"> {
+  const existing = await getCoachingClientRecord(data.email)
+  if (!existing) {
+    await createCoachingClientRecord(data)
+    return "created"
+  }
+
+  const updates: Partial<CoachingClientRecord> = {}
+  for (const [k, v] of Object.entries(data) as [keyof CoachingClientRecord, unknown][]) {
+    if (k === "email" || k === "createdAt") continue
+    if (v === undefined || v === null || v === "") continue
+    // Never demote someone who already has coaching to "awaiting payment".
+    if (k === "status" && existing.status === "ACTIVE" && v === "PENDING_PAYMENT") continue
+    ;(updates as Record<string, unknown>)[k] = v
+  }
+  if (Object.keys(updates).length > 0) {
+    await updateCoachingClientRecord(data.email, updates)
+  }
+  return "merged"
+}
+
 export async function getCoachingClientRecord(email: string): Promise<CoachingClientRecord | null> {
   const db = makeDb()
   const result = await db.send(
@@ -619,6 +648,7 @@ export async function updateCoachingClientRecord(email: string, updates: Partial
   const names: Record<string, string> = {}
   for (const [k, v] of Object.entries(updates)) {
     if (k === "email") continue
+    if (v === undefined) continue
     sets.push(`#${k} = :${k}`)
     values[`:${k}`] = v
     names[`#${k}`] = k

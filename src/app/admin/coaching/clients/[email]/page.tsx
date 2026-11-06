@@ -820,10 +820,20 @@ export default function ClientProfilePage() {
                   <input
                     type="number"
                     placeholder="e.g. 39700"
+                    disabled={!!client.stripeSubscriptionId}
                     value={commitmentForm.approvedPriceInCents}
                     onChange={(e) => setCommitmentForm((f) => ({ ...f, approvedPriceInCents: e.target.value }))}
-                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", background: client.stripeSubscriptionId ? "#151515" : "#0a0a0a", border: `1px solid ${border}`, color: client.stripeSubscriptionId ? "#555" : "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box", cursor: client.stripeSubscriptionId ? "not-allowed" : "text" }}
                   />
+                  {/* This figure is what the client sees in their portal, and
+                      nothing here reaches Stripe. While a subscription is live
+                      the two must agree, so it is read-only rather than a way
+                      to display a price nobody is being charged. */}
+                  <p style={{ fontSize: "0.6rem", color: "#666", marginTop: 6, lineHeight: 1.5 }}>
+                    {client.stripeSubscriptionId
+                      ? "Locked — this client has a live Stripe subscription. Changing this would show them a price Stripe isn't charging."
+                      : "Shown to the client in their portal. This does not create or change any billing."}
+                  </p>
                 </div>
                 <div>
                   <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>

@@ -9,7 +9,7 @@ import {
 import Stripe from "stripe"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
-import { grantCoachingAccess, generateAuthToken, storeAuthToken, createCoachingClientRecord, isAdminEmail } from "@/lib/authTokens"
+import { grantCoachingAccess, generateAuthToken, storeAuthToken, upsertCoachingClientRecord, isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
@@ -222,7 +222,10 @@ export async function POST(req: NextRequest) {
 
   // Paid signup → PENDING_PAYMENT until webhook fires; free grants → ACTIVE
   const hasPrice = (body.priceInCents ?? 0) >= 100
-  await createCoachingClientRecord({
+  // Merge rather than replace. Admitting someone who is already a client used
+  // to overwrite their whole record and lose their programme, nutrition
+  // profile and history with it.
+  const outcome = await upsertCoachingClientRecord({
     email,
     displayName,
     phone: body.phone?.trim() || undefined,
@@ -283,7 +286,7 @@ export async function POST(req: NextRequest) {
       html: paymentLinkEmail(firstName, session.url ?? ""),
     }).catch((err) => console.error("Payment link email failed:", err))
 
-    return NextResponse.json({ ok: true, accountCreated: !accountExists, checkoutUrl: session.url })
+    return NextResponse.json({ ok: true, accountCreated: !accountExists, clientRecord: outcome, checkoutUrl: session.url })
   }
 
   // No price: grant immediate access and send welcome email

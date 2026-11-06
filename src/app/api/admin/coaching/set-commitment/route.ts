@@ -67,7 +67,22 @@ export async function POST(req: NextRequest) {
     commitmentNeedsConfirmation: false,
   }
 
-  if (body.approvedPriceInCents) {
+  // The price on this record is what the client portal shows them. It is a
+  // label, not a billing instruction — nothing here reaches Stripe. So it may
+  // only be changed while there is no live subscription to contradict it.
+  // Editing it under an active subscription would tell someone they are paying
+  // $175 while Stripe quietly went on charging the old amount.
+  if (body.approvedPriceInCents && body.approvedPriceInCents !== client.approvedPriceInCents) {
+    if (client.stripeSubscriptionId) {
+      return NextResponse.json({
+        error:
+          "This client has a live Stripe subscription, so the price shown to them has to match what Stripe actually charges. " +
+          "Changing the amount here would not change their billing. Cancel and re-enrol them at the new rate, or wait for scheduled price changes.",
+        code: "price_locked_by_subscription",
+        currentPriceInCents: client.approvedPriceInCents ?? null,
+        stripeSubscriptionId: client.stripeSubscriptionId,
+      }, { status: 409 })
+    }
     updates.approvedPriceInCents = body.approvedPriceInCents
   }
 
