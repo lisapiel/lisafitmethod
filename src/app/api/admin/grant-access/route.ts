@@ -38,11 +38,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (product === "training") {
-    await grantTrainingAccess(email)
+    await grantTrainingAccess(email, "admin")
   } else if (product === "nutrition") {
-    await grantNutritionAccess(email)
+    await grantNutritionAccess(email, "admin")
   } else if (product === "tracker") {
-    await grantTrackerAccess(email)
+    await grantTrackerAccess(email, "admin")
   } else {
     return NextResponse.json({ error: "Invalid product" }, { status: 400 })
   }

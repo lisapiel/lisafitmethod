@@ -77,12 +77,15 @@ export async function markAuthTokenUsed(token: string): Promise<void> {
   )
 }
 
-export async function grantTrackerAccess(email: string): Promise<void> {
+// `grantType` records where the access came from. A refund may only take back
+// what a payment put there, so an admin or complimentary grant is marked and
+// left alone when the money for some other purchase goes back.
+export async function grantTrackerAccess(email: string, grantType: GrantType = "purchase"): Promise<void> {
   const db = makeDb()
   await db.send(
     new PutCommand({
       TableName: TABLE,
-      Item: { userId: `tracker_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString() },
+      Item: { userId: `tracker_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString(), grantType },
     })
   )
 }
@@ -100,12 +103,17 @@ export async function hasTrackerAccess(email: string): Promise<boolean> {
   }
 }
 
-export async function grantTrainingAccess(email: string): Promise<void> {
+// `grantType` records where the access came from. A refund may only take back
+// what a payment put there, so an admin or complimentary grant is marked and
+// left alone when the money for some other purchase goes back.
+export type GrantType = "purchase" | "admin" | "complimentary"
+
+export async function grantTrainingAccess(email: string, grantType: GrantType = "purchase"): Promise<void> {
   const db = makeDb()
   await db.send(
     new PutCommand({
       TableName: TABLE,
-      Item: { userId: `training_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString() },
+      Item: { userId: `training_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString(), grantType },
     })
   )
 }
@@ -123,12 +131,15 @@ export async function hasTrainingAccess(email: string): Promise<boolean> {
   }
 }
 
-export async function grantNutritionAccess(email: string): Promise<void> {
+// `grantType` records where the access came from. A refund may only take back
+// what a payment put there, so an admin or complimentary grant is marked and
+// left alone when the money for some other purchase goes back.
+export async function grantNutritionAccess(email: string, grantType: GrantType = "purchase"): Promise<void> {
   const db = makeDb()
   await db.send(
     new PutCommand({
       TableName: TABLE,
-      Item: { userId: `nutrition_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString() },
+      Item: { userId: `nutrition_access_${email.toLowerCase()}`, grantedAt: new Date().toISOString(), grantType },
     })
   )
 }

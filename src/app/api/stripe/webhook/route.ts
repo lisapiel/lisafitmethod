@@ -7,6 +7,9 @@ import {
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
+import { decideRefund } from "@/lib/refundPolicy"
+import { gatherRefundFacts } from "@/lib/refundFacts"
+import { revokeEntitlement, readAccessRecord, alreadyHandled, markHandled } from "@/lib/entitlementAudit"
 import { randomBytes } from "crypto"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import {
@@ -1161,6 +1164,131 @@ export async function POST(request: NextRequest) {
       )
     }
     // coaching subscriptions handled in the coaching block below
+  }
+
+  // ── Refunds and disputes ────────────────────────────────────────────────
+  //
+  // Course access is for life, so it is only ever taken back when the money
+  // has actually gone back and nothing else entitles the person to it. A
+  // partial refund is usually a goodwill gesture rather than an undoing of the
+  // sale, and an open dispute is a question rather than an answer — both of
+  // those notify and change nothing.
+  if (event.type === "charge.refunded" || event.type === "charge.dispute.closed" || event.type === "charge.dispute.created") {
+    const stripe = makeStripe()
+
+    if (event.type === "charge.dispute.created") {
+      const dispute = event.data.object as Stripe.Dispute
+      const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
+      const charge = chargeId ? await stripe.charges.retrieve(chargeId).catch(() => null) : null
+      notifyAdmin({
+        kind: "dispute-opened",
+        subject: `Payment disputed — $${(dispute.amount / 100).toFixed(2)}`,
+        headline: "A customer has disputed a payment",
+        body: [
+          `Amount: $${(dispute.amount / 100).toFixed(2)}`,
+          `Reason given: ${dispute.reason}`,
+          charge?.billing_details?.email ? `Customer: ${charge.billing_details.email}` : "",
+          "",
+          "Their access has NOT been touched. You have a window to submit evidence in Stripe; if the dispute is later lost, access to that product is removed automatically.",
+        ].filter(Boolean).join("\n"),
+        ctaLabel: "Respond in Stripe",
+        ctaHref: `https://dashboard.stripe.com/disputes/${dispute.id}`,
+        meta: { disputeId: dispute.id, chargeId: chargeId ?? "" },
+      }).catch(() => {})
+      return NextResponse.json({ received: true })
+    }
+
+    let charge: Stripe.Charge | null = null
+    let stripeId = ""
+    // Idempotency has to distinguish "this same event again" from "more money
+    // went back than last time". Keyed on the charge alone, a partial refund
+    // would mark the charge handled and a later full refund would be skipped
+    // as a duplicate — leaving access in place that should have gone.
+    let idempotencyKey = ""
+    let lostDispute = false
+
+    if (event.type === "charge.dispute.closed") {
+      const dispute = event.data.object as Stripe.Dispute
+      if (dispute.status !== "lost") {
+        // Won or withdrawn — the money stays with us and so does their access.
+        return NextResponse.json({ received: true })
+      }
+      lostDispute = true
+      stripeId = dispute.id
+      idempotencyKey = dispute.id
+      const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
+      charge = chargeId ? await stripe.charges.retrieve(chargeId).catch(() => null) : null
+    } else {
+      charge = event.data.object as Stripe.Charge
+      stripeId = charge.id
+      idempotencyKey = `${charge.id}_${charge.amount_refunded ?? 0}`
+    }
+
+    if (!charge) return NextResponse.json({ received: true })
+    if (await alreadyHandled(idempotencyKey)) return NextResponse.json({ received: true, idempotent: true })
+
+    try {
+      // A lost dispute removes the full amount, whatever the charge record
+      // says about refunds.
+      const facts = await gatherRefundFacts(stripe, charge, lostDispute ? charge.amount : undefined)
+      const decision = decideRefund(facts)
+
+      for (const entitlement of decision.revoke) {
+        const previous = await readAccessRecord(facts.email, entitlement)
+        await revokeEntitlement({
+          email: facts.email,
+          entitlement,
+          reason: lostDispute ? `Dispute lost (${stripeId})` : `Full refund (${stripeId})`,
+          stripeId,
+          previous,
+        })
+      }
+
+      await markHandled(idempotencyKey, {
+        email: facts.email,
+        product: facts.product ?? "(none)",
+        revoked: decision.revoke,
+        summary: decision.summary,
+      })
+
+      notifyAdmin({
+        kind: decision.revoke.length > 0 ? "access-revoked" : "refund-noted",
+        subject: decision.revoke.length > 0
+          ? `Access removed after ${lostDispute ? "a lost dispute" : "a refund"} — ${facts.email}`
+          : `${lostDispute ? "Dispute lost" : "Refund"} — no access change — ${facts.email || "unknown customer"}`,
+        headline: decision.revoke.length > 0
+          ? `${facts.email} has lost access to ${decision.revoke.join(", ")}`
+          : `A ${lostDispute ? "dispute was lost" : "refund was processed"} and nothing was removed`,
+        body: [
+          decision.summary,
+          "",
+          `Charge: $${(facts.amount / 100).toFixed(2)}  ·  refunded $${(facts.amountRefunded / 100).toFixed(2)}`,
+          `Product on the charge: ${facts.product ?? "(none recorded)"}`,
+          decision.revoke.length > 0
+            ? "An audit record of exactly what was removed is stored, so this can be put back by hand if it was wrong."
+            : "",
+        ].filter(Boolean).join("\n"),
+        ctaLabel: "Open in Stripe",
+        ctaHref: `https://dashboard.stripe.com/payments/${charge.id}`,
+        meta: { email: facts.email, stripeId, revoked: decision.revoke.join(",") },
+      }).catch(() => {})
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error)
+      console.error("refund/dispute handling failed:", detail)
+      // Deliberately not revoking anything on an error path, and returning 500
+      // so Stripe retries rather than this being lost.
+      notifyAdmin({
+        kind: "webhook-failure",
+        subject: `Refund handling failed — ${stripeId}`,
+        headline: "A refund or dispute could not be processed",
+        body: `Nothing was revoked. Stripe will retry.\n\n${detail}`,
+        ctaLabel: "Open in Stripe",
+        ctaHref: `https://dashboard.stripe.com/payments/${charge.id}`,
+        meta: { stripeId, error: detail },
+      }).catch(() => {})
+      return NextResponse.json({ error: "Refund handling failed", detail }, { status: 500 })
+    }
+    return NextResponse.json({ received: true })
   }
 
   if (event.type === "invoice.payment_failed") {
