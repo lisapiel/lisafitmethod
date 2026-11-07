@@ -169,7 +169,7 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
         style={{
           width: "100%", maxWidth: 520, background: "#fff",
           borderTopLeftRadius: 12, borderTopRightRadius: 12,
-          padding: "1.25rem 1.25rem 1.5rem", maxHeight: "92vh", overflowY: "auto",
+          padding: "1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom))", maxHeight: "92vh", overflowY: "auto",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
