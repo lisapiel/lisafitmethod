@@ -134,7 +134,14 @@ export default function MessagesClient() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100dvh - 58px - 4rem)" }}>
+    <div className="coaching-messages-pane" style={{ display: "flex", flexDirection: "column", height: "calc(100dvh - 58px - 4rem)" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .coaching-messages-pane {
+            height: calc(100dvh - 58px - env(safe-area-inset-top) - 2rem - 64px - env(safe-area-inset-bottom)) !important;
+          }
+        }
+      `}</style>
       {/* Header */}
       <div style={{ marginBottom: "1.25rem", flexShrink: 0 }}>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Coaching</p>

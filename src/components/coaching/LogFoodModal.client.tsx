@@ -160,7 +160,7 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
       style={{
         position: "fixed", inset: 0, background: "rgba(10,10,10,0.55)",
         display: "flex", alignItems: "flex-end", justifyContent: "center",
-        zIndex: 100,
+        zIndex: 1000,
       }}
       onClick={onClose}
     >

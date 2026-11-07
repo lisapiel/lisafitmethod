@@ -273,6 +273,9 @@ export default function CoachingClientLayout({
         @media (max-width: 768px) {
           .coaching-sidebar { display: none !important; }
           .coaching-mobile-nav { display: flex !important; }
+          /* The bottom nav is fixed, so reserve its height (64px) plus the
+             Home-indicator area, or it covers the last buttons on the page. */
+          .coaching-main { padding-bottom: calc(64px + env(safe-area-inset-bottom) + 1rem) !important; }
         }
         @media (min-width: 769px) {
           .coaching-mobile-nav { display: none !important; }
@@ -424,7 +427,7 @@ export default function CoachingClientLayout({
         {/* Main content — page padding scales down on phones so cards can breathe
             near the screen edges without touching them. maxWidth keeps the
             reading column comfortable on tablet + desktop. */}
-        <main style={{ flex: 1, minWidth: 0, padding: "clamp(1rem, 3vw, 2rem) clamp(0.9rem, 3.5vw, 1.5rem)", maxWidth: 900, width: "100%" }}>
+        <main className="coaching-main" style={{ flex: 1, minWidth: 0, padding: "clamp(1rem, 3vw, 2rem) clamp(0.9rem, 3.5vw, 1.5rem)", maxWidth: 900, width: "100%" }}>
           {children}
         </main>
       </div>
