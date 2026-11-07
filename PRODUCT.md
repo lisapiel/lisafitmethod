@@ -15,21 +15,21 @@ The job: get stronger, move better, lose fat and build visible muscle with a str
 Secondary audiences that the product serves directly:
 - **Course buyers** working through the self-guided courses at their own pace.
 - **Coaching clients** in the client portal (`/my-coaching`): check-ins, workouts, nutrition, progress, messages.
-- **Masterclass members** who know the basics and want new programming each month.
+- **Masterclass members** (once it launches; it is not public yet) who know the basics and want new programming each month.
 - **Lisa herself**, as the sole operator of a large admin area (`/admin`: coaching clients, programs, check-ins, blog, testimonials, leads, promo codes).
 
 ## Product Purpose
 
 Lisa Fit Method gives people structure: strength training built on movement quality, real structure, smart progression, and a body that lasts. Success means a client who was spinning their wheels trains consistently, progresses measurably, and trusts their body again.
 
-**1:1 coaching is the main business.** The self-guided courses are the on-ramp: people start on their own at their own pace, and if they upgrade to coaching within 90 days of buying the Complete Foundations Bundle, the full bundle price is credited towards their first coaching month. When in doubt, a surface should move people towards coaching, with courses as the lower-commitment way in.
+**1:1 coaching is the main business.** The self-guided courses are the on-ramp: people start on their own at their own pace, and buyers of the Complete Foundations Bundle get the full bundle price as a coaching credit. The credit applies only to the initial 3-month coaching commitment, taken up within 90 days of buying the bundle, and it is credited against the first coaching month. Month-to-month coaching is not eligible. The binding conditions are in the Terms (`/terms`). When in doubt, a surface should move people towards coaching, with courses as the lower-commitment way in.
 
 Offers (prices live in `@/lib/pricing` and site settings, never hard-coded):
 - **1:1 Coaching**: application-based, custom program, weekly check-ins, form feedback, messaging between check-ins. Small roster on purpose; applications reviewed personally within 48 hours.
 - **Training Foundations**: self-guided course (foundation movements, core and glute priority, a structured program with built-in tracking, 50+ exercise videos).
 - **Nutrition Foundations**: self-guided course (calorie/macro calculator, scalable 4-week meal plan, eating out, supplements, troubleshooting).
-- **Complete Foundations Bundle**: both courses, with the coaching credit.
-- **Masterclass**: monthly subscription. A new 3-day program each month, 361 exercise videos, monthly batched Q&A with Lisa. Assumes the basics; Training Foundations comes first.
+- **Complete Foundations Bundle**: both courses, with the coaching credit (initial 3-month coaching commitment only, within 90 days).
+- **Masterclass**: **not publicly launched.** Its pages are hidden behind a launch flag and visible only to Lisa and admins. Don't link to it or promote it on public pages until Lisa launches it. Planned as a monthly subscription: A new 3-day program each month, 361 exercise videos, monthly batched Q&A with Lisa. Assumes the basics; Training Foundations comes first.
 - **Free guides** (training and nutrition) as lead magnets, plus a blog.
 
 ## Positioning

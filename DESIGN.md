@@ -198,6 +198,8 @@ A restrained palette of warm neutrals and a single gold accent, defined twice: a
 
 **The Two Golds Rule.** Use Antique Gold on light grounds and Champagne Gold on dark grounds. Swapping them breaks contrast in one direction or the other.
 
+**The Readable Contrast Rule.** On the coaching platform and in all new work, text meets WCAG 2.2 AA: 4.5:1 for text under 24px (under 18.66px if bold), and 3:1 for larger text and for UI marks such as borders, icons and focus rings. Measured on light grounds: Warm Taupe passes for text of any size (5.4:1 on ivory, 5.7:1 on white). Antique Gold (3.1:1 on ivory), Success Green (3.2:1 on white) and Warning Terracotta (3.2:1 on white) pass only as large text or as marks. Champagne Gold on ivory (2.1:1) fails as both text and marks. Small text therefore uses Ink Text or Warm Taupe, and color is never the only signal of state: always pair it with a word or an icon.
+
 ## Typography
 
 **Display Font:** Playfair Display (with Georgia, serif)
@@ -221,6 +223,8 @@ Headings use `text-wrap: balance` globally.
 **The Same Opening Rule.** Every public section opens with eyebrow, then a short drawn gold rule (54px), then the headline. Repeating one opening is most of what makes the site read as one document.
 
 **The Light Body Rule.** Body copy is weight 300. Emphasis comes from the serif and from gold italics, never from bold body text.
+
+**The Readable Floor Rule.** On the coaching platform and in new work, secondary labels (eyebrows, field labels, figure labels, metadata) are at least 12px, and body text is 16px, the preferred size everywhere and especially on mobile. Some existing portal and admin screens fall below this. They will be brought up as part of the coaching platform UI/UX work, not changed piecemeal.
 
 ## Layout
 
@@ -293,6 +297,8 @@ One stat treatment everywhere: a Playfair value in gold, a 9.5px uppercase label
 ### Portal Card (coaching portal)
 A white card with a Portal Hairline border, 8px radius and fluid padding, on a Warm Ivory ground. Section labels are small uppercase DM Sans; key numbers are bold Playfair. Status colors mark progress only.
 
+**The Thumb Target Rule.** Every tap target on the coaching platform is at least 44×44px, well above the WCAG 2.2 AA minimum of 24px, with at least 8px between neighbouring targets. Clients log sets one-handed mid-workout, so primary actions sit within thumb reach. Every interactive element shows a visible focus ring that meets 3:1 contrast.
+
 ### Course Card (course world and admin)
 A Course Card surface with a Course Hairline border, 4–8px radius, Course Cream text, Cormorant headings and Montserrat body and labels.
 
@@ -304,7 +310,7 @@ A Course Card surface with a Course Hairline border, 4–8px radius, Course Crea
 - **Do** put `ToneShift` between every light and dark ground, and set `data-tone` on every section so the nav can read it.
 - **Do** use Antique Gold for accents on light grounds and Champagne Gold on dark grounds.
 - **Do** honor `prefers-reduced-motion` in every reveal, rule and transition. The existing `Reveal`, `RevealLines` and `DrawRule` already do.
-- **Do** make new portal and tracker screens easy to read on a phone mid-workout, with generous tap targets. For new work, keep text at 12px or larger and body at 16px or larger. Some existing portal labels are smaller than that.
+- **Do** make coaching platform screens easy to read and use on a phone mid-workout: secondary labels at 12px or larger, body text at 16px, AA contrast, and tap targets of at least 44×44px (see the Readable Floor, Readable Contrast and Thumb Target rules).
 - **Do** use status colors only to report state.
 
 ### Don't:
