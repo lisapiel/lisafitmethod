@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
+import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
 import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
@@ -96,8 +97,8 @@ export default function MyCoachingHomeClient() {
   const [primaryGoal, setPrimaryGoal] = useState<Goal | null>(null)
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   // Set to true if the logger persisted an in-progress draft for today's
-  // workout — read from localStorage after nextWorkout resolves. Same key
-  // format the workout page writes: `lfm-workout-draft-<weekNumber>-<dayIndex>`.
+  // workout — read from localStorage after nextWorkout resolves, using the
+  // same keys the workout page writes (see workoutDraftKey).
   const [workoutInProgress, setWorkoutInProgress] = useState(false)
 
   useEffect(() => {
@@ -212,12 +213,15 @@ export default function MyCoachingHomeClient() {
   // "Start" to "Continue". No new state system — just reads the same
   // localStorage key the workout logger writes.
   useEffect(() => {
-    if (!nextWorkout) { setWorkoutInProgress(false); return }
+    if (!nextWorkout || !program) { setWorkoutInProgress(false); return }
     try {
-      const key = `lfm-workout-draft-${nextWorkout.week.weekNumber}-${nextWorkout.dayIndex}`
-      setWorkoutInProgress(typeof window !== "undefined" && localStorage.getItem(key) != null)
+      const keys = [
+        workoutDraftKey(program.id, nextWorkout.week.weekNumber, nextWorkout.dayIndex),
+        legacyWorkoutDraftKey(nextWorkout.week.weekNumber, nextWorkout.dayIndex),
+      ]
+      setWorkoutInProgress(typeof window !== "undefined" && keys.some((k) => localStorage.getItem(k) != null))
     } catch { setWorkoutInProgress(false) }
-  }, [nextWorkout])
+  }, [nextWorkout, program])
 
   if (loading) return <Spinner />
 

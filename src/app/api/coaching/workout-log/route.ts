@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { listWorkoutLogRecords, createWorkoutLogRecord, getCoachingClientRecord } from "@/lib/authTokens"
+import { listWorkoutLogRecords, createWorkoutLogRecord, createWorkoutLogRecordOnce, getCoachingClientRecord } from "@/lib/authTokens"
+import { isValidSubmissionId } from "@/lib/workoutLogSave"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 
 export const dynamic = "force-dynamic"
@@ -33,18 +34,34 @@ export async function POST(req: NextRequest) {
   const email = await getSessionEmail()
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const data = await req.json()
-  const log = await createWorkoutLogRecord({
+  let data: Record<string, unknown>
+  try {
+    data = await req.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+  }
+  const fields = {
     clientEmail: email.toLowerCase(),
-    programId: data.programId,
-    weekNumber: data.weekNumber,
-    dayLabel: data.dayLabel,
+    programId: data.programId as string,
+    weekNumber: data.weekNumber as number,
+    dayLabel: data.dayLabel as string,
     completedAt: new Date().toISOString(),
     setData: typeof data.setData === "string" ? data.setData : JSON.stringify(data.setData ?? []),
-    overallRpe: data.overallRpe,
-    energyLevel: data.energyLevel,
-    clientNotes: data.clientNotes,
-  })
+    overallRpe: data.overallRpe as number | undefined,
+    energyLevel: data.energyLevel as number | undefined,
+    clientNotes: data.clientNotes as string | undefined,
+  }
+
+  // Pages loaded before this release send no submissionId; they keep the old
+  // behaviour until the client refreshes.
+  let log
+  if (isValidSubmissionId(data.submissionId)) {
+    const saved = await createWorkoutLogRecordOnce(fields, data.submissionId)
+    if (!saved.created) return NextResponse.json({ log: saved.record, duplicate: true })
+    log = saved.record
+  } else {
+    log = await createWorkoutLogRecord(fields)
+  }
 
   // Fire admin notification (non-blocking — email failures never break the save)
   ;(async () => {

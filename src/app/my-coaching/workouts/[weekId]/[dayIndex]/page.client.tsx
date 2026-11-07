@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { expandedWeeks } from "@/lib/programExpansion"
+import { newSubmissionId, submitFailureMessage, submitWorkoutLog } from "@/lib/workoutSubmit"
+import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -125,6 +127,8 @@ type WorkoutDraft = {
   // the day's exercise lineup after the client started logging.
   exerciseSignature: string
   savedAt: string
+  // Reused on every retry of this workout so the server stores it only once.
+  submissionId?: string
 }
 
 function readWorkoutDraft(key: string): WorkoutDraft | null {
@@ -917,6 +921,9 @@ export default function WorkoutLoggerClient() {
   const [clientNotes, setClientNotes] = useState("")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState("")
+  const submittingRef = useRef(false)
+  const [submissionId, setSubmissionId] = useState("")
   const [alreadyLogged, setAlreadyLogged] = useState(false)
   const [existingFeedback, setExistingFeedback] = useState<{ text: string; at: string } | null>(null)
   const [showRpeInfo, setShowRpeInfo] = useState(false)
@@ -933,10 +940,11 @@ export default function WorkoutLoggerClient() {
   // with an empty setMap during the initial render.
   const [ready, setReady] = useState(false)
 
-  // Draft key — one per week+day for this browser. Persists in-progress
+  // Draft key — one per program+week+day for this browser. Persists in-progress
   // weight/reps/RPE/completed across app backgrounding, screen locks, and
   // PWA tab kills, so the client doesn't lose their entries mid-workout.
-  const draftKey = `lfm-workout-draft-${weekId}-${dayIndex}`
+  // The program id is only known after load, so the key lives in state.
+  const [draftKey, setDraftKey] = useState("")
 
   const load = useCallback(async () => {
     try {
@@ -985,6 +993,10 @@ export default function WorkoutLoggerClient() {
 
       if (!targetDay) { setLoading(false); return }
 
+      const key = workoutDraftKey(prog.id as string, weekId, dayIndex)
+      const legacyKey = legacyWorkoutDraftKey(weekId, dayIndex)
+      setDraftKey(key)
+
       // Check if already logged.
       //
       // Scope "already logged" to logs from THIS program. When the coach
@@ -1001,7 +1013,8 @@ export default function WorkoutLoggerClient() {
         if (existingLog) {
           setAlreadyLogged(true)
           // Workout is server-side; any local draft is stale.
-          clearWorkoutDraft(draftKey)
+          clearWorkoutDraft(key)
+          clearWorkoutDraft(legacyKey)
           if (existingLog.coachFeedback) {
             setExistingFeedback({
               text: existingLog.coachFeedback as string,
@@ -1084,7 +1097,11 @@ export default function WorkoutLoggerClient() {
       // regrouping exercises into (or out of) a superset invalidates any
       // in-progress draft rather than restoring it under a mismatched layout.
       const currentSignature = targetDay.exercises.map((e) => `${e.exerciseId}:${e.supersetGroupId ?? ""}`).join("|")
-      const draft = readWorkoutDraft(draftKey)
+      // Drafts written before the key included the program id are read once
+      // from the old key and then moved, guarded by the exercise signature.
+      const draft = readWorkoutDraft(key) ?? readWorkoutDraft(legacyKey)
+      clearWorkoutDraft(legacyKey)
+      setSubmissionId(draft?.submissionId || newSubmissionId())
       if (draft && draft.exerciseSignature === currentSignature) {
         for (const [idxStr, draftSets] of Object.entries(draft.setMap)) {
           const idx = Number(idxStr)
@@ -1107,7 +1124,7 @@ export default function WorkoutLoggerClient() {
       } else if (draft) {
         // Draft is for a different exercise layout (coach edited the program).
         // Drop it so we don't try to restore mismatched data.
-        clearWorkoutDraft(draftKey)
+        clearWorkoutDraft(key)
       }
 
       setSetMap(initialMap)
@@ -1137,7 +1154,7 @@ export default function WorkoutLoggerClient() {
       }
     } catch { /* layout handles auth */ }
     setLoading(false)
-  }, [weekId, dayIndex, draftKey])
+  }, [weekId, dayIndex])
 
   useEffect(() => { load() }, [load])
 
@@ -1146,7 +1163,7 @@ export default function WorkoutLoggerClient() {
   // an empty setMap. Also skipped once the workout is fully saved or the
   // "already completed" branch fires.
   useEffect(() => {
-    if (!ready || saved || alreadyLogged || !day) return
+    if (!ready || saved || alreadyLogged || !day || !draftKey) return
     const signature = day.exercises.map((e) => `${e.exerciseId}:${e.supersetGroupId ?? ""}`).join("|")
     try {
       // Strip the hint fields (_prevWeight / _prevReps) — they're derived
@@ -1166,10 +1183,11 @@ export default function WorkoutLoggerClient() {
         clientNotes,
         exerciseSignature: signature,
         savedAt: new Date().toISOString(),
+        submissionId,
       }
       localStorage.setItem(draftKey, JSON.stringify(draft))
     } catch { /* ignore quota / private mode errors */ }
-  }, [ready, saved, alreadyLogged, day, setMap, overallRpe, clientNotes, draftKey])
+  }, [ready, saved, alreadyLogged, day, setMap, overallRpe, clientNotes, draftKey, submissionId])
 
   function updateSet(exIdx: number, setIdx: number, updated: SetEntry) {
     setSetMap((prev) => ({
@@ -1179,8 +1197,12 @@ export default function WorkoutLoggerClient() {
   }
 
   async function finishWorkout() {
-    if (!day || !email || !programId) return
+    if (!day || !email || !programId || !submissionId) return
+    // A ref, not state: two taps in the same frame both see saving === false.
+    if (submittingRef.current) return
+    submittingRef.current = true
     setSaving(true)
+    setSaveError("")
 
     const setData = day.exercises.flatMap((ex, exIdx) =>
       (setMap[exIdx] ?? []).map((s, setIdx) => ({
@@ -1195,25 +1217,24 @@ export default function WorkoutLoggerClient() {
       }))
     )
 
-    const res = await fetch("/api/coaching/workout-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        programId,
-        weekNumber: weekId,
-        dayLabel: day.dayLabel,
-        setData: JSON.stringify(setData),
-        overallRpe: overallRpe ? parseInt(overallRpe) : undefined,
-        clientNotes: clientNotes || undefined,
-      }),
+    const result = await submitWorkoutLog({
+      submissionId,
+      programId,
+      weekNumber: weekId,
+      dayLabel: day.dayLabel,
+      setData: JSON.stringify(setData),
+      overallRpe: overallRpe ? parseInt(overallRpe) : undefined,
+      clientNotes: clientNotes || undefined,
     })
 
-    // Only clear the draft if the server actually accepted the log —
-    // otherwise we'd lose the client's work on a bad network.
-    if (res.ok) clearWorkoutDraft(draftKey)
-
+    submittingRef.current = false
     setSaving(false)
-    setSaved(true)
+    if (result.ok) {
+      clearWorkoutDraft(draftKey)
+      setSaved(true)
+    } else {
+      setSaveError(submitFailureMessage(result.reason))
+    }
   }
 
   const completedSets = Object.values(setMap).flat().filter((s) => s.completed).length
@@ -1295,7 +1316,8 @@ export default function WorkoutLoggerClient() {
            without covering the workout notes / last exercise. */
         .workout-logger-page { padding-bottom: 100px; }
         @media (max-width: 768px) {
-          .workout-logger-page { padding-bottom: calc(170px + env(safe-area-inset-bottom)); }
+          /* The layout already reserves the bottom nav; this clears the finish bar. */
+          .workout-logger-page { padding-bottom: 130px; }
           .workout-finish-bar { bottom: calc(64px + env(safe-area-inset-bottom)) !important; }
         }
         @media (min-width: 769px) {
@@ -1463,7 +1485,12 @@ export default function WorkoutLoggerClient() {
 
       {/* Sticky finish bar — positioned above the mobile bottom nav on phones
           so the "Finish Workout" button isn't hidden behind it. */}
-      <div className="workout-finish-bar" style={{ position: "fixed", left: 0, right: 0, background: white, borderTop: `1px solid ${border}`, padding: "1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, zIndex: 50 }}>
+      <div className="workout-finish-bar" style={{ position: "fixed", left: 0, right: 0, background: white, borderTop: `1px solid ${border}`, padding: "1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, zIndex: 50 }}>
+        {saveError && (
+          <p role="alert" style={{ flexBasis: "100%", order: -1, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", lineHeight: 1.45, color: "#c14646", margin: 0 }}>
+            {saveError}
+          </p>
+        )}
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, color: black, margin: 0 }}>
             {completedSets === totalSets && totalSets > 0 ? "All sets done! 🎉" : `${completedSets}/${totalSets} sets`}
@@ -1489,7 +1516,7 @@ export default function WorkoutLoggerClient() {
             flexShrink: 0,
           }}
         >
-          {saving ? "Saving…" : "Finish Workout"}
+          {saving ? "Saving…" : saveError ? "Retry" : "Finish Workout"}
         </button>
       </div>
 
