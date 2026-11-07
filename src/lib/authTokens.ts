@@ -1,6 +1,8 @@
 import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
+import { scanAll } from "./dynamoScan"
+import { saveWorkoutLogOnce } from "./workoutLogSave"
 
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
@@ -688,14 +690,12 @@ export async function clearCoachingClientField(
 
 export async function listCoachingClientRecords(): Promise<CoachingClientRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_client_" },
-    })
-  )
-  return ((result.Items ?? []) as (CoachingClientRecord & { userId: string })[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": "coaching_client_" },
+  })
+  return (items as (CoachingClientRecord & { userId: string })[])
     .map((item) => item as CoachingClientRecord)
     .sort((a, b) => (a.displayName ?? "").localeCompare(b.displayName ?? ""))
 }
@@ -738,27 +738,23 @@ export async function createCoachingMessage(data: Omit<CoachingMessageRecord, "i
 
 export async function listCoachingMessages(threadId: string): Promise<CoachingMessageRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": `coaching_msg_${threadId}_` },
-    })
-  )
-  return ((result.Items ?? []) as CoachingMessageRecord[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": `coaching_msg_${threadId}_` },
+  })
+  return (items as CoachingMessageRecord[])
     .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
 }
 
 export async function listAllCoachingMessages(): Promise<CoachingMessageRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_msg_" },
-    })
-  )
-  return ((result.Items ?? []) as CoachingMessageRecord[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": "coaching_msg_" },
+  })
+  return (items as CoachingMessageRecord[])
     .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
 }
 
@@ -892,8 +888,8 @@ export async function listCoachingCheckIns(clientEmail?: string): Promise<Coachi
         FilterExpression: "begins_with(userId, :prefix)",
         ExpressionAttributeValues: { ":prefix": "coaching_checkin_" },
       }
-  const result = await db.send(new ScanCommand(params))
-  return ((result.Items ?? []) as CoachingCheckInRecord[])
+  const items = await scanAll(db, params)
+  return (items as CoachingCheckInRecord[])
     .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
 }
 
@@ -992,14 +988,12 @@ export async function getExerciseRecord(id: string): Promise<ExerciseRecord | nu
 
 export async function listExerciseRecords(): Promise<ExerciseRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_exercise_" },
-    })
-  )
-  return ((result.Items ?? []) as ExerciseRecord[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": "coaching_exercise_" },
+  })
+  return (items as ExerciseRecord[])
     .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
 }
 
@@ -1072,14 +1066,12 @@ export async function getProgramRecord(id: string): Promise<CoachingProgramRecor
 
 export async function listProgramRecords(): Promise<CoachingProgramRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_program_" },
-    })
-  )
-  return ((result.Items ?? []) as CoachingProgramRecord[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": "coaching_program_" },
+  })
+  return (items as CoachingProgramRecord[])
     .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
 }
 
@@ -1155,14 +1147,12 @@ export async function getWorkoutTemplate(id: string): Promise<CoachingWorkoutTem
 
 export async function listWorkoutTemplates(): Promise<CoachingWorkoutTemplateRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_workout_" },
-    })
-  )
-  return ((result.Items ?? []) as CoachingWorkoutTemplateRecord[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": "coaching_workout_" },
+  })
+  return (items as CoachingWorkoutTemplateRecord[])
     .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
 }
 
@@ -1253,6 +1243,13 @@ export async function createWorkoutLogRecord(data: Omit<CoachingWorkoutLogRecord
   return record
 }
 
+export async function createWorkoutLogRecordOnce(
+  data: Omit<CoachingWorkoutLogRecord, "id">,
+  submissionId: string
+): Promise<{ record: CoachingWorkoutLogRecord; created: boolean }> {
+  return saveWorkoutLogOnce(makeDb(), TABLE, data, submissionId)
+}
+
 export async function listWorkoutLogRecords(clientEmail?: string): Promise<CoachingWorkoutLogRecord[]> {
   const db = makeDb()
   const params = clientEmail
@@ -1266,8 +1263,8 @@ export async function listWorkoutLogRecords(clientEmail?: string): Promise<Coach
         FilterExpression: "begins_with(userId, :prefix)",
         ExpressionAttributeValues: { ":prefix": "coaching_workoutlog_" },
       }
-  const result = await db.send(new ScanCommand(params))
-  return ((result.Items ?? []) as CoachingWorkoutLogRecord[])
+  const items = await scanAll(db, params)
+  return (items as CoachingWorkoutLogRecord[])
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
 }
 
@@ -1316,8 +1313,8 @@ export async function listSnapshotRecords(clientEmail?: string): Promise<Progres
         FilterExpression: "begins_with(userId, :prefix)",
         ExpressionAttributeValues: { ":prefix": "coaching_snapshot_" },
       }
-  const result = await db.send(new ScanCommand(params))
-  return ((result.Items ?? []) as ProgressSnapshotRecord[])
+  const items = await scanAll(db, params)
+  return (items as ProgressSnapshotRecord[])
     .sort((a, b) => b.snapshotDate.localeCompare(a.snapshotDate))
 }
 
@@ -1365,8 +1362,8 @@ export async function listGoalRecords(clientEmail?: string): Promise<CoachingGoa
         FilterExpression: "begins_with(userId, :prefix)",
         ExpressionAttributeValues: { ":prefix": "coaching_goal_" },
       }
-  const result = await db.send(new ScanCommand(params))
-  return (result.Items ?? []) as CoachingGoalRecord[]
+  const items = await scanAll(db, params)
+  return items as CoachingGoalRecord[]
 }
 
 export async function updateGoalRecord(id: string, updates: Partial<CoachingGoalRecord>): Promise<void> {
@@ -1412,14 +1409,12 @@ export async function createTaskRecord(data: Omit<CoachTaskRecord, "id" | "creat
 
 export async function listTaskRecords(): Promise<CoachTaskRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix)",
-      ExpressionAttributeValues: { ":prefix": "coaching_task_" },
-    })
-  )
-  return ((result.Items ?? []) as CoachTaskRecord[])
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix)",
+    ExpressionAttributeValues: { ":prefix": "coaching_task_" },
+  })
+  return (items as CoachTaskRecord[])
     .sort((a) => (a.completedAt ? 1 : -1))
 }
 
@@ -1660,15 +1655,15 @@ export async function recordTermsAcceptance(
 
 export async function listAcceptancesForEmail(email: string): Promise<TermsAcceptanceRecord[]> {
   const db = makeDb()
-  const result = await db.send(new ScanCommand({
+  const items = await scanAll(db, {
     TableName: TABLE,
     FilterExpression: "begins_with(userId, :prefix) AND customerEmail = :email",
     ExpressionAttributeValues: {
       ":prefix": "terms_acceptance_",
       ":email": email.toLowerCase(),
     },
-  }))
-  return ((result.Items ?? []) as TermsAcceptanceRecord[])
+  })
+  return (items as TermsAcceptanceRecord[])
     .sort((a, b) => b.acceptedAt.localeCompare(a.acceptedAt))
 }
 
@@ -1848,14 +1843,12 @@ export async function listNutritionLogsForClient(
   opts?: { fromDate?: string; toDate?: string }
 ): Promise<NutritionLogRecord[]> {
   const db = makeDb()
-  const result = await db.send(
-    new ScanCommand({
-      TableName: TABLE,
-      FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
-      ExpressionAttributeValues: { ":prefix": "nutrition_log_", ":email": clientEmail.toLowerCase() },
-    })
-  )
-  const all = (result.Items ?? []) as NutritionLogRecord[]
+  const items = await scanAll(db, {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :prefix) AND clientEmail = :email",
+    ExpressionAttributeValues: { ":prefix": "nutrition_log_", ":email": clientEmail.toLowerCase() },
+  })
+  const all = items as NutritionLogRecord[]
   const filtered = all.filter((r) => {
     if (opts?.fromDate && r.date < opts.fromDate) return false
     if (opts?.toDate && r.date > opts.toDate) return false

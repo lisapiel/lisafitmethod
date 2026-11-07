@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb"
 import { isAdminEmail } from "@/lib/authTokens"
+import { scanAll } from "@/lib/dynamoScan"
 
 export const dynamic = "force-dynamic"
 
@@ -48,11 +49,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const result = await makeDb().send(new ScanCommand({
+  const items = await scanAll<Record<string, unknown>>(makeDb(), {
     TableName: TABLE,
     FilterExpression: "begins_with(userId, :prefix)",
     ExpressionAttributeValues: { ":prefix": "coaching_restart_" },
-  }))
+  })
 
   type RestartItem = {
     id: string
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest) {
     previousCancellationReason: string | null
   }
 
-  const requests: RestartItem[] = (result.Items ?? [])
+  const requests: RestartItem[] = items
     .map((item) => ({
       id: String(item.userId).replace("coaching_restart_", ""),
       email: String(item.email),
