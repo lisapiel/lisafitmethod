@@ -1033,6 +1033,9 @@ export interface CoachingProgramRecord {
   // independent of Week 1's — fixes the "Phase III rotation shows one Week 1
   // tab and then Program Complete" bug for 4-day rotations.
   durationWeeks?: number
+  // Warm-up rule options for programs with no client (templates). Client
+  // programs use the client's warm-up profile instead.
+  warmupOptions?: { bands?: boolean; beginner?: boolean; backSafe?: boolean; foamRoller?: boolean }
 }
 
 export async function createProgramRecord(data: Omit<CoachingProgramRecord, "id" | "createdAt"> & { id?: string }): Promise<CoachingProgramRecord> {

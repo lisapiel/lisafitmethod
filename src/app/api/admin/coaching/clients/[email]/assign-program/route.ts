@@ -6,6 +6,8 @@ import {
   getProgramRecord,
   createProgramRecord,
 } from "@/lib/authTokens"
+import { clientWarmupSettings, loadLibraryIndex } from "@/lib/warmups/store"
+import { prepareForClient } from "@/lib/warmups/review"
 
 export const dynamic = "force-dynamic"
 
@@ -37,12 +39,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ema
 
   // Otherwise, copy the template (or another client's program) into a fresh
   // client-owned program record.
+  // The copy is new to this client: fill empty warm-ups/cool-downs and
+  // re-choose automatic ones for their options. Hand-built ones are kept.
+  let weeks = source.weeks
+  let warmups = { filled: 0, updated: 0 }
+  try {
+    const [index, settings] = await Promise.all([loadLibraryIndex(), clientWarmupSettings(email)])
+    const prepared = prepareForClient(source.weeks, index, settings.options)
+    weeks = prepared.weeks
+    warmups = { filled: prepared.filled, updated: prepared.updated }
+  } catch (err) {
+    console.error("assign-program: warm-up preparation skipped", err)
+  }
+
   const copy = await createProgramRecord({
     name: `${source.name} — ${client.displayName}`,
     clientEmail: email,
     isTemplate: false,
     status: "ACTIVE",
-    weeks: source.weeks,
+    weeks,
     notes: source.notes,
     // Carry rotation length from the template so the assigned client-copy
     // matches the template's week progression. Omitted when the template
@@ -52,5 +67,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ema
 
   await updateCoachingClientRecord(email, { currentProgramId: copy.id })
 
-  return NextResponse.json({ ok: true, programId: copy.id, copied: true, sourceId: programId })
+  return NextResponse.json({ ok: true, programId: copy.id, copied: true, sourceId: programId, warmups })
 }
