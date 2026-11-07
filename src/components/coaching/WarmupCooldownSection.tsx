@@ -13,16 +13,18 @@ export default function WarmupCooldownSection({
   label,
   data,
   onChange,
+  flush = false,
 }: {
   label: "Warmup" | "Cooldown"
   data: WarmupCooldownData
   onChange: (next: WarmupCooldownData) => void
+  flush?: boolean
 }) {
   const hasContent = data.notes || data.exercises.length > 0
   const [open, setOpen] = useState(hasContent)
 
   return (
-    <div style={{ marginTop: label === "Cooldown" ? 22 : 0, marginBottom: label === "Warmup" ? 6 : 0, border: `1px solid ${border}`, background: "#0d0d0d" }}>
+    <div style={{ marginTop: label === "Cooldown" && !flush ? 22 : 0, marginBottom: label === "Warmup" ? 6 : 0, border: `1px solid ${border}`, background: "#0d0d0d" }}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

@@ -8,11 +8,16 @@ import WorkoutBuilder from "@/components/coaching/WorkoutBuilder"
 import WarmupCooldownSection from "@/components/coaching/WarmupCooldownSection"
 import WorkoutLibraryModal from "@/components/coaching/WorkoutLibraryModal"
 import type { ProgramExercise } from "@/components/coaching/ExerciseRow"
+import WarmupSettingsPanel from "@/components/coaching/warmups/WarmupSettingsPanel"
+import SequenceStatus from "@/components/coaching/warmups/SequenceStatus"
+import AutoFillNotice from "@/components/coaching/warmups/AutoFillNotice"
+import { useAutoSequences, markManual } from "@/components/coaching/warmups/useAutoSequences"
+import { DEFAULT_OPTIONS, type Sequence, type WarmupOptions } from "@/lib/warmups/engine"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
 
-type WarmupCooldown = { notes: string; exercises: ProgramExercise[] }
+type WarmupCooldown = { notes: string; exercises: ProgramExercise[]; source?: Sequence["source"]; rule?: string }
 type ProgramDay = { dayLabel: string; notes: string; warmup?: WarmupCooldown; exercises: ProgramExercise[]; cooldown?: WarmupCooldown }
 type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 type ProgramStatus = "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
@@ -51,6 +56,14 @@ export default function EditProgramPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState("")
+  const [templateOptions, setTemplateOptions] = useState<WarmupOptions>(DEFAULT_OPTIONS)
+  const [clientOptions, setClientOptions] = useState<WarmupOptions | null>(null)
+
+  const autoMode = clientEmail ? "client" : "template"
+  const auto = useAutoSequences({
+    weeks, setWeeks, mode: autoMode,
+    options: loading ? null : clientEmail ? clientOptions : templateOptions,
+  })
 
   const week = weeks[activeWeek]
   const day = week?.days[activeDay]
@@ -71,6 +84,7 @@ export default function EditProgramPage() {
             setProgramStatus((p.status ?? "DRAFT") as ProgramStatus)
             setClientEmail(p.clientEmail ?? null)
             setDurationWeeksInput(typeof p.durationWeeks === "number" ? String(p.durationWeeks) : "")
+            setTemplateOptions({ ...DEFAULT_OPTIONS, ...(p.warmupOptions ?? {}) })
             try { setWeeks(JSON.parse(p.weeks) as ProgramWeek[]) } catch { /* keep default */ }
           }
         }
@@ -184,6 +198,7 @@ export default function EditProgramPage() {
           weeks: JSON.stringify(weeks),
           notes: programNotes || undefined,
           durationWeeks,
+          ...(clientEmail ? {} : { warmupOptions: templateOptions }),
         }),
       })
       if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000) } else { setError("Failed to save.") }
@@ -265,6 +280,19 @@ export default function EditProgramPage() {
         </p>
       </div>
 
+      <WarmupSettingsPanel
+        mode={autoMode}
+        clientEmail={clientEmail}
+        templateOptions={templateOptions}
+        onOptions={clientEmail ? setClientOptions : setTemplateOptions}
+        totals={auto.totals}
+        onAddAllEmpty={auto.addAllEmpty}
+        onUpdateAllOutdated={auto.updateAllOutdated}
+        paused={auto.paused}
+        onResume={auto.resume}
+      />
+      <AutoFillNotice notice={auto.notice} onUndo={auto.undoNotice} onDismiss={auto.dismissNotice} />
+
       {/* Week tabs */}
       <div className="h-scroll" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
         {weeks.map((w, wi) => (
@@ -305,10 +333,17 @@ export default function EditProgramPage() {
           </div>
 
           {/* Warmup */}
+          <SequenceStatus
+            kind="warmup" {...auto.stateFor(day, "warmup")} mode={autoMode}
+            hasExercises={day.exercises.length > 0} showFlags
+            onApply={(seq) => updateDay((d) => ({ ...d, warmup: seq }))}
+            onKeep={() => updateDay((d) => ({ ...d, warmup: markManual(d.warmup ?? { notes: "", exercises: [] }) }))}
+          />
           <WarmupCooldownSection
+            key={`w-${activeWeek}-${activeDay}-${day.warmup?.exercises.length ?? 0}`}
             label="Warmup"
             data={day.warmup ?? { notes: "", exercises: [] }}
-            onChange={(w) => updateDay((d) => ({ ...d, warmup: w }))}
+            onChange={(w) => updateDay((d) => ({ ...d, warmup: markManual({ ...d.warmup, ...w }) }))}
           />
 
           {/* Main workout */}
@@ -321,10 +356,20 @@ export default function EditProgramPage() {
           />
 
           {/* Cooldown */}
+          <div style={{ marginTop: 22 }}>
+            <SequenceStatus
+              kind="cooldown" {...auto.stateFor(day, "cooldown")} mode={autoMode}
+              hasExercises={day.exercises.length > 0} showFlags={false}
+              onApply={(seq) => updateDay((d) => ({ ...d, cooldown: seq }))}
+              onKeep={() => updateDay((d) => ({ ...d, cooldown: markManual(d.cooldown ?? { notes: "", exercises: [] }) }))}
+            />
+          </div>
           <WarmupCooldownSection
+            key={`c-${activeWeek}-${activeDay}-${day.cooldown?.exercises.length ?? 0}`}
             label="Cooldown"
+            flush
             data={day.cooldown ?? { notes: "", exercises: [] }}
-            onChange={(c) => updateDay((d) => ({ ...d, cooldown: c }))}
+            onChange={(c) => updateDay((d) => ({ ...d, cooldown: markManual({ ...d.cooldown, ...c }) }))}
           />
         </div>
       )}

@@ -91,6 +91,7 @@ const drawerLinks = [
   { section: "Coaching", items: [
     { href: "/admin/coaching/applications", label: "Applications" },
     { href: "/admin/coaching/programs", label: "Programs" },
+    { href: "/admin/coaching/warmups", label: "Warm-up Review" },
     { href: "/admin/coaching/workouts", label: "Workout Library" },
     { href: "/admin/coaching/exercises", label: "Exercise Library" },
     { href: "/admin/coaching/tasks", label: "Tasks" },
