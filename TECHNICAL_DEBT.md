@@ -68,3 +68,35 @@ Both readings are defensible and either one moves live client targets, so this
 is a decision for Lisa, not a silent fix.
 
 **Plan:** ask Lisa which reading she wants before changing anything.
+
+---
+
+## Testimonial and lead lists still read only the first database page
+**Added:** 2026-11-07
+**Area:** `api/testimonials`, `components/TestimonialsSection.tsx`, `admin/testimonials/**`, `api/admin/leads`, `api/free-guide`
+
+The coaching lists now page through the whole table (`scanAll`), but these
+seven scans were left alone because they belong to the frozen public site or
+the separate `lfm-leads` table. The coaching table is already past 1 MB, so
+testimonials past the first page can silently disappear.
+
+**Impact:** medium once testimonials grow; the free-guide duplicate check can
+miss existing leads.
+
+**Plan:** swap each to `scanAll` (data reading only, nothing visible changes)
+once Lisa approves touching those files.
+
+---
+
+## Every coaching list scans the whole table
+**Added:** 2026-11-07
+**Area:** `src/lib/authTokens.ts`
+
+All coaching records share one table keyed by `userId` prefix, so each list
+reads the entire table (two pages today) and filters. Correct now, but cost
+and latency grow with the table. `scanAll` logs a warning past 20 pages.
+
+**Impact:** low today (721 records).
+
+**Plan:** add a secondary index on record type / client email and switch the
+hot lists (workout logs, nutrition logs, messages) to Query.

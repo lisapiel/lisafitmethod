@@ -67,3 +67,39 @@ Two faults in the copy-fidelity tool itself, which is the thing the redesign's
 
 **Rule:** a verification tool that silently ignores part of its input is worse
 than no tool. When a flag can repeat, read all of it.
+
+---
+
+## Coaching lists read only the first page of the database
+**Date:** 2026-11-07
+**Area:** `src/lib/authTokens.ts` list functions, `api/admin/coaching/restart-requests`
+
+Thirteen coaching list functions and the restart-requests route ran a single
+DynamoDB Scan. A Scan stops after 1 MB of the table *before* the filter runs,
+so once the table passed 1 MB (1.39 MB on 2026-11-07) records beyond the first
+page silently vanished: 2 of 9 clients, 29 of 92 workout logs, 137 of 490
+exercises and 5 of 19 programs were invisible in the app. Nothing errored.
+
+**Fix:** every list now goes through `scanAll` in `src/lib/dynamoScan.ts`,
+which follows `LastEvaluatedKey` to the end.
+
+**Rule:** never call `ScanCommand` directly for a list. Use `scanAll`. A
+filtered scan returning few or no items does not mean there are no more.
+
+---
+
+## Workout "complete" screen shown when the save failed
+**Date:** 2026-11-07
+**Area:** `src/app/my-coaching/workouts/[weekId]/[dayIndex]/page.client.tsx`
+
+`finishWorkout` set `saved` whether or not the request succeeded, and a
+network error threw past it. A client could see "Workout complete!" with
+nothing stored. A retry would also have created a second log.
+
+**Fix:** success is shown only when the server returns the stored log. Each
+workout attempt carries a `submissionId` kept in the draft; the server derives
+the record id from it with a conditional write, so retries and double taps
+store one log and send one coach email.
+
+**Rule:** never show success before the server confirms it, and make any
+client-retried write idempotent.
