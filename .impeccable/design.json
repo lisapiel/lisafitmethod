@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T18:42:57+00:00",
+  "title": "Design System: Lisa Fit Method",
+  "extensions": {
+    "colorMeta": {
+      "ink-black": {
+        "role": "neutral",
+        "displayName": "Ink Black",
+        "canonical": "oklch(14.5% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "warm-ivory": {
+        "role": "neutral",
+        "displayName": "Warm Ivory",
+        "canonical": "oklch(98.0% 0.005 78.3)",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262523",
+          "#434240",
+          "#62615f",
+          "#84827f",
+          "#a6a5a3",
+          "#cac9c7",
+          "#efeeed"
+        ]
+      },
+      "paper-stone": {
+        "role": "neutral",
+        "displayName": "Paper Stone",
+        "canonical": "oklch(96.2% 0.006 75.4)",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262523",
+          "#43423f",
+          "#63615e",
+          "#84827f",
+          "#a7a5a2",
+          "#cbc9c6",
+          "#f0eeec"
+        ]
+      },
+      "champagne-gold": {
+        "role": "primary",
+        "displayName": "Champagne Gold",
+        "canonical": "oklch(75.2% 0.068 75.5)",
+        "tonalRamp": [
+          "#130900",
+          "#31220a",
+          "#523e20",
+          "#765c37",
+          "#997d57",
+          "#b9a180",
+          "#dac6aa",
+          "#fcecd6"
+        ]
+      },
+      "antique-gold": {
+        "role": "primary",
+        "displayName": "Antique Gold",
+        "canonical": "oklch(64.9% 0.070 75.1)",
+        "tonalRamp": [
+          "#130900",
+          "#322209",
+          "#533e1f",
+          "#775c36",
+          "#997d56",
+          "#baa17f",
+          "#dbc6aa",
+          "#fcecd6"
+        ]
+      },
+      "ink-text": {
+        "role": "neutral",
+        "displayName": "Ink Text",
+        "canonical": "oklch(21.8% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "warm-taupe": {
+        "role": "neutral",
+        "displayName": "Warm Taupe",
+        "canonical": "oklch(51.1% 0.011 62.4)",
+        "tonalRamp": [
+          "#0d0b09",
+          "#282422",
+          "#45413d",
+          "#66605b",
+          "#87817c",
+          "#a9a4a0",
+          "#ccc8c5",
+          "#f1eeeb"
+        ]
+      },
+      "portal-hairline": {
+        "role": "neutral",
+        "displayName": "Portal Hairline",
+        "canonical": "oklch(91.6% 0.010 67.7)",
+        "tonalRamp": [
+          "#0d0b09",
+          "#272422",
+          "#45413d",
+          "#65605b",
+          "#86817c",
+          "#a9a4a0",
+          "#ccc8c5",
+          "#f1eeeb"
+        ]
+      },
+      "course-charcoal": {
+        "role": "neutral",
+        "displayName": "Course Charcoal",
+        "canonical": "oklch(17.8% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "course-card": {
+        "role": "neutral",
+        "displayName": "Course Card",
+        "canonical": "oklch(20.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "course-hairline": {
+        "role": "neutral",
+        "displayName": "Course Hairline",
+        "canonical": "oklch(28.5% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "course-cream": {
+        "role": "neutral",
+        "displayName": "Course Cream",
+        "canonical": "oklch(92.8% 0.027 83.5)",
+        "tonalRamp": [
+          "#0e0b05",
+          "#29241b",
+          "#474135",
+          "#686051",
+          "#8a8171",
+          "#aca496",
+          "#cfc8bd",
+          "#f3eee5"
+        ]
+      },
+      "course-gold": {
+        "role": "primary",
+        "displayName": "Course Gold",
+        "canonical": "oklch(75.0% 0.085 82.1)",
+        "tonalRamp": [
+          "#140900",
+          "#322200",
+          "#543e11",
+          "#785c27",
+          "#9a7e49",
+          "#baa175",
+          "#dbc6a2",
+          "#fdeccf"
+        ]
+      },
+      "course-gold-light": {
+        "role": "primary",
+        "displayName": "Course Gold Light",
+        "canonical": "oklch(84.8% 0.088 84.5)",
+        "tonalRamp": [
+          "#130900",
+          "#322200",
+          "#533f0f",
+          "#775d24",
+          "#997e46",
+          "#b9a273",
+          "#dac7a0",
+          "#fcedce"
+        ]
+      },
+      "course-muted": {
+        "role": "neutral",
+        "displayName": "Course Muted",
+        "canonical": "oklch(62.7% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "status-success": {
+        "role": "status",
+        "displayName": "Status Success",
+        "canonical": "oklch(64.1% 0.103 149.6)",
+        "tonalRamp": [
+          "#001002",
+          "#062d12",
+          "#1d4e2a",
+          "#347043",
+          "#569263",
+          "#81b48a",
+          "#acd6b3",
+          "#d8f9dd"
+        ]
+      },
+      "status-warning": {
+        "role": "status",
+        "displayName": "Status Warning",
+        "canonical": "oklch(66.9% 0.131 32.4)",
+        "tonalRamp": [
+          "#200000",
+          "#451007",
+          "#6e281c",
+          "#9a4232",
+          "#c06452",
+          "#dd8d7c",
+          "#fab6a7",
+          "#ffe0d4"
+        ]
+      },
+      "status-error": {
+        "role": "status",
+        "displayName": "Status Error",
+        "canonical": "oklch(56.4% 0.158 23.7)",
+        "tonalRamp": [
+          "#230000",
+          "#4b040a",
+          "#761c1f",
+          "#a43536",
+          "#cb5956",
+          "#e8847f",
+          "#ffafaa",
+          "#ffdbd6"
+        ]
+      },
+      "status-error-on-dark": {
+        "role": "status",
+        "displayName": "Error Rose",
+        "canonical": "oklch(67.6% 0.140 21.5)",
+        "tonalRamp": [
+          "#210001",
+          "#470b10",
+          "#712327",
+          "#9e3c3f",
+          "#c45f5f",
+          "#e18887",
+          "#feb2b0",
+          "#ffddda"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Homepage hero only, max 18ch."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Every public section heading; <i> renders gold italic."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Subsection heads, rail titles, FAQ questions."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Opening paragraph under a heading, max ~62ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose in Warm Taupe, 56–72ch."
+      },
+      "label": {
+        "displayName": "Eyebrow / Label",
+        "purpose": "Uppercase section eyebrows and labels."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "All buttons and text links."
+      },
+      "course-display": {
+        "displayName": "Course Display",
+        "purpose": "Headings in Training Foundations, Masterclass, admin."
+      },
+      "course-body": {
+        "displayName": "Course Body",
+        "purpose": "Body and UI text in the course world."
+      }
+    },
+    "shadows": [
+      {
+        "name": "nav-hairline-light",
+        "value": "inset 0 -1px 0 rgba(26,26,26,0.1)",
+        "purpose": "Bottom edge of the condensed nav on light grounds, with 16px backdrop blur."
+      },
+      {
+        "name": "nav-hairline-dark",
+        "value": "inset 0 -1px 0 rgba(200,169,126,0.18)",
+        "purpose": "Bottom edge of the condensed nav on dark grounds."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-atelier",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The single easing for reveals, button fills, nav and accordion."
+      },
+      {
+        "name": "button-fill",
+        "value": "620ms",
+        "purpose": "Ink/gold fill rising through a button on hover."
+      },
+      {
+        "name": "reveal",
+        "value": "1000ms",
+        "purpose": "Fade-up reveal on scroll; line reveals 1100ms with 120ms stagger."
+      },
+      {
+        "name": "rule-draw",
+        "value": "1400ms",
+        "purpose": "Gold rule drawing in under an eyebrow."
+      },
+      {
+        "name": "nav-tone",
+        "value": "760ms",
+        "purpose": "Nav colour and condense transitions."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "All transitions drop to none under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "600px"
+      },
+      {
+        "name": "rail-collapse",
+        "value": "680px"
+      },
+      {
+        "name": "list-collapse",
+        "value": "760px"
+      },
+      {
+        "name": "nav-burger",
+        "value": "960px"
+      },
+      {
+        "name": "wide",
+        "value": "1800px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default call to action on light grounds; ink fill rises on hover.",
+      "html": "<a href=\"#\" class=\"ds-btn-primary\"><span>Apply for coaching</span></a>",
+      "css": ".ds-btn-primary{position:relative;overflow:hidden;display:inline-block;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;padding:17px 38px;text-align:center;border:0;border-radius:0;cursor:pointer;transition:color 560ms cubic-bezier(0.16,1,0.3,1);background:var(--accent-dark,#a8895e);color:#fff;border:none;} .ds-btn-primary>span{position:relative;z-index:1;} .ds-btn-primary::before{content:'';position:absolute;inset:0;z-index:0;background:var(--black,#0a0a0a);transform:scaleY(0);transform-origin:bottom;transition:transform 620ms cubic-bezier(0.16,1,0.3,1);} .ds-btn-primary:hover::before,.ds-btn-primary:focus-visible::before{transform:scaleY(1);} .ds-btn-primary:hover,.ds-btn-primary:focus-visible{color:var(--off-white,#f5f2ee);} .ds-btn-primary:focus-visible{outline:1px solid var(--accent,#c8a97e);outline-offset:3px;}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action on light grounds; gold hairline that fills with gold.",
+      "html": "<a href=\"#\" class=\"ds-btn-outline\"><span>See the courses</span></a>",
+      "css": ".ds-btn-outline{position:relative;overflow:hidden;display:inline-block;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;padding:17px 38px;text-align:center;border:0;border-radius:0;cursor:pointer;transition:color 560ms cubic-bezier(0.16,1,0.3,1);background:transparent;color:var(--accent-dark,#a8895e);border:1px solid rgba(168,137,94,0.45);} .ds-btn-outline>span{position:relative;z-index:1;} .ds-btn-outline::before{content:'';position:absolute;inset:0;z-index:0;background:var(--accent-dark,#a8895e);transform:scaleY(0);transform-origin:bottom;transition:transform 620ms cubic-bezier(0.16,1,0.3,1);} .ds-btn-outline:hover::before,.ds-btn-outline:focus-visible::before{transform:scaleY(1);} .ds-btn-outline:hover,.ds-btn-outline:focus-visible{color:#fff;} .ds-btn-outline:focus-visible{outline:1px solid var(--accent,#c8a97e);outline-offset:3px;}"
+    },
+    {
+      "name": "Gold Button (dark ground)",
+      "kind": "button",
+      "refersTo": "button-gold",
+      "description": "Primary action on black sections.",
+      "html": "<div class=\"ds-dark\"><a href=\"#\" class=\"ds-btn-gold\"><span>Get the bundle</span></a></div>",
+      "css": ".ds-dark{background:#0a0a0a;padding:32px;} .ds-btn-gold{position:relative;overflow:hidden;display:inline-block;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;padding:17px 38px;text-align:center;border:0;border-radius:0;cursor:pointer;transition:color 560ms cubic-bezier(0.16,1,0.3,1);background:var(--accent,#c8a97e);color:#0a0a0a;border:none;} .ds-btn-gold>span{position:relative;z-index:1;} .ds-btn-gold::before{content:'';position:absolute;inset:0;z-index:0;background:var(--off-white,#f5f2ee);transform:scaleY(0);transform-origin:bottom;transition:transform 620ms cubic-bezier(0.16,1,0.3,1);} .ds-btn-gold:hover::before,.ds-btn-gold:focus-visible::before{transform:scaleY(1);} .ds-btn-gold:hover,.ds-btn-gold:focus-visible{color:#0a0a0a;} .ds-btn-gold:focus-visible{outline:1px solid var(--accent,#c8a97e);outline-offset:3px;}"
+    },
+    {
+      "name": "Text Link",
+      "kind": "custom",
+      "refersTo": "link",
+      "description": "Uppercase gold link with underline; arrow gap widens on hover.",
+      "html": "<a href=\"#\" class=\"ds-link\">Read the method <span aria-hidden=\"true\">→</span></a>",
+      "css": ".ds-link{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;color:var(--accent-dark,#a8895e);border-bottom:1px solid rgba(168,137,94,0.4);padding-bottom:6px;transition:gap 520ms cubic-bezier(0.16,1,0.3,1),color 420ms ease,border-color 420ms ease;} .ds-link:hover,.ds-link:focus-visible{gap:17px;color:#1a1a1a;border-color:#1a1a1a;outline:none;}"
+    },
+    {
+      "name": "Underline Input",
+      "kind": "input",
+      "refersTo": "input-underline",
+      "description": "Square, underline-only field with a small uppercase label.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"you@example.com\"></label>",
+      "css": ".ds-field{display:block;max-width:360px;} .ds-field-label{display:block;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#6b6560;margin-bottom:9px;} .ds-input{width:100%;background:transparent;border:0;border-bottom:1px solid rgba(26,26,26,0.13);border-radius:0;padding:11px 2px;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:1rem;font-weight:300;color:#1a1a1a;outline:none;transition:border-color 420ms ease;} .ds-input:focus{border-bottom-color:#a8895e;} .ds-input::placeholder{color:rgba(26,26,26,0.28);}"
+    },
+    {
+      "name": "Navigation Bar (condensed, light)",
+      "kind": "nav",
+      "refersTo": "nav-cta",
+      "description": "Wordmark, uppercase links with drawn gold underline, hairline CTA.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-mark\">LISA FIT METHOD</span><span class=\"ds-nav-links\"><a href=\"#\" class=\"ds-nav-link\">Coaching</a><a href=\"#\" class=\"ds-nav-link\">Courses</a><a href=\"#\" class=\"ds-nav-cta\">Apply</a></span></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:12px 24px;background:rgba(250,248,245,0.86);backdrop-filter:blur(16px);box-shadow:inset 0 -1px 0 rgba(26,26,26,0.1);} .ds-nav-mark{font-family:var(--font-playfair),'Playfair Display',serif;font-weight:500;font-size:1rem;letter-spacing:0.26em;color:#1a1a1a;} .ds-nav-links{display:flex;align-items:center;gap:26px;} .ds-nav-link{position:relative;font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;color:rgba(26,26,26,0.62);padding-bottom:3px;transition:color 760ms cubic-bezier(0.16,1,0.3,1);} .ds-nav-link::after{content:'';position:absolute;left:0;bottom:0;height:1px;width:100%;background:#c8a97e;transform:scaleX(0);transform-origin:left;transition:transform 620ms cubic-bezier(0.16,1,0.3,1);} .ds-nav-link:hover,.ds-nav-link:focus-visible{color:#1a1a1a;outline:none;} .ds-nav-link:hover::after,.ds-nav-link:focus-visible::after{transform:scaleX(1);} .ds-nav-cta{font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border:1px solid rgba(26,26,26,0.24);color:#1a1a1a;transition:background 520ms ease,color 520ms ease;} .ds-nav-cta:hover,.ds-nav-cta:focus-visible{background:#1a1a1a;color:#faf8f5;outline:none;}"
+    },
+    {
+      "name": "Section Opening",
+      "kind": "custom",
+      "refersTo": "section-opening",
+      "description": "Signature: eyebrow, short gold rule, Playfair headline with gold italic.",
+      "html": "<div class=\"ds-open\"><p class=\"ds-eyebrow\">The method</p><div class=\"ds-open-rule\"></div><h2 class=\"ds-h2\">Your body isn't the problem. <i>The plan is.</i></h2></div>",
+      "css": ".ds-open{background:#faf8f5;padding:40px;} .ds-eyebrow{font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;color:#a8895e;margin:0;} .ds-open-rule{width:54px;height:1px;background:rgba(168,137,94,0.5);margin:16px 0 26px;} .ds-h2{font-family:var(--font-playfair),'Playfair Display',serif;font-weight:500;font-size:clamp(1.95rem,4.1vw,3.5rem);line-height:1.04;letter-spacing:-0.015em;color:#1a1a1a;margin:0;text-wrap:balance;} .ds-h2 i{font-style:italic;color:#a8895e;}"
+    },
+    {
+      "name": "Marker List",
+      "kind": "custom",
+      "refersTo": "marker-list",
+      "description": "Hairline-ruled rows with gold arrow markers; replaces cards.",
+      "html": "<ul class=\"ds-mlist\"><li><span aria-hidden=\"true\">→</span>A structured program with built-in tracking</li><li><span aria-hidden=\"true\">→</span>Core and glute priority</li><li><span aria-hidden=\"true\">→</span>50+ exercise videos</li></ul>",
+      "css": ".ds-mlist{list-style:none;margin:0;padding:0;max-width:520px;} .ds-mlist li{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid rgba(26,26,26,0.13);font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-weight:300;font-size:0.95rem;line-height:1.65;color:rgba(26,26,26,0.68);} .ds-mlist li span{font-size:11px;line-height:1.9;color:#a8895e;}"
+    },
+    {
+      "name": "Portal Card",
+      "kind": "card",
+      "refersTo": "portal-card",
+      "description": "Coaching portal card: white, hairline border, 8px radius, status figure.",
+      "html": "<div class=\"ds-pcard\"><p class=\"ds-pcard-label\">This week</p><p class=\"ds-pcard-value\">3 of 4</p><p class=\"ds-pcard-sub\">workouts logged</p></div>",
+      "css": ".ds-pcard{background:#fff;border:1px solid #e8e2dc;border-radius:8px;padding:clamp(1.5rem,5vw,2.5rem);max-width:280px;} .ds-pcard-label{font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#6b6560;margin:0 0 8px;} .ds-pcard-value{font-family:var(--font-playfair),'Playfair Display',serif;font-size:1.35rem;font-weight:700;line-height:1;color:#5c9e6a;margin:0;} .ds-pcard-sub{font-family:var(--font-dm-sans),'DM Sans',sans-serif;font-size:1rem;color:#6b6560;margin:6px 0 0;}"
+    },
+    {
+      "name": "Course Card",
+      "kind": "card",
+      "refersTo": "course-card",
+      "description": "Dark course-world surface: Cormorant heading, Montserrat body, gold accent.",
+      "html": "<div class=\"ds-ccard\"><p class=\"ds-ccard-tag\">Module 2</p><h3 class=\"ds-ccard-title\">Core &amp; glute priority</h3><p class=\"ds-ccard-body\">Build the base every other lift depends on.</p></div>",
+      "css": ".ds-ccard{background:#161616;border:1px solid #2a2a2a;border-radius:4px;padding:24px;max-width:320px;} .ds-ccard-tag{font-family:var(--font-montserrat),Montserrat,sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#c9a96e;margin:0 0 10px;} .ds-ccard-title{font-family:var(--font-cormorant),'Cormorant Garamond',serif;font-weight:400;font-size:1.8rem;line-height:1.1;color:#f0e6d3;margin:0 0 8px;} .ds-ccard-body{font-family:var(--font-montserrat),Montserrat,sans-serif;font-weight:300;font-size:0.85rem;line-height:1.7;color:#888;margin:0;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Modern Strength Atelier",
+    "overview": "A premium, editorial training space that has the warmth of a private studio and the precision of a well-designed strength program. Ivory paper, ink black, muted gold, elegant serif headlines, atmospheric gym photography, and refined layouts. It should feel sophisticated and athletic, never clinical and never over-decorated. The public site reads as one long document, not a stack of modules. Every section opens the same way, sits on the same grid and shares one spacing ramp, so no section looks like it was added later.\n\nThe system has three registers that share one palette family. The **public site** (the Atelier proper) is about three-quarters light: warm paper where the reading happens, with the black ground saved for the moments that earn drama (the opening, the bundle, the closing ask, the footer). The **coaching portal** (`/my-coaching`) stays on the same warm light ground, but it serves clarity, usability and effortless one-handed mobile use over decoration. The **course world** (Training Foundations, Masterclass and the admin area) is a separate dark, luxury register: charcoal, cream and gold, with Cormorant Garamond and Montserrat.\n\nDensity is generous on the public site (long line-heights, wide section padding, light 300-weight body text) and tighter in the portal and admin, where the job is getting a task done.",
+    "keyCharacteristics": [
+      "One accent family (gold) on ivory and black. No other brand hues.",
+      "Square corners, hairline rules and underline inputs on the public site. No boxes and no shadows.",
+      "Serif display type, light sans body text, and small wide-tracked uppercase labels.",
+      "Slow, eased motion (`cubic-bezier(0.16,1,0.3,1)`): ink-fill buttons, drawn rules, line-by-line reveals. Every animation respects reduced motion.",
+      "Tone changes between dark and light sections blend across an eased gradient band, never on a hard edge."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Gold is the only brand hue. New colors or fonts need Lisa's explicit approval. Tints of the existing tokens at reduced opacity are how the system gets its range.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status-Only Rule",
+        "body": "Green, terracotta and red exist only to report state (success, warning, error). They are never decoration, never brand, and never appear on the public marketing pages.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Golds Rule",
+        "body": "Use Antique Gold on light grounds and Champagne Gold on dark grounds. Swapping them breaks contrast in one direction or the other.",
+        "section": "colors"
+      },
+      {
+        "name": "The Same Opening Rule",
+        "body": "Every public section opens with eyebrow, then a short drawn gold rule (54px), then the headline. Repeating one opening is most of what makes the site read as one document.",
+        "section": "typography"
+      },
+      {
+        "name": "The Light Body Rule",
+        "body": "Body copy is weight 300. Emphasis comes from the serif and from gold italics, never from bold body text.",
+        "section": "typography"
+      },
+      {
+        "name": "The Seamless Ground Rule",
+        "body": "Never change tone (light to dark) on a hard edge. Use `ToneShift`, a smoothstep-eased gradient band (`clamp(42px, 9vw, 150px)`, 20px on phones) whose halves carry `data-tone` so the nav flips at the midpoint.",
+        "section": "layout"
+      },
+      {
+        "name": "The Three-Quarters Light Rule",
+        "body": "Most of a public page is paper. Dark grounds are reserved for the opening, the bundle, the closing ask and the footer.",
+        "section": "layout"
+      },
+      {
+        "name": "The No-Box Rule",
+        "body": "On the public site, separate content with hairline rules and space, never with drop shadows or bordered cards.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Square Atelier Rule",
+        "body": "Square corners on every public page. Rounded corners belong to the portal, course and admin apps only.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** build public sections from the shared furniture in `src/components/preview/d/Sections.tsx` (`SectionD`, `OpenD`, `MarkerListD`, `ModuleRailD`, `PriceBlockD`, `QaListD`) so new pages inherit the rhythm.",
+      "**Do** use only the `--d-*` spacing ramp, `--d-gutter` and `--d-max` for spacing and width on public pages.",
+      "**Do** put `ToneShift` between every light and dark ground, and set `data-tone` on every section so the nav can read it.",
+      "**Do** use Antique Gold for accents on light grounds and Champagne Gold on dark grounds.",
+      "**Do** honor `prefers-reduced-motion` in every reveal, rule and transition. The existing `Reveal`, `RevealLines` and `DrawRule` already do.",
+      "**Do** make new portal and tracker screens easy to read on a phone mid-workout, with generous tap targets. For new work, keep text at 12px or larger and body at 16px or larger. Some existing portal labels are smaller than that.",
+      "**Do** use status colors only to report state."
+    ],
+    "donts": [
+      "**Don't** introduce new colors or fonts without Lisa's explicit approval.",
+      "**Don't** round corners, add drop shadows or wrap content in bordered cards on public pages.",
+      "**Don't** change tone on a hard edge between sections.",
+      "**Don't** use bold body text. Use the serif or gold italics for emphasis.",
+      "**Don't** use green, terracotta or red on the public marketing pages, or anywhere as decoration.",
+      "**Don't** mix the course world's Cormorant and Montserrat into the public site, or the public site's Playfair and DM Sans into course modules.",
+      "**Don't** use fast, bouncy or springy easing. Motion here is slow and settles."
+    ]
+  }
+}
