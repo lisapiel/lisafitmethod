@@ -237,8 +237,21 @@ function planSequence(kind: SequenceKind, type: SessionType, day: DayLike, index
   return { kind, rule, adjustments, exercises, missingFromLibrary }
 }
 
+// A day that is itself mobility or stretching work (most main exercises
+// tagged that way) gets no automatic warm-up or cool-down: it would repeat
+// the session.
+export function isMobilitySession(day: DayLike, index: LibraryIndex): boolean {
+  if (day.exercises.length === 0) return false
+  const mobility = day.exercises.filter((ex) => {
+    const lib = index.byId.get(ex.exerciseId)
+    return /mobility|stretch/i.test(`${lib?.category ?? ""} ${lib?.movementPattern ?? ""}`)
+  }).length
+  return mobility / day.exercises.length >= 0.5
+}
+
 export function planDay(day: DayLike, index: LibraryIndex, opts: WarmupOptions): DayPlan | null {
   if (day.exercises.length === 0) return null
+  if (isMobilitySession(day, index)) return null
   const hint = nameHint(day.dayLabel)
   const byExercises = typeFromExercises(day, index)
   const flags: string[] = []

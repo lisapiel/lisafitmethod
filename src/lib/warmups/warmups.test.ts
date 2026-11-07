@@ -32,6 +32,9 @@ const main: LibraryExercise[] = [
   { id: "twist", name: "Russian Twist", primaryMuscle: "Obliques" },
   { id: "thruster", name: "Thruster", primaryMuscle: "Quads, Glutes, Shoulders" },
   { id: "untagged", name: "Mystery Move" },
+  { id: "butterfly", name: "Butterfly Stretch", primaryMuscle: "Adductors", category: "stretch, mobility", movementPattern: "mobility" },
+  { id: "hipcircle", name: "Hip Circles", primaryMuscle: "Hip Flexors", category: "mobility, warm up" },
+  { id: "latlunge", name: "Lateral Lunge (main)", primaryMuscle: "Quads, Glutes", category: "leg, glute, mobility, bodyweight" },
 ]
 const library: LibraryExercise[] = [
   ...drillNames.map((name, i) => ({ id: `d${i}`, name, videoS3Key: `v/${i}.mp4` })),
@@ -229,5 +232,16 @@ describe("a sequence the coach emptied on purpose", () => {
     const weeks = JSON.stringify([{ weekNumber: 1, days: [d] }])
     assert.ok(!reviewProgram(weeks, index, DEFAULT_OPTIONS).some((i) => i.kind === "warmup"))
     assert.equal(applyReview(weeks, index, DEFAULT_OPTIONS, [{ week: 1, dayIndex: 0, kind: "warmup" }]).applied, 0)
+  })
+})
+
+describe("mobility sessions", () => {
+  test("a day that is mostly mobility or stretching gets no automatic sequences", () => {
+    const d = day("Day 2", ["butterfly", "hipcircle", "latlunge", "squat"])
+    assert.equal(planDay(d, index, DEFAULT_OPTIONS), null)
+    assert.equal(reviewProgram(JSON.stringify([{ weekNumber: 1, days: [d] }]), index, DEFAULT_OPTIONS).length, 0)
+  })
+  test("one mobility-tagged exercise on a leg day changes nothing", () => {
+    assert.equal(planDay(day("Day 1", ["latlunge", "squat", "rdl", "thrust"]), index, DEFAULT_OPTIONS)?.typeLabel, "Leg Day")
   })
 })

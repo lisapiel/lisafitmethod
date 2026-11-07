@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import {
-  fillEmptySequences, indexLibrary, planDay, sequenceState,
+  fillEmptySequences, indexLibrary, isMobilitySession, planDay, sequenceState,
   type DayLike, type DayPlan, type LibraryExercise, type LibraryIndex, type Sequence,
   type SequenceKind, type SequenceState, type WarmupOptions,
 } from "@/lib/warmups/engine"
@@ -88,10 +88,10 @@ export function useAutoSequences<D extends DayLike, W extends Week<D>>({ weeks, 
     })
   }, [weeks, index, optionsKey, mode, options, setWeeks, paused])
 
-  const stateFor = useCallback((day: D, kind: SequenceKind): { state: SequenceState; plan: DayPlan | null } => {
+  const stateFor = useCallback((day: D, kind: SequenceKind): { state: SequenceState; plan: DayPlan | null; mobility: boolean } => {
     const plan = planFor(day)
-    return { state: sequenceState(day, kind, plan), plan }
-  }, [planFor])
+    return { state: sequenceState(day, kind, plan), plan, mobility: !!index && isMobilitySession(day, index) }
+  }, [planFor, index])
 
   const totals = useMemo(() => {
     let empty = 0

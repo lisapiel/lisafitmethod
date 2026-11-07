@@ -11,10 +11,11 @@ function ruleText(plan: DayPlan, kind: SequenceKind) {
   return `${p.rule}, from the ${plan.decidedBy}${p.adjustments.length ? ` · ${p.adjustments.join(" · ")}` : ""}`
 }
 
-export default function SequenceStatus({ kind, state, plan, mode, hasExercises, showFlags, onApply, onKeep }: {
+export default function SequenceStatus({ kind, state, plan, mobility = false, mode, hasExercises, showFlags, onApply, onKeep }: {
   kind: SequenceKind
   state: SequenceState
   plan: DayPlan | null
+  mobility?: boolean
   mode: AutoMode
   hasExercises: boolean
   showFlags: boolean
@@ -27,6 +28,7 @@ export default function SequenceStatus({ kind, state, plan, mode, hasExercises, 
   )
 
   if (state.status === "no-plan") {
+    if (mobility) return quiet(`Mobility session, so no automatic ${noun(kind)}. Add one by hand if you want it.`)
     return hasExercises ? null : quiet(`Add main exercises and the ${noun(kind)} is chosen for you.`)
   }
   if (state.status === "auto-current" && plan) {
