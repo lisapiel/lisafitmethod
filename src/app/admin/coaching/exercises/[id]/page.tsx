@@ -39,7 +39,7 @@ const EMPTY: FormState = {
 }
 
 function cdnUrl(key: string) {
-  return `${CDN}/${encodeURIComponent(key)}`
+  return `${CDN}/${key.split("/").map(encodeURIComponent).join("/")}`
 }
 
 function Spinner() {

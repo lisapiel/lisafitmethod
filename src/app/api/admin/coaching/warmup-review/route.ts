@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     out.push({
       id: p.id, name: p.name, isTemplate: !!p.isTemplate, status: p.status ?? "DRAFT", updatedAt: p.updatedAt ?? "",
       client: client ? { email: client.email, displayName: client.displayName, status: client.status ?? null, isCurrent: client.currentProgramId === p.id } : null,
+      inUseBy: p.isTemplate ? clients.filter((c) => c.currentProgramId === p.id).map((c) => c.displayName) : [],
       options, reasons: settings?.suggestion.reasons ?? {}, profileFlags: settings?.suggestion.flags ?? [], profileSaved: !!settings?.profile,
       items,
     })
@@ -50,6 +51,12 @@ export async function POST(req: NextRequest) {
   if (!program) return NextResponse.json({ error: "Program not found" }, { status: 404 })
   if ((program.updatedAt ?? "") !== (body.updatedAt ?? "")) {
     return NextResponse.json({ error: "This program was edited after the review loaded. Reload and review again." }, { status: 409 })
+  }
+  // A template is only safe to fill when no client trains from it directly;
+  // assignment normally makes a copy, but older records may point at the
+  // template itself.
+  if (program.isTemplate && (await listCoachingClientRecords()).some((c) => c.currentProgramId === program.id)) {
+    return NextResponse.json({ error: "A client is training from this template directly, so it is treated as their program. Review it from that client instead." }, { status: 409 })
   }
   const index = await loadLibraryIndex()
   const options = program.clientEmail ? (await clientWarmupSettings(program.clientEmail)).options : templateOptions(program)

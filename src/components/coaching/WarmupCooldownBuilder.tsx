@@ -11,7 +11,7 @@ const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
 
 function cdnThumb(key: string | null | undefined) {
   if (!key) return ""
-  return `${CDN}/${encodeURIComponent(key.replace(/\.mp4$/i, ".jpg"))}`
+  return `${CDN}/${key.replace(/\.mp4$/i, ".jpg").split("/").map(encodeURIComponent).join("/")}`
 }
 
 function DrillRow({

@@ -198,11 +198,11 @@ describe("client options from intake", () => {
     assert.equal(suggestFromIntake({ trainingExperience: "3–5 years" }).options.beginner, false)
     assert.equal(suggestFromIntake({ trainingExperience: "3–5 years" }).flags.length, 0)
   })
-  test("older and free-text answers are read but flagged", () => {
+  test("older and free-text answers are read; stated years need no confirmation", () => {
     assert.equal(suggestFromIntake({ trainingExperience: "Moins de 6 mois" }).options.beginner, true)
     const g = suggestFromIntake({ currentFitnessLevel: "Crossfit 10+ years but inconsistent recently" })
     assert.equal(g.options.beginner, false)
-    assert.match(g.flags.join(" "), /free-text/)
+    assert.equal(g.flags.length, 0)
   })
   test("missing or unclear experience defaults to beginner, with a flag", () => {
     for (const s of [suggestFromIntake(null), suggestFromIntake({ trainingExperience: "it depends" })]) {

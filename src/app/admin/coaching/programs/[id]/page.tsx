@@ -302,7 +302,7 @@ export default function EditProgramPage() {
         paused={auto.paused}
         onResume={auto.resume}
       />
-      <AutoFillNotice notice={auto.notice} onUndo={auto.undoNotice} onDismiss={auto.dismissNotice} />
+      <AutoFillNotice notice={auto.notice} onUndo={auto.undoNotice} onDismiss={auto.dismissNotice} newDaysOnly={!!clientEmail} />
 
       {/* Week tabs */}
       <div className="h-scroll" style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>

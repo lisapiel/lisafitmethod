@@ -7,6 +7,7 @@ export interface ReviewProgram {
   status: string
   updatedAt: string
   client: { email: string; displayName: string; status: string | null; isCurrent: boolean } | null
+  inUseBy?: string[]
   options: { beginner: boolean; bands: boolean; backSafe: boolean; foamRoller: boolean }
   reasons: Record<string, string>
   profileFlags: string[]

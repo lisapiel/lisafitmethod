@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
-import Link from "next/link"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -63,9 +62,6 @@ export default function AdminClientNotesPage({ params }: { params: Promise<{ ema
   return (
     <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <Link href={`/admin/coaching/clients/${encodedEmail}`} style={{ color: muted, fontSize: "0.75rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "1.5rem" }}>
-          ← {clientName || clientEmail}
-        </Link>
 
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>Private</p>

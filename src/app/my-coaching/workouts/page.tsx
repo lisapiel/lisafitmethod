@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { expandedWeeks } from "@/lib/programExpansion"
+import { cdnUrl } from "@/lib/cdnUrl"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -198,7 +199,7 @@ export default function WorkoutsPage() {
                           <div key={ei} style={{ width: 32, height: 32, borderRadius: "50%", border: `2px solid ${white}`, overflow: "hidden", background: "#f5f2ee", marginLeft: ei > 0 ? -8 : 0, flexShrink: 0 }}>
                             {ex.videoS3Key && (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={`${CDN}/${encodeURIComponent(ex.videoS3Key.replace(/\.mp4$/i, ".jpg"))}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              <img src={cdnUrl(CDN, ex.videoS3Key.replace(/\.mp4$/i, ".jpg"))} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             )}
                           </div>
                         ))}

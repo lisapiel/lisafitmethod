@@ -14,6 +14,8 @@ export default function WarmupReviewClient() {
   const [programs, setPrograms] = useState<ReviewProgram[] | null>(null)
   const [error, setError] = useState("")
   const [showTemplates, setShowTemplates] = useState(false)
+  const [bulk, setBulk] = useState<"idle" | "confirm" | "busy">("idle")
+  const [bulkResult, setBulkResult] = useState("")
 
   const load = useCallback(async () => {
     setError("")
@@ -47,6 +49,19 @@ export default function WarmupReviewClient() {
 
   const clients = programs?.filter((p) => !p.isTemplate) ?? []
   const templates = programs?.filter((p) => p.isTemplate) ?? []
+  const safeTemplates = templates.filter((t) => (t.inUseBy ?? []).length === 0)
+  const templateAdds = safeTemplates.reduce((n, t) => n + t.items.length, 0)
+
+  async function completeTemplates() {
+    setBulk("busy")
+    const results: string[] = []
+    for (const t of safeTemplates) {
+      const msg = await apply(t, t.items.map((i) => ({ week: i.week, dayIndex: i.dayIndex, kind: i.kind })))
+      results.push(`${t.name}: ${msg}`)
+    }
+    setBulkResult(results.join(" "))
+    setBulk("idle")
+  }
 
   return (
     <div style={{ maxWidth: 1040 }}>
@@ -65,11 +80,34 @@ export default function WarmupReviewClient() {
 
       {clients.map((p) => <ReviewProgramSection key={p.id} program={p} onApply={apply} />)}
 
+      {bulkResult && <p role="status" style={{ fontFamily: wu.font, fontSize: "0.875rem", color: wu.cream, margin: "16px 0 0" }}>{bulkResult}</p>}
       {templates.length > 0 && (
         <div style={{ borderTop: `1px solid ${wu.line}`, paddingTop: 18, marginTop: 10 }}>
           <button type="button" className="wu-btn wu-btn-quiet" aria-expanded={showTemplates} onClick={() => setShowTemplates((v) => !v)}>
             {showTemplates ? "Hide" : "Show"} {templates.length} {templates.length === 1 ? "template" : "templates"} with gaps
           </button>
+          {safeTemplates.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, margin: "12px 0 0" }}>
+              {bulk === "confirm" ? (
+                <>
+                  <p style={{ flex: "1 1 320px", margin: 0, fontFamily: wu.font, fontSize: "0.875rem", lineHeight: 1.55, color: wu.cream }}>
+                    This adds {templateAdds} sequences to {safeTemplates.length} {safeTemplates.length === 1 ? "template" : "templates"}. Templates are copied when assigned, so no client&apos;s program changes, and sequences you set by hand are kept.
+                  </p>
+                  <button type="button" className="wu-btn wu-btn-primary" onClick={completeTemplates}>Confirm and complete</button>
+                  <button type="button" className="wu-btn wu-btn-quiet" onClick={() => setBulk("idle")}>Cancel</button>
+                </>
+              ) : (
+                <button type="button" className="wu-btn wu-btn-primary" disabled={bulk === "busy"} onClick={() => { setBulk("confirm"); setBulkResult("") }}>
+                  {bulk === "busy" ? "Completing…" : `Complete all ${safeTemplates.length} templates`}
+                </button>
+              )}
+            </div>
+          )}
+          {templates.filter((t) => (t.inUseBy ?? []).length > 0).map((t) => (
+            <p key={t.id} role="note" style={{ fontFamily: wu.font, fontSize: "0.8125rem", color: wu.warn, margin: "10px 0 0" }}>
+              {t.name} is used directly by {t.inUseBy!.join(", ")}, so it is left out. Review it from that client.
+            </p>
+          ))}
           {showTemplates && templates.map((p) => <ReviewProgramSection key={p.id} program={p} onApply={apply} />)}
         </div>
       )}

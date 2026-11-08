@@ -157,12 +157,9 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#111", color: cream, fontFamily: "var(--font-montserrat), sans-serif", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "min(70vh, 640px)", background: "#111", color: cream, fontFamily: "var(--font-montserrat), sans-serif", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <div style={{ padding: "2rem 2rem 1rem", flexShrink: 0 }}>
-        <Link href="/admin/coaching/messages" style={{ color: muted, fontSize: "0.75rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "1.25rem" }}>
-          ← Messages
-        </Link>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
             <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 4px" }}>Thread</p>

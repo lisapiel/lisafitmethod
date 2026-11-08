@@ -73,61 +73,78 @@ export default function WarmupSettingsPanel({ mode, clientEmail, clientName, tem
   }
 
   const dirty = mode === "client" && loaded && FIELDS.some((f) => draft[f.key] !== loaded.options[f.key])
+  const needsEye = mode === "client" && !!loaded && !loaded.profile && loaded.suggestion.flags.length > 0
+  const summary = [
+    draft.beginner ? "beginner substitutions" : "standard progressions",
+    draft.bands ? "bands" : "no bands",
+    draft.backSafe ? "Pigeon Pose" : "Figure 4 instead of Pigeon",
+    draft.foamRoller ? "foam roller" : "no foam roller",
+  ].join(" · ")
+  const source = mode === "client" ? (loaded?.profile ? "set by you" : loaded ? "from their intake" : "loading…") : "for this template"
 
   return (
-    <section aria-labelledby="wu-settings-title" style={{ background: wu.card, border: `1px solid ${wu.line}`, borderRadius: 8, padding: "18px 22px", marginBottom: "1.5rem" }}>
+    <section aria-labelledby="wu-settings-title" style={{ background: wu.card, border: `1px solid ${wu.line}`, borderRadius: 8, padding: "14px 18px", marginBottom: "1.5rem" }}>
       <WarmupStyles />
-      <h2 id="wu-settings-title" style={{ fontFamily: wu.font, fontSize: "0.9375rem", fontWeight: 600, color: wu.cream, margin: 0 }}>
-        Warm-ups and cool-downs
-      </h2>
-      <p style={{ fontFamily: wu.font, fontSize: "0.8125rem", lineHeight: 1.55, color: wu.muted, margin: "4px 0 10px", maxWidth: "70ch" }}>
-        {mode === "client"
-          ? `Chosen from your sequences using ${clientName ? `${clientName}'s` : "this client's"} settings. Nothing in an assigned program changes until you add a suggestion and save.`
-          : "Chosen from your sequences for every day with exercises. Anything you edit by hand stays as you set it."}
-      </p>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", columnGap: 24 }}>
-        {FIELDS.map((f) => {
-          const reason = mode === "client" ? loaded?.suggestion.reasons[f.key] : undefined
-          const saved = mode === "client" && typeof loaded?.profile?.[f.key] === "boolean"
-          return (
-            <label key={f.key} className="wu-toggle">
-              <input type="checkbox" checked={draft[f.key]} onChange={(e) => toggle(f.key, e.target.checked)} />
-              <span className="wu-switch" aria-hidden />
-              <span>
-                <span style={{ display: "block", fontFamily: wu.font, fontSize: "0.875rem", color: wu.cream }}>{f.label}</span>
-                <span style={{ display: "block", fontFamily: wu.font, fontSize: "0.75rem", lineHeight: 1.5, color: wu.muted }}>
-                  {saved ? "Set by you. " : reason ? `Suggested: ${reason}. ` : ""}{f.hint}
+      <details open={needsEye || undefined}>
+        <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "4px 12px", minHeight: 32 }}>
+          <h2 id="wu-settings-title" style={{ fontFamily: wu.font, fontSize: "0.9375rem", fontWeight: 600, color: wu.cream, margin: 0 }}>
+            Warm-ups and cool-downs: automatic
+          </h2>
+          <span style={{ fontFamily: wu.font, fontSize: "0.8125rem", color: wu.muted }}>{summary} ({source})</span>
+          <span style={{ fontFamily: wu.font, fontSize: "0.8125rem", fontWeight: 600, color: wu.gold, textDecoration: "underline", textUnderlineOffset: 3 }}>Adjust</span>
+        </summary>
+        <p style={{ fontFamily: wu.font, fontSize: "0.8125rem", lineHeight: 1.55, color: wu.muted, margin: "10px 0", maxWidth: "70ch" }}>
+          {mode === "client"
+            ? `Chosen from your sequences using ${clientName ? `${clientName}'s` : "this client's"} settings. Days you add are filled automatically; days already in the program change only when you apply a suggestion and save.`
+            : "Chosen from your sequences for every day with exercises. Anything you edit by hand stays as you set it."}
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", columnGap: 24 }}>
+          {FIELDS.map((f) => {
+            const reason = mode === "client" ? loaded?.suggestion.reasons[f.key] : undefined
+            const saved = mode === "client" && typeof loaded?.profile?.[f.key] === "boolean"
+            return (
+              <label key={f.key} className="wu-toggle">
+                <input type="checkbox" checked={draft[f.key]} onChange={(e) => toggle(f.key, e.target.checked)} />
+                <span className="wu-switch" aria-hidden />
+                <span>
+                  <span style={{ display: "block", fontFamily: wu.font, fontSize: "0.875rem", color: wu.cream }}>{f.label}</span>
+                  <span style={{ display: "block", fontFamily: wu.font, fontSize: "0.75rem", lineHeight: 1.5, color: wu.muted }}>
+                    {saved ? "Set by you. " : reason ? `Suggested: ${reason}. ` : ""}{f.hint}
+                  </span>
                 </span>
-              </span>
-            </label>
-          )
-        })}
-      </div>
+              </label>
+            )
+          })}
+        </div>
+        {mode === "client" && (dirty || needsEye) && (
+          <div style={{ marginTop: 10 }}>
+            <button type="button" className="wu-btn wu-btn-primary" onClick={saveProfile} disabled={saving}>
+              {saving ? "Saving…" : dirty ? "Save settings" : "Confirm settings"}
+            </button>
+          </div>
+        )}
+      </details>
 
-      {mode === "client" && loaded && !loaded.profile && <Flags flags={loaded.suggestion.flags} />}
+      {needsEye && <Flags flags={loaded!.suggestion.flags} />}
 
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginTop: 12 }}>
-        {mode === "client" && (
-          <button type="button" className="wu-btn wu-btn-primary" onClick={saveProfile} disabled={saving || (!dirty && !!loaded?.profile)}>
-            {saving ? "Saving…" : loaded?.profile ? "Save settings" : "Confirm settings"}
-          </button>
-        )}
-        {totals.empty > 0 && mode === "client" && (
-          <button type="button" className="wu-btn wu-btn-quiet" onClick={onAddAllEmpty}>
-            Add suggestions to {totals.empty} empty {totals.empty === 1 ? "sequence" : "sequences"}
-          </button>
-        )}
-        {totals.outdated > 0 && (
-          <button type="button" className="wu-btn wu-btn-quiet" onClick={onUpdateAllOutdated}>
-            Update {totals.outdated} automatic {totals.outdated === 1 ? "sequence" : "sequences"}
-          </button>
-        )}
-        {paused && onResume && (
-          <button type="button" className="wu-btn wu-btn-quiet" onClick={onResume}>Resume automatic filling</button>
-        )}
-        {message && <p role="status" style={{ margin: 0, fontFamily: wu.font, fontSize: "0.8125rem", color: message.startsWith("Saved") ? wu.ok : wu.warn }}>{message}</p>}
-      </div>
+      {(totals.empty > 0 && mode === "client") || totals.outdated > 0 || (paused && onResume) || message ? (
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginTop: 10 }}>
+          {totals.empty > 0 && mode === "client" && (
+            <button type="button" className="wu-btn wu-btn-quiet" onClick={onAddAllEmpty}>
+              Add suggestions to {totals.empty} empty {totals.empty === 1 ? "sequence" : "sequences"}
+            </button>
+          )}
+          {totals.outdated > 0 && (
+            <button type="button" className="wu-btn wu-btn-quiet" onClick={onUpdateAllOutdated}>
+              Update {totals.outdated} automatic {totals.outdated === 1 ? "sequence" : "sequences"}
+            </button>
+          )}
+          {paused && onResume && (
+            <button type="button" className="wu-btn wu-btn-quiet" onClick={onResume}>Resume automatic filling</button>
+          )}
+          {message && <p role="status" style={{ margin: 0, fontFamily: wu.font, fontSize: "0.8125rem", color: message.startsWith("Saved") ? wu.ok : wu.warn }}>{message}</p>}
+        </div>
+      ) : null}
     </section>
   )
 }

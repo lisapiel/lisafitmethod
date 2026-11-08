@@ -7,6 +7,7 @@ import Link from "next/link"
 import { expandedWeeks } from "@/lib/programExpansion"
 import { newSubmissionId, submitFailureMessage, submitWorkoutLog } from "@/lib/workoutSubmit"
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
+import { cdnUrl } from "@/lib/cdnUrl"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -124,7 +125,7 @@ function parseSetsCount(s: string): number {
 }
 
 function cdnThumb(key: string) {
-  return `${CDN}/${encodeURIComponent(key.replace(/\.mp4$/i, ".jpg"))}`
+  return cdnUrl(CDN, key.replace(/\.mp4$/i, ".jpg"))
 }
 
 // Draft persistence for in-progress workouts. Keeps the client's typed
@@ -295,9 +296,12 @@ function WarmupCooldownDisplay({
                   key={i}
                   style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 10px", background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6 }}
                 >
-                  <div
+                  <button
+                    type="button"
+                    disabled={!videoKey}
+                    aria-label={videoKey ? `Play ${ex.name} demonstration` : `${ex.name} (no video)`}
                     onClick={() => videoKey && onVideoClick(videoKey, ex.name)}
-                    style={{ width: 42, height: 42, borderRadius: 4, overflow: "hidden", background: "#f0ede8", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
+                    style={{ width: 44, height: 44, padding: 0, border: 0, borderRadius: 4, overflow: "hidden", background: "#f0ede8", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
                   >
                     {videoKey ? (
                       <>
@@ -310,7 +314,7 @@ function WarmupCooldownDisplay({
                         </div>
                       </>
                     ) : null}
-                  </div>
+                  </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", fontWeight: 600, color: black, margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {ex.name}
@@ -338,6 +342,8 @@ function WarmupCooldownDisplay({
 }
 
 function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: string; onClose: () => void }) {
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   // Escape closes the modal — matches expected modal-dialog behavior.
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose() }
@@ -386,11 +392,20 @@ function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: strin
         <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1rem, 3.5vw, 1.15rem)", color: "#f0e6d3", margin: "0 44px 0.6rem 0" }}>
           {name}
         </p>
-        <video
-          src={`${CDN}/${encodeURIComponent(videoKey)}`}
-          controls autoPlay playsInline
-          style={{ width: "100%", maxHeight: "80vh", borderRadius: 4, background: "#000", objectFit: "contain" }}
-        />
+        {failed ? (
+          <div role="alert" style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 4, padding: "28px 20px", textAlign: "center", color: "#f0e6d3", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", lineHeight: 1.5 }}>
+            <p style={{ margin: "0 0 14px" }}>This demonstration video couldn&apos;t load. Check your connection, or message Lisa if it keeps happening.</p>
+            <button type="button" onClick={() => { setFailed(false); setAttempt((n) => n + 1) }} style={{ minHeight: 44, padding: "0 20px", background: "#c8a97e", color: "#1a1a1a", border: 0, borderRadius: 4, fontWeight: 700, cursor: "pointer" }}>Try again</button>
+          </div>
+        ) : (
+          <video
+            key={attempt}
+            src={cdnUrl(CDN, videoKey)}
+            controls autoPlay playsInline preload="auto"
+            onError={() => setFailed(true)}
+            style={{ width: "100%", maxHeight: "80vh", borderRadius: 4, background: "#000", objectFit: "contain" }}
+          />
+        )}
       </div>
     </div>
   )
@@ -813,9 +828,12 @@ function ExerciseBlock({
       {/* Exercise header */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", background: allDone ? "#f8fdf8" : "transparent", borderBottom: `1px solid ${allDone ? "#d4ead4" : border}` }}>
         {/* Thumbnail */}
-        <div
+        <button
+          type="button"
+          disabled={!videoKey}
+          aria-label={videoKey ? `Play ${ex.name} demonstration` : `${ex.name} (no video)`}
           onClick={videoKey ? onVideoClick : undefined}
-          style={{ width: 52, height: 52, borderRadius: 6, overflow: "hidden", background: "#f5f2ee", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
+          style={{ width: 52, height: 52, padding: 0, border: 0, borderRadius: 6, overflow: "hidden", background: "#f5f2ee", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
         >
           {videoKey ? (
             <>
@@ -832,7 +850,7 @@ function ExerciseBlock({
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#ddd" strokeWidth="1.2" /><path d="M6.5 5.5l6 3.5-6 3.5V5.5Z" fill="#ddd" /></svg>
             </div>
           )}
-        </div>
+        </button>
 
         {/* Name + prescription */}
         <div style={{ flex: 1, minWidth: 0 }}>

@@ -9,8 +9,10 @@ import {
 } from "@/lib/warmups/engine"
 
 // "template": unassigned programs and new programs. Empty sequences fill
-// automatically. "client": an assigned program. Nothing changes until the
-// coach applies a suggestion and saves.
+// automatically. "client": an assigned program. Days that existed when the
+// editor opened only change when the coach applies a suggestion; days the
+// coach adds during this edit are new work and fill automatically. Nothing is
+// stored until the program is saved.
 export type AutoMode = "template" | "client"
 
 type Week<D> = { days: D[] }
@@ -68,13 +70,21 @@ export function useAutoSequences<D extends DayLike, W extends Week<D>>({ weeks, 
   // they save the program.
   const weeksRef = useRef(weeks)
   weeksRef.current = weeks
+  const loadedShape = useRef<number[] | null>(null)
+  // Options arrive only after the program has loaded, so the shape recorded
+  // here is the stored program, never the editor's placeholder week.
+  if (loadedShape.current === null && options && weeks.length > 0) loadedShape.current = weeks.map((w) => w.days.length)
   useEffect(() => {
-    if (mode !== "template" || paused || !index || !options) return
+    if (paused || !index || !options) return
+    const shape = loadedShape.current
+    const isNewDay = (wi: number, di: number) => !shape || wi >= shape.length || di >= shape[wi]
+    if (mode === "client" && !shape) return
     const before = weeksRef.current
     let count = 0
-    const next = before.map((w) => ({
+    const next = before.map((w, wi) => ({
       ...w,
-      days: w.days.map((d) => {
+      days: w.days.map((d, di) => {
+        if (mode === "client" && !isNewDay(wi, di)) return d
         const { day, filled } = fillEmptySequences(d, planDay(d, index, options))
         count += filled.length
         return day

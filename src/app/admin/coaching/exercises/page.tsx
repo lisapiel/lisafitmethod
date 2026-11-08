@@ -27,7 +27,7 @@ type Exercise = {
 
 function cdnUrl(key: string | null | undefined): string {
   if (!key) return ""
-  return `${CDN}/${encodeURIComponent(key)}`
+  return `${CDN}/${key.split("/").map(encodeURIComponent).join("/")}`
 }
 
 function VideoPreviewModal({ videoKey, name, onClose }: { videoKey: string; name: string; onClose: () => void }) {

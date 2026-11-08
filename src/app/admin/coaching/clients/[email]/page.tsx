@@ -22,10 +22,6 @@ function Spinner() {
   )
 }
 
-function initials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-}
-
 function formatDate(iso: string | null | undefined) {
   if (!iso) return "—"
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
@@ -431,19 +427,11 @@ export default function ClientProfilePage() {
 
   return (
     <div style={{ maxWidth: 900 }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-        <Link href="/admin/coaching/clients" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#666", textDecoration: "none", letterSpacing: "0.08em" }}>← Clients</Link>
-      </div>
-
       {/* Client hero */}
       <div style={{ background: "#111", border: `1px solid ${border}`, padding: "24px", marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" }}>
-        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#1a1a1a", border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <span style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.3rem", fontWeight: 600, color: gold }}>{initials(client.displayName)}</span>
-        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6, flexWrap: "wrap" }}>
-            <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0 }}>{client.displayName}</h1>
+            <h2 style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#888", margin: 0 }}>Details and status</h2>
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.12em", color: STATUS_COLORS[client.status ?? "ACTIVE"] }}>
               {STATUS_LABELS[client.status ?? "ACTIVE"] ?? client.status ?? "ACTIVE"}
             </span>
@@ -468,22 +456,6 @@ export default function ClientProfilePage() {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="h-scroll" style={{ display: "flex", gap: 8, marginBottom: "1.5rem", flexWrap: "wrap" }}>
-        {[
-          { label: "Workouts", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts` },
-          { label: "Nutrition", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/nutrition` },
-          { label: "Program", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/program` },
-          { label: "Progress", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/progress` },
-          { label: "Messages", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/messages` },
-          { label: "Check-Ins", href: `/admin/coaching/check-ins` },
-          { label: "Notes", href: `/admin/coaching/clients/${encodeURIComponent(client.email)}/notes` },
-        ].map(({ label, href }) => (
-          <Link key={label} href={href} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>
-            {label}
-          </Link>
-        ))}
-      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
         {/* Current Program */}

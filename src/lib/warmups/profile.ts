@@ -22,7 +22,6 @@ export interface ProfileSuggestion {
   flags: string[]
 }
 
-const FORM_ANSWERS = /^(i'?m new to structured training|less than 6 months|6\s*[–-]\s*12 months|1\s*[–-]\s*2 years|3\s*[–-]\s*5 years|5\+ years)$/i
 const BEGINNER_EXPERIENCE = /new to structured|less than 6|moins de 6|6\s*(?:[–-]|to)\s*12|beginner|d[ée]butant/i
 const EXPERIENCED = /\b([1-9]\d?)\s*\+?\s*(?:[–-]\s*\d+\s*)?(?:years?|yrs?|ans)\b|intermediate|advanced|interm[ée]diaire/i
 const BACK_WORDS = /\b(back|spine|spinal|disc|disk|lumbar|sciatic|sciatica|herniat|si joint)\b/i
@@ -42,7 +41,6 @@ export function suggestFromIntake(intake: IntakeAnswers | null): ProfileSuggesti
   } else if (exp && EXPERIENCED.test(exp)) {
     options.beginner = false
     reasons.beginner = `Intake: "${quoted}"`
-    if (!FORM_ANSWERS.test(exp)) flags.push(`Experience was a free-text answer ("${quoted}"): please confirm the beginner setting.`)
   } else if (exp) {
     reasons.beginner = `Intake answer "${quoted}" is unclear, so the beginner option is on to be safe`
     flags.push(`Unclear experience answer ("${quoted}"): beginner substitutions are on until you confirm.`)

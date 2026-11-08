@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import { cdnUrl } from "@/lib/cdnUrl"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -16,7 +17,6 @@ export default function ClientProgramPage() {
   const params = useParams()
   const emailParam = decodeURIComponent(params.email as string)
 
-  const [clientName, setClientName] = useState("")
   const [programName, setProgramName] = useState("")
   const [programId, setProgramId] = useState("")
   const [weeks, setWeeks] = useState<ProgramWeek[]>([])
@@ -39,7 +39,6 @@ export default function ClientProgramPage() {
         const data = await clientRes.json()
         const c = data.client
         if (c) {
-          setClientName(c.displayName)
           if (c.currentProgramId) {
             const progRes = await fetch(`/api/admin/coaching/programs/${c.currentProgramId}`, {
               headers: { Authorization: `Bearer ${token}` },
@@ -75,7 +74,6 @@ export default function ClientProgramPage() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-        <Link href={`/admin/coaching/clients/${encodeURIComponent(emailParam)}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#666", textDecoration: "none" }}>← {clientName || emailParam}</Link>
         <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0, flex: 1 }}>{programName || "Program"}</h1>
         {programId && (
           <Link href={`/admin/coaching/programs/${programId}`} style={{ background: "none", border: `1px solid ${border}`, color: gold, padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none" }}>
@@ -121,7 +119,7 @@ export default function ClientProgramPage() {
                   <div key={i} style={{ background: "#0f0f0f", border: `1px solid ${border}`, padding: "14px 18px", marginBottom: 8, display: "flex", alignItems: "center", gap: 14 }}>
                     <div style={{ width: 40, height: 40, flexShrink: 0 }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      {ex.videoS3Key && <img src={`${CDN}/${encodeURIComponent(ex.videoS3Key.replace(/\.mp4$/i, ".jpg"))}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                      {ex.videoS3Key && <img src={cdnUrl(CDN, ex.videoS3Key.replace(/\.mp4$/i, ".jpg"))} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                     </div>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 600, color: "#f0e6d3", margin: "0 0 6px" }}>{ex.name}</p>

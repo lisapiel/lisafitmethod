@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
-import Link from "next/link"
 import { toLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 
 const gold = "#c9a96e"
@@ -251,9 +250,6 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
   return (
     <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        <Link href={`/admin/coaching/clients/${encodedEmail}`} style={{ color: muted, fontSize: "0.75rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "1.5rem" }}>
-          ← {clientName || clientEmail}
-        </Link>
 
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>

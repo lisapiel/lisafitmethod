@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
-import Link from "next/link"
+import { cdnUrl } from "@/lib/cdnUrl"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -476,7 +476,7 @@ function WorkoutCard({
                   {p?.videoS3Key && (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                      src={`${CDN}/${encodeURIComponent(p.videoS3Key.replace(/\.mp4$/i, ".jpg"))}`}
+                      src={cdnUrl(CDN, p.videoS3Key.replace(/\.mp4$/i, ".jpg"))}
                       alt=""
                       style={{ width: 32, height: 32, objectFit: "cover", flexShrink: 0 }}
                     />
@@ -577,7 +577,6 @@ export default function AdminClientWorkoutsPage() {
   const emailParam = decodeURIComponent(params.email as string)
 
   const [loading, setLoading] = useState(true)
-  const [clientName, setClientName] = useState("")
   const [logs, setLogs] = useState<WorkoutLog[]>([])
   const [program, setProgram] = useState<ProgramWeek[] | null>(null)
 
@@ -594,7 +593,6 @@ export default function AdminClientWorkoutsPage() {
       })
       if (clientRes.ok) {
         const data = await clientRes.json() as { client: { displayName?: string; currentProgramId?: string } }
-        if (data.client?.displayName) setClientName(data.client.displayName)
         if (data.client?.currentProgramId) {
           const pRes = await fetch(`/api/admin/coaching/programs/${data.client.currentProgramId}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -643,9 +641,6 @@ export default function AdminClientWorkoutsPage() {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-        <Link href={`/admin/coaching/clients/${encodeURIComponent(emailParam)}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#666", textDecoration: "none" }}>
-          ← {clientName || emailParam}
-        </Link>
         <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: cream, margin: 0, flex: 1 }}>
           Workouts
         </h1>
