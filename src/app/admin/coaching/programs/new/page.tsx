@@ -34,6 +34,11 @@ type ProgramDay = {
   warmup?: WarmupCooldown
   exercises: ProgramExercise[]
   cooldown?: WarmupCooldown
+  // Optional day-type flag. Absent = strength (every existing day). When
+  // "sport", the builder shows a short Sport-day pane instead of the
+  // usual exercise editors; the client runner then renders the simple
+  // sport form at log time.
+  dayType?: "sport"
 }
 type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 
@@ -376,50 +381,96 @@ export default function NewProgramPage() {
               style={{ background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", width: 160 }} />
             <input type="text" value={day.notes} onChange={(e) => updateDay((d) => ({ ...d, notes: e.target.value }))} placeholder="Day notes (e.g. Lower body focus)…"
               style={{ background: "#111", border: `1px solid ${border}`, color: "#888", padding: "7px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", flex: "1 1 240px" }} />
-            <button onClick={() => setShowWorkoutLibrary(true)} style={{ background: "none", border: `1px solid ${gold}`, color: gold, padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
-              + Insert from Library
-            </button>
+            <div role="radiogroup" aria-label="Day type" style={{ display: "flex", gap: 0, border: `1px solid ${border}`, borderRadius: 4, overflow: "hidden" }}>
+              {(["strength", "sport"] as const).map((v) => {
+                const active = (day.dayType ?? "strength") === v
+                return (
+                  <button
+                    key={v}
+                    role="radio"
+                    aria-checked={active}
+                    type="button"
+                    onClick={() => updateDay((d) => (v === "sport"
+                      ? { ...d, dayType: "sport" }
+                      : { dayLabel: d.dayLabel, notes: d.notes, warmup: d.warmup ?? { notes: "", exercises: [] }, exercises: d.exercises ?? [], cooldown: d.cooldown ?? { notes: "", exercises: [] } }
+                    ))}
+                    style={{
+                      background: active ? gold : "transparent",
+                      color: active ? "#0a0a0a" : "#888",
+                      border: "none",
+                      padding: "7px 14px",
+                      fontFamily: "var(--font-montserrat), sans-serif",
+                      fontSize: "0.65rem",
+                      fontWeight: active ? 700 : 500,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {v}
+                  </button>
+                )
+              })}
+            </div>
+            {day.dayType !== "sport" && (
+              <button onClick={() => setShowWorkoutLibrary(true)} style={{ background: "none", border: `1px solid ${gold}`, color: gold, padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+                + Insert from Library
+              </button>
+            )}
           </div>
 
-          {/* Warmup section */}
-          <SequenceStatus
-            kind="warmup" {...auto.stateFor(day, "warmup")} mode="template"
-            hasExercises={day.exercises.length > 0} showFlags
-            onApply={(seq) => updateDay((d) => ({ ...d, warmup: seq }))}
-            onKeep={() => updateDay((d) => ({ ...d, warmup: markManual(d.warmup ?? { notes: "", exercises: [] }) }))}
-          />
-          <WarmupCooldownSection
-            key={`w-${activeWeek}-${activeDay}-${day.warmup?.exercises.length ?? 0}`}
-            label="Warmup"
-            data={day.warmup ?? { notes: "", exercises: [] }}
-            onChange={(w) => updateDay((d) => ({ ...d, warmup: markManual({ ...d.warmup, ...w }) }))}
-          />
+          {day.dayType === "sport" ? (
+            <div style={{ background: "#161616", border: `1px solid ${gold}`, borderLeft: `3px solid ${gold}`, padding: "14px 18px", borderRadius: 4, color: "#888", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", lineHeight: 1.6 }}>
+              <p style={{ color: gold, margin: "0 0 6px", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                Sport day
+              </p>
+              <p style={{ margin: 0 }}>
+                The client chooses the sport, duration, and intensity when they complete this day. No warm-up, exercises, or cooldown are set here — only the day name above.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Warmup section */}
+              <SequenceStatus
+                kind="warmup" {...auto.stateFor(day, "warmup")} mode="template"
+                hasExercises={day.exercises.length > 0} showFlags
+                onApply={(seq) => updateDay((d) => ({ ...d, warmup: seq }))}
+                onKeep={() => updateDay((d) => ({ ...d, warmup: markManual(d.warmup ?? { notes: "", exercises: [] }) }))}
+              />
+              <WarmupCooldownSection
+                key={`w-${activeWeek}-${activeDay}-${day.warmup?.exercises.length ?? 0}`}
+                label="Warmup"
+                data={day.warmup ?? { notes: "", exercises: [] }}
+                onChange={(w) => updateDay((d) => ({ ...d, warmup: markManual({ ...d.warmup, ...w }) }))}
+              />
 
-          {/* Main exercises */}
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "22px 0 10px" }}>
-            Main Workout
-          </p>
-          <WorkoutBuilder
-            exercises={day.exercises}
-            onChange={(exs) => updateDay((d) => ({ ...d, exercises: exs }))}
-          />
+              {/* Main exercises */}
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "22px 0 10px" }}>
+                Main Workout
+              </p>
+              <WorkoutBuilder
+                exercises={day.exercises}
+                onChange={(exs) => updateDay((d) => ({ ...d, exercises: exs }))}
+              />
 
-          {/* Cooldown section */}
-          <div style={{ marginTop: 22 }}>
-            <SequenceStatus
-              kind="cooldown" {...auto.stateFor(day, "cooldown")} mode="template"
-              hasExercises={day.exercises.length > 0} showFlags={false}
-              onApply={(seq) => updateDay((d) => ({ ...d, cooldown: seq }))}
-              onKeep={() => updateDay((d) => ({ ...d, cooldown: markManual(d.cooldown ?? { notes: "", exercises: [] }) }))}
-            />
-          </div>
-          <WarmupCooldownSection
-            key={`c-${activeWeek}-${activeDay}-${day.cooldown?.exercises.length ?? 0}`}
-            label="Cooldown"
-            flush
-            data={day.cooldown ?? { notes: "", exercises: [] }}
-            onChange={(c) => updateDay((d) => ({ ...d, cooldown: markManual({ ...d.cooldown, ...c }) }))}
-          />
+              {/* Cooldown section */}
+              <div style={{ marginTop: 22 }}>
+                <SequenceStatus
+                  kind="cooldown" {...auto.stateFor(day, "cooldown")} mode="template"
+                  hasExercises={day.exercises.length > 0} showFlags={false}
+                  onApply={(seq) => updateDay((d) => ({ ...d, cooldown: seq }))}
+                  onKeep={() => updateDay((d) => ({ ...d, cooldown: markManual(d.cooldown ?? { notes: "", exercises: [] }) }))}
+                />
+              </div>
+              <WarmupCooldownSection
+                key={`c-${activeWeek}-${activeDay}-${day.cooldown?.exercises.length ?? 0}`}
+                label="Cooldown"
+                flush
+                data={day.cooldown ?? { notes: "", exercises: [] }}
+                onChange={(c) => updateDay((d) => ({ ...d, cooldown: markManual({ ...d.cooldown, ...c }) }))}
+              />
+            </>
+          )}
         </div>
       )}
 

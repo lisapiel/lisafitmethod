@@ -12,6 +12,14 @@ export interface WorkoutSubmitBody {
   setData: string
   overallRpe?: number
   clientNotes?: string
+  // Optional sport-day payload — present only when the client is logging a
+  // Sport-type day. Strength workouts never send these fields and the
+  // server ignores them for non-sport submissions. `setData` is still sent
+  // (serialized to "[]") so downstream readers that parse it never trip.
+  dayType?: "sport"
+  sportName?: string
+  sportDurationMinutes?: number
+  sportIntensity?: "easy" | "moderate" | "hard"
 }
 
 type FetchLike = (input: string, init: RequestInit) => Promise<Pick<Response, "ok" | "status" | "json">>

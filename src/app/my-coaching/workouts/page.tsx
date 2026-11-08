@@ -12,7 +12,7 @@ const white = "#fff"
 const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
 
 type ProgramExercise = { exerciseId: string; name: string; videoS3Key: string; sets: string; reps: string; weight: string; rpe: string }
-type ProgramDay = { dayLabel: string; notes: string; exercises: ProgramExercise[] }
+type ProgramDay = { dayLabel: string; notes: string; exercises: ProgramExercise[]; dayType?: "sport" }
 type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 
 function Spinner() {
@@ -177,8 +177,15 @@ export default function WorkoutsPage() {
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                    <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.1rem", fontWeight: 700, color: black, margin: 0 }}>{day.dayLabel}</h3>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.1rem", fontWeight: 700, color: black, margin: 0 }}>{day.dayLabel}</h3>
+                      {day.dayType === "sport" && (
+                        <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, border: `1px solid ${accent}`, borderRadius: 3, padding: "2px 6px" }}>
+                          Sport
+                        </span>
+                      )}
+                    </div>
                     {isDone && <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 600, color: "#5c9e6a", letterSpacing: "0.08em" }}>COMPLETED</span>}
                   </div>
                   {day.notes && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 10px" }}>{day.notes}</p>}

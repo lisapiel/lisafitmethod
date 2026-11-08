@@ -1199,6 +1199,15 @@ export interface CoachingWorkoutLogRecord {
   clientNotes?: string
   coachFeedback?: string
   coachFeedbackAt?: string
+  // Optional sport/activity-day fields. Absent for every historical and
+  // every future strength workout log — this stays backward-compatible with
+  // every existing reader. Only set when the program day's `dayType` is
+  // "sport". `setData` is still written (serialized to "[]") so downstream
+  // code that parses it never trips.
+  dayType?: "sport"
+  sportName?: string
+  sportDurationMinutes?: number
+  sportIntensity?: "easy" | "moderate" | "hard"
 }
 
 export async function getWorkoutLogRecord(id: string): Promise<CoachingWorkoutLogRecord | null> {

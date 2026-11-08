@@ -57,7 +57,18 @@ function groupSupersets(exercises: ProgramExercise[]): SupersetGroup[] {
 }
 
 type WarmupCooldown = { notes: string; exercises: ProgramExercise[] }
-type ProgramDay = { dayLabel: string; notes: string; warmup?: WarmupCooldown; exercises: ProgramExercise[]; cooldown?: WarmupCooldown }
+type ProgramDay = {
+  dayLabel: string
+  notes: string
+  warmup?: WarmupCooldown
+  exercises: ProgramExercise[]
+  cooldown?: WarmupCooldown
+  // When present, this day is NOT a strength workout — the runner renders
+  // the SportDayForm instead of the exercise blocks. Absent = strength
+  // day (every existing program). Backward-compatible: readers that
+  // don't know this field simply ignore it.
+  dayType?: "sport"
+}
 type ProgramWeek = { weekNumber: number; label: string; days: ProgramDay[] }
 
 type SetEntry = { weight: string; reps: string; rpe: string; completed: boolean }
@@ -919,6 +930,15 @@ export default function WorkoutLoggerClient() {
   const [videoModal, setVideoModal] = useState<{ key: string; name: string } | null>(null)
   const [overallRpe, setOverallRpe] = useState("")
   const [clientNotes, setClientNotes] = useState("")
+  // Sport-day inputs. Only used when `day.dayType === "sport"`. The
+  // strength-workout flow ignores them entirely.
+  const [sportNameInput, setSportNameInput] = useState("")
+  const [sportDurationInput, setSportDurationInput] = useState("")
+  const [sportIntensityInput, setSportIntensityInput] = useState<"easy" | "moderate" | "hard" | "">("")
+  // When this day is a sport day AND it's already logged, we keep the
+  // original submission summary so the "Already completed" card can show
+  // what the client did (sport name / duration / intensity).
+  const [existingSport, setExistingSport] = useState<{ name?: string; durationMinutes?: number; intensity?: "easy" | "moderate" | "hard" } | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState("")
@@ -1025,6 +1045,16 @@ export default function WorkoutLoggerClient() {
               const seenIso = new Date().toISOString()
               localStorage.setItem("lfm-coach-feedback-seen-at", seenIso)
             } catch { /* ignore */ }
+          }
+          // If this was a sport-day submission, surface the sport summary
+          // so the "Already completed" card can say what the client did.
+          if (existingLog.dayType === "sport") {
+            const intensity = existingLog.sportIntensity
+            setExistingSport({
+              name: typeof existingLog.sportName === "string" ? (existingLog.sportName as string) : undefined,
+              durationMinutes: typeof existingLog.sportDurationMinutes === "number" ? (existingLog.sportDurationMinutes as number) : undefined,
+              intensity: intensity === "easy" || intensity === "moderate" || intensity === "hard" ? intensity : undefined,
+            })
           }
           setLoading(false)
           return
@@ -1196,6 +1226,45 @@ export default function WorkoutLoggerClient() {
     }))
   }
 
+  // Sport-day submit path. Mirrors finishWorkout's safety rails (ref-guard,
+  // submissionId, same submitWorkoutLog helper) but sends only the sport
+  // payload — setData is "[]" so downstream readers that JSON.parse it
+  // never trip. Completion is still keyed by (programId, weekNumber,
+  // dayLabel), identical to a strength workout, so Day 5's log never
+  // satisfies Day 6's already-logged check.
+  async function finishSportDay() {
+    if (!day || !email || !programId || !submissionId) return
+    if (submittingRef.current) return
+    const trimmedName = sportNameInput.trim()
+    if (trimmedName.length === 0) { setSaveError("Enter the sport you did."); return }
+    const durNum = Number(sportDurationInput)
+    if (!Number.isFinite(durNum) || durNum <= 0 || durNum > 1440) { setSaveError("Enter a duration in minutes (1–1440)."); return }
+    if (!sportIntensityInput) { setSaveError("Pick an intensity."); return }
+    submittingRef.current = true
+    setSaving(true)
+    setSaveError("")
+    const result = await submitWorkoutLog({
+      submissionId,
+      programId,
+      weekNumber: weekId,
+      dayLabel: day.dayLabel,
+      setData: "[]",
+      clientNotes: clientNotes || undefined,
+      dayType: "sport",
+      sportName: trimmedName.slice(0, 80),
+      sportDurationMinutes: Math.round(durNum),
+      sportIntensity: sportIntensityInput,
+    })
+    submittingRef.current = false
+    setSaving(false)
+    if (result.ok) {
+      clearWorkoutDraft(draftKey)
+      setSaved(true)
+    } else {
+      setSaveError(submitFailureMessage(result.reason))
+    }
+  }
+
   async function finishWorkout() {
     if (!day || !email || !programId || !submissionId) return
     // A ref, not state: two taps in the same frame both see saving === false.
@@ -1252,6 +1321,13 @@ export default function WorkoutLoggerClient() {
   }
 
   if (alreadyLogged) {
+    const sportSummary = existingSport
+      ? [
+          existingSport.name,
+          existingSport.durationMinutes != null ? `${existingSport.durationMinutes} min` : null,
+          existingSport.intensity ? `${existingSport.intensity[0].toUpperCase()}${existingSport.intensity.slice(1)} intensity` : null,
+        ].filter(Boolean).join(" · ")
+      : null
     return (
       <div>
         <div style={{ marginBottom: "1.5rem" }}>
@@ -1262,7 +1338,11 @@ export default function WorkoutLoggerClient() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12l5.5 6L20 6" stroke="#5c9e6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
           <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.5rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Already completed!</h2>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 24px" }}>You&apos;ve already logged {week.label} — {day.dayLabel}.</p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>You&apos;ve already logged {week.label} — {day.dayLabel}.</p>
+          {sportSummary && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: "0 0 24px", fontWeight: 600 }}>{sportSummary}</p>
+          )}
+          {!sportSummary && <div style={{ height: 16 }} />}
           <Link href="/my-coaching/workouts" style={{ display: "inline-block", background: accent, color: black, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>View all workouts</Link>
         </div>
 
@@ -1304,6 +1384,119 @@ export default function WorkoutLoggerClient() {
               Home
             </button>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Sport-day render — the whole page is a short form (sport + duration +
+  // intensity + confirm). No warm-up, no exercise blocks, no cooldown,
+  // no overall-RPE chooser. Completion is still keyed by (programId,
+  // weekNumber, dayLabel), so two Sport days in the same program log
+  // independently just like two strength days do.
+  if (day.dayType === "sport") {
+    return (
+      <div>
+        <div style={{ marginBottom: "1.25rem" }}>
+          <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, textDecoration: "none" }}>← Workouts</Link>
+        </div>
+        <div style={{ marginBottom: "1.25rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
+            Sport
+          </p>
+          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: 0 }}>
+            {day.dayLabel}
+          </h1>
+        </div>
+        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.25rem 1.5rem" }}>
+          <div style={{ marginBottom: 14 }}>
+            <label htmlFor="sport-name" style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, marginBottom: 6 }}>
+              Sport
+            </label>
+            <input
+              id="sport-name"
+              type="text"
+              inputMode="text"
+              value={sportNameInput}
+              onChange={(e) => setSportNameInput(e.target.value)}
+              placeholder="Soccer, Basketball, Hockey, Tennis…"
+              autoComplete="off"
+              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 500, borderRadius: 6, outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label htmlFor="sport-duration" style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, marginBottom: 6 }}>
+              Duration (minutes)
+            </label>
+            <input
+              id="sport-duration"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={sportDurationInput}
+              onChange={(e) => setSportDurationInput(e.target.value.replace(/[^\d]/g, ""))}
+              placeholder="e.g. 60"
+              style={{ width: 140, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 600, borderRadius: 6, outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+              Intensity
+            </p>
+            <div role="radiogroup" aria-label="Intensity" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              {(["easy", "moderate", "hard"] as const).map((v) => {
+                const active = sportIntensityInput === v
+                return (
+                  <button
+                    key={v}
+                    role="radio"
+                    aria-checked={active}
+                    type="button"
+                    onClick={() => setSportIntensityInput(v)}
+                    style={{
+                      background: active ? black : "transparent",
+                      border: `1px solid ${active ? black : border}`,
+                      color: active ? white : black,
+                      padding: "11px 10px",
+                      fontFamily: "var(--font-dm-sans), sans-serif",
+                      fontSize: "0.85rem",
+                      fontWeight: active ? 700 : 500,
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      WebkitTapHighlightColor: "transparent",
+                    }}
+                  >
+                    {v[0].toUpperCase() + v.slice(1)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          {saveError && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: "#c14646", margin: "0 0 12px" }}>
+              {saveError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={finishSportDay}
+            disabled={saving || !submissionId}
+            style={{
+              width: "100%",
+              background: saving || !submissionId ? "#ddd5ca" : black,
+              color: saving || !submissionId ? "#9a9087" : white,
+              border: "none",
+              padding: "14px 20px",
+              fontFamily: "var(--font-dm-sans), sans-serif",
+              fontSize: "0.9rem",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              borderRadius: 6,
+              cursor: saving || !submissionId ? "not-allowed" : "pointer",
+            }}
+          >
+            {saving ? "Saving…" : "Confirm / Complete →"}
+          </button>
         </div>
       </div>
     )
