@@ -29,7 +29,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 6,
   padding: "10px 14px",
   fontFamily: "var(--font-dm-sans), sans-serif",
-  fontSize: "0.9rem",
+  fontSize: "1rem",
   color: black,
   outline: "none",
   boxSizing: "border-box",

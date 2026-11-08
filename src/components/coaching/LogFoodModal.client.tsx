@@ -242,7 +242,7 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="e.g. 3 eggs, oatmeal, blueberries"
-            style={{ width: "100%", background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+            style={{ width: "100%", background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
           />
         </div>
 
@@ -293,7 +293,7 @@ function Field({ label, required, value, onChange, placeholder }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        style={{ width: "100%", background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.95rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
+        style={{ width: "100%", background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
       />
     </div>
   )

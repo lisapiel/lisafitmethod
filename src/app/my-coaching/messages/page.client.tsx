@@ -264,7 +264,7 @@ export default function MessagesClient() {
             borderRadius: 6,
             padding: "0.6rem 0.75rem",
             fontFamily: "var(--font-dm-sans), sans-serif",
-            fontSize: "0.875rem",
+            fontSize: "1rem",
             color: black,
             resize: "none",
             outline: "none",

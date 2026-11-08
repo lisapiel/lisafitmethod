@@ -157,7 +157,7 @@ export default function SetupClient() {
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="32"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
+              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
             />
           </div>
           <div>
@@ -170,7 +170,7 @@ export default function SetupClient() {
               value={weightLbs}
               onChange={(e) => setWeightLbs(e.target.value)}
               placeholder="145"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
+              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
             />
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function SetupClient() {
               value={heightFeet}
               onChange={(e) => setHeightFeet(e.target.value)}
               placeholder="5 ft"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
+              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
             />
             <input
               type="text"
@@ -195,7 +195,7 @@ export default function SetupClient() {
               value={heightInches}
               onChange={(e) => setHeightInches(e.target.value)}
               placeholder="6 in"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
+              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
             />
           </div>
         </div>

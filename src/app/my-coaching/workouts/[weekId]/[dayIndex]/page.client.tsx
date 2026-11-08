@@ -1666,7 +1666,7 @@ export default function WorkoutLoggerClient() {
               style={{
                 width: "100%", background: "#faf8f5", border: `1px solid ${border}`,
                 color: overallRpe ? black : "#aaa", padding: "9px 12px",
-                fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem",
+                fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem",
                 fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
                 appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
                 backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
@@ -1689,7 +1689,7 @@ export default function WorkoutLoggerClient() {
             onChange={(e) => setClientNotes(e.target.value)}
             placeholder="How did the workout feel? Any injuries or issues?"
             rows={3}
-            style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", outline: "none", resize: "none", borderRadius: 4, boxSizing: "border-box" }}
+            style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", resize: "none", borderRadius: 4, boxSizing: "border-box" }}
           />
         </div>
       </div>
