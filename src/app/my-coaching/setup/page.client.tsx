@@ -108,9 +108,6 @@ export default function SetupClient() {
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.25rem" }}>
       <div style={{ marginBottom: "1.25rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>
-          One quick step
-        </p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.9rem", fontWeight: 700, color: black, margin: "0 0 8px", lineHeight: 1.2 }}>
           Let&apos;s personalise your nutrition.
         </h1>

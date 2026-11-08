@@ -7,6 +7,7 @@ import { RECIPES } from "@/lib/nutritionRecipes"
 import type { Recipe } from "@/components/nutrition/RecipeCard"
 import type { CoachingClientRecord, NutritionLogRecord } from "@/lib/authTokens"
 import NutritionComposer from "@/components/coaching/NutritionComposer.client"
+import { ChevronDown, ChevronRight } from "@/components/portal/PortalIcons"
 import LogFoodModal from "@/components/coaching/LogFoodModal.client"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
 import { buildDailyTotals, summarizePeriod, recentRepeatedMeals, type DailyTotals, type MacroTarget, type RepeatedMeal } from "@/lib/nutritionAnalytics"
@@ -24,7 +25,7 @@ const PRINCIPLES: Array<{ title: string; body: string }> = [
   },
   {
     title: "Weekly average beats daily perfection",
-    body: "Miss a day? Not a problem. What matters is the trend — hit your target as a 7-day average and you're on track.",
+    body: "Miss a day? Not a problem. What matters is the trend. Hit your target as a 7-day average and you're on track.",
   },
   {
     title: "Don't drop fat too low",
@@ -32,11 +33,11 @@ const PRINCIPLES: Array<{ title: string; body: string }> = [
   },
   {
     title: "Water + sleep are levers",
-    body: "Both change hunger, energy, and recovery cues. Half your bodyweight in ounces of water, 7+ hours of sleep — before you touch macros.",
+    body: "Both change hunger, energy, and recovery cues. Half your bodyweight in ounces of water, 7+ hours of sleep. Sort those before you touch macros.",
   },
 ]
 
-const WEEKLY_INTRO = `Aim for these numbers as a weekly average — not daily perfection. One heavy day is fine if you balance across the week. Fat loss = weekly average slightly under target; muscle gain = slightly over. Trend matters more than any single day.`
+const WEEKLY_INTRO = `Aim for these numbers as a weekly average, not daily perfection. One heavy day is fine if you balance across the week. Fat loss = weekly average slightly under target; muscle gain = slightly over. Trend matters more than any single day.`
 
 type Loaded = { client: CoachingClientRecord | null }
 
@@ -168,9 +169,6 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
     return (
       <div>
         <div style={{ marginBottom: "1.25rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
-            Nutrition
-          </p>
           <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.9rem", fontWeight: 700, color: black, margin: 0, lineHeight: 1.2 }}>
             Your personalised macros
           </h1>
@@ -181,7 +179,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
             Finish your setup to see your targets
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: "0 0 16px", lineHeight: 1.55 }}>
-            I need a few quick details — height, age, activity, goal — to build your macros. Takes 90 seconds.
+            I need a few quick details (height, age, activity and goal) to build your macros. It takes about 90 seconds.
           </p>
           <Link
             href="/my-coaching/setup"
@@ -197,16 +195,11 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   const recipes = macroRecipes()
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ marginBottom: "1.25rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
-          Nutrition
-        </p>
-        <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.9rem", fontWeight: 700, color: black, margin: 0, lineHeight: 1.2 }}>
-          Today
-        </h1>
-      </div>
+    <div className="pt" style={{ maxWidth: 680 }}>
+      <header className="pt-hello" style={{ marginBottom: "1rem" }}>
+        <h1>Nutrition</h1>
+        <p className="pt-date">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+      </header>
 
       {/* TODAY — intake vs target. Calories + Protein are the stronger
           hierarchy. Carbs + Fat are secondary. Source badge mirrors the
@@ -318,7 +311,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
                       <strong>{l.calories} kcal</strong> · {l.protein}g P
                       {l.carbs != null ? ` · ${l.carbs}g C` : ""}
                       {l.fat != null ? ` · ${l.fat}g F` : ""}
-                      {l.description ? <span style={{ color: muted }}> — {l.description}</span> : null}
+                      {l.description ? <span style={{ color: muted }}> · {l.description}</span> : null}
                     </div>
                     <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
                       <button
@@ -449,8 +442,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
           note would be misleading. */}
       {macros.source === "auto" && (
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, lineHeight: 1.6, margin: "0 0 1rem", padding: "0 4px" }}>
-          These are starting estimates based on your profile, activity and goal.
-          We can adjust them over time based on your progress, training and feedback.
+          These are starting numbers from your profile. We&apos;ll adjust them as we see how you respond.
         </p>
       )}
 
@@ -464,94 +456,62 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black, margin: 0, lineHeight: 1.55 }}>
             Very low calorie targets are best set with individual review.
-            Message Lisa before dropping below this starting point, and consider
+            Message me before going any lower, and consider
             talking with a qualified nutrition or medical professional if needed.
           </p>
         </div>
       )}
 
-      {/* Nutrition Support — send meal / day-of-eating / question to Lisa.
-          Sits near the personalized target so a client can share what they
-          actually ate in the same visit. Attachments upload to Amplify
-          Storage; the submission lands as a message in the coaching thread. */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <NutritionComposer email={email} />
-      </div>
+      <details className="pt-about" style={{ marginBottom: 12 }}>
+        <summary>Ask me about your nutrition <ChevronDown /></summary>
+        <div style={{ padding: "0 12px 12px" }}>
+          <NutritionComposer email={email} />
+        </div>
+      </details>
 
-      {/* Weekly-average explainer */}
-      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
-          Read this once
-        </p>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: 0, lineHeight: 1.7 }}>
-          {WEEKLY_INTRO}
-        </p>
-      </div>
-
-      {/* Key principles */}
-      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "1.5rem 0 0.75rem" }}>
-        Four things that matter
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginBottom: "1.5rem" }}>
-        {PRINCIPLES.map((p) => (
-          <div key={p.title} style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "14px 16px" }}>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1rem", fontWeight: 700, color: black, margin: "0 0 6px" }}>
-              {p.title}
-            </p>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: muted, margin: 0, lineHeight: 1.55 }}>
-              {p.body}
-            </p>
+      <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.25rem", fontWeight: 700, color: black, margin: "1.75rem 0 0.75rem" }}>Guides</h2>
+      <div style={{ display: "grid", gap: 8, marginBottom: "1.25rem" }}>
+        <details className="pt-about">
+          <summary>How to read your targets <ChevronDown /></summary>
+          <p className="pt-about-body">{WEEKLY_INTRO}</p>
+        </details>
+        <details className="pt-about">
+          <summary>Four things that matter <ChevronDown /></summary>
+          <div className="pt-about-body" style={{ display: "grid", gap: 14 }}>
+            {PRINCIPLES.map((p) => (
+              <div key={p.title}>
+                <p style={{ fontWeight: 700, margin: "0 0 2px" }}>{p.title}</p>
+                <p style={{ margin: 0, color: muted }}>{p.body}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </details>
+        <details className="pt-about">
+          <summary>High-protein meal ideas <ChevronDown /></summary>
+          <ul className="pt-about-body" style={{ listStyle: "none", margin: 0, display: "grid", gap: 14 }}>
+            {recipes.map((r, i) => (
+              <li key={i}>
+                <p style={{ fontWeight: 700, margin: "0 0 2px" }}>{r.name}</p>
+                <p style={{ margin: "0 0 2px", fontSize: "0.875rem", color: muted }}>{r.mealType} · {r.prepMins} min · {r.proteinG}g protein · {r.calories} kcal</p>
+                <p style={{ margin: 0, fontSize: "0.875rem" }}>{r.description.split(".")[0]}.</p>
+              </li>
+            ))}
+          </ul>
+        </details>
       </div>
 
-      {/* Meal ideas */}
-      <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 0.75rem" }}>
-        Meal ideas · high protein
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 10, marginBottom: "1.5rem" }}>
-        {recipes.map((r, i) => (
-          <div key={i} style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "14px 16px" }}>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", color: accent, textTransform: "uppercase", margin: "0 0 4px" }}>
-              {r.mealType} · {r.prepMins} min
-            </p>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1rem", fontWeight: 700, color: black, margin: "0 0 6px" }}>
-              {r.name}
-            </p>
-            <div style={{ display: "flex", gap: 12, marginBottom: 6 }}>
-              <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: black, fontWeight: 600 }}>
-                {r.proteinG}g protein
-              </span>
-              <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted }}>
-                {r.calories} kcal
-              </span>
-            </div>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0, lineHeight: 1.5 }}>
-              {r.description.split(".")[0]}.
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Access-aware cross-sell — Nutrition Foundations is a separately sold
-          course, not included with coaching. Copy branches on whether the
-          client already owns it. */}
-      <div style={{ background: `${accent}12`, border: `1px solid ${accent}55`, borderRadius: 8, padding: "1.25rem 1.5rem", textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.05rem", fontWeight: 700, color: black, margin: "0 0 6px" }}>
-          Want to go deeper?
-        </p>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 14px", lineHeight: 1.55 }}>
-          {ownsNutritionCourse
-            ? "Your Nutrition Foundations course covers the full system behind calories, macros, meal structure and sustainable nutrition habits."
-            : "Nutrition Foundations is my complete self-guided nutrition course covering the fundamentals behind calories, macros, meal structure and sustainable nutrition habits."}
-        </p>
-        <Link
-          href={ownsNutritionCourse ? "/nutrition-foundations" : "/nutrition"}
-          style={{ display: "inline-block", background: accent, color: black, padding: "10px 22px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", fontWeight: 700, textDecoration: "none", borderRadius: 4, letterSpacing: "0.06em" }}
-        >
-          {ownsNutritionCourse ? "Open Nutrition Foundations →" : "Explore Nutrition Foundations →"}
-        </Link>
-      </div>
+      {/* Nutrition Foundations is a separately sold course; the link branches on whether the client owns it. */}
+      <Link className="pt-row" href={ownsNutritionCourse ? "/nutrition-foundations" : "/nutrition"} style={{ marginBottom: "1rem" }}>
+        <span className="pt-row-main">
+          <span className="pt-row-title">{ownsNutritionCourse ? "Open Nutrition Foundations" : "Nutrition Foundations"}</span>
+          <span className="pt-row-sub">
+            {ownsNutritionCourse
+              ? "Your course covers the full system behind calories, macros, meal structure and lasting habits."
+              : "My self-guided course on calories, macros, meal structure and habits that last."}
+          </span>
+        </span>
+        <span className="pt-chev"><ChevronRight /></span>
+      </Link>
 
       {/* Small link to setup for edits */}
       <div style={{ textAlign: "center", marginTop: "1.25rem" }}>

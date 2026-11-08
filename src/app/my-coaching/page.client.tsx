@@ -11,7 +11,6 @@ import { checkInStatus as checkInState, type PortalWeek } from "@/lib/portalProg
 import UpNextCard from "@/components/portal/UpNextCard"
 import CoachNote from "@/components/portal/CoachNote"
 import { ChevronRight } from "@/components/portal/PortalIcons"
-import "./portal.css"
 
 
 type ProgramDay = { dayLabel: string; notes: string; exercises: { exerciseId: string; name: string; sets: string; reps: string; weight: string }[]; dayType?: "sport" }

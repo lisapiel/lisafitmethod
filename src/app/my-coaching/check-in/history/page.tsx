@@ -209,7 +209,6 @@ export default function CheckInHistoryPage() {
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem", flexWrap: "wrap", gap: 12 }}>
         <div>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Weekly</p>
           <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.6rem, 5.5vw, 2rem)", fontWeight: 700, color: black, margin: 0 }}>Check-In History</h1>
         </div>
         <Link href="/my-coaching/check-in" style={{ display: "inline-block", background: black, color: white, padding: "10px 22px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>

@@ -649,7 +649,6 @@ export default function CheckInClient() {
     <div style={{ maxWidth: 560 }}>
       {/* Header */}
       <div style={{ marginBottom: "1.5rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Weekly</p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.6rem, 5.5vw, 2rem)", fontWeight: 700, color: black, margin: 0 }}>Check-In</h1>
       </div>
 
@@ -687,7 +686,7 @@ export default function CheckInClient() {
         {step === 1 && (
           <div>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 4px" }}>Progress</h2>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1.25rem" }}>Weight and measurements are optional — enter what you actually track.</p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1.25rem" }}>Weight and measurements are optional. Add whatever you track.</p>
 
             <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, display: "block", marginBottom: 8 }}>Current weight <span style={{ fontWeight: 400, color: muted, fontSize: "0.72rem" }}>(optional)</span></label>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -841,7 +840,7 @@ export default function CheckInClient() {
               <YesNoRow label="Any pain or unusual discomfort during training this week?" value={form.painReported} onChange={(v) => setForm((f) => ({ ...f, painReported: v }))} />
               {form.painReported === "yes" && (
                 <TextBlock label="Tell me where you felt it, which exercise, and what it felt like." value={form.painNotes} onChange={set("painNotes")}
-                  placeholder="e.g. Lower back on my second set of deadlifts — sharp, went away after." />
+                  placeholder="e.g. Lower back on my second set of deadlifts. Sharp, went away after." />
               )}
             </div>
 
@@ -850,7 +849,7 @@ export default function CheckInClient() {
               {form.formReviewRequested === "yes" && (
                 <div>
                   <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, margin: "0 0 12px", lineHeight: 1.5 }}>
-                    Add up to {MAX_FORM_REVIEW_VIDEOS} short clips total. Videos are private — only you and Lisa can view them.
+                    Add up to {MAX_FORM_REVIEW_VIDEOS} short clips total. Videos are private. Only you and I can see them.
                   </p>
                   {form.formReviews.map((r) => (
                     <FormReviewCard

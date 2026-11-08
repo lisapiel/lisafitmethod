@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-const accent = "#c8a97e"
 const black = "#0a0a0a"
 const muted = "#6b6560"
 const border = "#e8e2dc"
@@ -98,7 +97,6 @@ export default function LogMeasurementsPage() {
         <Link href="/my-coaching/progress" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "0.75rem" }}>
           ← Progress
         </Link>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Log</p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.9rem", fontWeight: 700, color: black, margin: 0 }}>Measurements</h1>
       </div>
 

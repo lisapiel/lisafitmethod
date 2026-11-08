@@ -214,7 +214,6 @@ export default function GoalsClient() {
   return (
     <div>
       <div style={{ marginBottom: "1.75rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>What you&apos;re working toward</p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: 0 }}>Goals</h1>
       </div>
 
@@ -251,14 +250,14 @@ export default function GoalsClient() {
             </div>
             <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem" }}>
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.6rem", fontWeight: 700, color: achievedCount > 0 ? accent : black, margin: 0, lineHeight: 1 }}>{achievedCount}</p>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Achieved 🏆</p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", color: muted, margin: "4px 0 0", letterSpacing: "0.08em" }}>Achieved</p>
             </div>
           </div>
 
-          {ordered.map(({ key, label, icon, items }) => (
+          {ordered.map(({ key, label, items }) => (
             <div key={key} style={{ marginBottom: "1.75rem" }}>
               <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: muted, margin: "0 0 10px" }}>
-                <span style={{ marginRight: 6 }}>{icon}</span> {label}
+                {label}
               </p>
               <div style={{ display: "grid", gap: "0.75rem" }}>
                 {items.map((goal) => {

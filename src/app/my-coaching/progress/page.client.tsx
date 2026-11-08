@@ -256,7 +256,7 @@ export default function ProgressClient() {
           // Milestones: auto-derived from logs + start date
           const milestoneList: Milestone[] = []
           if (startDate) {
-            milestoneList.push({ date: startDate, title: "Started coaching", icon: "🚀", subtitle: "Day one — welcome to the journey" })
+            milestoneList.push({ date: startDate, title: "Started coaching", icon: "start", subtitle: "Day one" })
           }
           if (sortedAsc[0]) {
             milestoneList.push({ date: sortedAsc[0].completedAt, title: "First workout logged", icon: "💪" })
@@ -406,7 +406,6 @@ export default function ProgressClient() {
           on narrow phones without becoming tiny. */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1rem", gap: 12, flexWrap: "wrap" }}>
         <div>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Your</p>
           <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.5rem, 5vw, 2rem)", fontWeight: 700, color: black, margin: 0 }}>Progress</h1>
         </div>
         <Link href="/my-coaching/progress/log" style={{ display: "inline-block", background: black, color: white, padding: "10px 22px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>
@@ -461,7 +460,7 @@ export default function ProgressClient() {
         {workoutStats.total === 0 ? (
           <div style={{ background: "#faf8f5", borderRadius: 6, padding: "1.25rem", textAlign: "center" }}>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: "0 0 10px" }}>
-              No workouts logged yet — start your first one to build a streak.
+              No workouts logged yet. Your first one will show up here.
             </p>
             <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none", fontWeight: 600 }}>
               Go to workouts →
@@ -480,7 +479,7 @@ export default function ProgressClient() {
             <div>
               <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Week Streak</p>
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: workoutStats.streakWeeks > 0 ? accent : black, margin: 0 }}>
-                {workoutStats.streakWeeks} {workoutStats.streakWeeks > 0 && <span style={{ fontSize: "1rem" }}>🔥</span>}
+                {workoutStats.streakWeeks}
               </p>
             </div>
             <div>
@@ -498,7 +497,7 @@ export default function ProgressClient() {
       {/* Weight chart */}
       <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 16px" }}>
-          Weight Trend — from weekly check-ins
+          Weight from your check-ins
         </p>
         <WeightChart data={weightData} />
         {weightData.length === 0 && (
@@ -514,7 +513,7 @@ export default function ProgressClient() {
       {strengthPRs.length > 0 && (
         <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 16px" }}>
-            Strength Progress 💪
+            Strength progress
           </p>
           <div style={{ display: "grid", gap: 10 }}>
             {strengthPRs.map((pr) => (
@@ -569,7 +568,7 @@ export default function ProgressClient() {
             {snapshots.map((s, i) => (
               <div key={s.id} style={{ background: i === 0 ? "#fdf9f4" : "#faf8f5", border: `1px solid ${i === 0 ? "#f0e4cc" : border}`, borderRadius: 6, padding: "1rem 1.25rem" }}>
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: i === 0 ? accent : muted, margin: "0 0 10px" }}>
-                  {i === 0 ? "Most Recent — " : ""}{new Date(s.snapshotDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  {i === 0 ? "Latest · " : ""}{new Date(s.snapshotDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </p>
                 {s.weight && <MeasRow label="Weight" value={s.weight} unit={s.weightUnit ?? "lbs"} />}
                 <MeasRow label="Waist" value={s.waist} />
@@ -588,14 +587,14 @@ export default function ProgressClient() {
       {milestones.length > 0 && (
         <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginTop: "1.25rem" }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 18px" }}>
-            Your Journey
+            Milestones
           </p>
           <div style={{ position: "relative", paddingLeft: 24 }}>
             <div style={{ position: "absolute", left: 11, top: 6, bottom: 6, width: 2, background: `${accent}33` }} />
             {milestones.map((m, i) => (
               <div key={i} style={{ position: "relative", marginBottom: i === milestones.length - 1 ? 0 : 18 }}>
-                <div style={{ position: "absolute", left: -19, top: 4, width: 22, height: 22, borderRadius: "50%", background: white, border: `2px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem" }}>
-                  {m.icon}
+                <div style={{ position: "absolute", left: -19, top: 4, width: 22, height: 22, borderRadius: "50%", background: white, border: `2px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center" }} aria-hidden="true">
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: accent }} />
                 </div>
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 2px" }}>
                   {new Date(m.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}

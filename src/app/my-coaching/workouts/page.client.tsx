@@ -6,7 +6,6 @@ import { expandedWeeks } from "@/lib/programExpansion"
 import { completedFor, currentWeekIndex, nextWorkout, weekProgress, type PortalLog, type PortalWeek } from "@/lib/portalProgram"
 import WeekDayList from "@/components/portal/WeekDayList"
 import { ChevronDown } from "@/components/portal/PortalIcons"
-import "../portal.css"
 
 type Loaded = { id: string; name: string; notes: string; weeks: PortalWeek[]; logs: PortalLog[] }
 

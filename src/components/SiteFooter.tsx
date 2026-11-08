@@ -6,7 +6,8 @@ import Link from "next/link"
 import { DEFAULTS, S3_SETTINGS_URL } from "@/lib/siteSettings"
 import { usesOwnChrome } from "@/components/siteChrome"
 
-const HIDDEN_PREFIXES = ["/admin", "/training-foundations", "/preview"]
+// The signed-in coaching portal has its own account and legal links.
+const HIDDEN_PREFIXES = ["/admin", "/training-foundations", "/preview", "/my-coaching"]
 const DEFAULT_TAGLINE = DEFAULTS.text.footerTagline
 
 export default function SiteFooter() {

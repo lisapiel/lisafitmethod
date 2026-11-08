@@ -144,8 +144,7 @@ export default function MessagesClient() {
       `}</style>
       {/* Header */}
       <div style={{ marginBottom: "1.25rem", flexShrink: 0 }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>Coaching</p>
-        <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>Messages with Lisa</h1>
+        <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>Messages</h1>
       </div>
 
       {/* Thread */}
@@ -163,9 +162,9 @@ export default function MessagesClient() {
             <div style={{ width: 56, height: 56, borderRadius: "50%", background: `${accent}18`, border: `1.5px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 4h16v11H13l-4 3.5V15H3V4Z" stroke={accent} strokeWidth="1.4" strokeLinejoin="round" /></svg>
             </div>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", color: black, margin: "0 0 8px" }}>Start the conversation</p>
+            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", color: black, margin: "0 0 8px" }}>Ask me anything</p>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: 0, maxWidth: 280, lineHeight: 1.5 }}>
-              Ask a question, share a win, or flag something. Lisa responds within 24–48 hours.
+              Questions, wins, anything that hurts or feels off. I reply within a day or two.
             </p>
           </div>
         ) : (
@@ -255,7 +254,7 @@ export default function MessagesClient() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Message Lisa… (Enter to send, Shift+Enter for new line)"
+          placeholder="Message Lisa"
           rows={1}
           style={{
             flex: 1,

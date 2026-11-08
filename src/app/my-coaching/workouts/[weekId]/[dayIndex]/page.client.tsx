@@ -8,6 +8,7 @@ import { expandedWeeks } from "@/lib/programExpansion"
 import { newSubmissionId, submitFailureMessage, submitWorkoutLog } from "@/lib/workoutSubmit"
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
+import RunnerNotes from "@/components/portal/RunnerNotes"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -211,7 +212,7 @@ function RpeInfoModal({ onClose }: { onClose: () => void }) {
           Rate of Perceived Exertion
         </h3>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: muted, lineHeight: 1.5, margin: "0 0 14px" }}>
-          A 1–10 rating of how hard a set felt. Answer honestly — this helps Lisa know if the weight is right and if you can push harder next week.
+          How hard the set felt, from 1 to 10. Be honest. It tells me if the weight is right and when you&apos;re ready for more.
         </p>
         <div style={{ border: `1px solid ${border}`, borderRadius: 6, overflow: "hidden" }}>
           {rows.map((r, i) => (
@@ -263,7 +264,7 @@ function WarmupCooldownDisplay({
         }}
       >
         <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 700, color: accent, letterSpacing: "0.14em", textTransform: "uppercase" }}>
-          {label === "Warmup" ? "🔥 " : "🧘 "}{label}
+          {label === "Warmup" ? "Warm-up" : "Cool-down"}
           <span style={{ marginLeft: 8, color: muted, fontWeight: 400 }}>
             {data.exercises.length > 0 ? `· ${data.exercises.length} drill${data.exercises.length !== 1 ? "s" : ""}` : "· notes"}
           </span>
@@ -276,7 +277,7 @@ function WarmupCooldownDisplay({
       {open && (
         <div style={{ padding: "0 16px 14px", borderTop: `1px solid ${border}` }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.68rem", color: muted, margin: "10px 0 12px", fontStyle: "italic" }}>
-            No tracking — just a guide. Do this to prep{label === "Cooldown" ? " recovery" : ""}.
+            {label === "Cooldown" ? "Nothing to log. Ease into recovery with these." : "Nothing to log. Move through these before you start."}
           </p>
 
           {data.notes && (
@@ -452,12 +453,13 @@ function SetRow({
       {/* Weight */}
       <div>
         {hint(entry._prevWeight ?? "")}
-        <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>Weight</div>
+        <div className="pt-sr">Set {setNum} weight</div>
         <input
           type="text"
           inputMode="decimal"
           value={entry.weight}
           onChange={(e) => onChange({ ...entry, weight: e.target.value })}
+          aria-label={`Set ${setNum} weight`}
           placeholder={entry._prevWeight || prescribed.weight || "—"}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
@@ -470,12 +472,13 @@ function SetRow({
       {/* Reps */}
       <div>
         {hint(entry._prevReps ?? "")}
-        <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 3 }}>Reps</div>
+        <div className="pt-sr">Set {setNum} reps</div>
         <input
           type="text"
           inputMode="numeric"
           value={entry.reps}
           onChange={(e) => onChange({ ...entry, reps: e.target.value })}
+          aria-label={`Set ${setNum} reps`}
           placeholder={entry._prevReps || prescribed.reps || "—"}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
@@ -489,7 +492,7 @@ function SetRow({
       <div>
         {hint(entry._prevRpe ?? "")}
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase" }}>RPE</span>
+          <span className="pt-sr">Set {setNum} RPE</span>
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); onRpeInfoClick?.() }}
@@ -508,6 +511,7 @@ function SetRow({
         <select
           value={entry.rpe}
           onChange={(e) => onChange({ ...entry, rpe: e.target.value })}
+          aria-label={`Set ${setNum} RPE`}
           style={{
             width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
             color: entry.rpe ? black : "#aaa", padding: "8px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
@@ -1356,7 +1360,7 @@ export default function WorkoutLoggerClient() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12l5.5 6L20 6" stroke="#5c9e6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
           <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.5rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Already completed!</h2>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>You&apos;ve already logged {week.label} — {day.dayLabel}.</p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>You&apos;ve already logged {week.label} · {day.dayLabel}.</p>
           {sportSummary && (
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: "0 0 24px", fontWeight: 600 }}>{sportSummary}</p>
           )}
@@ -1391,8 +1395,8 @@ export default function WorkoutLoggerClient() {
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f0faf0", border: "2px solid #5c9e6a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4.5 13l6 7L21.5 6" stroke="#5c9e6a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Workout complete! 💪</h2>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>{week.label} — {day.dayLabel}</p>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Workout done. Nice work.</h2>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>{week.label} · {day.dayLabel}</p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 28px" }}>{completedSets} of {totalSets} sets logged.</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
             <button onClick={() => router.push("/my-coaching/workouts")} style={{ display: "inline-block", background: black, color: white, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", border: "none", borderRadius: 4, cursor: "pointer" }}>
@@ -1543,13 +1547,13 @@ export default function WorkoutLoggerClient() {
 
       {/* Header */}
       <div style={{ marginBottom: "1.5rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
-          {week.label}
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 4px" }}>
+          {week.label} · Day {dayIndex + 1}
         </p>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: "0 0 6px" }}>
           {day.dayLabel}
         </h1>
-        {day.notes && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: 0 }}>{day.notes}</p>}
+        {day.notes?.trim() && <RunnerNotes text={day.notes.trim()} />}
       </div>
 
       {/* Progress bar */}
@@ -1580,7 +1584,7 @@ export default function WorkoutLoggerClient() {
       {/* Main workout section header (only shown when warmup or cooldown exists) */}
       {(day.warmup || day.cooldown) && (day.warmup?.notes || (day.warmup?.exercises.length ?? 0) > 0 || day.cooldown?.notes || (day.cooldown?.exercises.length ?? 0) > 0) && day.exercises.length > 0 && (
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0.5rem 0 0.75rem" }}>
-          💪 Main Workout
+          Main workout
         </p>
       )}
 
@@ -1704,7 +1708,7 @@ export default function WorkoutLoggerClient() {
         )}
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, color: black, margin: 0 }}>
-            {completedSets === totalSets && totalSets > 0 ? "All sets done! 🎉" : `${completedSets}/${totalSets} sets`}
+            {completedSets === totalSets && totalSets > 0 ? "All sets done. Nice work." : `${completedSets}/${totalSets} sets`}
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted, margin: 0 }}>
             {day.exercises.length} exercises

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { fetchAuthSession } from "aws-amplify/auth"
 import MemberDrawer from "@/components/MemberDrawer.client"
+import "./portal.css"
 
 const accent = "#c8a97e"
 const warmWhite = "#faf8f5"
@@ -109,7 +110,7 @@ function ReacceptInterstitial({ onAccepted }: { onAccepted: () => void }) {
     try {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString()
-      if (!token) { setError("Session expired — please refresh the page."); setSubmitting(false); return }
+      if (!token) { setError("Your session expired. Refresh the page to keep going."); setSubmitting(false); return }
       const res = await fetch("/api/coaching/reaccept", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -132,17 +133,6 @@ function ReacceptInterstitial({ onAccepted }: { onAccepted: () => void }) {
       padding: "2rem 1.5rem",
     }}>
       <div style={{ maxWidth: 520, width: "100%" }}>
-        <p style={{
-          fontSize: 11,
-          fontWeight: 500,
-          letterSpacing: "0.25em",
-          textTransform: "uppercase",
-          color: accent,
-          marginBottom: 12,
-          fontFamily: "var(--font-dm-sans), sans-serif",
-        }}>
-          1:1 Coaching
-        </p>
         <h1 style={{
           fontFamily: "var(--font-playfair), serif",
           fontSize: "clamp(24px, 4vw, 32px)",
@@ -429,6 +419,12 @@ export default function CoachingClientLayout({
             reading column comfortable on tablet + desktop. */}
         <main className="coaching-main" style={{ flex: 1, minWidth: 0, padding: "clamp(1rem, 3vw, 2rem) clamp(0.9rem, 3.5vw, 1.5rem)", maxWidth: 900, width: "100%" }}>
           {children}
+          <footer className="pt-legal" aria-label="Account and legal">
+            <Link href="/account">Account</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/licensing">Licensing</Link>
+          </footer>
         </main>
       </div>
 

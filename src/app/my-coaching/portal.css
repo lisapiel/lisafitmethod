@@ -136,3 +136,11 @@
   .pt-home { display: grid; gap: 16px; max-width: 680px; }
   .pt-home-side { display: grid; gap: 12px; }
 }
+
+.pt-legal { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 40px; padding-top: 16px; border-top: 1px solid #e8e2dc; font-family: var(--font-dm-sans), system-ui, sans-serif; font-size: 0.8125rem; }
+.pt-legal a { color: #6b6560; text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+.pt-legal a:hover { color: #1a1a1a; text-decoration: underline; text-underline-offset: 3px; }
+
+.pt-runner-notes { background: #fdf6ec; border: 1px solid #ecdcc3; border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; margin-top: 12px; max-width: 680px; }
+.pt-runner-notes p { margin: 0; }
+.pt-runner-notes-title { font-weight: 700; font-size: 0.9375rem; }
