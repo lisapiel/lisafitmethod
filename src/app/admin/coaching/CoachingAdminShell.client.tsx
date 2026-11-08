@@ -68,6 +68,10 @@ function pageTitle(pathname: string): string {
   const last = segments[segments.length - 1]
   const parent = segments[segments.length - 2]
   if (parent === "clients" && last !== "new") return "Client"
+  if (segments[2] === "clients" && segments.length === 5) {
+    const tabs: Record<string, string> = { workouts: "Training", program: "Program", nutrition: "Nutrition", progress: "Progress", "check-ins": "Check-ins", messages: "Messages", notes: "Notes" }
+    if (tabs[last]) return tabs[last]
+  }
   const titleMap: Record<string, string> = {
     clients: "Clients", "check-ins": "Check-ins", messages: "Messages", applications: "Applications", programs: "Programs",
     workouts: "Workouts", exercises: "Exercises", tasks: "Tasks", settings: "Settings", warmups: "Warm-ups",
