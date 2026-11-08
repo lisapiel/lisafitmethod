@@ -493,7 +493,7 @@ function SetRow({
         {hint(entry._prevRpe ?? "")}
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
           <span className="pt-sr">Set {setNum} RPE</span>
-          <button
+          {setNum === 1 && <button
             type="button"
             onClick={(e) => { e.preventDefault(); onRpeInfoClick?.() }}
             aria-label="What is RPE?"
@@ -506,7 +506,7 @@ function SetRow({
             }}
           >
             i
-          </button>
+          </button>}
         </div>
         <select
           value={entry.rpe}
