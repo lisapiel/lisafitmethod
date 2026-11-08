@@ -4,10 +4,10 @@ import { useState, useEffect, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { toLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 
-const gold = "#c9a96e"
-const border = "#2a2a2a"
-const cream = "#f0e6d3"
-const muted = "#888"
+const gold = "var(--ca-accent-mark)"
+const border = "var(--ca-line)"
+const cream = "var(--ca-text)"
+const muted = "var(--ca-muted)"
 
 // Internal chart points are always lb-canonical so a client who switched
 // LBS↔KG mid-journey still charts correctly. The chart renders the
@@ -46,21 +46,21 @@ function WeightChart({ data, displayUnit }: { data: WeightPoint[]; displayUnit: 
     <div>
       <div style={{ display: "flex", gap: 24, marginBottom: 12, flexWrap: "wrap" }}>
         <div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>STARTING</p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>STARTING</p>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.4rem", fontWeight: 700, color: cream, margin: 0 }}>{toDisplay(first.lbs)} <span style={{ fontSize: "0.8rem", fontWeight: 400, color: muted }}>{unitLabel}</span></p>
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>CURRENT</p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>CURRENT</p>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: gold, margin: 0 }}>{toDisplay(latest.lbs)} <span style={{ fontSize: "0.9rem", fontWeight: 400, color: muted }}>{unitLabel}</span></p>
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>CHANGE</p>
-          <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: diffDisplay < 0 ? "#5c9e6a" : diffDisplay > 0 ? "#d97460" : muted, margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>CHANGE</p>
+          <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: diffDisplay < 0 ? "var(--ca-ok)" : diffDisplay > 0 ? "var(--ca-warn)" : muted, margin: 0 }}>
             {diffDisplay > 0 ? "+" : ""}{diffDisplay.toFixed(1)} <span style={{ fontSize: "0.9rem", fontWeight: 400, color: muted }}>{unitLabel}</span>
           </p>
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>DATA POINTS</p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.12em", margin: "0 0 2px" }}>DATA POINTS</p>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: cream, margin: 0 }}>{data.length}</p>
         </div>
       </div>
@@ -74,7 +74,7 @@ function WeightChart({ data, displayUnit }: { data: WeightPoint[]; displayUnit: 
         <path d={areaD} fill="url(#wg-admin)" />
         <path d={pathD} fill="none" stroke={gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {data.map((d, i) => (
-          <circle key={i} cx={toX(i)} cy={toY(toDisplay(d.lbs))} r={i === data.length - 1 ? 4 : 3} fill={i === data.length - 1 ? gold : `${gold}88`} />
+          <circle key={i} cx={toX(i)} cy={toY(toDisplay(d.lbs))} r={i === data.length - 1 ? 4 : 3} fill={i === data.length - 1 ? gold : `color-mix(in srgb, ${gold} 53%, transparent)`} />
         ))}
         <text x={padX} y={H - 4} fontFamily="var(--font-montserrat), sans-serif" fontSize="9" fill={muted}>
           {new Date(data[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -248,11 +248,11 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
   const latest = measurements[0]
 
   return (
-    <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "var(--ca-surface)", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
 
         <div style={{ marginBottom: "2rem" }}>
-          <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>
+          <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>
             {clientName || clientEmail}
           </p>
           <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2rem", fontWeight: 700, color: cream, margin: 0 }}>Progress</h1>
@@ -261,8 +261,8 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
         {loading ? <Spinner /> : (
           <>
             {/* Weight chart */}
-            <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
-              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 16px" }}>
+            <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 16px" }}>
                 Weight
               </p>
               {weightData.length === 0 ? (
@@ -274,8 +274,8 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
 
             {/* Latest measurements summary */}
             {latest && (latest.waist || latest.hips || latest.chest || latest.arm || latest.thigh || latest.glutes) && (
-              <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>
+              <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>
                   Latest measurements · {new Date(latest.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </p>
                 <MeasRow label="Waist"  value={latest.waist} />
@@ -288,8 +288,8 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
             )}
 
             {/* Measurement history */}
-            <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem" }}>
-              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 16px" }}>
+            <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem" }}>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 16px" }}>
                 Measurement history
               </p>
               {measurements.length === 0 ? (
@@ -298,7 +298,7 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
                 <div style={{ display: "grid", gap: "1rem" }}>
                   {measurements.map((m, i) => (
                     <div key={`${m.date}-${i}`} style={{ border: `1px solid ${border}`, borderRadius: 6, padding: "1rem" }}>
-                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: gold, margin: "0 0 10px", fontWeight: 600 }}>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, margin: "0 0 10px", fontWeight: 600 }}>
                         {new Date(m.date).toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" })}
                       </p>
                       <MeasRow label="Waist"  value={m.waist} />

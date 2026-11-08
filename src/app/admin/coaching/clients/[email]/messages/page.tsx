@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
-import Link from "next/link"
 import { attachmentKeys, SignedImage } from "@/components/coaching/NutritionComposer.client"
 
-const gold = "#c9a96e"
-const border = "#2a2a2a"
-const cream = "#f0e6d3"
-const muted = "#888"
+const gold = "var(--ca-accent-mark)"
+const border = "var(--ca-line)"
+const cream = "var(--ca-text)"
+const muted = "var(--ca-muted)"
 const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
 const ADMIN_EMAILS = new Set(["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"])
 
@@ -157,31 +156,13 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div style={{ minHeight: "min(70vh, 640px)", background: "#111", color: cream, fontFamily: "var(--font-montserrat), sans-serif", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
-      <div style={{ padding: "2rem 2rem 1rem", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          <div>
-            <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 4px" }}>Thread</p>
-            <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: cream, margin: 0 }}>
-              {clientName || clientEmail}
-            </h1>
-          </div>
-          <Link
-            href={`/admin/coaching/clients/${encodedEmail}`}
-            style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, textDecoration: "none", border: `1px solid ${border}`, padding: "6px 14px", borderRadius: 4 }}
-          >
-            View Profile →
-          </Link>
-        </div>
-      </div>
-
+    <div style={{ minHeight: "min(70vh, 640px)", background: "var(--ca-surface)", color: cream, fontFamily: "var(--font-montserrat), sans-serif", display: "flex", flexDirection: "column" }}>
       {loading ? <Spinner /> : (
         <>
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem 2rem 1rem", minHeight: 0 }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem clamp(12px, 3vw, 2rem) 1rem", minHeight: 0 }}>
             {messages.length === 0 ? (
-              <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "3rem", textAlign: "center", marginTop: "1rem" }}>
+              <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "3rem", textAlign: "center", marginTop: "1rem" }}>
                 <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.2rem", color: muted }}>No messages yet in this thread</p>
               </div>
             ) : (
@@ -190,7 +171,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                   <div key={group.date}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "1.5rem 0 1rem" }}>
                       <div style={{ flex: 1, height: 1, background: border }} />
-                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, letterSpacing: "0.08em", flexShrink: 0 }}>{group.date}</span>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.08em", flexShrink: 0 }}>{group.date}</span>
                       <div style={{ flex: 1, height: 1, background: border }} />
                     </div>
                     {group.messages.map((msg) => {
@@ -200,16 +181,16 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                       return (
                         <div key={msg.id} style={{ display: "flex", justifyContent: isCoach ? "flex-end" : "flex-start", marginBottom: "0.75rem" }}>
                           {!isCoach && (
-                            <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#2a2a2a", border: `1.5px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", marginRight: 8, flexShrink: 0, alignSelf: "flex-end" }}>
-                              <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: muted }}>
+                            <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--ca-line)", border: `1.5px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", marginRight: 8, flexShrink: 0, alignSelf: "flex-end" }}>
+                              <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: muted }}>
                                 {(clientName || clientEmail).charAt(0).toUpperCase()}
                               </span>
                             </div>
                           )}
                           <div style={{ maxWidth: "70%" }}>
                             <div style={{
-                              background: isCoach ? gold : "#222",
-                              color: isCoach ? "#111" : cream,
+                              background: isCoach ? gold : "var(--ca-line)",
+                              color: isCoach ? "var(--ca-surface)" : cream,
                               borderRadius: isCoach ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
                               padding: "0.6rem 0.9rem",
                               fontFamily: "var(--font-montserrat), sans-serif",
@@ -221,9 +202,9 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                               {kindLabel && (
                                 <p style={{
                                   fontFamily: "var(--font-montserrat), sans-serif",
-                                  fontSize: "0.55rem", fontWeight: 700,
+                                  fontSize: "0.75rem", fontWeight: 700,
                                   letterSpacing: "0.16em", textTransform: "uppercase",
-                                  color: isCoach ? "#5a4d2f" : gold,
+                                  color: isCoach ? "var(--ca-accent-tint)" : gold,
                                   margin: "0 0 6px",
                                 }}>
                                   {kindLabel}
@@ -243,7 +224,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
                               )}
                               {msg.body && <>{msg.body}</>}
                             </div>
-                            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, margin: "3px 4px 0", textAlign: isCoach ? "right" : "left" }}>
+                            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: "3px 4px 0", textAlign: isCoach ? "right" : "left" }}>
                               {formatTime(msg.sentAt)}
                             </p>
                           </div>
@@ -258,7 +239,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
           </div>
 
           {/* Composer */}
-          <div style={{ background: "#161616", borderTop: `1px solid ${border}`, padding: "1rem 2rem", display: "flex", gap: 10, alignItems: "flex-end", flexShrink: 0 }}>
+          <div style={{ background: "var(--ca-raised)", borderTop: `1px solid ${border}`, padding: "1rem 2rem", display: "flex", gap: 10, alignItems: "flex-end", flexShrink: 0 }}>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -266,7 +247,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
               placeholder={`Message ${clientName || clientEmail}… (Enter to send)`}
               rows={1}
               style={{
-                flex: 1, background: "#111", border: `1px solid ${border}`, borderRadius: 6,
+                flex: 1, background: "var(--ca-surface)", border: `1px solid ${border}`, borderRadius: 6,
                 padding: "0.65rem 0.875rem", fontFamily: "var(--font-montserrat), sans-serif",
                 fontSize: "0.875rem", color: cream, resize: "none", outline: "none",
                 lineHeight: 1.5, maxHeight: 120, overflowY: "auto",
@@ -276,16 +257,16 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
               onClick={send}
               disabled={sending || !input.trim()}
               style={{
-                background: input.trim() ? gold : "#2a2a2a", border: "none", borderRadius: 6,
+                background: input.trim() ? gold : "var(--ca-line)", border: "none", borderRadius: 6,
                 width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: input.trim() ? "pointer" : "not-allowed", flexShrink: 0, transition: "background 0.15s",
               }}
             >
               {sending ? (
-                <div style={{ width: 14, height: 14, border: `2px solid #888`, borderTop: `2px solid #111`, borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                <div style={{ width: 14, height: 14, border: `2px solid var(--ca-muted)`, borderTop: `2px solid var(--ca-surface)`, borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
               ) : (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2 8l10-6-3 6 3 6-10-6Z" fill={input.trim() ? "#111" : "#444"} />
+                  <path d="M2 8l10-6-3 6 3 6-10-6Z" fill={input.trim() ? "var(--ca-surface)" : "var(--ca-muted)"} />
                 </svg>
               )}
             </button>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
+import { thumbFallback } from "@/lib/cdnUrl"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -86,7 +87,7 @@ export default function ExerciseSearchModal({ onSelect, onClose, title }: {
               style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", background: "none", border: "none", borderBottom: `1px solid #1a1a1a`, cursor: "pointer", textAlign: "left" }}>
               {ex.thumbnailS3Key && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={cdnThumb(ex.thumbnailS3Key)} alt="" style={{ width: 40, height: 40, objectFit: "cover", flexShrink: 0, background: "#0a0a0a" }} />
+                <img src={cdnThumb(ex.thumbnailS3Key)} onError={thumbFallback} alt="" style={{ width: 40, height: 40, objectFit: "cover", flexShrink: 0, background: "#0a0a0a" }} />
               )}
               <div>
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#f0e6d3", margin: 0 }}>{ex.name}</p>

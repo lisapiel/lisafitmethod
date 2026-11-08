@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { thumbFallback } from "@/lib/cdnUrl"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -238,7 +239,7 @@ export default function EditExercisePage() {
           >
             {form.thumbnailS3Key && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={cdnUrl(form.thumbnailS3Key)} alt={form.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={cdnUrl(form.thumbnailS3Key)} onError={thumbFallback} alt={form.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             )}
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>

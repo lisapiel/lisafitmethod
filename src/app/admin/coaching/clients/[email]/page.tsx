@@ -6,8 +6,8 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import type { CoachingClientRecord } from "@/lib/authTokens"
 
-const gold = "#c9a96e"
-const border = "#2a2a2a"
+const gold = "var(--ca-accent-mark)"
+const border = "var(--ca-line)"
 
 type ClientData = CoachingClientRecord
 
@@ -16,7 +16,7 @@ type CheckIn = { id: string; submittedAt: string; status: string | null; weight:
 
 function Spinner() {
   return (
-    <div style={{ width: 18, height: 18, border: "2px solid #2a2a2a", borderTop: `2px solid ${gold}`, borderRadius: "50%", animation: "spin 0.7s linear infinite" }}>
+    <div style={{ width: 18, height: 18, border: "2px solid var(--ca-line)", borderTop: `2px solid ${gold}`, borderRadius: "50%", animation: "spin 0.7s linear infinite" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
@@ -29,9 +29,9 @@ function formatDate(iso: string | null | undefined) {
 
 function SectionCard({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div style={{ background: "#111", border: `1px solid ${border}` }}>
+    <div style={{ background: "var(--ca-surface)", border: `1px solid ${border}` }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: `1px solid ${border}` }}>
-        <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#666" }}>{title}</span>
+        <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--ca-muted)" }}>{title}</span>
         {action}
       </div>
       <div style={{ padding: "16px 20px" }}>{children}</div>
@@ -410,46 +410,46 @@ export default function ClientProfilePage() {
   }
 
   if (loading) {
-    return <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "3rem", color: "#555" }}><Spinner /><span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem" }}>Loading client…</span></div>
+    return <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "3rem", color: "var(--ca-muted)" }}><Spinner /><span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem" }}>Loading client…</span></div>
   }
 
   if (!client) {
     return (
       <div style={{ padding: "3rem", textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.5rem", color: "#444" }}>Client not found</p>
-        <Link href="/admin/coaching/clients" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: gold, textDecoration: "none" }}>← Back to Clients</Link>
+        <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.5rem", color: "var(--ca-muted)" }}>Client not found</p>
+        <Link href="/admin/coaching/clients" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, textDecoration: "none" }}>← Back to Clients</Link>
       </div>
     )
   }
 
-  const STATUS_COLORS: Record<string, string> = { ACTIVE: "#5c9e6a", PAUSED: "#c9a96e", INACTIVE: "#444", PENDING_PAYMENT: "#d97460" }
+  const STATUS_COLORS: Record<string, string> = { ACTIVE: "var(--ca-ok)", PAUSED: "var(--ca-accent-mark)", INACTIVE: "var(--ca-muted)", PENDING_PAYMENT: "var(--ca-warn)" }
   const STATUS_LABELS: Record<string, string> = { ACTIVE: "ACTIVE", PAUSED: "PAUSED", INACTIVE: "INACTIVE", PENDING_PAYMENT: "AWAITING PAYMENT" }
 
   return (
     <div style={{ maxWidth: 900 }}>
       {/* Client hero */}
-      <div style={{ background: "#111", border: `1px solid ${border}`, padding: "24px", marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" }}>
+      <div style={{ background: "var(--ca-surface)", border: `1px solid ${border}`, padding: "24px", marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6, flexWrap: "wrap" }}>
-            <h2 style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#888", margin: 0 }}>Details and status</h2>
-            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.12em", color: STATUS_COLORS[client.status ?? "ACTIVE"] }}>
+            <h2 style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ca-muted)", margin: 0 }}>Details and status</h2>
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.12em", color: STATUS_COLORS[client.status ?? "ACTIVE"] }}>
               {STATUS_LABELS[client.status ?? "ACTIVE"] ?? client.status ?? "ACTIVE"}
             </span>
           </div>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#555" }}>{client.email}</span>
-            {client.phone && <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#555" }}>{client.phone}</span>}
-            {client.startDate && <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#555" }}>Started {formatDate(client.startDate)}</span>}
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>{client.email}</span>
+            {client.phone && <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>{client.phone}</span>}
+            {client.startDate && <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>Started {formatDate(client.startDate)}</span>}
           </div>
           {client.goal && (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888", marginTop: 8 }}>
-              <span style={{ color: "#444" }}>Goal: </span>{client.goal}
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", marginTop: 8 }}>
+              <span style={{ color: "var(--ca-muted)" }}>Goal: </span>{client.goal}
             </p>
           )}
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {(["PENDING_PAYMENT", "ACTIVE", "PAUSED", "INACTIVE"] as const).map((s) => (
-            <button key={s} onClick={() => updateStatus(s)} style={{ background: client.status === s ? "#1a1a1a" : "none", border: `1px solid ${client.status === s ? "#3a3a3a" : border}`, color: client.status === s ? STATUS_COLORS[s] : "#444", padding: "6px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+            <button key={s} onClick={() => updateStatus(s)} style={{ background: client.status === s ? "var(--ca-raised)" : "none", border: `1px solid ${client.status === s ? "var(--ca-line)" : border}`, color: client.status === s ? STATUS_COLORS[s] : "var(--ca-muted)", padding: "6px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
               {STATUS_LABELS[s]}
             </button>
           ))}
@@ -462,25 +462,25 @@ export default function ClientProfilePage() {
         <SectionCard
           title="Current Program"
           action={
-            <button onClick={() => setShowAssignProgram(true)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+            <button onClick={() => setShowAssignProgram(true)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
               {program ? "Change" : "Assign"}
             </button>
           }
         >
           {program ? (
             <div>
-              <Link href={`/admin/coaching/programs/${program.id}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: "#f0e6d3", textDecoration: "none", display: "block", marginBottom: 4 }}>
+              <Link href={`/admin/coaching/programs/${program.id}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: "var(--ca-text)", textDecoration: "none", display: "block", marginBottom: 4 }}>
                 {program.name}
               </Link>
-              <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#5c9e6a", letterSpacing: "0.08em" }}>{program.status ?? "ACTIVE"}</span>
+              <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-ok)", letterSpacing: "0.08em" }}>{program.status ?? "ACTIVE"}</span>
               <div style={{ marginTop: 12 }}>
-                <Link href={`/admin/coaching/programs/${program.id}`} style={{ display: "inline-block", background: gold, color: "#0a0a0a", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>
+                <Link href={`/admin/coaching/programs/${program.id}`} style={{ display: "inline-block", background: gold, color: "var(--ca-on-accent)", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>
                   Edit Program
                 </Link>
               </div>
             </div>
           ) : (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444" }}>No program assigned yet.</p>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>No program assigned yet.</p>
           )}
         </SectionCard>
 
@@ -488,21 +488,21 @@ export default function ClientProfilePage() {
         <SectionCard
           title="Recent Check-Ins"
           action={
-            <Link href={`/admin/coaching/check-ins?client=${encodeURIComponent(client.email)}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <Link href={`/admin/coaching/clients/${encodeURIComponent(client.email)}/check-ins`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               View All
             </Link>
           }
         >
           {recentCheckIns.length === 0 ? (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444" }}>No check-ins yet.</p>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>No check-ins yet.</p>
           ) : (
             recentCheckIns.map((ci) => (
               <div key={ci.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <div>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#f0e6d3", margin: 0 }}>{formatDate(ci.submittedAt)}</p>
-                  {ci.weight && <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", margin: 0 }}>{ci.weight} {ci.weightUnit ?? "LBS"}</p>}
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-text)", margin: 0 }}>{formatDate(ci.submittedAt)}</p>
+                  {ci.weight && <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: 0 }}>{ci.weight} {ci.weightUnit ?? "LBS"}</p>}
                 </div>
-                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: ci.status === "PENDING" ? gold : "#5c9e6a", letterSpacing: "0.1em" }}>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: ci.status === "PENDING" ? gold : "var(--ca-ok)", letterSpacing: "0.1em" }}>
                   {ci.status ?? "PENDING"}
                 </span>
               </div>
@@ -514,13 +514,13 @@ export default function ClientProfilePage() {
         <SectionCard
           title="Recent Workouts"
           action={
-            <Link href={`/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            <Link href={`/admin/coaching/clients/${encodeURIComponent(client.email)}/workouts`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               View All
             </Link>
           }
         >
           {recentWorkouts.length === 0 ? (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444" }}>No workouts logged yet.</p>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>No workouts logged yet.</p>
           ) : (
             recentWorkouts.map((w) => (
               <Link
@@ -529,16 +529,16 @@ export default function ClientProfilePage() {
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, textDecoration: "none" }}
               >
                 <div>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#f0e6d3", margin: 0 }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-text)", margin: 0 }}>
                     {formatDate(w.completedAt)} · {w.dayLabel}
                   </p>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#555", margin: 0 }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: 0 }}>
                     Week {w.weekNumber}{w.overallRpe ? ` · RPE ${w.overallRpe}` : ""}
                   </p>
                 </div>
                 <span style={{
-                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", letterSpacing: "0.08em",
-                  color: w.hasFeedback ? "#5c9e6a" : gold,
+                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.08em",
+                  color: w.hasFeedback ? "var(--ca-ok)" : gold,
                 }}>
                   {w.hasFeedback ? "✓ FEEDBACK" : "NEEDS FEEDBACK"}
                 </span>
@@ -551,7 +551,7 @@ export default function ClientProfilePage() {
         <SectionCard
           title="Private Notes"
           action={
-            <button onClick={() => setEditingNotes(!editingNotes)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+            <button onClick={() => setEditingNotes(!editingNotes)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
               {editingNotes ? "Cancel" : "Edit"}
             </button>
           }
@@ -563,14 +563,14 @@ export default function ClientProfilePage() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={5}
                 placeholder="Private notes about this client (never shown to them)…"
-                style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 10 }}
+                style={{ width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 10 }}
               />
-              <button onClick={saveNotes} disabled={savingNotes} style={{ background: gold, color: "#0a0a0a", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}>
+              <button onClick={saveNotes} disabled={savingNotes} style={{ background: gold, color: "var(--ca-on-accent)", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}>
                 {savingNotes ? "Saving…" : "Save"}
               </button>
             </div>
           ) : (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: notes ? "#888" : "#333", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: notes ? "var(--ca-muted)" : "var(--ca-line)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
               {notes || "No notes yet."}
             </p>
           )}
@@ -584,8 +584,8 @@ export default function ClientProfilePage() {
               { label: "Start date", value: formatDate(client.startDate) },
             ].map(({ label, value }) => (
               <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#444", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>
-                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888" }}>{value}</span>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>{value}</span>
               </div>
             ))}
           </div>
@@ -597,7 +597,7 @@ export default function ClientProfilePage() {
         <SectionCard
           title="Message to Client (shown on their home)"
           action={
-            <button onClick={() => setEditingCoachMessage((v) => !v)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+            <button onClick={() => setEditingCoachMessage((v) => !v)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
               {editingCoachMessage ? "Cancel" : (coachMessage ? "Edit" : "Add")}
             </button>
           }
@@ -609,18 +609,18 @@ export default function ClientProfilePage() {
                 onChange={(e) => setCoachMessage(e.target.value)}
                 placeholder="A personal note this client will see at the top of their portal. Keep it short and motivating, e.g. 'Great work hitting all workouts last week. This week focus on hitting your protein goal every day.'"
                 rows={4}
-                style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 10, lineHeight: 1.5 }}
+                style={{ width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 10, lineHeight: 1.5 }}
               />
-              <button onClick={saveCoachMessage} disabled={savingCoachMessage} style={{ background: gold, color: "#0a0a0a", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}>
+              <button onClick={saveCoachMessage} disabled={savingCoachMessage} style={{ background: gold, color: "var(--ca-on-accent)", border: "none", padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}>
                 {savingCoachMessage ? "Saving…" : "Save Message"}
               </button>
             </div>
           ) : coachMessage ? (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "#f0e6d3", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "var(--ca-text)", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
               &ldquo;{coachMessage}&rdquo;
             </p>
           ) : (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: 0 }}>
               No message set. Add one to give this client a personal coaching touch on their home page.
             </p>
           )}
@@ -632,13 +632,13 @@ export default function ClientProfilePage() {
         <SectionCard
           title="Goals"
           action={
-            <button onClick={() => setShowAddGoal(true)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
+            <button onClick={() => setShowAddGoal(true)} style={{ background: "none", border: "none", color: gold, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase" }}>
               + Add Goal
             </button>
           }
         >
           {goals.length === 0 && !showAddGoal ? (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#444", margin: 0 }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: 0 }}>
               No goals set. Add a body composition, strength, habit, or custom goal.
             </p>
           ) : (
@@ -648,33 +648,33 @@ export default function ClientProfilePage() {
                   {/* Header row */}
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 2px" }}>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 2px" }}>
                         {(g.type || "").replace(/-/g, " ")}
                       </p>
-                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: "#f0e6d3", margin: 0, fontWeight: 600 }}>{g.label}</p>
-                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#888", margin: "3px 0 0" }}>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: "var(--ca-text)", margin: 0, fontWeight: 600 }}>{g.label}</p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: "3px 0 0" }}>
                         {g.startValue ?? "—"} → {g.targetValue ?? "—"} {g.unit ?? ""}
                       </p>
                     </div>
-                    <button onClick={() => deleteGoal(g.id)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", padding: "2px 6px", fontSize: "1rem", flexShrink: 0 }}>×</button>
+                    <button onClick={() => deleteGoal(g.id)} style={{ background: "none", border: "none", color: "var(--ca-muted)", cursor: "pointer", padding: "2px 6px", fontSize: "1rem", flexShrink: 0 }}>×</button>
                   </div>
                   {/* Current + status row — wraps on mobile */}
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 4, flex: "1 1 130px" }}>
-                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Current:</span>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Current:</span>
                       <input
                         type="text"
                         inputMode="decimal"
                         defaultValue={g.currentValue ?? ""}
                         onBlur={(e) => updateGoalCurrent(g.id, e.target.value, g.status ?? "ON_TRACK")}
                         placeholder="—"
-                        style={{ flex: 1, minWidth: 0, background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", borderRadius: 2, boxSizing: "border-box" }}
+                        style={{ flex: 1, minWidth: 0, background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", borderRadius: 2, boxSizing: "border-box" }}
                       />
                     </div>
                     <select
                       defaultValue={g.status ?? "ON_TRACK"}
                       onChange={(e) => updateGoalCurrent(g.id, "", e.target.value)}
-                      style={{ flex: "1 1 130px", minWidth: 0, background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", outline: "none", borderRadius: 2, boxSizing: "border-box" }}
+                      style={{ flex: "1 1 130px", minWidth: 0, background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "6px 8px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", borderRadius: 2, boxSizing: "border-box" }}
                     >
                       <option value="ON_TRACK">On track</option>
                       <option value="NEEDS_ATTENTION">Needs attention</option>
@@ -685,11 +685,11 @@ export default function ClientProfilePage() {
               ))}
 
               {showAddGoal && (
-                <div style={{ marginTop: 14, padding: "14px", background: "#0a0a0a", border: `1px solid ${border}` }}>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.12em", textTransform: "uppercase", margin: "0 0 10px" }}>New Goal</p>
+                <div style={{ marginTop: 14, padding: "14px", background: "var(--ca-bg)", border: `1px solid ${border}` }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, letterSpacing: "0.12em", textTransform: "uppercase", margin: "0 0 10px" }}>New Goal</p>
                   {/* Type + Label — stacks on narrow */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8, marginBottom: 8 }}>
-                    <select value={newGoal.type} onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}>
+                    <select value={newGoal.type} onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}>
                       <option value="body-composition">Body Composition</option>
                       <option value="strength">Strength</option>
                       <option value="habit">Habit</option>
@@ -700,21 +700,21 @@ export default function ClientProfilePage() {
                       placeholder="Goal name (e.g. Lose 15 lbs)"
                       value={newGoal.label}
                       onChange={(e) => setNewGoal({ ...newGoal, label: e.target.value })}
-                      style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" }}
+                      style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
                   {/* Numeric fields — 2 per row on narrow, 4 on wider */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 8, marginBottom: 10 }}>
-                    <input placeholder="Start" inputMode="decimal" value={newGoal.startValue} onChange={(e) => setNewGoal({ ...newGoal, startValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                    <input placeholder="Current" inputMode="decimal" value={newGoal.currentValue} onChange={(e) => setNewGoal({ ...newGoal, currentValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                    <input placeholder="Target" inputMode="decimal" value={newGoal.targetValue} onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                    <input placeholder="Unit (lbs, reps)" value={newGoal.unit} onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })} style={{ background: "#161616", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Start" inputMode="decimal" value={newGoal.startValue} onChange={(e) => setNewGoal({ ...newGoal, startValue: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Current" inputMode="decimal" value={newGoal.currentValue} onChange={(e) => setNewGoal({ ...newGoal, currentValue: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Target" inputMode="decimal" value={newGoal.targetValue} onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
+                    <input placeholder="Unit (lbs, reps)" value={newGoal.unit} onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={addGoal} disabled={!newGoal.label.trim() || savingGoal} style={{ background: newGoal.label.trim() ? gold : "#333", color: newGoal.label.trim() ? "#0a0a0a" : "#666", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: newGoal.label.trim() ? "pointer" : "not-allowed", flex: "1 1 auto" }}>
+                    <button onClick={addGoal} disabled={!newGoal.label.trim() || savingGoal} style={{ background: newGoal.label.trim() ? gold : "var(--ca-line)", color: newGoal.label.trim() ? "var(--ca-bg)" : "var(--ca-muted)", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: newGoal.label.trim() ? "pointer" : "not-allowed", flex: "1 1 auto" }}>
                       {savingGoal ? "Adding…" : "Add Goal"}
                     </button>
-                    <button onClick={() => setShowAddGoal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>Cancel</button>
+                    <button onClick={() => setShowAddGoal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "var(--ca-muted)", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", cursor: "pointer" }}>Cancel</button>
                   </div>
                 </div>
               )}
@@ -726,15 +726,15 @@ export default function ClientProfilePage() {
       {/* Assign program modal */}
       {showAssignProgram && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowAssignProgram(false)}>
-          <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 2, width: "100%", maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 2, width: "100%", maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ padding: "20px 24px", borderBottom: `1px solid ${border}` }}>
-              <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.3rem", color: "#f0e6d3", margin: 0 }}>Assign Program</p>
+              <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.3rem", color: "var(--ca-text)", margin: 0 }}>Assign Program</p>
             </div>
             <div style={{ padding: "20px 24px" }}>
               <select
                 value={selectedProgramId}
                 onChange={(e) => setSelectedProgramId(e.target.value)}
-                style={{ width: "100%", background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", marginBottom: 16 }}
+                style={{ width: "100%", background: "var(--ca-surface)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", marginBottom: 16 }}
               >
                 <option value="">Select a program…</option>
                 {allPrograms
@@ -748,10 +748,10 @@ export default function ClientProfilePage() {
                   ))}
               </select>
               <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={assignProgram} disabled={!selectedProgramId || savingProgram} style={{ background: selectedProgramId ? gold : "#333", color: "#0a0a0a", border: "none", padding: "10px 22px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: selectedProgramId ? "pointer" : "not-allowed" }}>
+                <button onClick={assignProgram} disabled={!selectedProgramId || savingProgram} style={{ background: selectedProgramId ? gold : "var(--ca-line)", color: "var(--ca-on-accent)", border: "none", padding: "10px 22px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: selectedProgramId ? "pointer" : "not-allowed" }}>
                   {savingProgram ? "Assigning…" : "Assign Program"}
                 </button>
-                <button onClick={() => setShowAssignProgram(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}>
+                <button onClick={() => setShowAssignProgram(false)} style={{ background: "none", border: `1px solid ${border}`, color: "var(--ca-muted)", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", cursor: "pointer" }}>
                   Cancel
                 </button>
               </div>
@@ -765,20 +765,20 @@ export default function ClientProfilePage() {
         <SectionCard title="Subscription &amp; Commitment">
           {client.commitmentNeedsConfirmation ? (
             <div>
-              <div style={{ background: "#130d00", border: `1px solid #4a3820`, padding: "10px 14px", marginBottom: 16, borderRadius: 2 }}>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#c8a97e", margin: 0 }}>
+              <div style={{ background: "var(--ca-accent-tint)", border: `1px solid var(--ca-accent-tint)`, padding: "10px 14px", marginBottom: 16, borderRadius: 2 }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-accent-mark)", margin: 0 }}>
                   Commitment type not confirmed for this client. Set it below so they can manage their subscription independently.
                 </p>
               </div>
               <div style={{ display: "grid", gap: 10 }}>
                 <div>
-                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                     Commitment type *
                   </label>
                   <select
                     value={commitmentForm.commitmentType}
                     onChange={(e) => setCommitmentForm((f) => ({ ...f, commitmentType: e.target.value }))}
-                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
                   >
                     <option value="">Select…</option>
                     <option value="THREE_MONTH_MINIMUM">3-month minimum</option>
@@ -786,7 +786,7 @@ export default function ClientProfilePage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                     Approved price (cents, optional)
                   </label>
                   <input
@@ -795,36 +795,36 @@ export default function ClientProfilePage() {
                     disabled={!!client.stripeSubscriptionId}
                     value={commitmentForm.approvedPriceInCents}
                     onChange={(e) => setCommitmentForm((f) => ({ ...f, approvedPriceInCents: e.target.value }))}
-                    style={{ width: "100%", background: client.stripeSubscriptionId ? "#151515" : "#0a0a0a", border: `1px solid ${border}`, color: client.stripeSubscriptionId ? "#555" : "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box", cursor: client.stripeSubscriptionId ? "not-allowed" : "text" }}
+                    style={{ width: "100%", background: client.stripeSubscriptionId ? "var(--ca-surface)" : "var(--ca-bg)", border: `1px solid ${border}`, color: client.stripeSubscriptionId ? "var(--ca-muted)" : "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box", cursor: client.stripeSubscriptionId ? "not-allowed" : "text" }}
                   />
                   {/* This figure is what the client sees in their portal, and
                       nothing here reaches Stripe. While a subscription is live
                       the two must agree, so it is read-only rather than a way
                       to display a price nobody is being charged. */}
-                  <p style={{ fontSize: "0.6rem", color: "#666", marginTop: 6, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: "0.75rem", color: "var(--ca-muted)", marginTop: 6, lineHeight: 1.5 }}>
                     {client.stripeSubscriptionId
                       ? "Locked — this client has a live Stripe subscription. Changing this would show them a price Stripe isn't charging."
                       : "Shown to the client in their portal. This does not create or change any billing."}
                   </p>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                     Subscription start date (optional)
                   </label>
                   <input
                     type="date"
                     value={commitmentForm.subscriptionStartDate}
                     onChange={(e) => setCommitmentForm((f) => ({ ...f, subscriptionStartDate: e.target.value }))}
-                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
                 {commitmentError && (
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#d97460", margin: 0 }}>{commitmentError}</p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-warn)", margin: 0 }}>{commitmentError}</p>
                 )}
                 <button
                   onClick={saveCommitment}
                   disabled={!commitmentForm.commitmentType || savingCommitment}
-                  style={{ background: commitmentForm.commitmentType ? gold : "#333", color: "#0a0a0a", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: commitmentForm.commitmentType ? "pointer" : "not-allowed", alignSelf: "start" }}
+                  style={{ background: commitmentForm.commitmentType ? gold : "var(--ca-line)", color: "var(--ca-on-accent)", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: commitmentForm.commitmentType ? "pointer" : "not-allowed", alignSelf: "start" }}
                 >
                   {savingCommitment ? "Saving…" : "Confirm commitment"}
                 </button>
@@ -846,8 +846,8 @@ export default function ClientProfilePage() {
                 { label: "Cancellation effective", value: formatDate(client.cancellationEffectiveDate) },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#444", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#888" }}>{value}</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>{value}</span>
                 </div>
               ))}
             </div>
@@ -861,35 +861,35 @@ export default function ClientProfilePage() {
           <SectionCard title="Cancel Coaching">
             {!cancelPreview ? (
               <div>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#666", lineHeight: 1.7, margin: "0 0 16px" }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", lineHeight: 1.7, margin: "0 0 16px" }}>
                   Schedules cancellation at the end of the client&apos;s current billing period. Coaching access remains active through that date; Stripe will not charge again after it.
                 </p>
                 {cancelPreviewError && (
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#d97460", margin: "0 0 12px" }}>{cancelPreviewError}</p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-warn)", margin: "0 0 12px" }}>{cancelPreviewError}</p>
                 )}
                 <button
                   onClick={loadCancelPreview}
                   disabled={loadingCancelPreview}
-                  style={{ background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: loadingCancelPreview ? "not-allowed" : "pointer", opacity: loadingCancelPreview ? 0.6 : 1 }}
+                  style={{ background: "transparent", border: `1px solid var(--ca-warn)`, color: "var(--ca-warn)", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: loadingCancelPreview ? "not-allowed" : "pointer", opacity: loadingCancelPreview ? 0.6 : 1 }}
                 >
                   {loadingCancelPreview ? "Loading…" : "Cancel coaching at end of billing period →"}
                 </button>
               </div>
             ) : (
               <div>
-                <div style={{ background: "#130d00", border: `1px solid #4a3820`, padding: "14px 16px", marginBottom: 16, borderRadius: 2 }}>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#c8a97e", margin: "0 0 6px", fontWeight: 600 }}>
+                <div style={{ background: "var(--ca-accent-tint)", border: `1px solid var(--ca-accent-tint)`, padding: "14px 16px", marginBottom: 16, borderRadius: 2 }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-accent-mark)", margin: "0 0 6px", fontWeight: 600 }}>
                     Cancellation preview
                   </p>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#f0e6d3", margin: "0 0 4px" }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "var(--ca-text)", margin: "0 0 4px" }}>
                     {client.displayName} will retain coaching access through <strong>{cancelPreview.effectiveDateDisplay}</strong>.
                   </p>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#888", margin: 0 }}>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: 0 }}>
                     No further Stripe payments will be collected after that date.
                   </p>
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                  <label style={{ display: "block", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                     Reason (optional — for your records)
                   </label>
                   <input
@@ -897,23 +897,23 @@ export default function ClientProfilePage() {
                     value={cancelReason}
                     onChange={(e) => setCancelReason(e.target.value)}
                     placeholder="e.g. Client requested, payment issues…"
-                    style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
                 {cancelPreviewError && (
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#d97460", margin: "0 0 10px" }}>{cancelPreviewError}</p>
+                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-warn)", margin: "0 0 10px" }}>{cancelPreviewError}</p>
                 )}
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button
                     onClick={() => { setCancelPreview(null); setCancelPreviewError(""); setCancelReason("") }}
-                    style={{ background: "transparent", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}
+                    style={{ background: "transparent", border: `1px solid ${border}`, color: "var(--ca-muted)", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", cursor: "pointer" }}
                   >
                     Keep coaching
                   </button>
                   <button
                     onClick={submitCancel}
                     disabled={submittingCancel}
-                    style={{ background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: submittingCancel ? "not-allowed" : "pointer", opacity: submittingCancel ? 0.6 : 1 }}
+                    style={{ background: "transparent", border: `1px solid var(--ca-warn)`, color: "var(--ca-warn)", padding: "9px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: submittingCancel ? "not-allowed" : "pointer", opacity: submittingCancel ? 0.6 : 1 }}
                   >
                     {submittingCancel ? "Scheduling…" : `Confirm — cancel coaching after ${cancelPreview.effectiveDateDisplay}`}
                   </button>
@@ -924,15 +924,15 @@ export default function ClientProfilePage() {
         </div>
       )}
       {cancelDone && (
-        <div style={{ marginTop: "1rem", background: "#0d1a0d", border: `1px solid #2a4a2a`, padding: "14px 20px" }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#5c9e6a", margin: 0 }}>
+        <div style={{ marginTop: "1rem", background: "var(--ca-ok-tint)", border: `1px solid var(--ca-ok-tint)`, padding: "14px 20px" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-ok)", margin: 0 }}>
             Cancellation scheduled. {client.displayName} retains access through <strong>{cancelDone}</strong>. Client and admin notified.
           </p>
         </div>
       )}
       {client.cancellationScheduledAt && !cancelDone && (
-        <div style={{ marginTop: "1rem", background: "#111", border: `1px solid ${border}`, padding: "14px 20px" }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#888", margin: 0 }}>
+        <div style={{ marginTop: "1rem", background: "var(--ca-surface)", border: `1px solid ${border}`, padding: "14px 20px" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-muted)", margin: 0 }}>
             Cancellation already scheduled
             {client.cancellationEffectiveDate ? ` — coaching active through ${new Date(client.cancellationEffectiveDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}.
           </p>
@@ -940,16 +940,16 @@ export default function ClientProfilePage() {
       )}
 
       {/* Danger zone */}
-      <div style={{ marginTop: "2.5rem", border: `1px solid #4a1e1e`, background: "#170a0a", padding: "16px 20px" }}>
-        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#c14646", margin: "0 0 6px" }}>
+      <div style={{ marginTop: "2.5rem", border: `1px solid var(--ca-danger-tint)`, background: "var(--ca-danger-tint)", padding: "16px 20px" }}>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ca-danger)", margin: "0 0 6px" }}>
           Danger zone
         </p>
-        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#888", margin: "0 0 12px", lineHeight: 1.5 }}>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-muted)", margin: "0 0 12px", lineHeight: 1.5 }}>
           Permanently remove this client and all their coaching data. Their Cognito login account will stay.
         </p>
         <button
           onClick={() => { setDeleteConfirmText(""); setDeleteError(""); setShowDeleteModal(true) }}
-          style={{ background: "none", border: `1px solid #4a1e1e`, color: "#c14646", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}
+          style={{ background: "none", border: `1px solid var(--ca-danger-tint)`, color: "var(--ca-danger)", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer" }}
         >
           Delete client
         </button>
@@ -963,18 +963,18 @@ export default function ClientProfilePage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ background: "#111", border: `1px solid ${border}`, borderLeft: `4px solid #c14646`, padding: "1.5rem", maxWidth: 460, width: "100%" }}
+            style={{ background: "var(--ca-surface)", border: `1px solid ${border}`, borderLeft: `4px solid var(--ca-danger)`, padding: "1.5rem", maxWidth: 460, width: "100%" }}
           >
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#c14646", margin: "0 0 6px" }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ca-danger)", margin: "0 0 6px" }}>
               Danger zone
             </p>
-            <h3 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.35rem", color: "#f0e6d3", margin: "0 0 10px", fontWeight: 500 }}>
+            <h3 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.35rem", color: "var(--ca-text)", margin: "0 0 10px", fontWeight: 500 }}>
               Delete {client.displayName}?
             </h3>
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#888", margin: "0 0 12px", lineHeight: 1.5 }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "var(--ca-muted)", margin: "0 0 12px", lineHeight: 1.5 }}>
               This permanently removes their coaching data — client record, workouts, check-ins, progress snapshots, goals, and message thread. Their Cognito login account will stay. This cannot be undone.
             </p>
-            <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+            <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: "var(--ca-muted)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
               Type DELETE to confirm
             </label>
             <input
@@ -983,20 +983,20 @@ export default function ClientProfilePage() {
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder="DELETE"
-              style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", outline: "none", boxSizing: "border-box", marginBottom: 12 }}
+              style={{ width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", outline: "none", boxSizing: "border-box", marginBottom: 12 }}
             />
-            {deleteError && <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: "#c14646", margin: "0 0 10px" }}>{deleteError}</p>}
+            {deleteError && <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-danger)", margin: "0 0 10px" }}>{deleteError}</p>}
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setShowDeleteModal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+              <button onClick={() => setShowDeleteModal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "var(--ca-muted)", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
                 Cancel
               </button>
               <button
                 onClick={handleDeleteClient}
                 disabled={deleteConfirmText !== "DELETE" || deleting}
                 style={{
-                  background: deleteConfirmText === "DELETE" && !deleting ? "#c14646" : "#333",
-                  color: "#fff", border: "none", padding: "9px 20px",
-                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                  background: deleteConfirmText === "DELETE" && !deleting ? "var(--ca-danger)" : "var(--ca-line)",
+                  color: "var(--ca-text)", border: "none", padding: "9px 20px",
+                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
                   cursor: deleteConfirmText === "DELETE" && !deleting ? "pointer" : "not-allowed",
                 }}
               >
@@ -1008,11 +1008,6 @@ export default function ClientProfilePage() {
       )}
 
       {/* Back to list */}
-      <div style={{ marginTop: "2rem" }}>
-        <button onClick={() => router.push("/admin/coaching/clients")} style={{ background: "none", border: "none", color: "#555", padding: 0, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer", letterSpacing: "0.08em" }}>
-          ← Back to all clients
-        </button>
-      </div>
     </div>
   )
 }

@@ -3,34 +3,40 @@
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import type { ClientSummary, CoachingOverview } from "@/lib/coachingOverview"
-import { CheckInChip, Icon, StatusChip, WeekDots, dayCount, initials } from "./AdminUi"
+import { Icon, StatusChip, WeekDots, dayCount, initials } from "./AdminUi"
 
 type Filter = "ACTIVE" | "PENDING_PAYMENT" | "PAUSED" | "ALL"
 
+function checkInText(c: ClientSummary) {
+  if (c.status !== "ACTIVE") return null
+  return c.checkIn.state === "reviewed" ? "Checked in ✓" : c.checkIn.state === "pending" ? null : "No check-in yet"
+}
+
 function ClientRow({ c }: { c: ClientSummary }) {
   const p = c.program
+  const chips = [
+    c.checkIn.painReported && <span key="pain" className="ca-chip" data-tone="danger">Pain reported</span>,
+    c.checkIn.state === "pending" && !c.checkIn.painReported && <span key="ci" className="ca-chip" data-tone="warn">Check-in to review</span>,
+    c.messages.needsReply && <span key="msg" className="ca-chip" data-tone="warn">Awaiting your reply</span>,
+  ].filter(Boolean)
+  const ci = checkInText(c)
   return (
-    <Link href={`/admin/coaching/clients/${encodeURIComponent(c.email)}`} className="ca-row" style={{ alignItems: "start" }}>
+    <Link href={`/admin/coaching/clients/${encodeURIComponent(c.email)}`} className="ca-row" style={{ alignItems: "start", minHeight: 0 }}>
       <span className="ca-avatar" aria-hidden="true">{initials(c.displayName)}</span>
       <span className="ca-row-main">
-        <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "wrap" }}>
-          <span className="ca-row-title ca-trunc" style={{ maxWidth: "100%" }}>{c.displayName}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flexWrap: "wrap" }}>
+          <span className="ca-row-title ca-trunc" style={{ maxWidth: "100%", marginRight: 4 }}>{c.displayName}</span>
           <StatusChip status={c.status} />
+          {chips}
         </span>
         <span className="ca-meta-line">
-          {p ? (
-            <span>{p.finished ? "Program complete" : `Week ${p.currentWeek} of ${p.totalWeeks}`}</span>
-          ) : c.status === "ACTIVE" ? <span>No program yet</span> : null}
+          {p ? <span>{p.finished ? "Program complete" : `Week ${p.currentWeek} of ${p.totalWeeks}`}</span> : c.status === "ACTIVE" ? <span>No program yet</span> : null}
           {p && !p.finished && p.daysThisWeek > 0 && (
             <span><WeekDots done={p.doneThisWeek} total={p.daysThisWeek} />{p.doneThisWeek}/{p.daysThisWeek} this week</span>
           )}
           <span>Trained {dayCount(c.training.daysSinceWorkout)}</span>
-          <span>Food {c.nutrition.daysLoggedLast7}/7 days</span>
-        </span>
-        <span style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-          {c.status === "ACTIVE" && <CheckInChip state={c.checkIn.state} />}
-          {c.checkIn.painReported && <span className="ca-chip" data-tone="danger">Pain reported</span>}
-          {c.messages.needsReply && <span className="ca-chip" data-tone="warn">Awaiting your reply</span>}
+          <span>Food {c.nutrition.daysLoggedLast7}/7</span>
+          {ci && <span>{ci}</span>}
         </span>
       </span>
       <span className="ca-row-aside" style={{ alignSelf: "center" }}>

@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { SignedVideo } from "@/components/coaching/NutritionComposer.client"
 
-const gold = "#c9a96e"
-const border = "#2a2a2a"
-const cream = "#f0e6d3"
-const muted = "#888"
+const gold = "var(--ca-accent-mark)"
+const border = "var(--ca-line)"
+const cream = "var(--ca-text)"
+const muted = "var(--ca-muted)"
 
 type FormReview = { exercise: string; note: string; videoKeys: string[] }
 
@@ -87,13 +87,13 @@ function formatDate(iso: string) {
 
 function RatingRow({ label, value }: { label: string; value: number | null }) {
   if (!value) return null
-  const color = value >= 4 ? "#5c9e6a" : value >= 3 ? gold : "#d97460"
+  const color = value >= 4 ? "var(--ca-ok)" : value >= 3 ? gold : "var(--ca-warn)"
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.06em", width: 130, flexShrink: 0 }}>{label.toUpperCase()}</span>
+      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.06em", width: 130, flexShrink: 0 }}>{label.toUpperCase()}</span>
       <div style={{ display: "flex", gap: 4 }}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <div key={n} style={{ width: 28, height: 10, borderRadius: 3, background: n <= value ? color : "#2a2a2a" }} />
+          <div key={n} style={{ width: 28, height: 10, borderRadius: 3, background: n <= value ? color : "var(--ca-line)" }} />
         ))}
       </div>
       <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color }}>{value}/5</span>
@@ -104,7 +104,7 @@ function RatingRow({ label, value }: { label: string; value: number | null }) {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: "1.5rem" }}>
-      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 8px" }}>{label}</p>
+      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 8px" }}>{label}</p>
       {children}
     </div>
   )
@@ -115,19 +115,19 @@ function TextBlock({ text }: { text: string }) {
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>{children}</div>
+  return <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem", marginBottom: "1rem" }}>{children}</div>
 }
 
 function Chip({ label, tone = "neutral" }: { label: string; tone?: "attention" | "info" | "neutral" }) {
-  const bg = tone === "attention" ? "#3a1f1f" : tone === "info" ? `${gold}18` : "#222"
-  const fg = tone === "attention" ? "#e07a7a" : tone === "info" ? gold : cream
-  const bd = tone === "attention" ? "#5a2a2a" : tone === "info" ? `${gold}55` : border
+  const bg = tone === "attention" ? "var(--ca-danger-tint)" : tone === "info" ? `color-mix(in srgb, ${gold} 9%, transparent)` : "var(--ca-line)"
+  const fg = tone === "attention" ? "var(--ca-danger)" : tone === "info" ? gold : cream
+  const bd = tone === "attention" ? "var(--ca-danger-tint)" : tone === "info" ? `color-mix(in srgb, ${gold} 33%, transparent)` : border
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 6,
       background: bg, color: fg, border: `1px solid ${bd}`,
       padding: "5px 10px", borderRadius: 999,
-      fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em",
+      fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em",
     }}>{label}</span>
   )
 }
@@ -261,13 +261,13 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   }
 
   if (loading) return (
-    <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem" }}>
+    <div style={{ color: cream }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}><Spinner /></div>
     </div>
   )
 
   if (!checkIn) return (
-    <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
+    <div style={{ color: cream, fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         <p style={{ color: muted }}>Check-in not found.</p>
         <Link href="/admin/coaching/check-ins" style={{ color: gold, fontSize: "0.8rem" }}>← Back to queue</Link>
@@ -290,7 +290,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   if (checkIn.questionForLisa && checkIn.questionForLisa.trim()) chips.push({ label: "Question for you", tone: "info" })
 
   return (
-    <div style={{ minHeight: "100vh", background: "#111", color: cream, padding: "2.5rem 2rem", fontFamily: "var(--font-montserrat), sans-serif" }}>
+    <div style={{ color: cream, fontFamily: "var(--font-montserrat), sans-serif" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         <Link href="/admin/coaching/check-ins" style={{ color: muted, fontSize: "0.75rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: "1.5rem" }}>
           ← Check-In Queue
@@ -298,16 +298,16 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.25rem", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>{formatDate(checkIn.submittedAt)}</p>
-            <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2rem", fontWeight: 700, color: cream, margin: "0 0 4px" }}>{clientName || checkIn.clientEmail}</h1>
+            <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 6px" }}>{formatDate(checkIn.submittedAt)}</p>
+            <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "2rem", fontWeight: 700, color: cream, margin: "0 0 4px" }}><Link href={`/admin/coaching/clients/${encodeURIComponent(checkIn.clientEmail.toLowerCase())}`} style={{ color: "inherit", textDecoration: "underline", textDecorationColor: "var(--ca-accent-mark)", textUnderlineOffset: 6, textDecorationThickness: 1 }}>{clientName || checkIn.clientEmail}</Link></h1>
             <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: 0 }}>{checkIn.clientEmail}</p>
           </div>
           <span style={{
             display: "inline-block", padding: "5px 14px", borderRadius: 4,
-            fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.08em",
-            background: reviewed ? "#2a2a2a" : `${gold}18`,
-            color: reviewed ? "#5c9e6a" : gold,
-            border: `1px solid ${reviewed ? "#3a3a3a" : gold}`,
+            fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em",
+            background: reviewed ? "var(--ca-line)" : `color-mix(in srgb, ${gold} 9%, transparent)`,
+            color: reviewed ? "var(--ca-ok)" : gold,
+            border: `1px solid ${reviewed ? "var(--ca-line)" : gold}`,
           }}>
             {reviewed ? "REVIEWED" : "PENDING REVIEW"}
           </span>
@@ -327,10 +327,10 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             {/* Progress card */}
             {(checkIn.weight != null || checkIn.measurementSnapshot) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Progress</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Progress</p>
                 {checkIn.weight != null && (
                   <div style={{ marginBottom: checkIn.measurementSnapshot ? 14 : 0 }}>
-                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Weight</p>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Weight</p>
                     <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: cream, margin: 0 }}>
                       {checkIn.weight} <span style={{ fontSize: "1rem", fontWeight: 400, color: muted }}>{checkIn.weightUnit ?? ""}</span>
                     </p>
@@ -342,9 +342,9 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                   if (ms.length === 0) return null
                   return (
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Measurements</p>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Measurements</p>
                       {ms.map((m, i) => (
-                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "4px 0", borderBottom: i === ms.length - 1 ? "none" : "1px solid #1e1e1e" }}>
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "4px 0", borderBottom: i === ms.length - 1 ? "none" : "1px solid var(--ca-raised)" }}>
                           <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: cream, textTransform: "capitalize" }}>{m.label}</span>
                           <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", fontWeight: 600, color: cream }}>{m.value}{m.unit ? ` ${m.unit}` : ""}</span>
                         </div>
@@ -358,7 +358,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             {/* Training — v2 layout */}
             {isV2 && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Training</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Training</p>
                 {checkIn.workoutsCompleted != null && (
                   <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, margin: "0 0 12px", fontWeight: 600 }}>
                     {checkIn.workoutsPlanned != null
@@ -375,7 +375,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             {/* Attention — pain + program adjustments (v2) */}
             {isV2 && (checkIn.painReported === true || meaningfulAdjustments.length > 0) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#e07a7a", margin: "0 0 10px" }}>Attention</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--ca-danger)", margin: "0 0 10px" }}>Attention</p>
                 {checkIn.painReported === true && (
                   <div style={{ marginBottom: meaningfulAdjustments.length > 0 ? 14 : 0 }}>
                     <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", fontWeight: 700, color: cream, margin: "0 0 6px" }}>Pain / discomfort</p>
@@ -399,7 +399,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             {/* Recovery — v2 layout (uses shared sleep/energy/stress + new recovery) */}
             {isV2 && (checkIn.sleepQuality || checkIn.energyLevel || checkIn.stressLevel || checkIn.recoveryRating) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Recovery</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Recovery</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <RatingRow label="Sleep" value={checkIn.sleepQuality} />
                   <RatingRow label="Energy" value={checkIn.energyLevel} />
@@ -412,7 +412,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             {/* Legacy wellbeing block (v1) */}
             {!isV2 && (checkIn.sleepQuality || checkIn.energyLevel || checkIn.hungerLevel || checkIn.stressLevel || checkIn.digestion) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Wellbeing</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Wellbeing</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <RatingRow label="Sleep Quality" value={checkIn.sleepQuality} />
                   <RatingRow label="Energy Level" value={checkIn.energyLevel} />
@@ -424,7 +424,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             )}
             {!isV2 && (checkIn.trainingPerformance || checkIn.nutritionAdherence || checkIn.workoutConsistency) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Training &amp; Nutrition</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Training &amp; Nutrition</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <RatingRow label="Training" value={checkIn.trainingPerformance} />
                   <RatingRow label="Nutrition" value={checkIn.nutritionAdherence} />
@@ -438,18 +438,18 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           <div>
             {isV2 && checkIn.formReviewRequested === true && checkIn.formReviews.length > 0 && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Form Review</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Form Review</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   {checkIn.formReviews.map((r, i) => (
-                    <div key={i} style={{ background: "#111", border: `1px solid ${border}`, borderRadius: 6, padding: 12 }}>
+                    <div key={i} style={{ background: "var(--ca-surface)", border: `1px solid ${border}`, borderRadius: 6, padding: 12 }}>
                       {r.exercise && (
-                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", fontWeight: 700, color: cream, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: cream, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                           <span style={{ color: muted, fontWeight: 500 }}>Exercise: </span>{r.exercise}
                         </p>
                       )}
                       {r.note && (
                         <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, margin: "0 0 10px", lineHeight: 1.55, whiteSpace: "pre-wrap" }}>
-                          <span style={{ color: muted, fontSize: "0.7rem" }}>Client note: </span>&ldquo;{r.note}&rdquo;
+                          <span style={{ color: muted, fontSize: "0.75rem" }}>Client note: </span>&ldquo;{r.note}&rdquo;
                         </p>
                       )}
                       {r.videoKeys.length > 0 && (
@@ -471,7 +471,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
 
             {isV2 && (checkIn.nutritionStatus || checkIn.nutritionHelp) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Nutrition</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Nutrition</p>
                 {checkIn.nutritionStatus && (
                   <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: cream, margin: "0 0 10px", fontWeight: 600 }}>
                     {NUTRITION_STATUS_LABEL[checkIn.nutritionStatus] ?? checkIn.nutritionStatus}
@@ -483,12 +483,12 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
 
             {isV2 && (checkIn.weeklyWin || checkIn.weeklyChallenge || checkIn.questionForLisa) && (
               <Card>
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Weekly Reflection</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Weekly Reflection</p>
                 {checkIn.weeklyWin && <Section label="Biggest win"><TextBlock text={checkIn.weeklyWin} /></Section>}
                 {checkIn.weeklyChallenge && <Section label="Biggest challenge"><TextBlock text={checkIn.weeklyChallenge} /></Section>}
                 {checkIn.questionForLisa && (
                   <Section label="Question for you">
-                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", color: "#e8c98a", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{checkIn.questionForLisa}</p>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", color: "var(--ca-accent-mark)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{checkIn.questionForLisa}</p>
                   </Section>
                 )}
               </Card>
@@ -501,7 +501,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                 {checkIn.struggles && <Section label="Struggles"><TextBlock text={checkIn.struggles} /></Section>}
                 {checkIn.questionsForCoach && (
                   <Section label="Questions for You">
-                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "#e8c98a", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{checkIn.questionsForCoach}</p>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", color: "var(--ca-accent-mark)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{checkIn.questionsForCoach}</p>
                   </Section>
                 )}
                 {checkIn.additionalNotes && <Section label="Additional Notes"><TextBlock text={checkIn.additionalNotes} /></Section>}
@@ -511,8 +511,8 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
         </div>
 
         {/* Feedback composer (unchanged) */}
-        <div style={{ background: "#161616", border: `1px solid ${reviewed ? "#3a3820" : `${gold}44`}`, borderRadius: 8, padding: "1.5rem", marginTop: "1.5rem" }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
+        <div style={{ background: "var(--ca-raised)", border: `1px solid ${reviewed ? "var(--ca-accent-tint)" : `color-mix(in srgb, ${gold} 27%, transparent)`}`, borderRadius: 8, padding: "1.5rem", marginTop: "1.5rem" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
             {reviewed ? `Your Feedback · ${checkIn.reviewedAt ? formatDate(checkIn.reviewedAt) : ""}` : "Write Feedback"}
           </p>
           <textarea
@@ -521,7 +521,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             placeholder="Write your feedback for this client. Be specific — what's working, what to adjust, encouragement..."
             rows={8}
             style={{
-              width: "100%", background: "#111", border: `1px solid ${border}`, borderRadius: 6,
+              width: "100%", background: "var(--ca-surface)", border: `1px solid ${border}`, borderRadius: 6,
               color: cream, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.875rem",
               lineHeight: 1.6, padding: "0.875rem 1rem", resize: "vertical", outline: "none", boxSizing: "border-box",
             }}
@@ -529,7 +529,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1rem", flexWrap: "wrap", gap: 12 }}>
             <div>
               {saved && (
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#5c9e6a", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-ok)", margin: 0 }}>
                   ✓ Feedback sent — client notified
                 </p>
               )}
@@ -545,8 +545,8 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                 onClick={sendFeedback}
                 disabled={saving || !feedback.trim()}
                 style={{
-                  background: feedback.trim() ? gold : "#2a2a2a", border: "none",
-                  color: feedback.trim() ? "#111" : muted, padding: "10px 24px",
+                  background: feedback.trim() ? gold : "var(--ca-line)", border: "none",
+                  color: feedback.trim() ? "var(--ca-surface)" : muted, padding: "10px 24px",
                   fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 700,
                   cursor: feedback.trim() ? "pointer" : "not-allowed", borderRadius: 4, transition: "background 0.15s",
                 }}

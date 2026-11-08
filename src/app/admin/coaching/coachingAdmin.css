@@ -184,12 +184,26 @@ a.ca-row:active { background: var(--ca-accent-tint); }
   .ca-desknav .ca-spacer { flex: 1; }
 }
 
-/* Old client sub-pages embedded under the workspace header */
-.ca-client-legacy > div { min-height: 0 !important; }
-@media (min-width: 769px) {
-  .ca-client-legacy > div { padding-left: 0 !important; padding-right: 0 !important; padding-top: 0 !important; background: transparent !important; }
-}
+/* Client sub-pages render under the workspace header: drop their own page
+   padding and grounds so they sit on the shared surface. */
+.ca { --ca-ok-tint: rgba(92, 158, 106, 0.14); }
+.ca-client-embed > div { min-height: 0 !important; padding-left: 0 !important; padding-right: 0 !important; padding-top: 0 !important; background: transparent !important; max-width: none !important; }
+.ca-client-embed input, .ca-client-embed textarea, .ca-client-embed select { color: var(--ca-text); background-color: var(--ca-surface); border-color: var(--ca-line); }
 @media (max-width: 768px) {
-  .ca-client-legacy { margin: 0 -16px; padding: 0 16px 16px; min-height: 0; }
-  .ca-client-legacy > div { padding: 0 !important; }
+  .ca-client-embed input, .ca-client-embed textarea, .ca-client-embed select { font-size: 16px; }
+}
+
+@media (min-width: 1024px) {
+  .ca-dash > section:first-child { position: sticky; top: 16px; }
+}
+
+.ca-facts > a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+@media (max-width: 768px) {
+  .ca-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ca-facts:not([data-tab="overview"]) { display: none; }
+}
+/* The tab already names the section; old page titles stay for screen readers only. */
+.ca-client-embed h1 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (max-width: 768px) {
+  .ca input, .ca textarea, .ca select { font-size: 16px !important; }
 }

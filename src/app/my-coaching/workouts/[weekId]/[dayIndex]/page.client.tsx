@@ -7,7 +7,7 @@ import Link from "next/link"
 import { expandedWeeks } from "@/lib/programExpansion"
 import { newSubmissionId, submitFailureMessage, submitWorkoutLog } from "@/lib/workoutSubmit"
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
-import { cdnUrl } from "@/lib/cdnUrl"
+import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -306,7 +306,7 @@ function WarmupCooldownDisplay({
                     {videoKey ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={cdnThumb(videoKey)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={cdnThumb(videoKey)} onError={thumbFallback} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.18)" }}>
                           <div style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>
@@ -838,7 +838,7 @@ function ExerciseBlock({
           {videoKey ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cdnThumb(videoKey)} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={cdnThumb(videoKey)} onError={thumbFallback} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.15)" }}>
                 <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>

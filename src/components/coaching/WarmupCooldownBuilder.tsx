@@ -4,6 +4,7 @@ import { useState } from "react"
 import ExerciseSearchModal from "./ExerciseSearchModal"
 import type { SearchExercise } from "./ExerciseSearchModal"
 import type { ProgramExercise } from "./ExerciseRow"
+import { thumbFallback } from "@/lib/cdnUrl"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -38,7 +39,7 @@ function DrillRow({
         <div style={{ width: 36, height: 36, flexShrink: 0 }}>
           {ex.videoS3Key && (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={cdnThumb(ex.videoS3Key)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={cdnThumb(ex.videoS3Key)} onError={thumbFallback} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           )}
         </div>
         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "#f0e6d3", flex: 1 }}>{ex.name}</span>

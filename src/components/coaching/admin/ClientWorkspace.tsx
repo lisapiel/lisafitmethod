@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect, useRef } from "react"
 import { useParams, usePathname } from "next/navigation"
 import type { CoachingOverview } from "@/lib/coachingOverview"
 import { StatusChip, WeekDots, dayCount, initials } from "./AdminUi"
@@ -17,7 +18,6 @@ const TABS = [
   { seg: "messages", label: "Messages" },
   { seg: "notes", label: "Notes" },
 ]
-const NATIVE_TABS = new Set(["check-ins"])
 
 export default function ClientWorkspace({ children }: { children: React.ReactNode }) {
   const params = useParams<{ email: string }>()
@@ -38,6 +38,11 @@ export default function ClientWorkspace({ children }: { children: React.ReactNod
     { seg: "messages", value: c.messages.needsReply ? "Awaiting reply" : c.messages.threadId ? "Answered" : "No messages", label: c.messages.unread > 0 ? `${c.messages.unread} unread` : "Messages" },
   ] : []
 
+  const tabsRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    tabsRef.current?.querySelector<HTMLElement>("[aria-current=page]")?.scrollIntoView({ block: "nearest", inline: "nearest" })
+  }, [current])
+
   const badgeFor = (seg: string) => !c ? 0 : seg === "messages" ? c.messages.unread : seg === "check-ins" && c.checkIn.state === "pending" ? 1 : 0
 
   return (
@@ -53,22 +58,22 @@ export default function ClientWorkspace({ children }: { children: React.ReactNod
       </header>
 
       {facts.length > 0 && (
-        <nav className="ca-facts" aria-label="At a glance">
+        <nav className="ca-facts" data-tab={current || "overview"} aria-label="At a glance">
           {facts.map((f) => (
-            <Link key={f.seg} href={`${base}/${f.seg}`} className="ca-fact"><b>{f.value}</b><span className="ca-trunc">{f.label}</span></Link>
+            <Link key={f.seg} href={`${base}/${f.seg}`} replace className="ca-fact"><b>{f.value}</b><span className="ca-trunc">{f.label}</span></Link>
           ))}
         </nav>
       )}
 
-      <nav className="ca-tabs" aria-label="Client sections">
+      <nav ref={tabsRef} className="ca-tabs" aria-label="Client sections">
         {TABS.map((t) => (
-          <Link key={t.seg} href={t.seg ? `${base}/${t.seg}` : base} className="ca-tab" aria-current={current === t.seg ? "page" : undefined}>
+          <Link key={t.seg} href={t.seg ? `${base}/${t.seg}` : base} replace scroll={false} className="ca-tab" aria-current={current === t.seg ? "page" : undefined}>
             {t.label}{badgeFor(t.seg) > 0 && <span className="ca-badge">{badgeFor(t.seg)}</span>}
           </Link>
         ))}
       </nav>
 
-      {NATIVE_TABS.has(current) ? children : <div className="ca-legacy ca-client-legacy">{children}</div>}
+      <div className="ca-client-embed">{children}</div>
     </div>
   )
 }

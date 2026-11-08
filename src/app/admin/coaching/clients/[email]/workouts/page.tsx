@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
-import { cdnUrl } from "@/lib/cdnUrl"
+import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
 
-const gold = "#c9a96e"
-const border = "#2a2a2a"
-const cream = "#f0e6d3"
-const muted = "#888"
-const green = "#5c9e6a"
-const red = "#d97460"
+const gold = "var(--ca-accent-mark)"
+const border = "var(--ca-line)"
+const cream = "var(--ca-text)"
+const muted = "var(--ca-muted)"
+const green = "var(--ca-ok)"
+const red = "var(--ca-warn)"
 const CDN = process.env.NEXT_PUBLIC_AMBRISA_CDN_URL ?? ""
 
 type SetEntry = {
@@ -238,8 +238,8 @@ function ExerciseProgressCard({ trends }: { trends: ExerciseTrend[] }) {
   const shown = trends.slice(0, 10)
 
   return (
-    <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1.25rem" }}>
-      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
+    <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1.25rem" }}>
+      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
         Progress by exercise
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -256,7 +256,7 @@ function ExerciseProgressCard({ trends }: { trends: ExerciseTrend[] }) {
             ? "stable"
             : `${primaryDelta > 0 ? "+" : ""}${primaryDelta.toFixed(primaryDelta % 1 ? 1 : 0)} ${primaryUnit}`
           return (
-            <div key={t.exerciseId} style={{ padding: "8px 10px", background: "#0f0f0f", border: `1px solid ${border}`, borderLeft: `3px solid ${arrowColor}` }}>
+            <div key={t.exerciseId} style={{ padding: "8px 10px", background: "var(--ca-surface)", border: `1px solid ${border}`, borderLeft: `3px solid ${arrowColor}` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
                 <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 600, color: cream, minWidth: 0, flex: "1 1 140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {t.name}
@@ -267,19 +267,19 @@ function ExerciseProgressCard({ trends }: { trends: ExerciseTrend[] }) {
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
                 {showWeight && (
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted }}>
-                    <span style={{ color: "#555", textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.08em" }}>Weight </span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted }}>
+                    <span style={{ color: "var(--ca-muted)", textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.08em" }}>Weight </span>
                     {t.firstWeight} → {t.latestWeight}
                   </span>
                 )}
                 {showReps && (
-                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted }}>
-                    <span style={{ color: "#555", textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.08em" }}>Reps </span>
+                  <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted }}>
+                    <span style={{ color: "var(--ca-muted)", textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.08em" }}>Reps </span>
                     {t.firstReps} → {t.latestReps}
                   </span>
                 )}
-                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted }}>
-                  <span style={{ color: "#555", textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.08em" }}>Sessions </span>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted }}>
+                  <span style={{ color: "var(--ca-muted)", textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.08em" }}>Sessions </span>
                   {t.sessions}
                 </span>
               </div>
@@ -288,7 +288,7 @@ function ExerciseProgressCard({ trends }: { trends: ExerciseTrend[] }) {
         })}
       </div>
       {trends.length > shown.length && (
-        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: muted, margin: "10px 0 0", textAlign: "center" }}>
+        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: "10px 0 0", textAlign: "center" }}>
           + {trends.length - shown.length} more exercises tracked
         </p>
       )}
@@ -301,7 +301,7 @@ function ExerciseProgressCard({ trends }: { trends: ExerciseTrend[] }) {
 function ProgressPreview({ progress }: { progress: WeekProgress }) {
   if (!progress.hasData) {
     return (
-      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.5rem", marginBottom: "1.25rem", textAlign: "center" }}>
+      <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, padding: "1.5rem", marginBottom: "1.25rem", textAlign: "center" }}>
         <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.1rem", color: muted, margin: 0 }}>
           No workouts logged yet.
         </p>
@@ -309,24 +309,24 @@ function ProgressPreview({ progress }: { progress: WeekProgress }) {
     )
   }
   return (
-    <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1.25rem" }}>
-      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
+    <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, padding: "1.25rem 1.5rem", marginBottom: "1.25rem" }}>
+      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
         This week vs last
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
         <div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 3px" }}>Workouts</p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 3px" }}>Workouts</p>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.6rem", color: cream, margin: 0, lineHeight: 1 }}>
             {progress.workoutsThisWeek}
-            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, marginLeft: 8 }}>vs {progress.workoutsLastWeek} last</span>
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, marginLeft: 8 }}>vs {progress.workoutsLastWeek} last</span>
           </p>
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 3px" }}>Volume</p>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 3px" }}>Volume</p>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.6rem", color: cream, margin: 0, lineHeight: 1 }}>
             {Math.round(progress.volumeThisWeek).toLocaleString()}
             {progress.volumeDeltaPct !== null && (
-              <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: progress.volumeDeltaPct >= 0 ? green : red, marginLeft: 8 }}>
+              <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: progress.volumeDeltaPct >= 0 ? green : red, marginLeft: 8 }}>
                 {progress.volumeDeltaPct >= 0 ? "+" : ""}{Math.round(progress.volumeDeltaPct)}%
               </span>
             )}
@@ -336,7 +336,7 @@ function ProgressPreview({ progress }: { progress: WeekProgress }) {
 
       {progress.improvements.length > 0 && (
         <div style={{ marginTop: 10 }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, color: green, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: green, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
             ↑ Improvements
           </p>
           {progress.improvements.map((imp, i) => (
@@ -349,7 +349,7 @@ function ProgressPreview({ progress }: { progress: WeekProgress }) {
 
       {progress.declines.length > 0 && (
         <div style={{ marginTop: 10 }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, color: red, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: red, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
             ↓ Went down
           </p>
           {progress.declines.map((d, i) => (
@@ -428,7 +428,7 @@ function WorkoutCard({
   }
 
   return (
-    <div style={{ background: "#161616", border: `1px solid ${border}`, marginBottom: 10 }}>
+    <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, marginBottom: 10 }}>
       <button
         onClick={() => setOpen((v) => !v)}
         style={{
@@ -441,22 +441,22 @@ function WorkoutCard({
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: cream, margin: "0 0 3px" }}>
             {formatDate(log.completedAt)} · {log.dayLabel}
           </p>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: muted, margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: 0 }}>
             Week {log.weekNumber} · {exerciseCount} exercises · {completedSets}/{totalSets} sets{log.overallRpe ? ` · RPE ${log.overallRpe}` : ""}
           </p>
           {log.clientNotes && (
-            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#aaa", margin: "3px 0 0", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: "3px 0 0", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               &ldquo;{log.clientNotes.length > 70 ? log.clientNotes.slice(0, 70) + "…" : log.clientNotes}&rdquo;
             </p>
           )}
         </div>
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
           {log.coachFeedback ? (
-            <span style={{ background: gold, color: "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.08em", padding: "3px 8px" }}>
+            <span style={{ background: gold, color: "var(--ca-on-accent)", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em", padding: "3px 8px" }}>
               ✓ FEEDBACK
             </span>
           ) : (
-            <span style={{ border: `1px solid ${border}`, color: muted, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.08em", padding: "3px 8px" }}>
+            <span style={{ border: `1px solid ${border}`, color: muted, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em", padding: "3px 8px" }}>
               NO FEEDBACK
             </span>
           )}
@@ -471,12 +471,12 @@ function WorkoutCard({
           {byExercise.map(([id, ex]) => {
             const p = prescribed.get(id)
             return (
-              <div key={id} style={{ marginTop: 12, background: "#0f0f0f", border: `1px solid ${border}`, padding: "10px 12px" }}>
+              <div key={id} style={{ marginTop: 12, background: "var(--ca-surface)", border: `1px solid ${border}`, padding: "10px 12px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   {p?.videoS3Key && (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                      src={cdnUrl(CDN, p.videoS3Key.replace(/\.mp4$/i, ".jpg"))}
+                      src={cdnUrl(CDN, p.videoS3Key.replace(/\.mp4$/i, ".jpg"))} onError={thumbFallback}
                       alt=""
                       style={{ width: 32, height: 32, objectFit: "cover", flexShrink: 0 }}
                     />
@@ -486,7 +486,7 @@ function WorkoutCard({
                       {ex.name}
                     </p>
                     {p && (
-                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: muted, margin: "2px 0 0" }}>
+                      <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: "2px 0 0" }}>
                         Prescribed: {p.sets}×{p.reps}{p.weight ? ` @ ${p.weight}` : ""}{p.rpe ? ` RPE ${p.rpe}` : ""}
                       </p>
                     )}
@@ -494,16 +494,16 @@ function WorkoutCard({
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 1fr 40px", gap: 6, alignItems: "center", padding: "4px 0", borderBottom: `1px solid ${border}` }}>
                   {["Set", "Weight", "Reps", "RPE", "✓"].map((h) => (
-                    <span key={h} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.5rem", fontWeight: 700, color: muted, letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</span>
+                    <span key={h} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: muted, letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</span>
                   ))}
                 </div>
                 {ex.entries.map((s, i) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 1fr 40px", gap: 6, alignItems: "center", padding: "5px 0", borderBottom: i === ex.entries.length - 1 ? "none" : `1px solid #1e1e1e` }}>
-                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted }}>{s.setNumber}</span>
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 1fr 40px", gap: 6, alignItems: "center", padding: "5px 0", borderBottom: i === ex.entries.length - 1 ? "none" : `1px solid var(--ca-raised)` }}>
+                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted }}>{s.setNumber}</span>
                     <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: cream, fontWeight: 600 }}>{s.weight || "—"}</span>
                     <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: cream, fontWeight: 600 }}>{s.reps || "—"}</span>
                     <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted }}>{s.rpe || "—"}</span>
-                    <span style={{ color: s.completed ? green : "#444", fontSize: "0.8rem" }}>{s.completed ? "✓" : "○"}</span>
+                    <span style={{ color: s.completed ? green : "var(--ca-muted)", fontSize: "0.8rem" }}>{s.completed ? "✓" : "○"}</span>
                   </div>
                 ))}
               </div>
@@ -511,8 +511,8 @@ function WorkoutCard({
           })}
 
           {log.clientNotes && (
-            <div style={{ marginTop: 14, padding: "10px 12px", borderLeft: `2px solid ${gold}`, background: "#0f0f0f" }}>
-              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, color: gold, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
+            <div style={{ marginTop: 14, padding: "10px 12px", borderLeft: `2px solid ${gold}`, background: "var(--ca-surface)" }}>
+              <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: gold, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>
                 Client note
               </p>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: cream, margin: 0, fontStyle: "italic", lineHeight: 1.5 }}>
@@ -524,11 +524,11 @@ function WorkoutCard({
           {/* Coach feedback textarea */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: gold }}>
+              <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: gold }}>
                 Comment for the client on this workout
               </label>
               {log.coachFeedbackAt && (
-                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", color: muted, letterSpacing: "0.08em" }}>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, letterSpacing: "0.08em" }}>
                   sent {daysAgo(log.coachFeedbackAt)}
                 </span>
               )}
@@ -539,7 +539,7 @@ function WorkoutCard({
               rows={3}
               placeholder="e.g. Great work — bump squat to 145 next week, drop RPE target to 8."
               style={{
-                width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: cream,
+                width: "100%", background: "var(--ca-bg)", border: `1px solid ${border}`, color: cream,
                 padding: "10px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem",
                 outline: "none", resize: "vertical", boxSizing: "border-box", lineHeight: 1.5,
               }}
@@ -549,16 +549,16 @@ function WorkoutCard({
                 onClick={saveFeedback}
                 disabled={saving}
                 style={{
-                  background: saving ? "#555" : gold, color: "#0a0a0a", border: "none",
+                  background: saving ? "var(--ca-muted)" : gold, color: "var(--ca-on-accent)", border: "none",
                   padding: "8px 18px", fontFamily: "var(--font-montserrat), sans-serif",
-                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                  fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
                   cursor: saving ? "wait" : "pointer",
                 }}
               >
                 {saving ? "Saving…" : log.coachFeedback ? "Update comment" : "Send comment"}
               </button>
               {savedFlash && (
-                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: green, fontWeight: 600 }}>
+                <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: green, fontWeight: 600 }}>
                   ✓ Saved
                 </span>
               )}
@@ -630,7 +630,7 @@ export default function AdminClientWorkoutsPage() {
   if (loading) {
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "3rem", color: muted }}>
-        <div style={{ width: 18, height: 18, border: "2px solid #2a2a2a", borderTop: `2px solid ${gold}`, borderRadius: "50%", animation: "spin 0.7s linear infinite" }}>
+        <div style={{ width: 18, height: 18, border: "2px solid var(--ca-line)", borderTop: `2px solid ${gold}`, borderRadius: "50%", animation: "spin 0.7s linear infinite" }}>
           <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         </div>
         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem" }}>Loading…</span>
@@ -651,7 +651,7 @@ export default function AdminClientWorkoutsPage() {
       <ExerciseProgressCard trends={exerciseTrends} />
 
       {logs.length === 0 ? (
-        <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "2.5rem", textAlign: "center" }}>
+        <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, padding: "2.5rem", textAlign: "center" }}>
           <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.2rem", color: muted, margin: 0 }}>
             No workouts logged yet.
           </p>
