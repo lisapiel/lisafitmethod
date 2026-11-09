@@ -27,6 +27,8 @@ export type AdminSnapshot = {
 
 export type Macros = { calories: number; protein: number; carbs: number; fat: number }
 
+export type WeighInEstimate = { weighIn: { at: string; lbs: number }; macros: Macros }
+
 export type DayState = "logged" | "recovered" | "partial" | "empty"
 
 export type DayInfo = {

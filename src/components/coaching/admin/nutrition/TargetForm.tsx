@@ -15,12 +15,13 @@ const FIELDS = [
 
 type Draft = Record<keyof Macros, string>
 
-export function TargetForm({ email, current, onSaved, onCancel }: { email: string; current: Macros | null; onSaved: () => void; onCancel: () => void }) {
+export function TargetForm({ email, current, initial, onSaved, onCancel }: { email: string; current: Macros | null; initial?: Macros | null; onSaved: () => void; onCancel: () => void }) {
+  const start = initial ?? current
   const [draft, setDraft] = useState<Draft>({
-    calories: current ? String(current.calories) : "",
-    protein: current ? String(current.protein) : "",
-    carbs: current ? String(current.carbs) : "",
-    fat: current ? String(current.fat) : "",
+    calories: start ? String(start.calories) : "",
+    protein: start ? String(start.protein) : "",
+    carbs: start ? String(start.carbs) : "",
+    fat: start ? String(start.fat) : "",
   })
   const [reason, setReason] = useState("")
   const [step, setStep] = useState<"edit" | "confirm">("edit")

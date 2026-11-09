@@ -22,6 +22,11 @@ export function dateTime(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
+export function weighInDay(at: string): string {
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(at) ? keyToDate(at) : new Date(at)
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
 export function plural(n: number, one: string, many = `${one}s`): string {
   return `${n} ${n === 1 ? one : many}`
 }

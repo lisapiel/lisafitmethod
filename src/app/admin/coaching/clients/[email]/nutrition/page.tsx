@@ -5,6 +5,8 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
+import { estimateAtLatestWeighIn } from "@/lib/startingWeight"
+import { buildWeightHistory } from "@/lib/weightHistory"
 import type { CoachingClientRecord, NutritionLogRecord } from "@/lib/authTokens"
 import { localDateKey, addDaysToKey } from "@/lib/localDate"
 import { buildDailyTotals, type MacroTarget } from "@/lib/nutritionAnalytics"
@@ -69,6 +71,10 @@ export default function AdminClientNutritionPage() {
   const effective = useMemo(() => (client ? resolveMacrosFor(client) : null), [client])
   const starting = useMemo(() => (client ? pickMacros(resolveMacrosFor({ ...client, customMacros: undefined })) : null), [client])
   const currentTarget = useMemo(() => pickMacros(effective), [effective])
+  const review = useMemo(
+    () => (client ? estimateAtLatestWeighIn(client, buildWeightHistory({ checkIns, logged: snapshots })) : null),
+    [client, checkIns, snapshots],
+  )
 
   const todayKey = localDateKey()
   const days = useMemo(() => {
@@ -110,11 +116,11 @@ export default function AdminClientNutritionPage() {
         </div>
         <div className="can-col">
           <div className="can-o5">
-            <TargetCard email={emailParam} current={currentTarget} isCustom={effective?.source === "override"} starting={starting} onChanged={load} />
+            <TargetCard email={emailParam} current={currentTarget} isCustom={effective?.source === "override"} starting={starting} review={review} onChanged={load} />
           </div>
           <div className="can-o3"><WeightCard client={client} checkIns={checkIns} /></div>
           <div className="can-o6"><RecoverySection email={emailParam} onLogsChanged={load} /></div>
-          <div className="can-o7"><BodyDataCard client={client} email={emailParam} snapshots={snapshots} checkIns={checkIns} /></div>
+          <div className="can-o7"><BodyDataCard client={client} email={emailParam} snapshots={snapshots} checkIns={checkIns} onChanged={load} /></div>
         </div>
       </div>
     </div>
