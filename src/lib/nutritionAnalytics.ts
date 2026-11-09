@@ -84,6 +84,10 @@ export interface DailyTotals {
   entryCount: number
   target?: MacroTarget         // the target this day's adherence is scored against
   logged: boolean              // true iff entryCount > 0
+  // A macro total is only "known" when every entry that day carries it. A
+  // missing value is unknown, never zero, so partial days are kept out of
+  // that macro's averages instead of dragging them down.
+  known: { protein: boolean; carbs: boolean; fat: boolean }
 }
 
 export function groupLogsByDay(logs: NutritionLogRecord[]): Map<LocalDateKey, NutritionLogRecord[]> {
@@ -109,6 +113,7 @@ export function buildDailyTotals(args: {
   const byDay = groupLogsByDay(logs)
   return keyRange(from, to).map((date) => {
     const dayLogs = byDay.get(date) ?? []
+    const has = (k: "protein" | "carbs" | "fat") => dayLogs.length > 0 && dayLogs.every((l) => typeof l[k] === "number" && Number.isFinite(l[k]))
     const calories = dayLogs.reduce((a, l) => a + (l.calories || 0), 0)
     const protein = dayLogs.reduce((a, l) => a + (l.protein || 0), 0)
     const carbs = dayLogs.reduce((a, l) => a + (l.carbs ?? 0), 0)
@@ -123,6 +128,7 @@ export function buildDailyTotals(args: {
       entryCount: dayLogs.length,
       target,
       logged: dayLogs.length > 0,
+      known: { protein: has("protein"), carbs: has("carbs"), fat: has("fat") },
     }
   })
 }
@@ -134,6 +140,9 @@ export interface PeriodSummary {
   expectedDays: number
   loggingAdherence: number          // 0..1
   avg: { calories: number; protein: number; carbs: number; fat: number } | null
+  // How many days each average is based on. A macro with 0 days has no
+  // average (its value in `avg` is 0 and must be shown as "not logged").
+  avgDays: { calories: number; protein: number; carbs: number; fat: number }
   // Adherence per macro = fraction of LOGGED days where intake met or exceeded
   // target × 0.95 (allows a small-rounding "close enough"). Null when no
   // logged days.
@@ -159,14 +168,23 @@ export function summarizePeriod(args: {
   const logged = dailies.filter((d) => d.logged)
   const loggedDays = logged.length
 
+  const knownDays = (k: "protein" | "carbs" | "fat") => logged.filter((d) => d.known?.[k] ?? true)
+  const mean = (days: DailyTotals[], k: "calories" | "protein" | "carbs" | "fat") =>
+    days.length === 0 ? 0 : Math.round(days.reduce((a, d) => a + d[k], 0) / days.length)
   const avg = loggedDays === 0
     ? null
     : {
-        calories: Math.round(logged.reduce((a, d) => a + d.calories, 0) / loggedDays),
-        protein: Math.round(logged.reduce((a, d) => a + d.protein, 0) / loggedDays),
-        carbs: Math.round(logged.reduce((a, d) => a + d.carbs, 0) / loggedDays),
-        fat: Math.round(logged.reduce((a, d) => a + d.fat, 0) / loggedDays),
+        calories: mean(logged, "calories"),
+        protein: mean(knownDays("protein"), "protein"),
+        carbs: mean(knownDays("carbs"), "carbs"),
+        fat: mean(knownDays("fat"), "fat"),
       }
+  const avgDays = {
+    calories: loggedDays,
+    protein: knownDays("protein").length,
+    carbs: knownDays("carbs").length,
+    fat: knownDays("fat").length,
+  }
 
   // Macro adherence — only over LOGGED days. A client never gets dinged for
   // not logging; that's the loggingAdherence number.
@@ -184,7 +202,7 @@ export function summarizePeriod(args: {
       else if (kcalDelta < 0) under += 1
       else over += 1
       // Protein "met" when ≥ PROTEIN_MET_DAILY_FRACTION of target.
-      if (d.protein >= t.protein * ANALYTICS_THRESHOLDS.PROTEIN_MET_DAILY_FRACTION) met += 1
+      if ((d.known?.protein ?? true) && d.protein >= t.protein * ANALYTICS_THRESHOLDS.PROTEIN_MET_DAILY_FRACTION) met += 1
     }
     calBuckets = { underTarget: under, onTarget: on, overTarget: over }
     proteinMet = { met }
@@ -197,6 +215,7 @@ export function summarizePeriod(args: {
     expectedDays,
     loggingAdherence: expectedDays === 0 ? 0 : loggedDays / expectedDays,
     avg,
+    avgDays,
     macroAdherence: {
       calories: calBuckets,
       protein: proteinMet,

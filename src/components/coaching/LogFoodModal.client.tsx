@@ -25,9 +25,14 @@ export interface LogFoodModalProps {
   // original record are preserved server-side (the PATCH route only accepts
   // mutable fields). Prevents the modal from ever producing a duplicate log.
   editLogId?: string
+  // Recent entries, used only to warn before saving an exact repeat.
+  recentLogs?: NutritionLogRecord[]
 }
 
-export default function LogFoodModal({ open, onClose, onLogged, initialMealType, prefill, editLogId }: LogFoodModalProps) {
+export default function LogFoodModal({ open, onClose, onLogged, initialMealType, prefill, editLogId, recentLogs = [] }: LogFoodModalProps) {
+  const todayKey = localDateKey(new Date(), resolveTimeZone())
+  const [day, setDay] = useState(todayKey)
+  const [repeatOk, setRepeatOk] = useState(false)
   const [mode, setMode] = useState<Mode>(initialMealType ? "meal" : "quick")
   const [mealType, setMealType] = useState<MealType>(initialMealType ?? "breakfast")
   const [calories, setCalories] = useState("")
@@ -120,7 +125,15 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
 
     // CREATE mode — new log.
     const timeZone = resolveTimeZone()
-    const date = localDateKey(new Date(), timeZone)
+    const date = day && day <= todayKey ? day : todayKey
+    const sameLabel = (l: NutritionLogRecord) => (l.mealType ?? null) === (mode === "meal" ? mealType : null)
+    const repeat = recentLogs.some((l) => l.date === date && l.calories === Math.round(kcal) && sameLabel(l) && Date.now() - Date.parse(l.loggedAt) < 10 * 60_000)
+    if (repeat && !repeatOk) {
+      setRepeatOk(true)
+      setError("Looks like you just added this. Tap Save again if you want it twice.")
+      setSaving(false)
+      return
+    }
     const body = {
       kind: mode,
       mealType: mode === "meal" ? mealType : undefined,
@@ -225,6 +238,14 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
           </div>
         )}
 
+        {!isEdit && (
+          <div style={{ marginBottom: 12 }}>
+            <label htmlFor="log-day" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8125rem", fontWeight: 600, color: black, display: "block", marginBottom: 4 }}>Day</label>
+            <input id="log-day" type="date" value={day} max={todayKey} onChange={(e) => { setDay(e.target.value); setRepeatOk(false) }}
+              style={{ background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", borderRadius: 8, minHeight: 44 }} />
+          </div>
+        )}
+
         {/* Fields */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
           <Field label="Calories" required value={calories} onChange={setCalories} placeholder="e.g. 450" />
@@ -274,6 +295,10 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
             Cancel
           </button>
         </div>
+
+        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8125rem", color: muted, lineHeight: 1.5, margin: "12px 0 0" }}>
+          Keep it simple! You can log your daily totals all at once at the end of the day, or add meals and snacks throughout the day. Whatever works best for you 😊
+        </p>
       </div>
     </div>
   )

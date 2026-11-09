@@ -9,6 +9,8 @@ import type { CoachingClientRecord, NutritionLogRecord } from "@/lib/authTokens"
 import NutritionComposer from "@/components/coaching/NutritionComposer.client"
 import { ChevronDown, ChevronRight } from "@/components/portal/PortalIcons"
 import LogFoodModal from "@/components/coaching/LogFoodModal.client"
+import FoodToday from "@/components/portal/FoodToday"
+import FoodWeek from "@/components/portal/FoodWeek"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
 import { buildDailyTotals, summarizePeriod, recentRepeatedMeals, type DailyTotals, type MacroTarget, type RepeatedMeal } from "@/lib/nutritionAnalytics"
 
@@ -115,10 +117,8 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
     return row ?? null
   }, [todayLogs, todayKey, currentTarget, macros])
 
-  const weekSummary = useMemo(() => {
-    const dailies = buildDailyTotals({ logs, from: weekFrom, to: todayKey, currentTarget })
-    return summarizePeriod({ dailies, today: todayKey })
-  }, [logs, weekFrom, todayKey, currentTarget])
+  const weekDailies = useMemo(() => buildDailyTotals({ logs, from: weekFrom, to: todayKey, currentTarget }), [logs, weekFrom, todayKey, currentTarget])
+  const weekSummary = useMemo(() => summarizePeriod({ dailies: weekDailies, today: todayKey }), [weekDailies, todayKey])
 
   const mealsLoggedToday = useMemo(() => {
     const set = new Set<string>()
@@ -197,56 +197,11 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   return (
     <div className="pt" style={{ maxWidth: 680 }}>
       <header className="pt-hello" style={{ marginBottom: "1rem" }}>
-        <h1>Nutrition</h1>
+        <h1>Food</h1>
         <p className="pt-date">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
       </header>
 
-      {/* TODAY — intake vs target. Calories + Protein are the stronger
-          hierarchy. Carbs + Fat are secondary. Source badge mirrors the
-          admin "Set by Lisa / Auto" wording so there is no ambiguity about
-          whose target the client is following. */}
-      <div style={{ background: black, color: white, borderRadius: 8, padding: "1.5rem 1.5rem", marginBottom: "0.75rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: 0 }}>
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
-          </p>
-          {macros.source === "override" ? (
-            <span style={{ background: accent, color: black, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", padding: "3px 8px", borderRadius: 3, textTransform: "uppercase" }}>
-              Set by Lisa
-            </span>
-          ) : (
-            <span style={{ color: "#a4a09a", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem" }}>
-              Auto from your profile
-            </span>
-          )}
-        </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
-          <span style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2.4rem", fontWeight: 700, lineHeight: 1 }}>
-            {(todayTotals?.calories ?? 0).toLocaleString()}
-          </span>
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.95rem", color: "#c9c4bd" }}>
-            / {macros.calories.toLocaleString()} kcal
-          </span>
-        </div>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.95rem", color: "#c9c4bd", margin: "0 0 14px" }}>
-          <strong style={{ color: white }}>{todayTotals?.protein ?? 0}</strong> / {macros.protein}g protein
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-          {[
-            { label: "Carbs", have: todayTotals?.carbs ?? 0, target: macros.carbs },
-            { label: "Fat",   have: todayTotals?.fat ?? 0,   target: macros.fat },
-          ].map((m) => (
-            <div key={m.label} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 6, padding: "9px 12px" }}>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", color: accent, textTransform: "uppercase", margin: "0 0 3px" }}>
-                {m.label}
-              </p>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: white, margin: 0 }}>
-                <strong>{m.have}</strong> <span style={{ color: "#a4a09a" }}>/ {m.target}g</span>
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <FoodToday logs={todayLogs} totals={todayTotals} target={{ calories: macros.calories, protein: macros.protein, carbs: macros.carbs, fat: macros.fat }} setByLisa={macros.source === "override"} />
 
       {/* +LOG FOOD + Meal checklist. The checklist shortcuts straight into
           the structured modal with the right mealType preselected so a
@@ -357,32 +312,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
         </div>
       )}
 
-      {/* THIS WEEK summary — simple 7-day average + days-logged. */}
-      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "1rem" }}>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 10px" }}>
-          This week
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-          <div>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Avg kcal</p>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>
-              {weekSummary.avg ? weekSummary.avg.calories.toLocaleString() : "—"}
-            </p>
-          </div>
-          <div>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Avg protein</p>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>
-              {weekSummary.avg ? `${weekSummary.avg.protein}g` : "—"}
-            </p>
-          </div>
-          <div>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 3px" }}>Days logged</p>
-            <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", fontWeight: 700, color: black, margin: 0 }}>
-              {weekSummary.loggedDays} / {weekSummary.expectedDays}
-            </p>
-          </div>
-        </div>
-      </div>
+      <FoodWeek days={weekDailies} summary={weekSummary} target={{ calories: macros.calories, protein: macros.protein }} todayKey={todayKey} />
 
       {/* Recent / repeated meals — one-tap re-log of common foods */}
       {repeats.length > 0 && (
@@ -429,6 +359,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
       )}
 
       <LogFoodModal
+        recentLogs={logs}
         open={logOpen.open}
         onClose={() => setLogOpen({ open: false })}
         initialMealType={logOpen.mealType}

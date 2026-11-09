@@ -10,6 +10,7 @@ import { expandedWeeks } from "@/lib/programExpansion"
 import { checkInStatus as checkInState, type PortalWeek } from "@/lib/portalProgram"
 import UpNextCard from "@/components/portal/UpNextCard"
 import CoachNote from "@/components/portal/CoachNote"
+import HomeGlance from "@/components/portal/HomeGlance"
 import { ChevronRight } from "@/components/portal/PortalIcons"
 
 
@@ -222,11 +223,6 @@ export default function MyCoachingHomeClient() {
   const firstName = clientInfo?.displayName.split(" ")[0] ?? ""
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
 
-  // Sunday-start week, as before.
-  const startOfWeek = new Date()
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
-  startOfWeek.setHours(0, 0, 0, 0)
-  const thisWeekLogs = logs.filter((l) => new Date(l.completedAt) >= startOfWeek)
 
   function isoWeekKey(d: Date) {
     const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
@@ -252,6 +248,15 @@ export default function MyCoachingHomeClient() {
   const nutritionMissing = !!clientInfo && (clientInfo.heightInches == null || clientInfo.age == null || clientInfo.sex == null)
   const macros = clientInfo ? resolveMacrosFor(clientInfo) : null
   const checkIn = checkInState(checkIns.map((c) => c.submittedAt))
+  const weekStrip = (() => {
+    if (!program) return null
+    const wk = nextWorkout?.week ?? program.weeks[program.weeks.length - 1]
+    if (!wk) return null
+    const done = logs.filter((l) => l.programId === program.id && l.weekNumber === wk.weekNumber)
+    const finished = wk.days.filter((d) => done.some((l) => l.dayLabel === d.dayLabel)).length
+    const sportDays = wk.days.map((d, i) => ((d as { dayType?: string }).dayType === "sport" ? i : -1)).filter((i) => i >= 0)
+    return { label: wk.label, finished, total: wk.days.length, sportDays }
+  })()
 
   const latestFeedback = (() => {
     const withFb = logs.filter((l) => l.coachFeedback && l.coachFeedbackAt)
@@ -312,39 +317,12 @@ export default function MyCoachingHomeClient() {
       </div>
 
       <div className="pt-home-side">
-        <nav className="pt-glance" aria-label="This week">
-          <Link className="pt-fact" href="/my-coaching/workouts">
-            <b>{thisWeekLogs.length}</b>
-            <span>{thisWeekLogs.length === 1 ? "Workout" : "Workouts"} this week</span>
-          </Link>
-          {checkIn.due ? (
-            <Link className="pt-fact" data-tone="due" href="/my-coaching/check-in">
-              <b>Due</b>
-              <span>Weekly check-in</span>
-            </Link>
-          ) : (
-            <Link className="pt-fact" href="/my-coaching/check-in/history">
-              <b className="pt-ok">Done</b>
-              <span>Check-in{checkIn.daysAgo ? `, ${checkIn.daysAgo}d ago` : ", today"}</span>
-            </Link>
-          )}
-          {nutritionMissing ? (
-            <Link className="pt-fact" data-tone="due" href="/my-coaching/setup">
-              <b>Set up</b>
-              <span>Your nutrition targets</span>
-            </Link>
-          ) : macros ? (
-            <Link className="pt-fact" href="/my-coaching/nutrition">
-              <b>{macros.calories.toLocaleString()}</b>
-              <span>Calories · {macros.protein}g protein</span>
-            </Link>
-          ) : (
-            <Link className="pt-fact" href="/my-coaching/nutrition">
-              <b>Food</b>
-              <span>Log today</span>
-            </Link>
-          )}
-        </nav>
+        <HomeGlance
+          week={weekStrip}
+          checkIn={checkIn}
+          target={macros ? { calories: macros.calories, protein: macros.protein } : null}
+          setupNeeded={nutritionMissing}
+        />
 
         {progressBits.length > 0 && (
           <Link className="pt-row" href="/my-coaching/progress">

@@ -6,7 +6,7 @@ import { hasNutritionAccess } from "@/lib/authTokens"
 import NutritionClient from "./page.client"
 
 export const metadata: Metadata = {
-  title: "Nutrition | Lisa Fit Method Coaching",
+  title: "Food | Lisa Fit Method Coaching",
   robots: "noindex, nofollow",
 }
 

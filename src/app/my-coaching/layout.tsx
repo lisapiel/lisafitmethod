@@ -12,7 +12,9 @@ import CoachingClientLayout from "./CoachingLayout.client"
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0a0a",
+  // cover lets env(safe-area-inset-*) work, so the bottom bar clears the iPhone home indicator.
+  viewportFit: "cover",
+  themeColor: "#faf8f5",
 }
 
 export default async function MyCoachingLayout({ children }: { children: React.ReactNode }) {

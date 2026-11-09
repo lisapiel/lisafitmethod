@@ -19,7 +19,7 @@ const border = "#e8e2dc"
 const navLinks = [
   { href: "/my-coaching", label: "Home", exact: true, icon: HomeIcon },
   { href: "/my-coaching/workouts", label: "Workouts", icon: DumbellIcon },
-  { href: "/my-coaching/nutrition", label: "Nutrition", icon: NutritionIcon },
+  { href: "/my-coaching/nutrition", label: "Food", icon: NutritionIcon },
   { href: "/my-coaching/progress", label: "Progress", icon: ChartIcon },
   { href: "/my-coaching/messages", label: "Messages", icon: MessageIcon },
 ]
@@ -462,18 +462,19 @@ export default function CoachingClientLayout({
                 alignItems: "center",
                 gap: "0.2rem",
                 textDecoration: "none",
-                color: active ? accent : muted,
-                padding: "0.35rem 0.25rem",
+                color: active ? "#1a1a1a" : "#57514b",
+                padding: "0.2rem 0.25rem",
+                minHeight: 48,
                 WebkitTapHighlightColor: "transparent",
               }}
             >
-              <span aria-hidden style={{ display: "inline-flex" }}>
+              <span aria-hidden className="coaching-nav-icon" data-active={active ? "" : undefined}>
                 <Icon />
               </span>
               <span style={{
                 fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: "0.68rem",
-                fontWeight: active ? 600 : 500,
+                fontSize: "0.6875rem",
+                fontWeight: active ? 700 : 600,
                 letterSpacing: "0.02em",
                 lineHeight: 1,
                 whiteSpace: "nowrap",

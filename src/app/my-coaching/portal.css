@@ -163,3 +163,51 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 .pt-seg-opt[aria-checked="true"] { background: var(--pt-black); border-color: var(--pt-black); color: #f5f2ee; }
 .pt-error { margin: 0; color: #b4483a; font-size: 0.9375rem; }
 .pt-btn:disabled { background: var(--pt-line); color: var(--pt-muted); cursor: not-allowed; filter: none; transform: none; }
+
+/* Food: rings for today, a 7-day strip below. */
+.pt-food-today { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 22px; padding: 18px 16px 16px; display: grid; justify-items: center; gap: 6px; margin-bottom: 12px; }
+.pt-food-status { margin: 4px 0 0; font-weight: 600; font-size: 0.9375rem; }
+.pt-food-range { margin: 0; font-size: 0.8125rem; color: var(--pt-muted); text-align: center; }
+.pt-food-macros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100%; margin-top: 10px; }
+.pt-food-macro { display: grid; justify-items: center; gap: 1px; text-align: center; }
+.pt-food-macro b { font-size: 0.8125rem; }
+.pt-food-macro span { font-size: 0.75rem; color: var(--pt-muted); }
+.pt-food-macro small { font-size: 0.6875rem; color: var(--pt-muted); }
+.pt-food-week { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; margin-bottom: 12px; }
+.pt-food-week h2 { margin: 0; font-size: 0.9375rem; font-weight: 700; }
+.pt-food-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; }
+.pt-food-days li { display: grid; justify-items: center; gap: 2px; font-size: 0.6875rem; color: var(--pt-muted); }
+.pt-food-avgs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pt-food-avgs div { background: var(--pt-bg); border-radius: 12px; padding: 10px 12px; display: grid; }
+.pt-food-avgs b { font-size: 1.0625rem; }
+.pt-food-avgs span { font-size: 0.75rem; color: var(--pt-muted); }
+.pt-food-foot { margin: 0; font-size: 0.75rem; color: var(--pt-muted); line-height: 1.5; }
+
+/* Bottom bar icons: drawn on a 16-unit grid, shown at 22px; the active tab gets a soft pill. */
+.coaching-nav-icon { display: inline-flex; align-items: center; justify-content: center; padding: 3px 14px; border-radius: 999px; }
+.coaching-nav-icon svg { width: 22px; height: 22px; }
+.coaching-nav-icon[data-active] { background: #f1e6d4; color: #8a6a3e; }
+
+/* Home: week strip, to do, today's food. */
+.pt-glance2 { display: grid; gap: 12px; }
+.pt-week-strip { display: flex; align-items: center; gap: 12px; background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 16px; padding: 12px 16px; text-decoration: none; color: inherit; min-height: 60px; }
+.pt-week-strip > span:first-child { flex: 1; display: grid; }
+.pt-week-strip b { font-size: 0.9375rem; }
+.pt-week-strip span span { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-week-marks { display: flex; gap: 6px; }
+.pt-week-marks i { width: 24px; height: 8px; border-radius: 4px; background: #e6dfd5; display: block; }
+.pt-week-marks i[data-done] { background: #557a5a; }
+.pt-week-marks i[data-sport]:not([data-done]) { background: #efdfc4; }
+.pt-todo { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 16px; overflow: hidden; }
+.pt-todo h2 { margin: 0; padding: 12px 16px 4px; font-size: 0.9375rem; font-weight: 700; }
+.pt-todo-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px 13px; text-decoration: none; color: inherit; min-height: 52px; }
+.pt-todo-row + .pt-todo-row { border-top: 1px solid #f1ece6; }
+.pt-todo-text { flex: 1; display: grid; }
+.pt-todo-text b { font-size: 0.9375rem; font-weight: 600; }
+.pt-todo-text span { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-todo-go { font-weight: 700; font-size: 0.875rem; color: var(--pt-gold-ink); }
+.pt-food-glance { display: flex; align-items: center; gap: 14px; background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 16px; padding: 10px 14px; text-decoration: none; color: inherit; }
+.pt-food-glance-text { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.pt-food-glance-text b { font-size: 0.9375rem; }
+.pt-food-glance-text span { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-caught-up { margin: 0; font-size: 0.8125rem; color: var(--pt-muted); padding: 0 4px; }
