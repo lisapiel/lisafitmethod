@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { buildWeightHistory, summarizeWeight } from "./weightHistory"
+import { buildWeightHistory, formatReading, formatWeighInDay, summarizeWeight, weighInDayKey } from "./weightHistory"
 
 test("a logged weight with no check-ins is the current weight, with no change invented", () => {
   const r = buildWeightHistory({ checkIns: [], logged: [{ snapshotDate: "2026-11-08", weight: 125, weightUnit: "LBS" }] })
@@ -42,4 +42,85 @@ test("mixed units compare in pounds and display in the latest unit", () => {
 test("the same weigh-in recorded twice at the same moment counts once", () => {
   const r = buildWeightHistory({ checkIns: [{ submittedAt: "2026-11-01T10:00:00Z", weight: 130 }, { submittedAt: "2026-11-01T10:00:00Z", weight: 130 }], logged: [] })
   assert.equal(r.length, 1)
+})
+
+// All same-day tests pin the time zone so "local day" doesn't depend on the
+// machine running them. 2026-11-08T23:30:00Z is 6:30 pm on Nov 8 in New York.
+const NY = "America/New_York"
+
+test("a check-in and a logged weight on the same local day with the same weight are one weigh-in", () => {
+  const r = buildWeightHistory({
+    checkIns: [{ submittedAt: "2026-11-08T23:30:00Z", weight: 125, weightUnit: "LBS" }],
+    logged: [{ snapshotDate: "2026-11-08", weight: 125, weightUnit: "LBS" }],
+    timeZone: NY,
+  })
+  assert.equal(r.length, 1)
+  assert.equal(r[0].source, "logged")
+  assert.equal(summarizeWeight(r).count, 1)
+})
+
+test("within 0.2 lb is the same reading, more than that is two", () => {
+  const near = buildWeightHistory({ checkIns: [{ submittedAt: "2026-11-08T15:00:00Z", weight: 125.2 }], logged: [{ snapshotDate: "2026-11-08", weight: 125 }], timeZone: NY })
+  assert.equal(near.length, 1)
+  const far = buildWeightHistory({ checkIns: [{ submittedAt: "2026-11-08T15:00:00Z", weight: 125.4 }], logged: [{ snapshotDate: "2026-11-08", weight: 125 }], timeZone: NY })
+  assert.equal(far.length, 2)
+})
+
+test("same local day with a different weight keeps both", () => {
+  const r = buildWeightHistory({
+    checkIns: [{ submittedAt: "2026-11-08T23:30:00Z", weight: 124, weightUnit: "LBS" }],
+    logged: [{ snapshotDate: "2026-11-08", weight: 125, weightUnit: "LBS" }],
+    timeZone: NY,
+  })
+  assert.equal(r.length, 2)
+})
+
+test("the same weight on different days is two weigh-ins", () => {
+  const r = buildWeightHistory({
+    checkIns: [{ submittedAt: "2026-11-09T15:00:00Z", weight: 125 }],
+    logged: [{ snapshotDate: "2026-11-08", weight: 125 }],
+    timeZone: NY,
+  })
+  assert.equal(r.length, 2)
+})
+
+test("the local day decides, not the UTC day", () => {
+  // 2026-11-09T02:00:00Z is still Nov 8 in New York, so it matches a Nov 8 log.
+  const ny = buildWeightHistory({ checkIns: [{ submittedAt: "2026-11-09T02:00:00Z", weight: 125 }], logged: [{ snapshotDate: "2026-11-08", weight: 125 }], timeZone: NY })
+  assert.equal(ny.length, 1)
+  // In Berlin the same moment is Nov 9, a different day from the log.
+  const berlin = buildWeightHistory({ checkIns: [{ submittedAt: "2026-11-09T02:00:00Z", weight: 125 }], logged: [{ snapshotDate: "2026-11-08", weight: 125 }], timeZone: "Europe/Berlin" })
+  assert.equal(berlin.length, 2)
+})
+
+test("kilograms and pounds for the same reading on the same day count once", () => {
+  // 60 kg = 132.28 lb.
+  const r = buildWeightHistory({
+    checkIns: [{ submittedAt: "2026-11-08T15:00:00Z", weight: 132.3, weightUnit: "LBS" }],
+    logged: [{ snapshotDate: "2026-11-08", weight: 60, weightUnit: "KG" }],
+    timeZone: NY,
+  })
+  assert.equal(r.length, 1)
+  assert.equal(r[0].unit, "KG")
+})
+
+test("check-ins marked same or skipped add no weigh-in, even if a weight came along", () => {
+  const r = buildWeightHistory({
+    checkIns: [
+      { submittedAt: "2026-11-01T15:00:00Z", weight: 126, weightStatus: "new" },
+      { submittedAt: "2026-11-08T15:00:00Z", weightStatus: "same" },
+      { submittedAt: "2026-11-15T15:00:00Z", weight: 999, weightStatus: "same" },
+      { submittedAt: "2026-11-22T15:00:00Z", weight: 124, weightStatus: "skipped" },
+    ],
+    logged: [],
+    timeZone: NY,
+  })
+  assert.deepEqual(r.map((x) => x.lbs), [126])
+})
+
+test("a logged date-only value displays as its own calendar day", () => {
+  assert.equal(formatWeighInDay("2026-11-08"), "Nov 8")
+  assert.equal(weighInDayKey("2026-11-08", "Pacific/Kiritimati"), "2026-11-08")
+  assert.equal(formatReading({ lbs: 125, unit: "LBS" }), "125 lb")
+  assert.equal(formatReading({ lbs: 60 * 2.20462, unit: "KG" }), "60 kg")
 })
