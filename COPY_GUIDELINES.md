@@ -44,7 +44,10 @@ Lisa's own example of the tone:
 Many clients are beginners. Every workout note should make sense to someone
 who has never trained before.
 
-- **Explain a term the first time it appears in a note, then use it freely.**
+- **Explain each term once per program, the first time it appears, then use it freely.**
+  If the term shows on Day 1 (for example the RPE value on exercise cards),
+  explain it in the Day 1 workout note. Don't repeat the definition on later
+  days or later weeks of the same program.
   Explain what it means and what the client should do, not just the acronym.
   - Reps in reserve (RIR): how many more good reps you could still do before
     you'd have to stop. "Stop each set when you could still do 2 more good reps."
@@ -65,8 +68,12 @@ who has never trained before.
 - Keep every prescription exactly: exercise names, sets, reps, load, rest,
   RIR/RPE, progression rules and safety instructions. Rewording must never
   change what the client does.
-- Keep explanations short. One sentence is usually enough. Don't repeat a
-  definition inside the same workout.
+- Keep explanations short. One sentence is usually enough.
+- Don't say the same thing in a workout note and an exercise note. Technique
+  and exercise-specific instructions belong in that exercise's note; the
+  workout note covers the day as a whole.
+- Never add a new prescription (for example training to failure, extra sets
+  or a new progression) as part of a wording change. Flag it for Lisa instead.
 
 ### Where notes go
 
