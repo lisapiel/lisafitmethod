@@ -17,6 +17,7 @@ const TONES = {
 
 export default function ProgressRing({
   value, target, size = 80, stroke = 8, tone = "calories", state = "logged", center, sub, label,
+  trackColor, textColor, mutedColor, overColor,
 }: {
   value: number | null
   target: number
@@ -27,6 +28,11 @@ export default function ProgressRing({
   center?: string
   sub?: string
   label: string
+  // Optional overrides (CSS colours or var()) for surfaces with their own palette.
+  trackColor?: string
+  textColor?: string
+  mutedColor?: string
+  overColor?: string
 }) {
   const id = useId().replace(/:/g, "")
   const c = size / 2
@@ -51,10 +57,10 @@ export default function ProgressRing({
         </defs>
       )}
       {unknown ? (
-        <circle cx={c} cy={c} r={r} fill="none" stroke="#c9c1b6" strokeWidth={Math.max(2, stroke / 3)} strokeDasharray="1.5 4" strokeLinecap="round" />
+        <circle cx={c} cy={c} r={r} fill="none" stroke="#c9c1b6" strokeWidth={Math.max(2, stroke / 3)} strokeDasharray="1.5 4" strokeLinecap="round" style={mutedColor ? { stroke: mutedColor } : undefined} />
       ) : (
         <>
-          <circle cx={c} cy={c} r={r} fill="none" stroke="#efe9e1" strokeWidth={stroke} />
+          <circle cx={c} cy={c} r={r} fill="none" stroke="#efe9e1" strokeWidth={stroke} style={trackColor ? { stroke: trackColor } : undefined} />
           <circle
             cx={c} cy={c} r={r} fill="none"
             stroke={state === "estimate" ? `url(#est-${id})` : t.solid}
@@ -64,15 +70,15 @@ export default function ProgressRing({
             transform={`rotate(-90 ${c} ${c})`}
           />
           {over > 0 && (
-            <circle cx={c} cy={c} r={r2} fill="none" stroke="#7a4f14" strokeWidth={Math.max(2.5, stroke / 3)} strokeLinecap="round" strokeDasharray={`${over} ${C2}`} transform={`rotate(-90 ${c} ${c})`} />
+            <circle cx={c} cy={c} r={r2} fill="none" stroke="#7a4f14" strokeWidth={Math.max(2.5, stroke / 3)} strokeLinecap="round" strokeDasharray={`${over} ${C2}`} transform={`rotate(-90 ${c} ${c})`} style={overColor ? { stroke: overColor } : undefined} />
           )}
         </>
       )}
       {center && (
-        <text x={c} y={sub ? c + (big ? 2 : 1) : c + (big ? 10 : 5)} textAnchor="middle" fontSize={big ? size * 0.16 : size * 0.19} fontWeight="700" fill={unknown ? "#6b6560" : "#1a1a1a"} fontFamily="DM Sans, sans-serif">{center}</text>
+        <text x={c} y={sub ? c + (big ? 2 : 1) : c + (big ? 10 : 5)} textAnchor="middle" fontSize={big ? size * 0.16 : size * 0.19} fontWeight="700" fill={unknown ? "#6b6560" : "#1a1a1a"} fontFamily="DM Sans, sans-serif" style={(unknown ? mutedColor : textColor) ? { fill: unknown ? mutedColor : textColor } : undefined}>{center}</text>
       )}
       {sub && (
-        <text x={c} y={c + (big ? size * 0.12 : size * 0.16)} textAnchor="middle" fontSize={big ? 13 : 10} fill="#6b6560" fontFamily="DM Sans, sans-serif">{sub}</text>
+        <text x={c} y={c + (big ? size * 0.12 : size * 0.16)} textAnchor="middle" fontSize={big ? 13 : 10} fill="#6b6560" fontFamily="DM Sans, sans-serif" style={mutedColor ? { fill: mutedColor } : undefined}>{sub}</text>
       )}
     </svg>
   )
