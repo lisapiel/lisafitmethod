@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
+import { buildWeightHistory, summarizeWeight, type WeightReading } from "@/lib/weightHistory"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -12,7 +13,6 @@ const white = "#fff"
 
 // Raw check-in point (whatever the client submitted). The chart converts to
 // canonical lb internally so mixed-unit histories still show correct trends.
-type WeightPoint = { date: string; weight: number; unit: string }
 type Snapshot = {
   id: string
   snapshotDate: string
@@ -26,23 +26,18 @@ type Snapshot = {
   notes: string | null
 }
 
-function WeightChart({ data }: { data: WeightPoint[] }) {
-  // Normalize every entry to canonical lb up front. Any entry that fails
-  // validation (NaN / non-positive) is dropped from the trend without
-  // silently deleting the underlying record — future check-in fixes on the
-  // form + API prevent new bad rows.
-  const points = data
-    .map((d) => ({
-      date: d.date,
-      lbs: toLbs(d.weight, d.unit),
-      submittedUnit: normalizeUnit(d.unit),
-    }))
-    .filter((p): p is { date: string; lbs: number; submittedUnit: WeightUnit } => p.lbs != null)
+function WeightChart({ data, starting }: { data: WeightReading[]; starting: { lbs: number; unit: WeightUnit } | null }) {
+  const points = data.map((d) => ({ date: d.at, lbs: d.lbs, submittedUnit: d.unit, source: d.source }))
+  const summary = summarizeWeight(data, starting?.unit ?? "LBS")
+  const latest = summary.latest
+  const when = (iso: string) => new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00` : iso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  const latestNote = latest ? `${latest.source === "logged" ? "Logged" : "From your check-in"} on ${when(latest.at)}` : ""
+  const startingNote = starting ? `You entered ${fromLbs(starting.lbs, summary.unit).toFixed(1)} ${summary.unit === "KG" ? "kg" : "lb"} as your starting weight when you set up coaching. It isn't counted as a weigh-in.` : null
 
   // Display unit follows the LATEST valid entry so a client who switched
   // units sees their most recent choice honored.
-  const displayUnit: WeightUnit = points[points.length - 1]?.submittedUnit ?? "LBS"
-  const latestLbs = points[points.length - 1]?.lbs
+  const displayUnit: WeightUnit = summary.unit
+  const latestLbs = latest?.lbs
 
   // Insufficient history: still surface Current if we have one usable point,
   // but never fabricate a Change value. Zero-history is completely empty.
@@ -55,15 +50,17 @@ function WeightChart({ data }: { data: WeightPoint[] }) {
             <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>
               {fromLbs(latestLbs, displayUnit).toFixed(1)} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{displayUnit === "KG" ? "kg" : "lb"}</span>
             </p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "2px 0 0" }}>{latestNote}</p>
           </div>
         )}
         <div style={{ background: "#faf8f5", borderRadius: 8, padding: "1.25rem 1.5rem", textAlign: "center" }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: 0 }}>
             {points.length === 0
-              ? "Weight data will appear here once you've submitted check-ins."
-              : "Submit one more check-in to see your trend."}
+              ? "Log your weight here or add it to your next check-in, and it will show up on this page."
+              : "Log one more weigh-in and you'll start to see your trend."}
           </p>
         </div>
+        {startingNote && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "10px 0 0" }}>{startingNote}</p>}
       </div>
     )
   }
@@ -78,9 +75,7 @@ function WeightChart({ data }: { data: WeightPoint[] }) {
   const toY = (v: number) => padY + ((maxW - v) / range) * plotH
   const pathD = displayValues.map((v, i) => `${i === 0 ? "M" : "L"} ${toX(i)} ${toY(v)}`).join(" ")
   const areaD = `${pathD} L ${toX(points.length - 1)} ${padY + plotH} L ${padX} ${padY + plotH} Z`
-  const firstLbs = points[0].lbs
-  const diffLbs = points[points.length - 1].lbs - firstLbs
-  const diffDisplay = +fromLbs(diffLbs, displayUnit).toFixed(1)
+  const diffDisplay = summary.change ?? 0
   const displayUnitLabel = displayUnit === "KG" ? "kg" : "lb"
 
   return (
@@ -89,15 +84,16 @@ function WeightChart({ data }: { data: WeightPoint[] }) {
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Current</p>
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{fromLbs(points[points.length - 1].lbs, displayUnit).toFixed(1)} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{displayUnitLabel}</span></p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "2px 0 0" }}>{latestNote}</p>
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Change</p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Since {when(points[0].date)}</p>
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: diffDisplay < 0 ? "#5c9e6a" : diffDisplay > 0 ? "#d97460" : muted, margin: 0 }}>
             {diffDisplay > 0 ? "+" : ""}{diffDisplay} <span style={{ fontSize: "0.85rem", fontWeight: 400, color: muted }}>{displayUnitLabel}</span>
           </p>
         </div>
         <div>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Check-ins</p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Weigh-ins</p>
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: 0 }}>{points.length}</p>
         </div>
       </div>
@@ -122,6 +118,7 @@ function WeightChart({ data }: { data: WeightPoint[] }) {
         <text x={padX - 4} y={toY(maxW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{maxW.toFixed(1)}</text>
         <text x={padX - 4} y={toY(minW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{minW.toFixed(1)}</text>
       </svg>
+      {startingNote && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "10px 0 0" }}>{startingNote}</p>}
     </div>
   )
 }
@@ -158,7 +155,8 @@ type Milestone = { date: string; title: string; icon: string; subtitle?: string 
 
 export default function ProgressClient() {
   const [loading, setLoading] = useState(true)
-  const [weightData, setWeightData] = useState<WeightPoint[]>([])
+  const [weightData, setWeightData] = useState<WeightReading[]>([])
+  const [startingWeight, setStartingWeight] = useState<{ lbs: number; unit: WeightUnit } | null>(null)
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [workoutStats, setWorkoutStats] = useState<WorkoutStats>({ total: 0, thisWeek: 0, lastWorkout: null, streakWeeks: 0 })
   const [strengthPRs, setStrengthPRs] = useState<StrengthPR[]>([])
@@ -282,26 +280,10 @@ export default function ProgressClient() {
           const ciList = allCheckIns
             .filter((ci) => ci.weight)
             .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
-          // Chart series = startingWeight (if any) PRE-pended, then check-ins.
-          // Prepends only when the starting weight predates the first check-in,
-          // so we don't invent a point in the middle. Dated at
-          // subscriptionStartDate / createdAt, falling back to startDate on
-          // the progress payload if that's what the API exposes.
-          const series: Array<{ date: string; weight: number; unit: string }> = []
+          // The setup starting weight is shown on its own line, never as a weigh-in.
           const progClient = progRes.status === "fulfilled" ? progRes.value.client : null
-          const startingWeight = progClient?.startingWeight
-          const startingUnit   = (progClient?.weightUnit as string | undefined) ?? "LBS"
-          const seedDate       = progClient?.subscriptionStartDate ?? progClient?.createdAt ?? startDate
-          if (startingWeight != null && seedDate) {
-            const firstCiDate = ciList[0]?.submittedAt as string | undefined
-            if (!firstCiDate || seedDate <= firstCiDate) {
-              series.push({ date: seedDate, weight: Number(startingWeight), unit: startingUnit })
-            }
-          }
-          for (const ci of ciList) {
-            series.push({ date: ci.submittedAt as string, weight: Number(ci.weight), unit: (ci.weightUnit as string) ?? "lbs" })
-          }
-          setWeightData(series)
+          const startLbs = toLbs(progClient?.startingWeight as number | undefined, (progClient?.weightUnit as string | undefined) ?? "LBS")
+          setStartingWeight(startLbs != null ? { lbs: startLbs, unit: normalizeUnit((progClient?.weightUnit as string | undefined) ?? "LBS") } : null)
 
           // Additional milestones from weight check-ins
           const sortedAll = [...allCheckIns].sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
@@ -340,6 +322,10 @@ export default function ProgressClient() {
         // the client sees everything they've logged, newest first, without
         // schema duplication.
         const snapsRaw: Array<Record<string, unknown>> = snapshotsRes.status === "fulfilled" ? (snapshotsRes.value.snapshots ?? []) : []
+        setWeightData(buildWeightHistory({
+          checkIns: checkInsRes.status === "fulfilled" ? (checkInsRes.value.checkIns ?? []) : [],
+          logged: snapsRaw,
+        }))
         const snapRows: Snapshot[] = snapsRaw.map((s) => ({
           id: s.id as string,
           snapshotDate: s.snapshotDate as string,
@@ -498,13 +484,13 @@ export default function ProgressClient() {
       {/* Weight chart */}
       <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 16px" }}>
-          Weight from your check-ins
+          Your weight
         </p>
-        <WeightChart data={weightData} />
+        <WeightChart data={weightData} starting={startingWeight} />
         {weightData.length === 0 && (
           <div style={{ textAlign: "center", marginTop: 12 }}>
-            <Link href="/my-coaching/check-in" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none", fontWeight: 600 }}>
-              Submit your first check-in →
+            <Link href="/my-coaching/progress/log" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none", fontWeight: 600 }}>
+              Log your weight
             </Link>
           </div>
         )}

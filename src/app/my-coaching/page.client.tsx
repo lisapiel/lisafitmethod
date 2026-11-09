@@ -5,7 +5,7 @@ import { fetchUserAttributes } from "aws-amplify/auth"
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
-import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
+import { buildWeightHistory, summarizeWeight, type WeightReading } from "@/lib/weightHistory"
 import { expandedWeeks } from "@/lib/programExpansion"
 import { checkInStatus as checkInState, type PortalWeek } from "@/lib/portalProgram"
 import UpNextCard from "@/components/portal/UpNextCard"
@@ -63,7 +63,6 @@ type Goal = {
   status: string | null
 }
 
-type CheckIn = { submittedAt: string; weight: number | null; weightUnit: string | null }
 
 function HomeSkeleton() {
   return (
@@ -91,7 +90,8 @@ export default function MyCoachingHomeClient() {
   const [program, setProgram] = useState<ProgramInfo | null>(null)
   const [logs, setLogs] = useState<WorkoutLog[]>([])
   const [primaryGoal, setPrimaryGoal] = useState<Goal | null>(null)
-  const [checkIns, setCheckIns] = useState<CheckIn[]>([])
+  const [weighIns, setWeighIns] = useState<WeightReading[]>([])
+  const [checkInDates, setCheckInDates] = useState<string[]>([])
   // Set to true if the logger persisted an in-progress draft for today's
   // workout — read from localStorage after nextWorkout resolves, using the
   // same keys the workout page writes (see workoutDraftKey).
@@ -104,11 +104,12 @@ export default function MyCoachingHomeClient() {
         const userEmail = attrs.email ?? ""
         setEmail(userEmail)
 
-        const [programRes, logsRes, goalsRes, ciRes] = await Promise.allSettled([
+        const [programRes, logsRes, goalsRes, ciRes, snapRes] = await Promise.allSettled([
           fetch("/api/coaching/program").then((r) => r.json()),
           fetch("/api/coaching/workout-log").then((r) => r.json()),
           fetch("/api/coaching/goals").then((r) => r.json()),
           fetch("/api/coaching/check-in").then((r) => r.json()),
+          fetch("/api/coaching/progress").then((r) => r.json()),
         ])
 
         if (programRes.status === "fulfilled") {
@@ -175,13 +176,11 @@ export default function MyCoachingHomeClient() {
           setPrimaryGoal(headline)
         }
 
-        if (ciRes.status === "fulfilled") {
-          setCheckIns((ciRes.value.checkIns ?? []).map((ci: Record<string, unknown>) => ({
-            submittedAt: ci.submittedAt as string,
-            weight: ci.weight != null ? Number(ci.weight) : null,
-            weightUnit: (ci.weightUnit as string | null) ?? null,
-          })))
-        }
+        if (ciRes.status === "fulfilled") setCheckInDates((ciRes.value.checkIns ?? []).map((ci: Record<string, unknown>) => ci.submittedAt as string))
+        setWeighIns(buildWeightHistory({
+          checkIns: ciRes.status === "fulfilled" ? (ciRes.value.checkIns ?? []) : [],
+          logged: snapRes.status === "fulfilled" ? (snapRes.value.snapshots ?? []) : [],
+        }))
       } catch { /* auth error handled by layout */ }
       setLoading(false)
     }
@@ -237,18 +236,15 @@ export default function MyCoachingHomeClient() {
   const cursor = new Date()
   while (weeksWith.has(isoWeekKey(cursor))) { streak++; cursor.setDate(cursor.getDate() - 7) }
 
-  // Weight change in the client's own unit, from check-ins (canonicalised to lb first).
-  const weighInsLbs = checkIns.filter((c) => c.weight != null).sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
-    .map((c) => ({ lbs: toLbs(c.weight, c.weightUnit), unit: normalizeUnit(c.weightUnit) }))
-    .filter((p): p is { lbs: number; unit: WeightUnit } => p.lbs != null)
-  const displayUnit: WeightUnit = weighInsLbs[weighInsLbs.length - 1]?.unit ?? (clientInfo?.weightUnit === "KG" ? "KG" : "LBS")
-  const weightDelta = weighInsLbs.length >= 2 ? +fromLbs(weighInsLbs[weighInsLbs.length - 1].lbs - weighInsLbs[0].lbs, displayUnit).toFixed(1) : null
-  const weightUnit = displayUnit === "KG" ? "kg" : "lb"
+  // Same weigh-ins as the Progress page: check-ins plus logged weights.
+  const weight = summarizeWeight(weighIns, clientInfo?.weightUnit === "KG" ? "KG" : "LBS")
+  const weightDelta = weight.change
+  const weightUnit = weight.unit === "KG" ? "kg" : "lb"
   const goalPct = primaryGoal ? goalProgressPct(primaryGoal) : null
 
   const nutritionMissing = !!clientInfo && (clientInfo.heightInches == null || clientInfo.age == null || clientInfo.sex == null)
   const macros = clientInfo ? resolveMacrosFor(clientInfo) : null
-  const checkIn = checkInState(checkIns.map((c) => c.submittedAt))
+  const checkIn = checkInState(checkInDates)
   const weekStrip = (() => {
     if (!program) return null
     const wk = nextWorkout?.week ?? program.weeks[program.weeks.length - 1]
@@ -275,7 +271,7 @@ export default function MyCoachingHomeClient() {
   })()
 
   const progressBits = [
-    weightDelta != null && weightDelta !== 0 ? `${weightDelta < 0 ? "Down" : "Up"} ${Math.abs(weightDelta)} ${weightUnit} since you started` : null,
+    weightDelta != null && weightDelta !== 0 ? `${weightDelta < 0 ? "Down" : "Up"} ${Math.abs(weightDelta)} ${weightUnit} since your first weigh-in` : null,
     primaryGoal && goalPct !== null ? `${goalPct}% of the way to ${primaryGoal.label || "your goal"}` : null,
     streak > 1 ? `${streak} weeks in a row` : null,
   ].filter(Boolean) as string[]
