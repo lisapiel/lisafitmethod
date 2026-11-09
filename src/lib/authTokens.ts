@@ -1,3 +1,4 @@
+import { coachThreadId } from "@/lib/coachThreadKey"
 import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
@@ -745,6 +746,19 @@ export async function listCoachingMessages(threadId: string): Promise<CoachingMe
   })
   return (items as CoachingMessageRecord[])
     .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
+}
+
+// Replaces the text of an existing message in place. Marking it unread again
+// lets the client notice the change without a second message.
+export async function updateCoachingMessageBody(message: CoachingMessageRecord, body: string): Promise<void> {
+  const db = makeDb()
+  await db.send(new UpdateCommand({
+    TableName: TABLE,
+    Key: { userId: `coaching_msg_${message.threadId}_${message.sentAt}_${message.id}` },
+    UpdateExpression: "SET body = :body REMOVE readAt",
+    ConditionExpression: "attribute_exists(userId)",
+    ExpressionAttributeValues: { ":body": body },
+  }))
 }
 
 export async function listAllCoachingMessages(): Promise<CoachingMessageRecord[]> {
@@ -1524,8 +1538,7 @@ export async function deleteCoachingClientCascade(email: string): Promise<Delete
   }
 
   // 7. Messages — thread is deterministic: sorted [client, coach].join("_")
-  const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
-  const threadId = [lower, COACH_EMAIL].sort().join("_")
+  const threadId = coachThreadId(lower)
   const messages = await listCoachingMessages(threadId)
   for (const m of messages) {
     try {

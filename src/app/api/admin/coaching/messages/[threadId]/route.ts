@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { isAdminEmail, listCoachingMessages, createCoachingMessage, markCoachingMessagesRead } from "@/lib/authTokens"
+import { COACH_THREAD_KEY } from "@/lib/coachIdentity"
 
 export const dynamic = "force-dynamic"
 
@@ -29,7 +30,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ thre
 
   const { threadId } = await params
   const messages = await listCoachingMessages(threadId)
-  await markCoachingMessagesRead(threadId, coachEmail)
+  // Clients always write to the coach thread key, so mark those read whichever admin is signed in.
+  await markCoachingMessagesRead(threadId, COACH_THREAD_KEY)
 
   return NextResponse.json({ messages })
 }

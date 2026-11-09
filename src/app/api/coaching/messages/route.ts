@@ -4,6 +4,7 @@ import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { createCoachingMessage, listCoachingMessages, markCoachingMessagesRead, getCoachingClientRecord, hasCoachingAccess, type CoachingMessageKind } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
+import { COACH_THREAD_KEY as COACH_EMAIL, coachThreadId } from "@/lib/coachIdentity"
 
 const NUTRITION_KIND_LABEL: Record<CoachingMessageKind, string> = {
   "nutrition-meal": "Nutrition · Meal",
@@ -14,7 +15,6 @@ const NUTRITION_KINDS = Object.keys(NUTRITION_KIND_LABEL) as CoachingMessageKind
 
 export const dynamic = "force-dynamic"
 
-const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
 
 async function getSessionEmail(): Promise<string | null> {
   return runWithAmplifyServerContext({
@@ -34,7 +34,7 @@ export async function GET() {
   const email = await getSessionEmail()
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const threadId = [email.toLowerCase(), COACH_EMAIL].sort().join("_")
+  const threadId = coachThreadId(email)
   const messages = await listCoachingMessages(threadId)
   await markCoachingMessagesRead(threadId, email)
 
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message body or attachment required" }, { status: 400 })
   }
 
-  const threadId = [email.toLowerCase(), COACH_EMAIL].sort().join("_")
+  const threadId = coachThreadId(email)
   const message = await createCoachingMessage({
     threadId,
     fromEmail: email.toLowerCase(),

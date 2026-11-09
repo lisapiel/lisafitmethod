@@ -5,7 +5,10 @@ import {
   getCoachingCheckIn,
   updateCoachingCheckIn,
   createCoachingMessage,
+  listCoachingMessages,
+  updateCoachingMessageBody,
 } from "@/lib/authTokens"
+import { checkInFeedbackPrefix, coachThreadId, isCoachSender } from "@/lib/coachIdentity"
 
 export const dynamic = "force-dynamic"
 
@@ -57,18 +60,25 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     reviewedAt: now,
   })
 
-  // Send feedback as a message to the client thread
-  const threadId = [coachEmail.toLowerCase(), checkIn.clientEmail.toLowerCase()].sort().join("_")
-  const submittedDate = new Date(checkIn.submittedAt).toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", year: "numeric",
-  })
-  await createCoachingMessage({
-    threadId,
-    fromEmail: coachEmail.toLowerCase(),
-    toEmail: checkIn.clientEmail.toLowerCase(),
-    body: `Feedback on your check-in from ${submittedDate}:\n\n${feedback.trim()}`,
-    sentAt: now,
-  })
+  // Always the thread the client sees, whichever admin account is signed in.
+  // Saving again updates the earlier feedback message instead of posting another.
+  const threadId = coachThreadId(checkIn.clientEmail)
+  const prefix = checkInFeedbackPrefix(checkIn.submittedAt)
+  const body = `${prefix}\n\n${feedback.trim()}`
+  const earlier = (await listCoachingMessages(threadId))
+    .filter((m) => isCoachSender(m.fromEmail) && m.toEmail.toLowerCase() === checkIn.clientEmail.toLowerCase() && m.body.startsWith(prefix))
+    .pop()
+  if (earlier) {
+    if (earlier.body !== body) await updateCoachingMessageBody(earlier, body)
+  } else {
+    await createCoachingMessage({
+      threadId,
+      fromEmail: coachEmail.toLowerCase(),
+      toEmail: checkIn.clientEmail.toLowerCase(),
+      body,
+      sentAt: now,
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }

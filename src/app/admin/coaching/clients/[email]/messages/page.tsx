@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback, use } from "react"
+import { coachThreadId } from "@/lib/coachThreadKey"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { attachmentKeys, SignedImage } from "@/components/coaching/NutritionComposer.client"
 
@@ -8,7 +9,6 @@ const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
 const cream = "var(--ca-text)"
 const muted = "var(--ca-muted)"
-const COACH_EMAIL = "lisa.p.mcpherson@gmail.com"
 const ADMIN_EMAILS = new Set(["lisa.p.mcpherson@gmail.com", "contact@lisafitmethod.com"])
 
 type NutritionKind = "nutrition-meal" | "nutrition-day" | "nutrition-question"
@@ -53,7 +53,7 @@ function Spinner() {
 export default function AdminClientMessagesPage({ params }: { params: Promise<{ email: string }> }) {
   const { email: encodedEmail } = use(params)
   const clientEmail = decodeURIComponent(encodedEmail)
-  const threadId = [clientEmail.toLowerCase(), COACH_EMAIL].sort().join("_")
+  const threadId = coachThreadId(clientEmail)
 
   const [loading, setLoading] = useState(true)
   const [token, setToken] = useState("")
