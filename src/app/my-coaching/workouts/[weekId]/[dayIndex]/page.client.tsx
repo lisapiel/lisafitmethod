@@ -191,12 +191,12 @@ function Spinner() {
 
 function RpeInfoModal({ onClose }: { onClose: () => void }) {
   const rows: Array<{ n: string; label: string; desc: string }> = [
-    { n: "10", label: "Maximum effort", desc: "Could not do another rep. Failure." },
-    { n: "9", label: "Very hard", desc: "Could maybe squeeze out 1 more rep." },
-    { n: "8", label: "Hard", desc: "Could do 2 more reps with good form." },
-    { n: "7", label: "Challenging", desc: "Could do 3 more reps. Solid working weight." },
-    { n: "5–6", label: "Moderate", desc: "Working, but with 4–5 reps in the tank." },
-    { n: "1–4", label: "Easy", desc: "Warmup / activation range." },
+    { n: "10", label: "Maximum effort", desc: "You couldn't do another rep. This is failure." },
+    { n: "9", label: "Very hard", desc: "You could maybe squeeze out 1 more rep." },
+    { n: "8", label: "Hard", desc: "You could do 2 more reps with good form." },
+    { n: "7", label: "Challenging", desc: "You could do 3 more reps. A solid working weight." },
+    { n: "5–6", label: "Moderate", desc: "You're working, with 4 to 5 reps left in the tank." },
+    { n: "1–4", label: "Easy", desc: "Warm-up or activation effort." },
   ]
   return (
     <div
@@ -397,7 +397,7 @@ function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: strin
         </p>
         {failed ? (
           <div role="alert" style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 4, padding: "28px 20px", textAlign: "center", color: "#f0e6d3", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", lineHeight: 1.5 }}>
-            <p style={{ margin: "0 0 14px" }}>This demonstration video couldn&apos;t load. Check your connection, or message Lisa if it keeps happening.</p>
+            <p style={{ margin: "0 0 14px" }}>This video didn&apos;t load. Check your connection, or message me if it keeps happening.</p>
             <button type="button" onClick={() => { setFailed(false); setAttempt((n) => n + 1) }} style={{ minHeight: 44, padding: "0 20px", background: "#c8a97e", color: "#1a1a1a", border: 0, borderRadius: 4, fontWeight: 700, cursor: "pointer" }}>Try again</button>
           </div>
         ) : (
@@ -1338,7 +1338,7 @@ export default function WorkoutLoggerClient() {
   if (!week || !day) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", color: muted }}>Workout not found</p>
+        <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", color: muted }}>I can&apos;t find this workout</p>
         <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: accent, textDecoration: "none" }}>← Back to workouts</Link>
       </div>
     )
@@ -1393,7 +1393,7 @@ export default function WorkoutLoggerClient() {
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f0faf0", border: "2px solid #5c9e6a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4.5 13l6 7L21.5 6" stroke="#5c9e6a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>{isSportDay ? "Sport day logged. Nice work." : "Workout done. Nice work."}</h2>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>{isSportDay ? "Sport day logged." : "Workout done. Nice work."}</h2>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>{week.label} · {day.dayLabel}</p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 28px" }}>{isSportDay ? sportSummary({ name: sportNameInput.trim(), durationMinutes: Number(sportDurationInput) || undefined, intensity: sportIntensityInput || undefined }) : `${completedSets} of ${totalSets} sets logged.`}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
@@ -1599,11 +1599,11 @@ export default function WorkoutLoggerClient() {
           </div>
         </div>
         <div>
-          <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted, display: "block", marginBottom: 4 }}>Any notes for Lisa?</label>
+          <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted, display: "block", marginBottom: 4 }}>Anything to tell me?</label>
           <textarea
             value={clientNotes}
             onChange={(e) => setClientNotes(e.target.value)}
-            placeholder="How did the workout feel? Any injuries or issues?"
+            placeholder="How did it feel? Tell me about any pain, injuries or problems."
             rows={3}
             style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "9px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", resize: "none", borderRadius: 4, boxSizing: "border-box" }}
           />
@@ -1620,7 +1620,7 @@ export default function WorkoutLoggerClient() {
         )}
         <div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, color: black, margin: 0 }}>
-            {completedSets === totalSets && totalSets > 0 ? "All sets done. Nice work." : `${completedSets}/${totalSets} sets`}
+            {completedSets === totalSets && totalSets > 0 ? "All sets done." : `${completedSets}/${totalSets} sets`}
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted, margin: 0 }}>
             {day.exercises.length} exercises

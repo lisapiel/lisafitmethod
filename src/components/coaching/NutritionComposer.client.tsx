@@ -25,9 +25,9 @@ const white = "#fff"
 // modified; no new `nutrition-meal` / `nutrition-day` messages can be created.
 const COMPOSER_KIND = "nutrition-question" as const
 const COMPOSER_PLACEHOLDER =
-  "e.g. Am I eating enough protein on training days? Any photos or context are fine."
+  "For example: Am I eating enough protein on training days? Photos and extra details are welcome."
 const COMPOSER_HINT =
-  "Food you've actually eaten belongs in Log Food (above). Use this for questions, feedback requests, or anything else nutrition-related."
+  "To record what you've eaten, use Log food above. This space is for questions, feedback requests, or anything else about your nutrition."
 
 // Reasonable upload guardrails. iPhone JPEGs are typically 2–5 MB.
 const MAX_ATTACHMENTS = 6
@@ -84,11 +84,11 @@ export default function NutritionComposer({ email }: { email: string }) {
     const accepted: File[] = []
     for (const f of files.slice(0, room)) {
       if (!f.type.startsWith("image/")) {
-        setError("Only image files are supported.")
+        setError("Please choose an image file.")
         continue
       }
       if (f.size > MAX_FILE_BYTES) {
-        setError(`${f.name} is larger than 8 MB.`)
+        setError(`${f.name} is too big. Photos need to be under 8 MB.`)
         continue
       }
       accepted.push(f)
@@ -131,7 +131,7 @@ export default function NutritionComposer({ email }: { email: string }) {
         }).result
         setAttachments((prev) => prev.map((x) => x === att ? { ...x, s3Key: plannedKey, uploading: false, progress: 100 } : x))
       } catch {
-        setAttachments((prev) => prev.map((x) => x === att ? { ...x, uploading: false, error: "Upload failed" } : x))
+        setAttachments((prev) => prev.map((x) => x === att ? { ...x, uploading: false, error: "Didn't upload" } : x))
       }
     }
   }
@@ -159,7 +159,7 @@ export default function NutritionComposer({ email }: { email: string }) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({} as { error?: string }))
-        throw new Error(data.error || `Send failed (${res.status})`)
+        throw new Error(data.error || `That didn't send (error ${res.status}). Please try again.`)
       }
       // Clean up preview URLs — the sent-state view uses CDN URLs instead.
       for (const a of attachments) URL.revokeObjectURL(a.previewUrl)
@@ -167,7 +167,7 @@ export default function NutritionComposer({ email }: { email: string }) {
       setText("")
       setPhase("sent")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Send failed")
+      setError(err instanceof Error ? err.message : "That didn't send. Check your connection and try again.")
       setPhase("error")
     } finally {
       submitLockRef.current = false

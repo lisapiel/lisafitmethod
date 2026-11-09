@@ -24,23 +24,23 @@ const white = "#fff"
 const PRINCIPLES: Array<{ title: string; body: string }> = [
   {
     title: "Protein first",
-    body: "Anchor every meal with protein. Carbs, fats, and veg build around it. Aim for ~1g per lb of bodyweight across the day.",
+    body: "Build each meal around a source of protein, then add your carbs, fats and vegetables. Aim for about 1 g of protein per pound of body weight across the day.",
   },
   {
-    title: "Weekly average beats daily perfection",
-    body: "Miss a day? Not a problem. What matters is the trend. Hit your target as a 7-day average and you're on track.",
+    title: "Look at the weekly average",
+    body: "Missed your numbers one day? That's okay. What matters is the trend. If you hit your target as a 7-day average, you're on track.",
   },
   {
     title: "Don't drop fat too low",
-    body: "Dietary fat drives hormones. Even in a cut, keep it at 0.3–0.4g per lb of bodyweight. Nuts, olive oil, avocado, eggs.",
+    body: "Your hormones depend on dietary fat. Even while you're losing fat, keep it at 0.3 to 0.4 g per pound of body weight. Nuts, olive oil, avocado and eggs are all good sources.",
   },
   {
-    title: "Water + sleep are levers",
-    body: "Both change hunger, energy, and recovery cues. Half your bodyweight in ounces of water, 7+ hours of sleep. Sort those before you touch macros.",
+    title: "Water and sleep count too",
+    body: "Both affect how hungry you feel, your energy and your recovery. Aim for half your body weight (in pounds) in ounces of water, and at least 7 hours of sleep. Get these right before you worry about your macros.",
   },
 ]
 
-const WEEKLY_INTRO = `Aim for these numbers as a weekly average, not daily perfection. One heavy day is fine if you balance across the week. Fat loss = weekly average slightly under target; muscle gain = slightly over. Trend matters more than any single day.`
+const WEEKLY_INTRO = `Aim for these numbers as a weekly average. You don't need to hit them perfectly every day, and one bigger day is fine if you balance it out over the week. If your goal is fat loss, keep your weekly average slightly under your target. If it's muscle gain, keep it slightly over. The trend matters more than any single day.`
 
 type Loaded = { client: CoachingClientRecord | null }
 
@@ -132,26 +132,26 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   const [selectedDay, setSelectedDay] = useState<LocalDateKey>(localDateKey())
   const flagEstimate = useCallback(async (l: NutritionLogRecord) => {
     if (typeof window === "undefined") return
-    const note = window.prompt("What's not right about this estimate? Lisa will take a look.", "")
+    const note = window.prompt("What's not right about this estimate? I'll take a look.", "")
     if (note == null) return
     const res = await fetch(`/api/coaching/nutrition-logs/${encodeURIComponent(l.id)}/flag`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: note.slice(0, 500) }) }).catch(() => null)
-    window.alert(res?.ok ? "Thanks. Lisa will review it." : "That didn't send. Please try again, or message Lisa.")
+    window.alert(res?.ok ? "Thanks. I'll take a look." : "That didn't send. Please try again, or message me.")
   }, [])
 
   const deleteLog = useCallback(async (logId: string, label: string) => {
-    if (typeof window !== "undefined" && !window.confirm(`Delete ${label}? This cannot be undone.`)) return
+    if (typeof window !== "undefined" && !window.confirm(`Delete ${label}? You can't undo this.`)) return
     setDeletingId(logId)
     try {
       const res = await fetch(`/api/coaching/nutrition-logs/${encodeURIComponent(logId)}`, { method: "DELETE" })
       if (!res.ok) {
         let message = `Server returned ${res.status}`
         try { const data = await res.json() as { error?: string }; if (data?.error) message = data.error } catch {}
-        if (typeof window !== "undefined") window.alert(`Delete failed: ${message}`)
+        if (typeof window !== "undefined") window.alert(`That didn't delete. ${message}`)
       } else {
         await loadLogs()
       }
     } catch (err) {
-      if (typeof window !== "undefined") window.alert(`Delete failed: ${err instanceof Error ? err.message : "Network error"}`)
+      if (typeof window !== "undefined") window.alert(`That didn't delete. ${err instanceof Error ? err.message : "Check your connection and try again."}`)
     }
     setDeletingId(null)
   }, [loadLogs])
@@ -262,9 +262,9 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
             Individual review
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black, margin: 0, lineHeight: 1.55 }}>
-            Very low calorie targets are best set with individual review.
-            Message me before going any lower, and consider
-            talking with a qualified nutrition or medical professional if needed.
+            I prefer to set very low calorie targets with you one on one.
+            Please message me before going any lower. If needed, it's also a
+            good idea to talk with a qualified nutrition or medical professional.
           </p>
         </div>
       )}

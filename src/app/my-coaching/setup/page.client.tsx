@@ -62,17 +62,17 @@ export default function SetupClient() {
     const ft = parseInt(heightFeet)
     const inch = parseFloat(heightInches || "0")
 
-    if (!ageNum || ageNum < 16 || ageNum > 100) { setErrorMsg("Enter a valid age (16–100)"); return }
-    if (!weightNum || weightNum < 80 || weightNum > 500) { setErrorMsg("Enter your current weight in pounds"); return }
-    if (!ft || ft < 4 || ft > 7) { setErrorMsg("Enter a valid height in feet (4–7)"); return }
-    if (inch < 0 || inch >= 12) { setErrorMsg("Inches must be 0–11"); return }
+    if (!ageNum || ageNum < 16 || ageNum > 100) { setErrorMsg("Please enter an age between 16 and 100."); return }
+    if (!weightNum || weightNum < 80 || weightNum > 500) { setErrorMsg("Please enter your current weight in pounds."); return }
+    if (!ft || ft < 4 || ft > 7) { setErrorMsg("Please enter your height in feet, between 4 and 7."); return }
+    if (inch < 0 || inch >= 12) { setErrorMsg("Inches should be between 0 and 11."); return }
     const heightIn = ft * 12 + inch
 
     setSaving(true)
     try {
       const session = await fetchAuthSession()
       const token = session.tokens?.accessToken?.toString()
-      if (!token) { setErrorMsg("You need to be logged in."); setSaving(false); return }
+      if (!token) { setErrorMsg("Please log in again to save this."); setSaving(false); return }
       const res = await fetch("/api/coaching/setup", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -87,7 +87,7 @@ export default function SetupClient() {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({} as { error?: string }))
-        setErrorMsg((data as { error?: string }).error ?? "Something went wrong.")
+        setErrorMsg((data as { error?: string }).error ?? "Something went wrong. Please try again.")
         setSaving(false)
         return
       }
@@ -95,7 +95,7 @@ export default function SetupClient() {
       try { localStorage.removeItem("lfm-setup-skipped") } catch { /* ignore */ }
       router.push("/my-coaching/nutrition")
     } catch {
-      setErrorMsg("Something went wrong.")
+      setErrorMsg("Something went wrong. Please try again.")
     }
     setSaving(false)
   }
@@ -120,7 +120,7 @@ export default function SetupClient() {
         {/* Sex */}
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 6 }}>
-            Biological sex (for BMR formula)
+            Biological sex (used to estimate your calorie needs)
           </label>
           <div style={{ display: "flex", gap: 8 }}>
             {(["female", "male"] as const).map((s) => (

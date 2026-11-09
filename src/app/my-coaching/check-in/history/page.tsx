@@ -69,7 +69,7 @@ const NUTRITION_STATUS_LABEL: Record<string, string> = {
 }
 const ADJUSTMENT_LABEL: Record<string, string> = {
   "exercises": "Exercise selection",
-  "volume-intensity": "Volume / intensity",
+  "volume-intensity": "Volume or intensity",
   "schedule": "Schedule",
   "nutrition": "Nutrition",
   "recovery": "Recovery",
@@ -254,7 +254,7 @@ export default function CheckInHistoryPage() {
                       </p>
                       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0 }}>
                         {ci.weight ? `${ci.weight} ${ci.weightUnit ?? ""}` : "No weight logged"}
-                        {reviewed ? " · Feedback received" : " · Awaiting feedback"}
+                        {reviewed ? " · Feedback received" : " · Feedback on its way"}
                       </p>
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export default function CheckInHistoryPage() {
                     ) : ci.coachFeedback && (
                       <div style={{ background: "#fdf9f4", border: `1px solid #f0e4cc`, borderRadius: 6, padding: "1rem 1.25rem", marginTop: "0.75rem" }}>
                         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
-                          Lisa&apos;s Feedback · {ci.reviewedAt ? formatDate(ci.reviewedAt) : ""}
+                          My feedback · {ci.reviewedAt ? formatDate(ci.reviewedAt) : ""}
                         </p>
                         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: black, lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{ci.coachFeedback}</p>
                       </div>
@@ -282,7 +282,7 @@ export default function CheckInHistoryPage() {
 
                     {!reviewed && (
                       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, marginTop: "0.75rem", fontStyle: "italic" }}>
-                        Awaiting feedback from Lisa.
+                        My feedback is on its way.
                       </p>
                     )}
                   </div>
@@ -304,12 +304,12 @@ function V2Body({ ci }: { ci: CheckIn }) {
   const meaningfulAdjustments = ci.adjustmentAreas.filter((a) => a !== "none")
   const videoCount = ci.formReviews.reduce((n, r) => n + r.videoKeys.length, 0)
   const chips: Array<{ label: string; tone: "attention" | "info" }> = []
-  if (ci.painReported === true) chips.push({ label: "Pain / discomfort reported", tone: "attention" })
+  if (ci.painReported === true) chips.push({ label: "Pain or discomfort reported", tone: "attention" })
   if (ci.formReviewRequested === true) {
     chips.push({ label: `Form review submitted${videoCount > 0 ? ` · ${videoCount} video${videoCount === 1 ? "" : "s"}` : ""}`, tone: "info" })
   }
-  if (meaningfulAdjustments.length > 0) chips.push({ label: "Program adjustment requested", tone: "info" })
-  if (ci.questionForLisa && ci.questionForLisa.trim()) chips.push({ label: "Question for Lisa", tone: "info" })
+  if (meaningfulAdjustments.length > 0) chips.push({ label: "You asked for a change", tone: "info" })
+  if (ci.questionForLisa && ci.questionForLisa.trim()) chips.push({ label: "You asked a question", tone: "info" })
 
   const hasAnyMeasurements = (() => {
     if (!ci.measurementSnapshot) return false
@@ -354,17 +354,17 @@ function V2Body({ ci }: { ci: CheckIn }) {
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <RatingBadge label="Sleep" value={ci.sleepQuality} />
             <RatingBadge label="Energy" value={ci.energyLevel} />
-            <RatingBadge label="Stress mgmt" value={ci.stressLevel} />
+            <RatingBadge label="Stress management" value={ci.stressLevel} />
             <RatingBadge label="Recovery" value={ci.recoveryRating} />
           </div>
         </div>
       )}
 
       {ci.trainingWins && <TextSection label="What felt good" text={ci.trainingWins} />}
-      {ci.trainingChallenges && <TextSection label="Didn't enjoy / wanted changed" text={ci.trainingChallenges} />}
+      {ci.trainingChallenges && <TextSection label="What you didn't enjoy or want changed" text={ci.trainingChallenges} />}
 
       {ci.painReported === true && ci.painNotes && (
-        <TextSection label="Pain / discomfort" text={ci.painNotes} />
+        <TextSection label="Pain or discomfort" text={ci.painNotes} />
       )}
 
       {ci.formReviewRequested === true && ci.formReviews.length > 0 && (
@@ -401,7 +401,7 @@ function V2Body({ ci }: { ci: CheckIn }) {
 
       {meaningfulAdjustments.length > 0 && (
         <div style={{ marginBottom: "1rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>Wanted adjusted</p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>You asked me to adjust</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: ci.adjustmentNotes ? 6 : 0 }}>
             {meaningfulAdjustments.map((a) => <Chip key={a} label={ADJUSTMENT_LABEL[a] ?? a} tone="info" />)}
           </div>
@@ -411,7 +411,7 @@ function V2Body({ ci }: { ci: CheckIn }) {
         </div>
       )}
 
-      {ci.questionForLisa && <TextSection label="Question for Lisa" text={ci.questionForLisa} />}
+      {ci.questionForLisa && <TextSection label="Your question for me" text={ci.questionForLisa} />}
     </div>
   )
 }
@@ -431,7 +431,7 @@ function LegacyBody({ ci }: { ci: CheckIn }) {
 
       {ci.wins && <TextSection label="Wins" text={ci.wins} />}
       {ci.struggles && <TextSection label="Struggles" text={ci.struggles} />}
-      {ci.questionsForCoach && <TextSection label="Questions for Lisa" text={ci.questionsForCoach} />}
+      {ci.questionsForCoach && <TextSection label="Your questions for me" text={ci.questionsForCoach} />}
     </div>
   )
 }

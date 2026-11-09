@@ -79,7 +79,7 @@ const NUTRITION_STATUS_OPTIONS: Array<{ value: NutritionStatus; label: string }>
 ]
 const ADJUSTMENT_OPTIONS: Array<{ value: AdjustmentArea; label: string }> = [
   { value: "exercises", label: "Exercise selection" },
-  { value: "volume-intensity", label: "Training volume / intensity" },
+  { value: "volume-intensity", label: "Training volume or intensity" },
   { value: "schedule", label: "Schedule" },
   { value: "nutrition", label: "Nutrition" },
   { value: "recovery", label: "Recovery" },
@@ -389,12 +389,12 @@ export default function CheckInClient() {
     setErrorMsg(null)
     const totalExistingVideos = form.formReviews.reduce((acc, r) => acc + r.videos.length, 0)
     const remaining = MAX_FORM_REVIEW_VIDEOS - totalExistingVideos
-    if (remaining <= 0) { setErrorMsg(`Max ${MAX_FORM_REVIEW_VIDEOS} videos per check-in.`); return }
+    if (remaining <= 0) { setErrorMsg(`You can add up to ${MAX_FORM_REVIEW_VIDEOS} videos per check-in.`); return }
 
     const accepted: File[] = []
     for (const f of Array.from(files).slice(0, remaining)) {
-      if (!f.type.startsWith("video/")) { setErrorMsg("Only video files are supported."); continue }
-      if (f.size > MAX_VIDEO_BYTES) { setErrorMsg(`${f.name} is over 200 MB.`); continue }
+      if (!f.type.startsWith("video/")) { setErrorMsg("Please choose a video file."); continue }
+      if (f.size > MAX_VIDEO_BYTES) { setErrorMsg(`${f.name} is too big. Videos need to be under 200 MB.`); continue }
       accepted.push(f)
     }
     if (accepted.length === 0) return
@@ -446,7 +446,7 @@ export default function CheckInClient() {
           ...f,
           formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
             ...r,
-            videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, uploading: false, error: "Upload failed" } : x),
+            videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, uploading: false, error: "Didn't upload" } : x),
           } : r),
         }))
       }
@@ -502,7 +502,7 @@ export default function CheckInClient() {
 
   function submit() {
     if (!canProceed() || submitLockRef.current) return
-    if (anyVideoUploading) { setErrorMsg("Wait for videos to finish uploading."); return }
+    if (anyVideoUploading) { setErrorMsg("Please wait for your videos to finish uploading."); return }
     if (lastWeight && form.weight.trim()) {
       const change = relativeChange(
         { value: lastWeight.value, unit: lastWeight.unit },
@@ -572,11 +572,11 @@ export default function CheckInClient() {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({} as { error?: string }))
-        throw new Error(data.error || "Something went wrong.")
+        throw new Error(data.error || "Something went wrong. Please try again.")
       }
       setSubmitted(true)
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Something went wrong.")
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.")
       submitLockRef.current = false
     }
     setSaving(false)
@@ -623,7 +623,7 @@ export default function CheckInClient() {
         <div style={{ background: "#fdf9f5", border: `1px solid ${border}`, borderRadius: 8, padding: "2rem", textAlign: "center", maxWidth: 480 }}>
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.2rem", color: black, margin: "0 0 8px" }}>Already submitted this week</p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 20px" }}>
-            Your check-in is with Lisa. She&apos;ll send feedback soon.
+            Your check-in is with me. I&apos;ll send you feedback soon.
           </p>
           <Link href="/my-coaching/check-in/history" style={{ display: "inline-block", background: accent, color: black, padding: "11px 24px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>
             View history & feedback
@@ -719,7 +719,7 @@ export default function CheckInClient() {
             <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: `1px solid ${border}` }}>
               <label style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, marginBottom: 4 }}>Measurements <span style={{ fontWeight: 400, color: muted, fontSize: "0.72rem" }}>(optional)</span></label>
               <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, margin: "0 0 12px", lineHeight: 1.5 }}>
-                Fill in only what you measured. Blank fields are ignored.
+                Only fill in what you measured. You can leave the rest blank.
               </p>
 
               {(() => {
@@ -865,7 +865,7 @@ export default function CheckInClient() {
                   ))}
                   <button type="button" onClick={addFormReview}
                     style={{ background: "none", border: `1px dashed ${border}`, color: muted, padding: "10px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", borderRadius: 4, width: "100%" }}>
-                    + Add form-review request
+                    + Ask for a form review
                   </button>
                 </div>
               )}
@@ -924,7 +924,7 @@ export default function CheckInClient() {
               }}
             >
               <span style={{ color: accent }}>→</span>
-              Want feedback on a meal or day of eating? Send it to Lisa
+              Want feedback on a meal or a day of eating? Send it to me
             </Link>
           </div>
         )}
@@ -1062,7 +1062,7 @@ function FormReviewCard({
     <div style={{ background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6, padding: 12, marginBottom: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 10 }}>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: 0 }}>Form review</p>
-        <button type="button" onClick={onRemove} aria-label="Remove form-review request"
+        <button type="button" onClick={onRemove} aria-label="Remove this form review"
           style={{ background: "none", border: "none", color: "#c14646", padding: "0 4px", cursor: "pointer", fontSize: "1.05rem", lineHeight: 1 }}>×</button>
       </div>
 
