@@ -263,7 +263,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black, margin: 0, lineHeight: 1.55 }}>
             I prefer to set very low calorie targets with you one on one.
-            Please message me before going any lower. If needed, it's also a
+            Please message me before going any lower. If needed, it&apos;s also a
             good idea to talk with a qualified nutrition or medical professional.
           </p>
         </div>
