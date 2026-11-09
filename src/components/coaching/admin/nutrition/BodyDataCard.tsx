@@ -5,6 +5,7 @@ import { useMemo } from "react"
 import type { CoachingClientRecord } from "@/lib/authTokens"
 import { activityLabel, formatHeight, GOAL_META } from "@/lib/nutrition"
 import { shortDate } from "./format"
+import { StartingWeightPanel } from "./StartingWeightPanel"
 import type { AdminCheckIn, AdminSnapshot } from "./types"
 
 type Reading = { date: string; label: string; value: number; unit: string }
@@ -43,7 +44,7 @@ function latestReadings(snapshots: AdminSnapshot[], checkIns: AdminCheckIn[]): R
   return Array.from(byLabel.values())
 }
 
-export function BodyDataCard({ client, email, snapshots, checkIns }: { client: CoachingClientRecord; email: string; snapshots: AdminSnapshot[]; checkIns: AdminCheckIn[] }) {
+export function BodyDataCard({ client, email, snapshots, checkIns, onChanged }: { client: CoachingClientRecord; email: string; snapshots: AdminSnapshot[]; checkIns: AdminCheckIn[]; onChanged: () => Promise<void> | void }) {
   const latest = useMemo(() => latestReadings(snapshots, checkIns), [snapshots, checkIns])
   const hasBody = client.heightInches != null && client.age != null && client.sex != null && client.activityLevel != null
   const facts: Array<[string, string]> = [
@@ -59,12 +60,13 @@ export function BodyDataCard({ client, email, snapshots, checkIns }: { client: C
     <section className="can-card" aria-labelledby="can-body-h">
       <div className="can-card-head">
         <h2 id="can-body-h" className="can-h">Setup and body data</h2>
-        <span className="can-note">The client edits this in setup</span>
+        <span className="can-note">The client edits this in setup. You correct the starting weight.</span>
       </div>
       {!hasBody && <p className="can-note" style={{ marginBottom: 12 }}>Setup isn&apos;t complete yet, so there&apos;s no starting estimate.</p>}
       <div className="can-chips">
         {facts.map(([k, v]) => <div key={k}><span>{k}</span><b>{v}</b></div>)}
       </div>
+      <StartingWeightPanel email={email} client={client} onChanged={onChanged} />
       {latest.length > 0 && (
         <>
           <hr className="can-sep" />

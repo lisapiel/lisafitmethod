@@ -148,3 +148,10 @@
 .can-chips span { font-size: 0.75rem; color: var(--ca-muted); }
 .can-chips b { font-size: 0.9375rem; font-weight: 600; color: var(--ca-text); overflow-wrap: anywhere; }
 .can-ring svg { max-width: 100%; height: auto; }
+
+/* Starting weight correction */
+.can-sw { display: grid; gap: 8px; margin: 12px 0 0; }
+.can-sw .can-form { margin: 0; }
+.can-sw-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.can-sw-row .can-field { flex: 1 1 160px; max-width: 220px; }
+.can-review { display: grid; gap: 4px; justify-items: start; padding: 10px 12px; margin: 0 0 12px; border-radius: 8px; border: 1px dashed var(--ca-line); }
