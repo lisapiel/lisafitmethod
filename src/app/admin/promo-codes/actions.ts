@@ -1,12 +1,17 @@
 "use server"
 import { getPromoCodes, savePromoCodes } from "@/lib/promoCodes"
 import { revalidatePath } from "next/cache"
+import { verifyAdminToken } from "@/lib/adminAuth"
+
+const NOT_ALLOWED = { error: "Only the coach can change promo codes. Sign in again and retry." }
 
 export async function addPromoCode(
+  accessToken: string,
   code: string,
   discountPct: number,
   product: "training" | "nutrition" | "all" = "all"
 ): Promise<{ error?: string }> {
+  if (!(await verifyAdminToken(accessToken))) return NOT_ALLOWED
   const normalized = code.trim().toUpperCase()
   if (!normalized || normalized.length < 3) return { error: "Code must be at least 3 characters." }
   if (discountPct < 1 || discountPct > 100) return { error: "Discount must be between 1 and 100." }
@@ -22,7 +27,8 @@ export async function addPromoCode(
   }
 }
 
-export async function deletePromoCode(code: string): Promise<{ error?: string }> {
+export async function deletePromoCode(accessToken: string, code: string): Promise<{ error?: string }> {
+  if (!(await verifyAdminToken(accessToken))) return NOT_ALLOWED
   try {
     const codes = await getPromoCodes()
     delete codes[code]
@@ -35,7 +41,8 @@ export async function deletePromoCode(code: string): Promise<{ error?: string }>
   }
 }
 
-export async function togglePromoCode(code: string, active: boolean): Promise<{ error?: string }> {
+export async function togglePromoCode(accessToken: string, code: string, active: boolean): Promise<{ error?: string }> {
+  if (!(await verifyAdminToken(accessToken))) return NOT_ALLOWED
   try {
     const codes = await getPromoCodes()
     if (!codes[code]) return { error: "Code not found." }

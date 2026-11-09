@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
+import { verifyAdminToken } from "@/lib/adminAuth"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 
@@ -17,22 +17,6 @@ function makeDynamo() {
   )
 }
 
-async function getUserSub(accessToken: string): Promise<string | null> {
-  try {
-    const cognito = new CognitoIdentityProviderClient({
-      region: process.env.COGNITO_REGION ?? "us-east-2",
-      credentials: {
-        accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-      },
-    })
-    const result = await cognito.send(new GetUserCommand({ AccessToken: accessToken }))
-    return result.UserAttributes?.find((a) => a.Name === "sub")?.Value ?? null
-  } catch {
-    return null
-  }
-}
-
 function getToken(req: NextRequest): string | null {
   const auth = req.headers.get("authorization")
   if (!auth?.startsWith("Bearer ")) return null
@@ -42,8 +26,7 @@ function getToken(req: NextRequest): string | null {
 export async function GET(req: NextRequest) {
   const token = getToken(req)
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const sub = await getUserSub(token)
-  if (!sub) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await verifyAdminToken(token))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
     const db = makeDynamo()
@@ -61,8 +44,7 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const token = getToken(req)
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const sub = await getUserSub(token)
-  if (!sub) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await verifyAdminToken(token))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
     const { id } = await req.json() as { id: string }

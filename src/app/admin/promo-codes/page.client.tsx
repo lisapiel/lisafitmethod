@@ -1,6 +1,11 @@
 "use client"
 import { useState, useEffect, useTransition } from "react"
+import { fetchAuthSession } from "aws-amplify/auth"
 import { addPromoCode, deletePromoCode, togglePromoCode } from "./actions"
+
+async function adminToken(): Promise<string> {
+  try { return (await fetchAuthSession()).tokens?.accessToken?.toString() ?? "" } catch { return "" }
+}
 import type { PromoCodes } from "@/lib/promoCodes"
 
 const gold = "#c9a96e"
@@ -19,8 +24,9 @@ export function PromoCodesClient() {
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
-    fetch("/api/admin/promo-codes")
-      .then((r) => r.json())
+    adminToken()
+      .then((t) => fetch("/api/admin/promo-codes", { headers: { Authorization: `Bearer ${t}` } }))
+      .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json() })
       .then((data: { codes: PromoCodes }) => {
         setCodes(data.codes ?? {})
         setLoading(false)
@@ -37,7 +43,7 @@ export function PromoCodesClient() {
     const pct = parseInt(newDiscount, 10)
     startTransition(async () => {
       try {
-        const result = await addPromoCode(newCode, pct, newProduct)
+        const result = await addPromoCode(await adminToken(), newCode, pct, newProduct)
         if (result?.error) { setError(result.error); return }
         setCodes((prev) => ({ ...prev, [newCode.trim().toUpperCase()]: { discountPct: pct, active: true, product: newProduct } }))
         setNewCode("")
@@ -52,7 +58,7 @@ export function PromoCodesClient() {
   function handleDelete(code: string) {
     startTransition(async () => {
       try {
-        const result = await deletePromoCode(code)
+        const result = await deletePromoCode(await adminToken(), code)
         if (result?.error) return
         setCodes((prev) => { const next = { ...prev }; delete next[code]; return next })
       } catch {
@@ -64,7 +70,7 @@ export function PromoCodesClient() {
   function handleToggle(code: string, active: boolean) {
     startTransition(async () => {
       try {
-        const result = await togglePromoCode(code, active)
+        const result = await togglePromoCode(await adminToken(), code, active)
         if (result?.error) return
         setCodes((prev) => ({ ...prev, [code]: { ...prev[code], active } }))
       } catch {

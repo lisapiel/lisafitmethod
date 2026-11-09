@@ -5,6 +5,12 @@ import { isAdminEmail } from "./authTokens"
 export async function verifyAdminRequest(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("authorization")
   if (!auth?.startsWith("Bearer ")) return null
+  return verifyAdminToken(auth.slice(7))
+}
+
+// For server actions, which receive the admin's access token as an argument.
+export async function verifyAdminToken(accessToken: string | null | undefined): Promise<string | null> {
+  if (!accessToken) return null
   try {
     const cognito = new CognitoIdentityProviderClient({
       region: process.env.COGNITO_REGION ?? "us-east-2",
@@ -13,7 +19,7 @@ export async function verifyAdminRequest(req: NextRequest): Promise<string | nul
         secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
       },
     })
-    const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
+    const result = await cognito.send(new GetUserCommand({ AccessToken: accessToken }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
     return callerEmail && isAdminEmail(callerEmail) ? callerEmail : null
   } catch {
