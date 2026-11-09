@@ -18,14 +18,15 @@ const CLIENT_FACING = [
   "src/app/coaching/accept-terms",
   "src/lib/coachingRecords.ts",
   "src/app/api/admin/coaching/applications",
-  "src/app/api/admin/coaching/grant-access",
   "src/app/api/admin/coaching/restart-requests",
-  "src/app/api/admin/coaching/backfill-payment",
   "src/app/api/admin/coaching/send-waiver-link",
   "src/app/api/admin/coaching/check-ins",
   "src/app/api/coaching/accept-terms",
   "src/app/api/coaching/invite-setup",
 ]
+
+// grant-access and backfill-payment send payment-confirmation emails. They are
+// billing code and are reworded separately, with Lisa's go-ahead, not in a copy pass.
 
 // Keep this tiny. Each entry needs a reason.
 const ALLOWED = new Set([
