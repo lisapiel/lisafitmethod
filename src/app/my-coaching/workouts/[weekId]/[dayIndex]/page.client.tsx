@@ -1393,7 +1393,7 @@ export default function WorkoutLoggerClient() {
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f0faf0", border: "2px solid #5c9e6a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4.5 13l6 7L21.5 6" stroke="#5c9e6a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>{isSportDay ? "Sport day logged." : "Workout done. Nice work."}</h2>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>{isSportDay ? "Sport day logged. Nice work." : "Workout done. Nice work."}</h2>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>{week.label} · {day.dayLabel}</p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 28px" }}>{isSportDay ? sportSummary({ name: sportNameInput.trim(), durationMinutes: Number(sportDurationInput) || undefined, intensity: sportIntensityInput || undefined }) : `${completedSets} of ${totalSets} sets logged.`}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
