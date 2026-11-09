@@ -3,7 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { uploadData } from "aws-amplify/storage"
-import { relativeChange } from "@/lib/weight"
+import { fromLbs, relativeChange } from "@/lib/weight"
+import { buildWeightHistory, summarizeWeight, weighInDayKey, type WeightReading } from "@/lib/weightHistory"
+import { HUNGER_OPTIONS, type Hunger, type WeightStatus } from "@/lib/checkInAnswers"
+import { daysBetweenKeys, localDateKey } from "@/lib/localDate"
+import CheckInWeightChoice from "@/components/portal/CheckInWeightChoice"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -29,12 +33,11 @@ type FormReview = {
 }
 
 type FormState = {
+  weightChoice: WeightStatus | ""
   weight: string
   weightUnit: "LBS" | "KG"
   measurements: Measurement[]
   trainingRating: number
-  trainingWins: string
-  trainingChallenges: string
   painReported: "unset" | "no" | "yes"
   painNotes: string
   formReviewRequested: "unset" | "no" | "yes"
@@ -45,6 +48,7 @@ type FormState = {
   recoveryRating: number
   nutritionStatus: NutritionStatus | ""
   nutritionHelp: string
+  hunger: Hunger | ""
   weeklyWin: string
   weeklyChallenge: string
   adjustmentAreas: AdjustmentArea[]
@@ -53,13 +57,13 @@ type FormState = {
 }
 
 const INITIAL: FormState = {
-  weight: "", weightUnit: "LBS",
+  weightChoice: "", weight: "", weightUnit: "LBS",
   measurements: [],
-  trainingRating: 0, trainingWins: "", trainingChallenges: "",
+  trainingRating: 0,
   painReported: "unset", painNotes: "",
   formReviewRequested: "unset", formReviews: [],
   sleepRating: 0, energyRating: 0, stressRating: 0, recoveryRating: 0,
-  nutritionStatus: "", nutritionHelp: "",
+  nutritionStatus: "", nutritionHelp: "", hunger: "",
   weeklyWin: "", weeklyChallenge: "",
   adjustmentAreas: [], adjustmentNotes: "",
   questionForLisa: "",
@@ -69,6 +73,9 @@ const STEPS = ["Progress", "Training", "Recovery", "Nutrition", "Reflect"]
 const MAX_FORM_REVIEW_VIDEOS = 3
 const MAX_VIDEO_BYTES = 200 * 1024 * 1024 // 200 MB — enough for a phone-shot exercise clip
 const PLAUSIBILITY_THRESHOLD = 0.2 // 20% weight-change confirmation
+// A Progress log from today or yesterday is fresh enough to stand in for this
+// week's weigh-in, so "Same as last time" is picked for the client.
+const RECENT_LOG_DAYS = 1
 
 const NUTRITION_STATUS_OPTIONS: Array<{ value: NutritionStatus; label: string }> = [
   { value: "on-track", label: "On track" },
@@ -271,7 +278,8 @@ export default function CheckInClient() {
   const [email, setEmail] = useState<string>("")
   const [programExerciseList, setProgramExerciseList] = useState<ProgramExerciseLite[]>([])
   const [autoWorkouts, setAutoWorkouts] = useState<{ completed: number; planned?: number; sinceIso: string | null }>({ completed: 0, sinceIso: null })
-  const [lastWeight, setLastWeight] = useState<{ value: number; unit: "LBS" | "KG" } | null>(null)
+  const [latestReading, setLatestReading] = useState<WeightReading | null>(null)
+  const [preselectedFromProgress, setPreselectedFromProgress] = useState(false)
   const [showTypoConfirm, setShowTypoConfirm] = useState(false)
 
   const submitLockRef = useRef(false)
@@ -286,28 +294,33 @@ export default function CheckInClient() {
           if (d.email) setEmail(String(d.email))
         }
 
-        // Load check-in history to detect: already-submitted-this-week + last weight
-        const ciRes = await fetch("/api/coaching/check-in")
+        // Check-in history (already submitted this week?) and every weigh-in,
+        // from check-ins and Progress logs, for the weight step.
+        const [ciRes, snapRes] = await Promise.all([
+          fetch("/api/coaching/check-in"),
+          fetch("/api/coaching/progress").catch(() => null),
+        ])
         let lastCheckInIso: string | null = null
+        let checkIns: Array<Record<string, unknown> & { submittedAt: string }> = []
         if (ciRes.ok) {
           const data = await ciRes.json()
+          checkIns = data.checkIns ?? []
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          const recent = (data.checkIns ?? []).find(
-            (ci: { submittedAt: string }) => new Date(ci.submittedAt) > weekAgo
-          )
-          if (recent) setAlreadySubmitted(true)
-          type CIRaw = { submittedAt: string; weight?: number | string | null; weightUnit?: string | null }
-          const withWeight = (data.checkIns ?? [])
-            .filter((ci: CIRaw) => ci.weight != null && Number(ci.weight) > 0)
-            .sort((a: CIRaw, b: CIRaw) => b.submittedAt.localeCompare(a.submittedAt))
-          if (withWeight[0]) {
-            setLastWeight({
-              value: Number(withWeight[0].weight),
-              unit: withWeight[0].weightUnit === "KG" ? "KG" : "LBS",
-            })
-          }
-          const sortedAll = (data.checkIns ?? []).sort((a: { submittedAt: string }, b: { submittedAt: string }) => b.submittedAt.localeCompare(a.submittedAt))
+          if (checkIns.some((ci) => new Date(ci.submittedAt) > weekAgo)) setAlreadySubmitted(true)
+          const sortedAll = [...checkIns].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
           if (sortedAll[0]) lastCheckInIso = sortedAll[0].submittedAt
+        }
+        const snapshots: Array<Record<string, unknown>> = snapRes?.ok ? ((await snapRes.json()).snapshots ?? []) : []
+        const latest = summarizeWeight(buildWeightHistory({ checkIns, logged: snapshots })).latest
+        setLatestReading(latest)
+        if (latest) setForm((f) => ({ ...f, weightUnit: latest.unit }))
+        const latestDay = latest ? weighInDayKey(latest.at) : null
+        if (latest?.source === "logged" && latestDay) {
+          const ago = daysBetweenKeys(latestDay, localDateKey())
+          if (ago >= 0 && ago <= RECENT_LOG_DAYS) {
+            setForm((f) => ({ ...f, weightChoice: "same" }))
+            setPreselectedFromProgress(true)
+          }
         }
 
         // Load program + workout log for the auto training summary
@@ -487,7 +500,15 @@ export default function CheckInClient() {
   const anyVideoUploading = form.formReviews.some((r) => r.videos.some((v) => v.uploading))
 
   function canProceed(): boolean {
-    if (step === 1) return true  // weight/measurements optional
+    if (step === 1) {
+      // A weight choice is required; measurements stay optional.
+      if (form.weightChoice === "") return false
+      if (form.weightChoice === "new") {
+        const n = parseFloat(form.weight)
+        return Number.isFinite(n) && n > 0
+      }
+      return true
+    }
     if (step === 2) {
       if (form.painReported === "unset") return false
       if (form.formReviewRequested === "unset") return false
@@ -503,9 +524,9 @@ export default function CheckInClient() {
   function submit() {
     if (!canProceed() || submitLockRef.current) return
     if (anyVideoUploading) { setErrorMsg("Please wait for your videos to finish uploading."); return }
-    if (lastWeight && form.weight.trim()) {
+    if (latestReading && form.weightChoice === "new" && form.weight.trim()) {
       const change = relativeChange(
-        { value: lastWeight.value, unit: lastWeight.unit },
+        { value: latestReading.lbs, unit: "LBS" },
         { value: form.weight, unit: form.weightUnit },
       )
       if (change != null && change >= PLAUSIBILITY_THRESHOLD) {
@@ -538,16 +559,18 @@ export default function CheckInClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           schemaVersion: 2,
-          // Progress
-          weight: form.weight || undefined,
-          weightUnit: form.weightUnit,
+          // Progress. Only a new weight is a reading; "same" points at the
+          // reading the client confirmed, and "skipped" sends nothing.
+          weightStatus: form.weightChoice,
+          ...(form.weightChoice === "new" && { weight: form.weight, weightUnit: form.weightUnit }),
+          ...(form.weightChoice === "same" && latestReading && {
+            weightConfirmedFrom: { lbs: latestReading.lbs, unit: latestReading.unit, at: latestReading.at, source: latestReading.source },
+          }),
           measurements: form.measurements.filter((m) => m.label.trim() && m.value.trim()),
           // Training
           workoutsCompleted: autoWorkouts.completed,
           workoutsPlanned: autoWorkouts.planned,
           trainingRating: form.trainingRating || undefined,
-          trainingWins: form.trainingWins || undefined,
-          trainingChallenges: form.trainingChallenges || undefined,
           // Attention
           painReported: form.painReported === "yes" ? true : form.painReported === "no" ? false : undefined,
           painNotes: form.painReported === "yes" ? (form.painNotes || undefined) : undefined,
@@ -562,6 +585,7 @@ export default function CheckInClient() {
           // Nutrition
           nutritionStatus: form.nutritionStatus || undefined,
           nutritionHelp: form.nutritionHelp || undefined,
+          hunger: form.hunger || undefined,
           // Weekly reflection
           weeklyWin: form.weeklyWin || undefined,
           weeklyChallenge: form.weeklyChallenge || undefined,
@@ -686,27 +710,18 @@ export default function CheckInClient() {
         {step === 1 && (
           <div>
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 4px" }}>Progress</h2>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1.25rem" }}>Weight and measurements are optional. Add whatever you track.</p>
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1.25rem" }}>Choose one option for your weight. Measurements are optional.</p>
 
-            <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, display: "block", marginBottom: 8 }}>Current weight <span style={{ fontWeight: 400, color: muted, fontSize: "0.72rem" }}>(optional)</span></label>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={form.weight}
-                onChange={(e) => set("weight")(e.target.value)}
-                placeholder="e.g. 145"
-                style={{ flex: "1 1 140px", minWidth: 0, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 600, outline: "none", borderRadius: 6, boxSizing: "border-box" }}
-              />
-              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                {(["LBS", "KG"] as const).map((u) => (
-                  <button key={u} type="button" onClick={() => set("weightUnit")(u)}
-                    style={{ background: form.weightUnit === u ? accent : white, border: `2px solid ${form.weightUnit === u ? accent : border}`, color: form.weightUnit === u ? black : muted, padding: "10px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", borderRadius: 6 }}>
-                    {u}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <CheckInWeightChoice
+              latest={latestReading}
+              choice={form.weightChoice}
+              weight={form.weight}
+              unit={form.weightUnit}
+              preselectedFromProgress={preselectedFromProgress}
+              onChoice={(v) => { setPreselectedFromProgress(false); set("weightChoice")(v) }}
+              onWeight={set("weight")}
+              onUnit={set("weightUnit")}
+            />
 
             {/* Measurements — structured, every field optional. Submits
                 through the existing free-form `measurements` array with
@@ -831,11 +846,6 @@ export default function CheckInClient() {
 
             <RatingRow label="How did training feel overall?" value={form.trainingRating} onChange={set("trainingRating")} />
 
-            <TextBlock label="What felt good this week?" value={form.trainingWins} onChange={set("trainingWins")}
-              placeholder="Exercises you enjoyed, strength improvements, movements that felt better…" />
-            <TextBlock label="Anything you didn't enjoy, struggled with, or want changed?" value={form.trainingChallenges} onChange={set("trainingChallenges")}
-              placeholder="An awkward movement, an exercise you'd like swapped, equipment issues, timing…" />
-
             <div style={{ paddingTop: "1rem", borderTop: `1px solid ${border}` }}>
               <YesNoRow label="Any pain or unusual discomfort during training this week?" value={form.painReported} onChange={(v) => setForm((f) => ({ ...f, painReported: v }))} />
               {form.painReported === "yes" && (
@@ -911,6 +921,30 @@ export default function CheckInClient() {
               })}
             </div>
 
+            <fieldset style={{ border: "none", margin: "0 0 1.25rem", padding: 0 }}>
+              <legend style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, marginBottom: 8, padding: 0 }}>How was your hunger this week? <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 400, color: muted }}>(optional)</span></legend>
+              <div role="radiogroup" aria-label="How was your hunger this week?" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {HUNGER_OPTIONS.map((opt) => {
+                  const active = form.hunger === opt.value
+                  return (
+                    <button key={opt.value} type="button" role="radio" aria-checked={active}
+                      onClick={() => set("hunger")(active ? "" : opt.value)}
+                      style={{
+                        textAlign: "left", minHeight: 44,
+                        background: active ? `${accent}18` : "transparent",
+                        border: `1px solid ${active ? accent : border}`,
+                        color: black, padding: "12px 14px",
+                        fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.88rem",
+                        fontWeight: active ? 700 : 600,
+                        cursor: "pointer", borderRadius: 4, WebkitTapHighlightColor: "transparent",
+                      }}>
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
+
             <TextBlock label="Anything you'd like help with?" value={form.nutritionHelp} onChange={set("nutritionHelp")}
               placeholder="Hunger, protein, meal timing, food choices, hitting macros, travel, digestion, anything else…" />
 
@@ -935,10 +969,10 @@ export default function CheckInClient() {
             <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 4px" }}>Week Review</h2>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: muted, margin: "0 0 1rem" }}>Anything I should know before I write your feedback?</p>
 
-            <TextBlock label="Biggest win this week?" value={form.weeklyWin} onChange={set("weeklyWin")}
-              placeholder="A PR, a habit that stuck, a moment of progress…" />
-            <TextBlock label="Biggest challenge this week?" value={form.weeklyChallenge} onChange={set("weeklyChallenge")}
-              placeholder="What felt hard? Missed workouts, cravings, low energy days…" />
+            <TextBlock label="What was your biggest win this week?" value={form.weeklyWin} onChange={set("weeklyWin")}
+              placeholder="A workout that felt good, getting stronger, a habit that stuck…" />
+            <TextBlock label="What was hardest this week?" value={form.weeklyChallenge} onChange={set("weeklyChallenge")}
+              placeholder="An exercise that felt awkward, missed workouts, cravings, low energy days…" />
 
             <div style={{ marginBottom: "1.25rem" }}>
               <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, display: "block", marginBottom: 8 }}>Is there anything you&apos;d like me to adjust for next week? <span style={{ fontWeight: 400, color: muted, fontSize: "0.72rem" }}>(optional)</span></label>
@@ -1002,7 +1036,7 @@ export default function CheckInClient() {
       </div>
 
       {/* Plausibility confirmation — soft guard against weight typos */}
-      {showTypoConfirm && lastWeight && (
+      {showTypoConfirm && latestReading && (
         <div role="dialog" aria-modal="true" aria-labelledby="typo-confirm-title"
           style={{
             position: "fixed", inset: 0, background: "rgba(10,10,10,0.55)",
@@ -1015,7 +1049,7 @@ export default function CheckInClient() {
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>Double-check your weight</p>
             <h2 id="typo-confirm-title" style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 10px", lineHeight: 1.25 }}>Is that right?</h2>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: black, margin: "0 0 6px", lineHeight: 1.55 }}>
-              Your last check-in was <strong>{lastWeight.value} {lastWeight.unit === "KG" ? "kg" : "lb"}</strong> and you entered <strong>{form.weight} {form.weightUnit === "KG" ? "kg" : "lb"}</strong>.
+              Your last weigh-in was <strong>{+fromLbs(latestReading.lbs, form.weightUnit).toFixed(1)} {form.weightUnit === "KG" ? "kg" : "lb"}</strong> and you entered <strong>{form.weight} {form.weightUnit === "KG" ? "kg" : "lb"}</strong>.
             </p>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "0 0 16px", lineHeight: 1.55 }}>
               If that&apos;s correct, go ahead. If it was a typo, edit it before submitting.
