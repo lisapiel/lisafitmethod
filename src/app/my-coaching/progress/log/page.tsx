@@ -1,5 +1,6 @@
 "use client"
 
+import { localDateKey } from "@/lib/localDate"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -38,7 +39,7 @@ export default function LogMeasurementsPage() {
   const router = useRouter()
   const [weightUnit, setWeightUnit] = useState<"LBS" | "KG">("LBS")
   const [form, setForm] = useState({
-    snapshotDate: new Date().toISOString().slice(0, 10),
+    snapshotDate: localDateKey(),
     weight: "",
     waist: "",
     hips: "",
