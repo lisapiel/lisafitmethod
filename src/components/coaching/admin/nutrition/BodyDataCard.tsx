@@ -60,7 +60,7 @@ export function BodyDataCard({ client, email, snapshots, checkIns, onChanged }: 
     <section className="can-card" aria-labelledby="can-body-h">
       <div className="can-card-head">
         <h2 id="can-body-h" className="can-h">Setup and body data</h2>
-        <span className="can-note">The client edits this in setup. You correct the starting weight.</span>
+        <span className="can-note">The client fills this in at setup. You correct the starting weight and review goal or activity changes.</span>
       </div>
       {!hasBody && <p className="can-note" style={{ marginBottom: 12 }}>Setup isn&apos;t complete yet, so there&apos;s no starting estimate.</p>}
       <div className="can-chips">

@@ -18,7 +18,8 @@ import { DaysList } from "@/components/coaching/admin/nutrition/DaysList"
 import { TargetCard } from "@/components/coaching/admin/nutrition/TargetCard"
 import { RecoverySection } from "@/components/coaching/admin/nutrition/RecoverySection"
 import { BodyDataCard } from "@/components/coaching/admin/nutrition/BodyDataCard"
-import type { AdminCheckIn, AdminSnapshot } from "@/components/coaching/admin/nutrition/types"
+import { ProfileRequestsCard } from "@/components/coaching/admin/nutrition/ProfileRequestsCard"
+import type { AdminCheckIn, AdminSnapshot, Macros } from "@/components/coaching/admin/nutrition/types"
 import "@/components/coaching/admin/nutrition/nutritionAdmin.css"
 
 const CHART_DAYS = 30
@@ -36,6 +37,9 @@ export default function AdminClientNutritionPage() {
   const [logs, setLogs] = useState<NutritionLogRecord[]>([])
   const [checkIns, setCheckIns] = useState<AdminCheckIn[]>([])
   const [snapshots, setSnapshots] = useState<AdminSnapshot[]>([])
+  const [pendingRequests, setPendingRequests] = useState(0)
+  const [startChange, setStartChange] = useState<{ macros: Macros; key: number } | null>(null)
+  const startTargetChange = useCallback((macros: Macros) => setStartChange({ macros, key: Date.now() }), [])
 
   const load = useCallback(async () => {
     try {
@@ -107,7 +111,12 @@ export default function AdminClientNutritionPage() {
 
   return (
     <div>
-      <h1 className="ca-title" style={{ marginBottom: 16 }}>Nutrition</h1>
+      <h1 className="ca-title" style={{ marginBottom: pendingRequests > 0 ? 6 : 16 }}>Nutrition</h1>
+      {pendingRequests > 0 && (
+        <p className="can-note" role="status" data-testid="pending-requests-line" style={{ marginBottom: 16 }}>
+          {pendingRequests === 1 ? "1 goal or activity request is" : `${pendingRequests} goal or activity requests are`} waiting for your review below.
+        </p>
+      )}
       <div className="can">
         <div className="can-col">
           <div className="can-o1"><SummaryCard week={week} target={currentTarget} todayKey={todayKey} /></div>
@@ -115,8 +124,9 @@ export default function AdminClientNutritionPage() {
           <div className="can-o4"><DaysList logs={logs} currentTarget={currentTarget ?? undefined} todayKey={todayKey} /></div>
         </div>
         <div className="can-col">
+          <ProfileRequestsCard email={emailParam} client={client} onChanged={load} onStartTargetChange={startTargetChange} onPendingCount={setPendingRequests} />
           <div className="can-o5">
-            <TargetCard email={emailParam} current={currentTarget} isCustom={effective?.source === "override"} starting={starting} review={review} onChanged={load} />
+            <TargetCard email={emailParam} current={currentTarget} isCustom={effective?.source === "override"} starting={starting} review={review} onChanged={load} startChange={startChange} />
           </div>
           <div className="can-o3"><WeightCard client={client} checkIns={checkIns} /></div>
           <div className="can-o6"><RecoverySection email={emailParam} onLogsChanged={load} /></div>
