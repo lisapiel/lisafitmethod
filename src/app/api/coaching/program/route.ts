@@ -4,6 +4,7 @@ import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { getCoachingClientRecord, getProgramRecord } from "@/lib/authTokens"
 import { hydrateProgramVideos } from "@/lib/programHydration"
+import { toClientProgram, toClientRecord } from "@/lib/clientView"
 
 export const dynamic = "force-dynamic"
 
@@ -27,7 +28,7 @@ export async function GET() {
 
   const client = await getCoachingClientRecord(email)
   if (!client?.currentProgramId) {
-    return NextResponse.json({ program: null, client })
+    return NextResponse.json({ program: null, client: client ? toClientRecord(client) : client })
   }
 
   const rawProgram = await getProgramRecord(client.currentProgramId)
@@ -36,5 +37,5 @@ export async function GET() {
   // sees a working videoS3Key even for programs whose embedded value
   // was empty or stale at save time.
   const program = await hydrateProgramVideos(rawProgram)
-  return NextResponse.json({ program, client })
+  return NextResponse.json({ program: program ? toClientProgram(program) : program, client: toClientRecord(client) })
 }

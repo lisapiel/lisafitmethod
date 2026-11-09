@@ -5,9 +5,8 @@ import Link from "next/link"
 import { expandedWeeks } from "@/lib/programExpansion"
 import { completedFor, currentWeekIndex, nextWorkout, weekProgress, type PortalLog, type PortalWeek } from "@/lib/portalProgram"
 import WeekDayList from "@/components/portal/WeekDayList"
-import { ChevronDown } from "@/components/portal/PortalIcons"
 
-type Loaded = { id: string; name: string; notes: string; weeks: PortalWeek[]; logs: PortalLog[] }
+type Loaded = { id: string; name: string; weeks: PortalWeek[]; logs: PortalLog[] }
 
 function Skeleton() {
   return (
@@ -44,7 +43,7 @@ export default function WorkoutsClient() {
         const logs: PortalLog[] = logsRes.status === "fulfilled"
           ? (logsRes.value.logs ?? []).map((l: Record<string, unknown>) => ({ programId: l.programId as string, weekNumber: Number(l.weekNumber), dayLabel: l.dayLabel as string, completedAt: l.completedAt as string }))
           : []
-        setData({ id: prog.id as string, name: prog.name as string, notes: ((prog.notes as string) ?? "").trim(), weeks, logs })
+        setData({ id: prog.id as string, name: prog.name as string, weeks, logs })
         setState("ready")
       } catch {
         if (alive) setState("error")
@@ -95,12 +94,6 @@ export default function WorkoutsClient() {
         </div>
       </header>
 
-      {data.notes && (
-        <details className="pt-about">
-          <summary>About this program <ChevronDown /></summary>
-          <p className="pt-about-body">{data.notes}</p>
-        </details>
-      )}
 
       <div className="pt-weeks" role="group" aria-label="Choose a week">
         {data.weeks.map((w, wi) => {
