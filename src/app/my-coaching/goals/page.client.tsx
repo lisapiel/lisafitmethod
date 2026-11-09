@@ -227,13 +227,13 @@ export default function GoalsClient() {
             </svg>
           </div>
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: black, margin: "0 0 10px" }}>
-            Your goals will be created after your first coaching review.
+            I&apos;ll set your goals after your first coaching review.
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: muted, margin: "0 0 24px", lineHeight: 1.6, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
-            Lisa is reviewing your check-in to set goals that are personal to where you are now and where you want to go. Have specific goals in mind? Let her know.
+            I&apos;m going through your check-in so your goals fit where you are now and where you want to go. If you already have specific goals in mind, tell me.
           </p>
           <Link href="/my-coaching/messages" style={{ display: "inline-block", background: accent, color: black, padding: "13px 26px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", borderRadius: 4 }}>
-            Message Lisa
+            Message me
           </Link>
         </div>
       ) : (

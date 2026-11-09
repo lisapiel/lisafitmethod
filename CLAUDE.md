@@ -98,6 +98,7 @@ If there are uncommitted changes already in the repo, surface them to Lisa befor
 - Images: always include `alt` text. Use `next/image` for all images so they are optimized automatically.
 - No comments explaining what the code does — only add a comment if the reason behind something is non-obvious.
 - Keep markup semantic (`<section>`, `<nav>`, `<main>`, `<footer>`).
+- Client-facing copy follows `COPY_GUIDELINES.md`.
 
 ---
 

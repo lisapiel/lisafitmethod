@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
-    subject: "Action required: accept your coaching terms — Lisa Fit Method",
+    subject: "Action required: accept your coaching terms | Lisa Fit Method",
     html: `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
         <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:#1a1a1a;line-height:1.3;">One quick step before we begin, ${firstName}.</h1>
         <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-          Your payment is confirmed and I'm ready to get started — I just need you to review and accept the Coaching Terms &amp; Conditions and Assumption of Risk &amp; Liability Waiver before I activate your portal.
+          Your payment is confirmed and I'm ready to get started. Before I activate your portal, I just need you to review and accept the Coaching Terms &amp; Conditions and the Assumption of Risk &amp; Liability Waiver.
         </p>
         <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">
           This only takes a moment. Click below to review and accept.
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="background:#c8a97e;border-radius:2px;">
           <a href="${acceptUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Review &amp; Accept →</a>
         </td></tr></table>
-        <p style="margin:0;font-size:12px;color:#999;line-height:1.6;">This link expires in 48 hours. If it has expired, please contact us at <a href="mailto:contact@lisafitmethod.com" style="color:#c8a97e;">contact@lisafitmethod.com</a> and we'll send a new one.</p>
+        <p style="margin:0;font-size:12px;color:#999;line-height:1.6;">This link expires in 48 hours. If it has expired, email me at <a href="mailto:contact@lisafitmethod.com" style="color:#c8a97e;">contact@lisafitmethod.com</a> and I'll send you a new one.</p>
       </td></tr>
     </table>
   </td></tr></table>

@@ -4,7 +4,7 @@ import { getWaiverToken } from "@/lib/authTokens"
 import AcceptTermsClient from "./page.client"
 
 export const metadata: Metadata = {
-  title: "Accept Coaching Terms — Lisa Fit Method",
+  title: "Accept Coaching Terms | Lisa Fit Method",
   robots: { index: false, follow: false },
 }
 

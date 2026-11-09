@@ -150,8 +150,8 @@ function ReacceptInterstitial({ onAccepted }: { onAccepted: () => void }) {
           marginBottom: 28,
           fontFamily: "var(--font-dm-sans), sans-serif",
         }}>
-          Our Coaching Terms &amp; Conditions and Assumption of Risk &amp; Liability Waiver have been updated.
-          Please review and accept them to continue using your coaching portal.
+          I&apos;ve updated the Coaching Terms &amp; Conditions and the Assumption of Risk &amp; Liability Waiver.
+          Please review and accept them to keep using your coaching portal.
         </p>
 
         <form onSubmit={handleSubmit}>

@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr><td style="background:#c9a96e;border-radius:2px;">
           <a href="${link}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Complete Enrollment &rarr;</a>
         </td></tr></table>
-        <p style="margin:0;font-size:13px;color:#8a8a8a;line-height:1.7;">For your security this particular link can only be used once. Your invitation itself doesn't expire — if you need another, just ask.</p>
+        <p style="margin:0;font-size:13px;color:#8a8a8a;line-height:1.7;">For your security, this link can only be used once. Your invitation itself doesn't expire, so if you need another link, just ask.</p>
       </td></tr>
     </table>
   </td></tr></table>

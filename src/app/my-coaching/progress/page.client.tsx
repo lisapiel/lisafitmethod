@@ -478,7 +478,7 @@ export default function ProgressClient() {
               <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.1rem", fontWeight: 700, color: black, margin: "8px 0 0", lineHeight: 1.2 }}>
                 {workoutStats.lastWorkout
                   ? new Date(workoutStats.lastWorkout).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-                  : "—"}
+                  : "None yet"}
               </p>
             </div>
           </div>
@@ -527,7 +527,7 @@ export default function ProgressClient() {
             ))}
           </div>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: "12px 0 0", fontStyle: "italic" }}>
-            Top exercises where you&apos;ve added the most weight since you started.
+            These are the exercises where you&apos;ve added the most weight since you started.
           </p>
         </div>
       )}
@@ -548,7 +548,7 @@ export default function ProgressClient() {
         {snapshots.length === 0 ? (
           <div style={{ textAlign: "center", padding: "2rem 0" }}>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 16px", lineHeight: 1.5 }}>
-              Log your measurements to track body composition over time.
+              Log your measurements so you can see how your body changes over time.
             </p>
             <Link href="/my-coaching/progress/log" style={{ display: "inline-block", background: accent, color: black, padding: "11px 24px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>
               Log First Measurements
@@ -597,7 +597,7 @@ export default function ProgressClient() {
           </div>
           {clientStartDate && milestones.length < 3 && (
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "18px 0 0", fontStyle: "italic" }}>
-              More milestones unlock as you progress. Keep going.
+              More milestones will appear as you keep training.
             </p>
           )}
         </div>
