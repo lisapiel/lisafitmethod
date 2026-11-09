@@ -9,6 +9,7 @@ import type { NutritionKind, ThreadMessage, ThreadTheme } from "@/components/coa
 import { MessageComposer } from "@/components/coaching/messages/MessageComposer.client"
 import type { ComposerTheme } from "@/components/coaching/messages/MessageComposer.client"
 import { useThreadScroll } from "@/components/coaching/messages/useThreadScroll"
+import { useFitToViewport } from "@/components/coaching/messages/useFitToViewport"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -75,6 +76,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
   const [clientName, setClientName] = useState("")
   const [messages, setMessages] = useState<ThreadMessage[]>([])
   const { listRef, onScroll, keepPinned, markSent } = useThreadScroll(messages.length, !loading)
+  const { ref: panelRef, height: panelHeight } = useFitToViewport(!loading)
 
   const loadMessages = useCallback(async (accessToken: string) => {
     try {
@@ -152,7 +154,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
   const name = clientName || clientEmail
 
   return (
-    <div style={{ height: "min(calc(100dvh - 96px), 760px)", background: "var(--ca-surface)", color: cream, fontFamily: sans, display: "flex", flexDirection: "column", minWidth: 0, ...({ "--lfm-focus": "var(--ca-focus)" } as CSSProperties) }}>
+    <div ref={panelRef} style={{ height: panelHeight != null ? `${panelHeight}px` : "min(calc(100dvh - 96px), 760px)", background: "var(--ca-surface)", color: cream, fontFamily: sans, display: "flex", flexDirection: "column", minWidth: 0, ...({ "--lfm-focus": "var(--ca-focus)" } as CSSProperties) }}>
       <ThreadStyles />
       {loading ? <Spinner /> : (
         <>

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import type { CoachingOverview } from "@/lib/coachingOverview"
 import { Empty, LoadError, SkeletonRows, initials, timeAgo } from "@/components/coaching/admin/AdminUi"
@@ -12,7 +13,10 @@ type View = "reply" | "all"
 export default function MessagesPage() {
   const { data, error, loading, reload } = useAdminFetch<CoachingOverview>(OVERVIEW_PATH, { pollMs: 30_000 })
   const [view, setView] = useState<View | null>(null)
+  const [pick, setPick] = useState("")
+  const router = useRouter()
   const threads = data?.threads ?? []
+  const threadEmails = new Set(threads.map((t) => t.clientEmail.toLowerCase()))
   const waiting = threads.filter((t) => t.lastFromClient)
   const active = view ?? (waiting.length > 0 ? "reply" : "all")
   const shown = active === "reply" ? waiting : threads
@@ -26,6 +30,20 @@ export default function MessagesPage() {
         </div>
       </header>
       {error && <LoadError error={error} onRetry={reload} hasData={!!data} />}
+      {data && data.clients.length > 0 && (
+        <form className="ca-card" style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "end", padding: 14, marginBottom: 14 }} onSubmit={(e) => { e.preventDefault(); if (pick) router.push(`/admin/coaching/clients/${encodeURIComponent(pick)}/messages`) }}>
+          <label htmlFor="msg-any-client" style={{ display: "grid", gap: 6, flex: "1 1 220px", minWidth: 0, fontWeight: 600, fontSize: "0.875rem" }}>
+            Message any client
+            <select id="msg-any-client" value={pick} onChange={(e) => setPick(e.target.value)} style={{ minHeight: 44, borderRadius: 10, border: "1px solid var(--ca-line)", background: "var(--ca-surface)", color: "var(--ca-text)", padding: "0 12px", font: "inherit", fontWeight: 400 }}>
+              <option value="">Choose a client</option>
+              {[...data.clients].sort((a, b) => a.displayName.localeCompare(b.displayName)).map((c) => (
+                <option key={c.email} value={c.email}>{c.displayName}{c.status === "ACTIVE" ? "" : ` (${c.status === "PENDING_PAYMENT" ? "awaiting payment" : c.status.toLowerCase()})`}{threadEmails.has(c.email.toLowerCase()) ? "" : " · no messages yet"}</option>
+              ))}
+            </select>
+          </label>
+          <button type="submit" className="ca-btn-primary" disabled={!pick}>Open conversation</button>
+        </form>
+      )}
       {data && (
         <div className="ca-filters" role="group" aria-label="Show">
           <button type="button" className="ca-filter" aria-pressed={active === "reply"} onClick={() => setView("reply")}>Needs reply <span style={{ opacity: 0.75 }}>{waiting.length}</span></button>
