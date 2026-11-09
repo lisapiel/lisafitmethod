@@ -39,6 +39,47 @@ Lisa's own example of the tone:
 | Payment confirmed — your coaching portal is now active. | Your payment is confirmed and your coaching portal is now active. |
 | Your invitation itself doesn't expire — if you need another, just ask. | Your invitation itself doesn't expire, so if you need another link, just ask. |
 
+## Workout notes and training terms
+
+Many clients are beginners. Every workout note should make sense to someone
+who has never trained before.
+
+- **Explain a term the first time it appears in a note, then use it freely.**
+  Explain what it means and what the client should do, not just the acronym.
+  - Reps in reserve (RIR): how many more good reps you could still do before
+    you'd have to stop. "Stop each set when you could still do 2 more good reps."
+  - RPE: a 1 to 10 rating of how hard a set feels, where 10 means you
+    couldn't do another rep.
+  - Working sets: the sets after your warm-up.
+  - Progressive overload / progressing: adding a little weight or a few reps
+    over time. Say "add weight gradually" rather than "progressively load".
+  - Tempo: how fast you lift and lower. Say it in seconds ("lower for 3 seconds").
+  - Volume: the number of sets. Say "sets" where you can.
+  - Hinge: bending at your hips while keeping your back flat.
+- Avoid program-design jargon in client notes: "exposure", "stimulus",
+  "hypertrophy" (say "building muscle"), "tolerance" (say what to watch for),
+  "anti-extension", "working hip", "unilateral" (say "single-leg").
+- Write numbers and units out: "about 60 to 90 seconds", "30 seconds on each
+  side". No "~", "+" lists or "30sec".
+- Refer to Lisa as "me", never "your coach".
+- Keep every prescription exactly: exercise names, sets, reps, load, rest,
+  RIR/RPE, progression rules and safety instructions. Rewording must never
+  change what the client does.
+- Keep explanations short. One sentence is usually enough. Don't repeat a
+  definition inside the same workout.
+
+### Where notes go
+
+- **Workout notes** (the day's notes) hold the guidance, explanations of terms
+  and progression. They are collapsed by default behind "My notes for this
+  workout" ("My notes for this day" on sport days) on Home and inside the
+  workout, and open into normal paragraphs. Use a blank line between paragraphs.
+- **Exercise notes** show directly on the exercise cards, so keep them to one
+  or two short cues. Put longer explanations in the workout notes instead.
+- Don't add explanatory text to Home, workout cards or the exercise list.
+- Workout titles (day labels) are tied to clients' logged workouts. Don't
+  rename them as a copy edit.
+
 ## Don't touch
 
 - Anything a client wrote: check-in answers, notes, messages, food entries.

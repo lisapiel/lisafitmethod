@@ -36,7 +36,7 @@ export default function SportDayForm(p: Props) {
       <header className="pt-sport-head">
         <p className="pt-date">{p.meta} · Sport day</p>
         <h1>{p.dayLabel}</h1>
-        {p.notes && <RunnerNotes text={p.notes} />}
+        {p.notes && <RunnerNotes text={p.notes} sport />}
       </header>
       <form
         className="pt-form"

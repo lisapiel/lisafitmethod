@@ -143,7 +143,9 @@
 
 .pt-runner-notes { background: #fdf6ec; border: 1px solid #ecdcc3; border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; margin-top: 12px; max-width: 680px; }
 .pt-runner-notes p { margin: 0; }
-.pt-runner-notes-title { font-weight: 700; font-size: 0.9375rem; }
+.pt-runner-notes { padding-block: 4px; }
+.pt-runner-notes-toggle { justify-self: start; }
+.pt-runner-notes .pt-from-text { padding-bottom: 10px; }
 
 /* Sport day: a short form in place of the exercise list. */
 .pt-sport { display: grid; gap: 18px; max-width: 560px; }
