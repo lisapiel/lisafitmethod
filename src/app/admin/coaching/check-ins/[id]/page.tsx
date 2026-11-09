@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
+import CheckInContext from "@/components/coaching/admin/CheckInContext"
+import AssessmentEditor from "@/components/coaching/admin/AssessmentEditor"
 import { fetchAuthSession } from "aws-amplify/auth"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { SignedVideo } from "@/components/coaching/NutritionComposer.client"
 
@@ -144,14 +145,10 @@ function Spinner() {
 
 export default function AdminCheckInReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [token, setToken] = useState("")
   const [checkIn, setCheckIn] = useState<CheckIn | null>(null)
   const [clientName, setClientName] = useState("")
-  const [feedback, setFeedback] = useState("")
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -227,7 +224,6 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             coachFeedback: ci.coachFeedback ?? null,
             reviewedAt: ci.reviewedAt ?? null,
           })
-          if (ci.coachFeedback) setFeedback(ci.coachFeedback)
 
           if (clientsRes.status === "fulfilled" && clientsRes.value.ok) {
             const clientData = await clientsRes.value.json()
@@ -242,23 +238,6 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
     }
     load()
   }, [id])
-
-  async function sendFeedback() {
-    if (!checkIn || !feedback.trim() || !token) return
-    setSaving(true)
-    try {
-      const res = await fetch(`/api/admin/coaching/check-ins/${id}`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ feedback: feedback.trim() }),
-      })
-      if (res.ok) {
-        setSaved(true)
-        setCheckIn((prev) => prev ? { ...prev, status: "REVIEWED", coachFeedback: feedback.trim(), reviewedAt: new Date().toISOString() } : prev)
-      }
-    } catch (err) { console.error(err) }
-    setSaving(false)
-  }
 
   if (loading) return (
     <div style={{ color: cream }}>
@@ -319,6 +298,23 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             {chips.map((c) => <Chip key={c.label} label={c.label} tone={c.tone} />)}
           </div>
         )}
+
+        <CheckInContext
+          token={token}
+          clientEmail={checkIn.clientEmail}
+          submittedAt={checkIn.submittedAt}
+          weight={checkIn.weight}
+          weightUnit={checkIn.weightUnit}
+          workoutsCompleted={checkIn.workoutsCompleted}
+          workoutsPlanned={checkIn.workoutsPlanned}
+          trainingRating={checkIn.trainingRating}
+          recovery={[
+            { label: "Sleep", value: checkIn.sleepQuality },
+            { label: "Energy", value: checkIn.energyLevel },
+            { label: "Recovery", value: checkIn.recoveryRating },
+            { label: "Stress", value: checkIn.stressLevel, higherIsWorse: true },
+          ]}
+        />
 
         {/* ── Content columns ─────────────────────────────────────────── */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1rem" }}>
@@ -510,52 +506,13 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           </div>
         </div>
 
-        {/* Feedback composer (unchanged) */}
-        <div style={{ background: "var(--ca-raised)", border: `1px solid ${reviewed ? "var(--ca-accent-tint)" : `color-mix(in srgb, ${gold} 27%, transparent)`}`, borderRadius: 8, padding: "1.5rem", marginTop: "1.5rem" }}>
-          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>
-            {reviewed ? `Your Feedback · ${checkIn.reviewedAt ? formatDate(checkIn.reviewedAt) : ""}` : "Write Feedback"}
-          </p>
-          <textarea
-            value={feedback}
-            onChange={(e) => { setFeedback(e.target.value); setSaved(false) }}
-            placeholder="Write your feedback for this client. Be specific — what's working, what to adjust, encouragement..."
-            rows={8}
-            style={{
-              width: "100%", background: "var(--ca-surface)", border: `1px solid ${border}`, borderRadius: 6,
-              color: cream, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.875rem",
-              lineHeight: 1.6, padding: "0.875rem 1rem", resize: "vertical", outline: "none", boxSizing: "border-box",
-            }}
-          />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "1rem", flexWrap: "wrap", gap: 12 }}>
-            <div>
-              {saved && (
-                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-ok)", margin: 0 }}>
-                  ✓ Feedback sent — client notified
-                </p>
-              )}
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={() => router.push("/admin/coaching/check-ins")}
-                style={{ background: "transparent", border: `1px solid ${border}`, color: muted, padding: "10px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", cursor: "pointer", borderRadius: 4 }}
-              >
-                Back to Queue
-              </button>
-              <button
-                onClick={sendFeedback}
-                disabled={saving || !feedback.trim()}
-                style={{
-                  background: feedback.trim() ? gold : "var(--ca-line)", border: "none",
-                  color: feedback.trim() ? "var(--ca-surface)" : muted, padding: "10px 24px",
-                  fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 700,
-                  cursor: feedback.trim() ? "pointer" : "not-allowed", borderRadius: 4, transition: "background 0.15s",
-                }}
-              >
-                {saving ? "Sending..." : reviewed ? "Update Feedback" : "Send Feedback"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <AssessmentEditor
+          token={token}
+          checkInId={id}
+          clientFirstName={(clientName || "").split(" ")[0]}
+          legacyFeedback={checkIn.coachFeedback}
+          onSent={() => setCheckIn((prev) => prev ? { ...prev, status: "REVIEWED", reviewedAt: new Date().toISOString() } : prev)}
+        />
       </div>
     </div>
   )

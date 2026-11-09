@@ -207,3 +207,47 @@ a.ca-row:active { background: var(--ca-accent-tint); }
 @media (max-width: 768px) {
   .ca input, .ca textarea, .ca select { font-size: 16px !important; }
 }
+
+/* Check-in review: context panel and structured assessment. */
+.ca-ctx, .ca-assess { background: var(--ca-raised); border: 1px solid var(--ca-line); border-radius: 14px; padding: 16px 18px; margin-bottom: 1.25rem; display: grid; gap: 12px; color: var(--ca-text); }
+.ca-ctx-head, .ca-assess-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.ca-ctx-head h2, .ca-assess-head h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.ca-ctx-head a { color: var(--ca-accent-mark); font-size: 0.875rem; font-weight: 600; }
+.ca-ctx-rings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.ca-ctx-rings > div { display: grid; justify-items: center; gap: 2px; }
+.ca-ctx-rings b { font-size: 0.875rem; }
+.ca-ctx-rings span { font-size: 0.8125rem; color: var(--ca-muted); }
+.ca-ctx-note { margin: 0; font-size: 0.8125rem; color: var(--ca-muted); }
+.ca-ctx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.ca-ctx-cell { background: var(--ca-surface); border: 1px solid var(--ca-line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; }
+.ca-ctx-cell > span { font-size: 0.8125rem; color: var(--ca-muted); }
+.ca-ctx-cell b { font-size: 1.05rem; }
+.ca-ctx-bar { display: grid; grid-template-columns: 70px minmax(0, 1fr) 18px; align-items: center; gap: 8px; font-size: 0.8125rem; }
+.ca-ctx-bar i { display: block; height: 8px; border-radius: 4px; background: var(--ca-line); overflow: hidden; }
+.ca-ctx-bar em { display: block; height: 8px; border-radius: 4px; background: var(--ca-accent-mark); }
+.ca-ctx-bar em[data-warn] { background: var(--ca-warn); }
+.ca-assess-state { font-size: 0.8125rem; color: var(--ca-muted); }
+.ca-assess-state[data-sent] { color: var(--ca-ok); font-weight: 600; }
+.ca-assess-shared { margin: 0; font-size: 0.8125rem; color: var(--ca-ok); font-weight: 600; }
+.ca-assess-field { display: grid; gap: 6px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.ca-assess-field label, .ca-assess-field legend { font-size: 0.875rem; font-weight: 700; padding: 0; }
+.ca-assess-field legend span { font-weight: 400; color: var(--ca-muted); margin-left: 6px; }
+.ca-assess-field textarea, .ca-assess-field input { width: 100%; box-sizing: border-box; background: var(--ca-surface); border: 1px solid var(--ca-line); border-radius: 10px; color: var(--ca-text); font: 400 1rem/1.5 inherit; padding: 10px 12px; }
+.ca-assess-field input + input { margin-top: 6px; }
+.ca-assess-private textarea { border-style: dashed; background: transparent; }
+.ca-assess-check { display: flex; align-items: center; gap: 10px; font-size: 0.875rem; min-height: 44px; }
+.ca-assess-check input { width: 20px; height: 20px; }
+.ca-assess-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ca-btn-primary { min-height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: var(--ca-accent); color: var(--ca-on-accent); font-weight: 700; font-size: 0.9375rem; cursor: pointer; }
+.ca-btn-quiet { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--ca-line); background: transparent; color: var(--ca-text); font-weight: 600; font-size: 0.9375rem; cursor: pointer; }
+.ca-btn-primary:disabled, .ca-btn-quiet:disabled { opacity: 0.5; cursor: not-allowed; }
+.ca-assess-confirm { background: var(--ca-accent-tint); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; }
+.ca-assess-confirm p { margin: 0; font-size: 0.9375rem; }
+.ca-assess-error { margin: 0; color: var(--ca-danger); font-size: 0.875rem; }
+.ca-assess-status { margin: 0; color: var(--ca-ok); font-size: 0.875rem; }
+.ca-assess-muted { margin: 0; color: var(--ca-muted); font-size: 0.8125rem; }
+.ca-assess-legacy { background: var(--ca-surface); border-radius: 10px; padding: 10px 12px; font-size: 0.875rem; }
+.ca-assess-legacy p { margin: 4px 0 0; white-space: pre-wrap; }
+.ca-assess-history summary { cursor: pointer; font-size: 0.875rem; font-weight: 600; min-height: 32px; }
+.ca-assess-history div { padding: 8px 0; border-top: 1px solid var(--ca-line); font-size: 0.8125rem; }
+.ca-assess-history p { margin: 4px 0 0; color: var(--ca-muted); }

@@ -11,6 +11,7 @@ import { checkInStatus as checkInState, type PortalWeek } from "@/lib/portalProg
 import UpNextCard from "@/components/portal/UpNextCard"
 import CoachNote from "@/components/portal/CoachNote"
 import HomeGlance from "@/components/portal/HomeGlance"
+import WeekFromLisa from "@/components/portal/WeekFromLisa"
 import { ChevronRight } from "@/components/portal/PortalIcons"
 
 
@@ -317,6 +318,8 @@ export default function MyCoachingHomeClient() {
       </div>
 
       <div className="pt-home-side">
+        <WeekFromLisa compact />
+
         <HomeGlance
           week={weekStrip}
           checkIn={checkIn}

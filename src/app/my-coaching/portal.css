@@ -260,3 +260,17 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 .pt-recent-item span { font-size: 0.8125rem; color: var(--pt-muted); }
 .pt-day-pick { display: grid; justify-items: center; gap: 2px; background: none; border: 0; padding: 4px 0; border-radius: 12px; font: inherit; color: inherit; cursor: pointer; min-height: 56px; width: 100%; }
 .pt-day-pick[aria-pressed="true"] { background: #f6efe3; }
+
+/* Your week, from Lisa: shared assessment and the priorities checklist. */
+.pt-week-lisa { background: #fdf6ec; border: 1px solid #ecdcc3; border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; }
+.pt-week-lisa-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pt-week-lisa-head h2 { margin: 0; font-family: var(--pt-serif); font-size: 1.15rem; }
+.pt-week-lisa-head span { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-week-lisa-list { display: grid; gap: 4px; }
+.pt-week-lisa-list > p { margin: 0 0 2px; font-size: 0.8125rem; font-weight: 700; color: #6b5432; }
+.pt-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 0.9375rem; cursor: pointer; }
+.pt-check input { width: 22px; height: 22px; accent-color: #557a5a; flex: none; }
+.pt-check[data-checked] span { color: var(--pt-muted); text-decoration: line-through; }
+.pt-week-lisa-part { display: grid; gap: 2px; }
+.pt-week-lisa-part b { font-size: 0.875rem; }
+.pt-week-lisa-part p { margin: 0; font-size: 0.9375rem; line-height: 1.55; white-space: pre-wrap; }

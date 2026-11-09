@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import WeekFromLisa from "@/components/portal/WeekFromLisa"
+import type { ClientAssessment } from "@/lib/coachingRecords"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -126,6 +128,14 @@ function Spinner() {
 }
 
 export default function CheckInHistoryPage() {
+  const [assessments, setAssessments] = useState<Record<string, ClientAssessment>>({})
+  useEffect(() => {
+    fetch("/api/coaching/assessments")
+      .then((r) => (r.ok ? r.json() : { assessments: [] }))
+      .then((d: { assessments: ClientAssessment[] }) => setAssessments(Object.fromEntries((d.assessments ?? []).map((x) => [x.checkInId, x]))))
+      .catch(() => {})
+  }, [])
+
   const [loading, setLoading] = useState(true)
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -259,7 +269,9 @@ export default function CheckInHistoryPage() {
                     {isV2 ? <V2Body ci={ci} /> : <LegacyBody ci={ci} />}
 
                     {/* Lisa's feedback + awaiting state — shared across both schemas */}
-                    {ci.coachFeedback && (
+                    {assessments[ci.id] ? (
+                      <div style={{ marginTop: "0.75rem" }}><WeekFromLisa initial={assessments[ci.id]} /></div>
+                    ) : ci.coachFeedback && (
                       <div style={{ background: "#fdf9f4", border: `1px solid #f0e4cc`, borderRadius: 6, padding: "1rem 1.25rem", marginTop: "0.75rem" }}>
                         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
                           Lisa&apos;s Feedback · {ci.reviewedAt ? formatDate(ci.reviewedAt) : ""}
