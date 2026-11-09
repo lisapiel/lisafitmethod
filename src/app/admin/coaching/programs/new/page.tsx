@@ -425,7 +425,7 @@ export default function NewProgramPage() {
                 Sport day
               </p>
               <p style={{ margin: 0 }}>
-                The client chooses the sport, duration, and intensity when they complete this day. No warm-up, exercises, or cooldown are set here — only the day name above.
+                The client logs the sport, how long they played and how hard it felt. Your day notes show above their form. No warm-up, exercises or cool-down on this day.
               </p>
             </div>
           ) : (

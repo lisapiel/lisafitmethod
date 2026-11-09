@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { sportLogSummary, type SportLogFields } from "@/lib/sportDay"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
 import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
@@ -37,7 +38,7 @@ type WorkoutLog = {
   clientNotes?: string
   coachFeedback?: string
   coachFeedbackAt?: string
-}
+} & SportLogFields
 
 type ProgramExercise = { exerciseId: string; name: string; videoS3Key: string; sets: string; reps: string; weight: string; rpe: string }
 type ProgramDay = { dayLabel: string; exercises: ProgramExercise[] }
@@ -379,6 +380,7 @@ function WorkoutCard({
     try { return JSON.parse(log.setData) as SetEntry[] } catch { return [] }
   }, [log.setData])
 
+  const sportLine = sportLogSummary(log)
   const totalSets = sets.length
   const completedSets = sets.filter((s) => s.completed).length
   const exerciseCount = new Set(sets.map((s) => s.exerciseId)).size
@@ -442,7 +444,7 @@ function WorkoutCard({
             {formatDate(log.completedAt)} · {log.dayLabel}
           </p>
           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: 0 }}>
-            Week {log.weekNumber} · {exerciseCount} exercises · {completedSets}/{totalSets} sets{log.overallRpe ? ` · RPE ${log.overallRpe}` : ""}
+            Week {log.weekNumber} · {sportLine ? `Sport · ${sportLine}` : `${exerciseCount} exercises · ${completedSets}/${totalSets} sets${log.overallRpe ? ` · RPE ${log.overallRpe}` : ""}`}
           </p>
           {log.clientNotes && (
             <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: "3px 0 0", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

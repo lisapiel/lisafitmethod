@@ -242,7 +242,7 @@ export default function EditProgramPage() {
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
         <Link href="/admin/coaching/programs" style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", color: "#666", textDecoration: "none", letterSpacing: "0.08em" }}>← Programs</Link>
-        <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0, flex: 1 }}>{programName || "Edit Program"}</h1>
+        <h1 style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 300, color: "#f0e6d3", margin: 0, flex: "1 1 260px", minWidth: 0, overflowWrap: "anywhere" }}>{programName || "Edit Program"}</h1>
         <button onClick={handleDuplicate} style={{ background: "none", border: `1px solid ${border}`, color: "#888", padding: "7px 14px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>Duplicate</button>
         {clientEmail && (
           <Link href={`/admin/coaching/clients/${encodeURIComponent(clientEmail)}`} style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, textDecoration: "none", letterSpacing: "0.08em" }}>
@@ -251,7 +251,7 @@ export default function EditProgramPage() {
         )}
       </div>
 
-      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "20px 24px", marginBottom: "1.5rem", display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1rem", alignItems: "end" }}>
+      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "20px 24px", marginBottom: "1.5rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", alignItems: "end" }}>
         <div>
           <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", display: "block", marginBottom: 6 }}>Name *</label>
           <input type="text" value={programName} onChange={(e) => setProgramName(e.target.value)} style={{ width: "100%", background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" }} />
@@ -384,7 +384,7 @@ export default function EditProgramPage() {
                 Sport day
               </p>
               <p style={{ margin: 0 }}>
-                The client chooses the sport, duration, and intensity when they complete this day. No warm-up, exercises, or cooldown are set here — only the day name above.
+                The client logs the sport, how long they played and how hard it felt. Your day notes show above their form. No warm-up, exercises or cool-down on this day.
               </p>
             </div>
           ) : (
