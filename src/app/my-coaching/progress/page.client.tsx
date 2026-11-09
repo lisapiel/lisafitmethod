@@ -26,11 +26,15 @@ type Snapshot = {
   notes: string | null
 }
 
+// A date without a time (e.g. "2026-11-08") is a calendar day. Read it as local
+// midday so it never shows as the day before in US time zones.
+const asDate = (d: string) => new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T12:00:00` : d)
+
 function WeightChart({ data, starting }: { data: WeightReading[]; starting: { lbs: number; unit: WeightUnit } | null }) {
   const points = data.map((d) => ({ date: d.at, lbs: d.lbs, submittedUnit: d.unit, source: d.source }))
   const summary = summarizeWeight(data, starting?.unit ?? "LBS")
   const latest = summary.latest
-  const when = (iso: string) => new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00` : iso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  const when = (iso: string) => asDate(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" })
   const latestNote = latest ? `${latest.source === "logged" ? "Logged" : "From your check-in"} on ${when(latest.at)}` : ""
   const startingNote = starting ? `You entered ${fromLbs(starting.lbs, summary.unit).toFixed(1)} ${summary.unit === "KG" ? "kg" : "lb"} as your starting weight when you set up coaching. It isn't counted as a weigh-in.` : null
 
@@ -110,10 +114,10 @@ function WeightChart({ data, starting }: { data: WeightReading[]; starting: { lb
           <circle key={i} cx={toX(i)} cy={toY(v)} r={i === displayValues.length - 1 ? 4 : 3} fill={i === displayValues.length - 1 ? accent : `${accent}88`} />
         ))}
         <text x={padX} y={H - 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted}>
-          {new Date(points[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {when(points[0].date)}
         </text>
         <text x={W - padX} y={H - 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">
-          {new Date(points[points.length - 1].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {when(points[points.length - 1].date)}
         </text>
         <text x={padX - 4} y={toY(maxW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{maxW.toFixed(1)}</text>
         <text x={padX - 4} y={toY(minW) + 4} fontFamily="var(--font-dm-sans), sans-serif" fontSize="9" fill={muted} textAnchor="end">{minW.toFixed(1)}</text>
@@ -555,7 +559,7 @@ export default function ProgressClient() {
             {snapshots.map((s, i) => (
               <div key={s.id} style={{ background: i === 0 ? "#fdf9f4" : "#faf8f5", border: `1px solid ${i === 0 ? "#f0e4cc" : border}`, borderRadius: 6, padding: "1rem 1.25rem" }}>
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: i === 0 ? accent : muted, margin: "0 0 10px" }}>
-                  {i === 0 ? "Latest · " : ""}{new Date(s.snapshotDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  {i === 0 ? "Latest · " : ""}{asDate(s.snapshotDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </p>
                 {s.weight && <MeasRow label="Weight" value={s.weight} unit={s.weightUnit ?? "lbs"} />}
                 <MeasRow label="Waist" value={s.waist} />
@@ -584,7 +588,7 @@ export default function ProgressClient() {
                   <span style={{ width: 8, height: 8, borderRadius: "50%", background: accent }} />
                 </div>
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 2px" }}>
-                  {new Date(m.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  {asDate(m.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </p>
                 <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1rem", fontWeight: 700, color: black, margin: 0 }}>{m.title}</p>
                 {m.subtitle && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "2px 0 0", fontStyle: "italic" }}>{m.subtitle}</p>}
