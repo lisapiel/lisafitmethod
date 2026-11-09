@@ -61,7 +61,7 @@ function coachingWelcomeEmail(name: string, setPasswordUrl: string): string {
           </p>
           <p style="font-size:15px;color:#6b6560;line-height:1.6;margin:0 0 24px;">
             Hi ${name},<br /><br />
-            I'm so excited to start working with you! Your coaching portal is all set up — this is where you'll find your workouts, track your progress, submit your weekly check-ins, and message me directly.
+            I'm so excited to start working with you! Your coaching portal is all set up. It's where you'll find your workouts, track your progress, send your weekly check-ins and message me directly.
           </p>
           <p style="font-size:15px;color:#6b6560;margin:0 0 28px;">
             Click below to set your password and access your portal:
@@ -282,7 +282,7 @@ export async function POST(req: NextRequest) {
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: email,
-      subject: "You're approved — set up your coaching membership",
+      subject: "You're approved! Set up your coaching membership",
       html: paymentLinkEmail(firstName, session.url ?? ""),
     }).catch((err) => console.error("Payment link email failed:", err))
 

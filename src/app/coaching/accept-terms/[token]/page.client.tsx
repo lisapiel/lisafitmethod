@@ -54,7 +54,7 @@ export default function AcceptTermsClient({ token, email }: { token: string; ema
           </h1>
           <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 28, fontFamily: "var(--font-dm-sans), sans-serif" }}>
             Your acceptance has been recorded and your coaching portal is now active.
-            Check your email &mdash; you&apos;ll receive a link to set up your account shortly.
+            Check your email. You&apos;ll get a link to set up your account shortly.
           </p>
           <Link
             href="/login"

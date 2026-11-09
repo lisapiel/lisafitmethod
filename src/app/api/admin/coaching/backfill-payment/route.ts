@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
           replyTo: "contact@lisafitmethod.com",
           to: email,
-          subject: "Your coaching portal is ready — Lisa Fit Method",
+          subject: "Your coaching portal is ready | Lisa Fit Method",
           html: `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
       <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
         <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
         <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">You're in, ${firstName}.</h1>
-        <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">Payment confirmed — your coaching portal is now active. Log in with your existing account to get started. I'm already working on your program.</p>
+        <p style="margin:0 0 28px;font-size:15px;color:#4a4a4a;line-height:1.7;">Your payment is confirmed and your coaching portal is now active. Log in with your existing account to get started. I'm already working on your program.</p>
         <table cellpadding="0" cellspacing="0"><tr><td style="background:#c8a97e;border-radius:2px;">
           <a href="https://lisafitmethod.com/my-coaching" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Open Coaching Portal →</a>
         </td></tr></table>
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
           from: "Lisa Fit Method <noreply@lisafitmethod.com>",
           replyTo: "contact@lisafitmethod.com",
           to: email,
-          subject: "Welcome to 1:1 Coaching — set up your account",
+          subject: "Welcome to 1:1 Coaching. Set up your account",
           html: `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
@@ -212,7 +212,7 @@ export async function POST(req: NextRequest) {
       <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
         <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
         <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">Welcome, ${firstName}. Let's get started.</h1>
-        <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">Payment confirmed — I'm so excited to work with you. Set your password to access your coaching portal.</p>
+        <p style="margin:0 0 20px;font-size:15px;color:#4a4a4a;line-height:1.7;">Your payment is confirmed and I'm so excited to work with you. Set your password to access your coaching portal.</p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;"><tr><td style="background:#c8a97e;border-radius:2px;">
           <a href="${setPasswordUrl}" style="display:inline-block;padding:16px 32px;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">Set Your Password →</a>
         </td></tr></table>

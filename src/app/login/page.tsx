@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { LoginClient } from "./page.client"
 
 export const metadata: Metadata = {
-  title: "Login — Lisa Fit Method",
+  title: "Log in | Lisa Fit Method",
 }
 
 export default function LoginPage() {

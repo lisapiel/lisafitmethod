@@ -81,7 +81,7 @@ function approvalEmail(name: string, acceptUrl: string): string {
             I'd love to work with you again. Click below to review your coaching terms and set up your monthly membership.
           </p>
           <p style="margin:0 0 32px;font-size:15px;color:#4a4a4a;line-height:1.7;">
-            Once payment is confirmed, you'll be back in your coaching portal right away — no new account needed.
+            Once your payment is confirmed, you'll be back in your coaching portal right away. You won't need a new account.
           </p>
           <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
             <tr>
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
-    subject: "Welcome back — restart your coaching",
+    subject: "Welcome back! Here's how to restart your coaching",
     html: approvalEmail(displayName, acceptUrl),
   }).catch((err) => console.error("Restart approval email failed:", err))
 

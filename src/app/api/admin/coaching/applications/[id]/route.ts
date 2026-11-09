@@ -66,7 +66,7 @@ function approvalEmail(name: string, checkoutUrl: string): string {
           </table>
           <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">Coaching</p>
           <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.3;">
-            You're in ${firstName} !
+            You're in, ${firstName}!
           </h1>
           <p style="margin:0 0 18px;font-size:15px;color:#4a4a4a;line-height:1.7;">
             I just finished reading your application and I'd love to work with you :)
@@ -165,7 +165,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: application.email,
-      subject: "Your coaching application — Lisa Fit Method",
+      subject: "Your coaching application | Lisa Fit Method",
       html: declineEmail(application.name),
     }).catch((err) => console.error("Decline email failed:", err))
     return NextResponse.json({ ok: true, status: "DECLINED" })
