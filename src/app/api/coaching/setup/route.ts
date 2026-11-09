@@ -70,12 +70,18 @@ export async function POST(req: NextRequest) {
     activityLevel: activity,
     nutritionGoal: goal,
   }
-  // Seed startingWeight if we haven't captured it yet and they provided a current weight
+  // The starting weight is saved once, the first time setup sends one. After
+  // that only Lisa corrects it, so a different weight sent here is not saved
+  // and the response says so, so the page never claims it saved one.
   const currentWeight = Number(body.currentWeight)
-  if (!existing?.startingWeight && currentWeight && currentWeight >= 80 && currentWeight <= 500) {
+  const existingStart = existing?.startingWeight
+  let startingWeightKept = false
+  if (!existingStart && currentWeight && currentWeight >= 80 && currentWeight <= 500) {
     updates.startingWeight = currentWeight
+  } else if (existingStart && body.currentWeight != null && currentWeight !== existingStart) {
+    startingWeightKept = true
   }
 
   await updateCoachingClientRecord(email, updates)
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, startingWeight: updates.startingWeight ?? existingStart ?? null, startingWeightKept })
 }

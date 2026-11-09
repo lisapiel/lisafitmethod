@@ -150,3 +150,23 @@ the local calendar day.
 **Rule:** every weight shown to a client comes from `buildWeightHistory`. A
 profile value is never presented as a measurement, and date-only strings are
 never passed straight to `new Date()`.
+
+---
+
+## Setup showed an editable starting weight that was never saved
+**Date:** 2026-11-09
+**Area:** `src/app/my-coaching/setup/page.client.tsx`, `src/app/api/coaching/setup/route.ts`
+
+Setup saves the typed weight as `startingWeight` only the first time. The page
+still pre-filled the box with the saved value and let the client change it, so
+an edit went through as a normal save and was silently dropped. Nobody,
+including the coach, had a way to correct a wrong starting weight.
+
+**Fix:** once a starting weight exists, setup shows it read-only with a note
+to message Lisa, and doesn't send a weight. The API ignores a different weight
+from a stale page and returns `startingWeightKept: true`, and the page says so
+instead of moving on. Lisa corrects starting weights from the coach Nutrition
+tab, with a required reason and a `starting_weight_change_<id>` history.
+
+**Rule:** a form never offers an edit the server will ignore. If a value is
+write-once for the client, show it read-only and name who can change it.

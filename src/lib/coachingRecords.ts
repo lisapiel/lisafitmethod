@@ -5,6 +5,7 @@ import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 import { scanAll } from "./dynamoScan"
+import { sortNewestFirst, type StartingWeightChangeRecord } from "./startingWeight"
 
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
@@ -129,6 +130,28 @@ export async function listTargetChanges(clientEmail: string): Promise<TargetChan
     ExpressionAttributeValues: { ":p": "nutrition_target_change_", ":e": clientEmail.toLowerCase() },
   })
   return (items as TargetChangeRecord[]).sort((a, b) => b.changedAt.localeCompare(a.changedAt))
+}
+
+// ── Starting weight corrections ─────────────────────────────────────────────
+
+export async function putStartingWeightChange(rec: Omit<StartingWeightChangeRecord, "id">): Promise<StartingWeightChangeRecord> {
+  const id = randomBytes(12).toString("hex")
+  const full = { id, ...rec }
+  await makeDb().send(new PutCommand({ TableName: TABLE, Item: strip({ userId: `starting_weight_change_${id}`, ...full }) }))
+  return full
+}
+
+export async function deleteStartingWeightChange(id: string): Promise<void> {
+  await makeDb().send(new DeleteCommand({ TableName: TABLE, Key: { userId: `starting_weight_change_${id}` } }))
+}
+
+export async function listStartingWeightChanges(clientEmail: string): Promise<StartingWeightChangeRecord[]> {
+  const items = await scanAll(makeDb(), {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :p) AND clientEmail = :e",
+    ExpressionAttributeValues: { ":p": "starting_weight_change_", ":e": clientEmail.toLowerCase() },
+  })
+  return sortNewestFirst(items as StartingWeightChangeRecord[])
 }
 
 // ── Check-in assessments ────────────────────────────────────────────────────

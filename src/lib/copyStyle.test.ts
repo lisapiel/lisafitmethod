@@ -22,6 +22,7 @@ const CLIENT_FACING = [
   "src/app/api/admin/coaching/check-ins",
   "src/app/api/coaching/accept-terms",
   "src/app/api/coaching/invite-setup",
+  "src/app/api/coaching/setup",
 ]
 
 // grant-access, backfill-payment and restart-requests send payment or subscription emails. They are

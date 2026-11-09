@@ -3,21 +3,23 @@
 import { useCallback, useEffect, useState } from "react"
 import { adminJson, clientPath } from "./api"
 import { BackToStartForm } from "./BackToStartForm"
-import { dateTime, kcal } from "./format"
+import { dateTime, kcal, weighInDay } from "./format"
 import { TargetForm } from "./TargetForm"
 import { TargetHistory } from "./TargetHistory"
-import type { Macros, TargetChange } from "./types"
+import type { Macros, TargetChange, WeighInEstimate } from "./types"
 
 type Mode = "view" | "change" | "back"
 
-export function TargetCard({ email, current, isCustom, starting, onChanged }: {
+export function TargetCard({ email, current, isCustom, starting, review, onChanged }: {
   email: string
   current: Macros | null
   isCustom: boolean
   starting: Macros | null
+  review: WeighInEstimate | null
   onChanged: () => Promise<void> | void
 }) {
   const [mode, setMode] = useState<Mode>("view")
+  const [prefill, setPrefill] = useState<Macros | null>(null)
   const [changes, setChanges] = useState<TargetChange[] | null>(null)
   const [historyError, setHistoryError] = useState("")
   const [saved, setSaved] = useState(false)
@@ -62,10 +64,21 @@ export function TargetCard({ email, current, isCustom, starting, onChanged }: {
         <p className="can-note" style={{ marginBottom: 12 }}>Last changed {dateTime(last.changedAt)}. Reason: {last.reason}</p>
       )}
       {saved && mode === "view" && <p className="can-ok" role="status" style={{ marginBottom: 12 }}>Saved. The new target is live.</p>}
+      {!isCustom && review && mode === "view" && (
+        <div className="can-review" data-testid="weigh-in-estimate">
+          <p className="can-text">
+            Based on their latest weigh-in ({Math.round(review.weighIn.lbs * 10) / 10} lb on {weighInDay(review.weighIn.at)}), the automatic estimate would be {kcal(review.macros.calories)} kcal · {review.macros.protein} g protein.
+          </p>
+          <p className="can-note">Their target stays the same unless you change it.</p>
+          <button type="button" className="can-textbtn" onClick={() => { setSaved(false); setPrefill(review.macros); setMode("change") }}>
+            Start a target change with these numbers
+          </button>
+        </div>
+      )}
 
       {mode === "view" && (
         <div className="can-actions">
-          <button type="button" className="ca-btn" data-variant="primary" onClick={() => { setSaved(false); setMode("change") }}>
+          <button type="button" className="ca-btn" data-variant="primary" onClick={() => { setSaved(false); setPrefill(null); setMode("change") }}>
             {current ? "Change target" : "Set a target"}
           </button>
           {isCustom && (
@@ -73,7 +86,7 @@ export function TargetCard({ email, current, isCustom, starting, onChanged }: {
           )}
         </div>
       )}
-      {mode === "change" && <TargetForm email={email} current={current} onSaved={done} onCancel={() => setMode("view")} />}
+      {mode === "change" && <TargetForm email={email} current={current} initial={prefill} onSaved={done} onCancel={() => setMode("view")} />}
       {mode === "back" && <BackToStartForm email={email} current={current} starting={starting} onSaved={done} onCancel={() => setMode("view")} />}
 
       <hr className="can-sep" />
