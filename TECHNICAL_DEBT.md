@@ -100,3 +100,19 @@ and latency grow with the table. `scanAll` logs a warning past 20 pages.
 
 **Plan:** add a secondary index on record type / client email and switch the
 hot lists (workout logs, nutrition logs, messages) to Query.
+
+## Coach training history for one client is slow
+**Added:** 2026-11-09
+**Area:** admin client Workouts tab, `src/app/api/admin/coaching/clients/[email]/` workout history
+
+The coach's training history for a single client lists every workout log by
+scanning the whole table and filtering by client. On the local test database
+(a slow emulator, with large synthetic seed data) the request took about 13
+seconds. Production is much faster, but this grows with every logged workout.
+
+**Impact:** the coach Workouts tab can show "Loading" for a while as data
+grows. Results are correct; only speed is affected. Tests wait for the content
+to appear rather than relying on a fixed delay.
+
+**Plan:** same fix as the entry above (a secondary index so this becomes a
+Query for one client), plus measure the real production timing first.
