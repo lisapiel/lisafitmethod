@@ -29,6 +29,7 @@ export function Icon({ name, size = 18 }: { name: keyof typeof paths | string; s
 export const ATTENTION_ICON: Record<AttentionKind, string> = {
   pain: "alert", reply: "message", "check-in": "checkin", application: "person", task: "task",
   "no-program": "program", "program-ending": "program", inactive: "idle", payment: "card",
+  "profile-request": "person",
 }
 
 export function initials(name: string) {

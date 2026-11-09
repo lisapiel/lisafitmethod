@@ -9,6 +9,7 @@ import { GROUP_HREF, GROUP_TITLE, groupAttention, type AttentionRow } from "@/li
 const ACTION: Record<AttentionKind, string> = {
   pain: "Safety", reply: "Reply", "check-in": "Review", application: "Decide", task: "Task",
   "no-program": "Assign", "program-ending": "Plan", inactive: "Check in", payment: "Waiting",
+  "profile-request": "Review",
 }
 
 function ItemRow({ a, nested = false }: { a: AttentionItem; nested?: boolean }) {
