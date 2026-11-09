@@ -5,6 +5,7 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import type { CoachingClientRecord } from "@/lib/authTokens"
+import { IntakeCard } from "@/components/coaching/admin/IntakeCard"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -483,6 +484,8 @@ export default function ClientProfilePage() {
             <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)" }}>No program assigned yet.</p>
           )}
         </SectionCard>
+
+        <IntakeCard email={client.email} />
 
         {/* Recent Check-Ins */}
         <SectionCard
