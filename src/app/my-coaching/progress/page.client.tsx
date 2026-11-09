@@ -187,7 +187,8 @@ export default function ProgressClient() {
           }))
           const now = new Date()
           const startOfWeek = new Date(now)
-          startOfWeek.setDate(now.getDate() - now.getDay())
+          // Weeks start on Monday everywhere in coaching.
+          startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7))
           startOfWeek.setHours(0, 0, 0, 0)
 
           const sorted = [...logs].sort((a, b) => b.completedAt.localeCompare(a.completedAt))
