@@ -144,3 +144,22 @@
 .pt-runner-notes { background: #fdf6ec; border: 1px solid #ecdcc3; border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; margin-top: 12px; max-width: 680px; }
 .pt-runner-notes p { margin: 0; }
 .pt-runner-notes-title { font-weight: 700; font-size: 0.9375rem; }
+
+/* Sport day: a short form in place of the exercise list. */
+.pt-sport { display: grid; gap: 18px; max-width: 560px; }
+.pt-back { font-size: 0.875rem; color: var(--pt-muted); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; justify-self: start; }
+.pt-sport-head { display: grid; gap: 4px; }
+.pt-sport-head h1 { font-family: var(--pt-serif); font-weight: 700; font-size: clamp(1.75rem, 6vw, 2rem); line-height: 1.1; margin: 0; text-wrap: balance; }
+.pt-form { display: grid; gap: 18px; background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 16px; padding: 20px 18px; }
+.pt-field { display: grid; gap: 8px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.pt-field label, .pt-field legend { font-weight: 600; font-size: 0.9375rem; padding: 0; }
+.pt-optional { font-weight: 400; color: var(--pt-muted); margin-left: 4px; }
+.pt-input { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--pt-line); border-radius: 10px; background: var(--pt-bg); color: var(--pt-ink); font: 500 1rem/1.4 var(--pt-sans); }
+textarea.pt-input { resize: vertical; min-height: 88px; }
+.pt-input:focus { border-color: var(--pt-gold-ink); outline: none; box-shadow: 0 0 0 3px rgba(200, 169, 126, 0.25); }
+.pt-input-short { max-width: 140px; font-variant-numeric: tabular-nums; }
+.pt-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pt-seg-opt { min-height: 48px; border-radius: 10px; border: 1px solid var(--pt-line); background: var(--pt-surface); color: var(--pt-ink); font: 600 0.9375rem/1 var(--pt-sans); cursor: pointer; }
+.pt-seg-opt[aria-checked="true"] { background: var(--pt-black); border-color: var(--pt-black); color: #f5f2ee; }
+.pt-error { margin: 0; color: #b4483a; font-size: 0.9375rem; }
+.pt-btn:disabled { background: var(--pt-line); color: var(--pt-muted); cursor: not-allowed; filter: none; transform: none; }

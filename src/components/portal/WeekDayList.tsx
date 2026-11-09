@@ -31,7 +31,7 @@ export default function WeekDayList({ week, done, next }: { week: PortalWeek; do
                   )}
                 </span>
               </span>
-              {isNext ? <span className="pt-btn pt-start">Start</span> : <span className="pt-chev"><ChevronRight /></span>}
+              {isNext ? <span className="pt-btn pt-start">{sport ? "Log" : "Start"}</span> : <span className="pt-chev"><ChevronRight /></span>}
               <span className="pt-sr">{doneAt ? "Completed" : isNext ? "Up next" : ""}</span>
             </Link>
           </li>

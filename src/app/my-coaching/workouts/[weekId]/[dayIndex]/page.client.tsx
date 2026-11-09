@@ -9,6 +9,8 @@ import { newSubmissionId, submitFailureMessage, submitWorkoutLog } from "@/lib/w
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
 import RunnerNotes from "@/components/portal/RunnerNotes"
+import SportDayForm from "@/components/portal/SportDayForm"
+import { sportSummary } from "@/lib/sportDay"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -1258,10 +1260,10 @@ export default function WorkoutLoggerClient() {
     if (!day || !email || !programId || !submissionId) return
     if (submittingRef.current) return
     const trimmedName = sportNameInput.trim()
-    if (trimmedName.length === 0) { setSaveError("Enter the sport you did."); return }
+    if (trimmedName.length === 0) { setSaveError("Tell me what you played."); return }
     const durNum = Number(sportDurationInput)
-    if (!Number.isFinite(durNum) || durNum <= 0 || durNum > 1440) { setSaveError("Enter a duration in minutes (1–1440)."); return }
-    if (!sportIntensityInput) { setSaveError("Pick an intensity."); return }
+    if (!Number.isFinite(durNum) || durNum <= 0 || durNum > 1440) { setSaveError("Add how many minutes you played."); return }
+    if (!sportIntensityInput) { setSaveError("Pick how hard it was."); return }
     submittingRef.current = true
     setSaving(true)
     setSaveError("")
@@ -1343,13 +1345,7 @@ export default function WorkoutLoggerClient() {
   }
 
   if (alreadyLogged) {
-    const sportSummary = existingSport
-      ? [
-          existingSport.name,
-          existingSport.durationMinutes != null ? `${existingSport.durationMinutes} min` : null,
-          existingSport.intensity ? `${existingSport.intensity[0].toUpperCase()}${existingSport.intensity.slice(1)} intensity` : null,
-        ].filter(Boolean).join(" · ")
-      : null
+    const sportLine = existingSport ? sportSummary(existingSport) : null
     return (
       <div>
         <div style={{ marginBottom: "1.5rem" }}>
@@ -1359,19 +1355,19 @@ export default function WorkoutLoggerClient() {
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#f0faf0", border: "2px solid #5c9e6a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12l5.5 6L20 6" stroke="#5c9e6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.5rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Already completed!</h2>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.5rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Already done</h2>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>You&apos;ve already logged {week.label} · {day.dayLabel}.</p>
-          {sportSummary && (
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: "0 0 24px", fontWeight: 600 }}>{sportSummary}</p>
+          {sportLine && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: "0 0 24px", fontWeight: 600 }}>{sportLine}</p>
           )}
-          {!sportSummary && <div style={{ height: 16 }} />}
+          {!sportLine && <div style={{ height: 16 }} />}
           <Link href="/my-coaching/workouts" style={{ display: "inline-block", background: accent, color: black, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", borderRadius: 4 }}>View all workouts</Link>
         </div>
 
         {existingFeedback && (
           <div style={{ background: "#fdfbf7", border: `1px solid ${accent}`, borderLeft: `4px solid ${accent}`, borderRadius: 8, padding: "1.25rem 1.5rem" }}>
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 8px" }}>
-              From Lisa{existingFeedback.at ? ` · ${(() => {
+              A note from me{existingFeedback.at ? ` · ${(() => {
                 const days = Math.floor((Date.now() - new Date(existingFeedback.at).getTime()) / 86_400_000)
                 return days === 0 ? "today" : days === 1 ? "yesterday" : `${days}d ago`
               })()}` : ""}
@@ -1385,6 +1381,8 @@ export default function WorkoutLoggerClient() {
     )
   }
 
+  const isSportDay = day.dayType === "sport"
+
   if (saved) {
     return (
       <div>
@@ -1395,9 +1393,9 @@ export default function WorkoutLoggerClient() {
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#f0faf0", border: "2px solid #5c9e6a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4.5 13l6 7L21.5 6" stroke="#5c9e6a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>Workout done. Nice work.</h2>
+          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.8rem", fontWeight: 700, color: black, margin: "0 0 8px" }}>{isSportDay ? "Sport day logged. Nice work." : "Workout done. Nice work."}</h2>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 8px" }}>{week.label} · {day.dayLabel}</p>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 28px" }}>{completedSets} of {totalSets} sets logged.</p>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: muted, margin: "0 0 28px" }}>{isSportDay ? sportSummary({ name: sportNameInput.trim(), durationMinutes: Number(sportDurationInput) || undefined, intensity: sportIntensityInput || undefined }) : `${completedSets} of ${totalSets} sets logged.`}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
             <button onClick={() => router.push("/my-coaching/workouts")} style={{ display: "inline-block", background: black, color: white, padding: "12px 28px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, textDecoration: "none", border: "none", borderRadius: 4, cursor: "pointer" }}>
               Back to Workouts →
@@ -1418,109 +1416,23 @@ export default function WorkoutLoggerClient() {
   // independently just like two strength days do.
   if (day.dayType === "sport") {
     return (
-      <div>
-        <div style={{ marginBottom: "1.25rem" }}>
-          <Link href="/my-coaching/workouts" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, textDecoration: "none" }}>← Workouts</Link>
-        </div>
-        <div style={{ marginBottom: "1.25rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: accent, margin: "0 0 4px" }}>
-            Sport
-          </p>
-          <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: 0 }}>
-            {day.dayLabel}
-          </h1>
-        </div>
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1.25rem 1.25rem 1.5rem" }}>
-          <div style={{ marginBottom: 14 }}>
-            <label htmlFor="sport-name" style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, marginBottom: 6 }}>
-              Sport
-            </label>
-            <input
-              id="sport-name"
-              type="text"
-              inputMode="text"
-              value={sportNameInput}
-              onChange={(e) => setSportNameInput(e.target.value)}
-              placeholder="Soccer, Basketball, Hockey, Tennis…"
-              autoComplete="off"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 500, borderRadius: 6, outline: "none", boxSizing: "border-box" }}
-            />
-          </div>
-          <div style={{ marginBottom: 14 }}>
-            <label htmlFor="sport-duration" style={{ display: "block", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, marginBottom: 6 }}>
-              Duration (minutes)
-            </label>
-            <input
-              id="sport-duration"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={sportDurationInput}
-              onChange={(e) => setSportDurationInput(e.target.value.replace(/[^\d]/g, ""))}
-              placeholder="e.g. 60"
-              style={{ width: 140, background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "12px 14px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16, fontWeight: 600, borderRadius: 6, outline: "none", boxSizing: "border-box" }}
-            />
-          </div>
-          <div style={{ marginBottom: 18 }}>
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
-              Intensity
-            </p>
-            <div role="radiogroup" aria-label="Intensity" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-              {(["easy", "moderate", "hard"] as const).map((v) => {
-                const active = sportIntensityInput === v
-                return (
-                  <button
-                    key={v}
-                    role="radio"
-                    aria-checked={active}
-                    type="button"
-                    onClick={() => setSportIntensityInput(v)}
-                    style={{
-                      background: active ? black : "transparent",
-                      border: `1px solid ${active ? black : border}`,
-                      color: active ? white : black,
-                      padding: "11px 10px",
-                      fontFamily: "var(--font-dm-sans), sans-serif",
-                      fontSize: "0.85rem",
-                      fontWeight: active ? 700 : 500,
-                      borderRadius: 6,
-                      cursor: "pointer",
-                      WebkitTapHighlightColor: "transparent",
-                    }}
-                  >
-                    {v[0].toUpperCase() + v.slice(1)}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-          {saveError && (
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: "#c14646", margin: "0 0 12px" }}>
-              {saveError}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={finishSportDay}
-            disabled={saving || !submissionId}
-            style={{
-              width: "100%",
-              background: saving || !submissionId ? "#ddd5ca" : black,
-              color: saving || !submissionId ? "#9a9087" : white,
-              border: "none",
-              padding: "14px 20px",
-              fontFamily: "var(--font-dm-sans), sans-serif",
-              fontSize: "0.9rem",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              borderRadius: 6,
-              cursor: saving || !submissionId ? "not-allowed" : "pointer",
-            }}
-          >
-            {saving ? "Saving…" : "Confirm / Complete →"}
-          </button>
-        </div>
-      </div>
+      <SportDayForm
+        meta={`${week.label} · Day ${dayIndex + 1}`}
+        dayLabel={day.dayLabel}
+        notes={day.notes?.trim() ?? ""}
+        name={sportNameInput}
+        duration={sportDurationInput}
+        intensity={sportIntensityInput}
+        clientNotes={clientNotes}
+        error={saveError}
+        saving={saving}
+        ready={!!submissionId}
+        onName={setSportNameInput}
+        onDuration={setSportDurationInput}
+        onIntensity={setSportIntensityInput}
+        onClientNotes={setClientNotes}
+        onSubmit={finishSportDay}
+      />
     )
   }
 
