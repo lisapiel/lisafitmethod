@@ -368,6 +368,9 @@ export interface CoachingApplication {
   exercisePreferences?: string
   scheduleConstraints?: string
   whyCoachingNow?: string
+  // Nov 2026: comfort with the main strength exercises. Older applications
+  // don't have it.
+  strengthConfidence?: "learning" | "regular" | "confident"
   status: "PENDING" | "APPROVED" | "DECLINED" | "PAID"
   applicationDate: string
   reviewedAt?: string
@@ -418,6 +421,7 @@ export async function submitCoachingApplication(data: {
   exercisePreferences?: string
   scheduleConstraints?: string
   whyCoachingNow?: string
+  strengthConfidence?: "learning" | "regular" | "confident"
 }): Promise<string> {
   const db = makeDb()
   const id = randomBytes(16).toString("hex")
@@ -449,6 +453,7 @@ export async function submitCoachingApplication(data: {
     exercisePreferences: data.exercisePreferences?.trim(),
     scheduleConstraints: data.scheduleConstraints?.trim(),
     whyCoachingNow: data.whyCoachingNow?.trim(),
+    strengthConfidence: data.strengthConfidence,
     status: "PENDING",
     applicationDate: new Date().toISOString(),
   }
@@ -564,7 +569,7 @@ export interface CoachingClientRecord {
   heightInches?: number
   age?: number
   sex?: "male" | "female"
-  activityLevel?: number        // Current scale: 1.20 / 1.35 / 1.50 / 1.65 / 1.80. Legacy: 1.375 / 1.55 / 1.725 / 1.9 (still valid — remapped to nearest new value by the setup form).
+  activityLevel?: number        // Current scale: ACTIVITY_LEVELS in nutrition.ts (1.20 / 1.30 / 1.42 / 1.55 / 1.70). Older stored values are remapped at read time by canonicalActivityLevel. New saves must use the current scale.
   nutritionGoal?: "fat-loss" | "recomp" | "maintain" | "muscle-gain"
   // Optional coach-set macro override (takes precedence over auto-computed values)
   customMacros?: {

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { CoachingApplication, CommitmentType } from "@/lib/authTokens"
+import { strengthConfidenceLabel } from "@/lib/intake"
 
 // Standard monthly prices in whole dollars per commitment. Auto-fills the
 // price input when the coach picks a commitment. The coach can still type
@@ -524,6 +525,12 @@ export default function AdminApplicationsPage() {
                         <div>
                           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Experience</p>
                           <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{app.trainingExperience}</p>
+                        </div>
+                      )}
+                      {app.strengthConfidence && (
+                        <div data-testid="app-strength-confidence">
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 2px" }}>Strength exercises</p>
+                          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.78rem", color: "#bbb", margin: 0 }}>{strengthConfidenceLabel(app.strengthConfidence) ?? app.strengthConfidence}</p>
                         </div>
                       )}
                       {app.daysPerWeek && (

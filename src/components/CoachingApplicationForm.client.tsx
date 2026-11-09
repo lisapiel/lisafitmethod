@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { STRENGTH_CONFIDENCE_OPTIONS, STRENGTH_CONFIDENCE_QUESTION } from "@/lib/intake"
 
 // The 1:1 coaching application.
 //
 // Moved out of src/app/coaching/page.client.tsx unchanged so the Direction D
-// coaching page submits through exactly the same code: the same seventeen
+// coaching page submits through exactly the same code: the same eighteen
 // fields, the same member-access prefill, the same debounced bundle-credit
 // lookup, and the same POST of the whole form object to /api/coaching/apply.
 // None of the application logic is reimplemented anywhere.
@@ -26,6 +27,7 @@ interface FormState {
   primaryGoalOther: string
   specificOutcome: string
   trainingExperience: string
+  strengthConfidence: string
   currentTraining: string
   daysPerWeek: string
   sessionDuration: string
@@ -46,6 +48,7 @@ const emptyForm: FormState = {
   primaryGoalOther: "",
   specificOutcome: "",
   trainingExperience: "",
+  strengthConfidence: "",
   currentTraining: "",
   daysPerWeek: "",
   sessionDuration: "",
@@ -260,6 +263,16 @@ export function CoachingApplicationForm() {
                         <option>1–2 years</option>
                         <option>3–5 years</option>
                         <option>5+ years</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>{STRENGTH_CONFIDENCE_QUESTION} *</Label>
+                    <div className="ch-select-wrap">
+                      <select required value={form.strengthConfidence} onChange={set("strengthConfidence")} style={{ ...inputBase, paddingRight: 36 }} className="ch-input" data-testid="strength-confidence">
+                        <option value="">Select…</option>
+                        {STRENGTH_CONFIDENCE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
                   </div>
