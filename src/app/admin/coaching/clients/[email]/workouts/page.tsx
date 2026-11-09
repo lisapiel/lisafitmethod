@@ -304,7 +304,7 @@ function ProgressPreview({ progress }: { progress: WeekProgress }) {
     return (
       <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, padding: "1.5rem", marginBottom: "1.25rem", textAlign: "center" }}>
         <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.1rem", color: muted, margin: 0 }}>
-          No workouts logged yet.
+          No workouts this week or last week.
         </p>
       </div>
     )
