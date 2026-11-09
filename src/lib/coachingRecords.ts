@@ -6,6 +6,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 import { scanAll } from "./dynamoScan"
 import { sortNewestFirst, type StartingWeightChangeRecord } from "./startingWeight"
+import { sortRequestsNewestFirst, type ProfileChangeRequest } from "./profileRequests"
 
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
@@ -152,6 +153,71 @@ export async function listStartingWeightChanges(clientEmail: string): Promise<St
     ExpressionAttributeValues: { ":p": "starting_weight_change_", ":e": clientEmail.toLowerCase() },
   })
   return sortNewestFirst(items as StartingWeightChangeRecord[])
+}
+
+// ── Goal and activity change requests ──────────────────────────────────────
+
+const requestKey = (id: string) => ({ userId: `profile_change_request_${id}` })
+
+export function newRecordId(): string {
+  return randomBytes(12).toString("hex")
+}
+
+export async function putProfileChangeRequest(rec: ProfileChangeRequest): Promise<void> {
+  await makeDb().send(new PutCommand({
+    TableName: TABLE,
+    Item: strip({ ...requestKey(rec.id), ...rec } as Record<string, unknown>),
+    ConditionExpression: "attribute_not_exists(userId)",
+  }))
+}
+
+export async function getProfileChangeRequest(id: string): Promise<ProfileChangeRequest | null> {
+  const r = await makeDb().send(new GetCommand({ TableName: TABLE, Key: requestKey(id) }))
+  return (r.Item as ProfileChangeRequest) ?? null
+}
+
+export async function listProfileChangeRequests(clientEmail: string): Promise<ProfileChangeRequest[]> {
+  const items = await scanAll(makeDb(), {
+    TableName: TABLE,
+    FilterExpression: "begins_with(userId, :p) AND clientEmail = :e",
+    ExpressionAttributeValues: { ":p": "profile_change_request_", ":e": clientEmail.toLowerCase() },
+  })
+  return sortRequestsNewestFirst(items as ProfileChangeRequest[])
+}
+
+// Only a request that is still pending can be decided, so two clicks (or two
+// tabs) can't both apply. Returns false when it was already decided.
+export async function decideProfileChangeRequestRecord(id: string, fields: Partial<ProfileChangeRequest>): Promise<boolean> {
+  const f = strip(fields as Record<string, unknown>)
+  delete f.id
+  delete f.clientEmail
+  const keys = Object.keys(f)
+  try {
+    await makeDb().send(new UpdateCommand({
+      TableName: TABLE,
+      Key: requestKey(id),
+      UpdateExpression: `SET ${keys.map((k) => `#${k} = :${k}`).join(", ")}`,
+      ConditionExpression: "attribute_exists(userId) AND #cur = :pending",
+      ExpressionAttributeNames: { ...Object.fromEntries(keys.map((k) => [`#${k}`, k])), "#cur": "status" },
+      ExpressionAttributeValues: { ...Object.fromEntries(keys.map((k) => [`:${k}`, f[k]])), ":pending": "pending" },
+    }))
+    return true
+  } catch (e) {
+    if ((e as { name?: string }).name === "ConditionalCheckFailedException") return false
+    throw e
+  }
+}
+
+// Puts a request back to pending when the client update after an approval
+// fails, so the request and the client record never disagree.
+export async function reopenProfileChangeRequest(id: string): Promise<void> {
+  await makeDb().send(new UpdateCommand({
+    TableName: TABLE,
+    Key: requestKey(id),
+    UpdateExpression: "SET #s = :pending REMOVE decidedAt, decidedBy, coachNote, targetSetByCoach, automaticEstimate",
+    ExpressionAttributeNames: { "#s": "status" },
+    ExpressionAttributeValues: { ":pending": "pending" },
+  }))
 }
 
 // ── Check-in assessments ────────────────────────────────────────────────────
