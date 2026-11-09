@@ -6,6 +6,7 @@ import AssessmentEditor from "@/components/coaching/admin/AssessmentEditor"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import { SignedVideo } from "@/components/coaching/NutritionComposer.client"
+import { checkInWeightLine, hungerLabel } from "@/lib/checkInAnswers"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -23,6 +24,8 @@ type CheckIn = {
   // Progress
   weight: number | null
   weightUnit: string | null
+  weightStatus: string | null
+  weightLine: string | null
   measurementSnapshot: string | null
   // Legacy 1–5 ratings
   sleepQuality: number | null
@@ -54,6 +57,7 @@ type CheckIn = {
   // v2 — Nutrition
   nutritionStatus: string | null
   nutritionHelp: string | null
+  hunger: string | null
   // v2 — Weekly reflection
   weeklyWin: string | null
   weeklyChallenge: string | null
@@ -191,6 +195,8 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             schemaVersion: ci.schemaVersion != null ? Number(ci.schemaVersion) : null,
             weight: ci.weight != null ? Number(ci.weight) : null,
             weightUnit: ci.weightUnit ?? null,
+            weightStatus: typeof ci.weightStatus === "string" ? ci.weightStatus : null,
+            weightLine: checkInWeightLine(ci),
             measurementSnapshot: ci.measurementSnapshot ?? null,
             sleepQuality: ci.sleepQuality != null ? Number(ci.sleepQuality) : null,
             energyLevel: ci.energyLevel != null ? Number(ci.energyLevel) : null,
@@ -216,6 +222,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             recoveryRating: ci.recoveryRating != null ? Number(ci.recoveryRating) : null,
             nutritionStatus: ci.nutritionStatus ?? null,
             nutritionHelp: ci.nutritionHelp ?? null,
+            hunger: hungerLabel(ci.hunger),
             weeklyWin: ci.weeklyWin ?? null,
             weeklyChallenge: ci.weeklyChallenge ?? null,
             adjustmentAreas,
@@ -303,8 +310,8 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           token={token}
           clientEmail={checkIn.clientEmail}
           submittedAt={checkIn.submittedAt}
-          weight={checkIn.weight}
-          weightUnit={checkIn.weightUnit}
+          weightLine={checkIn.weightLine}
+          weightStatus={checkIn.weightStatus}
           workoutsCompleted={checkIn.workoutsCompleted}
           workoutsPlanned={checkIn.workoutsPlanned}
           trainingRating={checkIn.trainingRating}
@@ -321,15 +328,20 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           {/* Left column — Progress + Training + Recovery */}
           <div>
             {/* Progress card */}
-            {(checkIn.weight != null || checkIn.measurementSnapshot) && (
+            {(checkIn.weightLine != null || checkIn.measurementSnapshot) && (
               <Card>
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Progress</p>
-                {checkIn.weight != null && (
+                {checkIn.weight != null && checkIn.weightStatus !== "same" && checkIn.weightStatus !== "skipped" ? (
                   <div style={{ marginBottom: checkIn.measurementSnapshot ? 14 : 0 }}>
                     <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Weight</p>
                     <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.8rem", fontWeight: 700, color: cream, margin: 0 }}>
                       {checkIn.weight} <span style={{ fontSize: "1rem", fontWeight: 400, color: muted }}>{checkIn.weightUnit ?? ""}</span>
                     </p>
+                  </div>
+                ) : checkIn.weightLine && (
+                  <div style={{ marginBottom: checkIn.measurementSnapshot ? 14 : 0 }}>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Weight</p>
+                    <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.95rem", fontWeight: 600, color: cream, margin: 0 }}>{checkIn.weightLine}</p>
                   </div>
                 )}
                 {(() => {
@@ -465,7 +477,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
               </Card>
             )}
 
-            {isV2 && (checkIn.nutritionStatus || checkIn.nutritionHelp) && (
+            {isV2 && (checkIn.nutritionStatus || checkIn.nutritionHelp || checkIn.hunger) && (
               <Card>
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Nutrition</p>
                 {checkIn.nutritionStatus && (
@@ -473,6 +485,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                     {NUTRITION_STATUS_LABEL[checkIn.nutritionStatus] ?? checkIn.nutritionStatus}
                   </p>
                 )}
+                {checkIn.hunger && <Section label="Hunger"><TextBlock text={checkIn.hunger} /></Section>}
                 {checkIn.nutritionHelp && <Section label="Wants help with"><TextBlock text={checkIn.nutritionHelp} /></Section>}
               </Card>
             )}
