@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verifyAdminRequest } from "@/lib/adminAuth"
 import { getCoachingClientRecord, updateCoachingClientRecord, clearCoachingClientField } from "@/lib/authTokens"
-import { validateMacroCalorieConsistency } from "@/lib/nutrition"
+import { validateMacroCalorieConsistency, resolveMacrosFor } from "@/lib/nutrition"
+import { putTargetChange, deleteTargetChange, listTargetChanges, type MacroValues } from "@/lib/coachingRecords"
 
 export const dynamic = "force-dynamic"
 
@@ -44,8 +45,24 @@ function macroOutOfRange(cm: { calories: number; protein: number; carbs: number;
 // Body:
 //   PATCH set:   { customMacros: { calories, protein, carbs, fat } }
 //   PATCH clear: { customMacros: null }
+function macrosOf(m: { calories: number; protein: number; carbs: number; fat: number } | null): MacroValues {
+  return { calories: m?.calories ?? 0, protein: m?.protein ?? 0, carbs: m?.carbs ?? 0, fat: m?.fat ?? 0 }
+}
+
+// GET: the client's target change history, newest first.
+export async function GET(req: NextRequest, { params }: { params: Promise<{ email: string }> }) {
+  if (!(await verifyAdminRequest(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { email: rawEmail } = await params
+  const email = decodeURIComponent(rawEmail).toLowerCase()
+  return NextResponse.json({ changes: await listTargetChanges(email) })
+}
+
+// PATCH: Lisa changes a target. Every change needs a reason and is recorded
+// with the previous and new values. The history record is written first and
+// removed again if the target update fails, so the two never disagree.
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ email: string }> }) {
-  if (!(await verifyAdminRequest(req))) {
+  const admin = await verifyAdminRequest(req)
+  if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const { email: rawEmail } = await params
@@ -54,7 +71,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ em
   const client = await getCoachingClientRecord(email)
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 })
 
-  let body: { customMacros?: CustomMacrosIn | null }
+  let body: { customMacros?: CustomMacrosIn | null; reason?: string; context?: string; checkInId?: string }
   try {
     body = await req.json()
   } catch {
@@ -62,11 +79,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ em
   }
 
   // Explicit null → clear the override.
+  const reason = typeof body.reason === "string" ? body.reason.trim().slice(0, 1000) : ""
+  if (reason.length < 3) {
+    return NextResponse.json({ error: "Add a short reason for this change. It's kept in the target history." }, { status: 400 })
+  }
+  const wasAutomatic = !client.customMacros
+  const previous = { ...macrosOf(resolveMacrosFor(client)), automatic: wasAutomatic }
+  const record = (next: MacroValues & { automatic: boolean }, kind: "set-custom" | "back-to-automatic") => putTargetChange({
+    clientEmail: email, changedAt: new Date().toISOString(), changedBy: admin.toLowerCase(), kind, previous, next, reason,
+    context: typeof body.context === "string" ? body.context.slice(0, 1000) : undefined,
+    checkInId: typeof body.checkInId === "string" ? body.checkInId.slice(0, 80) : undefined,
+  })
+
   if (body.customMacros === null) {
+    const automatic = { ...macrosOf(resolveMacrosFor({ ...client, customMacros: undefined })), automatic: true }
+    const change = await record(automatic, "back-to-automatic")
     try {
       await clearCoachingClientField(email, "customMacros")
-      return NextResponse.json({ ok: true, customMacros: null })
+      return NextResponse.json({ ok: true, customMacros: null, change })
     } catch (err) {
+      await deleteTargetChange(change.id).catch(() => {})
       const message = err instanceof Error ? err.message : "Unknown DynamoDB error"
       return NextResponse.json({ error: `Clear override failed: ${message}` }, { status: 500 })
     }
@@ -104,11 +136,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ em
   // Explicit object (no undefineds) so the SDK marshaller is never asked to
   // serialize a `customMacros` value with gaps.
   const customMacros = { calories, protein, carbs, fat, updatedAt }
+  const change = await record({ calories, protein, carbs, fat, automatic: false }, "set-custom")
   try {
     await updateCoachingClientRecord(email, { customMacros })
   } catch (err) {
+    await deleteTargetChange(change.id).catch(() => {})
     const message = err instanceof Error ? err.message : "Unknown DynamoDB error"
     return NextResponse.json({ error: `Save override failed: ${message}` }, { status: 500 })
   }
-  return NextResponse.json({ ok: true, customMacros })
+  return NextResponse.json({ ok: true, customMacros, change })
 }

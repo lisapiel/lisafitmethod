@@ -4,37 +4,37 @@ import { useEffect, useState } from "react"
 import { localDateKey, resolveTimeZone } from "@/lib/localDate"
 import type { NutritionLogRecord } from "@/lib/authTokens"
 
-const accent = "#c8a97e"
-const black = "#0a0a0a"
-const muted = "#6b6560"
-const border = "#e8e2dc"
-const red = "#c04040"
-
-type Mode = "quick" | "meal"
 type MealType = "breakfast" | "lunch" | "dinner" | "snack"
+type Label = "none" | MealType | "summary"
+
+const LABELS: Array<{ value: Label; text: string }> = [
+  { value: "none", text: "No label" },
+  { value: "breakfast", text: "Breakfast" },
+  { value: "lunch", text: "Lunch" },
+  { value: "dinner", text: "Dinner" },
+  { value: "snack", text: "Snack" },
+  { value: "summary", text: "Daily summary" },
+]
 
 export interface LogFoodModalProps {
   open: boolean
   onClose: () => void
   onLogged: (log: NutritionLogRecord) => void
   initialMealType?: MealType
-  // Prefill the form from a prior entry (repeat-meal shortcut, or editing).
-  prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType">>
-  // When set, the modal is in EDIT mode: Save PATCHes this existing record
-  // rather than creating a new one. The date / timeZone / targetAtLog of the
-  // original record are preserved server-side (the PATCH route only accepts
-  // mutable fields). Prevents the modal from ever producing a duplicate log.
+  // Prefill from a previous entry (Recent meals) or the entry being edited.
+  prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType" | "isDaySummary">>
+  // Edit mode: Save updates this entry instead of creating a new one.
   editLogId?: string
-  // Recent entries, used only to warn before saving an exact repeat.
+  // Recent entries, used to warn before saving a repeat or an overlapping summary.
   recentLogs?: NutritionLogRecord[]
 }
+
+type Notice = null | { kind: "repeat" } | { kind: "day-has-entries"; logged: number; count: number } | { kind: "day-has-summary" }
 
 export default function LogFoodModal({ open, onClose, onLogged, initialMealType, prefill, editLogId, recentLogs = [] }: LogFoodModalProps) {
   const todayKey = localDateKey(new Date(), resolveTimeZone())
   const [day, setDay] = useState(todayKey)
-  const [repeatOk, setRepeatOk] = useState(false)
-  const [mode, setMode] = useState<Mode>(initialMealType ? "meal" : "quick")
-  const [mealType, setMealType] = useState<MealType>(initialMealType ?? "breakfast")
+  const [label, setLabel] = useState<Label>(initialMealType ?? "none")
   const [calories, setCalories] = useState("")
   const [protein, setProtein] = useState("")
   const [carbs, setCarbs] = useState("")
@@ -42,284 +42,167 @@ export default function LogFoodModal({ open, onClose, onLogged, initialMealType,
   const [description, setDescription] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [notice, setNotice] = useState<Notice>(null)
+  const isEdit = !!editLogId
 
   useEffect(() => {
     if (!open) return
-    // In EDIT mode, honour whatever mealType the saved record had — including
-    // "no mealType" (a saved Quick Add). The caller passes the record's
-    // mealType via `prefill.mealType` and we respect that.
-    const effectiveMealType = (prefill?.mealType as MealType | undefined) ?? initialMealType
-    setMode(effectiveMealType ? "meal" : "quick")
-    setMealType(effectiveMealType ?? "breakfast")
+    setDay(todayKey)
+    setLabel(prefill?.isDaySummary ? "summary" : ((prefill?.mealType as MealType | undefined) ?? initialMealType ?? "none"))
     setCalories(prefill?.calories != null ? String(prefill.calories) : "")
     setProtein(prefill?.protein != null ? String(prefill.protein) : "")
     setCarbs(prefill?.carbs != null ? String(prefill.carbs) : "")
     setFat(prefill?.fat != null ? String(prefill.fat) : "")
     setDescription(prefill?.description ?? "")
     setError("")
-  }, [open, initialMealType, prefill])
+    setNotice(null)
+  }, [open, initialMealType, prefill, todayKey])
 
   if (!open) return null
 
-  async function save() {
-    setSaving(true)
-    setError("")
-    const n = (s: string) => (s === "" ? NaN : Number(s))
-    const kcal = n(calories)
-    const pro = n(protein)
-    if (!Number.isFinite(kcal) || kcal < 0 || kcal > 5000) {
-      setError("Enter calories between 0 and 5000.")
-      setSaving(false)
-      return
-    }
-    if (!Number.isFinite(pro) || pro < 0 || pro > 400) {
-      setError("Enter protein between 0 and 400g.")
-      setSaving(false)
-      return
-    }
-    const carbsN = carbs === "" ? undefined : n(carbs)
-    const fatN = fat === "" ? undefined : n(fat)
-    if (carbsN != null && (!Number.isFinite(carbsN) || carbsN < 0 || carbsN > 800)) {
-      setError("Carbs must be between 0 and 800g.")
-      setSaving(false)
-      return
-    }
-    if (fatN != null && (!Number.isFinite(fatN) || fatN < 0 || fatN > 300)) {
-      setError("Fat must be between 0 and 300g.")
-      setSaving(false)
-      return
-    }
-    // EDIT mode — PATCH the existing record so no duplicate log is created.
-    // Only mutable fields are sent; date / timeZone / loggedAt / targetAtLog
-    // stay as they were when the log was originally written.
-    if (editLogId) {
-      const patchBody: Record<string, unknown> = {
-        calories: Math.round(kcal),
-        protein: Math.round(pro),
-        description: description.trim() || "",
-      }
-      if (mode === "meal") patchBody.mealType = mealType
-      if (carbsN != null) patchBody.carbs = Math.round(carbsN)
-      if (fatN != null) patchBody.fat = Math.round(fatN)
-      try {
-        const res = await fetch(`/api/coaching/nutrition-logs/${encodeURIComponent(editLogId)}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patchBody),
-        })
-        if (res.ok) {
-          const data = await res.json() as { log: NutritionLogRecord }
-          onLogged(data.log)
-          onClose()
-        } else {
-          let message = `Server returned ${res.status}`
-          try { const data = await res.json() as { error?: string }; if (data?.error) message = data.error } catch {}
-          setError(message)
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Network error.")
-      }
-      setSaving(false)
-      return
-    }
+  const num = (s: string) => (s.trim() === "" ? undefined : Number(s))
 
-    // CREATE mode — new log.
-    const timeZone = resolveTimeZone()
-    const date = day && day <= todayKey ? day : todayKey
-    const sameLabel = (l: NutritionLogRecord) => (l.mealType ?? null) === (mode === "meal" ? mealType : null)
-    const repeat = recentLogs.some((l) => l.date === date && l.calories === Math.round(kcal) && sameLabel(l) && Date.now() - Date.parse(l.loggedAt) < 10 * 60_000)
-    if (repeat && !repeatOk) {
-      setRepeatOk(true)
-      setError("Looks like you just added this. Tap Save again if you want it twice.")
+  function check(): { kcal: number; pro?: number; c?: number; f?: number } | null {
+    const kcal = num(calories)
+    if (kcal == null || !Number.isFinite(kcal) || kcal < 0 || kcal > 5000) { setError("Add your calories (0 to 5,000)."); return null }
+    const pro = num(protein), c = num(carbs), f = num(fat)
+    if (pro != null && (!Number.isFinite(pro) || pro < 0 || pro > 400)) { setError("Protein should be between 0 and 400 g."); return null }
+    if (c != null && (!Number.isFinite(c) || c < 0 || c > 800)) { setError("Carbs should be between 0 and 800 g."); return null }
+    if (f != null && (!Number.isFinite(f) || f < 0 || f > 300)) { setError("Fat should be between 0 and 300 g."); return null }
+    return { kcal: Math.round(kcal), pro: pro != null ? Math.round(pro) : undefined, c: c != null ? Math.round(c) : undefined, f: f != null ? Math.round(f) : undefined }
+  }
+
+  async function send(url: string, method: "POST" | "PATCH", body: Record<string, unknown>) {
+    try {
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      const data = await res.json().catch(() => ({})) as { log?: NutritionLogRecord; error?: string; logged?: number; count?: number }
+      if (res.ok && data.log) { onLogged(data.log); onClose(); return }
+      if (res.status === 409 && data.error === "day-has-entries") { setNotice({ kind: "day-has-entries", logged: data.logged ?? 0, count: data.count ?? 0 }); return }
+      if (res.status === 409 && data.error === "day-has-summary") { setNotice({ kind: "day-has-summary" }); return }
+      setError(data.error ?? "That didn't save. Check your connection and try again.")
+    } catch {
+      setError("That didn't save. Check your connection and try again.")
+    }
+  }
+
+  async function save(opts: { confirmRepeat?: boolean; confirmExtra?: boolean; asRegular?: boolean } = {}) {
+    setError("")
+    const v = check()
+    if (!v) return
+    setSaving(true)
+    const useLabel: Label = opts.asRegular ? "none" : label
+    if (isEdit) {
+      await send(`/api/coaching/nutrition-logs/${encodeURIComponent(editLogId!)}`, "PATCH", {
+        calories: v.kcal,
+        protein: v.pro ?? null, carbs: v.c ?? null, fat: v.f ?? null,
+        description: description.trim(),
+        ...(useLabel !== "none" && useLabel !== "summary" ? { mealType: useLabel } : {}),
+      })
       setSaving(false)
       return
     }
-    const body = {
-      kind: mode,
-      mealType: mode === "meal" ? mealType : undefined,
-      date, timeZone,
-      calories: Math.round(kcal),
-      protein: Math.round(pro),
-      carbs: carbsN != null ? Math.round(carbsN) : undefined,
-      fat: fatN != null ? Math.round(fatN) : undefined,
-      description: description.trim() || undefined,
-    }
-    try {
-      const res = await fetch("/api/coaching/nutrition-logs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-      if (res.ok) {
-        const data = await res.json() as { log: NutritionLogRecord }
-        onLogged(data.log)
-        onClose()
-      } else {
-        let message = `Server returned ${res.status}`
-        try { const data = await res.json() as { error?: string }; if (data?.error) message = data.error } catch {}
-        setError(message)
+    const date = day && day <= todayKey ? day : todayKey
+    const sameDay = recentLogs.filter((l) => l.date === date)
+    if (!opts.confirmRepeat && !opts.confirmExtra) {
+      const sameLabel = (l: NutritionLogRecord) => (l.mealType ?? "none") === (useLabel === "summary" ? "none" : useLabel) && !!l.isDaySummary === (useLabel === "summary")
+      if (sameDay.some((l) => l.calories === v.kcal && sameLabel(l) && Date.now() - Date.parse(l.loggedAt) < 10 * 60_000)) {
+        setNotice({ kind: "repeat" }); setSaving(false); return
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Network error.")
     }
+    await send("/api/coaching/nutrition-logs", "POST", {
+      date, timeZone: resolveTimeZone(),
+      kind: useLabel === "none" || useLabel === "summary" ? "quick" : "meal",
+      mealType: useLabel === "none" || useLabel === "summary" ? undefined : useLabel,
+      isDaySummary: useLabel === "summary" || undefined,
+      confirmExtra: opts.confirmExtra || undefined,
+      calories: v.kcal, protein: v.pro, carbs: v.c, fat: v.f,
+      description: description.trim() || undefined,
+    })
     setSaving(false)
   }
 
-  const isEdit = !!editLogId
   return (
-    <div
-      role="dialog"
-      aria-label={isEdit ? "Edit food log" : "Log food"}
-      style={{
-        position: "fixed", inset: 0, background: "rgba(10,10,10,0.55)",
-        display: "flex", alignItems: "flex-end", justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%", maxWidth: 520, background: "#fff",
-          borderTopLeftRadius: 12, borderTopRightRadius: 12,
-          padding: "1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom))", maxHeight: "92vh", overflowY: "auto",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-          <h2 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.3rem", fontWeight: 700, color: black, margin: 0 }}>
-            {isEdit ? "Edit log" : "Log food"}
-          </h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "1.4rem", color: muted, cursor: "pointer", lineHeight: 1 }} aria-label="Close">×</button>
-        </div>
-
-        {/* Mode toggle */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 14 }}>
-          {([
-            { k: "quick" as Mode, label: "Quick add" },
-            { k: "meal" as Mode, label: "Meal" },
-          ]).map((o) => (
-            <button
-              key={o.k}
-              onClick={() => setMode(o.k)}
-              style={{
-                background: mode === o.k ? black : "#fff",
-                color: mode === o.k ? "#fff" : black,
-                border: `1px solid ${mode === o.k ? black : border}`,
-                padding: "9px 12px",
-                fontFamily: "var(--font-dm-sans), sans-serif",
-                fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.06em",
-                borderRadius: 4, cursor: "pointer",
-              }}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-
-        {mode === "meal" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: 14 }}>
-            {(["breakfast", "lunch", "dinner", "snack"] as MealType[]).map((mt) => (
-              <button
-                key={mt}
-                onClick={() => setMealType(mt)}
-                style={{
-                  background: mealType === mt ? accent : "#fff",
-                  color: mealType === mt ? black : muted,
-                  border: `1px solid ${mealType === mt ? accent : border}`,
-                  padding: "8px 4px",
-                  fontFamily: "var(--font-dm-sans), sans-serif",
-                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
-                  textTransform: "uppercase", borderRadius: 4, cursor: "pointer",
-                }}
-              >
-                {mt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {!isEdit && (
-          <div style={{ marginBottom: 12 }}>
-            <label htmlFor="log-day" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8125rem", fontWeight: 600, color: black, display: "block", marginBottom: 4 }}>Day</label>
-            <input id="log-day" type="date" value={day} max={todayKey} onChange={(e) => { setDay(e.target.value); setRepeatOk(false) }}
-              style={{ background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", borderRadius: 8, minHeight: 44 }} />
-          </div>
-        )}
-
-        {/* Fields */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
-          <Field label="Calories" required value={calories} onChange={setCalories} placeholder="e.g. 450" />
-          <Field label="Protein (g)" required value={protein} onChange={setProtein} placeholder="e.g. 35" />
-          <Field label="Carbs (g)" value={carbs} onChange={setCarbs} placeholder="optional" />
-          <Field label="Fat (g)" value={fat} onChange={setFat} placeholder="optional" />
-        </div>
-
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 4 }}>
-            What you ate (optional)
-          </label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g. 3 eggs, oatmeal, blueberries"
-            style={{ width: "100%", background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
-          />
-        </div>
-
-        {error && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: red, margin: "0 0 10px" }}>{error}</p>}
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            onClick={save}
-            disabled={saving}
-            style={{
-              flex: 1, background: saving ? "#555" : black, color: "#fff", border: "none",
-              padding: "12px 20px", fontFamily: "var(--font-dm-sans), sans-serif",
-              fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.06em",
-              borderRadius: 4, cursor: saving ? "wait" : "pointer",
-            }}
-          >
-            {saving ? "Saving…" : isEdit ? "Update log" : "Save log"}
-          </button>
-          <button
-            onClick={onClose}
-            disabled={saving}
-            style={{
-              background: "none", border: `1px solid ${border}`, color: muted,
-              padding: "12px 16px", fontFamily: "var(--font-dm-sans), sans-serif",
-              fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.06em",
-              borderRadius: 4, cursor: "pointer",
-            }}
-          >
-            Cancel
+    <div className="pt pt-sheet-backdrop" role="presentation" onClick={onClose}>
+      <div className="pt-sheet" role="dialog" aria-modal="true" aria-labelledby="log-food-title" onClick={(e) => e.stopPropagation()}>
+        <div className="pt-sheet-head">
+          <h2 id="log-food-title">{isEdit ? "Edit entry" : "Log food"}</h2>
+          <button type="button" className="pt-icon-btn" aria-label="Close" onClick={onClose}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </div>
 
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8125rem", color: muted, lineHeight: 1.5, margin: "12px 0 0" }}>
-          Keep it simple! You can log your daily totals all at once at the end of the day, or add meals and snacks throughout the day. Whatever works best for you 😊
-        </p>
+        <form className="pt-form pt-form-flat" onSubmit={(e) => { e.preventDefault(); save() }}>
+          {!isEdit && (
+            <div className="pt-field">
+              <label htmlFor="log-day">Day</label>
+              <input id="log-day" className="pt-input pt-input-short" type="date" value={day} max={todayKey} onChange={(e) => { setDay(e.target.value); setNotice(null) }} />
+            </div>
+          )}
+
+          <fieldset className="pt-field">
+            <legend>Label <span className="pt-optional">Optional</span></legend>
+            <div className="pt-chips" role="radiogroup" aria-label="Label">
+              {LABELS.filter((o) => !isEdit || o.value !== "summary" || label === "summary").map((o) => (
+                <button key={o.value} type="button" role="radio" aria-checked={label === o.value} className="pt-chip" disabled={isEdit && (o.value === "summary" || label === "summary")} onClick={() => { setLabel(o.value); setNotice(null) }}>{o.text}</button>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="pt-field-grid">
+            <div className="pt-field">
+              <label htmlFor="log-kcal">Calories</label>
+              <input id="log-kcal" className="pt-input" inputMode="numeric" value={calories} onChange={(e) => setCalories(e.target.value)} placeholder="e.g. 450" />
+            </div>
+            <div className="pt-field">
+              <label htmlFor="log-protein">Protein (g) <span className="pt-optional">Helpful</span></label>
+              <input id="log-protein" className="pt-input" inputMode="numeric" value={protein} onChange={(e) => setProtein(e.target.value)} placeholder="e.g. 35" />
+            </div>
+            <div className="pt-field">
+              <label htmlFor="log-carbs">Carbs (g) <span className="pt-optional">Optional</span></label>
+              <input id="log-carbs" className="pt-input" inputMode="numeric" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+            </div>
+            <div className="pt-field">
+              <label htmlFor="log-fat">Fat (g) <span className="pt-optional">Optional</span></label>
+              <input id="log-fat" className="pt-input" inputMode="numeric" value={fat} onChange={(e) => setFat(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="pt-field">
+            <label htmlFor="log-desc">What you ate <span className="pt-optional">Helpful</span></label>
+            <input id="log-desc" className="pt-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. 3 eggs, oatmeal, blueberries" maxLength={500} />
+          </div>
+
+          {notice?.kind === "repeat" && (
+            <div className="pt-notice" role="alert">
+              <p>Looks like you just added this. Add it again?</p>
+              <div className="pt-notice-actions"><button type="button" className="pt-btn pt-btn-sm" onClick={() => save({ confirmRepeat: true })}>Add again</button><button type="button" className="pt-textbtn" onClick={() => setNotice(null)}>Cancel</button></div>
+            </div>
+          )}
+          {notice?.kind === "day-has-entries" && (
+            <div className="pt-notice" role="alert">
+              <p>You&apos;ve already logged {notice.logged.toLocaleString()} kcal on this day ({notice.count} {notice.count === 1 ? "entry" : "entries"}). A daily summary would count that food twice.</p>
+              <p>Add what&apos;s left of the day as a regular entry instead, or edit your earlier entries.</p>
+              <div className="pt-notice-actions"><button type="button" className="pt-btn pt-btn-sm" onClick={() => { setLabel("none"); setNotice(null); save({ asRegular: true }) }}>Add as a regular entry</button><button type="button" className="pt-textbtn" onClick={() => setNotice(null)}>Cancel</button></div>
+            </div>
+          )}
+          {notice?.kind === "day-has-summary" && (
+            <div className="pt-notice" role="alert">
+              <p>You logged a daily summary for this day. Only add this if it wasn&apos;t included in that summary.</p>
+              <div className="pt-notice-actions"><button type="button" className="pt-btn pt-btn-sm" onClick={() => save({ confirmExtra: true })}>It wasn&apos;t included, add it</button><button type="button" className="pt-textbtn" onClick={() => setNotice(null)}>Cancel</button></div>
+            </div>
+          )}
+
+          {error && <p className="pt-error" role="alert">{error}</p>}
+
+          {!notice && (
+            <div className="pt-sheet-actions">
+              <button type="submit" className="pt-btn" data-wide="" disabled={saving}>{saving ? "Saving…" : isEdit ? "Save changes" : "Save"}</button>
+            </div>
+          )}
+
+          <p className="pt-sheet-note">Keep it simple! You can log your daily totals all at once at the end of the day, or add meals and snacks throughout the day. Whatever works best for you 😊</p>
+        </form>
       </div>
-    </div>
-  )
-}
-
-function Field({ label, required, value, onChange, placeholder }: {
-  label: string; required?: boolean; value: string; onChange: (v: string) => void; placeholder?: string
-}) {
-  return (
-    <div>
-      <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 4 }}>
-        {label}{required ? " *" : ""}
-      </label>
-      <input
-        type="text"
-        inputMode="numeric"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        style={{ width: "100%", background: "#fff", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", borderRadius: 4, boxSizing: "border-box" }}
-      />
     </div>
   )
 }

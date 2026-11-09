@@ -11,6 +11,7 @@ import { ChevronDown, ChevronRight } from "@/components/portal/PortalIcons"
 import LogFoodModal from "@/components/coaching/LogFoodModal.client"
 import FoodToday from "@/components/portal/FoodToday"
 import FoodWeek from "@/components/portal/FoodWeek"
+import FoodEntries from "@/components/portal/FoodEntries"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
 import { buildDailyTotals, summarizePeriod, recentRepeatedMeals, type DailyTotals, type MacroTarget, type RepeatedMeal } from "@/lib/nutritionAnalytics"
 
@@ -64,10 +65,9 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   const [logOpen, setLogOpen] = useState<{
     open: boolean
     mealType?: "breakfast" | "lunch" | "dinner" | "snack"
-    prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType">>
+    prefill?: Partial<Pick<NutritionLogRecord, "calories" | "protein" | "carbs" | "fat" | "description" | "mealType" | "isDaySummary">>
     editLogId?: string
   }>({ open: false })
-  const [expandToday, setExpandToday] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadLogs = useCallback(async () => {
@@ -120,11 +120,6 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   const weekDailies = useMemo(() => buildDailyTotals({ logs, from: weekFrom, to: todayKey, currentTarget }), [logs, weekFrom, todayKey, currentTarget])
   const weekSummary = useMemo(() => summarizePeriod({ dailies: weekDailies, today: todayKey }), [weekDailies, todayKey])
 
-  const mealsLoggedToday = useMemo(() => {
-    const set = new Set<string>()
-    for (const l of todayLogs) if (l.mealType) set.add(l.mealType)
-    return set
-  }, [todayLogs])
 
   // Recent/repeated meals — top 4 from the last 14 days (we already fetched
   // those). Each becomes a one-tap re-log button.
@@ -134,6 +129,15 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
   // so TODAY totals + THIS WEEK averages + Recent Meals all pick up the
   // change in one pass. The admin Nutrition page reads the same records so
   // it reflects the deletion automatically.
+  const [selectedDay, setSelectedDay] = useState<LocalDateKey>(localDateKey())
+  const flagEstimate = useCallback(async (l: NutritionLogRecord) => {
+    if (typeof window === "undefined") return
+    const note = window.prompt("What's not right about this estimate? Lisa will take a look.", "")
+    if (note == null) return
+    const res = await fetch(`/api/coaching/nutrition-logs/${encodeURIComponent(l.id)}/flag`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: note.slice(0, 500) }) }).catch(() => null)
+    window.alert(res?.ok ? "Thanks. Lisa will review it." : "That didn't send. Please try again, or message Lisa.")
+  }, [])
+
   const deleteLog = useCallback(async (logId: string, label: string) => {
     if (typeof window !== "undefined" && !window.confirm(`Delete ${label}? This cannot be undone.`)) return
     setDeletingId(logId)
@@ -203,159 +207,31 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
 
       <FoodToday logs={todayLogs} totals={todayTotals} target={{ calories: macros.calories, protein: macros.protein, carbs: macros.carbs, fat: macros.fat }} setByLisa={macros.source === "override"} />
 
-      {/* +LOG FOOD + Meal checklist. The checklist shortcuts straight into
-          the structured modal with the right mealType preselected so a
-          repeated breakfast is seconds to log. */}
-      <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "0.75rem" }}>
-        <button
-          onClick={() => setLogOpen({ open: true })}
-          style={{
-            width: "100%", background: black, color: white, border: "none",
-            padding: "14px 20px", fontFamily: "var(--font-dm-sans), sans-serif",
-            fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.08em",
-            textTransform: "uppercase", borderRadius: 4, cursor: "pointer",
-            marginBottom: 12,
-          }}
-        >
-          + Log food
-        </button>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-          {(["breakfast", "lunch", "dinner", "snack"] as const).map((mt) => {
-            const done = mealsLoggedToday.has(mt)
-            return (
-              <button
-                key={mt}
-                onClick={() => setLogOpen({ open: true, mealType: mt })}
-                style={{
-                  background: done ? `${accent}18` : "#fff",
-                  border: `1px solid ${done ? accent : border}`,
-                  color: done ? black : muted,
-                  padding: "9px 4px",
-                  fontFamily: "var(--font-dm-sans), sans-serif",
-                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em",
-                  textTransform: "uppercase", borderRadius: 4, cursor: "pointer",
-                }}
-              >
-                {done ? "✓ " : ""}{mt}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <FoodEntries
+        title={selectedDay === todayKey ? "Today's food" : new Date(`${selectedDay}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+        entries={logs.filter((l) => l.date === selectedDay)}
+        onAdd={() => setLogOpen({ open: true })}
+        onEdit={(l) => setLogOpen({ open: true, editLogId: l.id, prefill: { calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat, description: l.description, mealType: l.mealType, isDaySummary: l.isDaySummary } })}
+        onDelete={(l) => deleteLog(l.id, "this entry")}
+        onFlag={flagEstimate}
+        busyId={deletingId}
+      />
 
-      {/* Today's logged entries */}
-      {todayLogs.length > 0 && (
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "0.75rem" }}>
-          <button
-            onClick={() => setExpandToday((v) => !v)}
-            style={{ background: "none", border: "none", color: muted, fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", padding: 0, marginBottom: expandToday ? 10 : 0 }}
-          >
-            {expandToday ? "Hide" : `View today's ${todayLogs.length} entr${todayLogs.length === 1 ? "y" : "ies"}`}
-          </button>
-          {expandToday && (
-            <div>
-              {[...todayLogs].sort((a, b) => a.loggedAt.localeCompare(b.loggedAt)).map((l) => {
-                const label = l.description || `${l.mealType ?? l.kind} · ${l.calories} kcal`
-                const busy = deletingId === l.id
-                return (
-                  <div key={l.id} style={{ borderTop: `1px solid ${border}`, padding: "10px 0", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: black }}>
-                    <div>
-                      <span style={{ color: accent, textTransform: "uppercase", fontSize: "0.55rem", letterSpacing: "0.1em", fontWeight: 700, marginRight: 8 }}>
-                        {l.mealType ?? l.kind}
-                      </span>
-                      <strong>{l.calories} kcal</strong> · {l.protein}g P
-                      {l.carbs != null ? ` · ${l.carbs}g C` : ""}
-                      {l.fat != null ? ` · ${l.fat}g F` : ""}
-                      {l.description ? <span style={{ color: muted }}> · {l.description}</span> : null}
-                    </div>
-                    <div style={{ marginTop: 6, display: "flex", gap: 8 }}>
-                      <button
-                        type="button"
-                        onClick={() => setLogOpen({
-                          open: true,
-                          editLogId: l.id,
-                          mealType: l.mealType,
-                          prefill: {
-                            calories: l.calories, protein: l.protein, carbs: l.carbs, fat: l.fat,
-                            description: l.description, mealType: l.mealType,
-                          },
-                        })}
-                        disabled={busy}
-                        style={{
-                          background: "transparent", border: `1px solid ${border}`, color: black,
-                          padding: "4px 10px", borderRadius: 4, cursor: busy ? "wait" : "pointer",
-                          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem",
-                          fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteLog(l.id, label)}
-                        disabled={busy}
-                        style={{
-                          background: "transparent", border: `1px solid #e2c2c2`, color: "#a53333",
-                          padding: "4px 10px", borderRadius: 4, cursor: busy ? "wait" : "pointer",
-                          fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem",
-                          fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-                        }}
-                      >
-                        {busy ? "Deleting…" : "Delete"}
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
+      <FoodWeek days={weekDailies} summary={weekSummary} target={{ calories: macros.calories, protein: macros.protein }} todayKey={todayKey} selected={selectedDay} onSelect={setSelectedDay} />
 
-      <FoodWeek days={weekDailies} summary={weekSummary} target={{ calories: macros.calories, protein: macros.protein }} todayKey={todayKey} />
-
-      {/* Recent / repeated meals — one-tap re-log of common foods */}
       {repeats.length > 0 && (
-        <div style={{ background: white, border: `1px solid ${border}`, borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "1rem" }}>
-          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, margin: "0 0 10px" }}>
-            Recent meals
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 8 }}>
+        <section className="pt-recent" aria-label="Recent meals">
+          <h2>Recent meals</h2>
+          <p>Tap one to log it again with the same numbers.</p>
+          <div className="pt-recent-list">
             {repeats.map((r) => (
-              <button
-                key={r.key}
-                onClick={() => setLogOpen({
-                  open: true,
-                  mealType: r.mealType,
-                  prefill: {
-                    calories: r.calories, protein: r.protein, carbs: r.carbs, fat: r.fat,
-                    description: r.description, mealType: r.mealType,
-                  },
-                })}
-                style={{
-                  background: "#fff", border: `1px solid ${border}`, color: black,
-                  padding: "10px 12px", borderRadius: 6, cursor: "pointer",
-                  textAlign: "left",
-                  fontFamily: "var(--font-dm-sans), sans-serif",
-                }}
-              >
-                <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accent, margin: "0 0 2px" }}>
-                  {r.mealType ?? "Log"} · ×{r.count}
-                </p>
-                <p style={{ fontSize: "0.82rem", fontWeight: 600, color: black, margin: "0 0 2px", lineHeight: 1.3 }}>
-                  {r.description ? r.description : `${r.calories} kcal · ${r.protein}g P`}
-                </p>
-                {r.description && (
-                  <p style={{ fontSize: "0.7rem", color: muted, margin: 0 }}>
-                    {r.calories} kcal · {r.protein}g P
-                    {r.carbs != null ? ` · ${r.carbs}g C` : ""}
-                    {r.fat != null ? ` · ${r.fat}g F` : ""}
-                  </p>
-                )}
+              <button key={r.key} type="button" className="pt-recent-item" onClick={() => setLogOpen({ open: true, mealType: r.mealType, prefill: { calories: r.calories, protein: r.protein, carbs: r.carbs, fat: r.fat, description: r.description, mealType: r.mealType } })}>
+                <b>{r.description || (r.mealType ? r.mealType[0].toUpperCase() + r.mealType.slice(1) : "Entry")}</b>
+                <span>{r.calories} kcal{r.protein != null ? ` · ${r.protein} g protein` : ""} · logged {r.count}×</span>
               </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       <LogFoodModal

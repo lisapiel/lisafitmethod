@@ -36,30 +36,34 @@ export async function PATCH(req: Request, { params }: Ctx) {
   const existing = await getNutritionLog(id)
   if (!existing) return NextResponse.json({ error: "Log not found" }, { status: 404 })
   if (existing.clientEmail !== email.toLowerCase()) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (existing.source === "message-estimate") return NextResponse.json({ error: "This estimate was added by Lisa from your messages. Use \"This isn't right\" to flag it." }, { status: 403 })
 
-  let body: Partial<NutritionLogRecord>
+  let body: { [K in keyof NutritionLogRecord]?: NutritionLogRecord[K] | null }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 })
   }
-  const updates: Partial<NutritionLogRecord> = {}
+  const updates: { [K in keyof NutritionLogRecord]?: NutritionLogRecord[K] | null } = {}
   if (body.calories != null) {
     const n = Number(body.calories)
     if (!Number.isFinite(n) || n < 0 || n > 5000) return NextResponse.json({ error: "`calories` out of range." }, { status: 400 })
     updates.calories = Math.round(n)
   }
-  if (body.protein != null) {
+  if (body.protein === null) updates.protein = null
+  else if (body.protein != null) {
     const n = Number(body.protein)
     if (!Number.isFinite(n) || n < 0 || n > 400) return NextResponse.json({ error: "`protein` out of range." }, { status: 400 })
     updates.protein = Math.round(n)
   }
-  if (body.carbs != null) {
+  if (body.carbs === null) updates.carbs = null
+  else if (body.carbs != null) {
     const n = Number(body.carbs)
     if (!Number.isFinite(n) || n < 0 || n > 800) return NextResponse.json({ error: "`carbs` out of range." }, { status: 400 })
     updates.carbs = Math.round(n)
   }
-  if (body.fat != null) {
+  if (body.fat === null) updates.fat = null
+  else if (body.fat != null) {
     const n = Number(body.fat)
     if (!Number.isFinite(n) || n < 0 || n > 300) return NextResponse.json({ error: "`fat` out of range." }, { status: 400 })
     updates.fat = Math.round(n)
@@ -89,6 +93,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
   const existing = await getNutritionLog(id)
   if (!existing) return NextResponse.json({ error: "Log not found" }, { status: 404 })
   if (existing.clientEmail !== email.toLowerCase()) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (existing.source === "message-estimate") return NextResponse.json({ error: "This estimate was added by Lisa from your messages. Use \"This isn't right\" to flag it." }, { status: 403 })
   try {
     await deleteNutritionLog(id)
     return NextResponse.json({ ok: true })

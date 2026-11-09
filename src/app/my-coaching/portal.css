@@ -211,3 +211,52 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 .pt-food-glance-text b { font-size: 0.9375rem; }
 .pt-food-glance-text span { font-size: 0.8125rem; color: var(--pt-muted); }
 .pt-caught-up { margin: 0; font-size: 0.8125rem; color: var(--pt-muted); padding: 0 4px; }
+
+/* Log food sheet: bottom sheet on phones, centred dialog on wider screens. */
+.pt-sheet-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(10, 10, 10, 0.5); display: flex; align-items: flex-end; justify-content: center; }
+.pt-sheet { width: 100%; max-width: 560px; max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; background: var(--pt-surface); border-radius: 22px 22px 0 0; padding: 16px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12); }
+@media (min-width: 700px) { .pt-sheet-backdrop { align-items: center; } .pt-sheet { border-radius: 22px; padding-bottom: 20px; } }
+.pt-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.pt-sheet-head h2 { margin: 0; font-family: var(--pt-serif); font-size: 1.5rem; }
+.pt-icon-btn { width: 44px; height: 44px; border-radius: 12px; border: 0; background: transparent; color: var(--pt-ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.pt-form-flat { border: 0; padding: 0; background: transparent; gap: 14px; }
+.pt-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pt-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pt-chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--pt-line); background: var(--pt-surface); color: var(--pt-ink); font: 600 0.875rem/1 var(--pt-sans); cursor: pointer; }
+.pt-chip[aria-checked="true"] { background: var(--pt-black); border-color: var(--pt-black); color: #f5f2ee; }
+.pt-chip:disabled { opacity: 0.45; cursor: default; }
+.pt-notice { background: #fdf6ec; border: 1px solid #ecdcc3; border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; }
+.pt-notice p { margin: 0; font-size: 0.9375rem; line-height: 1.45; }
+.pt-notice-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pt-btn-sm { min-height: 44px; padding: 0 16px; font-size: 0.9375rem; }
+.pt-sheet-actions { display: flex; }
+.pt-sheet-note { margin: 0; font-size: 0.875rem; color: var(--pt-muted); line-height: 1.5; text-align: center; }
+
+/* Food: entries for the chosen day, recent meals, tappable days. */
+.pt-entries { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 12px; margin-bottom: 12px; }
+.pt-entries-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pt-entries-head h2 { margin: 0; font-size: 0.9375rem; font-weight: 700; }
+.pt-entries-head span { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-entries-empty { margin: 0; font-size: 0.875rem; color: var(--pt-muted); }
+.pt-entry-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.pt-entry { padding: 10px 0; border-top: 1px solid #f1ece6; display: grid; gap: 2px; }
+.pt-entry-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pt-entry-label { font-size: 0.8125rem; font-weight: 700; color: var(--pt-muted); }
+.pt-entry-label[data-tone="snack"] { color: var(--pt-gold-ink); }
+.pt-entry-label[data-tone="summary"] { color: var(--pt-ink); }
+.pt-entry-kcal { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pt-entry-desc { margin: 0; font-size: 0.9375rem; }
+.pt-entry-macros { margin: 0; font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-entry-actions { display: flex; gap: 16px; }
+.pt-entry-actions .pt-textbtn { min-height: 40px; font-size: 0.875rem; }
+.pt-textbtn-quiet { color: var(--pt-muted); }
+.pt-tag-est { font-size: 0.75rem; font-weight: 700; color: #6b4e1c; background: #f6ecda; border-radius: 999px; padding: 2px 8px; }
+.pt-recent { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 8px; margin-bottom: 12px; }
+.pt-recent h2 { margin: 0; font-size: 0.9375rem; font-weight: 700; }
+.pt-recent > p { margin: 0; font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-recent-list { display: grid; gap: 8px; }
+.pt-recent-item { text-align: left; display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--pt-line); background: var(--pt-bg); color: var(--pt-ink); font: inherit; cursor: pointer; min-height: 52px; }
+.pt-recent-item b { font-size: 0.9375rem; font-weight: 600; }
+.pt-recent-item span { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-day-pick { display: grid; justify-items: center; gap: 2px; background: none; border: 0; padding: 4px 0; border-radius: 12px; font: inherit; color: inherit; cursor: pointer; min-height: 56px; width: 100%; }
+.pt-day-pick[aria-pressed="true"] { background: #f6efe3; }

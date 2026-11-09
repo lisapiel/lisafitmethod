@@ -11,7 +11,7 @@ function dayName(key: string, isToday: boolean) {
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "short" })
 }
 
-export default function FoodWeek({ days, summary, target, todayKey }: { days: DailyTotals[]; summary: PeriodSummary; target: Target; todayKey: string }) {
+export default function FoodWeek({ days, summary, target, todayKey, selected, onSelect }: { days: DailyTotals[]; summary: PeriodSummary; target: Target; todayKey: string; selected?: string; onSelect?: (date: string) => void }) {
   const n = summary.loggedDays
   const missing = days.filter((d) => !d.logged && d.date !== todayKey).length
   const pDays = summary.avgDays.protein
@@ -24,8 +24,10 @@ export default function FoodWeek({ days, summary, target, todayKey }: { days: Da
           const label = d.logged ? `${dayName(d.date, today)}: ${d.calories} calories` : `${dayName(d.date, today)}: nothing logged`
           return (
             <li key={d.date}>
-              <ProgressRing size={36} stroke={4} tone="calories" state={d.logged ? "logged" : "unknown"} value={d.logged ? d.calories : null} target={d.target?.calories ?? target.calories} label={label} />
-              <span style={today ? { color: "#1a1a1a", fontWeight: 700 } : undefined}>{dayName(d.date, today)}</span>
+              <button type="button" className="pt-day-pick" aria-pressed={selected === d.date} aria-label={`${label}. Show this day`} onClick={() => onSelect?.(d.date)}>
+                <ProgressRing size={36} stroke={4} tone="calories" state={d.logged ? "logged" : "unknown"} value={d.logged ? d.calories : null} target={d.target?.calories ?? target.calories} label={label} />
+                <span style={today ? { color: "#1a1a1a", fontWeight: 700 } : undefined}>{dayName(d.date, today)}</span>
+              </button>
             </li>
           )
         })}

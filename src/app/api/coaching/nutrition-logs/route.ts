@@ -66,20 +66,36 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "`mealType` is required for meal entries." }, { status: 400 })
   }
   const calories = Number(body.calories)
-  const protein = Number(body.protein)
   if (!Number.isFinite(calories) || calories < 0 || calories > 5000) {
     return NextResponse.json({ error: "`calories` must be between 0 and 5000." }, { status: 400 })
   }
-  if (!Number.isFinite(protein) || protein < 0 || protein > 400) {
+  // Protein, carbs and fat are optional. Absent stays absent (unknown); a
+  // typed 0 is kept as 0.
+  const optional = (v: unknown) => (v == null || v === "" ? undefined : Number(v))
+  const protein = optional(body.protein)
+  if (protein != null && (!Number.isFinite(protein) || protein < 0 || protein > 400)) {
     return NextResponse.json({ error: "`protein` must be between 0 and 400." }, { status: 400 })
   }
-  const carbs = body.carbs == null || body.carbs === 0 ? undefined : Number(body.carbs)
-  const fat = body.fat == null || body.fat === 0 ? undefined : Number(body.fat)
+  const carbs = optional(body.carbs)
+  const fat = optional(body.fat)
   if (carbs != null && (!Number.isFinite(carbs) || carbs < 0 || carbs > 800)) {
     return NextResponse.json({ error: "`carbs` must be between 0 and 800." }, { status: 400 })
   }
   if (fat != null && (!Number.isFinite(fat) || fat < 0 || fat > 300)) {
     return NextResponse.json({ error: "`fat` must be between 0 and 300." }, { status: 400 })
+  }
+
+  // Daily summaries never double count: a summary only starts an empty day,
+  // and food added after a summary must be confirmed as not included in it.
+  // Stored entries therefore always add up, in this and any earlier version.
+  const isDaySummary = body.isDaySummary === true
+  const sameDay = await listNutritionLogsForClient(email, { fromDate: body.date, toDate: body.date })
+  if (isDaySummary && sameDay.length > 0) {
+    const logged = sameDay.reduce((a, l) => a + (l.calories || 0), 0)
+    return NextResponse.json({ error: "day-has-entries", logged, count: sameDay.length }, { status: 409 })
+  }
+  if (!isDaySummary && sameDay.some((l) => l.isDaySummary) && (body as { confirmExtra?: boolean }).confirmExtra !== true) {
+    return NextResponse.json({ error: "day-has-summary" }, { status: 409 })
   }
 
   // Snapshot the active coach target at the time of logging. If body data is
@@ -103,10 +119,11 @@ export async function POST(req: Request) {
       mealType: kind === "meal" ? (body.mealType as NutritionLogRecord["mealType"]) : undefined,
       description,
       calories: Math.round(calories),
-      protein: Math.round(protein),
+      protein: protein != null ? Math.round(protein) : undefined,
       carbs: carbs != null ? Math.round(carbs) : undefined,
       fat: fat != null ? Math.round(fat) : undefined,
       targetAtLog,
+      ...(isDaySummary ? { isDaySummary: true } : {}),
     })
     return NextResponse.json({ ok: true, log: record })
   } catch (err) {

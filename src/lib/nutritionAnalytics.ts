@@ -474,7 +474,7 @@ export interface RepeatedMeal {
   key: string
   mealType?: NutritionLogRecord["mealType"]
   calories: number
-  protein: number
+  protein?: number
   carbs?: number
   fat?: number
   description?: string
@@ -488,9 +488,11 @@ export function recentRepeatedMeals(logs: NutritionLogRecord[], opts?: { limit?:
   const groups = new Map<string, RepeatedMeal>()
   for (const l of logs) {
     if (!l.calories || l.calories < T.REPEAT_MEAL_MIN_KCAL) continue
+    // Only the client's own meal entries are offered for reuse.
+    if (l.isDaySummary || l.source === "message-estimate") continue
     const descKey = (l.description ?? "").trim().toLowerCase().slice(0, T.REPEAT_MEAL_DESCRIPTION_KEY_LEN)
     const roundedKcal = Math.round(l.calories / T.REPEAT_MEAL_KCAL_BUCKET) * T.REPEAT_MEAL_KCAL_BUCKET
-    const roundedProt = Math.round(l.protein / T.REPEAT_MEAL_PROTEIN_BUCKET) * T.REPEAT_MEAL_PROTEIN_BUCKET
+    const roundedProt = l.protein == null ? "na" : Math.round(l.protein / T.REPEAT_MEAL_PROTEIN_BUCKET) * T.REPEAT_MEAL_PROTEIN_BUCKET
     const key = `${l.mealType ?? "any"}|${roundedKcal}|${roundedProt}|${descKey}`
     const existing = groups.get(key)
     if (existing) {

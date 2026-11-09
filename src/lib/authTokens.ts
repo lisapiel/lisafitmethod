@@ -1819,9 +1819,19 @@ export interface NutritionLogRecord {
   mealType?: NutritionLogMealType
   description?: string
   calories: number
-  protein: number
+  // Absent means the client didn't enter it: unknown, never zero. Records
+  // written before protein became optional always carry it.
+  protein?: number
   carbs?: number
   fat?: number
+  // "Daily summary": the client's total for the whole day. Stored data always
+  // adds up correctly: a summary is only saved on a day with no other entries,
+  // and anything added after it is food the summary didn't include.
+  isDaySummary?: boolean
+  // Set only on entries Lisa recovered from an old food report in Messages.
+  // The original message is never changed; see nutrition_recovery_<messageId>.
+  source?: "message-estimate"
+  sourceMessageId?: string
   // Snapshot of the ACTIVE coach target when this log was created. Only used
   // for historical adherence; the current effective target is read live from
   // the client record. Omitted when the client's target could not be resolved
@@ -1882,9 +1892,11 @@ export async function listNutritionLogsForClient(
   return filtered.sort((a, b) => b.loggedAt.localeCompare(a.loggedAt))
 }
 
-export async function updateNutritionLog(id: string, updates: Partial<NutritionLogRecord>): Promise<void> {
+// `null` removes a field (a client clearing protein, for example).
+export async function updateNutritionLog(id: string, updates: { [K in keyof NutritionLogRecord]?: NutritionLogRecord[K] | null }): Promise<void> {
   const db = makeDb()
   const sets: string[] = []
+  const removes: string[] = []
   const values: Record<string, unknown> = {}
   const names: Record<string, string> = {}
   // Note: id, clientEmail, loggedAt are immutable from the client. updatedAt
@@ -1892,18 +1904,20 @@ export async function updateNutritionLog(id: string, updates: Partial<NutritionL
   for (const [k, v] of Object.entries(updates)) {
     if (k === "id" || k === "clientEmail" || k === "loggedAt") continue
     if (v === undefined) continue // never emit SET on an undefined
+    if (v === null) { removes.push(`#${k}`); names[`#${k}`] = k; continue }
     sets.push(`#${k} = :${k}`)
     values[`:${k}`] = v
     names[`#${k}`] = k
   }
-  if (sets.length === 0) return
+  if (sets.length === 0 && removes.length === 0) return
+  const expr = [sets.length ? `SET ${sets.join(", ")}` : "", removes.length ? `REMOVE ${removes.join(", ")}` : ""].filter(Boolean).join(" ")
   await db.send(
     new UpdateCommand({
       TableName: TABLE,
       Key: { userId: `nutrition_log_${id}` },
-      UpdateExpression: `SET ${sets.join(", ")}`,
+      UpdateExpression: expr,
       ExpressionAttributeNames: names,
-      ExpressionAttributeValues: values,
+      ...(sets.length ? { ExpressionAttributeValues: values } : {}),
     })
   )
 }
