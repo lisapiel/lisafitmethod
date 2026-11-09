@@ -1,5 +1,7 @@
 "use client"
 
+import ProgramLengthField from "@/components/coaching/admin/ProgramLengthField"
+import { DEFAULT_PHASE_WEEKS } from "@/lib/programExpansion"
 import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
@@ -59,7 +61,8 @@ export default function NewProgramPage() {
   const router = useRouter()
   const [programName, setProgramName] = useState("")
   const [programNotes, setProgramNotes] = useState("")
-  const [durationWeeksInput, setDurationWeeksInput] = useState<string>("")
+  const [durationWeeksInput, setDurationWeeksInput] = useState<string>(String(DEFAULT_PHASE_WEEKS))
+  const [introNote, setIntroNote] = useState("")
   const [weeks, setWeeks] = useState<ProgramWeek[]>([emptyWeek(1)])
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
@@ -218,7 +221,7 @@ export default function NewProgramPage() {
       if (raw !== "") {
         const n = Number(raw)
         if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 52) {
-          setError("Repeat for N weeks must be an integer between 1 and 52, or blank.")
+          setError("Program length must be a whole number of weeks between 1 and 52, or blank.")
           setSaving(false); return
         }
         durationWeeks = n
@@ -233,6 +236,7 @@ export default function NewProgramPage() {
           weeks: JSON.stringify(weeks),
           notes: programNotes || undefined,
           durationWeeks,
+          ...(introNote.trim() ? { introNote: introNote.trim() } : {}),
           warmupOptions: templateOptions,
         }),
       })
@@ -310,24 +314,7 @@ export default function NewProgramPage() {
         </div>
       </div>
 
-      {/* Rotation length — leave blank for a traditional multi-week program. */}
-      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "16px 24px", marginBottom: "1.5rem", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-        <div>
-          <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", display: "block", marginBottom: 6 }}>Repeat for N weeks</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={durationWeeksInput}
-            onChange={(e) => setDurationWeeksInput(e.target.value.replace(/[^\d]/g, ""))}
-            placeholder={`blank = ${weeks.length}`}
-            style={{ width: 110, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none" }}
-          />
-        </div>
-        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "#888", margin: 0, lineHeight: 1.55, flex: "1 1 240px" }}>
-          Blank keeps the exact {weeks.length} week{weeks.length === 1 ? "" : "s"} you author below (traditional program).
-          Enter a number greater than {weeks.length} to make this a rotation — the client sees that many weeks, each cycling through the authored week{weeks.length === 1 ? "" : "s"}, with completion tracked per week.
-        </p>
-      </div>
+      <ProgramLengthField value={durationWeeksInput} onChange={setDurationWeeksInput} storedWeeks={weeks.length} intro={introNote} onIntro={setIntroNote} />
 
       <WarmupSettingsPanel
         mode="template"

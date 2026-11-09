@@ -1,5 +1,6 @@
 "use client"
 
+import ProgramLengthField from "@/components/coaching/admin/ProgramLengthField"
 import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
@@ -59,6 +60,7 @@ export default function EditProgramPage() {
   // client. Each cycled week still gets its own weekNumber + its own
   // completion state via (programId, weekNumber, dayLabel).
   const [durationWeeksInput, setDurationWeeksInput] = useState<string>("")
+  const [introNote, setIntroNote] = useState("")
   const [weeks, setWeeks] = useState<ProgramWeek[]>([emptyWeek(1)])
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
@@ -95,6 +97,7 @@ export default function EditProgramPage() {
             setProgramStatus((p.status ?? "DRAFT") as ProgramStatus)
             setClientEmail(p.clientEmail ?? null)
             setDurationWeeksInput(typeof p.durationWeeks === "number" ? String(p.durationWeeks) : "")
+            setIntroNote(p.introNote ?? "")
             setTemplateOptions({ ...DEFAULT_OPTIONS, ...(p.warmupOptions ?? {}) })
             try { setWeeks(JSON.parse(p.weeks) as ProgramWeek[]) } catch { /* keep default */ }
           }
@@ -195,7 +198,7 @@ export default function EditProgramPage() {
       } else {
         const n = Number(raw)
         if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 52) {
-          setError("Repeat for N weeks must be an integer between 1 and 52, or blank.")
+          setError("Program length must be a whole number of weeks between 1 and 52, or blank.")
           setSaving(false); return
         }
         durationWeeks = n
@@ -209,6 +212,7 @@ export default function EditProgramPage() {
           weeks: JSON.stringify(weeks),
           notes: programNotes || undefined,
           durationWeeks,
+          introNote: introNote.trim(),
           ...(clientEmail ? {} : { warmupOptions: templateOptions }),
         }),
       })
@@ -268,28 +272,7 @@ export default function EditProgramPage() {
         </div>
       </div>
 
-      {/* Repeat-for-N-weeks (rotation). Blank = client sees exactly the
-          number of weeks you authored below (traditional program). Setting
-          this to a number larger than the authored week count turns the
-          program into a repeating rotation — each client-facing week gets
-          its own completion state. */}
-      <div style={{ background: "#161616", border: `1px solid ${border}`, padding: "16px 24px", marginBottom: "1.5rem", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-        <div>
-          <label style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", display: "block", marginBottom: 6 }}>Repeat for N weeks</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={durationWeeksInput}
-            onChange={(e) => setDurationWeeksInput(e.target.value.replace(/[^\d]/g, ""))}
-            placeholder={`blank = ${weeks.length}`}
-            style={{ width: 110, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none" }}
-          />
-        </div>
-        <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.68rem", color: "#888", margin: 0, lineHeight: 1.55, flex: "1 1 240px" }}>
-          Leave blank for a traditional program with the exact {weeks.length} week{weeks.length === 1 ? "" : "s"} you&apos;ve authored below.
-          Set to a number greater than {weeks.length} for a rotation — the client sees that many weeks and each one cycles through the authored week{weeks.length === 1 ? "" : "s"}. Completion is tracked per week independently.
-        </p>
-      </div>
+      <ProgramLengthField value={durationWeeksInput} onChange={setDurationWeeksInput} storedWeeks={weeks.length} intro={introNote} onIntro={setIntroNote} />
 
       <WarmupSettingsPanel
         mode={autoMode}

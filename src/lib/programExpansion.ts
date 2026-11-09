@@ -126,3 +126,29 @@ function cloneDays(days: ExpandedDay[] | undefined): ExpandedDay[] {
     return days.slice()
   }
 }
+
+// A training phase runs 6 weeks unless the coach chooses another length.
+// Clients repeat the written week(s) so they can build on the same exercises.
+export const DEFAULT_PHASE_WEEKS = 6
+
+// Length to store for a new or copied program: the coach's choice when given,
+// otherwise the default phase length when fewer weeks than that are written.
+// Programs that already write out at least that many weeks keep their own length.
+export function phaseLengthFor(storedWeekCount: number, requested?: number | null): number | undefined {
+  if (typeof requested === "number" && Number.isFinite(requested) && requested >= 1) return Math.min(Math.floor(requested), 52)
+  if (storedWeekCount > 0 && storedWeekCount < DEFAULT_PHASE_WEEKS) return DEFAULT_PHASE_WEEKS
+  return undefined
+}
+
+export function storedWeekCount(weeks: string | unknown[]): number {
+  if (Array.isArray(weeks)) return weeks.length
+  try { const p = JSON.parse(weeks) as unknown; return Array.isArray(p) ? p.length : 0 } catch { return 0 }
+}
+
+// The program introduction appears once, inside the notes for Week 1, Day 1.
+export function notesWithIntro(dayNotes: string | undefined, weekNumber: number, dayIndex: number, introNote?: string | null): string {
+  const day = (dayNotes ?? "").trim()
+  const intro = (introNote ?? "").trim()
+  if (!intro || weekNumber !== 1 || dayIndex !== 0) return day
+  return day ? `${intro}\n\n${day}` : intro
+}

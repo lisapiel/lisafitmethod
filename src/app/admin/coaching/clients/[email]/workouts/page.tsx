@@ -1,5 +1,6 @@
 "use client"
 
+import { expandedWeeks } from "@/lib/programExpansion"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { sportLogSummary, type SportLogFields } from "@/lib/sportDay"
 import { fetchAuthSession } from "aws-amplify/auth"
@@ -600,9 +601,9 @@ export default function AdminClientWorkoutsPage() {
             headers: { Authorization: `Bearer ${token}` },
           })
           if (pRes.ok) {
-            const p = await pRes.json() as { program?: { weeks?: string } }
+            const p = await pRes.json() as { program?: { weeks?: string; durationWeeks?: number } }
             if (p.program?.weeks) {
-              try { setProgram(JSON.parse(p.program.weeks) as ProgramWeek[]) } catch { /* ignore */ }
+              setProgram(expandedWeeks({ weeks: p.program.weeks, durationWeeks: p.program.durationWeeks }) as unknown as ProgramWeek[])
             }
           }
         }

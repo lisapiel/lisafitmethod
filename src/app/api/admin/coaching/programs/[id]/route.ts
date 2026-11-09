@@ -70,6 +70,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     status: "DRAFT",
     // Carry rotation length so duplicates behave like the source program.
     ...(typeof source.durationWeeks === "number" ? { durationWeeks: source.durationWeeks } : {}),
+    ...(source.introNote ? { introNote: source.introNote } : {}),
   })
   return NextResponse.json({ program })
 }

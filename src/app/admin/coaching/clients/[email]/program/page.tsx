@@ -20,6 +20,7 @@ export default function ClientProgramPage() {
   const [programName, setProgramName] = useState("")
   const [programId, setProgramId] = useState("")
   const [weeks, setWeeks] = useState<ProgramWeek[]>([])
+  const [durationWeeks, setDurationWeeks] = useState<number | null>(null)
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -50,6 +51,7 @@ export default function ClientProgramPage() {
                 setProgramName(prog.name)
                 setProgramId(prog.id)
                 try { setWeeks(JSON.parse(prog.weeks) as ProgramWeek[]) } catch { /* empty */ }
+                setDurationWeeks(typeof prog.durationWeeks === "number" ? prog.durationWeeks : null)
               }
             }
           }
@@ -89,6 +91,11 @@ export default function ClientProgramPage() {
         </div>
       ) : (
         <>
+          <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: "0 0 10px" }}>
+            {durationWeeks && durationWeeks > weeks.length
+              ? `Runs ${durationWeeks} weeks. The ${weeks.length === 1 ? "week below repeats" : `${weeks.length} weeks below repeat in order`}.`
+              : `Runs ${weeks.length} week${weeks.length === 1 ? "" : "s"}, as written below.`}
+          </p>
           {/* Week tabs */}
           <div className="h-scroll" style={{ display: "flex", gap: 6, marginBottom: "1rem", flexWrap: "wrap" }}>
             {weeks.map((w, wi) => (

@@ -1047,6 +1047,9 @@ export interface CoachingProgramRecord {
   // independent of Week 1's — fixes the "Phase III rotation shows one Week 1
   // tab and then Program Complete" bug for 4-day rotations.
   durationWeeks?: number
+  // Shown to the client once, with the Week 1, Day 1 notes (for example how to
+  // progress through the phase). Not repeated in later weeks.
+  introNote?: string
   // Warm-up rule options for programs with no client (templates). Client
   // programs use the client's warm-up profile instead.
   warmupOptions?: { bands?: boolean; beginner?: boolean; backSafe?: boolean; foamRoller?: boolean }

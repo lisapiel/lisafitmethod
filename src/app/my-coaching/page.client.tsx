@@ -6,7 +6,7 @@ import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
 import { buildWeightHistory, summarizeWeight, type WeightReading } from "@/lib/weightHistory"
-import { expandedWeeks } from "@/lib/programExpansion"
+import { expandedWeeks, notesWithIntro } from "@/lib/programExpansion"
 import { checkInStatus as checkInState, type PortalWeek } from "@/lib/portalProgram"
 import UpNextCard from "@/components/portal/UpNextCard"
 import CoachNote from "@/components/portal/CoachNote"
@@ -40,6 +40,7 @@ type ProgramInfo = {
   id: string
   name: string
   weeks: ProgramWeek[]
+  introNote?: string
 }
 
 type WorkoutLog = {
@@ -143,7 +144,7 @@ export default function MyCoachingHomeClient() {
               durationWeeks: typeof prog.durationWeeks === "number" ? prog.durationWeeks : undefined,
             }) as ProgramWeek[]
             if (weeks.length > 0) {
-              setProgram({ id: prog.id, name: prog.name, weeks })
+              setProgram({ id: prog.id, name: prog.name, weeks, introNote: typeof prog.introNote === "string" ? prog.introNote : undefined })
             }
           }
         }
@@ -303,7 +304,7 @@ export default function MyCoachingHomeClient() {
             <Link className="pt-btn" href="/my-coaching/messages">Message me</Link>
           </section>
         ) : nextWorkout ? (
-          <UpNextCard week={nextWorkout.week as PortalWeek} day={nextWorkout.day} dayIndex={nextWorkout.dayIndex} inProgress={workoutInProgress} />
+          <UpNextCard week={nextWorkout.week as PortalWeek} day={{ ...nextWorkout.day, notes: notesWithIntro(nextWorkout.day.notes, nextWorkout.week.weekNumber, nextWorkout.dayIndex, program?.introNote) }} dayIndex={nextWorkout.dayIndex} inProgress={workoutInProgress} />
         ) : (
           <section className="pt-empty">
             <h2>You finished the program</h2>

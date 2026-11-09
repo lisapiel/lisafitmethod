@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { fetchUserAttributes } from "aws-amplify/auth"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { expandedWeeks } from "@/lib/programExpansion"
+import { expandedWeeks, notesWithIntro } from "@/lib/programExpansion"
 import { newSubmissionId, submitFailureMessage, submitWorkoutLog } from "@/lib/workoutSubmit"
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
@@ -948,6 +948,7 @@ export default function WorkoutLoggerClient() {
   const [email, setEmail] = useState("")
   const [programId, setProgramId] = useState("")
   const [week, setWeek] = useState<ProgramWeek | null>(null)
+  const [introNote, setIntroNote] = useState("")
   const [day, setDay] = useState<ProgramDay | null>(null)
   const [setMap, setSetMap] = useState<ExerciseSetMap>({})
   const [exerciseInfo, setExerciseInfo] = useState<Record<string, ExerciseInfo>>({})
@@ -1033,6 +1034,7 @@ export default function WorkoutLoggerClient() {
       const targetWeek = weeks.find((w) => w.weekNumber === weekId) ?? null
       const targetDay = targetWeek?.days[dayIndex] ?? null
       setWeek(targetWeek)
+      setIntroNote(typeof prog.introNote === "string" ? prog.introNote : "")
       setDay(targetDay)
 
       if (!targetDay) { setLoading(false); return }
@@ -1419,7 +1421,7 @@ export default function WorkoutLoggerClient() {
       <SportDayForm
         meta={`${week.label} · Day ${dayIndex + 1}`}
         dayLabel={day.dayLabel}
-        notes={day.notes?.trim() ?? ""}
+        notes={notesWithIntro(day.notes, weekId, dayIndex, introNote)}
         name={sportNameInput}
         duration={sportDurationInput}
         intensity={sportIntensityInput}
@@ -1465,7 +1467,7 @@ export default function WorkoutLoggerClient() {
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "2rem", fontWeight: 700, color: black, margin: "0 0 6px" }}>
           {day.dayLabel}
         </h1>
-        {day.notes?.trim() && <RunnerNotes text={day.notes.trim()} />}
+        {notesWithIntro(day.notes, weekId, dayIndex, introNote) && <RunnerNotes text={notesWithIntro(day.notes, weekId, dayIndex, introNote)} />}
       </div>
 
       {/* Progress bar */}
