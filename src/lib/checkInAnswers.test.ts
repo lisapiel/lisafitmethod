@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { hungerLabel, normalizeCheckInWeight, parseHunger } from "./checkInAnswers"
+import { checkInWeightLine, hungerLabel, normalizeCheckInWeight, parseHunger } from "./checkInAnswers"
 
 const from = { lbs: 125, unit: "LBS", at: "2026-11-08", source: "logged" }
 
@@ -44,4 +44,13 @@ test("hunger accepts only the four answers", () => {
   assert.equal(parseHunger(3), undefined)
   assert.equal(hungerLabel("less"), "Less hungry than usual")
   assert.equal(hungerLabel(undefined), null)
+})
+
+test("the weight line covers new, same, skipped and old check-ins", () => {
+  assert.equal(checkInWeightLine({ weight: 124.6, weightUnit: "LBS", weightStatus: "new" }), "124.6 lb")
+  assert.equal(checkInWeightLine({ weightStatus: "same", weightConfirmedFrom: from }), "Same as last time (125 lb from Nov 8)")
+  assert.equal(checkInWeightLine({ weightStatus: "same" }), "Same as last time")
+  assert.equal(checkInWeightLine({ weightStatus: "skipped" }), "Skipped this week")
+  assert.equal(checkInWeightLine({ weight: 60, weightUnit: "KG" }), "60 kg")
+  assert.equal(checkInWeightLine({}), null)
 })

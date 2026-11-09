@@ -1,5 +1,5 @@
 import { isLocalDateKey } from "./localDate"
-import { MAX_LBS, MIN_LBS } from "./weightHistory"
+import { formatReading, formatWeighInDay, MAX_LBS, MIN_LBS } from "./weightHistory"
 
 // How a check-in answers the weight question. "new" is a fresh scale reading
 // saved as the check-in's weight. "same" confirms the client's last reading
@@ -71,4 +71,17 @@ export function normalizeCheckInWeight(body: Record<string, unknown>): { ok: tru
     return { ok: true, fields: { weight, weightUnit: unit ?? "LBS", weightStatus: "new" } }
   }
   return { ok: false, error: "Invalid weight choice" }
+}
+
+// One line describing a check-in's weight answer, for the coach review and
+// the client's history. Null when nothing was given on an older check-in.
+export function checkInWeightLine(ci: { weight?: unknown; weightUnit?: unknown; weightStatus?: unknown; weightConfirmedFrom?: unknown }): string | null {
+  if (ci.weightStatus === "skipped") return "Skipped this week"
+  if (ci.weightStatus === "same") {
+    const from = parseConfirmedFrom(ci.weightConfirmedFrom)
+    return from ? `Same as last time (${formatReading(from)} from ${formatWeighInDay(from.at)})` : "Same as last time"
+  }
+  const n = typeof ci.weight === "number" ? ci.weight : parseFloat(String(ci.weight ?? ""))
+  if (!Number.isFinite(n) || n <= 0) return null
+  return `${n} ${ci.weightUnit === "KG" ? "kg" : "lb"}`
 }

@@ -4,6 +4,7 @@ import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { createCoachingCheckIn, listCoachingCheckIns, getCoachingClientRecord, hasCoachingAccess, type CoachingCheckInRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
+import { normalizeCheckInWeight, parseHunger } from "@/lib/checkInAnswers"
 
 export const dynamic = "force-dynamic"
 
@@ -69,12 +70,11 @@ export async function POST(req: NextRequest) {
     }))
     .filter((m) => m.label && m.value)
 
-  // ── Weight (with the same validation as before) ─────────────────────────
-  let parsedWeight: number | undefined
-  if (body.weight != null && body.weight !== "") {
-    const n = parseFloat(String(body.weight))
-    if (Number.isFinite(n) && n > 0 && n < 2000) parsedWeight = n
-  }
+  // ── Weight: new reading, same as last time, or skipped ───────────────────
+  const weightIn = normalizeCheckInWeight(body)
+  if (!weightIn.ok) return NextResponse.json({ error: weightIn.error }, { status: 400 })
+  const weightFields = weightIn.fields
+  const parsedWeight = weightFields.weight
 
   // ── Schema version routing ──────────────────────────────────────────────
   // 2 = new redesigned check-in. Absent/1 = legacy (retained for any old
@@ -127,8 +127,7 @@ export async function POST(req: NextRequest) {
 
   // ── Build the check-in record ───────────────────────────────────────────
   const shared: Partial<CoachingCheckInRecord> = {
-    ...(parsedWeight != null && { weight: parsedWeight }),
-    ...(body.weightUnit === "LBS" || body.weightUnit === "KG" ? { weightUnit: body.weightUnit } : {}),
+    ...weightFields,
     ...(measurements.length > 0 && { measurementSnapshot: JSON.stringify(measurements) }),
   }
 
@@ -157,6 +156,7 @@ export async function POST(req: NextRequest) {
       // Nutrition
       ...(nutritionStatus && { nutritionStatus }),
       ...(toStr(body.nutritionHelp) && { nutritionHelp: toStr(body.nutritionHelp) }),
+      ...(parseHunger(body.hunger) && { hunger: parseHunger(body.hunger) }),
       // Weekly reflection
       ...(toStr(body.weeklyWin) && { weeklyWin: toStr(body.weeklyWin) }),
       ...(toStr(body.weeklyChallenge) && { weeklyChallenge: toStr(body.weeklyChallenge) }),
@@ -198,7 +198,9 @@ export async function POST(req: NextRequest) {
   const flags: string[] = []
   const meta: Record<string, string | number | null | undefined> = {
     client: email,
-    weight: parsedWeight != null ? `${parsedWeight} ${body.weightUnit || ""}` : null,
+    weight: parsedWeight != null
+      ? `${parsedWeight} ${weightFields.weightUnit ?? ""}`
+      : weightFields.weightStatus === "same" ? "same as last time" : weightFields.weightStatus === "skipped" ? "skipped" : null,
   }
 
   if (isV2) {

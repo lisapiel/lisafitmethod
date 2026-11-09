@@ -806,6 +806,11 @@ export interface CoachingCheckInRecord {
   // ── Progress (shared across schema versions) ──────────────────────────────
   weight?: number
   weightUnit?: "LBS" | "KG"
+  // How the client answered the weight question (absent on older check-ins).
+  // "same" and "skipped" never carry a weight; "same" points at the reading
+  // the client confirmed so it is not counted twice. See lib/checkInAnswers.
+  weightStatus?: "new" | "same" | "skipped"
+  weightConfirmedFrom?: { lbs: number; unit: "LBS" | "KG"; at: string; source: "check-in" | "logged" }
   // Optional body measurements captured during the check-in.
   // Stored as JSON string: Array<{ label, value, unit }>
   measurementSnapshot?: string
@@ -851,6 +856,7 @@ export interface CoachingCheckInRecord {
   // ── v2: Nutrition ─────────────────────────────────────────────────────────
   nutritionStatus?: "on-track" | "mostly-on-track" | "mixed" | "struggled" | "not-focusing"
   nutritionHelp?: string
+  hunger?: "comfortable" | "some-days" | "most-days" | "less"
 
   // ── v2: Weekly reflection ────────────────────────────────────────────────
   weeklyWin?: string
