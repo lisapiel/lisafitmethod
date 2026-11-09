@@ -2,7 +2,11 @@
 
 import { useState, useEffect, use } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
-import { toLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
+import { normalizeUnit, type WeightUnit } from "@/lib/weight"
+import { buildWeightHistory, summarizeWeight } from "@/lib/weightHistory"
+
+// A date without a time is a calendar day; read it as local midday so it never shows as the day before.
+const asDate = (d: string) => new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T12:00:00` : d)
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -77,10 +81,10 @@ function WeightChart({ data, displayUnit }: { data: WeightPoint[]; displayUnit: 
           <circle key={i} cx={toX(i)} cy={toY(toDisplay(d.lbs))} r={i === data.length - 1 ? 4 : 3} fill={i === data.length - 1 ? gold : `color-mix(in srgb, ${gold} 53%, transparent)`} />
         ))}
         <text x={padX} y={H - 4} fontFamily="var(--font-montserrat), sans-serif" fontSize="9" fill={muted}>
-          {new Date(data[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {asDate(data[0].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </text>
         <text x={W - padX} y={H - 4} fontFamily="var(--font-montserrat), sans-serif" fontSize="9" fill={muted} textAnchor="end">
-          {new Date(data[data.length - 1].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {asDate(data[data.length - 1].date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </text>
         <text x={padX - 4} y={toY(maxW) + 4} fontFamily="var(--font-montserrat), sans-serif" fontSize="9" fill={muted} textAnchor="end">{maxW}</text>
         <text x={padX - 4} y={toY(minW) + 4} fontFamily="var(--font-montserrat), sans-serif" fontSize="9" fill={muted} textAnchor="end">{minW}</text>
@@ -161,52 +165,26 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
           fetch(`/api/admin/coaching/progress/${encodeURIComponent(clientEmail)}`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
         ])
 
-        // Client record — needed for displayName, startingWeight (first chart
-        // point), weightUnit (display unit when no check-ins log one).
+        // Client record: display name, and the unit to use when there are no weigh-ins.
         type ClientSummary = { displayName?: string; startingWeight?: number; weightUnit?: string; createdAt?: string; subscriptionStartDate?: string }
         const client: ClientSummary = clientRes.status === "fulfilled" ? (clientRes.value.client ?? {}) : {}
         if (client.displayName) setClientName(client.displayName)
 
-        // Build canonical lb weight series — startingWeight (if any) first,
-        // then every check-in with a weight entry, all normalized through
-        // @/lib/weight.toLbs so historical unit switches don't break math.
         const checkIns: Array<Record<string, unknown>> = checkInsRes.status === "fulfilled" ? (checkInsRes.value.checkIns ?? []) : []
         const myCheckIns = checkIns
           .filter((ci) => typeof ci.clientEmail === "string" && (ci.clientEmail as string).toLowerCase() === clientEmail.toLowerCase())
           .sort((a, b) => (a.submittedAt as string).localeCompare(b.submittedAt as string))
 
-        const points: WeightPoint[] = []
-        // Point 1: startingWeight if the client record carries one. Dated
-        // at subscriptionStartDate (preferred) or createdAt, and only shown
-        // when it precedes any check-in so we don't invent a point mid-journey.
-        const startDate = client.subscriptionStartDate || client.createdAt
-        if (client.startingWeight != null && startDate) {
-          const startLbs = toLbs(client.startingWeight, normalizeUnit(client.weightUnit))
-          if (startLbs != null) {
-            const firstCheckInDate = myCheckIns.find((ci) => ci.weight != null)?.submittedAt as string | undefined
-            // Only prepend if genuinely before the first check-in — otherwise
-            // we'd duplicate the first check-in point.
-            if (!firstCheckInDate || startDate <= firstCheckInDate) {
-              points.push({ date: startDate, lbs: startLbs })
-            }
-          }
-        }
-        for (const ci of myCheckIns) {
-          if (ci.weight == null) continue
-          const lbs = toLbs(ci.weight as number, normalizeUnit(ci.weightUnit as string | undefined))
-          if (lbs == null) continue
-          points.push({ date: ci.submittedAt as string, lbs })
-        }
-        setWeightData(points)
-
-        // Display unit: last check-in's unit if present, else client record.
-        const lastCiUnit = [...myCheckIns].reverse().find((ci) => ci.weight != null)?.weightUnit as string | undefined
-        setDisplayUnit(normalizeUnit(lastCiUnit) ?? normalizeUnit(client.weightUnit))
+        // Weigh-ins = submitted check-ins + weights the client logged. The setup
+        // starting weight is a profile value, not a dated weigh-in.
+        type SnapIn = { id: string; snapshotDate: string; weight?: number; weightUnit?: string; waist?: number; hips?: number; chest?: number; arm?: number; thigh?: number; glutes?: number; notes?: string }
+        const snaps: SnapIn[] = snapshotsRes.status === "fulfilled" ? (snapshotsRes.value.snapshots ?? []) : []
+        const history = buildWeightHistory({ checkIns: myCheckIns, logged: snaps })
+        setWeightData(history.map((r) => ({ date: r.at, lbs: r.lbs })))
+        setDisplayUnit(summarizeWeight(history, normalizeUnit(client.weightUnit)).unit)
 
         // Measurement rows: union of ProgressSnapshotRecord entries + the
         // measurementSnapshot JSON that lives on each check-in, newest first.
-        type SnapIn = { id: string; snapshotDate: string; weight?: number; weightUnit?: string; waist?: number; hips?: number; chest?: number; arm?: number; thigh?: number; glutes?: number; notes?: string }
-        const snaps: SnapIn[] = snapshotsRes.status === "fulfilled" ? (snapshotsRes.value.snapshots ?? []) : []
         const snapRows: MeasurementRow[] = snaps.map((s) => ({
           date:  s.snapshotDate,
           waist: s.waist  != null ? Number(s.waist)  : null,
@@ -276,7 +254,7 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
             {latest && (latest.waist || latest.hips || latest.chest || latest.arm || latest.thigh || latest.glutes) && (
               <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "1.5rem", marginBottom: "1.25rem" }}>
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>
-                  Latest measurements · {new Date(latest.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  Latest measurements · {asDate(latest.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </p>
                 <MeasRow label="Waist"  value={latest.waist} />
                 <MeasRow label="Hips"   value={latest.hips} />
@@ -299,7 +277,7 @@ export default function AdminClientProgressPage({ params }: { params: Promise<{ 
                   {measurements.map((m, i) => (
                     <div key={`${m.date}-${i}`} style={{ border: `1px solid ${border}`, borderRadius: 6, padding: "1rem" }}>
                       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, margin: "0 0 10px", fontWeight: 600 }}>
-                        {new Date(m.date).toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" })}
+                        {asDate(m.date).toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric", year: "numeric" })}
                       </p>
                       <MeasRow label="Waist"  value={m.waist} />
                       <MeasRow label="Hips"   value={m.hips} />
