@@ -22,6 +22,8 @@ export default function SetupClient() {
   const [sex, setSex] = useState<Sex>("female")
   const [age, setAge] = useState("")
   const [weightLbs, setWeightLbs] = useState("")
+  const [startingWeight, setStartingWeight] = useState<number | null>(null)
+  const [keptNotice, setKeptNotice] = useState(false)
   const [heightFeet, setHeightFeet] = useState("")
   const [heightInches, setHeightInches] = useState("")
   const [activity, setActivity] = useState<number>(1.35)
@@ -49,7 +51,7 @@ export default function SetupClient() {
         // record is not touched — that only updates when the client saves.
         if (c.activityLevel) setActivity(remapLegacyActivity(c.activityLevel) ?? 1.35)
         if (c.nutritionGoal) setGoal(c.nutritionGoal)
-        if (c.startingWeight) setWeightLbs(String(c.startingWeight))
+        if (c.startingWeight) setStartingWeight(c.startingWeight)
       } catch { /* ignore */ }
     }
     load()
@@ -63,7 +65,7 @@ export default function SetupClient() {
     const inch = parseFloat(heightInches || "0")
 
     if (!ageNum || ageNum < 16 || ageNum > 100) { setErrorMsg("Please enter an age between 16 and 100."); return }
-    if (!weightNum || weightNum < 80 || weightNum > 500) { setErrorMsg("Please enter your current weight in pounds."); return }
+    if (startingWeight == null && (!weightNum || weightNum < 80 || weightNum > 500)) { setErrorMsg("Please enter your current weight in pounds."); return }
     if (!ft || ft < 4 || ft > 7) { setErrorMsg("Please enter your height in feet, between 4 and 7."); return }
     if (inch < 0 || inch >= 12) { setErrorMsg("Inches should be between 0 and 11."); return }
     const heightIn = ft * 12 + inch
@@ -82,7 +84,7 @@ export default function SetupClient() {
           sex,
           activityLevel: activity,
           nutritionGoal: goal,
-          currentWeight: weightNum,
+          ...(startingWeight == null ? { currentWeight: weightNum } : {}),
         }),
       })
       if (!res.ok) {
@@ -93,6 +95,14 @@ export default function SetupClient() {
       }
       // Mark that they've completed setup so the home banner clears
       try { localStorage.removeItem("lfm-setup-skipped") } catch { /* ignore */ }
+      const saved = await res.json().catch(() => ({})) as { startingWeight?: number | null; startingWeightKept?: boolean }
+      if (saved.startingWeightKept) {
+        // A starting weight already existed, so the typed weight wasn't saved.
+        if (typeof saved.startingWeight === "number") setStartingWeight(saved.startingWeight)
+        setKeptNotice(true)
+        setSaving(false)
+        return
+      }
       router.push("/my-coaching/nutrition")
     } catch {
       setErrorMsg("Something went wrong. Please try again.")
@@ -157,20 +167,36 @@ export default function SetupClient() {
               style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
             />
           </div>
-          <div>
-            <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 6 }}>
-              Current weight (lbs)
-            </label>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={weightLbs}
-              onChange={(e) => setWeightLbs(e.target.value)}
-              placeholder="145"
-              style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
-            />
-          </div>
+          {startingWeight == null ? (
+            <div>
+              <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 6 }}>
+                Current weight (lbs)
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={weightLbs}
+                onChange={(e) => setWeightLbs(e.target.value)}
+                placeholder="145"
+                style={{ width: "100%", background: "#faf8f5", border: `1px solid ${border}`, color: black, padding: "10px 12px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", outline: "none", boxSizing: "border-box", borderRadius: 4 }}
+              />
+            </div>
+          ) : (
+            <div>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+                Starting weight
+              </p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "1rem", color: black, margin: 0, padding: "10px 0" }}>
+                {startingWeight} lb
+              </p>
+            </div>
+          )}
         </div>
+        {startingWeight != null && (
+          <p data-testid="starting-weight-note" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: muted, margin: "-6px 0 16px", lineHeight: 1.55 }}>
+            This was saved when you set up coaching. If it&apos;s wrong, <Link href="/my-coaching/messages" style={{ color: black }}>message me</Link> and I&apos;ll correct it. To record what you weigh today, <Link href="/my-coaching/progress/log" style={{ color: black }}>log today&apos;s weight on Progress</Link>.
+          </p>
+        )}
 
         {/* Height */}
         <div style={{ marginBottom: 16 }}>
@@ -255,6 +281,15 @@ export default function SetupClient() {
             })}
           </div>
         </div>
+
+        {keptNotice && startingWeight != null && (
+          <div role="status" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: black, background: `${accent}18`, border: `1px solid ${accent}`, borderRadius: 4, padding: "10px 12px", margin: "0 0 12px", lineHeight: 1.55 }}>
+            <p style={{ margin: "0 0 6px" }}>
+              Your other details are saved. You already had a starting weight of {startingWeight} lb, so I kept that one and didn&apos;t save the new number. If it&apos;s wrong, message me and I&apos;ll correct it.
+            </p>
+            <Link href="/my-coaching/nutrition" style={{ color: black, fontWeight: 700 }}>See my macros</Link>
+          </div>
+        )}
 
         {errorMsg && (
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: "#c14646", margin: "0 0 12px" }}>
