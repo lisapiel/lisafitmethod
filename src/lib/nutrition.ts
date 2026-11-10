@@ -19,11 +19,11 @@ export type Sex = "male" | "female"
 // re-mapped at compute time via `canonicalActivityLevel` so existing clients
 // pick up the new semantics without record modification.
 export const ACTIVITY_LEVELS = [
-  { value: 1.20, key: "sedentary", label: "Sedentary",         desc: "Mostly seated lifestyle, little structured exercise." },
-  { value: 1.30, key: "light",     label: "Lightly Active",    desc: "Mostly seated/light daily activity + ~1–3 training sessions/week." },
-  { value: 1.42, key: "moderate",  label: "Moderately Active", desc: "Regular movement + ~3–5 training sessions/week." },
-  { value: 1.55, key: "active",    label: "Very Active",       desc: "Training ~5–6 days/week and/or a physically active lifestyle or job." },
-  { value: 1.70, key: "athlete",   label: "Highly Active",     desc: "Hard/frequent training plus a very active lifestyle or job." },
+  { value: 1.20, key: "sedentary", label: "Sedentary",         desc: "Mostly sitting, with little or no planned exercise." },
+  { value: 1.30, key: "light",     label: "Lightly Active",    desc: "Mostly sitting or light activity, plus about 1 to 3 workouts a week." },
+  { value: 1.42, key: "moderate",  label: "Moderately Active", desc: "Regular movement during the day, plus about 3 to 5 workouts a week." },
+  { value: 1.55, key: "active",    label: "Very Active",       desc: "Training about 5 or 6 days a week, or a physically active job or lifestyle." },
+  { value: 1.70, key: "athlete",   label: "Highly Active",     desc: "Hard, frequent training plus a very active job or lifestyle." },
 ] as const
 
 // Calorie multiplier per goal. Multiplicative (not fixed ± kcal), so a
