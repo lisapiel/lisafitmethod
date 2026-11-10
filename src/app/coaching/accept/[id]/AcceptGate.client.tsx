@@ -64,6 +64,11 @@ export default function AcceptGate({
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ applicationId }),
       })
+      if (res.status === 429) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        setError(data.error ?? "A setup link was sent a moment ago. Please check your inbox and spam folder first.")
+        return
+      }
       if (!res.ok) throw new Error()
       setSent(true)
     } catch {

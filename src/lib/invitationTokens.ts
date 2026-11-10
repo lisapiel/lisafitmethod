@@ -113,3 +113,36 @@ export async function consumeInvitationToken(
     return { valid: false, reason: "used" }
   }
 }
+
+// Limit setup-link emails per application: one every 2 minutes, at most 5 a day.
+// A conditional update makes this hold even when requests arrive together.
+export const INVITE_COOLDOWN_MS = 2 * 60 * 1000
+export const INVITE_DAILY_MAX = 5
+
+export async function reserveInviteSend(applicationId: string, now = new Date()): Promise<boolean> {
+  const db = makeDb()
+  const Key = { userId: `invite_send_${applicationId}` }
+  const day = now.toISOString().slice(0, 10)
+  const cutoff = new Date(now.getTime() - INVITE_COOLDOWN_MS).toISOString()
+  const at = now.toISOString()
+  try {
+    await db.send(new UpdateCommand({
+      TableName: TABLE, Key,
+      UpdateExpression: "SET sentCount = sentCount + :one, lastSentAt = :at",
+      ConditionExpression: "sentDay = :day AND sentCount < :max AND lastSentAt < :cutoff",
+      ExpressionAttributeValues: { ":one": 1, ":at": at, ":day": day, ":max": INVITE_DAILY_MAX, ":cutoff": cutoff },
+    }))
+    return true
+  } catch { /* not today's window yet, or limited */ }
+  try {
+    await db.send(new UpdateCommand({
+      TableName: TABLE, Key,
+      UpdateExpression: "SET sentCount = :one, sentDay = :day, lastSentAt = :at",
+      ConditionExpression: "attribute_not_exists(userId) OR (sentDay <> :day AND lastSentAt < :cutoff)",
+      ExpressionAttributeValues: { ":one": 1, ":at": at, ":day": day, ":cutoff": cutoff },
+    }))
+    return true
+  } catch {
+    return false
+  }
+}

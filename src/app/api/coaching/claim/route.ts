@@ -7,7 +7,7 @@ import {
   UsernameExistsException,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { getCoachingApplication } from "@/lib/authTokens"
-import { consumeInvitationToken } from "@/lib/invitationTokens"
+import { checkInvitationToken, consumeInvitationToken } from "@/lib/invitationTokens"
 import { applicationOwnerEmail } from "@/lib/coachingInvitation"
 
 export const dynamic = "force-dynamic"
@@ -56,6 +56,12 @@ export async function POST(req: NextRequest) {
   }
 
   const email = applicationOwnerEmail(application)
+  // Check the link before saying anything about the account, so an application id
+  // alone never reveals whether this address already has a login.
+  const peek = await checkInvitationToken(token, applicationId)
+  if (!peek.valid || peek.token.email !== email) {
+    return NextResponse.json({ error: "This setup link has already been used or has expired." }, { status: 403 })
+  }
   const cognito = makeCognito()
   const pool = process.env.COGNITO_USER_POOL_ID ?? ""
 
@@ -70,7 +76,7 @@ export async function POST(req: NextRequest) {
   }
   if (existingStatus === "CONFIRMED") {
     return NextResponse.json(
-      { error: "This address already has a login. Please sign in instead.", signInInstead: true, email },
+      { error: "This address already has a login. Please sign in instead.", signInInstead: true },
       { status: 409 },
     )
   }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { getCoachingApplication } from "@/lib/authTokens"
-import { generateInvitationToken, storeInvitationToken } from "@/lib/invitationTokens"
+import { generateInvitationToken, storeInvitationToken, reserveInviteSend } from "@/lib/invitationTokens"
 import { applicationOwnerEmail } from "@/lib/coachingInvitation"
 
 export const dynamic = "force-dynamic"
@@ -32,6 +32,9 @@ export async function POST(req: NextRequest) {
   }
 
   const email = applicationOwnerEmail(application)
+  if (!(await reserveInviteSend(applicationId))) {
+    return NextResponse.json({ error: "A setup link was sent a moment ago. Please check your inbox and spam folder first." }, { status: 429 })
+  }
   const token = generateInvitationToken()
   await storeInvitationToken({ token, applicationId, email })
 
@@ -66,5 +69,5 @@ export async function POST(req: NextRequest) {
 </body></html>`,
   }).catch((err) => console.error("invite-setup email failed:", err))
 
-  return NextResponse.json({ ok: true, sentTo: email })
+  return NextResponse.json({ ok: true })
 }
