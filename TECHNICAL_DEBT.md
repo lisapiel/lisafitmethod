@@ -8,11 +8,13 @@ Active items only. Delete an entry once it is resolved.
 **Added:** 2026-11-09
 **Area:** `src/lib/adminAuth.ts`, `src/app/admin/security`, admin email lists
 
-- `ADMIN_MFA_REQUIRED` covers the admin area (every `/api/admin/*` route, admin server actions and admin server pages). It does not cover places where an admin email simply skips a client paywall (`isAdminEmail` in `src/app/my-coaching/layout.tsx`, `src/app/api/member/access/route.ts`, the training and tracker access checks, and `/my-plan` in `src/middleware.ts`). Those only show client areas, but an unenrolled admin can still open them.
+- **Security limitation (still open):** `ADMIN_MFA_REQUIRED` covers the admin area (every `/api/admin/*` route, admin server actions and admin server pages). It does NOT cover places where an admin email simply skips a client paywall: the access checks in `src/lib/authTokens.ts` (training, nutrition, tracker, masterclass, coaching), `src/lib/productGates.ts`, `src/app/my-coaching/layout.tsx`, `src/app/api/member/access/route.ts`, `src/app/account/page.tsx`, and `/my-plan` in `src/middleware.ts`. An admin account that has NOT set up two-factor can still open paid course content, the client portal for its own account and Lisa's private /my-plan page with only a password. From the code, none of these show other clients' records; the coach's view of clients is all under the admin area, which is covered.
+  - **Why it is limited in practice:** once an admin account has set up two-factor, Cognito itself asks for the code at every sign-in, so a password alone gets nowhere on that account. The gap only matters for an admin account that isn't enrolled (for example, right after a lost-phone reset).
+  - **Smallest safe fix:** make those bypasses ask the same question the admin area asks. Replace the bare `isAdminEmail(email)` bypass with a server check that uses the session's access token (`adminSessionEmail()` in `src/lib/adminAuth.ts`, which already applies the two-factor rule) in the six places above, so that with enforcement on an unenrolled admin is treated as an ordinary visitor there. Until then: keep both admin accounts enrolled and re-enrol immediately after any reset.
 - No QR code on the setup screen. There is no QR library and adding one is a dependency change, so it shows the key in groups of four plus an `otpauth://` link.
 - The admin email list is still copied in `src/app/admin/layout.tsx`, `src/middleware.ts` and the messages page instead of importing `ADMIN_EMAILS`.
 
-**Impact:** low while enforcement is off.
+**Impact:** low while both admin accounts are enrolled; real for an unenrolled admin account even with enforcement on.
 
 **Plan:** route the admin bypasses through `checkAdminAccess` when enforcement is switched on for real; add a QR code if Lisa approves a small dependency.
 

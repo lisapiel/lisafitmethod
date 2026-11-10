@@ -11,6 +11,19 @@ There are two separate switches.
 
 Leave `ADMIN_MFA_REQUIRED` unset until both admin accounts have two-factor set up and have each signed in with a code at least once.
 
+## Setting up two-factor (each admin account)
+
+1. Install an authenticator app on the phone for this account (Google Authenticator, Microsoft Authenticator or 1Password). Use a different phone for each admin account.
+2. Sign in at lisafitmethod.com/admin/login and open **Security** in the admin menu.
+3. Choose **Set up two-factor**. In the app, add an account and choose **Enter a setup key** (there is no QR code). Type the key shown, in groups of four, with time-based codes. On a phone you can tap the link instead.
+4. Type the 6-digit code the app shows and choose **Turn on two-factor**. The page then says two-factor is on.
+5. Choose **Sign Out**, then sign in again. After your password, the page asks for a code. Enter the current one from the app. You should land in the admin area.
+6. Repeat with the other admin account on the other phone.
+
+## Known limitation
+
+Even with `ADMIN_MFA_REQUIRED=true`, an admin account that has not set up two-factor can still open the client-side pages that admins are let into for free (course content, the client portal for that account, /my-plan) with just a password. It cannot open the admin area or any client's records. Keep both admin accounts enrolled, and set two-factor up again straight after any reset. See TECHNICAL_DEBT.md for the planned fix.
+
 ## Before turning anything on
 
 - Set up two-factor on **both** admin accounts, `lisa.p.mcpherson@gmail.com` and `contact@lisafitmethod.com`.
