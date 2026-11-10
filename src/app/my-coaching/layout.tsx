@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { hasCoachingAccess, getCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION, isAdminEmail } from "@/lib/authTokens"
+import { hasCoachingAccess, getCoachingAccessVersions, termsAcceptanceCurrent, LIABILITY_WAIVER_VERSION, isAdminEmail } from "@/lib/authTokens"
 import CoachingClientLayout from "./CoachingLayout.client"
 
 // Keep accessibility pinch-zoom available for clients who need it. iOS Safari
@@ -44,7 +44,7 @@ export default async function MyCoachingLayout({ children }: { children: React.R
   if (!isAdmin) {
     const versions = await getCoachingAccessVersions(email as string)
     needsReaccept = !versions
-      || versions.acceptedTermsVersion !== TERMS_VERSION
+      || !termsAcceptanceCurrent(versions.acceptedTermsVersion)
       || versions.acceptedWaiverVersion !== LIABILITY_WAIVER_VERSION
   }
 

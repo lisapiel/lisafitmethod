@@ -1582,6 +1582,17 @@ export async function deleteCoachingClientCascade(email: string): Promise<Delete
 // rights, liability language, arbitration terms, scope of the waiver — MUST
 // bump the version and archive the previous copy (git tag `terms-{version}`).
 export const TERMS_VERSION = "2026-08-12-v2"
+
+// Earlier Terms versions that stay in force for the clients who accepted them,
+// so a change that only affects future purchases doesn't make every current
+// client accept again. Each client's record keeps the version they actually
+// accepted. Leave a version out of this list when a change must apply to
+// existing clients too.
+export const PRIOR_TERMS_STILL_IN_FORCE: readonly string[] = []
+
+export function termsAcceptanceCurrent(acceptedVersion: string | null | undefined): boolean {
+  return !!acceptedVersion && (acceptedVersion === TERMS_VERSION || PRIOR_TERMS_STILL_IN_FORCE.includes(acceptedVersion))
+}
 export const LIABILITY_WAIVER_VERSION = "2026-08-12"
 
 export type AcceptanceKind = "course-purchase" | "coaching-subscription"
