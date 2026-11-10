@@ -6,7 +6,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 import { scanAll } from "./dynamoScan"
 import { sortNewestFirst, type StartingWeightChangeRecord } from "./startingWeight"
-import { sortRequestsNewestFirst, type ProfileChangeRequest } from "./profileRequests"
+import { isProfileRequestLockStale, sortRequestsNewestFirst, type ProfileChangeRequest, type ProfileRequestLock } from "./profileRequests"
 
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
@@ -218,6 +218,61 @@ export async function reopenProfileChangeRequest(id: string): Promise<void> {
     ExpressionAttributeNames: { "#s": "status" },
     ExpressionAttributeValues: { ":pending": "pending" },
   }))
+}
+
+// The per-client lock that keeps at most one pending request. Its key uses a
+// separate prefix so nothing that scans "profile_change_request_" records
+// (including older app versions) ever mistakes it for a request.
+const lockKey = (email: string) => ({ userId: `profile_request_lock_${email.toLowerCase()}` })
+
+const isConditionFailure = (e: unknown) => (e as { name?: string }).name === "ConditionalCheckFailedException"
+
+// Takes the lock for a new request id. Returns false while another request
+// holds it. A stale lock (see isProfileRequestLockStale) is replaced, and
+// only if it still points at the same request, so two racers can't both win.
+export async function acquireProfileRequestLock(email: string, requestId: string, now: Date): Promise<boolean> {
+  const db = makeDb()
+  const item = { ...lockKey(email), requestId, createdAt: now.toISOString() }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await db.send(new PutCommand({ TableName: TABLE, Item: item, ConditionExpression: "attribute_not_exists(userId)" }))
+      return true
+    } catch (e) {
+      if (!isConditionFailure(e)) throw e
+    }
+    const held = (await db.send(new GetCommand({ TableName: TABLE, Key: lockKey(email) }))).Item as ProfileRequestLock | undefined
+    if (!held) continue
+    const request = held.requestId ? await getProfileChangeRequest(held.requestId) : null
+    if (!isProfileRequestLockStale(held, request, now)) return false
+    try {
+      await db.send(new PutCommand({
+        TableName: TABLE,
+        Item: item,
+        ...(held.requestId
+          ? { ConditionExpression: "requestId = :old", ExpressionAttributeValues: { ":old": held.requestId } }
+          : { ConditionExpression: "attribute_exists(userId) AND attribute_not_exists(requestId)" }),
+      }))
+      return true
+    } catch (e) {
+      if (isConditionFailure(e)) return false
+      throw e
+    }
+  }
+  return false
+}
+
+// Frees the lock, but only while it still belongs to this request.
+export async function releaseProfileRequestLock(email: string, requestId: string): Promise<void> {
+  try {
+    await makeDb().send(new DeleteCommand({
+      TableName: TABLE,
+      Key: lockKey(email),
+      ConditionExpression: "requestId = :id",
+      ExpressionAttributeValues: { ":id": requestId },
+    }))
+  } catch (e) {
+    if (!isConditionFailure(e)) throw e
+  }
 }
 
 // ── Check-in assessments ────────────────────────────────────────────────────

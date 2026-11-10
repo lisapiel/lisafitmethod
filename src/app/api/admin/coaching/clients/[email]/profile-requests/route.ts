@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { verifyAdminRequest } from "@/lib/adminAuth"
 import { getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
 import {
-  decideProfileChangeRequestRecord, getProfileChangeRequest, listProfileChangeRequests, reopenProfileChangeRequest,
+  decideProfileChangeRequestRecord, getProfileChangeRequest, listProfileChangeRequests, releaseProfileRequestLock, reopenProfileChangeRequest,
 } from "@/lib/coachingRecords"
 import { decideProfileRequest } from "@/lib/profileRequests"
 
@@ -28,6 +28,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ emai
 // POST: { id, action: "approve" | "decline", note? }. The request is marked
 // decided first (only while still pending), then the client record is updated.
 // If that update fails the request goes back to pending so the two agree.
+// Once decided, the client's pending-request lock is freed so they can send
+// another. A lock left behind by a failure here is stale and gets replaced.
 export async function POST(req: NextRequest, { params }: { params: Promise<{ email: string }> }) {
   const admin = await verifyAdminRequest(req)
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ema
     }
   }
 
+  await releaseProfileRequestLock(email, id).catch(() => {})
   return NextResponse.json({ ok: true, requests: await listProfileChangeRequests(email) })
 }
 

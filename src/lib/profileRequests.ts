@@ -99,6 +99,30 @@ export function planSetupProfile(
 
 // ── Client request ──────────────────────────────────────────────────────────
 
+export const PENDING_REQUEST_ERROR = "You already have a request waiting for me. I'll review that one first, and you can send another after."
+
+// One lock item per client makes "only one pending request" atomic: it is
+// written only if absent, before the request itself. A lock is stale, and may
+// be taken over, once the request it points to is no longer pending, or when
+// that request never got written (a failed save) and the lock is past a grace
+// period long enough for a normal save to finish.
+export const PROFILE_REQUEST_LOCK_GRACE_MS = 60_000
+
+export interface ProfileRequestLock {
+  requestId?: string
+  createdAt?: string
+}
+
+export function isProfileRequestLockStale(
+  lock: ProfileRequestLock,
+  request: Pick<ProfileChangeRequest, "status"> | null,
+  now: Date,
+): boolean {
+  if (request) return request.status !== "pending"
+  const at = Date.parse(lock.createdAt ?? "")
+  return !Number.isFinite(at) || now.getTime() - at > PROFILE_REQUEST_LOCK_GRACE_MS
+}
+
 export type RequestInput =
   | { ok: true; requested: ProfileValues; reason: string }
   | { ok: false; status: number; error: string }
@@ -112,7 +136,7 @@ export function validateProfileRequest(
     return { ok: false, status: 409, error: "Finish setup first. You can choose your goal and activity level there." }
   }
   if (existing.some((r) => r.status === "pending")) {
-    return { ok: false, status: 409, error: "You already have a request waiting for me. I'll review that one first, and you can send another after." }
+    return { ok: false, status: 409, error: PENDING_REQUEST_ERROR }
   }
   const requested: ProfileValues = {}
   if (body.nutritionGoal != null && body.nutritionGoal !== "") {

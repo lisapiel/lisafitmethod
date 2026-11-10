@@ -1,4 +1,4 @@
-import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { DeleteCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb"
 
 type Item = Record<string, unknown>
 
@@ -26,6 +26,31 @@ export class FakeTable {
     })
   }
 
+  // Conditions on a single item: attribute_exists / attribute_not_exists and
+  // "attr = :value", joined with AND. A missing item fails anything but
+  // attribute_not_exists.
+  private conditionHolds(item: Item | undefined, condition: string, values: Item): boolean {
+    return condition.split(/\s+AND\s+/).every((clause) => {
+      const ex = clause.match(/^attribute_(not_)?exists\((\w+)\)$/)
+      if (ex) {
+        const present = !!item && item[ex[2]] !== undefined
+        return ex[1] ? !present : present
+      }
+      const eq = clause.match(/^(\w+)\s*=\s*(:\w+)$/)
+      if (eq) return !!item && item[eq[1]] === values[eq[2]]
+      throw new Error(`FakeTable: unsupported condition clause ${clause}`)
+    })
+  }
+
+  private checkCondition(key: string, condition: string | undefined, values: Item | undefined) {
+    if (!condition) return
+    if (!this.conditionHolds(this.items.get(key), condition, values ?? {})) {
+      const err = new Error("The conditional request failed")
+      err.name = "ConditionalCheckFailedException"
+      throw err
+    }
+  }
+
   async send(command: unknown): Promise<Record<string, unknown>> {
     if (command instanceof ScanCommand) {
       this.scanCalls += 1
@@ -43,12 +68,14 @@ export class FakeTable {
     }
     if (command instanceof PutCommand) {
       const item = command.input.Item as Item
-      if (command.input.ConditionExpression === "attribute_not_exists(userId)" && this.items.has(String(item.userId))) {
-        const err = new Error("The conditional request failed")
-        err.name = "ConditionalCheckFailedException"
-        throw err
-      }
+      this.checkCondition(String(item.userId), command.input.ConditionExpression, command.input.ExpressionAttributeValues as Item | undefined)
       this.put(item)
+      return {}
+    }
+    if (command instanceof DeleteCommand) {
+      const key = String(command.input.Key?.userId)
+      this.checkCondition(key, command.input.ConditionExpression, command.input.ExpressionAttributeValues as Item | undefined)
+      this.items.delete(key)
       return {}
     }
     if (command instanceof GetCommand) {
