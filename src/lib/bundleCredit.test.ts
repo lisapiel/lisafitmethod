@@ -104,9 +104,10 @@ describe("application window", () => {
     assert.equal(applicationWindowDays("2027-02-01T05:00:00.000Z", cutover), 30)
     assert.equal(applicationWindowDays(PURCHASE, cutover), 30)
   })
-  test("the default cutover is a future placeholder, so everyone keeps 90 days for now", () => {
-    assert.ok(new Date(BUNDLE_CREDIT_30_DAY_CUTOVER).getTime() > new Date("2026-11-10T00:00:00Z").getTime())
-    assert.equal(applicationWindowDays(PURCHASE), 90)
+  test("the cutover is the day after the Terms were published: purchases on or before November 10, 2026 keep 90 days, later ones get 30", () => {
+    assert.equal(BUNDLE_CREDIT_30_DAY_CUTOVER, "2026-11-11T05:00:00.000Z")
+    assert.equal(applicationWindowDays(new Date(new Date("2026-11-11T05:00:00.000Z").getTime() - 1).toISOString()), 90)
+    assert.equal(applicationWindowDays("2026-11-11T05:00:00.000Z"), 30)
   })
   for (const [day, ok] of [[29, true], [30, true], [31, false]] as const) {
     test(`30-day window: application on day ${day} is ${ok ? "in" : "out"}`, () => {

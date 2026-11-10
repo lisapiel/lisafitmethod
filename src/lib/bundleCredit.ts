@@ -15,7 +15,7 @@ export const BUNDLE_CREDIT_WINDOW_DAYS = 30
 // sits far in the future, so every purchase keeps the 90-day window it was
 // sold with and nobody loses eligibility early. Purchases made before this
 // instant keep 90 days for good; purchases on or after it get 30.
-export const BUNDLE_CREDIT_30_DAY_CUTOVER = "2099-01-01T05:00:00.000Z"
+export const BUNDLE_CREDIT_30_DAY_CUTOVER = "2026-11-11T05:00:00.000Z"
 
 // Calendar days are counted in Lisa's time zone, so "within 30 days" means
 // the 30th day after purchase is still in, whatever the clock says.

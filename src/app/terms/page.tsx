@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const LAST_UPDATED = "August 12, 2026"
+const LAST_UPDATED = "November 10, 2026"
 
 export default function TermsPage() {
   return (
@@ -153,10 +153,15 @@ export default function TermsPage() {
           <p>If Lisa Fit Method ends a coaching engagement for a reason unrelated to any breach by the client, future billing will cease and a pro-rata refund will be provided for any portion of the current paid period during which coaching services will not be delivered.</p>
 
           <h3>Complete Foundations Bundle coaching credit</h3>
-          <p>Purchasers of the Complete Foundations Bundle may apply a $137 coaching credit toward their first coaching payment, subject to the following:</p>
+          <p>Purchasers of the Complete Foundations Bundle may receive a coaching credit toward their first coaching payment, subject to the following:</p>
           <ul>
-            <li>To claim the credit, your coaching application must be submitted within 90 days of your bundle purchase date. You are not required to begin coaching within those 90 days; only the application must be submitted within that window. Holding this credit does not guarantee acceptance into 1:1 coaching.</li>
-            <li>If your application is accepted, the $137 credit is applied toward your first monthly coaching payment.</li>
+            <li>The credit equals the amount you actually paid for the Complete Foundations Bundle, less any amount refunded to you. If the bundle payment is fully refunded, or is reversed through a payment dispute, no credit is available.</li>
+            <li>To claim the credit, your coaching application must be submitted within 30 days of your bundle purchase date. You are not required to begin coaching within those 30 days; only the application must be submitted within that window. Holding this credit does not guarantee acceptance into 1:1 coaching.</li>
+            <li>If you purchased the Complete Foundations Bundle on or before November 10, 2026, you keep the 90-day application window that applied when you purchased it.</li>
+            <li>The credit applies only to the 3-month commitment option. It does not apply to month-to-month coaching.</li>
+            <li>If your application is accepted, the credit is applied once, to the first monthly payment of your 3-month coaching, and never for more than the amount of that payment. Any part of the credit larger than that payment is not carried forward.</li>
+            <li>The credit applies to your first coaching enrollment only. It does not apply to a renewal, a restart after coaching has ended, or a change to an existing coaching price.</li>
+            <li>If Lisa Fit Method offers you a custom coaching price, the credit is not combined with that price automatically. Lisa Fit Method will confirm before you pay whether the credit applies.</li>
             <li>The credit has no cash value and is non-transferable.</li>
             <li>The credit may not be combined with another promotional coaching credit or discount unless Lisa Fit Method expressly permits it.</li>
           </ul>
