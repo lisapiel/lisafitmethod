@@ -26,3 +26,22 @@ export async function verifyAdminToken(accessToken: string | null | undefined): 
     return null
   }
 }
+
+// For server components: the signed-in coach's email from the session cookie, or null.
+export async function adminSessionEmail(): Promise<string | null> {
+  const { cookies } = await import("next/headers")
+  const { fetchAuthSession } = await import("aws-amplify/auth/server")
+  const { runWithAmplifyServerContext } = await import("@/lib/amplify-server")
+  const email = await runWithAmplifyServerContext({
+    nextServerContext: { cookies },
+    operation: async (contextSpec): Promise<string | null> => {
+      try {
+        const session = await fetchAuthSession(contextSpec)
+        return (session.tokens?.idToken?.payload?.email as string | undefined) ?? null
+      } catch {
+        return null
+      }
+    },
+  })
+  return email && isAdminEmail(email) ? email : null
+}

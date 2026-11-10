@@ -69,7 +69,7 @@ function isAlreadySignedIn(err: unknown): boolean {
 
 // Only ever send people to a path on this site.
 function safeRedirect(raw: string | null): string {
-  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account"
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return "/account"
   return raw
 }
 

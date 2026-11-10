@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { adminSessionEmail } from "@/lib/adminAuth"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
 import { getPublishedPhotoUrl, getPublishedVideoUrl } from "@/lib/mediaClient"
@@ -54,6 +56,8 @@ async function getAllTestimonials(): Promise<TestimonialRecord[]> {
 }
 
 export default async function TestimonialsPreviewPage() {
+  // Drafts are coach-only. The admin layout hides this page in the browser, but the server must refuse too.
+  if (!(await adminSessionEmail())) notFound()
   const [testimonials, settings] = await Promise.all([getAllTestimonials(), fetchSiteSettings()])
 
   const allSlots = new Set<string>()
