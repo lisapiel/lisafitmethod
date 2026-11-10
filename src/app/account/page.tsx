@@ -1,3 +1,4 @@
+import { adminMfaSatisfied } from "@/lib/adminBypass"
 import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
@@ -53,7 +54,7 @@ export default async function AccountPage({
     hasCoachingAccess(emailStr),
   ])
 
-  const isAdmin = isAdminEmail(emailStr)
+  const isAdmin = isAdminEmail(emailStr) && (await adminMfaSatisfied(emailStr))
 
   // An approved-but-unpaid applicant needs a way back into enrolment that
   // does not depend on still having the email. Without this the dashboard

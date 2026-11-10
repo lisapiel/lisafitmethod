@@ -1,3 +1,4 @@
+import { adminMfaSatisfied } from "@/lib/adminBypass"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { fetchAuthSession } from "aws-amplify/auth/server"
@@ -34,7 +35,7 @@ export async function assertMasterclassPublicVisible(): Promise<void> {
     },
   })
 
-  if (email && isAdminEmail(email)) return
+  if (email && isAdminEmail(email) && (await adminMfaSatisfied(email))) return
   if (email && (await hasMasterclassAccess(email))) return
 
   redirect("/")

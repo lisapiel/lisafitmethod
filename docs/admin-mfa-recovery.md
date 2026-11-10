@@ -20,9 +20,9 @@ Leave `ADMIN_MFA_REQUIRED` unset until both admin accounts have two-factor set u
 5. Choose **Sign Out**, then sign in again. After your password, the page asks for a code. Enter the current one from the app. You should land in the admin area.
 6. Repeat with the other admin account on the other phone.
 
-## Known limitation
+## Client pages
 
-Even with `ADMIN_MFA_REQUIRED=true`, an admin account that has not set up two-factor can still open the client-side pages that admins are let into for free (course content, the client portal for that account, /my-plan) with just a password. It cannot open the admin area or any client's records. Keep both admin accounts enrolled, and set two-factor up again straight after any reset. See TECHNICAL_DEBT.md for the planned fix.
+Admin accounts get into client pages (courses, trackers, My Coaching, /my-plan) without buying anything. When `ADMIN_MFA_REQUIRED` is `true`, that only applies to an admin account with an authenticator app set up. An admin account without one is treated like any other visitor there until it sets one up.
 
 ## Before turning anything on
 

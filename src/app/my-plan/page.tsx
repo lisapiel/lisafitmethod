@@ -1,5 +1,9 @@
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 import PlanPageClient from "./page.client"
+import { clientSessionEmail } from "@/lib/clientSession"
+import { isAdminEmail } from "@/lib/authTokens"
+import { adminMfaSatisfied } from "@/lib/adminBypass"
 
 export const dynamic = "force-dynamic"
 
@@ -15,6 +19,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function MyPlanPage() {
+export default async function MyPlanPage() {
+  const email = await clientSessionEmail()
+  if (!email || !isAdminEmail(email) || !(await adminMfaSatisfied(email))) redirect("/account")
   return <PlanPageClient />
 }
