@@ -56,57 +56,16 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 }
 
-// Admin-only: uploads a post JSON and updates the index
+// Admin-only: the server writes the post JSON and updates the index.
 export async function saveBlogPost(post: BlogPost): Promise<void> {
-  const { uploadData } = await import("aws-amplify/storage")
-
-  await uploadData({
-    path: `media/blog/${post.slug}.json`,
-    data: JSON.stringify(post),
-    options: { contentType: "application/json" },
-  }).result
-
-  const currentIndex = await getBlogIndex()
-  const meta: BlogPostMeta = {
-    slug: post.slug,
-    title: post.title,
-    date: post.date,
-    excerpt: post.excerpt,
-    readingTime: post.readingTime,
-    ...(post.coverImage ? { coverImage: post.coverImage } : {}),
-  }
-  const existing = currentIndex.findIndex((p) => p.slug === post.slug)
-  const updated = existing >= 0
-    ? currentIndex.map((p, i) => (i === existing ? meta : p))
-    : [meta, ...currentIndex]
-
-  updated.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
-  await uploadData({
-    path: "media/blog/index.json",
-    data: JSON.stringify({ posts: updated }),
-    options: { contentType: "application/json" },
-  }).result
+  const { adminJson } = await import("@/lib/mediaUpload.client")
+  await adminJson("/api/admin/blog/save", { post })
 }
 
-// Admin-only: removes a post and updates the index
+// Admin-only: the server removes the post and updates the index.
 export async function deleteBlogPost(slug: string): Promise<void> {
-  const { remove } = await import("aws-amplify/storage")
-  const { uploadData } = await import("aws-amplify/storage")
-
-  try {
-    await remove({ path: `media/blog/${slug}.json` })
-  } catch {
-    // file may not exist; index update still proceeds
-  }
-
-  const currentIndex = await getBlogIndex()
-  const updated = currentIndex.filter((p) => p.slug !== slug)
-  await uploadData({
-    path: "media/blog/index.json",
-    data: JSON.stringify({ posts: updated }),
-    options: { contentType: "application/json" },
-  }).result
+  const { adminJson } = await import("@/lib/mediaUpload.client")
+  await adminJson("/api/admin/blog/save", { slug }, "DELETE")
 }
 
 // Admin-only: uploads all static posts to S3 (one-time migration)

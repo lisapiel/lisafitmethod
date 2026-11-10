@@ -167,6 +167,7 @@ export default function AdminClientMessagesPage({ params }: { params: Promise<{ 
             listRef={listRef}
             onScroll={onScroll}
             label={`Conversation with ${name}`}
+            mediaViewer="admin"
             empty={
               <div style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, borderRadius: 8, padding: "3rem 1.5rem", textAlign: "center", marginTop: "1rem" }}>
                 <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.2rem", color: muted, margin: 0 }}>No messages yet in this thread</p>

@@ -5,7 +5,7 @@ import CheckInContext from "@/components/coaching/admin/CheckInContext"
 import AssessmentEditor from "@/components/coaching/admin/AssessmentEditor"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
-import { SignedVideo } from "@/components/coaching/NutritionComposer.client"
+import { SignedVideo } from "@/components/coaching/SignedMedia.client"
 import { checkInWeightLine, hungerLabel } from "@/lib/checkInAnswers"
 
 const gold = "var(--ca-accent-mark)"
@@ -466,6 +466,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                             <SignedVideo
                               key={k}
                               s3Key={k}
+                              viewer="admin"
                               style={{ width: "100%", maxHeight: 360, background: "#000", borderRadius: 4, display: "block" }}
                             />
                           ))}

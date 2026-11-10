@@ -161,6 +161,7 @@ export default function MessagesClient() {
         listRef={listRef}
         onScroll={onScroll}
         label="Conversation with Lisa"
+        mediaViewer="client"
         empty={<EmptyThread />}
         style={{ background: white, border: `1px solid ${border}`, borderRadius: "8px 8px 0 0", padding: "0.5rem clamp(10px, 3vw, 1.25rem) 1rem" }}
       />
