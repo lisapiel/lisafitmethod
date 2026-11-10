@@ -19,10 +19,15 @@ export async function GET(req: NextRequest) {
   if (!lookup.ok) {
     return NextResponse.json({ status: "none", amountCents: 0, applyBy: null, windowDays: null }, { status: lookup.status })
   }
-  const assessment = await assessBundleCredit(
-    { stripe: new Stripe(process.env.STRIPE_SECRET_KEY ?? ""), readClient: getCoachingClientRecord },
-    { application: { id: null, email: lookup.email, applicationDate: new Date().toISOString() }, commitmentType: null, priceCents: null },
-  ).catch(() => null)
+  let assessment: Awaited<ReturnType<typeof assessBundleCredit>> | null = null
+  try {
+    assessment = await assessBundleCredit(
+      { stripe: new Stripe(process.env.STRIPE_SECRET_KEY ?? ""), readClient: getCoachingClientRecord },
+      { application: { id: null, email: lookup.email, applicationDate: new Date().toISOString() }, commitmentType: null, priceCents: null },
+    )
+  } catch {
+    assessment = null
+  }
   if (!assessment) return NextResponse.json({ status: "none", amountCents: 0, applyBy: null, windowDays: null })
   return NextResponse.json({
     status: creditFormStatus(assessment.plan),
