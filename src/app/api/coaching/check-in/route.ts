@@ -16,12 +16,18 @@ type NutritionStatus = typeof NUTRITION_STATUSES[number]
 const ADJUSTMENT_AREAS = ["exercises", "volume-intensity", "schedule", "nutrition", "recovery", "other", "none"] as const
 
 async function getSessionEmail(): Promise<string | null> {
+  return (await getSessionIdentity())?.email ?? null
+}
+
+async function getSessionIdentity(): Promise<{ email: string; sub: string } | null> {
   return runWithAmplifyServerContext({
     nextServerContext: { cookies },
-    operation: async (contextSpec): Promise<string | null> => {
+    operation: async (contextSpec): Promise<{ email: string; sub: string } | null> => {
       try {
-        const session = await fetchAuthSession(contextSpec)
-        return (session.tokens?.idToken?.payload?.email as string | undefined) ?? null
+        const payload = (await fetchAuthSession(contextSpec)).tokens?.idToken?.payload
+        const email = payload?.email
+        const sub = payload?.sub
+        return typeof email === "string" && typeof sub === "string" ? { email, sub } : null
       } catch {
         return null
       }
@@ -50,8 +56,9 @@ function toNonNegativeInt(v: unknown): number | undefined {
 }
 
 export async function POST(req: NextRequest) {
-  const email = await getSessionEmail()
-  if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const me = await getSessionIdentity()
+  if (!me) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const email = me.email
 
   // Only active coaching clients submit new check-ins. The client-side layout
   // already redirects former clients away; this is server-side defense.
@@ -98,7 +105,7 @@ export async function POST(req: NextRequest) {
       const rawKeys = Array.isArray(raw.videoKeys)
         ? (raw.videoKeys as unknown[]).filter((k): k is string => typeof k === "string" && k.length > 0 && k.length <= 512)
         : []
-      const validKeys = rawKeys.filter((k) => k.startsWith(FORM_REVIEW_PREFIX) && isOwnClientKey(k, email, "form-review"))
+      const validKeys = rawKeys.filter((k) => k.startsWith(FORM_REVIEW_PREFIX) && isOwnClientKey(k, me.sub, "form-review"))
       if (validKeys.length !== rawKeys.length) {
         return NextResponse.json({ error: "Invalid form-review video key" }, { status: 400 })
       }

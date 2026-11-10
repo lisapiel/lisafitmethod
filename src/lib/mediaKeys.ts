@@ -91,10 +91,14 @@ export const BLOG_INDEX_KEY = "media/blog/index.json"
 
 // ── Client coaching uploads ────────────────────────────────────────────────
 
-// Same slug the check-in page and the nutrition composer have always used, so
-// keys stored before the server took over uploads still match.
-export function emailSlug(email: string): string {
-  return email.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+// Each client's private files live in a folder named after their Cognito
+// user id (the token's "sub"). It never changes and no two logins share one,
+// unlike a folder built from the email address, where "a.b@x.com" and
+// "a-b@x.com" would land in the same place.
+export function uploadOwnerFolder(sub: unknown): string | null {
+  if (typeof sub !== "string") return null
+  const v = sub.trim().toLowerCase()
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(v) ? v : null
 }
 
 export const CLIENT_UPLOAD_KINDS = {
@@ -114,14 +118,14 @@ export type ClientUploadPlan = { key: string; contentType: string; size: number 
 
 export function planClientUpload(
   input: { kind: unknown; ext: unknown; contentType: unknown; size: unknown },
-  email: string,
+  ownerSub: string,
   now: number = Date.now(),
   rand: string = randomSuffix(),
 ): ClientUploadPlan | { error: string; status: number } {
   if (!isClientUploadKind(input.kind)) return { error: "Unknown upload type", status: 400 }
   const rule = CLIENT_UPLOAD_KINDS[input.kind]
-  const slug = emailSlug(email)
-  if (!slug) return { error: "Unauthorized", status: 401 }
+  const folder = uploadOwnerFolder(ownerSub)
+  if (!folder) return { error: "Unauthorized", status: 401 }
   const ext = typeof input.ext === "string" ? input.ext.trim().toLowerCase().replace(/^\./, "") : ""
   if (!/^[a-z0-9]{1,5}$/.test(ext)) return { error: "Invalid file extension", status: 400 }
   if (!isValidContentType(input.contentType) || !input.contentType.toLowerCase().startsWith(rule.typePrefix)) {
@@ -132,7 +136,7 @@ export function planClientUpload(
   if (size > rule.maxBytes) {
     return { error: input.kind === "form-review" ? "Videos need to be under 200 MB." : "Photos need to be under 8 MB.", status: 413 }
   }
-  return { key: `${rule.prefix}${slug}/${now}-${rand}.${ext}`, contentType: input.contentType.toLowerCase(), size }
+  return { key: `${rule.prefix}${folder}/${now}-${rand}.${ext}`, contentType: input.contentType.toLowerCase(), size }
 }
 
 export function randomSuffix(): string {
@@ -141,7 +145,7 @@ export function randomSuffix(): string {
   return Array.from(bytes, (b) => b.toString(36).padStart(2, "0")).join("") + Date.now().toString(36)
 }
 
-// A key under one of the client upload prefixes, one slug folder deep.
+// A key under one of the client upload prefixes, one owner folder deep.
 export function clientKeyOwnerSlug(key: unknown): string | null {
   if (!isSafeKey(key)) return null
   const prefix = CLIENT_UPLOAD_PREFIXES.find((p) => key.startsWith(p))
@@ -154,11 +158,11 @@ export function isClientUploadKey(key: unknown): key is string {
   return clientKeyOwnerSlug(key) != null
 }
 
-// True only when the key is in the caller's own slug folder.
-export function isOwnClientKey(key: unknown, email: string, kind?: ClientUploadKind): key is string {
+// True only when the key is in the caller's own folder.
+export function isOwnClientKey(key: unknown, ownerSub: string, kind?: ClientUploadKind): key is string {
   const owner = clientKeyOwnerSlug(key)
-  const slug = emailSlug(email)
-  if (!owner || !slug || owner !== slug) return false
+  const folder = uploadOwnerFolder(ownerSub)
+  if (!owner || !folder || owner !== folder) return false
   return kind ? (key as string).startsWith(CLIENT_UPLOAD_KINDS[kind].prefix) : true
 }
 
