@@ -12,6 +12,7 @@ import {
   type CommitmentType,
 } from "@/lib/authTokens"
 import { generateInvitationToken, storeInvitationToken } from "@/lib/invitationTokens"
+import { saveBundleCreditChoice } from "@/lib/bundleCreditStore"
 
 export const dynamic = "force-dynamic"
 
@@ -25,16 +26,16 @@ function makeCognito() {
   })
 }
 
-async function verifyAdmin(req: NextRequest): Promise<boolean> {
+async function verifyAdmin(req: NextRequest): Promise<string | null> {
   const auth = req.headers.get("authorization")
-  if (!auth?.startsWith("Bearer ")) return false
+  if (!auth?.startsWith("Bearer ")) return null
   try {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail != null && isAdminEmail(callerEmail)
+    return callerEmail != null && isAdminEmail(callerEmail) ? callerEmail : null
   } catch {
-    return false
+    return null
   }
 }
 
@@ -142,12 +143,18 @@ function declineEmail(name: string): string {
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await verifyAdmin(req))) {
+  const adminEmail = await verifyAdmin(req)
+  if (!adminEmail) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const { id } = await params
-  const body = await req.json() as { action: "approve" | "decline"; priceInCents?: number; commitmentType?: CommitmentType }
+  const body = await req.json() as {
+    action: "approve" | "decline"
+    priceInCents?: number
+    commitmentType?: CommitmentType
+    applyBundleCredit?: boolean
+  }
 
   const application = await getCoachingApplication(id)
   if (!application) {
@@ -179,6 +186,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const commitmentType = body.commitmentType
     if (!commitmentType || !["THREE_MONTH_MINIMUM", "MONTH_TO_MONTH"].includes(commitmentType)) {
       return NextResponse.json({ error: "Commitment type is required" }, { status: 400 })
+    }
+
+    // Lisa's bundle-credit tick-box, tied to the price she approved. Checkout
+    // re-runs the rules from it, so a credit she turned off is never added and
+    // one she turned on is still only applied if the client qualifies. Saved
+    // first, so a failure here leaves the application untouched.
+    if (typeof body.applyBundleCredit === "boolean") {
+      await saveBundleCreditChoice(id, {
+        apply: body.applyBundleCredit,
+        priceCents: priceInCents,
+        decidedAt: new Date().toISOString(),
+        decidedBy: adminEmail,
+      })
     }
 
     // No account is created here any more. Approval used to silently mint a

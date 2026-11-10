@@ -3,8 +3,9 @@ import {
   CognitoIdentityProviderClient,
   GetUserCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
-import { listCoachingApplications, getBundleCredit, isAdminEmail } from "@/lib/authTokens"
+import { listCoachingApplications, getCoachingClientRecord, isAdminEmail } from "@/lib/authTokens"
 import { getCustomerHistory } from "@/lib/customerHistory"
+import { assessBundleCredit, creditApplicationOf } from "@/lib/bundleCreditAssess"
 
 export const dynamic = "force-dynamic"
 
@@ -33,15 +34,24 @@ export async function GET(req: NextRequest) {
   }
   const applications = await listCoachingApplications()
   // Enrich each application with:
-  //   - bundleCredit — legacy pill data (kept for back-compat with any consumer
-  //     that already reads it)
+  //   - bundleCredit — the credit facts from our own records (no Stripe call
+  //     per row). The page runs the shared rules on them as Lisa picks a
+  //     price; the approval screen then checks Stripe before anything is sent.
   //   - history — full customer purchase/history summary so the coach can see
   //     at a glance what the applicant has already purchased before approving.
   const enriched = await Promise.all(applications.map(async (app) => {
-    const [bundleCredit, history] = await Promise.all([
-      getBundleCredit(app.email).catch(() => null),
+    const [credit, history] = await Promise.all([
+      assessBundleCredit(
+        { stripe: null, readClient: getCoachingClientRecord },
+        {
+          application: creditApplicationOf(app),
+          commitmentType: app.approvedCommitmentType ?? null,
+          priceCents: app.approvedPriceInCents ?? null,
+        },
+      ).catch(() => null),
       getCustomerHistory(app.email).catch(() => null),
     ])
+    const bundleCredit = credit ? { facts: credit.facts, storedChoice: credit.storedChoice } : null
     return { ...app, bundleCredit, history }
   }))
   return NextResponse.json({ applications: enriched })

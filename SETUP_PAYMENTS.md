@@ -106,6 +106,7 @@ The welcome email after purchase is sent via [Resend](https://resend.com). Witho
 1. In the Stripe dashboard, go to **Developers → Webhooks → Add endpoint**.
 2. Set the endpoint URL to: `https://lisafitmethod.com/api/stripe/webhook`
 3. Under **Events to send**, select: `payment_intent.succeeded`
+   The bundle coaching credit also relies on `invoice.paid` (marks the credit used once a discounted first invoice is paid), `charge.refunded`, `charge.dispute.created` and `charge.dispute.closed` (keep the credit equal to what was kept), and `checkout.session.expired` (gives a held credit back straight away; without it the hold still lapses on its own after 25 hours).
 4. Click **Add endpoint**.
 5. Click the webhook you just created, then click **Reveal** next to **Signing secret**.
 6. Copy the signing secret (starts with `whsec_...`).

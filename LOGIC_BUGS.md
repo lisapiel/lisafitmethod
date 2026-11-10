@@ -5,6 +5,33 @@ that stops each from recurring.
 
 ---
 
+## Bundle credit was a fixed $137, marked used without being applied, and could be faked
+**Date:** 2026-11-10
+**Area:** `src/lib/bundleCredit*.ts`, `src/lib/coachingCheckout.ts`, `src/app/api/stripe/webhook/route.ts`, `src/lib/customerHistory.ts`
+
+The coaching credit was always $137, even when a promo code or a refund meant
+the buyer paid less. It was marked used on every coaching activation, so a
+month-to-month client, a custom-price client or a failed coupon still burned
+it, and the unconditional update created a fake `bundle_purchase_<email>`
+record for coaching clients who never bought the bundle, which the customer
+history then showed as a purchase. Two applications could each carry a coupon,
+and the approval screen subtracted $137 whatever the commitment.
+
+**Fix:** the rules live in one pure module (`bundleCredit.ts`) used by the
+form, admin screens, checkout and webhook. The credit is the net amount kept
+(paid less refunds, lost dispute = refunded), only on the 3-month option, only
+for a first coaching payment, capped at that payment. Checkout holds it for one
+application with a conditional write before creating the coupon; only a paid
+invoice whose bundle coupon actually took money off marks it used. Records
+without a PaymentIntent id are not purchases, and no write creates one except
+the bundle payment webhook. Custom prices need Lisa's explicit tick.
+
+**Rule:** a credit or entitlement is marked consumed only by the event that
+proves it was consumed (the paid invoice), never by a step that merely
+expects it to be. Writes to an existing record must require it to exist.
+
+---
+
 ## Setup saved an activity level that isn't one of the options
 **Date:** 2026-11-09
 **Area:** `src/app/my-coaching/setup/page.client.tsx`, `src/app/api/coaching/setup/route.ts`

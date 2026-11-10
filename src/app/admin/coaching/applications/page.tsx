@@ -5,6 +5,8 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { CoachingApplication, CommitmentType } from "@/lib/authTokens"
 import { strengthConfidenceLabel } from "@/lib/intake"
+import { formatCents } from "@/lib/bundleCredit"
+import { BundleCreditCallout, listCreditPlan, priceCentsFrom, type ListCreditFacts } from "@/components/coaching/admin/BundleCreditCallout"
 
 // Standard monthly prices in whole dollars per commitment. Auto-fills the
 // price input when the coach picks a commitment. The coach can still type
@@ -35,10 +37,10 @@ type CustomerHistoryPayload = {
   tracker:     { purchased: boolean; grantedAt: string | null }
   masterclass: { purchased: boolean; grantedAt: string | null }
   coaching:    { hasEverEnrolled: boolean; status: string | null; approvedPriceInCents: number | null; commitmentType: string | null; subscriptionStartDate: string | null; cancellationDate: string | null }
-  bundle:      { purchased: boolean; purchasedAt: string | null; expiresAt: string | null; usedAt: string | null; usedForSubscriptionId: string | null; amountCents: number; available: boolean }
+  bundle:      { purchased: boolean; purchasedAt: string | null; expiresAt: string | null; usedAt: string | null; usedForSubscriptionId: string | null; amountCents: number | null; available: boolean }
 }
 type EnrichedApplication = CoachingApplication & {
-  bundleCredit?: { available: boolean; amountCents: number; expiresAt: string | null; purchasedAt: string | null } | null
+  bundleCredit?: ListCreditFacts
   history?: CustomerHistoryPayload | null
 }
 
@@ -316,11 +318,15 @@ export default function AdminApplicationsPage() {
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 600, color: cream }}>{app.name}</span>
                         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: s.color, border: `1px solid ${s.color}44`, padding: "2px 8px", borderRadius: 3 }}>{s.label}</span>
-                        {app.bundleCredit?.available && (
-                          <span style={{ background: gold, color: "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", padding: "3px 8px", borderRadius: 3, textTransform: "uppercase" }}>
-                            Bundle credit ${(app.bundleCredit.amountCents / 100).toFixed(0)}
-                          </span>
-                        )}
+                        {(() => {
+                          const base = listCreditPlan(app.bundleCredit, null, null)
+                          if (!base?.eligible || app.bundleCredit?.facts.usage.usedAt) return null
+                          return (
+                            <span style={{ background: gold, color: "#0a0a0a", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.1em", padding: "3px 8px", borderRadius: 3, textTransform: "uppercase" }}>
+                              Bundle credit {formatCents(base.eligibleCreditCents)}
+                            </span>
+                          )
+                        })()}
                       </div>
                       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                         <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: muted }}>{app.email}</span>
@@ -342,11 +348,15 @@ export default function AdminApplicationsPage() {
                             style={{ flex: 1, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none" }}
                           />
                         </div>
-                        {app.bundleCredit?.available && prices[app.id] && parseFloat(prices[app.id]) > 0 && (
-                          <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.06em", alignSelf: "flex-start" }}>
-                            First month: ${Math.max(0, parseFloat(prices[app.id]) - app.bundleCredit.amountCents / 100).toFixed(2)}
-                          </span>
-                        )}
+                        {(() => {
+                          const plan = listCreditPlan(app.bundleCredit, commitments[app.id] || null, priceCentsFrom(prices[app.id]))
+                          if (!plan?.apply || plan.firstMonthCents === null) return null
+                          return (
+                            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: gold, letterSpacing: "0.06em", alignSelf: "flex-start" }}>
+                              First month: {formatCents(plan.firstMonthCents)}
+                            </span>
+                          )
+                        })()}
                         {/* Commitment selector */}
                         <select
                           value={commitments[app.id] ?? ""}
@@ -397,69 +407,16 @@ export default function AdminApplicationsPage() {
                     )}
                   </div>
 
-                  {/* Bundle-credit status callout — shown for EVERY application
-                      (pending, approved, paid, declined, historical) so the
-                      coach can see the applicant's bundle/credit posture at a
-                      glance whenever they reopen the record.
-                       - Pending: actionable wording tied to the currently-
-                         selected commitment (will apply / won't apply / pick
-                         3-month to apply).
-                       - Non-pending: factual wording only — never implies a
-                         credit will still be applied to an already-completed
-                         application.
-                      Bundle credit itself is 3-month-only and server-enforced. */}
-                  {(() => {
-                    const b = app.history?.bundle
-                    const selected = commitments[app.id]
-                    const isPending = app.status === "PENDING"
-                    if (!b || !b.purchased) {
-                      return (
-                        <div style={{ background: "#111", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.04em" }}>
-                          No active bundle coaching credit
-                        </div>
-                      )
-                    }
-                    const usedText = b.usedAt
-                      ? "Bundle coaching credit already used"
-                      : (b.available ? null : "Bundle purchased previously — 90-day coaching credit expired")
-                    if (usedText) {
-                      return (
-                        <div style={{ background: "#1a1512", border: `1px solid ${border}`, padding: "10px 14px", marginBottom: 10, fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.7rem", color: muted, letterSpacing: "0.04em" }}>
-                          {usedText}
-                          {b.purchasedAt && <span style={{ color: "#555" }}> · Purchased {formatDate(b.purchasedAt)}</span>}
-                          {b.usedAt && <span style={{ color: "#555" }}> · Used {formatDate(b.usedAt)}</span>}
-                        </div>
-                      )
-                    }
-                    // Purchased + available (credit not yet consumed, not yet expired).
-                    const willApply = isPending && selected === "THREE_MONTH_MINIMUM"
-                    const actionalLine = isPending
-                      ? (selected === "THREE_MONTH_MINIMUM"
-                          ? "Will apply on approval → first invoice reduced by $" + (b.amountCents / 100).toFixed(0)
-                          : selected === "MONTH_TO_MONTH"
-                            ? "Not applied — month-to-month coaching isn't eligible"
-                            : "Select 3-month commitment to apply this credit")
-                      : "Applies to 3-month coaching only · not yet used"
-                    return (
-                      <div style={{
-                        background: willApply ? "rgba(92,158,106,0.10)" : "rgba(201,169,110,0.10)",
-                        border: `1px solid ${willApply ? "#5c9e6a" : gold}`,
-                        borderLeft: `4px solid ${willApply ? "#5c9e6a" : gold}`,
-                        padding: "10px 14px", marginBottom: 10,
-                        fontFamily: "var(--font-montserrat), sans-serif",
-                      }}>
-                        <p style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: willApply ? "#7bc48c" : gold, margin: "0 0 4px" }}>
-                          🟢 ${(b.amountCents / 100).toFixed(0)} Bundle Credit {isPending ? "Available" : "On File"}
-                        </p>
-                        <p style={{ fontSize: "0.68rem", color: cream, margin: "0 0 2px", lineHeight: 1.55 }}>
-                          Purchased {b.purchasedAt ? formatDate(b.purchasedAt) : "—"} · Eligible through {b.expiresAt ? formatDate(b.expiresAt) : "—"} · Applies to 3-month coaching only
-                        </p>
-                        <p style={{ fontSize: "0.65rem", color: willApply ? "#7bc48c" : "#c78e5a", margin: 0, fontWeight: 600, letterSpacing: "0.04em" }}>
-                          {actionalLine}
-                        </p>
-                      </div>
-                    )
-                  })()}
+                  {/* Bundle-credit status, shown for every application so the
+                      coach sees the applicant's credit whenever the record is
+                      reopened. Same rules as checkout; the approval screen
+                      re-checks against Stripe before anything is sent. */}
+                  <BundleCreditCallout
+                    credit={app.bundleCredit}
+                    isPending={app.status === "PENDING"}
+                    commitment={commitments[app.id] || null}
+                    priceCents={priceCentsFrom(prices[app.id])}
+                  />
 
                   {/* Customer history — everything this email has ever bought.
                       Resolved from the same DDB access records that gate
@@ -867,12 +824,16 @@ export default function AdminApplicationsPage() {
                     {commitment === "THREE_MONTH_MINIMUM" ? "3-month minimum" : "Month-to-month"}
                   </span>
                 </div>
-                {app.bundleCredit?.available && price > 0 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>First month (after credit)</span>
-                    <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: gold }}>${Math.max(0, price - app.bundleCredit.amountCents / 100).toFixed(2)}</span>
-                  </div>
-                )}
+                {(() => {
+                  const plan = listCreditPlan(app.bundleCredit, commitment || null, priceCentsFrom(priceStr))
+                  if (!plan?.apply || plan.firstMonthCents === null) return null
+                  return (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>First month (after credit)</span>
+                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: gold }}>{formatCents(plan.firstMonthCents)}</span>
+                    </div>
+                  )
+                })()}
               </div>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#666", lineHeight: 1.6, margin: "0 0 20px" }}>
                 These terms will be shown on the client&apos;s acceptance screen and stored as their contractual agreement. Double-check before confirming.

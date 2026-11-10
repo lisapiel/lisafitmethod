@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb"
-import { getBundlePurchase, getBundleCredit, type CoachingClientRecord, BUNDLE_CREDIT_CENTS } from "./authTokens"
+import type { CoachingClientRecord } from "./authTokens"
+import { assessBundleCredit } from "./bundleCreditAssess"
 
 // Read-only customer purchase/history summary for a single email address.
 // Resolves per-product access records, coaching client record, and bundle
@@ -56,14 +57,17 @@ export interface ProductPurchase {
   purchased: boolean
   grantedAt: string | null
 }
+// Only a recorded bundle payment counts as a purchase. amountCents is the net
+// amount kept (paid less refunds), or null for an older record whose amount
+// still needs checking with Stripe.
 export interface BundleCreditSummary {
   purchased: boolean
   purchasedAt: string | null
   expiresAt: string | null
   usedAt: string | null
   usedForSubscriptionId: string | null
-  amountCents: number
-  available: boolean         // credit is still redeemable (purchased, not used, not expired)
+  amountCents: number | null
+  available: boolean
 }
 export interface CoachingSummary {
   hasEverEnrolled: boolean
@@ -87,14 +91,16 @@ const EMPTY_PRODUCT: ProductPurchase = { purchased: false, grantedAt: null }
 
 export async function getCustomerHistory(email: string): Promise<CustomerHistory> {
   const lower = email.toLowerCase()
-  const [training, nutrition, tracker, masterclass, coachingClient, bundlePurchase, bundleCredit] = await Promise.all([
+  const [training, nutrition, tracker, masterclass, coachingClient, credit] = await Promise.all([
     readProductAccess(lower, "training_access_"),
     readProductAccess(lower, "nutrition_access_"),
     readProductAccess(lower, "tracker_access_"),
     readProductAccess(lower, "masterclass_access_"),
     readCoachingClient(lower),
-    getBundlePurchase(lower).catch(() => null),
-    getBundleCredit(lower).catch(() => null),
+    assessBundleCredit(
+      { stripe: null, readClient: readCoachingClient },
+      { application: { id: null, email: lower, applicationDate: new Date().toISOString() }, commitmentType: null, priceCents: null },
+    ).catch(() => null),
   ])
 
   const coaching: CoachingSummary = coachingClient
@@ -117,14 +123,15 @@ export async function getCustomerHistory(email: string): Promise<CustomerHistory
         cancellationDate: null,
       }
 
+  const record = credit?.record ?? null
   const bundle: BundleCreditSummary = {
-    purchased: !!bundlePurchase,
-    purchasedAt: bundlePurchase?.purchasedAt ?? null,
-    expiresAt: bundleCredit?.expiresAt ?? null,
-    usedAt: bundlePurchase?.bundleCreditUsedAt ?? null,
-    usedForSubscriptionId: bundlePurchase?.usedForCoachingSubscriptionId ?? null,
-    amountCents: BUNDLE_CREDIT_CENTS,
-    available: !!bundleCredit?.available,
+    purchased: !!record,
+    purchasedAt: record?.purchasedAt ?? null,
+    expiresAt: credit?.plan.applyBy ?? null,
+    usedAt: record?.usage.usedAt ?? null,
+    usedForSubscriptionId: record?.usedForSubscriptionId ?? null,
+    amountCents: credit?.plan.netPaidCents ?? null,
+    available: !!credit?.plan.eligible,
   }
 
   return {

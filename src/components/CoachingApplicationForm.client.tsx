@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { STRENGTH_CONFIDENCE_OPTIONS, STRENGTH_CONFIDENCE_QUESTION } from "@/lib/intake"
+import { formatCents } from "@/lib/bundleCredit"
 
 // The 1:1 coaching application.
 //
@@ -137,15 +138,15 @@ export function CoachingApplicationForm() {
   // server only answers for the signed-in person's own email, so the lookup is
   // skipped for anyone signed out or typing a different address. Checkout still
   // applies the credit from the application email either way.
-  const [bundleCredit, setBundleCredit] = useState<{ available: boolean; amountCents: number; expiresAt: string | null } | null>(null)
+  const [bundleCredit, setBundleCredit] = useState<{ status: "available" | "check"; amountCents: number } | null>(null)
   useEffect(() => {
     const email = form.email.trim().toLowerCase()
     if (!sessionEmail || email !== sessionEmail) { setBundleCredit(null); return }
     const timeout = setTimeout(() => {
       fetch(`/api/coaching/bundle-credit?email=${encodeURIComponent(email)}`)
         .then((r) => r.json())
-        .then((d: { available?: boolean; amountCents?: number; expiresAt?: string | null }) => {
-          if (d.available) setBundleCredit({ available: true, amountCents: d.amountCents ?? 0, expiresAt: d.expiresAt ?? null })
+        .then((d: { status?: string; amountCents?: number }) => {
+          if (d.status === "available" || d.status === "check") setBundleCredit({ status: d.status, amountCents: d.amountCents ?? 0 })
           else setBundleCredit(null)
         })
         .catch(() => setBundleCredit(null))
@@ -407,7 +408,7 @@ export function CoachingApplicationForm() {
                     <p style={{ fontSize: "var(--text-small)", color: "#c0392b", lineHeight: 1.5 }}>Something went wrong. Please try again or reach out on Instagram.</p>
                   )}
 
-                  {bundleCredit?.available && (
+                  {bundleCredit && (
                     <div
                       style={{
                         background: `${ACCENT}18`,
@@ -418,11 +419,17 @@ export function CoachingApplicationForm() {
                       }}
                     >
                       <p style={{ fontSize: "var(--text-eyebrow)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: ACCENT, margin: "0 0 4px" }}>
-                        Bundle credit found ✓
+                        {bundleCredit.status === "available" ? "Bundle credit found ✓" : "Bundle purchase found"}
                       </p>
-                      <p style={{ fontSize: "var(--text-small)", color: TEXT, margin: 0, lineHeight: 1.5 }}>
-                        Choose the <strong>3-month coaching option</strong> below and your <strong>${(bundleCredit.amountCents / 100).toFixed(0)}</strong> bundle credit will be applied to your first coaching month. Month-to-month coaching isn&apos;t eligible for the bundle credit.
-                      </p>
+                      {bundleCredit.status === "available" ? (
+                        <p style={{ fontSize: "var(--text-small)", color: TEXT, margin: 0, lineHeight: 1.5 }}>
+                          Choose the <strong>3-month coaching option</strong> below and the <strong>{formatCents(bundleCredit.amountCents)}</strong> you paid for the bundle can be credited toward your first coaching month. Month-to-month coaching isn&apos;t eligible for the bundle credit.
+                        </p>
+                      ) : (
+                        <p style={{ fontSize: "var(--text-small)", color: TEXT, margin: 0, lineHeight: 1.5 }}>
+                          I&apos;ll check your bundle credit myself when I review your application. It only applies to the <strong>3-month coaching option</strong>.
+                        </p>
+                      )}
                     </div>
                   )}
 

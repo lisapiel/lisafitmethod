@@ -18,9 +18,11 @@ import {
   grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
   grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication, createCoachingClientRecord,
   getCoachingClientRecord, updateCoachingClientRecord,
-  recordBundlePurchase, markBundleCreditUsed,
   stampCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION,
 } from "@/lib/authTokens"
+import {
+  recordBundlePaymentFromIntent, syncBundleCreditFromCharge, settleBundleCreditFromInvoice, releaseBundleCreditForSession,
+} from "@/lib/bundleCreditWebhook"
 
 export const dynamic = "force-dynamic"
 
@@ -730,10 +732,6 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
         meta: { email, existing: preexisting.stripeSubscriptionId, duplicate: subscriptionId },
       }).catch(() => {})
     }
-    // Still refresh bundle-credit-used marker in case the first pass missed it
-    if (subscriptionId) {
-      await markBundleCreditUsed(email, subscriptionId).catch(() => { /* no bundle purchase — nothing to mark */ })
-    }
     return
   }
 
@@ -741,11 +739,6 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   // Stamp the current terms versions on the access record so the portal
   // layout check passes without requiring reacceptance for new clients.
   await stampCoachingAccessVersions(email, TERMS_VERSION, LIABILITY_WAIVER_VERSION).catch(() => {})
-  // If a bundle credit was applied, mark it used so it can't be reused
-  if (subscriptionId) {
-    await markBundleCreditUsed(email, subscriptionId).catch(() => { /* no bundle purchase record — nothing to mark */ })
-  }
-
   // Resolve Stripe subscription start date for commitment window tracking
   let subscriptionStartDate: string | undefined
   if (subscriptionId) {
@@ -1017,7 +1010,7 @@ export async function POST(request: NextRequest) {
         } else if (product === "bundle") {
           await provisionUser(email)
           await provisionNutritionUser(email)
-          await recordBundlePurchase(email, intent.id).catch((err) => console.error("recordBundlePurchase failed:", err))
+          await recordBundlePaymentFromIntent(intent).catch((err) => console.error("recordBundlePayment failed:", err))
         } else {
           await provisionUser(email)
           if (includesTracker) {
@@ -1166,6 +1159,43 @@ export async function POST(request: NextRequest) {
     // coaching subscriptions handled in the coaching block below
   }
 
+  // ── Bundle credit: used by a paid first invoice, or given back ──────────
+  // The credit becomes used only when an invoice carrying its coupon is paid.
+  // An expired checkout hands the hold back straight away; otherwise the hold
+  // lapses on its own.
+  if (event.type === "invoice.paid") {
+    const paid = event.data.object as { id?: string; discounts?: unknown[] }
+    const invoiceId = paid.discounts && paid.discounts.length > 0 ? paid.id ?? "" : ""
+    try {
+      const settled = invoiceId ? await settleBundleCreditFromInvoice(makeStripe(), invoiceId) : { outcome: "none" as const }
+      if (settled.outcome === "conflict" || settled.outcome === "no-record") {
+        const amount = `$${(settled.amountCents / 100).toFixed(2)}`
+        notifyAdmin({
+          kind: "webhook-failure",
+          subject: `Bundle credit needs a look: ${settled.email}`,
+          headline: "A bundle credit came off an invoice it may not belong to",
+          body: settled.outcome === "conflict"
+            ? `Invoice ${invoiceId} took ${amount} off with the bundle credit, but the credit was already used on invoice ${settled.usedForInvoiceId ?? "(unknown)"}.`
+            : `Invoice ${invoiceId} took ${amount} off with the bundle credit, but there is no bundle purchase on file for ${settled.email}.`,
+          ctaLabel: "Open in Stripe",
+          ctaHref: `https://dashboard.stripe.com/invoices/${invoiceId}`,
+          meta: { email: settled.email, invoiceId },
+        }).catch(() => {})
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error)
+      console.error("bundle credit settlement failed:", detail)
+      return NextResponse.json({ error: "Bundle credit settlement failed", detail }, { status: 500 })
+    }
+  }
+
+  if (event.type === "checkout.session.expired") {
+    await releaseBundleCreditForSession(makeStripe(), event.data.object).catch((err) =>
+      console.error("bundle credit release failed:", err)
+    )
+    return NextResponse.json({ received: true })
+  }
+
   // ── Refunds and disputes ────────────────────────────────────────────────
   //
   // Course access is for life, so it is only ever taken back when the money
@@ -1180,6 +1210,9 @@ export async function POST(request: NextRequest) {
       const dispute = event.data.object as Stripe.Dispute
       const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
       const charge = chargeId ? await stripe.charges.retrieve(chargeId).catch(() => null) : null
+      await syncBundleCreditFromCharge(stripe, charge, { dispute: "open" }).catch((err) =>
+        console.error("bundle credit dispute update failed:", err)
+      )
       notifyAdmin({
         kind: "dispute-opened",
         subject: `Payment disputed — $${(dispute.amount / 100).toFixed(2)}`,
@@ -1211,6 +1244,11 @@ export async function POST(request: NextRequest) {
       const dispute = event.data.object as Stripe.Dispute
       if (dispute.status !== "lost") {
         // Won or withdrawn — the money stays with us and so does their access.
+        const closedChargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
+        const closedCharge = closedChargeId ? await stripe.charges.retrieve(closedChargeId).catch(() => null) : null
+        await syncBundleCreditFromCharge(stripe, closedCharge, { dispute: "closed" }).catch((err) =>
+          console.error("bundle credit dispute update failed:", err)
+        )
         return NextResponse.json({ received: true })
       }
       lostDispute = true
@@ -1225,6 +1263,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (!charge) return NextResponse.json({ received: true })
+    // Keeps the bundle credit equal to what was actually kept. Runs before the
+    // idempotency check, so a retry after a failure here redoes everything.
+    try {
+      await syncBundleCreditFromCharge(stripe, charge, lostDispute ? { dispute: "lost" } : {})
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error)
+      console.error("bundle credit refund update failed:", detail)
+      return NextResponse.json({ error: "Bundle credit refund update failed", detail }, { status: 500 })
+    }
     if (await alreadyHandled(idempotencyKey)) return NextResponse.json({ received: true, idempotent: true })
 
     try {

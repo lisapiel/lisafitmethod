@@ -4,10 +4,10 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb"
 import {
   getCoachingApplication,
   getCoachingClientRecord,
-  getBundleCredit,
   updateCoachingApplication,
   type CoachingApplication,
 } from "@/lib/authTokens"
+import { creditApplicationOf, reserveCreditForCheckout } from "@/lib/bundleCreditAssess"
 
 function makeStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
@@ -244,29 +244,17 @@ export async function prepareCoachingCheckout(input: {
     throw new Error("Application is missing its approved price or commitment terms")
   }
 
-  // The bundle coupon is created once and then carried on the application, so
-  // retrying checkout cannot mint a second one-time discount.
-  let bundleCouponId: string | null = application.bundleCouponId ?? null
-  if (!bundleCouponId && commitmentType === "THREE_MONTH_MINIMUM") {
-    const credit = await getBundleCredit(application.email).catch(() => null)
-    if (credit?.available && credit.amountCents > 0) {
-      try {
-        const coupon = await stripe.coupons.create({
-          amount_off: Math.min(credit.amountCents, priceInCents),
-          currency: "usd",
-          duration: "once",
-          max_redemptions: 1,
-          name: "Bundle credit",
-          metadata: {
-            applicantEmail: application.email,
-            applicationId: application.id,
-            coachingCommitmentType: commitmentType,
-          },
-        })
-        bundleCouponId = coupon.id
-      } catch (err) {
-        console.error("Stripe coupon create failed:", err)
-      }
+  // The bundle credit is held for this one application before any coupon
+  // exists, so a retry, a second tab or a second application cannot carry
+  // another. Billing-change applications for existing clients never get it.
+  let bundleCouponId: string | null = null
+  if (commitmentType === "THREE_MONTH_MINIMUM") {
+    const credit = await reserveCreditForCheckout(
+      { stripe, readClient: getCoachingClientRecord },
+      { application: creditApplicationOf(application), commitmentType, priceCents: priceInCents },
+    )
+    if (credit) {
+      bundleCouponId = credit.couponId
     }
   }
 
