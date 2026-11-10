@@ -28,6 +28,7 @@ export default function AdminHeader() {
     { href: "/admin/promo-codes", label: "Promo Codes" },
     { href: "/admin/leads", label: "Leads" },
     { href: "/admin/masterclass", label: "Masterclass" },
+    { href: "/admin/security", label: "Security" },
   ]
 
   return (

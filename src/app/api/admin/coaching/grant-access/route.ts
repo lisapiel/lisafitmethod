@@ -10,6 +10,7 @@ import Stripe from "stripe"
 import { Resend } from "resend"
 import { randomBytes } from "crypto"
 import { grantCoachingAccess, generateAuthToken, storeAuthToken, upsertCoachingClientRecord, isAdminEmail } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 
 export const dynamic = "force-dynamic"
 
@@ -189,7 +190,7 @@ export async function POST(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (!isAdminEmail(callerEmail ?? "")) {
+    if (!isAdminEmail(callerEmail ?? "") || !adminMfaOk(result)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   } catch {

@@ -11,6 +11,7 @@ import {
   createCoachingClientRecord,
   type CommitmentType,
 } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 import { generateInvitationToken, storeInvitationToken } from "@/lib/invitationTokens"
 import { saveBundleCreditChoice } from "@/lib/bundleCreditStore"
 
@@ -33,7 +34,7 @@ async function verifyAdmin(req: NextRequest): Promise<string | null> {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail != null && isAdminEmail(callerEmail) ? callerEmail : null
+    return callerEmail != null && isAdminEmail(callerEmail) && adminMfaOk(result) ? callerEmail : null
   } catch {
     return null
   }

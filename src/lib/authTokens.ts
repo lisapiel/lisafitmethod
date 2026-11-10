@@ -1,3 +1,4 @@
+import { adminMfaSatisfied } from "./adminBypass"
 import { coachThreadId } from "@/lib/coachThreadKey"
 import { randomBytes } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
@@ -94,7 +95,7 @@ export async function grantTrackerAccess(email: string, grantType: GrantType = "
 }
 
 export async function hasTrackerAccess(email: string): Promise<boolean> {
-  if (isAdminEmail(email)) return true
+  if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -122,7 +123,7 @@ export async function grantTrainingAccess(email: string, grantType: GrantType = 
 }
 
 export async function hasTrainingAccess(email: string): Promise<boolean> {
-  if (isAdminEmail(email)) return true
+  if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -148,7 +149,7 @@ export async function grantNutritionAccess(email: string, grantType: GrantType =
 }
 
 export async function hasNutritionAccess(email: string): Promise<boolean> {
-  if (isAdminEmail(email)) return true
+  if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -217,7 +218,7 @@ export async function revokeMasterclassAccess(email: string): Promise<void> {
 }
 
 export async function hasMasterclassAccess(email: string): Promise<boolean> {
-  if (isAdminEmail(email)) return true
+  if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(
@@ -249,7 +250,7 @@ export async function grantCoachingAccess(email: string, plan?: string, startDat
 }
 
 export async function hasCoachingAccess(email: string): Promise<boolean> {
-  if (isAdminEmail(email)) return true
+  if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
     const db = makeDb()
     const result = await db.send(

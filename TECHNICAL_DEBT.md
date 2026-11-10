@@ -4,6 +4,19 @@ Active items only. Delete an entry once it is resolved.
 
 ---
 
+## Admin two-factor: gaps left on purpose
+**Added:** 2026-11-09
+**Area:** `src/lib/adminAuth.ts`, `src/app/admin/security`, admin email lists
+
+- No QR code on the setup screen. There is no QR library and adding one is a dependency change, so it shows the key in groups of four plus an `otpauth://` link.
+- The admin email list is still copied in `src/app/admin/layout.tsx`, `src/middleware.ts` and the messages page instead of importing `ADMIN_EMAILS`.
+
+**Impact:** low.
+
+**Plan:** add a QR code if Lisa approves a small dependency.
+
+---
+
 ## Direction D still lives under a "preview" path with a `pv-` class prefix
 **Added:** 2026-10-21
 **Area:** `src/components/preview/d/**`, the `pv-d-*` CSS classes

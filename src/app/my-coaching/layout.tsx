@@ -1,3 +1,4 @@
+import { adminMfaSatisfied } from "@/lib/adminBypass"
 import type { Viewport } from "next"
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
@@ -39,7 +40,7 @@ export default async function MyCoachingLayout({ children }: { children: React.R
     redirect("/account")
   }
 
-  const isAdmin = isAdminEmail(email as string)
+  const isAdmin = isAdminEmail(email as string) && (await adminMfaSatisfied(email as string))
   let needsReaccept = false
   if (!isAdmin) {
     const versions = await getCoachingAccessVersions(email as string)

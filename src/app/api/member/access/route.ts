@@ -1,3 +1,4 @@
+import { adminMfaSatisfied } from "@/lib/adminBypass"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
@@ -130,6 +131,6 @@ export async function GET() {
         tracker: productOffer(TRACKER_PRICE_CENTS, TRACKER_PRICE_DISPLAY, COACHING_CLIENT_TRACKER_CENTS, COACHING_CLIENT_TRACKER_DISPLAY),
       },
     },
-    isAdmin: isAdminEmail(email),
+    isAdmin: isAdminEmail(email) && (await adminMfaSatisfied(email)),
   })
 }
