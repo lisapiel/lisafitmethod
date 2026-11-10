@@ -7,6 +7,7 @@ import type { CoachingApplication, CommitmentType } from "@/lib/authTokens"
 import { strengthConfidenceLabel } from "@/lib/intake"
 import { formatCents } from "@/lib/bundleCredit"
 import { BundleCreditCallout, listCreditPlan, priceCentsFrom, type ListCreditFacts } from "@/components/coaching/admin/BundleCreditCallout"
+import { PaymentSummaryPanel } from "@/components/coaching/admin/PaymentSummary.client"
 
 // Standard monthly prices in whole dollars per commitment. Auto-fills the
 // price input when the coach picks a commitment. The coach can still type
@@ -45,6 +46,12 @@ type EnrichedApplication = CoachingApplication & {
 }
 
 const gold = "#c9a96e"
+// This page keeps its dark palette on phones too, so the shared panel is
+// pinned to the dark tokens rather than the light phone ones.
+const DARK_PANEL_VARS = {
+  "--ca-text": "#f0e6d3", "--ca-muted": "#888888", "--ca-line": "#2a2a2a",
+  "--ca-accent-mark": "#c9a96e", "--ca-ok": "#5c9e6a", "--ca-warn": "#d97460",
+} as React.CSSProperties
 const border = "#2a2a2a"
 const cream = "#f0e6d3"
 const muted = "#888"
@@ -98,6 +105,9 @@ export default function AdminApplicationsPage() {
   const [prices, setPrices] = useState<Record<string, string>>({})
   const [commitments, setCommitments] = useState<Record<string, CommitmentType | "">>({})
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  // Lisa's bundle-credit tick-box per application. Null until she touches it,
+  // which leaves the default for the price (on at standard, off at custom).
+  const [applyChoices, setApplyChoices] = useState<Record<string, boolean | null>>({})
   const [restartRequests, setRestartRequests] = useState<RestartRequest[]>([])
   const [restartPrices, setRestartPrices] = useState<Record<string, string>>({})
   const [restartCommitments, setRestartCommitments] = useState<Record<string, CommitmentType | "">>({})
@@ -198,10 +208,11 @@ export default function AdminApplicationsPage() {
       const priceStr = prices[id] ?? ""
       const priceInCents = Math.round(parseFloat(priceStr) * 100)
       const commitmentType = commitments[id] || undefined
+      const choice = applyChoices[id]
       const res = await fetch(`/api/admin/coaching/applications/${id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "approve", priceInCents, commitmentType }),
+        body: JSON.stringify({ action: "approve", priceInCents, commitmentType, ...(typeof choice === "boolean" ? { applyBundleCredit: choice } : {}) }),
       })
       const data = await res.json() as { ok: boolean; error?: string }
       if (!data.ok) alert(data.error ?? "Something went wrong")
@@ -343,7 +354,10 @@ export default function AdminApplicationsPage() {
                             min="1"
                             step="0.01"
                             value={prices[app.id] ?? ""}
-                            onChange={(e) => setPrices((p) => ({ ...p, [app.id]: e.target.value }))}
+                            onChange={(e) => {
+                              setPrices((p) => ({ ...p, [app.id]: e.target.value }))
+                              setApplyChoices((c) => ({ ...c, [app.id]: null }))
+                            }}
                             placeholder="Monthly price"
                             style={{ flex: 1, background: "#111", border: `1px solid ${border}`, color: "#f0e6d3", padding: "7px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none" }}
                           />
@@ -363,6 +377,7 @@ export default function AdminApplicationsPage() {
                           onChange={(e) => {
                             const nextCommitment = e.target.value as CommitmentType | ""
                             setCommitments((c) => ({ ...c, [app.id]: nextCommitment }))
+                            setApplyChoices((c) => ({ ...c, [app.id]: null }))
                             if (nextCommitment === "THREE_MONTH_MINIMUM" || nextCommitment === "MONTH_TO_MONTH") {
                               setPrices((p) => ({ ...p, [app.id]: nextPriceForCommitmentChange(p[app.id] ?? "", nextCommitment) }))
                             }
@@ -810,7 +825,7 @@ export default function AdminApplicationsPage() {
         const commitment = commitments[confirmingId]
         return (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 24 }}>
-            <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "2rem", maxWidth: 440, width: "100%" }}>
+            <div style={{ background: "#161616", border: `1px solid ${border}`, borderRadius: 8, padding: "2rem", maxWidth: 520, width: "100%", maxHeight: "calc(100dvh - 48px)", overflowY: "auto" }}>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 12px" }}>Confirm Approval</p>
               <p style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "1.4rem", color: "#f0e6d3", margin: "0 0 20px" }}>{app.name}</p>
               <div style={{ background: "#0a0a0a", border: `1px solid #2a2a2a`, borderLeft: `3px solid ${gold}`, padding: "14px 16px", marginBottom: 20, display: "grid", gap: 8 }}>
@@ -824,16 +839,18 @@ export default function AdminApplicationsPage() {
                     {commitment === "THREE_MONTH_MINIMUM" ? "3-month minimum" : "Month-to-month"}
                   </span>
                 </div>
-                {(() => {
-                  const plan = listCreditPlan(app.bundleCredit, commitment || null, priceCentsFrom(priceStr))
-                  if (!plan?.apply || plan.firstMonthCents === null) return null
-                  return (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.62rem", color: "#888" }}>First month (after credit)</span>
-                      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.9rem", fontWeight: 700, color: gold }}>{formatCents(plan.firstMonthCents)}</span>
-                    </div>
-                  )
-                })()}
+              </div>
+              <div style={{ background: "#0a0a0a", border: `1px solid #2a2a2a`, padding: "12px 16px", marginBottom: 20, ...DARK_PANEL_VARS }}>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, margin: "0 0 8px" }}>Payment summary</p>
+                <PaymentSummaryPanel
+                  email={app.email}
+                  applicationId={app.id}
+                  commitment={commitment || null}
+                  priceCents={priceCentsFrom(priceStr)}
+                  applyChoice={applyChoices[app.id] ?? null}
+                  onApplyChoice={(apply) => setApplyChoices((c) => ({ ...c, [app.id]: apply }))}
+                  sendLabel="Confirm & Send Payment Link"
+                />
               </div>
               <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "#666", lineHeight: 1.6, margin: "0 0 20px" }}>
                 These terms will be shown on the client&apos;s acceptance screen and stored as their contractual agreement. Double-check before confirming.

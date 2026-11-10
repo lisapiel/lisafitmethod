@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import type { CoachingClientRecord } from "@/lib/authTokens"
 import { IntakeCard } from "@/components/coaching/admin/IntakeCard"
+import { PaymentSummaryPanel } from "@/components/coaching/admin/PaymentSummary.client"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -855,6 +856,13 @@ export default function ClientProfilePage() {
               ))}
             </div>
           )}
+        </SectionCard>
+      </div>
+
+      {/* Payments and bundle credit, read-only */}
+      <div style={{ marginTop: "1rem" }}>
+        <SectionCard title="Payments &amp; Bundle Credit">
+          <PaymentSummaryPanel email={client.email} />
         </SectionCard>
       </div>
 
