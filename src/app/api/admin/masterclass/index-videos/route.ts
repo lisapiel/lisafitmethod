@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server"
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3"
-import { cookies } from "next/headers"
-import { fetchAuthSession } from "aws-amplify/auth/server"
-import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { isAdminEmail } from "@/lib/authTokens"
+import { adminSessionEmail } from "@/lib/adminAuth"
 
 export const dynamic = "force-dynamic"
 const BUCKET = "amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov"
@@ -32,19 +29,9 @@ export type S3VideoItem = {
 }
 
 export async function GET() {
-  const email = await runWithAmplifyServerContext({
-    nextServerContext: { cookies },
-    operation: async (contextSpec): Promise<string | null> => {
-      try {
-        const session = await fetchAuthSession(contextSpec)
-        return (session.tokens?.idToken?.payload?.email as string | undefined) ?? null
-      } catch {
-        return null
-      }
-    },
-  })
+  const email = await adminSessionEmail()
 
-  if (!isAdminEmail(email ?? "")) {
+  if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
   }
 

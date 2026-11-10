@@ -154,6 +154,8 @@ COGNITO_AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 RESEND_API_KEY=re_...
 ```
 
+`ADMIN_MFA_REQUIRED` (optional, server-side). Leave it unset. Set it to exactly `true` only after both admin accounts have two-factor set up at /admin/security; the admin area then refuses any admin account without an authenticator app. Any other value, or no value, means off. A change only takes effect after a new Amplify build. See `docs/admin-mfa-recovery.md`.
+
 ---
 
 ## Testing with Stripe test mode

@@ -5,6 +5,7 @@ import {
   ListUsersCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { isAdminEmail } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 
 export const dynamic = "force-dynamic"
 
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: token }))
     const email = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (!isAdminEmail(email ?? "")) {
+    if (!isAdminEmail(email ?? "") || !adminMfaOk(result)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   } catch {

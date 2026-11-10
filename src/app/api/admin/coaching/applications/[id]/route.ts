@@ -11,6 +11,7 @@ import {
   createCoachingClientRecord,
   type CommitmentType,
 } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 import { generateInvitationToken, storeInvitationToken } from "@/lib/invitationTokens"
 
 export const dynamic = "force-dynamic"
@@ -32,7 +33,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail != null && isAdminEmail(callerEmail)
+    return callerEmail != null && isAdminEmail(callerEmail) && adminMfaOk(result)
   } catch {
     return false
   }

@@ -3,6 +3,7 @@ import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-c
 import Stripe from "stripe"
 import { Resend } from "resend"
 import { isAdminEmail, getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 
 export const dynamic = "force-dynamic"
@@ -28,7 +29,7 @@ async function verifyAdmin(req: NextRequest): Promise<string | null> {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail && isAdminEmail(callerEmail) ? callerEmail : null
+    return callerEmail && isAdminEmail(callerEmail) && adminMfaOk(result) ? callerEmail : null
   } catch {
     return null
   }

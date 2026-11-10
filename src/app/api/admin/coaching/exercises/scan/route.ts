@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { isAdminEmail } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 
 export const dynamic = "force-dynamic"
 const BUCKET = "ambrisa-video-preset-s3-final"
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (!isAdminEmail(callerEmail ?? "")) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (!isAdminEmail(callerEmail ?? "") || !adminMfaOk(result)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }

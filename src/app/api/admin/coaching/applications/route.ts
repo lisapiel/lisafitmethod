@@ -4,6 +4,7 @@ import {
   GetUserCommand,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { listCoachingApplications, getBundleCredit, isAdminEmail } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 import { getCustomerHistory } from "@/lib/customerHistory"
 
 export const dynamic = "force-dynamic"
@@ -21,7 +22,7 @@ async function verifyAdmin(req: NextRequest): Promise<boolean> {
     })
     const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail != null && isAdminEmail(callerEmail)
+    return callerEmail != null && isAdminEmail(callerEmail) && adminMfaOk(result)
   } catch {
     return false
   }

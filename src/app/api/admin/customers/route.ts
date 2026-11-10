@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import { fetchAuthSession } from "aws-amplify/auth/server"
-import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb"
+import { adminSessionEmail } from "@/lib/adminAuth"
 import { isAdminEmail } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
@@ -28,19 +26,9 @@ function makeDb() {
 }
 
 export async function GET() {
-  const email = await runWithAmplifyServerContext({
-    nextServerContext: { cookies },
-    operation: async (contextSpec): Promise<string | null> => {
-      try {
-        const session = await fetchAuthSession(contextSpec)
-        return (session.tokens?.idToken?.payload?.email as string | undefined) ?? null
-      } catch {
-        return null
-      }
-    },
-  })
+  const email = await adminSessionEmail()
 
-  if (!isAdminEmail(email ?? "")) {
+  if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
   }
 

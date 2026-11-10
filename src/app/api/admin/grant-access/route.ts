@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { grantTrainingAccess, grantNutritionAccess, grantTrackerAccess, isAdminEmail } from "@/lib/authTokens"
+import { adminMfaOk } from "@/lib/adminMfa"
 
 export const dynamic = "force-dynamic"
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
     const cognito = makeCognito()
     const result = await cognito.send(new GetUserCommand({ AccessToken: token }))
     const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    if (!isAdminEmail(callerEmail ?? "")) {
+    if (!isAdminEmail(callerEmail ?? "") || !adminMfaOk(result)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
   } catch {
