@@ -115,12 +115,16 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 export function CoachingApplicationForm() {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle")
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/member/access")
       .then((r) => r.json())
       .then((d: { email?: string }) => {
-        if (d.email) setForm((f) => ({ ...f, email: d.email! }))
+        if (d.email) {
+          setSessionEmail(d.email.trim().toLowerCase())
+          setForm((f) => ({ ...f, email: d.email! }))
+        }
       })
       .catch(() => {})
   }, [])
@@ -128,12 +132,15 @@ export function CoachingApplicationForm() {
   const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }))
 
-  // Bundle-credit lookup — debounced by email input. Shows a banner if the
-  // applicant's email matches a bundle purchase within the credit window.
+  // Bundle-credit lookup, debounced by email input. Shows a banner if the
+  // applicant's email matches a bundle purchase within the credit window. The
+  // server only answers for the signed-in person's own email, so the lookup is
+  // skipped for anyone signed out or typing a different address. Checkout still
+  // applies the credit from the application email either way.
   const [bundleCredit, setBundleCredit] = useState<{ available: boolean; amountCents: number; expiresAt: string | null } | null>(null)
   useEffect(() => {
     const email = form.email.trim().toLowerCase()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setBundleCredit(null); return }
+    if (!sessionEmail || email !== sessionEmail) { setBundleCredit(null); return }
     const timeout = setTimeout(() => {
       fetch(`/api/coaching/bundle-credit?email=${encodeURIComponent(email)}`)
         .then((r) => r.json())
@@ -144,7 +151,7 @@ export function CoachingApplicationForm() {
         .catch(() => setBundleCredit(null))
     }, 400)
     return () => clearTimeout(timeout)
-  }, [form.email])
+  }, [form.email, sessionEmail])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

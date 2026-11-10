@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getBundleCredit } from "@/lib/authTokens"
+import { clientSessionEmail } from "@/lib/clientSession"
+import { resolveBundleCreditLookup } from "@/lib/bundleCreditAccess"
 
 export const dynamic = "force-dynamic"
 
-// GET /api/coaching/bundle-credit?email=X
-// Public — used by the apply form to show a credit-available banner when the
-// applicant's email matches a bundle purchase within the credit window.
-// Returns { available, amountCents, expiresAt, purchasedAt }.
+// GET /api/coaching/bundle-credit[?email=X]
+// Used by the apply form to show a credit-available banner. Signed-in only and
+// answers only for the session's own email, so nobody can check whether
+// another person bought a bundle. The credit itself is applied at checkout
+// from the application email, independent of this display lookup.
+// Returns { available, amountCents, expiresAt }.
 export async function GET(req: NextRequest) {
-  const email = req.nextUrl.searchParams.get("email")?.trim().toLowerCase()
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ available: false, amountCents: 0, expiresAt: null, purchasedAt: null })
+  const lookup = resolveBundleCreditLookup(await clientSessionEmail(), req.nextUrl.searchParams.get("email"))
+  if (!lookup.ok) {
+    return NextResponse.json({ available: false, amountCents: 0, expiresAt: null }, { status: lookup.status })
   }
-  const credit = await getBundleCredit(email)
-  return NextResponse.json(credit)
+  const { available, amountCents, expiresAt } = await getBundleCredit(lookup.email)
+  return NextResponse.json({ available, amountCents, expiresAt })
 }
