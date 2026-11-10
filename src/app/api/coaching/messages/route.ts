@@ -18,12 +18,18 @@ export const dynamic = "force-dynamic"
 
 
 async function getSessionEmail(): Promise<string | null> {
+  return (await getSessionIdentity())?.email ?? null
+}
+
+async function getSessionIdentity(): Promise<{ email: string; sub: string } | null> {
   return runWithAmplifyServerContext({
     nextServerContext: { cookies },
-    operation: async (contextSpec): Promise<string | null> => {
+    operation: async (contextSpec): Promise<{ email: string; sub: string } | null> => {
       try {
-        const session = await fetchAuthSession(contextSpec)
-        return (session.tokens?.idToken?.payload?.email as string | undefined) ?? null
+        const payload = (await fetchAuthSession(contextSpec)).tokens?.idToken?.payload
+        const email = payload?.email
+        const sub = payload?.sub
+        return typeof email === "string" && typeof sub === "string" ? { email, sub } : null
       } catch {
         return null
       }
@@ -43,8 +49,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const email = await getSessionEmail()
-  if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const me = await getSessionIdentity()
+  if (!me) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const email = me.email
 
   // Only active coaching clients can post new messages on this route. Existing
   // /my-coaching layout already redirects non-clients away, but the API needs
@@ -76,7 +83,7 @@ export async function POST(req: NextRequest) {
     ? payload.attachmentS3Keys.filter((k): k is string => typeof k === "string" && k.length > 0)
     : []
   if (rawKeys.length > 0) {
-    const invalid = rawKeys.find((k) => !k.startsWith("media/nutrition-messages/") || k.length > 512 || !isOwnClientKey(k, email, "meal-photo"))
+    const invalid = rawKeys.find((k) => !k.startsWith("media/nutrition-messages/") || k.length > 512 || !isOwnClientKey(k, me.sub, "meal-photo"))
     if (invalid) return NextResponse.json({ error: "Invalid attachment key" }, { status: 400 })
     if (rawKeys.length > 6) return NextResponse.json({ error: "Too many attachments (max 6)" }, { status: 400 })
     attachmentS3Keys = rawKeys.join(",")
