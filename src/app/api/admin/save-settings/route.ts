@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { verifyAdminRequest } from "@/lib/adminAuth"
+import { putMediaObject } from "@/lib/mediaStorage"
 
 export const dynamic = "force-dynamic"
 
-const BUCKET = "amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov"
 const KEY = "media/settings.json"
 
 export async function POST(request: NextRequest) {
@@ -24,23 +23,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Body must be a JSON object" }, { status: 400 })
   }
 
-  const s3 = new S3Client({
-    region: process.env.COGNITO_REGION ?? "us-east-2",
-    credentials: {
-      accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-      secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-    },
-  })
-
   try {
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: BUCKET,
-        Key: KEY,
-        Body: JSON.stringify(body, null, 2),
-        ContentType: "application/json",
-      })
-    )
+    await putMediaObject(KEY, JSON.stringify(body, null, 2), "application/json")
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error("[save-settings] S3 write failed:", err)

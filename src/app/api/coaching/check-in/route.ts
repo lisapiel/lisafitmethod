@@ -5,6 +5,7 @@ import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { createCoachingCheckIn, listCoachingCheckIns, getCoachingClientRecord, hasCoachingAccess, type CoachingCheckInRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import { normalizeCheckInWeight, parseHunger } from "@/lib/checkInAnswers"
+import { isOwnClientKey } from "@/lib/mediaKeys"
 
 export const dynamic = "force-dynamic"
 
@@ -83,8 +84,9 @@ export async function POST(req: NextRequest) {
 
   // ── v2: Form review video validation ────────────────────────────────────
   // Each formReview: { exercise: string, note?: string, videoKeys?: string[] }
-  // Every videoKey must live under media/coaching-form-reviews/ — refuse
-  // anything else so a client can't reference arbitrary paths.
+  // Every videoKey must live under media/coaching-form-reviews/, in the
+  // caller's own folder. Refuse anything else so a client can't reference
+  // arbitrary paths or another client's videos.
   type FormReviewIn = { exercise?: unknown; note?: unknown; videoKeys?: unknown }
   let formReviewsJson: string | undefined
   let totalVideos = 0
@@ -96,7 +98,7 @@ export async function POST(req: NextRequest) {
       const rawKeys = Array.isArray(raw.videoKeys)
         ? (raw.videoKeys as unknown[]).filter((k): k is string => typeof k === "string" && k.length > 0 && k.length <= 512)
         : []
-      const validKeys = rawKeys.filter((k) => k.startsWith(FORM_REVIEW_PREFIX))
+      const validKeys = rawKeys.filter((k) => k.startsWith(FORM_REVIEW_PREFIX) && isOwnClientKey(k, email, "form-review"))
       if (validKeys.length !== rawKeys.length) {
         return NextResponse.json({ error: "Invalid form-review video key" }, { status: 400 })
       }

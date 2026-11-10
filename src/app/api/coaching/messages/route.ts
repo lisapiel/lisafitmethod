@@ -5,6 +5,7 @@ import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { createCoachingMessage, listCoachingMessages, markCoachingMessagesRead, getCoachingClientRecord, hasCoachingAccess, type CoachingMessageKind } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import { COACH_THREAD_KEY as COACH_EMAIL, coachThreadId } from "@/lib/coachIdentity"
+import { isOwnClientKey } from "@/lib/mediaKeys"
 
 const NUTRITION_KIND_LABEL: Record<CoachingMessageKind, string> = {
   "nutrition-meal": "Nutrition · Meal",
@@ -68,14 +69,14 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate + normalize attachments. Each key must live under the shared
-  // nutrition-messages prefix — refuse anything else so a client can't
-  // reference arbitrary paths.
+  // nutrition-messages prefix, in the caller's own folder. Refuse anything
+  // else so a client can't reference arbitrary paths or another client's photos.
   let attachmentS3Keys: string | undefined
   const rawKeys = Array.isArray(payload.attachmentS3Keys)
     ? payload.attachmentS3Keys.filter((k): k is string => typeof k === "string" && k.length > 0)
     : []
   if (rawKeys.length > 0) {
-    const invalid = rawKeys.find((k) => !k.startsWith("media/nutrition-messages/") || k.length > 512)
+    const invalid = rawKeys.find((k) => !k.startsWith("media/nutrition-messages/") || k.length > 512 || !isOwnClientKey(k, email, "meal-photo"))
     if (invalid) return NextResponse.json({ error: "Invalid attachment key" }, { status: 400 })
     if (rawKeys.length > 6) return NextResponse.json({ error: "Too many attachments (max 6)" }, { status: 400 })
     attachmentS3Keys = rawKeys.join(",")
