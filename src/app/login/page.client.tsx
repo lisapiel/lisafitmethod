@@ -2,9 +2,12 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { signIn, confirmSignIn, fetchAuthSession, signOut } from "aws-amplify/auth"
+import { signIn, confirmSignIn, fetchAuthSession, signOut, type SignInOutput } from "aws-amplify/auth"
+import { TotpStep } from "@/components/auth/TotpStep.client"
+import { chooseTotpIfAsked, totpSetupFrom, type TotpSetup } from "@/lib/signInFlow.client"
+import { signInStepView } from "@/lib/totp"
 
-type Step = "credentials" | "new-password"
+type Step = "credentials" | "new-password" | "totp" | "totp-setup"
 
 const fieldStyle: React.CSSProperties = {
   display: "block",
@@ -86,6 +89,7 @@ export function LoginClient() {
   const [password, setPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmNewPassword, setConfirmNewPassword] = useState("")
+  const [totpSetup, setTotpSetup] = useState<TotpSetup | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -110,6 +114,29 @@ export function LoginClient() {
       await new Promise((r) => setTimeout(r, 250))
     }
     setError("Signed in, but your session didn't stick. Please try once more.")
+  }
+
+  // Clients don't use two-factor today, but an account that has it switched
+  // on still needs a way in, so every second step lands somewhere sensible.
+  const handleNextStep = async (raw: SignInOutput) => {
+    const result = await chooseTotpIfAsked(raw)
+    const view = signInStepView(result.nextStep.signInStep)
+    if (view === "new-password") {
+      setStep("new-password")
+    } else if (view === "totp") {
+      setStep("totp")
+    } else if (view === "totp-setup") {
+      setTotpSetup(totpSetupFrom(result, email.trim().toLowerCase()))
+      setStep("totp-setup")
+    } else if (result.isSignedIn) {
+      await goToRedirect()
+    }
+  }
+
+  const startOver = () => {
+    setStep("credentials")
+    setTotpSetup(null)
+    setError(null)
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -141,11 +168,7 @@ export function LoginClient() {
         result = await signIn(credentials)
       }
 
-      if (result.nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED") {
-        setStep("new-password")
-      } else if (result.isSignedIn) {
-        await goToRedirect()
-      }
+      await handleNextStep(result)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Sign in failed."
       if (isAlreadySignedIn(err)) {
@@ -177,10 +200,7 @@ export function LoginClient() {
 
     setLoading(true)
     try {
-      const result = await confirmSignIn({ challengeResponse: newPassword })
-      if (result.isSignedIn) {
-        await goToRedirect()
-      }
+      await handleNextStep(await confirmSignIn({ challengeResponse: newPassword }))
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to set password.")
     } finally {
@@ -286,6 +306,19 @@ export function LoginClient() {
               </p>
             </div>
           </>
+        )}
+
+        {(step === "totp" || step === "totp-setup") && (
+          <TotpStep
+            setup={step === "totp-setup" ? totpSetup : null}
+            showSetup={step === "totp-setup"}
+            onConfirmed={handleNextStep}
+            onStartOver={startOver}
+            labelStyle={labelStyle}
+            fieldStyle={fieldStyle}
+            submitStyle={submitStyle}
+            outerError={error}
+          />
         )}
 
         {step === "new-password" && (
