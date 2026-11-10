@@ -214,7 +214,7 @@ export const COURSES = [
 export const BUNDLE = {
   eyebrow: "Complete Foundations Bundle",
   title: "Train right. Eat to match.",
-  body: "Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month.",
+  body: "Both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you apply for 3-month 1:1 coaching within 30 days of buying the bundle, the amount you paid for it can be credited toward your first month of coaching.",
   now: PREVIEW_PRICES.bundleNow,
   was: PREVIEW_PRICES.bundleWas,
   saves: PREVIEW_PRICES.bundleSaves,
@@ -312,7 +312,7 @@ export const FAQS = [
   },
   {
     q: "Can I try the courses before committing to coaching?",
-    a: "Yes, and most of my coaching clients did exactly that. The Complete Foundations Bundle is a great on-ramp, and if you upgrade to 1:1 coaching within 90 days the full $137 credits toward your first coaching month.",
+    a: "Yes, and most of my coaching clients did exactly that. The Complete Foundations Bundle is a great on-ramp, and if you apply for 3-month 1:1 coaching within 30 days of buying it, the amount you paid for the bundle can be credited toward your first month of coaching.",
   },
   {
     q: "How is this different from a workout app?",

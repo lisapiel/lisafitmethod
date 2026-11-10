@@ -153,7 +153,7 @@ export const BUNDLE = {
   badge: "Best Value",
   headingLine1: "Train right.",
   headingLine2: "Eat to match.",
-  body: "The Complete Foundations Bundle: both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month.",
+  body: "The Complete Foundations Bundle: both courses together. Training Foundations gives you the movement system. Nutrition Foundations gives you the eating strategy. And if you apply for 3-month 1:1 coaching within 30 days of buying the bundle, the amount you paid for it can be credited toward your first month of coaching.",
   tileTrainingLabel: "Training Foundations",
   tileTrainingValueSuffix: " value",
   tileNutritionLabel: "Nutrition Foundations",
@@ -185,7 +185,7 @@ export const FAQS = [
   },
   {
     q: "Can I try the courses before committing to coaching?",
-    a: "Yes, and most of my coaching clients did exactly that. The Complete Foundations Bundle is a great on-ramp — it's $137 one-time and if you upgrade to 1:1 coaching within 90 days, the full $137 credits toward your first coaching month. It's also a good way to see how I teach before committing to 1:1 work.",
+    a: "Yes, and most of my coaching clients did exactly that. The Complete Foundations Bundle is a great on-ramp. It's $137 one-time, and if you apply for 3-month 1:1 coaching within 30 days of buying it, the amount you paid for the bundle can be credited toward your first month of coaching. It's also a good way to see how I teach before committing to 1:1 work.",
   },
   {
     q: "How is this different from a workout app?",

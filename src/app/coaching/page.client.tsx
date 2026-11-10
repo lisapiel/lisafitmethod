@@ -706,7 +706,7 @@ export default function CoachingClient() {
               },
               {
                 q: "Is there a smaller way to start before committing to coaching?",
-                a: "Yes. The Complete Foundations Bundle ($137) is the best place to start. If you upgrade to 3-month 1:1 coaching within 90 days, the full $137 credits toward your first coaching month. The bundle credit applies to the 3-month coaching option only, not to month-to-month coaching.",
+                a: "Yes. The Complete Foundations Bundle ($137) is the best place to start. If you apply for 3-month 1:1 coaching within 30 days of purchasing the Complete Foundations Bundle, the amount you actually paid for the bundle can be credited toward your first month of coaching. What counts is the date you apply, so you can start coaching later. The credit applies to the 3-month coaching option only. Month-to-month coaching isn't eligible.",
               },
               {
                 q: "Do you coach nutrition too?",
@@ -788,7 +788,7 @@ export default function CoachingClient() {
               </p>
 
               <Link href="/courses" className="ch-link">
-                Prefer a self-guided approach? The Complete Foundations Bundle ($137) is a great place to start. Upgrade to 3-month coaching within 90 days and the full $137 will be credited toward your first coaching month →
+                Prefer a self-guided approach? The Complete Foundations Bundle ($137) is a great place to start. Apply for 3-month coaching within 30 days and what you paid for the bundle can be credited toward your first coaching month →
               </Link>
             </div>
 
