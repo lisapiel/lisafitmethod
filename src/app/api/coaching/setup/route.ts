@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
-import { getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
+import { getCoachingClientRecord, listCoachingApplications, updateCoachingClientRecord } from "@/lib/authTokens"
+import { pickApplicationFor } from "@/lib/intake"
+import { goalFromApplication, hasCompletedProfile, planSetupProfile } from "@/lib/profileRequests"
 
 export const dynamic = "force-dynamic"
 
@@ -26,6 +28,20 @@ async function getCallerEmail(req: NextRequest): Promise<string | null> {
   }
 }
 
+// GET /api/coaching/setup: the nutrition goal to preselect for a client who
+// hasn't chosen one yet, taken from their application when it maps clearly.
+// Only the mapped goal is returned, never the application itself.
+export async function GET(req: NextRequest) {
+  const email = await getCallerEmail(req)
+  if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const client = await getCoachingClientRecord(email)
+  if (hasCompletedProfile(client) || client?.nutritionGoal) {
+    return NextResponse.json({ suggestedGoal: null })
+  }
+  const app = pickApplicationFor(await listCoachingApplications().catch(() => []), email)
+  return NextResponse.json({ suggestedGoal: goalFromApplication(app?.primaryGoal) })
+}
+
 // POST /api/coaching/setup — client saves their body data + nutrition goal.
 // Only the authenticated coaching client can update their own record.
 export async function POST(req: NextRequest) {
@@ -36,15 +52,14 @@ export async function POST(req: NextRequest) {
     heightInches?: number
     age?: number
     sex?: "male" | "female"
-    activityLevel?: number
-    nutritionGoal?: "fat-loss" | "recomp" | "maintain" | "muscle-gain"
+    activityLevel?: unknown
+    nutritionGoal?: unknown
     currentWeight?: number
   }
 
   // Validate basics
   const height = Number(body.heightInches)
   const age = Number(body.age)
-  const activity = Number(body.activityLevel)
   if (!height || height < 48 || height > 96) {
     return NextResponse.json({ error: "Height must be between 4' and 8' (48–96 inches)" }, { status: 400 })
   }
@@ -54,21 +69,17 @@ export async function POST(req: NextRequest) {
   if (body.sex !== "male" && body.sex !== "female") {
     return NextResponse.json({ error: "Sex must be male or female (for BMR formula)" }, { status: 400 })
   }
-  if (!activity || activity < 1.2 || activity > 1.9) {
-    return NextResponse.json({ error: "Activity level required" }, { status: 400 })
-  }
-  const goal = body.nutritionGoal
-  if (goal !== "fat-loss" && goal !== "recomp" && goal !== "maintain" && goal !== "muscle-gain") {
-    return NextResponse.json({ error: "Nutrition goal required" }, { status: 400 })
-  }
 
+  // Goal and activity are chosen once here. After that they change only when
+  // Lisa approves a request, so this path can't be used to get round the review.
   const existing = await getCoachingClientRecord(email)
+  const profile = planSetupProfile(existing, body)
+  if (!profile.ok) return NextResponse.json({ error: profile.error }, { status: profile.status })
   const updates: Parameters<typeof updateCoachingClientRecord>[1] = {
     heightInches: height,
     age,
     sex: body.sex,
-    activityLevel: activity,
-    nutritionGoal: goal,
+    ...profile.updates,
   }
   // The starting weight is saved once, the first time setup sends one. After
   // that only Lisa corrects it, so a different weight sent here is not saved

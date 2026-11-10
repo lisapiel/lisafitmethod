@@ -159,3 +159,12 @@ describe("attention list", () => {
     assert.deepEqual(o.attention.map((a) => a.kind).sort(), ["application", "reply"])
   })
 })
+
+describe("goal and activity requests", () => {
+  test("only pending requests appear, linking to the client's Nutrition tab", () => {
+    const r = (id: string, status: string) => ({ userId: `profile_change_request_${id}`, id, clientEmail: "a@x.test", status, createdAt: "2026-11-10T10:00:00Z" })
+    const o = buildOverview([client("a@x.test", { status: "PAUSED" }), r("1", "pending"), r("2", "approved"), r("3", "declined")], { now: NOW, isCoach })
+    assert.deepEqual(o.attention.map((a) => [a.kind, a.id, a.href]), [["profile-request", "profile-1", "/admin/coaching/clients/a%40x.test/nutrition"]])
+    assert.equal(o.attention[0].title, "a asked to change their goal or activity")
+  })
+})

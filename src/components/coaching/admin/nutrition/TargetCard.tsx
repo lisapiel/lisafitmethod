@@ -1,23 +1,27 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { adminJson, clientPath } from "./api"
 import { BackToStartForm } from "./BackToStartForm"
-import { dateTime, kcal, weighInDay } from "./format"
+import { dateTime, kcal, targetLine, weighInDay } from "./format"
 import { TargetForm } from "./TargetForm"
 import { TargetHistory } from "./TargetHistory"
 import type { Macros, TargetChange, WeighInEstimate } from "./types"
 
 type Mode = "view" | "change" | "back"
 
-export function TargetCard({ email, current, isCustom, starting, review, onChanged }: {
+export function TargetCard({ email, current, isCustom, starting, review, onChanged, startChange }: {
   email: string
   current: Macros | null
   isCustom: boolean
   starting: Macros | null
   review: WeighInEstimate | null
   onChanged: () => Promise<void> | void
+  // Opens the target form prefilled from elsewhere on the page. `key` changes
+  // on every request so the same numbers can be used twice.
+  startChange?: { macros: Macros; key: number } | null
 }) {
+  const ref = useRef<HTMLElement>(null)
   const [mode, setMode] = useState<Mode>("view")
   const [prefill, setPrefill] = useState<Macros | null>(null)
   const [changes, setChanges] = useState<TargetChange[] | null>(null)
@@ -36,6 +40,14 @@ export function TargetCard({ email, current, isCustom, starting, review, onChang
 
   useEffect(() => { loadHistory() }, [loadHistory])
 
+  useEffect(() => {
+    if (!startChange) return
+    setSaved(false)
+    setPrefill(startChange.macros)
+    setMode("change")
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [startChange])
+
   async function done() {
     setMode("view")
     setSaved(true)
@@ -45,7 +57,7 @@ export function TargetCard({ email, current, isCustom, starting, review, onChang
   const last = changes?.[0]
 
   return (
-    <section className="can-card" aria-labelledby="can-target-h">
+    <section className="can-card" aria-labelledby="can-target-h" ref={ref}>
       <div className="can-card-head">
         <h2 id="can-target-h" className="can-h">Target</h2>
         {current && <span className="can-tag" data-tone={isCustom ? undefined : "muted"}>{isCustom ? "Set by you" : "Starting estimate"}</span>}
@@ -86,7 +98,7 @@ export function TargetCard({ email, current, isCustom, starting, review, onChang
           )}
         </div>
       )}
-      {mode === "change" && <TargetForm email={email} current={current} initial={prefill} onSaved={done} onCancel={() => setMode("view")} />}
+      {mode === "change" && <TargetForm key={prefill ? targetLine(prefill) : "current"} email={email} current={current} initial={prefill} onSaved={done} onCancel={() => setMode("view")} />}
       {mode === "back" && <BackToStartForm email={email} current={current} starting={starting} onSaved={done} onCancel={() => setMode("view")} />}
 
       <hr className="can-sep" />

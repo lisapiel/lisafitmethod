@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { submitCoachingApplication, listCoachingApplications } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
+import { isStrengthConfidence, strengthConfidenceLabel } from "@/lib/intake"
 
 export const dynamic = "force-dynamic"
 
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
   const primaryGoalOther = s(b.primaryGoalOther)
   const specificOutcome = s(b.specificOutcome)
   const trainingExperience = s(b.trainingExperience)
+  const strengthConfidence = s(b.strengthConfidence)
   const currentTraining = s(b.currentTraining)
   const daysPerWeek = s(b.daysPerWeek)
   const sessionDuration = s(b.sessionDuration)
@@ -43,6 +45,9 @@ export async function POST(req: NextRequest) {
     !coachingOption || !startTiming
   ) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+  }
+  if (!isStrengthConfidence(strengthConfidence)) {
+    return NextResponse.json({ error: "Please tell me how comfortable you are with the main strength exercises." }, { status: 400 })
   }
   if (primaryGoal === "Other" && !primaryGoalOther) {
     return NextResponse.json({ error: "Please tell me what you want to achieve" }, { status: 400 })
@@ -77,6 +82,7 @@ export async function POST(req: NextRequest) {
     primaryGoalOther: primaryGoalOther || undefined,
     specificOutcome,
     trainingExperience,
+    strengthConfidence,
     currentTraining,
     daysPerWeek,
     sessionDuration,
@@ -104,6 +110,7 @@ export async function POST(req: NextRequest) {
       "primary goal": goalForDisplay,
       "specific outcome": specificOutcome,
       experience: trainingExperience,
+      "strength exercises": strengthConfidenceLabel(strengthConfidence) ?? strengthConfidence,
       "current training": currentTraining,
       "days per week": daysPerWeek,
       "session duration": sessionDuration,

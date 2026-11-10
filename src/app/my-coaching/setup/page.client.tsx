@@ -4,7 +4,10 @@ import { useState, useEffect } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ACTIVITY_LEVELS, GOAL_META, remapLegacyActivity, type NutritionGoal, type Sex } from "@/lib/nutrition"
+import { remapLegacyActivity, type NutritionGoal, type Sex } from "@/lib/nutrition"
+import { isCurrentActivityLevel } from "@/lib/profileRequests"
+import { ACTIVITY_OPTIONS, GOAL_OPTIONS, SetupOptionList } from "@/components/portal/SetupOptionList"
+import { ProfileChangeRequest } from "@/components/portal/ProfileChangeRequest"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -12,10 +15,8 @@ const muted = "#6b6560"
 const border = "#e8e2dc"
 const white = "#fff"
 
-// Goal picker order — Fat Loss first (most common), then the two maintenance-
-// class goals grouped together, then Muscle Gain. Labels + descriptions come
-// from GOAL_META so any UI surface stays in sync.
-const GOAL_ORDER: NutritionGoal[] = ["fat-loss", "recomp", "maintain", "muscle-gain"]
+const ACTIVITY_REQUIRED = "Choose the option that matches a normal week."
+const GOAL_REQUIRED = "Choose your nutrition goal."
 
 export default function SetupClient() {
   const router = useRouter()
@@ -26,39 +27,63 @@ export default function SetupClient() {
   const [keptNotice, setKeptNotice] = useState(false)
   const [heightFeet, setHeightFeet] = useState("")
   const [heightInches, setHeightInches] = useState("")
-  const [activity, setActivity] = useState<number>(1.35)
-  const [goal, setGoal] = useState<NutritionGoal>("fat-loss")
+  // Nothing is preselected for a new client: the activity level has to be a
+  // deliberate choice, and the goal is preselected only when the application
+  // says the same thing.
+  const [activity, setActivity] = useState<number | null>(null)
+  const [goal, setGoal] = useState<NutritionGoal | null>(null)
+  const [locked, setLocked] = useState<{ goal: NutritionGoal; activity: number } | null>(null)
+  const [loaded, setLoaded] = useState(false)
+  const [activityError, setActivityError] = useState("")
+  const [goalError, setGoalError] = useState("")
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
 
   // Pre-fill from the client record if some fields already exist
   useEffect(() => {
+    async function suggestGoal() {
+      try {
+        const token = (await fetchAuthSession()).tokens?.accessToken?.toString()
+        if (!token) return
+        const res = await fetch("/api/coaching/setup", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" })
+        if (!res.ok) return
+        const data = await res.json() as { suggestedGoal?: NutritionGoal | null }
+        if (data.suggestedGoal) setGoal((g) => g ?? data.suggestedGoal ?? null)
+      } catch { /* nothing preselected */ }
+    }
     async function load() {
       try {
         const res = await fetch("/api/coaching/program")
-        if (!res.ok) return
+        if (!res.ok) { await suggestGoal(); return }
         const data = await res.json() as { client?: { sex?: Sex; age?: number; heightInches?: number; activityLevel?: number; nutritionGoal?: NutritionGoal; startingWeight?: number } }
         const c = data.client
-        if (!c) return
+        if (!c) { await suggestGoal(); return }
         if (c.sex) setSex(c.sex)
         if (c.age) setAge(String(c.age))
         if (c.heightInches != null) {
           setHeightFeet(String(Math.floor(c.heightInches / 12)))
           setHeightInches(String(c.heightInches % 12))
         }
-        // Remap legacy activity values (1.375, 1.55, 1.725, 1.9) to the
-        // nearest new value so the correct button pre-selects. The database
-        // record is not touched — that only updates when the client saves.
-        if (c.activityLevel) setActivity(remapLegacyActivity(c.activityLevel) ?? 1.35)
-        if (c.nutritionGoal) setGoal(c.nutritionGoal)
+        // Once both are saved they are read-only here and change only
+        // through a request to Lisa.
+        if (c.nutritionGoal && c.activityLevel) {
+          setLocked({ goal: c.nutritionGoal, activity: c.activityLevel })
+        } else {
+          const remapped = c.activityLevel ? remapLegacyActivity(c.activityLevel) : undefined
+          if (isCurrentActivityLevel(remapped)) setActivity(remapped)
+          if (c.nutritionGoal) setGoal(c.nutritionGoal)
+          else await suggestGoal()
+        }
         if (c.startingWeight) setStartingWeight(c.startingWeight)
       } catch { /* ignore */ }
     }
-    load()
+    load().finally(() => setLoaded(true))
   }, [])
 
   async function handleSave() {
     setErrorMsg("")
+    setActivityError("")
+    setGoalError("")
     const ageNum = parseInt(age)
     const weightNum = parseFloat(weightLbs)
     const ft = parseInt(heightFeet)
@@ -69,6 +94,12 @@ export default function SetupClient() {
     if (!ft || ft < 4 || ft > 7) { setErrorMsg("Please enter your height in feet, between 4 and 7."); return }
     if (inch < 0 || inch >= 12) { setErrorMsg("Inches should be between 0 and 11."); return }
     const heightIn = ft * 12 + inch
+    if (!locked && (activity == null || goal == null)) {
+      if (activity == null) setActivityError(ACTIVITY_REQUIRED)
+      if (goal == null) setGoalError(GOAL_REQUIRED)
+      setErrorMsg(activity == null ? ACTIVITY_REQUIRED : GOAL_REQUIRED)
+      return
+    }
 
     setSaving(true)
     try {
@@ -82,8 +113,7 @@ export default function SetupClient() {
           heightInches: heightIn,
           age: ageNum,
           sex,
-          activityLevel: activity,
-          nutritionGoal: goal,
+          ...(locked ? {} : { activityLevel: activity, nutritionGoal: goal }),
           ...(startingWeight == null ? { currentWeight: weightNum } : {}),
         }),
       })
@@ -96,6 +126,7 @@ export default function SetupClient() {
       // Mark that they've completed setup so the home banner clears
       try { localStorage.removeItem("lfm-setup-skipped") } catch { /* ignore */ }
       const saved = await res.json().catch(() => ({})) as { startingWeight?: number | null; startingWeightKept?: boolean }
+      if (!locked && activity != null && goal != null) setLocked({ goal, activity })
       if (saved.startingWeightKept) {
         // A starting weight already existed, so the typed weight wasn't saved.
         if (typeof saved.startingWeight === "number") setStartingWeight(saved.startingWeight)
@@ -122,7 +153,7 @@ export default function SetupClient() {
           Let&apos;s personalise your nutrition.
         </h1>
         <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: muted, margin: 0, lineHeight: 1.55 }}>
-          Answer a few questions so I can build your macro targets. You can update these anytime.
+          Answer a few questions so I can build your macro targets.
         </p>
       </div>
 
@@ -223,64 +254,44 @@ export default function SetupClient() {
           </div>
         </div>
 
-        {/* Activity */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 6 }}>
-            Activity level
-          </label>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {ACTIVITY_LEVELS.map((a) => (
-              <button
-                key={a.key}
-                type="button"
-                onClick={() => setActivity(a.value)}
-                style={{
-                  textAlign: "left", background: activity === a.value ? `${accent}18` : "transparent",
-                  border: `1px solid ${activity === a.value ? accent : border}`,
-                  padding: "10px 12px", cursor: "pointer", borderRadius: 4,
-                }}
-              >
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", fontWeight: activity === a.value ? 700 : 600, color: black, margin: "0 0 2px" }}>
-                  {a.label}
+        {!loaded ? null : locked ? (
+          <ProfileChangeRequest goal={locked.goal} activity={locked.activity} />
+        ) : (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+                Activity level
+              </p>
+              <SetupOptionList
+                options={ACTIVITY_OPTIONS} selected={activity} label="Activity level" testId="setup-activity"
+                onSelect={(v) => { setActivity(v); setActivityError("") }}
+              />
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted, margin: "8px 0 0", lineHeight: 1.55 }}>
+                Pick what matches a normal week. If you train a few times a week but sit most of the day, Lightly Active or Moderately Active is usually the best fit.
+              </p>
+              {activityError && (
+                <p role="alert" data-testid="activity-error" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: "#c14646", margin: "6px 0 0" }}>
+                  {activityError}
                 </p>
-                <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0 }}>
-                  {a.desc}
-                </p>
-              </button>
-            ))}
-          </div>
-        </div>
+              )}
+            </div>
 
-        {/* Goal */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, display: "block", marginBottom: 6 }}>
-            Nutrition goal
-          </label>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {GOAL_ORDER.map((value) => {
-              const meta = GOAL_META[value]
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setGoal(value)}
-                  style={{
-                    textAlign: "left", background: goal === value ? `${accent}18` : "transparent",
-                    border: `1px solid ${goal === value ? accent : border}`,
-                    padding: "10px 12px", cursor: "pointer", borderRadius: 4,
-                  }}
-                >
-                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", fontWeight: goal === value ? 700 : 600, color: black, margin: "0 0 2px" }}>
-                    {meta.label}
-                  </p>
-                  <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0, lineHeight: 1.45 }}>
-                    {meta.desc}
-                  </p>
-                </button>
-              )
-            })}
-          </div>
-        </div>
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>
+                Nutrition goal
+              </p>
+              <SetupOptionList
+                options={GOAL_OPTIONS} selected={goal} label="Nutrition goal" testId="setup-goal"
+                onSelect={(v) => { setGoal(v); setGoalError("") }}
+              />
+              {goalError && (
+                <p role="alert" data-testid="goal-error" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: "#c14646", margin: "6px 0 0" }}>
+                  {goalError}
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
         {keptNotice && startingWeight != null && (
           <div role="status" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: black, background: `${accent}18`, border: `1px solid ${accent}`, borderRadius: 4, padding: "10px 12px", margin: "0 0 12px", lineHeight: 1.55 }}>

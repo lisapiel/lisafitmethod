@@ -32,7 +32,7 @@ export type ClientSummary = {
 }
 
 export type AttentionKind =
-  | "pain" | "reply" | "check-in" | "application" | "task" | "no-program" | "program-ending" | "inactive" | "payment"
+  | "pain" | "reply" | "check-in" | "application" | "task" | "no-program" | "program-ending" | "inactive" | "payment" | "profile-request"
 
 export type AttentionItem = {
   id: string
@@ -67,7 +67,7 @@ export type CoachingOverview = {
 
 export const OVERVIEW_PREFIXES = [
   "coaching_client_", "coaching_program_", "coaching_workoutlog_", "coaching_checkin_",
-  "coaching_msg_", "coaching_task_", "coaching_app_", "nutrition_log_",
+  "coaching_msg_", "coaching_task_", "coaching_app_", "nutrition_log_", "profile_change_request_",
 ] as const
 
 export const OVERVIEW_ATTRIBUTES = [
@@ -274,6 +274,13 @@ export function buildOverview(items: Raw[], opts: { now: Date; isCoach: (email: 
   const pendingApps = apps.filter((a) => str(a.status) === "PENDING")
   for (const a of pendingApps) {
     attention.push({ id: `app-${str(a.id)}`, kind: "application", urgency: 2, title: `New application from ${str(a.name) ?? "an applicant"}`, detail: "Waiting for your decision", href: "/admin/coaching/applications", clientEmail: lower(a.email) || null, clientName: str(a.name), at: str(a.applicationDate) })
+  }
+  for (const r of by("profile_change_request_")) {
+    if (str(r.status) !== "pending") continue
+    const email = lower(r.clientEmail)
+    if (!email) continue
+    const name = nameFor.get(email) ?? email
+    attention.push({ id: `profile-${str(r.id)}`, kind: "profile-request", urgency: 3, title: `${name} asked to change their goal or activity`, detail: "Waiting for your review on their Nutrition tab", href: clientHref(email, "/nutrition"), clientEmail: email, clientName: name, at: str(r.createdAt) })
   }
   const today = localDate(now, tz)
   for (const t of openTasks) {

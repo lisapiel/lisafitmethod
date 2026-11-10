@@ -5,6 +5,27 @@ that stops each from recurring.
 
 ---
 
+## Setup saved an activity level that isn't one of the options
+**Date:** 2026-11-09
+**Area:** `src/app/my-coaching/setup/page.client.tsx`, `src/app/api/coaching/setup/route.ts`
+
+The setup page started the activity level at 1.35, a value from the old scale
+that is none of the five current options. Nothing looked selected, and a
+client who didn't tap one saved 1.35 without choosing, which the calculator
+then read as Lightly Active. The API accepted any number from 1.2 to 1.9.
+
+**Fix:** nothing is preselected and the client must pick an option before
+saving. The API accepts only the five current values for a new save (legacy
+stored values still read through `canonicalActivityLevel`). Once goal and
+activity are saved, setup can't change them; the client sends a request and
+the coach reviews it (`src/lib/profileRequests.ts`).
+
+**Rule:** a default for a choice that changes someone's numbers must be one of
+the options shown, or there must be no default at all. Validate against the
+option list, not a numeric range.
+
+---
+
 ## ToneShift was passed tone names instead of ground colours
 **Date:** 2026-10-21
 **Area:** `src/components/preview/d/FlowD.tsx`, the Direction D inner pages
