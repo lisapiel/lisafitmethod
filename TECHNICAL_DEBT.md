@@ -4,6 +4,20 @@ Active items only. Delete an entry once it is resolved.
 
 ---
 
+## Admin two-factor: gaps left on purpose
+**Added:** 2026-11-09
+**Area:** `src/lib/adminAuth.ts`, `src/app/admin/security`, admin email lists
+
+- `ADMIN_MFA_REQUIRED` covers the admin area (every `/api/admin/*` route, admin server actions and admin server pages). It does not cover places where an admin email simply skips a client paywall (`isAdminEmail` in `src/app/my-coaching/layout.tsx`, `src/app/api/member/access/route.ts`, the training and tracker access checks, and `/my-plan` in `src/middleware.ts`). Those only show client areas, but an unenrolled admin can still open them.
+- No QR code on the setup screen. There is no QR library and adding one is a dependency change, so it shows the key in groups of four plus an `otpauth://` link.
+- The admin email list is still copied in `src/app/admin/layout.tsx`, `src/middleware.ts` and the messages page instead of importing `ADMIN_EMAILS`.
+
+**Impact:** low while enforcement is off.
+
+**Plan:** route the admin bypasses through `checkAdminAccess` when enforcement is switched on for real; add a QR code if Lisa approves a small dependency.
+
+---
+
 ## Direction D still lives under a "preview" path with a `pv-` class prefix
 **Added:** 2026-10-21
 **Area:** `src/components/preview/d/**`, the `pv-d-*` CSS classes
