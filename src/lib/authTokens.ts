@@ -742,12 +742,14 @@ export async function createCoachingMessage(data: Omit<CoachingMessageRecord, "i
   return record
 }
 
+// The key prefix alone is not exact: one thread id can be a prefix of another
+// (an email with "_" after the domain), so the stored threadId must match too.
 export async function listCoachingMessages(threadId: string): Promise<CoachingMessageRecord[]> {
   const db = makeDb()
   const items = await scanAll(db, {
     TableName: TABLE,
-    FilterExpression: "begins_with(userId, :prefix)",
-    ExpressionAttributeValues: { ":prefix": `coaching_msg_${threadId}_` },
+    FilterExpression: "begins_with(userId, :prefix) AND threadId = :t",
+    ExpressionAttributeValues: { ":prefix": `coaching_msg_${threadId}_`, ":t": threadId },
   })
   return (items as CoachingMessageRecord[])
     .sort((a, b) => a.sentAt.localeCompare(b.sentAt))

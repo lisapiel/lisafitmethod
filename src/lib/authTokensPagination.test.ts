@@ -29,6 +29,9 @@ before(() => {
   for (let i = 0; i < 6; i++) {
     table.put({ userId: `coaching_msg_t1_${i}`, id: String(i), threadId: "t1", sentAt: `2026-11-01T0${i}:00:00.000Z` })
   }
+  for (let i = 0; i < 3; i++) {
+    table.put({ userId: `coaching_msg_t1_x_${i}`, id: `x${i}`, threadId: "t1_x", sentAt: `2026-11-02T0${i}:00:00.000Z` })
+  }
   table.put({ userId: "coaching_goal_g1", id: "g1", clientEmail: "c0@example.test" })
   for (let i = 0; i < 5; i++) {
     table.put({ userId: `nutrition_log_${i}`, id: String(i), clientEmail: "c0@example.test", date: `2026-11-0${i + 1}`, loggedAt: `2026-11-0${i + 1}T12:00:00.000Z` })
@@ -62,6 +65,12 @@ describe("coaching list functions read every page", () => {
     const { listCoachingMessages } = await import("./authTokens")
     const r = await listCoachingMessages("t1")
     assert.deepEqual(r.map((m) => m.id), ["0", "1", "2", "3", "4", "5"])
+  })
+
+  test("messages: a thread id that prefixes another thread never picks up its messages", async () => {
+    const { listCoachingMessages } = await import("./authTokens")
+    assert.deepEqual((await listCoachingMessages("t1")).map((m) => m.threadId), Array(6).fill("t1"))
+    assert.deepEqual((await listCoachingMessages("t1_x")).map((m) => m.id), ["x0", "x1", "x2"])
   })
 
   test("goals, nutrition date range and check-ins", async () => {
