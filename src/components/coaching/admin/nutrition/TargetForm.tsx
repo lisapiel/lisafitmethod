@@ -56,10 +56,16 @@ export function TargetForm({ email, current, initial, onSaved, onCancel }: { ema
         body: { customMacros: values, reason: reason.trim() },
       })
       if (res.ok) { onSaved(); return }
-      setError(errorText(res.data, `The target wasn't saved (error ${res.status}).`))
+      // status 0 means adminJson already filled data.error with a specific
+      // infrastructure reason (session expiry, timeout, network). Any other
+      // non-ok status is a server-side refusal and carries its own error.
+      const fallback = res.status === 0
+        ? "Something stopped the save before the server was reached. Try again."
+        : `The target wasn't saved (error ${res.status}).`
+      setError(errorText(res.data, fallback))
       setStep("edit")
     } catch {
-      setError("Couldn't reach the server. Nothing was changed.")
+      setError("Something unexpected went wrong. Nothing was changed.")
       setStep("edit")
     }
     setSaving(false)
