@@ -183,17 +183,12 @@ export default function AdminHeader() {
       <style>{`
         .lfm-admin-menu-btn { display: none; }
         .lfm-admin-signout, .lfm-admin-menu-btn { white-space: nowrap; flex-shrink: 0; }
-        @media (min-width: 1024px) and (max-width: 1499px) {
-          .lfm-admin-header { height: auto !important; min-height: 60px; padding-block: 0.75rem !important; gap: 1.5rem; }
-          .lfm-admin-header > div { flex-wrap: wrap; row-gap: 0.5rem; column-gap: 2rem !important; min-width: 0; }
-          .lfm-admin-nav { flex-wrap: wrap; row-gap: 0.6rem; column-gap: 1.25rem !important; }
-        }
-        @media (max-width: 1023px) {
+        @media (max-width: 1499px) {
           .lfm-admin-nav, .lfm-admin-signout { display: none !important; }
           .lfm-admin-menu-btn { display: inline-block; }
           .lfm-admin-header { padding: 0 max(1rem, env(safe-area-inset-right, 0px)) 0 max(1rem, env(safe-area-inset-left, 0px)) !important; }
         }
-        @media (min-width: 1024px) { .lfm-admin-menu { display: none; } }
+        @media (min-width: 1500px) { .lfm-admin-menu { display: none; } }
       `}</style>
       <button
         onClick={handleSignOut}
