@@ -1008,9 +1008,23 @@ export async function POST(request: NextRequest) {
         } else if (product === "nutrition") {
           await provisionNutritionUser(email)
         } else if (product === "bundle") {
+          // The payment is a fact whether or not the account setup below
+          // works, and the coaching credit depends on this record.
+          await recordBundlePaymentFromIntent(intent).catch((err) => {
+            const detail = err instanceof Error ? err.message : String(err)
+            console.error("recordBundlePayment failed:", detail)
+            notifyAdmin({
+              kind: "webhook-failure",
+              subject: `Bundle purchase not recorded for ${email}`,
+              headline: "A bundle payment succeeded but its coaching credit record wasn't saved",
+              body: `PaymentIntent ${intent.id} for ${email} succeeded, but saving the bundle purchase record failed:\n\n${detail}\n\nWithout it the coaching credit won't be offered.`,
+              ctaLabel: "Open in Stripe",
+              ctaHref: `https://dashboard.stripe.com/payments/${intent.id}`,
+              meta: { email, paymentIntentId: intent.id, error: detail },
+            }).catch(() => {})
+          })
           await provisionUser(email)
           await provisionNutritionUser(email)
-          await recordBundlePaymentFromIntent(intent).catch((err) => console.error("recordBundlePayment failed:", err))
         } else {
           await provisionUser(email)
           if (includesTracker) {
@@ -1088,6 +1102,42 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // ── Bundle credit: used by a paid invoice ───────────────────────────────
+  // The credit becomes used only when an invoice carrying its coupon is paid.
+  // This runs before provisioning and doesn't depend on it: once the coupon
+  // has come off a paid invoice the credit is spent, and a provisioning
+  // failure must not leave it looking free when the hold lapses. An expired
+  // checkout hands the hold back further down; otherwise the hold lapses.
+  let creditSettlementError: string | null = null
+  if (event.type === "invoice.paid") {
+    const paid = event.data.object as { id?: string; discounts?: unknown[] }
+    const invoiceId = paid.discounts && paid.discounts.length > 0 ? paid.id ?? "" : ""
+    try {
+      const settled = invoiceId ? await settleBundleCreditFromInvoice(makeStripe(), invoiceId) : { outcome: "none" as const }
+      if (settled.outcome === "conflict" || settled.outcome === "no-record") {
+        const amount = `$${(settled.amountCents / 100).toFixed(2)}`
+        notifyAdmin({
+          kind: "webhook-failure",
+          subject: `Bundle credit needs a look: ${settled.email}`,
+          headline: "A bundle credit came off an invoice it may not belong to",
+          body: settled.outcome === "conflict"
+            ? `Invoice ${invoiceId} took ${amount} off with the bundle credit, but the credit was already used on invoice ${settled.usedForInvoiceId ?? "(unknown)"}.`
+            : `Invoice ${invoiceId} took ${amount} off with the bundle credit, but there is no bundle purchase on file for ${settled.email}.`,
+          ctaLabel: "Open in Stripe",
+          ctaHref: `https://dashboard.stripe.com/invoices/${invoiceId}`,
+          meta: { email: settled.email, invoiceId },
+        }).catch(() => {})
+      }
+    } catch (error) {
+      creditSettlementError = error instanceof Error ? error.message : String(error)
+      console.error("bundle credit settlement failed:", creditSettlementError)
+    }
+  }
+  // A failed settlement still lets provisioning below run, then asks Stripe
+  // to retry the event. Both steps are safe to repeat.
+  const settlementFailed = () =>
+    NextResponse.json({ error: "Bundle credit settlement failed", detail: creditSettlementError }, { status: 500 })
+
   // ── Subscription invoice events (masterclass + coaching) ─────────────────
   // Still handles renewals AND acts as a fallback if
   // checkout.session.completed didn't fire for the first payment.
@@ -1109,14 +1159,14 @@ export async function POST(request: NextRequest) {
         typeof l.subscription === "string" ? l.subscription : l.subscription?.id
       ).find(Boolean) ?? "")
 
-    if (!subscriptionId) return NextResponse.json({ received: true })
+    if (!subscriptionId) return creditSettlementError ? settlementFailed() : NextResponse.json({ received: true })
 
     const subscription = await makeStripe().subscriptions.retrieve(subscriptionId)
     const product = subscription.metadata?.product
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
     const currentPeriodEnd = extractCurrentPeriodEnd(subscription)
 
-    if (!email) return NextResponse.json({ received: true })
+    if (!email) return creditSettlementError ? settlementFailed() : NextResponse.json({ received: true })
 
     try {
       if (product === "masterclass") {
@@ -1145,6 +1195,7 @@ export async function POST(request: NextRequest) {
       console.error("invoice.paid failed:", detail)
       return NextResponse.json({ error: "Subscription provisioning failed", detail }, { status: 500 })
     }
+    if (creditSettlementError) return settlementFailed()
   }
 
   if (event.type === "customer.subscription.deleted") {
@@ -1157,36 +1208,6 @@ export async function POST(request: NextRequest) {
       )
     }
     // coaching subscriptions handled in the coaching block below
-  }
-
-  // ── Bundle credit: used by a paid first invoice, or given back ──────────
-  // The credit becomes used only when an invoice carrying its coupon is paid.
-  // An expired checkout hands the hold back straight away; otherwise the hold
-  // lapses on its own.
-  if (event.type === "invoice.paid") {
-    const paid = event.data.object as { id?: string; discounts?: unknown[] }
-    const invoiceId = paid.discounts && paid.discounts.length > 0 ? paid.id ?? "" : ""
-    try {
-      const settled = invoiceId ? await settleBundleCreditFromInvoice(makeStripe(), invoiceId) : { outcome: "none" as const }
-      if (settled.outcome === "conflict" || settled.outcome === "no-record") {
-        const amount = `$${(settled.amountCents / 100).toFixed(2)}`
-        notifyAdmin({
-          kind: "webhook-failure",
-          subject: `Bundle credit needs a look: ${settled.email}`,
-          headline: "A bundle credit came off an invoice it may not belong to",
-          body: settled.outcome === "conflict"
-            ? `Invoice ${invoiceId} took ${amount} off with the bundle credit, but the credit was already used on invoice ${settled.usedForInvoiceId ?? "(unknown)"}.`
-            : `Invoice ${invoiceId} took ${amount} off with the bundle credit, but there is no bundle purchase on file for ${settled.email}.`,
-          ctaLabel: "Open in Stripe",
-          ctaHref: `https://dashboard.stripe.com/invoices/${invoiceId}`,
-          meta: { email: settled.email, invoiceId },
-        }).catch(() => {})
-      }
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error)
-      console.error("bundle credit settlement failed:", detail)
-      return NextResponse.json({ error: "Bundle credit settlement failed", detail }, { status: 500 })
-    }
   }
 
   if (event.type === "checkout.session.expired") {

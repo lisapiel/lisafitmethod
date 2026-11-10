@@ -1,4 +1,5 @@
 import Stripe from "stripe"
+import { createHash } from "crypto"
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb"
 import {
@@ -6,8 +7,11 @@ import {
   getCoachingClientRecord,
   updateCoachingApplication,
   type CoachingApplication,
+  type CommitmentType,
 } from "@/lib/authTokens"
-import { creditApplicationOf, reserveCreditForCheckout } from "@/lib/bundleCreditAssess"
+import { creditApplicationOf, reserveCreditForCheckout, type CheckoutCredit } from "@/lib/bundleCreditAssess"
+import { readBundleCreditChoice, releaseBundleCredit } from "@/lib/bundleCreditStore"
+import { releaseBundleCreditForSession } from "@/lib/bundleCreditWebhook"
 
 function makeStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY ?? "")
@@ -91,7 +95,13 @@ export type CheckoutFacts = {
     paymentStatus: string | null
     url: string | null
     expiresAtMs: number
+    // The terms the session was built on, from its metadata. Null on
+    // sessions made before terms were recorded.
+    termsKey?: string | null
   } | null
+  // The terms the application carries now. When given, an open session is
+  // only reused if it was built on exactly these.
+  termsKey?: string
   now: number
 }
 
@@ -122,9 +132,11 @@ export function decideCheckout(facts: CheckoutFacts): CheckoutAction {
     if (session.status === "complete" || session.paymentStatus === "paid") {
       return { action: "awaiting-activation" }
     }
-    // Still open with enough life left: the same session answers a second
-    // click on Process Payment instead of opening a competing one.
-    if (session.status === "open" && session.url && session.expiresAtMs - facts.now > REUSE_FLOOR_MS) {
+    // Still open with enough life left, on the terms Lisa approved last: the
+    // same session answers a second click on Process Payment instead of
+    // opening a competing one. A session on older terms is replaced.
+    const sameTerms = facts.termsKey === undefined || session.termsKey === facts.termsKey
+    if (session.status === "open" && session.url && sameTerms && session.expiresAtMs - facts.now > REUSE_FLOOR_MS) {
       return { action: "reuse", url: session.url }
     }
   }
@@ -163,6 +175,116 @@ export async function findLiveCoachingSubscription(
   return null
 }
 
+// The terms a session is built on, as one string kept in its metadata. A
+// session is only ever reused for the same price, commitment and bundle
+// credit choice, so re-approving on new terms can't leave the old ones
+// payable.
+export function checkoutTermsKey(terms: {
+  priceCents: number | null | undefined
+  commitmentType: CommitmentType | null | undefined
+  creditChoice: boolean | null
+}): string {
+  const choice = terms.creditChoice === null ? "default" : terms.creditChoice ? "on" : "off"
+  return `v1|${terms.priceCents ?? "none"}|${terms.commitmentType ?? "none"}|credit-${choice}`
+}
+
+// The idempotency key has to change whenever the request does, or Stripe
+// refuses the second, different request with the same key. It covers every
+// parameter (the coupon included) and the session being replaced, so a
+// genuine double submit still collapses into one session.
+export function checkoutIdempotencyKey(applicationId: string, params: unknown, replacesSessionId: string | null): string {
+  const digest = createHash("sha256").update(JSON.stringify({ params, replacesSessionId })).digest("hex").slice(0, 40)
+  return `coaching-checkout-${applicationId}-${digest}`
+}
+
+// Stripe's own ceiling is 24 hours. Rounded down to ten minutes, so two
+// requests a moment apart build identical parameters.
+export function checkoutExpiresAt(nowMs: number): number {
+  const bucket = Math.floor(nowMs / 600_000) * 600
+  return bucket + 24 * 60 * 60
+}
+
+type SessionLike = { id: string; url: string | null; expires_at: number; status?: string | null; payment_status?: string | null }
+
+export interface SessionStripe {
+  checkout: {
+    sessions: {
+      create(params: Stripe.Checkout.SessionCreateParams, options: { idempotencyKey: string }): Promise<SessionLike>
+      retrieve(id: string): Promise<SessionLike>
+      expire(id: string): Promise<unknown>
+    }
+  }
+}
+
+export type RetireOutcome = "closed" | "paid" | "unknown"
+
+// Closes a session that is being replaced. If Stripe won't expire it, it is
+// read again: it may have just been paid, and then no second session may be
+// made.
+export async function retireCheckoutSession(stripe: SessionStripe, sessionId: string): Promise<RetireOutcome> {
+  try {
+    await stripe.checkout.sessions.expire(sessionId)
+    return "closed"
+  } catch { /* already closed, just paid, or Stripe is unavailable */ }
+  const now = await stripe.checkout.sessions.retrieve(sessionId).catch(() => null)
+  if (!now) return "unknown"
+  if (now.status === "complete" || now.payment_status === "paid") return "paid"
+  if (now.status === "expired") return "closed"
+  return "unknown"
+}
+
+export interface MintDeps {
+  stripe: SessionStripe
+  reserveCredit: () => Promise<CheckoutCredit | null>
+  releaseCredit: (credit: CheckoutCredit) => Promise<unknown>
+  // Gives back the hold the replaced session's coupon had, if it still has it.
+  releaseReplacedCredit: () => Promise<unknown>
+  now?: () => number
+}
+
+export type MintResult =
+  | { kind: "awaiting-activation"; sessionId: string }
+  | { kind: "created"; session: SessionLike; credit: CheckoutCredit | null }
+
+// Replaces any open session, holds the credit, and creates the new session.
+// Whatever fails after the hold is taken gives the hold back (only if it is
+// still this checkout's), so a failed checkout never costs the credit.
+export async function mintCheckoutSession(
+  deps: MintDeps,
+  input: {
+    applicationId: string
+    replaces: { id: string; open: boolean } | null
+    termsKey: string
+    buildParams: (bundleCouponId: string | null, expiresAt: number) => Stripe.Checkout.SessionCreateParams
+  },
+): Promise<MintResult> {
+  if (input.replaces?.open) {
+    const outcome = await retireCheckoutSession(deps.stripe, input.replaces.id)
+    if (outcome === "paid") return { kind: "awaiting-activation", sessionId: input.replaces.id }
+    if (outcome === "unknown") {
+      throw new Error("I couldn't close your earlier checkout just now. Nothing was charged. Please try again in a minute.")
+    }
+    await deps.releaseReplacedCredit().catch((err) =>
+      console.error("bundle credit release for replaced session failed:", err),
+    )
+  }
+
+  const credit = await deps.reserveCredit()
+  try {
+    const params = input.buildParams(credit?.couponId ?? null, checkoutExpiresAt((deps.now ?? Date.now)()))
+    const session = await deps.stripe.checkout.sessions.create(params, {
+      idempotencyKey: checkoutIdempotencyKey(input.applicationId, params, input.replaces?.id ?? null),
+    })
+    if (!session.url) throw new Error("Stripe returned a session without a URL")
+    return { kind: "created", session, credit }
+  } catch (err) {
+    if (credit) {
+      await deps.releaseCredit(credit).catch((e) => console.error("bundle credit release after failed checkout failed:", e))
+    }
+    throw err
+  }
+}
+
 export async function prepareCoachingCheckout(input: {
   application: CoachingApplication
   ownerEmail: string
@@ -172,6 +294,11 @@ export async function prepareCoachingCheckout(input: {
   const { application, ownerEmail, ownerName, baseUrl } = input
   const stripe = makeStripe()
   const emails = candidateEmails(application, ownerEmail)
+
+  const priceInCents = application.approvedPriceInCents
+  const commitmentType = application.approvedCommitmentType
+  const creditChoice = await readBundleCreditChoice(application.id, priceInCents ?? null).catch(() => null)
+  const termsKey = checkoutTermsKey({ priceCents: priceInCents, commitmentType, creditChoice })
 
   // Gather the facts, then apply the rule. Stripe is asked directly rather
   // than trusting our own records, because a stale record is exactly what a
@@ -183,14 +310,17 @@ export async function prepareCoachingCheckout(input: {
       : await findLiveCoachingSubscription(stripe, emails).catch(() => null)
 
   let existingSession: CheckoutFacts["existingSession"] = null
+  let replacedSession: Stripe.Checkout.Session | null = null
   if (application.stripeCheckoutSessionId) {
     try {
       const retrieved = await stripe.checkout.sessions.retrieve(application.stripeCheckoutSessionId)
+      replacedSession = retrieved
       existingSession = {
         status: retrieved.status ?? null,
         paymentStatus: retrieved.payment_status ?? null,
         url: retrieved.url ?? null,
         expiresAtMs: (retrieved.expires_at ?? 0) * 1000,
+        termsKey: retrieved.metadata?.checkoutTerms ?? null,
       }
     } catch {
       // Unknown or unreadable session — treated as absent, so a fresh one is minted.
@@ -204,6 +334,7 @@ export async function prepareCoachingCheckout(input: {
     applicationSubscriptionId: application.stripeSubscriptionId ?? null,
     liveSubscriptionId,
     existingSession,
+    termsKey,
     now: Date.now(),
   })
 
@@ -219,7 +350,8 @@ export async function prepareCoachingCheckout(input: {
 
   // Nothing live, nothing paid: mint a new session on the approved terms —
   // but only one request gets to do it.
-  if (!(await claimMintLock(application.id))) {
+  const claimed = await claimMintLock(application.id)
+  if (!claimed) {
     // Someone else is minting right now. Wait for them rather than opening a
     // competing session, then read back what they produced.
     for (let attempt = 0; attempt < 8; attempt++) {
@@ -229,7 +361,7 @@ export async function prepareCoachingCheckout(input: {
       if (sid && sid !== application.stripeCheckoutSessionId) {
         try {
           const made = await stripe.checkout.sessions.retrieve(sid)
-          if (made.status === "open" && made.url) {
+          if (made.status === "open" && made.url && made.metadata?.checkoutTerms === termsKey) {
             return { kind: "checkout", url: made.url, sessionId: made.id, reused: true }
           }
         } catch { /* fall through and mint our own */ }
@@ -237,84 +369,109 @@ export async function prepareCoachingCheckout(input: {
     }
   }
 
-
-  const priceInCents = application.approvedPriceInCents
-  const commitmentType = application.approvedCommitmentType
-  if (!priceInCents || !commitmentType) {
-    throw new Error("Application is missing its approved price or commitment terms")
-  }
-
-  // The bundle credit is held for this one application before any coupon
-  // exists, so a retry, a second tab or a second application cannot carry
-  // another. Billing-change applications for existing clients never get it.
-  let bundleCouponId: string | null = null
-  if (commitmentType === "THREE_MONTH_MINIMUM") {
-    const credit = await reserveCreditForCheckout(
-      { stripe, readClient: getCoachingClientRecord },
-      { application: creditApplicationOf(application), commitmentType, priceCents: priceInCents },
-    )
-    if (credit) {
-      bundleCouponId = credit.couponId
+  try {
+    if (!priceInCents || !commitmentType) {
+      throw new Error("Application is missing its approved price or commitment terms")
     }
-  }
 
-  const metadata = {
-    product: "coaching",
-    // The address that will be provisioned. The webhook reads this, so a
-    // linked application activates the account the person actually uses.
-    customerEmail: ownerEmail,
-    customerName: ownerName,
-    applicationId: application.id,
-    applicantEmail: application.email,
-    coachingCommitmentType: commitmentType,
-    coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
-    ...(bundleCouponId ? { bundleCouponId } : {}),
-  }
-
-  // Close the session being replaced, so an application never has two open
-  // ways to pay sitting in two different browser tabs.
-  if (application.stripeCheckoutSessionId && existingSession?.status === "open") {
-    await stripe.checkout.sessions.expire(application.stripeCheckoutSessionId).catch(() => {})
-  }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    payment_method_types: ["card"],
-    customer_email: ownerEmail,
-    line_items: [{
-      price_data: {
-        currency: "usd",
-        product_data: { name: "1:1 Coaching — Lisa Fit Method" },
-        unit_amount: priceInCents,
-        recurring: { interval: "month" },
+    // The bundle credit is held for this one application before any coupon
+    // exists, so a retry, a second tab or a second application cannot carry
+    // another. Billing-change applications for existing clients never get it.
+    const minted = await mintCheckoutSession({
+      stripe,
+      reserveCredit: () => commitmentType === "THREE_MONTH_MINIMUM"
+        ? reserveCreditForCheckout(
+          { stripe, readClient: getCoachingClientRecord },
+          { application: creditApplicationOf(application), commitmentType, priceCents: priceInCents },
+        )
+        : Promise.resolve(null),
+      releaseCredit: (credit) => releaseBundleCredit({ email: credit.email, applicationId: application.id, couponId: credit.couponId }),
+      releaseReplacedCredit: async () => {
+        if (replacedSession) await releaseBundleCreditForSession(stripe, replacedSession)
       },
-      quantity: 1,
-    }],
-    ...(bundleCouponId ? { discounts: [{ coupon: bundleCouponId }] } : {}),
-    metadata,
-    subscription_data: { metadata },
-    // Back to their own dashboard, which shows enrolment finishing and then
-    // opens the coaching portal once Stripe confirms.
-    success_url: `${baseUrl}/account?enrolled=1`,
-    cancel_url: `${baseUrl}/coaching/accept/${application.id}`,
-    // Stripe's own ceiling is 24 hours. The link that survives is the
-    // invitation, not this.
-    expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-  }, {
-    // Second net under the lock: if two creates do get through, Stripe itself
-    // returns one session rather than two.
-    idempotencyKey: `coaching-checkout-${application.id}-${Math.floor(Date.now() / 600_000)}`,
-  })
+    }, {
+      applicationId: application.id,
+      // Close the session being replaced, so an application never has two
+      // open ways to pay sitting in two different browser tabs.
+      replaces: application.stripeCheckoutSessionId
+        ? { id: application.stripeCheckoutSessionId, open: existingSession?.status === "open" }
+        : null,
+      termsKey,
+      buildParams: (bundleCouponId, expiresAt) => {
+        const metadata = {
+          product: "coaching",
+          // The address that will be provisioned. The webhook reads this, so a
+          // linked application activates the account the person actually uses.
+          customerEmail: ownerEmail,
+          customerName: ownerName,
+          applicationId: application.id,
+          applicantEmail: application.email,
+          coachingCommitmentType: commitmentType,
+          coachingCommitmentMonths: commitmentType === "THREE_MONTH_MINIMUM" ? "3" : "0",
+          checkoutTerms: termsKey,
+          ...(bundleCouponId ? { bundleCouponId } : {}),
+        }
+        return {
+          mode: "subscription",
+          payment_method_types: ["card"],
+          customer_email: ownerEmail,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: { name: "1:1 Coaching — Lisa Fit Method" },
+              unit_amount: priceInCents,
+              recurring: { interval: "month" },
+            },
+            quantity: 1,
+          }],
+          ...(bundleCouponId ? { discounts: [{ coupon: bundleCouponId }] } : {}),
+          metadata,
+          subscription_data: { metadata },
+          // Back to their own dashboard, which shows enrolment finishing and then
+          // opens the coaching portal once Stripe confirms.
+          success_url: `${baseUrl}/account?enrolled=1`,
+          cancel_url: `${baseUrl}/coaching/accept/${application.id}`,
+          // The link that survives is the invitation, not this.
+          expires_at: expiresAt,
+        }
+      },
+    })
 
-  if (!session.url) throw new Error("Stripe returned a session without a URL")
+    if (minted.kind === "awaiting-activation") {
+      return { kind: "awaiting-activation", sessionId: minted.sessionId }
+    }
+    const { session, credit } = minted
+    const url = session.url ?? ""
 
-  await updateCoachingApplication(application.id, {
-    stripeCheckoutUrl: session.url,
-    stripeCheckoutSessionId: session.id,
-    stripeCheckoutExpiresAt: new Date((session.expires_at ?? 0) * 1000).toISOString(),
-    ...(bundleCouponId ? { bundleCouponId } : {}),
-  }).catch((err) => console.error("updateCoachingApplication (checkout session) failed:", err))
+    await updateCoachingApplication(application.id, {
+      stripeCheckoutUrl: url,
+      stripeCheckoutSessionId: session.id,
+      stripeCheckoutExpiresAt: new Date((session.expires_at ?? 0) * 1000).toISOString(),
+      ...(credit ? { bundleCouponId: credit.couponId } : {}),
+    }).catch((err) => console.error("updateCoachingApplication (checkout session) failed:", err))
 
-  await releaseMintLock(application.id)
-  return { kind: "checkout", url: session.url, sessionId: session.id, reused: false }
+    return { kind: "checkout", url, sessionId: session.id, reused: false }
+  } finally {
+    if (claimed) await releaseMintLock(application.id)
+  }
+}
+
+// Called when Lisa approves (or re-approves) an application. An open session
+// built on different terms is closed straight away, so an old Stripe tab
+// can't be paid at the old price or with a credit she has since turned off.
+// A session that turns out to be paid is left alone.
+export async function retireCheckoutIfTermsChanged(application: CoachingApplication, termsKey: string): Promise<RetireOutcome | "kept" | "none"> {
+  const sessionId = application.stripeCheckoutSessionId
+  if (!sessionId) return "none"
+  const stripe = makeStripe()
+  const session = await stripe.checkout.sessions.retrieve(sessionId).catch(() => null)
+  if (!session || session.status !== "open") return "none"
+  if (session.metadata?.checkoutTerms === termsKey) return "kept"
+  const outcome = await retireCheckoutSession(stripe, sessionId)
+  if (outcome === "closed") {
+    await releaseBundleCreditForSession(stripe, session).catch((err) =>
+      console.error("bundle credit release for replaced session failed:", err),
+    )
+  }
+  return outcome
 }

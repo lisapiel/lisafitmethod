@@ -13,7 +13,8 @@ import {
 } from "@/lib/authTokens"
 import { adminMfaOk } from "@/lib/adminMfa"
 import { generateInvitationToken, storeInvitationToken } from "@/lib/invitationTokens"
-import { saveBundleCreditChoice } from "@/lib/bundleCreditStore"
+import { readBundleCreditChoice, saveBundleCreditChoice } from "@/lib/bundleCreditStore"
+import { checkoutTermsKey, retireCheckoutIfTermsChanged } from "@/lib/coachingCheckout"
 
 export const dynamic = "force-dynamic"
 
@@ -201,6 +202,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         decidedBy: adminEmail,
       })
     }
+
+    // A checkout already opened on the previous terms is closed, so the old
+    // price or credit can't be paid from a tab left open. Checkout also
+    // refuses to reuse it, so a failure here is only logged.
+    const creditChoice = await readBundleCreditChoice(id, priceInCents).catch(() => null)
+    await retireCheckoutIfTermsChanged(application, checkoutTermsKey({ priceCents: priceInCents, commitmentType, creditChoice }))
+      .then((outcome) => {
+        if (outcome === "unknown") console.error(`Couldn't close the earlier checkout for application ${id}`)
+      })
+      .catch((err) => console.error("retireCheckoutIfTermsChanged failed:", err))
 
     // No account is created here any more. Approval used to silently mint a
     // Cognito user for the application address with a suppressed random

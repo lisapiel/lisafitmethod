@@ -4,7 +4,7 @@ import {
   type BundlePaymentCheck, type CreditFacts, type CreditPlan,
 } from "./bundleCredit"
 import {
-  attachReservedCoupon, readBundleCreditChoice, readBundlePurchase, releaseBundleCredit, reserveBundleCredit,
+  PENDING_COUPON, attachReservedCoupon, readBundleCreditChoice, readBundlePurchase, releaseBundleCredit, reserveBundleCredit,
   type CreditDb, type StoredBundlePurchase,
 } from "./bundleCreditStore"
 import { STRIPE_UNREACHABLE, readCoachingHistory, verifyBundlePayment, type CoachingHistory, type StripeReader } from "./bundleCreditStripe"
@@ -180,10 +180,20 @@ export async function reserveCreditForCheckout(
     })
     couponId = coupon.id
   } catch (err) {
-    await releaseBundleCredit({ email: purchaseEmail, applicationId: input.application.id, couponId: null }, deps.db).catch(() => {})
+    await releaseBundleCredit({ email: purchaseEmail, applicationId: input.application.id, couponId: PENDING_COUPON }, deps.db).catch(() => {})
     console.error("Stripe coupon create failed:", err)
     throw new Error("I couldn't add your bundle credit to checkout just now. Nothing was charged. Please try again in a minute.")
   }
-  await attachReservedCoupon({ email: purchaseEmail, applicationId: input.application.id, couponId }, deps.db)
+  // The hold can be lost between taking it and here (it lapsed, or the
+  // checkout it replaced was released late). The coupon is then left unused.
+  const attached = await attachReservedCoupon({ email: purchaseEmail, applicationId: input.application.id, couponId }, deps.db)
+    .catch(async (err) => {
+      console.error("attachReservedCoupon failed:", err)
+      await releaseBundleCredit({ email: purchaseEmail, applicationId: input.application.id, couponId: PENDING_COUPON }, deps.db).catch(() => {})
+      return false
+    })
+  if (!attached) {
+    throw new Error("I couldn't add your bundle credit to checkout just now. Nothing was charged. Please try again in a minute.")
+  }
   return { couponId, email: purchaseEmail, amountCents: plan.appliedCents }
 }

@@ -2,11 +2,14 @@ import { test, describe, beforeEach } from "node:test"
 import assert from "node:assert/strict"
 import { FakeTable } from "./testing/fakeDynamo"
 import {
-  parseBundlePurchase, readBundlePurchase, recordBundlePayment, recordBundleRefund, reserveBundleCredit,
-  saveBundleCreditChoice, type CreditDb,
+  attachReservedCoupon, parseBundlePurchase, readBundlePurchase, recordBundlePayment, recordBundleRefund, releaseBundleCredit,
+  reserveBundleCredit, saveBundleCreditChoice, type CreditDb,
 } from "./bundleCreditStore"
 import { reserveCreditForCheckout, assessBundleCredit, creditApplicationOf, type CouponCreator } from "./bundleCreditAssess"
-import { verifyBundlePayment, bundleCreditDiscountOnInvoice, readCoachingHistory, type StripeReader } from "./bundleCreditStripe"
+import {
+  STRIPE_PAYMENT_NOT_FOUND, STRIPE_UNREACHABLE, isDefiniteStripeRefusal, verifyBundlePayment, bundleCreditDiscountOnInvoice,
+  readCoachingHistory, type StripeReader,
+} from "./bundleCreditStripe"
 import {
   recordBundlePaymentFromIntent, releaseBundleCreditForSession, settleBundleCreditFromInvoice, syncBundleCreditFromCharge,
   type WebhookStripe,
@@ -33,6 +36,7 @@ type Call = { method: string; args: unknown[] }
 function stubStripe(over: {
   intent?: unknown
   intentThrows?: boolean
+  intentError?: unknown
   disputes?: unknown[]
   customers?: Record<string, string[]>
   subscriptions?: Record<string, unknown[]>
@@ -48,6 +52,7 @@ function stubStripe(over: {
       retrieve: async (...args) => {
         log("paymentIntents.retrieve", ...args)
         if (over.intentThrows) throw new Error("network")
+        if (over.intentError) throw over.intentError
         return over.intent
       },
     },
@@ -447,5 +452,130 @@ describe("history and summaries require real purchase data", () => {
     const a = await assessBundleCredit({ stripe: null, db, readClient }, { application: creditApplicationOf(app), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW })
     assert.equal(a.purchaseEmail, BUYER)
     assert.equal(a.plan.appliedCents, 13700)
+  })
+})
+
+const stripeError = (statusCode: number | undefined, code?: string) =>
+  Object.assign(new Error("stripe said no"), { type: "StripeError", statusCode, code })
+
+describe("settled from the paid invoice alone", () => {
+  test("a paid invoice spends the credit even if the hold lapses before anything else succeeds", async () => {
+    await seedPurchase()
+    const { stripe } = stubStripe()
+    const deps = { stripe, db, readClient }
+    await reserveCreditForCheckout(deps, { application: creditApplicationOf(application("a1")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW })
+    // The webhook settles before provisioning, so this is all that has to
+    // work for the credit to count as used.
+    assert.equal((await settleBundleCreditFromInvoice(invoiceStripe({ email: BUYER, amount: 13700 }), "in_1", db)).outcome, "marked")
+    const longAfter = "2026-11-08T15:00:00.000Z"
+    for (const id of ["a1", "a2"]) {
+      const again = await reserveCreditForCheckout(deps, { application: creditApplicationOf(application(id)), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: longAfter })
+      assert.equal(again, null)
+    }
+    const a = await assessBundleCredit({ stripe: null, db, readClient }, { application: creditApplicationOf(application("a2")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: longAfter })
+    assert.ok(a.plan.blocks.includes("used"))
+    // A retried event for the same invoice changes nothing.
+    assert.equal((await settleBundleCreditFromInvoice(invoiceStripe({ email: BUYER, amount: 13700 }), "in_1", db)).outcome, "already-marked")
+  })
+})
+
+describe("a payment Stripe doesn't know", () => {
+  function legacy() {
+    table.put({ userId: `bundle_purchase_${BUYER}`, email: BUYER, purchasedAt: PURCHASED, paymentIntentId: "pi_gone" })
+  }
+  test("only network, server, rate-limit and key errors count as unreachable", () => {
+    assert.equal(isDefiniteStripeRefusal(stripeError(404, "resource_missing")), true)
+    assert.equal(isDefiniteStripeRefusal(stripeError(undefined, "resource_missing")), true)
+    assert.equal(isDefiniteStripeRefusal(stripeError(400, "parameter_invalid")), true)
+    for (const transient of [stripeError(500), stripeError(503), stripeError(429), stripeError(401), stripeError(403), stripeError(undefined), new Error("ECONNRESET"), null]) {
+      assert.equal(isDefiniteStripeRefusal(transient), false)
+    }
+  })
+  test("not found: couldn't verify, and checkout goes ahead at full price", async () => {
+    legacy()
+    const { stripe, calls } = stubStripe({ intentError: stripeError(404, "resource_missing") })
+    const check = await verifyBundlePayment(await readBundlePurchase(BUYER, db), stripe)
+    assert.equal(check.state === "unverified" && check.reason, STRIPE_PAYMENT_NOT_FOUND)
+    const credit = await reserveCreditForCheckout({ stripe, db, readClient }, { application: creditApplicationOf(application("a1")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW })
+    assert.equal(credit, null)
+    assert.equal(calls.some((c) => c.method === "coupons.create"), false)
+    const a = await assessBundleCredit({ stripe, db, readClient }, { application: creditApplicationOf(application("a1")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW })
+    assert.deepEqual(a.plan.blocks, ["unverified"])
+  })
+  test("Stripe actually down: checkout still stops and can be retried", async () => {
+    legacy()
+    const { stripe } = stubStripe({ intentError: stripeError(503) })
+    const check = await verifyBundlePayment(await readBundlePurchase(BUYER, db), stripe)
+    assert.equal(check.state === "unverified" && check.reason, STRIPE_UNREACHABLE)
+    await assert.rejects(
+      reserveCreditForCheckout({ stripe, db, readClient }, { application: creditApplicationOf(application("a1")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW }),
+      /try again/,
+    )
+  })
+})
+
+describe("holds between reserving and attaching the coupon", () => {
+  const until = "2026-11-06T16:00:00.000Z"
+  test("a late expiry for the checkout being replaced doesn't release the new hold", async () => {
+    await seedPurchase()
+    await reserveBundleCredit({ email: BUYER, applicationId: "a1", until, now: NOW }, db)
+    await attachReservedCoupon({ email: BUYER, applicationId: "a1", couponId: "coupon_old" }, db)
+    // The replacement takes the hold, then the old session's expiry arrives
+    // before the new coupon is attached.
+    await reserveBundleCredit({ email: BUYER, applicationId: "a1", until, now: NOW }, db)
+    assert.equal(await releaseBundleCredit({ email: BUYER, applicationId: "a1", couponId: "coupon_old" }, db), false)
+    assert.equal(await attachReservedCoupon({ email: BUYER, applicationId: "a1", couponId: "coupon_new" }, db), true)
+    assert.equal((await readBundlePurchase(BUYER, db))?.usage.reservedCouponId, "coupon_new")
+  })
+  test("a hold lost before the coupon is attached stops checkout instead of adding a coupon with no hold", async () => {
+    await seedPurchase()
+    const { stripe } = stubStripe()
+    let stolen = false
+    const sneaky: CreditDb = {
+      send: async (c) => {
+        // Another application takes the lapsed hold just as the coupon is made.
+        if (!stolen && c.constructor.name === "PutCommand" && (c.input as { Item?: Record<string, unknown> }).Item?.reservedCouponId === "pending") {
+          const r = (await table.send(c)) as { Item?: Record<string, unknown> }
+          stolen = true
+          const item = table.items.get(`bundle_purchase_${BUYER}`) ?? {}
+          table.put({ ...item, reservedForApplicationId: "a2", creditRev: Number(item.creditRev ?? 0) + 1 })
+          return r
+        }
+        return (await table.send(c)) as { Item?: Record<string, unknown> }
+      },
+    }
+    await assert.rejects(
+      reserveCreditForCheckout({ stripe, db: sneaky, readClient }, { application: creditApplicationOf(application("a1")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW }),
+      /Nothing was charged/,
+    )
+    assert.equal((await readBundlePurchase(BUYER, db))?.usage.reservedForApplicationId, "a2")
+  })
+})
+
+describe("a dispute or refund before the purchase was recorded", () => {
+  const verifiedIntent = {
+    id: "pi_bundle", status: "succeeded", amount_received: 13700, currency: "usd", created: Date.parse(PURCHASED) / 1000,
+    metadata: { product: "bundle", customerEmail: BUYER },
+  }
+  const early: WebhookStripe = {
+    invoices: { retrieve: async () => null },
+    paymentIntents: { retrieve: async () => verifiedIntent },
+    coupons: { retrieve: async () => null },
+  }
+  test("the dispute is kept, on a record written from the verified payment", async () => {
+    await syncBundleCreditFromCharge(early, { payment_intent: "pi_bundle", amount_refunded: 0 }, { dispute: "open" }, db)
+    const r = await readBundlePurchase(BUYER, db)
+    assert.equal(r?.amountPaidCents, 13700)
+    assert.equal(r?.dispute, "open")
+    // The payment webhook arriving afterwards doesn't wipe the dispute.
+    await recordBundlePaymentFromIntent(verifiedIntent, db)
+    assert.equal((await readBundlePurchase(BUYER, db))?.dispute, "open")
+    const a = await assessBundleCredit({ stripe: null, db, readClient }, { application: creditApplicationOf(application("a1")), commitmentType: "THREE_MONTH_MINIMUM", priceCents: 39700, now: NOW })
+    assert.ok(a.plan.blocks.includes("disputed"))
+  })
+  test("a payment that didn't succeed never creates a record", async () => {
+    const failed: WebhookStripe = { ...early, paymentIntents: { retrieve: async () => ({ ...verifiedIntent, status: "requires_payment_method" }) } }
+    await syncBundleCreditFromCharge(failed, { payment_intent: "pi_bundle", amount_refunded: 0 }, { dispute: "open" }, db)
+    assert.equal(await readBundlePurchase(BUYER, db), null)
   })
 })

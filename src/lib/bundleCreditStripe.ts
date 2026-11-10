@@ -8,6 +8,7 @@ import type { StoredBundlePurchase } from "./bundleCreditStore"
 type Page = Promise<{ data: unknown[] }>
 
 export const STRIPE_UNREACHABLE = "Stripe couldn't be reached"
+export const STRIPE_PAYMENT_NOT_FOUND = "Stripe couldn't find a matching bundle payment"
 
 export interface StripeReader {
   paymentIntents: { retrieve(id: string, params?: { expand?: string[] }): Promise<unknown> }
@@ -23,6 +24,18 @@ const str = (v: unknown): string | null => (typeof v === "string" && v.length > 
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null)
 const idOf = (v: unknown): string | null => str(v) ?? (isObj(v) ? str(v.id) : null)
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : [])
+
+// A definite answer from Stripe (no such payment, or a request it will never
+// accept) can't be fixed by trying again, so it means "couldn't verify", not
+// "Stripe is down". Only network trouble, Stripe's own errors, rate limits and
+// key problems count as unreachable.
+export function isDefiniteStripeRefusal(err: unknown): boolean {
+  if (!isObj(err)) return false
+  if (err.code === "resource_missing") return true
+  const status = num(err.statusCode)
+  if (status === null || status < 400 || status >= 500) return false
+  return status !== 401 && status !== 403 && status !== 408 && status !== 409 && status !== 429
+}
 
 const OPEN_DISPUTE = new Set(["needs_response", "under_review", "warning_needs_response", "warning_under_review"])
 
@@ -94,8 +107,8 @@ export async function verifyBundlePayment(record: StoredBundlePurchase | null, s
     const check = bundlePaymentFromIntent(intent, record.email, disputes)
     // The record's own purchase time is what the window has always used.
     return check.state === "verified" ? { state: "verified", payment: { ...check.payment, purchasedAt: record.purchasedAt } } : check
-  } catch {
-    return unverified(STRIPE_UNREACHABLE)
+  } catch (err) {
+    return unverified(isDefiniteStripeRefusal(err) ? STRIPE_PAYMENT_NOT_FOUND : STRIPE_UNREACHABLE)
   }
 }
 

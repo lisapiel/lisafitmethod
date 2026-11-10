@@ -51,6 +51,12 @@ export async function syncBundleCreditFromCharge(
   if (!isObj(intent) || !isObj(intent.metadata) || intent.metadata.product !== "bundle") return
   const email = str(intent.metadata.customerEmail)
   if (!email) return
+  // A refund or dispute can arrive before the purchase was recorded (the
+  // payment webhook is late, or its write failed). The PaymentIntent just
+  // read from Stripe is the verified payment, so the record is written from
+  // it first and the refund or dispute is never dropped. An existing record
+  // is left as it is.
+  if (intent.status === "succeeded") await recordBundlePaymentFromIntent(intent, db)
   await recordBundleRefund({
     email,
     paymentIntentId: intentId,

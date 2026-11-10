@@ -184,6 +184,11 @@ export async function recordBundleRefund(
   })
 }
 
+// Stands in for the coupon between taking a hold and attaching its coupon.
+// Deleting the old coupon id instead would let a late "expired" event for the
+// checkout being replaced release the new hold in that gap.
+export const PENDING_COUPON = "pending"
+
 // Holds the credit for one application while its checkout is open. Fails if
 // it is used, or held by another application whose hold hasn't lapsed.
 export async function reserveBundleCredit(
@@ -194,8 +199,9 @@ export async function reserveBundleCredit(
     const existing = parseBundlePurchase(item)
     if (!item || !existing) return { next: null, result: false }
     if (!canReserve(existing.usage, input.applicationId, input.now)) return { next: null, result: false }
-    const next: Record<string, unknown> = { ...item, reservedForApplicationId: input.applicationId, reservedUntil: input.until }
-    delete next.reservedCouponId
+    const next: Record<string, unknown> = {
+      ...item, reservedForApplicationId: input.applicationId, reservedUntil: input.until, reservedCouponId: PENDING_COUPON,
+    }
     return { next, result: true }
   })
 }
