@@ -17,6 +17,7 @@ const CLIENT_FACING = [
   "src/components/coaching/NutritionComposer.client.tsx",
   "src/app/coaching/accept-terms",
   "src/lib/coachingRecords.ts",
+  "src/lib/checkInAnswers.ts",
   "src/app/api/admin/coaching/applications",
   "src/app/api/admin/coaching/send-waiver-link",
   "src/app/api/admin/coaching/check-ins",

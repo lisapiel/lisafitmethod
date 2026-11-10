@@ -7,25 +7,49 @@ import { resolveMacrosFor } from "@/lib/nutrition"
 import { addDaysToKey, localDateKey } from "@/lib/localDate"
 import type { CoachingClientRecord, NutritionLogRecord } from "@/lib/authTokens"
 import ProgressRing from "@/components/portal/ProgressRing"
+import { buildWeightHistory, formatReading, formatWeighInDay, weighInDayKey, type WeightReading } from "@/lib/weightHistory"
+import { fromLbs } from "@/lib/weight"
 
 type Props = {
   token: string
   clientEmail: string
   submittedAt: string
-  weight: number | null
-  weightUnit: string | null
+  // The check-in's weight answer as one line (new weight, same as last time,
+  // skipped, or an older check-in's value). Null when none was given.
+  weightLine: string | null
+  weightStatus: string | null
   workoutsCompleted: number | null
   workoutsPlanned: number | null
   trainingRating: number | null
   recovery: Array<{ label: string; value: number | null; higherIsWorse?: boolean }>
 }
 
-type CheckInLite = { clientEmail: string; submittedAt: string; weight?: number | null }
+type CheckInLite = { clientEmail: string; submittedAt: string; weight?: number | null; weightUnit?: string | null; weightStatus?: string | null }
+type SnapshotLite = { snapshotDate?: string; weight?: number | null; weightUnit?: string | null }
+
+// The weigh-ins up to this check-in's day, from check-ins and Progress logs
+// together, with a same-day duplicate counted once.
+function weighInsUpTo(checkIns: CheckInLite[], logged: SnapshotLite[], submittedAt: string, timeZone?: string): WeightReading[] {
+  const day = localDateKey(new Date(submittedAt), timeZone)
+  return buildWeightHistory({ checkIns: checkIns.filter((c) => c.submittedAt <= submittedAt), logged, timeZone })
+    .filter((r) => (weighInDayKey(r.at, timeZone) ?? "") <= day)
+}
+
+function weightChangeLine(history: WeightReading[], status: string | null): string {
+  const current = history[history.length - 1]
+  if (!current) return status === "skipped" ? "No weigh-ins yet" : ""
+  if (status === "skipped") return `Last weigh-in ${formatReading(current)} on ${formatWeighInDay(current.at)}`
+  const prev = history[history.length - 2]
+  if (!prev) return "First weigh-in"
+  const change = +fromLbs(current.lbs - prev.lbs, current.unit).toFixed(1)
+  const unit = current.unit === "KG" ? "kg" : "lb"
+  return `${change > 0 ? "+" : ""}${change} ${unit} from ${formatWeighInDay(prev.at)} to ${formatWeighInDay(current.at)}`
+}
 
 export default function CheckInContext(p: Props) {
   const [logs, setLogs] = useState<NutritionLogRecord[] | null>(null)
   const [client, setClient] = useState<CoachingClientRecord | null>(null)
-  const [prevWeight, setPrevWeight] = useState<{ weight: number; at: string } | null>(null)
+  const [weighIns, setWeighIns] = useState<{ checkIns: CheckInLite[]; logged: SnapshotLite[] } | null>(null)
   const end = localDateKey(new Date(p.submittedAt))
   const start = addDaysToKey(end, -6)
   const enc = encodeURIComponent(p.clientEmail)
@@ -35,21 +59,24 @@ export default function CheckInContext(p: Props) {
     const h = { Authorization: `Bearer ${p.token}` }
     fetch(`/api/admin/coaching/clients/${enc}/nutrition-logs?from=${start}&to=${end}`, { headers: h }).then((r) => r.json()).then((d) => setLogs(d.logs ?? [])).catch(() => setLogs([]))
     fetch(`/api/admin/coaching/clients/${enc}`, { headers: h }).then((r) => r.json()).then((d) => setClient(d.client ?? null)).catch(() => {})
-    fetch(`/api/admin/coaching/check-ins`, { headers: h }).then((r) => r.json()).then((d: { checkIns?: CheckInLite[] }) => {
-      const prev = (d.checkIns ?? []).filter((c) => c.clientEmail?.toLowerCase() === p.clientEmail.toLowerCase() && c.submittedAt < p.submittedAt && c.weight != null)
-        .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))[0]
-      if (prev) setPrevWeight({ weight: Number(prev.weight), at: prev.submittedAt })
-    }).catch(() => {})
-  }, [p.token, enc, start, end, p.clientEmail, p.submittedAt])
+    Promise.all([
+      fetch(`/api/admin/coaching/check-ins`, { headers: h }).then((r) => r.json()) as Promise<{ checkIns?: CheckInLite[] }>,
+      fetch(`/api/admin/coaching/progress/${enc}`, { headers: h }).then((r) => r.json()) as Promise<{ snapshots?: SnapshotLite[] }>,
+    ]).then(([ci, pr]) => setWeighIns({
+      checkIns: (ci.checkIns ?? []).filter((c) => c.clientEmail?.toLowerCase() === p.clientEmail.toLowerCase()),
+      logged: pr.snapshots ?? [],
+    })).catch(() => setWeighIns({ checkIns: [], logged: [] }))
+  }, [p.token, enc, start, end, p.clientEmail])
 
   const target = client ? resolveMacrosFor(client) : null
   const dailies = logs ? buildDailyTotals({ logs, from: start, to: end, currentTarget: target ?? undefined }) : []
   const summary = logs ? summarizePeriod({ dailies, today: addDaysToKey(end, 1) }) : null
   const est = (logs ?? []).filter((l) => l.source === "message-estimate").length
   const n = summary?.loggedDays ?? 0
-  const unit = (p.weightUnit ?? "LBS").toUpperCase() === "KG" ? "kg" : "lb"
-  const change = p.weight != null && prevWeight ? +(p.weight - prevWeight.weight).toFixed(1) : null
-  const weeks = prevWeight ? Math.max(1, Math.round((Date.parse(p.submittedAt) - Date.parse(prevWeight.at)) / (7 * 864e5))) : null
+  // Logged days carry the client's own time zone; use it to decide which
+  // readings fall on the same day for them.
+  const clientTimeZone = (logs ?? []).find((l) => l.timeZone)?.timeZone
+  const history = weighIns ? weighInsUpTo(weighIns.checkIns, weighIns.logged, p.submittedAt, clientTimeZone) : null
 
   return (
     <section className="ca-ctx" aria-label="Context for this check-in">
@@ -83,8 +110,8 @@ export default function CheckInContext(p: Props) {
       <div className="ca-ctx-grid">
         <div className="ca-ctx-cell">
           <span>Weight</span>
-          <b>{p.weight != null ? `${p.weight} ${unit}` : "Not given"}</b>
-          <span>{change != null ? `${change > 0 ? "+" : ""}${change} ${unit} since the check-in ${weeks} ${weeks === 1 ? "week" : "weeks"} before` : p.weight != null ? "First weight check-in" : ""}</span>
+          <b>{p.weightLine ?? "Not given"}</b>
+          <span>{history === null ? "Loading weigh-ins…" : p.weightLine ? weightChangeLine(history, p.weightStatus) : ""}</span>
         </div>
         <div className="ca-ctx-cell">
           <span>Recovery (1 to 5)</span>

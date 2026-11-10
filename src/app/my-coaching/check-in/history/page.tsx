@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import WeekFromLisa from "@/components/portal/WeekFromLisa"
 import type { ClientAssessment } from "@/lib/coachingRecords"
+import { checkInWeightLine, hungerLabel } from "@/lib/checkInAnswers"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -21,6 +22,8 @@ type CheckIn = {
   // Progress
   weight: number | null
   weightUnit: string | null
+  // A ready-made line: the new weight, "Same as last time (...)", "Skipped this week", or null.
+  weightLine: string | null
   measurementSnapshot: string | null
   // Legacy 1–5 ratings + text
   sleepQuality: number | null
@@ -49,6 +52,7 @@ type CheckIn = {
   // v2 — Nutrition
   nutritionStatus: string | null
   nutritionHelp: string | null
+  hunger: string | null
   // v2 — Weekly reflection
   weeklyWin: string | null
   weeklyChallenge: string | null
@@ -173,6 +177,7 @@ export default function CheckInHistoryPage() {
               schemaVersion: ci.schemaVersion != null ? Number(ci.schemaVersion) : null,
               weight: ci.weight != null ? Number(ci.weight) : null,
               weightUnit: (ci.weightUnit as string | null) ?? null,
+              weightLine: checkInWeightLine(ci),
               measurementSnapshot: (ci.measurementSnapshot as string | null) ?? null,
               sleepQuality: ci.sleepQuality != null ? Number(ci.sleepQuality) : null,
               energyLevel: ci.energyLevel != null ? Number(ci.energyLevel) : null,
@@ -195,6 +200,7 @@ export default function CheckInHistoryPage() {
               recoveryRating: ci.recoveryRating != null ? Number(ci.recoveryRating) : null,
               nutritionStatus: (ci.nutritionStatus as string | null) ?? null,
               nutritionHelp: (ci.nutritionHelp as string | null) ?? null,
+              hunger: hungerLabel(ci.hunger),
               weeklyWin: (ci.weeklyWin as string | null) ?? null,
               weeklyChallenge: (ci.weeklyChallenge as string | null) ?? null,
               adjustmentAreas,
@@ -253,7 +259,7 @@ export default function CheckInHistoryPage() {
                         {formatDate(ci.submittedAt)}
                       </p>
                       <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: 0 }}>
-                        {ci.weight ? `${ci.weight} ${ci.weightUnit ?? ""}` : "No weight logged"}
+                        {ci.weightLine ?? "No weight logged"}
                         {reviewed ? " · Feedback received" : " · Feedback on its way"}
                       </p>
                     </div>
@@ -384,12 +390,17 @@ function V2Body({ ci }: { ci: CheckIn }) {
         </div>
       )}
 
-      {(ci.nutritionStatus || ci.nutritionHelp) && (
+      {(ci.nutritionStatus || ci.nutritionHelp || ci.hunger) && (
         <div style={{ marginBottom: "1rem" }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Nutrition</p>
           {ci.nutritionStatus && (
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.875rem", color: black, margin: "0 0 4px", fontWeight: 600 }}>
               {NUTRITION_STATUS_LABEL[ci.nutritionStatus] ?? ci.nutritionStatus}
+            </p>
+          )}
+          {ci.hunger && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: "0 0 4px" }}>
+              <span style={{ color: muted }}>Hunger: </span>{ci.hunger}
             </p>
           )}
           {ci.nutritionHelp && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, lineHeight: 1.55, margin: 0, whiteSpace: "pre-wrap" }}>{ci.nutritionHelp}</p>}

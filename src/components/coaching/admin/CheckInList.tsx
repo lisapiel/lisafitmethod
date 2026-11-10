@@ -22,7 +22,10 @@ function signals(ci: CoachingCheckInRecord) {
   if (typeof ci.sleepQuality === "number") out.push(`Sleep ${ci.sleepQuality}/5`)
   if (typeof ci.energyLevel === "number") out.push(`Energy ${ci.energyLevel}/5`)
   if (ci.nutritionStatus) out.push(NUTRITION[ci.nutritionStatus] ?? ci.nutritionStatus)
-  if (typeof ci.weight === "number") out.push(`${ci.weight} ${(ci.weightUnit ?? "lbs").toLowerCase()}`)
+  if (ci.weightStatus === "same") out.push("Weight same as last time")
+  else if (ci.weightStatus === "skipped") out.push("Weight skipped")
+  else if (typeof ci.weight === "number") out.push(`${ci.weight} ${(ci.weightUnit ?? "lbs").toLowerCase()}`)
+  if (ci.hunger === "most-days") out.push("Hungry most days")
   return out
 }
 
