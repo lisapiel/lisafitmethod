@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { uploadData, getUrl } from "aws-amplify/storage"
+import { putToSignedUrl, requestClientUpload } from "@/lib/mediaUpload.client"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -45,8 +45,8 @@ interface Attachment {
 type Phase = "idle" | "submitting" | "sent" | "error"
 
 function extForFile(file: File): string {
-  const fromName = file.name.includes(".") ? file.name.split(".").pop()! : ""
-  if (fromName && fromName.length <= 5) return fromName.toLowerCase()
+  const fromName = file.name.includes(".") ? file.name.split(".").pop()!.toLowerCase() : ""
+  if (/^[a-z0-9]{1,5}$/.test(fromName)) return fromName
   if (file.type === "image/jpeg") return "jpg"
   if (file.type === "image/png") return "png"
   if (file.type === "image/webp") return "webp"
@@ -54,11 +54,7 @@ function extForFile(file: File): string {
   return "jpg"
 }
 
-function randomId(): string {
-  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
-}
-
-export default function NutritionComposer({ email }: { email: string }) {
+export default function NutritionComposer() {
   const [text, setText] = useState("")
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [phase, setPhase] = useState<Phase>("idle")
@@ -97,39 +93,26 @@ export default function NutritionComposer({ email }: { email: string }) {
 
     // Add all attachments in uploading state first so the UI shows previews
     // immediately; each upload progresses independently.
-    const emailSlug = email.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
-    const newAttachments: Attachment[] = accepted.map((file) => {
-      const s3Key = `media/nutrition-messages/${emailSlug}/${Date.now()}-${randomId()}.${extForFile(file)}`
-      return {
-        file,
-        previewUrl: URL.createObjectURL(file),
-        s3Key: null,
-        progress: 0,
-        error: null,
-        uploading: true,
-        _plannedKey: s3Key,
-      } as Attachment & { _plannedKey: string }
-    })
+    const newAttachments: Attachment[] = accepted.map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+      s3Key: null,
+      progress: 0,
+      error: null,
+      uploading: true,
+    }))
     setAttachments((prev) => [...prev, ...newAttachments])
 
     // Upload sequentially — parallel uploads on mobile can hit iOS memory limits
     // for larger photos. Sequential is a bit slower but far more reliable.
+    // The server picks the key, always in this client's own folder.
     for (const att of newAttachments) {
-      const plannedKey = (att as Attachment & { _plannedKey: string })._plannedKey
       try {
-        await uploadData({
-          path: plannedKey,
-          data: att.file,
-          options: {
-            contentType: att.file.type || "image/jpeg",
-            onProgress: ({ transferredBytes, totalBytes }) => {
-              if (!totalBytes) return
-              const pct = Math.round((transferredBytes / totalBytes) * 100)
-              setAttachments((prev) => prev.map((x) => x === att ? { ...x, progress: pct } : x))
-            },
-          },
-        }).result
-        setAttachments((prev) => prev.map((x) => x === att ? { ...x, s3Key: plannedKey, uploading: false, progress: 100 } : x))
+        const upload = await requestClientUpload("meal-photo", extForFile(att.file), att.file.type || "image/jpeg", att.file.size)
+        await putToSignedUrl(upload, att.file, (pct) => {
+          setAttachments((prev) => prev.map((x) => x === att ? { ...x, progress: pct } : x))
+        })
+        setAttachments((prev) => prev.map((x) => x === att ? { ...x, s3Key: upload.key, uploading: false, progress: 100 } : x))
       } catch {
         setAttachments((prev) => prev.map((x) => x === att ? { ...x, uploading: false, error: "Didn't upload" } : x))
       }
@@ -356,99 +339,12 @@ export default function NutritionComposer({ email }: { email: string }) {
 }
 
 // Turn the comma-separated attachmentS3Keys string into an array of S3 keys.
-// Nutrition-message attachments are stored under an authenticated-only prefix,
-// so the renderer must call getUrl() to produce a short-lived signed URL —
-// there is no public CDN URL for these files.
+// Nutrition-message attachments are private, so the renderer asks the server
+// for a short-lived signed URL (SignedImage). There is no public URL for them.
 export function attachmentKeys(attachmentS3Keys?: string): string[] {
   if (!attachmentS3Keys) return []
   return attachmentS3Keys
     .split(",")
     .map((k) => k.trim())
     .filter((k) => k.length > 0)
-}
-
-// Render a private S3 video via a short-lived signed URL. Same auth story as
-// SignedImage. Uses the browser's native <video> so an authenticated viewer
-// can play form-review clips inline in the admin without downloading.
-export function SignedVideo({
-  s3Key,
-  style,
-  controls = true,
-  expiresIn = 3600,
-}: {
-  s3Key: string
-  style?: React.CSSProperties
-  controls?: boolean
-  expiresIn?: number
-}) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    setUrl(null)
-    setError(false)
-    getUrl({ path: s3Key, options: { expiresIn, validateObjectExistence: false } })
-      .then(({ url }) => { if (!cancelled) setUrl(url.toString()) })
-      .catch(() => { if (!cancelled) setError(true) })
-    return () => { cancelled = true }
-  }, [s3Key, expiresIn])
-
-  if (error) {
-    return (
-      <div style={{ ...style, background: "#111", color: muted, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", padding: 12 }}>
-        Couldn&apos;t load video
-      </div>
-    )
-  }
-  if (!url) {
-    return <div style={{ ...style, background: "#111" }} />
-  }
-  return (
-    <video src={url} controls={controls} playsInline preload="metadata" style={style} />
-  )
-}
-
-// Render a private S3 image via a short-lived signed URL. The URL is generated
-// from the viewer's authenticated Amplify session; a logged-out user cannot
-// produce one. Shown behind a neutral placeholder while the signed URL is
-// being requested, and behind a subtle error state if the request fails.
-export function SignedImage({
-  s3Key,
-  alt = "",
-  style,
-  expiresIn = 3600,
-}: {
-  s3Key: string
-  alt?: string
-  style?: React.CSSProperties
-  expiresIn?: number
-}) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    setUrl(null)
-    setError(false)
-    getUrl({ path: s3Key, options: { expiresIn, validateObjectExistence: false } })
-      .then(({ url }) => { if (!cancelled) setUrl(url.toString()) })
-      .catch(() => { if (!cancelled) setError(true) })
-    return () => { cancelled = true }
-  }, [s3Key, expiresIn])
-
-  if (error) {
-    return (
-      <div style={{ ...style, background: "#f5f2ee", color: muted, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", textAlign: "center", padding: 8 }}>
-        Couldn&apos;t load
-      </div>
-    )
-  }
-  if (!url) {
-    return <div style={{ ...style, background: "#f5f2ee" }} />
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt={alt} style={style} />
-  )
 }

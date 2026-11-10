@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { uploadData } from "aws-amplify/storage"
+import { adminJson } from "@/lib/mediaUpload.client"
 import { DEFAULTS, S3_SETTINGS_URL, type SiteSettings } from "@/lib/siteSettings"
 
 const APPSYNC_URL =
@@ -432,11 +432,7 @@ export default function DesignPage() {
         colors,
         text,
       }
-      await uploadData({
-        path: "media/settings.json",
-        data: new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" }),
-        options: { contentType: "application/json" },
-      }).result
+      await adminJson("/api/admin/save-settings", settings)
       setToast("Saved: changes will appear on the site within 60 seconds.")
       setTimeout(() => setToast(null), 6000)
     } catch (err) {
@@ -452,11 +448,7 @@ export default function DesignPage() {
     if (!confirm("Reset ALL settings (crops, colors, typography, text) to defaults and save? This will overwrite everything you've customized.")) return
     setSaving(true)
     try {
-      await uploadData({
-        path: "media/settings.json",
-        data: new Blob([JSON.stringify(DEFAULTS, null, 2)], { type: "application/json" }),
-        options: { contentType: "application/json" },
-      }).result
+      await adminJson("/api/admin/save-settings", DEFAULTS)
       setCrops(DEFAULTS.crops)
       setTypography(DEFAULTS.typography)
       setColors(DEFAULTS.colors)

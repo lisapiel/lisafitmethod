@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { uploadData } from "aws-amplify/storage"
+import { putToSignedUrl, requestClientUpload } from "@/lib/mediaUpload.client"
 import { fromLbs, relativeChange } from "@/lib/weight"
 import { buildWeightHistory, summarizeWeight, weighInDayKey, type WeightReading } from "@/lib/weightHistory"
 import { HUNGER_OPTIONS, type Hunger, type WeightStatus } from "@/lib/checkInAnswers"
@@ -101,8 +101,8 @@ const RATING_LABELS: Record<number, string> = { 1: "Poor", 2: "Below avg", 3: "O
 const STRESS_LABELS: Record<number, string> = { 1: "Overwhelmed", 2: "Rough", 3: "Manageable", 4: "Handled well", 5: "Very manageable" }
 
 function extForFile(file: File): string {
-  const fromName = file.name.includes(".") ? file.name.split(".").pop()! : ""
-  if (fromName && fromName.length <= 5) return fromName.toLowerCase()
+  const fromName = file.name.includes(".") ? file.name.split(".").pop()!.toLowerCase() : ""
+  if (/^[a-z0-9]{1,5}$/.test(fromName)) return fromName
   if (file.type === "video/mp4") return "mp4"
   if (file.type === "video/quicktime") return "mov"
   if (file.type === "video/webm") return "webm"
@@ -110,9 +110,6 @@ function extForFile(file: File): string {
 }
 function randomId(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
-}
-function emailSlug(email: string): string {
-  return email.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
 }
 
 // Determine the planned-workout denominator for the client's CURRENT week.
@@ -412,14 +409,12 @@ export default function CheckInClient() {
     }
     if (accepted.length === 0) return
 
-    const slug = emailSlug(email)
     // Optimistically add to state
     const started = accepted.map((file) => ({
       file,
       previewUrl: URL.createObjectURL(file),
       s3Key: null as string | null,
       progress: 0, error: null as string | null, uploading: true,
-      _plannedKey: `media/coaching-form-reviews/${slug}/${Date.now()}-${randomId()}.${extForFile(file)}`,
     }))
     setForm((f) => ({
       ...f,
@@ -427,31 +422,24 @@ export default function CheckInClient() {
     }))
 
     // Sequential upload — parallel large-video uploads can exhaust iOS memory.
+    // The server picks the key, always in this client's own folder.
     for (const v of started) {
       try {
-        await uploadData({
-          path: v._plannedKey,
-          data: v.file,
-          options: {
-            contentType: v.file.type || "video/mp4",
-            onProgress: ({ transferredBytes, totalBytes }) => {
-              if (!totalBytes) return
-              const pct = Math.round((transferredBytes / totalBytes) * 100)
-              setForm((f) => ({
-                ...f,
-                formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
-                  ...r,
-                  videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, progress: pct } : x),
-                } : r),
-              }))
-            },
-          },
-        }).result
+        const upload = await requestClientUpload("form-review", extForFile(v.file), v.file.type || "video/mp4", v.file.size)
+        await putToSignedUrl(upload, v.file, (pct) => {
+          setForm((f) => ({
+            ...f,
+            formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
+              ...r,
+              videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, progress: pct } : x),
+            } : r),
+          }))
+        })
         setForm((f) => ({
           ...f,
           formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
             ...r,
-            videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, s3Key: v._plannedKey, uploading: false, progress: 100 } : x),
+            videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, s3Key: upload.key, uploading: false, progress: 100 } : x),
           } : r),
         }))
       } catch {

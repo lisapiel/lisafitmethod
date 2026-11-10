@@ -55,10 +55,9 @@ function macroRecipes(): Recipe[] {
 
 interface NutritionClientProps {
   ownsNutritionCourse: boolean
-  email: string
 }
 
-export default function NutritionClient({ ownsNutritionCourse, email }: NutritionClientProps) {
+export default function NutritionClient({ ownsNutritionCourse }: NutritionClientProps) {
   const [loading, setLoading] = useState(true)
   const [state, setState] = useState<Loaded>({ client: null })
   const [logs, setLogs] = useState<NutritionLogRecord[]>([])
@@ -272,7 +271,7 @@ export default function NutritionClient({ ownsNutritionCourse, email }: Nutritio
       <details className="pt-about" style={{ marginBottom: 12 }}>
         <summary>Ask me about your nutrition <ChevronDown /></summary>
         <div style={{ padding: "0 12px 12px" }}>
-          <NutritionComposer email={email} />
+          <NutritionComposer />
         </div>
       </details>
 

@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation"
 import AdminHeader from "@/components/admin/AdminHeader"
 import { getBlogPost, saveBlogPost } from "@/lib/blogClient"
 import type { BlogPost } from "@/lib/blogClient"
-import { uploadData } from "aws-amplify/storage"
+import { putToSignedUrl, requestAdminUpload } from "@/lib/mediaUpload.client"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
-const S3_BASE = "https://amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov.s3.us-east-2.amazonaws.com"
 
 type Section = { heading: string; body: string }
 
@@ -95,9 +94,9 @@ export default function BlogPostFormClient({ mode, slug }: Props) {
     try {
       const ext = file.name.split(".").pop()
       const postSlug = mode === "edit" && slug ? slug : slugify(title) || "new-post"
-      const key = `media/blog/images/${postSlug}-cover.${ext}`
-      await uploadData({ path: key, data: file, options: { contentType: file.type } }).result
-      setCoverImage(`${S3_BASE}/${key}`)
+      const upload = await requestAdminUpload("blog-images", `${postSlug}-cover.${ext}`, file.type || "image/jpeg")
+      await putToSignedUrl(upload, file)
+      if (upload.publicUrl) setCoverImage(upload.publicUrl)
       showToast("Cover image uploaded.")
     } catch {
       showToast("Image upload failed.")

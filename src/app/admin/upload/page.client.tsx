@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { generateClient } from "aws-amplify/data"
-import { uploadData } from "aws-amplify/storage"
+import { adminJson, putToSignedUrl, requestAdminUpload } from "@/lib/mediaUpload.client"
+import type { MediaAsset } from "@/lib/mediaCatalog"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -13,8 +14,6 @@ import { VIDEO_SLOT_LABELS, PHOTO_SLOTS } from "@/lib/videoSlots"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
-
-const S3_BASE = "https://amplify-lisafitmethod-lis-lisafitmediastorebucket2-kgef6soixdov.s3.us-east-2.amazonaws.com"
 
 type Asset = {
   id: string
@@ -43,6 +42,12 @@ function getLabel(slot: string, type: "VIDEO" | "PHOTO") {
 
 function makeClient() {
   return generateClient<Schema>({ authMode: "userPool" })
+}
+
+// Catalogue writes go through the server; the Data API refuses them from the browser.
+async function catalog(action: "create" | "update" | "delete", input: Record<string, string | number | boolean>): Promise<MediaAsset | null> {
+  const { asset } = await adminJson<{ asset: MediaAsset | null }>("/api/admin/media/catalog", { action, input })
+  return asset
 }
 
 export default function UploadPageClient({ slot, type }: Props) {
@@ -80,44 +85,35 @@ export default function UploadPageClient({ slot, type }: Props) {
     setProgress(0)
 
     const ext = file.name.includes(".") ? `.${file.name.split(".").pop()}` : ""
-    const folder = type === "VIDEO" ? "media/videos" : "media/photos"
-    const s3Key = `${folder}/${slot}${ext}`
-    const publicUrl = `${S3_BASE}/${s3Key}`
+    const contentType = file.type || (type === "VIDEO" ? "video/mp4" : "image/jpeg")
 
     try {
-      await uploadData({
-        path: s3Key,
-        data: file,
-        options: {
-          contentType: file.type || (type === "VIDEO" ? "video/mp4" : "image/jpeg"),
-          onProgress: ({ transferredBytes, totalBytes }) => {
-            if (totalBytes) setProgress(Math.round((transferredBytes / totalBytes) * 100))
-          },
-        },
-      }).result
+      const upload = await requestAdminUpload(type === "VIDEO" ? "videos" : "photos", `${slot}${ext}`, contentType)
+      await putToSignedUrl(upload, file, setProgress)
+      const s3Key = upload.key
+      const publicUrl = upload.publicUrl ?? null
 
-      const client = makeClient()
       if (asset) {
-        await client.models.MediaAsset.update({
+        await catalog("update", {
           id: asset.id,
           s3Key,
-          url: publicUrl,
+          ...(publicUrl ? { url: publicUrl } : {}),
           fileSize: file.size,
-          mimeType: file.type,
+          mimeType: contentType,
           isPublished: asset.isPublished,
         })
-        setAsset({ ...asset, s3Key, url: publicUrl, fileSize: file.size, mimeType: file.type })
+        setAsset({ ...asset, s3Key, url: publicUrl, fileSize: file.size, mimeType: contentType })
       } else {
         const label = getLabel(slot, type)
-        const { data: created } = await client.models.MediaAsset.create({
+        const created = await catalog("create", {
           type,
           title: label,
           s3Key,
-          url: publicUrl,
+          ...(publicUrl ? { url: publicUrl } : {}),
           assignedTo: slot,
           isPublished: false,
           fileSize: file.size,
-          mimeType: file.type,
+          mimeType: contentType,
         })
         if (created) {
           setAsset({ id: created.id, title: created.title, s3Key: created.s3Key, url: created.url, isPublished: created.isPublished, fileSize: created.fileSize, mimeType: created.mimeType })
@@ -137,7 +133,7 @@ export default function UploadPageClient({ slot, type }: Props) {
     setError(null)
     const next = !asset.isPublished
     try {
-      await makeClient().models.MediaAsset.update({ id: asset.id, isPublished: next })
+      await catalog("update", { id: asset.id, isPublished: next })
       setAsset({ ...asset, isPublished: next })
       setSuccess(next ? "Published: live on the site." : "Unpublished: hidden from the site.")
     } catch (err) {
@@ -151,7 +147,7 @@ export default function UploadPageClient({ slot, type }: Props) {
     setDeleting(true)
     setError(null)
     try {
-      await makeClient().models.MediaAsset.delete({ id: asset.id })
+      await catalog("delete", { id: asset.id })
       setAsset(null)
       setSuccess("Asset deleted.")
     } catch (err) {

@@ -1,7 +1,9 @@
 "use client"
 
 import type { CSSProperties, ReactNode, Ref, UIEventHandler } from "react"
-import { attachmentKeys, SignedImage } from "@/components/coaching/NutritionComposer.client"
+import { attachmentKeys } from "@/components/coaching/NutritionComposer.client"
+import { SignedImage } from "@/components/coaching/SignedMedia.client"
+import type { MediaViewer } from "@/lib/mediaUpload.client"
 import { CollapsibleBody } from "./CollapsibleBody.client"
 import { formatClock, formatFull, groupThread } from "./threadGroups"
 
@@ -65,7 +67,7 @@ export function ThreadStyles() {
 }
 
 export function MessageThread({
-  messages, isMine, senderName, avatarInitial, theme, listRef, onScroll, empty, label, style,
+  messages, isMine, senderName, avatarInitial, theme, listRef, onScroll, empty, label, style, mediaViewer,
 }: {
   messages: ThreadMessage[]
   isMine: (msg: ThreadMessage) => boolean
@@ -77,6 +79,8 @@ export function MessageThread({
   empty: ReactNode
   label: string
   style: CSSProperties
+  // Which read route signs attachment URLs: the coach's, or the client's own.
+  mediaViewer: MediaViewer
 }) {
   const days = groupThread(messages)
 
@@ -145,7 +149,7 @@ export function MessageThread({
                           <div style={{ display: "grid", gridTemplateColumns: imageKeys.length === 1 ? "1fr" : `repeat(auto-fit, minmax(min(${theme.imageMinCol}px, 100%), 1fr))`, gap: 6, marginBottom: msg.body ? 8 : 0 }}>
                             {imageKeys.map((k) => (
                               <div key={k} style={{ borderRadius: 6, overflow: "hidden", background: theme.imageBg, aspectRatio: imageKeys.length === 1 ? "auto" : "4 / 3" }}>
-                                <SignedImage s3Key={k} style={{ width: "100%", height: "100%", display: "block", maxHeight: theme.imageMaxHeight, objectFit: "cover" }} />
+                                <SignedImage s3Key={k} viewer={mediaViewer} style={{ width: "100%", height: "100%", display: "block", maxHeight: theme.imageMaxHeight, objectFit: "cover" }} />
                               </div>
                             ))}
                           </div>
