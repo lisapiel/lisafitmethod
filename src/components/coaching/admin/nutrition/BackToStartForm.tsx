@@ -21,14 +21,17 @@ export function BackToStartForm({ email, current, starting, onSaved, onCancel }:
     setSaving(true)
     setError("")
     try {
-      const res = await adminJson<{ ok?: boolean }>(clientPath(email, "/nutrition"), {
+      const res = await adminJson<{ ok?: boolean; error?: string }>(clientPath(email, "/nutrition"), {
         method: "PATCH",
         body: { customMacros: null, reason: reason.trim() },
       })
       if (res.ok) { onSaved(); return }
-      setError(errorText(res.data, `Nothing was changed (error ${res.status}).`))
+      const fallback = res.status === 0
+        ? "Something stopped the save before the server was reached. Try again."
+        : `Nothing was changed (error ${res.status}).`
+      setError(errorText(res.data, fallback))
     } catch {
-      setError("Couldn't reach the server. Nothing was changed.")
+      setError("Something unexpected went wrong. Nothing was changed.")
     }
     setSaving(false)
   }

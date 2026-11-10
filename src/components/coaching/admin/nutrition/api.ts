@@ -1,33 +1,34 @@
 "use client"
 
 import { fetchAuthSession } from "aws-amplify/auth"
+import { adminJsonWith, REQUEST_TIMEOUT_MS, type ApiResult } from "./apiCore"
 
-export type ApiResult<T> = { ok: boolean; status: number; data: T | null }
+export type { ApiResult } from "./apiCore"
+export { clientPath, errorText, REQUEST_TIMEOUT_MS } from "./apiCore"
+
+async function defaultGetToken(forceRefresh = false): Promise<string | null> {
+  try {
+    const session = await fetchAuthSession(forceRefresh ? { forceRefresh: true } : undefined)
+    return session.tokens?.accessToken?.toString() ?? null
+  } catch {
+    // fetchAuthSession throws on refresh-token network failure (seen on iOS
+    // Safari when ITP has cleared storage, or during transient connectivity
+    // loss). Convert to null so adminJson can surface the session error
+    // through the normal non-ok result path rather than a generic throw.
+    return null
+  }
+}
+
+async function defaultDoFetch(path: string, init: RequestInit): Promise<Response> {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS)
+  try {
+    return await fetch(path, { ...init, signal: ctrl.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
 
 export async function adminJson<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<ApiResult<T>> {
-  const session = await fetchAuthSession()
-  const token = session.tokens?.accessToken?.toString()
-  const res = await fetch(path, {
-    method: init.method ?? "GET",
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${token ?? ""}`,
-      ...(init.body !== undefined ? { "Content-Type": "application/json" } : {}),
-    },
-    body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
-  })
-  let data: T | null = null
-  try { data = (await res.json()) as T } catch { data = null }
-  return { ok: res.ok, status: res.status, data }
-}
-
-export function clientPath(email: string, suffix = ""): string {
-  return `/api/admin/coaching/clients/${encodeURIComponent(email)}${suffix}`
-}
-
-export function errorText(data: unknown, fallback: string): string {
-  if (data && typeof data === "object" && "error" in data && typeof (data as { error: unknown }).error === "string") {
-    return (data as { error: string }).error
-  }
-  return fallback
+  return adminJsonWith<T>({ getToken: defaultGetToken, doFetch: defaultDoFetch }, path, init)
 }
