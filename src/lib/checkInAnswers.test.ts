@@ -54,3 +54,34 @@ test("the weight line covers new, same, skipped and old check-ins", () => {
   assert.equal(checkInWeightLine({ weight: 60, weightUnit: "KG" }), "60 kg")
   assert.equal(checkInWeightLine({}), null)
 })
+
+import { FORM_FEEDBACK_MAX, NUTRITION_NOTE_MAX, hasFormReviewVideos, parseFormFeedback, parseNutritionNote } from "./checkInAnswers"
+
+test("the nutrition note is optional, trimmed and capped at 1,000 characters", () => {
+  assert.deepEqual(parseNutritionNote(undefined), { ok: true })
+  assert.deepEqual(parseNutritionNote(null), { ok: true })
+  assert.deepEqual(parseNutritionNote("   "), { ok: true })
+  assert.deepEqual(parseNutritionNote("  Weekends were hard.  "), { ok: true, value: "Weekends were hard." })
+  assert.deepEqual(parseNutritionNote(` ${"a".repeat(NUTRITION_NOTE_MAX)} `), { ok: true, value: "a".repeat(NUTRITION_NOTE_MAX) })
+  assert.equal(parseNutritionNote("a".repeat(NUTRITION_NOTE_MAX + 1)).ok, false)
+  assert.equal(parseNutritionNote(42).ok, false)
+})
+
+test("form feedback is kept only for a check-in with videos, trimmed and length-checked", () => {
+  assert.deepEqual(parseFormFeedback("  Keep your chest up.  ", true), { ok: true, value: "Keep your chest up." })
+  assert.deepEqual(parseFormFeedback("Keep your chest up.", false), { ok: true, value: "" })
+  assert.deepEqual(parseFormFeedback(undefined, true), { ok: true, value: "" })
+  assert.equal(parseFormFeedback("a".repeat(FORM_FEEDBACK_MAX + 1), true).ok, false)
+  assert.equal(parseFormFeedback({ text: "x" }, true).ok, false)
+})
+
+test("a form-review request counts only when it has a video", () => {
+  const key = "media/coaching-form-reviews/sub/v.mp4"
+  assert.equal(hasFormReviewVideos(undefined), false)
+  assert.equal(hasFormReviewVideos(""), false)
+  assert.equal(hasFormReviewVideos("{bad"), false)
+  assert.equal(hasFormReviewVideos(JSON.stringify([{ exercise: "Squat", note: "depth", videoKeys: [] }])), false)
+  assert.equal(hasFormReviewVideos(JSON.stringify([{ exercise: "Squat", note: "", videoKeys: [key] }])), true)
+  assert.equal(hasFormReviewVideos([{ exercise: "Row", videoKeys: [key] }]), true)
+  assert.equal(hasFormReviewVideos([{ exercise: "Row" }]), false)
+})

@@ -57,6 +57,7 @@ type CheckIn = {
   // v2 — Nutrition
   nutritionStatus: string | null
   nutritionHelp: string | null
+  nutritionNote: string | null
   hunger: string | null
   // v2 — Weekly reflection
   weeklyWin: string | null
@@ -222,6 +223,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             recoveryRating: ci.recoveryRating != null ? Number(ci.recoveryRating) : null,
             nutritionStatus: ci.nutritionStatus ?? null,
             nutritionHelp: ci.nutritionHelp ?? null,
+            nutritionNote: typeof ci.nutritionNote === "string" && ci.nutritionNote.trim() ? ci.nutritionNote : null,
             hunger: hungerLabel(ci.hunger),
             weeklyWin: ci.weeklyWin ?? null,
             weeklyChallenge: ci.weeklyChallenge ?? null,
@@ -478,7 +480,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
               </Card>
             )}
 
-            {isV2 && (checkIn.nutritionStatus || checkIn.nutritionHelp || checkIn.hunger) && (
+            {isV2 && (checkIn.nutritionStatus || checkIn.nutritionHelp || checkIn.nutritionNote || checkIn.hunger) && (
               <Card>
                 <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 10px" }}>Nutrition</p>
                 {checkIn.nutritionStatus && (
@@ -487,6 +489,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                   </p>
                 )}
                 {checkIn.hunger && <Section label="Hunger"><TextBlock text={checkIn.hunger} /></Section>}
+                {checkIn.nutritionNote && <Section label="About their eating"><TextBlock text={checkIn.nutritionNote} /></Section>}
                 {checkIn.nutritionHelp && <Section label="Wants help with"><TextBlock text={checkIn.nutritionHelp} /></Section>}
               </Card>
             )}

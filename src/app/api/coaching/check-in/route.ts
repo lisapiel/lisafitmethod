@@ -4,16 +4,13 @@ import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { createCoachingCheckIn, listCoachingCheckIns, getCoachingClientRecord, hasCoachingAccess, type CoachingCheckInRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
-import { normalizeCheckInWeight, parseHunger } from "@/lib/checkInAnswers"
+import { ADJUSTMENT_AREAS, NUTRITION_STATUSES, normalizeCheckInWeight, parseHunger, parseNutritionNote, type NutritionStatus } from "@/lib/checkInAnswers"
 import { isOwnClientKey } from "@/lib/mediaKeys"
 
 export const dynamic = "force-dynamic"
 
 const MAX_FORM_REVIEW_VIDEOS = 3
 const FORM_REVIEW_PREFIX = "media/coaching-form-reviews/"
-const NUTRITION_STATUSES = ["on-track", "mostly-on-track", "mixed", "struggled", "not-focusing"] as const
-type NutritionStatus = typeof NUTRITION_STATUSES[number]
-const ADJUSTMENT_AREAS = ["exercises", "volume-intensity", "schedule", "nutrition", "recovery", "other", "none"] as const
 
 async function getSessionEmail(): Promise<string | null> {
   return (await getSessionIdentity())?.email ?? null
@@ -125,6 +122,9 @@ export async function POST(req: NextRequest) {
     nutritionStatus = body.nutritionStatus as NutritionStatus
   }
 
+  const nutritionNote = parseNutritionNote(isV2 ? body.nutritionNote : undefined)
+  if (!nutritionNote.ok) return NextResponse.json({ error: nutritionNote.error }, { status: 400 })
+
   // ── Adjustment areas: comma-separated list of known tokens ───────────────
   let adjustmentAreas: string | undefined
   if (isV2 && Array.isArray(body.adjustmentAreas)) {
@@ -166,6 +166,7 @@ export async function POST(req: NextRequest) {
       ...(nutritionStatus && { nutritionStatus }),
       ...(toStr(body.nutritionHelp) && { nutritionHelp: toStr(body.nutritionHelp) }),
       ...(parseHunger(body.hunger) && { hunger: parseHunger(body.hunger) }),
+      ...(nutritionNote.value && { nutritionNote: nutritionNote.value }),
       // Weekly reflection
       ...(toStr(body.weeklyWin) && { weeklyWin: toStr(body.weeklyWin) }),
       ...(toStr(body.weeklyChallenge) && { weeklyChallenge: toStr(body.weeklyChallenge) }),

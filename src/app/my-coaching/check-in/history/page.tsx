@@ -52,6 +52,7 @@ type CheckIn = {
   // v2 — Nutrition
   nutritionStatus: string | null
   nutritionHelp: string | null
+  nutritionNote: string | null
   hunger: string | null
   // v2 — Weekly reflection
   weeklyWin: string | null
@@ -200,6 +201,7 @@ export default function CheckInHistoryPage() {
               recoveryRating: ci.recoveryRating != null ? Number(ci.recoveryRating) : null,
               nutritionStatus: (ci.nutritionStatus as string | null) ?? null,
               nutritionHelp: (ci.nutritionHelp as string | null) ?? null,
+              nutritionNote: typeof ci.nutritionNote === "string" && ci.nutritionNote.trim() ? ci.nutritionNote : null,
               hunger: hungerLabel(ci.hunger),
               weeklyWin: (ci.weeklyWin as string | null) ?? null,
               weeklyChallenge: (ci.weeklyChallenge as string | null) ?? null,
@@ -390,7 +392,7 @@ function V2Body({ ci }: { ci: CheckIn }) {
         </div>
       )}
 
-      {(ci.nutritionStatus || ci.nutritionHelp || ci.hunger) && (
+      {(ci.nutritionStatus || ci.nutritionHelp || ci.nutritionNote || ci.hunger) && (
         <div style={{ marginBottom: "1rem" }}>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 4px" }}>Nutrition</p>
           {ci.nutritionStatus && (
@@ -401,6 +403,11 @@ function V2Body({ ci }: { ci: CheckIn }) {
           {ci.hunger && (
             <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, margin: "0 0 4px" }}>
               <span style={{ color: muted }}>Hunger: </span>{ci.hunger}
+            </p>
+          )}
+          {ci.nutritionNote && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, lineHeight: 1.55, margin: "0 0 4px", whiteSpace: "pre-wrap" }}>
+              <span style={{ color: muted }}>About your eating: </span>{ci.nutritionNote}
             </p>
           )}
           {ci.nutritionHelp && <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", color: black, lineHeight: 1.55, margin: 0, whiteSpace: "pre-wrap" }}>{ci.nutritionHelp}</p>}

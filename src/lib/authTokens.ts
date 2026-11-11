@@ -865,6 +865,8 @@ export interface CoachingCheckInRecord {
   nutritionStatus?: "on-track" | "mostly-on-track" | "mixed" | "struggled" | "not-focusing"
   nutritionHelp?: string
   hunger?: "comfortable" | "some-days" | "most-days" | "less"
+  // Optional free text: "Anything about your eating this week?" (max 1,000 chars).
+  nutritionNote?: string
 
   // ── v2: Weekly reflection ────────────────────────────────────────────────
   weeklyWin?: string

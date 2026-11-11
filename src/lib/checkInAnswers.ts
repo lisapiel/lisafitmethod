@@ -18,6 +18,11 @@ export type CheckInWeightFields = {
   weightConfirmedFrom?: WeightConfirmedFrom
 }
 
+export const NUTRITION_STATUSES = ["on-track", "mostly-on-track", "mixed", "struggled", "not-focusing"] as const
+export type NutritionStatus = typeof NUTRITION_STATUSES[number]
+export const ADJUSTMENT_AREAS = ["exercises", "volume-intensity", "schedule", "nutrition", "recovery", "other", "none"] as const
+export type AdjustmentArea = typeof ADJUSTMENT_AREAS[number]
+
 export const HUNGER_OPTIONS = [
   { value: "comfortable", label: "Comfortable most days" },
   { value: "some-days", label: "Hungry some days" },
@@ -32,6 +37,44 @@ export function parseHunger(v: unknown): Hunger | undefined {
 
 export function hungerLabel(v: unknown): string | null {
   return HUNGER_OPTIONS.find((o) => o.value === v)?.label ?? null
+}
+
+export const NUTRITION_NOTE_MAX = 1000
+export const FORM_FEEDBACK_MAX = 2000
+
+// The optional "Anything about your eating this week?" answer. Trimmed; blank
+// means not answered. Too long is refused, not cut, so nothing is lost silently.
+export function parseNutritionNote(v: unknown): { ok: true; value?: string } | { ok: false; error: string } {
+  if (v == null) return { ok: true }
+  if (typeof v !== "string") return { ok: false, error: "Invalid note about your eating" }
+  const t = v.trim()
+  if (!t) return { ok: true }
+  if (t.length > NUTRITION_NOTE_MAX) return { ok: false, error: "Please keep your note about your eating to 1,000 characters or fewer." }
+  return { ok: true, value: t }
+}
+
+// Lisa's technique feedback on a check-in's form-review videos. Only kept when
+// the check-in actually has videos; otherwise it is always empty.
+export function parseFormFeedback(v: unknown, hasVideos: boolean): { ok: true; value: string } | { ok: false; error: string } {
+  if (v == null || !hasVideos) return { ok: true, value: "" }
+  if (typeof v !== "string") return { ok: false, error: "Invalid form feedback" }
+  const t = v.trim()
+  if (t.length > FORM_FEEDBACK_MAX) return { ok: false, error: "Form feedback is too long. Keep it to 2,000 characters or fewer." }
+  return { ok: true, value: t }
+}
+
+// True when a check-in's stored formReviews (JSON string, or an already parsed
+// array) holds at least one uploaded video.
+export function hasFormReviewVideos(formReviews: unknown): boolean {
+  let list: unknown = formReviews
+  if (typeof list === "string") {
+    try { list = JSON.parse(list) } catch { return false }
+  }
+  if (!Array.isArray(list)) return false
+  return list.some((r) => {
+    const keys = r && typeof r === "object" ? (r as { videoKeys?: unknown }).videoKeys : undefined
+    return Array.isArray(keys) && keys.some((k) => typeof k === "string" && k.length > 0)
+  })
 }
 
 function parseWeight(v: unknown): number | undefined {

@@ -1,11 +1,15 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
 import { putToSignedUrl, requestClientUpload } from "@/lib/mediaUpload.client"
 import { fromLbs, relativeChange } from "@/lib/weight"
 import { buildWeightHistory, summarizeWeight, weighInDayKey, type WeightReading } from "@/lib/weightHistory"
-import { HUNGER_OPTIONS, type Hunger, type WeightStatus } from "@/lib/checkInAnswers"
+import { HUNGER_OPTIONS, NUTRITION_NOTE_MAX, type AdjustmentArea, type NutritionStatus } from "@/lib/checkInAnswers"
+import {
+  browserDraftStorage, checkInDraftKey, checkInStepComplete, clearCheckInDraft, clearStaleCheckInDrafts,
+  draftSignature, loadCheckInDraft, resumeStep, saveCheckInDraft, type CheckInDraftAnswers,
+} from "@/lib/checkInDraft"
 import { daysBetweenKeys, localDateKey } from "@/lib/localDate"
 import CheckInWeightChoice from "@/components/portal/CheckInWeightChoice"
 
@@ -18,43 +22,23 @@ const white = "#fff"
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type Measurement = { label: string; value: string; unit: string }
-type NutritionStatus = "on-track" | "mostly-on-track" | "mixed" | "struggled" | "not-focusing"
-type AdjustmentArea = "exercises" | "volume-intensity" | "schedule" | "nutrition" | "recovery" | "other" | "none"
 type ProgramExerciseLite = { id: string; name: string }
 type ProgramDay = { dayLabel: string; notes?: string; exercises?: Array<{ exerciseId?: string; name?: string }> }
 type ProgramWeek = { weekNumber?: number; label?: string; days: ProgramDay[] }
 type WorkoutLogLite = { completedAt: string; programId?: string; weekNumber?: number; dayLabel?: string }
 
+// A video restored from a saved draft was uploaded earlier: it has its storage
+// key but no local file or preview.
+type ReviewVideo = { id: string; file: File | null; name: string; previewUrl: string | null; s3Key: string | null; progress: number; error: string | null; uploading: boolean }
+
 type FormReview = {
   key: string  // local id for React
   exercise: string
   note: string
-  videos: Array<{ file: File; previewUrl: string; s3Key: string | null; progress: number; error: string | null; uploading: boolean }>
+  videos: ReviewVideo[]
 }
 
-type FormState = {
-  weightChoice: WeightStatus | ""
-  weight: string
-  weightUnit: "LBS" | "KG"
-  measurements: Measurement[]
-  trainingRating: number
-  painReported: "unset" | "no" | "yes"
-  painNotes: string
-  formReviewRequested: "unset" | "no" | "yes"
-  formReviews: FormReview[]
-  sleepRating: number
-  energyRating: number
-  stressRating: number
-  recoveryRating: number
-  nutritionStatus: NutritionStatus | ""
-  nutritionHelp: string
-  hunger: Hunger | ""
-  weeklyWin: string
-  weeklyChallenge: string
-  adjustmentAreas: AdjustmentArea[]
-  adjustmentNotes: string
-  questionForLisa: string
-}
+type FormState = Omit<CheckInDraftAnswers, "formReviews"> & { formReviews: FormReview[] }
 
 const INITIAL: FormState = {
   weightChoice: "", weight: "", weightUnit: "LBS",
@@ -63,7 +47,7 @@ const INITIAL: FormState = {
   painReported: "unset", painNotes: "",
   formReviewRequested: "unset", formReviews: [],
   sleepRating: 0, energyRating: 0, stressRating: 0, recoveryRating: 0,
-  nutritionStatus: "", nutritionHelp: "", hunger: "",
+  nutritionStatus: "", nutritionHelp: "", nutritionNote: "", hunger: "",
   weeklyWin: "", weeklyChallenge: "",
   adjustmentAreas: [], adjustmentNotes: "",
   questionForLisa: "",
@@ -110,6 +94,29 @@ function extForFile(file: File): string {
 }
 function randomId(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+}
+
+function toDraftAnswers(form: FormState): CheckInDraftAnswers {
+  return {
+    ...form,
+    formReviews: form.formReviews.map((r) => ({
+      exercise: r.exercise,
+      note: r.note,
+      videos: r.videos.flatMap((v) => (v.s3Key && !v.error ? [{ s3Key: v.s3Key, name: v.name }] : [])),
+    })),
+  }
+}
+
+function fromDraftAnswers(a: CheckInDraftAnswers): FormState {
+  return {
+    ...a,
+    formReviews: a.formReviews.map((r) => ({
+      key: randomId(),
+      exercise: r.exercise,
+      note: r.note,
+      videos: r.videos.map((v) => ({ id: randomId(), file: null, name: v.name, previewUrl: null, s3Key: v.s3Key, progress: 100, error: null, uploading: false })),
+    })),
+  }
 }
 
 // Determine the planned-workout denominator for the client's CURRENT week.
@@ -208,13 +215,17 @@ function RatingRow({
   )
 }
 
-function TextBlock({ label, value, onChange, placeholder, rows = 3 }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder: string; rows?: number
+function TextBlock({ label, value, onChange, placeholder, rows = 3, hint, maxLength, id }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder: string; rows?: number; hint?: string; maxLength?: number; id?: string
 }) {
   return (
     <div style={{ marginBottom: "1.25rem" }}>
-      <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, display: "block", marginBottom: 8 }}>{label} <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 400, color: muted }}>(optional)</span></label>
+      <label htmlFor={id} style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 600, color: black, display: "block", marginBottom: hint ? 4 : 8 }}>{label} <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", fontWeight: 400, color: muted }}>(optional)</span></label>
+      {hint && <p id={id ? `${id}-hint` : undefined} style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, margin: "0 0 8px", lineHeight: 1.5 }}>{hint}</p>}
       <textarea
+        id={id}
+        aria-describedby={id && hint ? `${id}-hint` : undefined}
+        maxLength={maxLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -281,15 +292,26 @@ export default function CheckInClient() {
 
   const submitLockRef = useRef(false)
 
+  // Draft autosave: the key for this client and check-in period, and what the
+  // form looked like before the client touched it (so only real answers count).
+  const [draftKey, setDraftKey] = useState<string | null>(null)
+  const [restoredDraft, setRestoredDraft] = useState(false)
+  const baselineRef = useRef<string | null>(null)
+
   useEffect(() => {
     async function init() {
       try {
         // Session email
+        let sessionEmail = ""
         const accessRes = await fetch("/api/member/access").catch(() => null)
         if (accessRes?.ok) {
           const d = await accessRes.json()
-          if (d.email) setEmail(String(d.email))
+          if (d.email) sessionEmail = String(d.email)
+          setEmail(sessionEmail)
         }
+        let base: FormState = INITIAL
+        let submittedThisWeek = false
+        let preselected = false
 
         // Check-in history (already submitted this week?) and every weigh-in,
         // from check-ins and Progress logs, for the weight step.
@@ -303,22 +325,42 @@ export default function CheckInClient() {
           const data = await ciRes.json()
           checkIns = data.checkIns ?? []
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          if (checkIns.some((ci) => new Date(ci.submittedAt) > weekAgo)) setAlreadySubmitted(true)
+          if (checkIns.some((ci) => new Date(ci.submittedAt) > weekAgo)) { submittedThisWeek = true; setAlreadySubmitted(true) }
           const sortedAll = [...checkIns].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
           if (sortedAll[0]) lastCheckInIso = sortedAll[0].submittedAt
         }
         const snapshots: Array<Record<string, unknown>> = snapRes?.ok ? ((await snapRes.json()).snapshots ?? []) : []
         const latest = summarizeWeight(buildWeightHistory({ checkIns, logged: snapshots })).latest
         setLatestReading(latest)
-        if (latest) setForm((f) => ({ ...f, weightUnit: latest.unit }))
+        if (latest) base = { ...base, weightUnit: latest.unit }
         const latestDay = latest ? weighInDayKey(latest.at) : null
         if (latest?.source === "logged" && latestDay) {
           const ago = daysBetweenKeys(latestDay, localDateKey())
           if (ago >= 0 && ago <= RECENT_LOG_DAYS) {
-            setForm((f) => ({ ...f, weightChoice: "same" }))
-            setPreselectedFromProgress(true)
+            base = { ...base, weightChoice: "same" }
+            preselected = true
           }
         }
+
+        // Bring back answers saved earlier in this check-in period.
+        const storage = browserDraftStorage()
+        const key = checkInDraftKey(sessionEmail, lastCheckInIso)
+        clearStaleCheckInDrafts(storage, sessionEmail, submittedThisWeek ? null : key)
+        if (key && !submittedThisWeek) {
+          baselineRef.current = draftSignature(toDraftAnswers(base))
+          const draft = loadCheckInDraft(storage, key)
+          if (draft && draftSignature(draft.answers) !== baselineRef.current) {
+            const answers = { ...draft.answers }
+            if (answers.weightChoice === "same" && !latest) answers.weightChoice = ""
+            base = fromDraftAnswers(answers)
+            if (answers.weightChoice !== "same") preselected = false
+            setStep(resumeStep(draft.step, answers))
+            setRestoredDraft(true)
+          }
+          setDraftKey(key)
+        }
+        setForm(base)
+        setPreselectedFromProgress(preselected)
 
         // Load program + workout log for the auto training summary
         const [progRes, logRes] = await Promise.all([
@@ -390,7 +432,7 @@ export default function CheckInClient() {
   function removeFormReview(key: string) {
     setForm((f) => {
       const target = f.formReviews.find((r) => r.key === key)
-      if (target) target.videos.forEach((v) => URL.revokeObjectURL(v.previewUrl))
+      if (target) target.videos.forEach((v) => { if (v.previewUrl) URL.revokeObjectURL(v.previewUrl) })
       return { ...f, formReviews: f.formReviews.filter((r) => r.key !== key) }
     })
   }
@@ -410,11 +452,13 @@ export default function CheckInClient() {
     if (accepted.length === 0) return
 
     // Optimistically add to state
-    const started = accepted.map((file) => ({
+    const started = accepted.map((file): ReviewVideo & { file: File } => ({
+      id: randomId(),
       file,
+      name: file.name,
       previewUrl: URL.createObjectURL(file),
-      s3Key: null as string | null,
-      progress: 0, error: null as string | null, uploading: true,
+      s3Key: null,
+      progress: 0, error: null, uploading: true,
     }))
     setForm((f) => ({
       ...f,
@@ -431,7 +475,7 @@ export default function CheckInClient() {
             ...f,
             formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
               ...r,
-              videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, progress: pct } : x),
+              videos: r.videos.map((x) => x.id === v.id ? { ...x, progress: pct } : x),
             } : r),
           }))
         })
@@ -439,7 +483,7 @@ export default function CheckInClient() {
           ...f,
           formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
             ...r,
-            videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, s3Key: upload.key, uploading: false, progress: 100 } : x),
+            videos: r.videos.map((x) => x.id === v.id ? { ...x, s3Key: upload.key, uploading: false, progress: 100 } : x),
           } : r),
         }))
       } catch {
@@ -447,29 +491,41 @@ export default function CheckInClient() {
           ...f,
           formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
             ...r,
-            videos: r.videos.map((x) => x.previewUrl === v.previewUrl ? { ...x, uploading: false, error: "Didn't upload" } : x),
+            videos: r.videos.map((x) => x.id === v.id ? { ...x, uploading: false, error: "Didn't upload" } : x),
           } : r),
         }))
       }
     }
   }
-  function removeReviewVideo(reviewKey: string, previewUrl: string) {
+  function removeReviewVideo(reviewKey: string, videoId: string) {
     setForm((f) => ({
       ...f,
       formReviews: f.formReviews.map((r) => r.key === reviewKey ? {
         ...r,
         videos: r.videos.filter((v) => {
-          if (v.previewUrl === previewUrl) URL.revokeObjectURL(v.previewUrl)
-          return v.previewUrl !== previewUrl
+          if (v.id === videoId && v.previewUrl) URL.revokeObjectURL(v.previewUrl)
+          return v.id !== videoId
         }),
       } : r),
     }))
   }
+  // Revoke dangling object URLs on unmount only. Revoking on every change
+  // would break the previews of videos that are still in the form.
+  const formReviewsRef = useRef(form.formReviews)
+  formReviewsRef.current = form.formReviews
   useEffect(() => () => {
-    // Revoke any dangling object URLs on unmount so the browser doesn't leak
-    // blob references for videos the user never sent.
-    form.formReviews.forEach((r) => r.videos.forEach((v) => URL.revokeObjectURL(v.previewUrl)))
-  }, [form.formReviews])
+    formReviewsRef.current.forEach((r) => r.videos.forEach((v) => { if (v.previewUrl) URL.revokeObjectURL(v.previewUrl) }))
+  }, [])
+
+  // ── Draft autosave ──────────────────────────────────────────────────────
+  const draftAnswers = useMemo(() => toDraftAnswers(form), [form])
+  const dirty = !loading && baselineRef.current != null && draftSignature(draftAnswers) !== baselineRef.current
+  useEffect(() => {
+    if (!draftKey || loading || submitted || alreadySubmitted) return
+    const storage = browserDraftStorage()
+    if (dirty) saveCheckInDraft(storage, draftKey, draftAnswers, step)
+    else clearCheckInDraft(storage, draftKey)
+  }, [draftAnswers, dirty, step, draftKey, loading, submitted, alreadySubmitted])
 
   // ── Adjustment-area toggle ──────────────────────────────────────────────
   function toggleAdjustment(area: AdjustmentArea) {
@@ -487,26 +543,19 @@ export default function CheckInClient() {
 
   const anyVideoUploading = form.formReviews.some((r) => r.videos.some((v) => v.uploading))
 
+  // Leaving the page (reload, closing the tab, typing another address) with
+  // unsent answers gets the browser's own warning. Moving around the portal
+  // doesn't, because the draft above already keeps the answers.
+  const warnOnLeave = (dirty || anyVideoUploading) && !submitted && !alreadySubmitted
+  useEffect(() => {
+    if (!warnOnLeave) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = "" }
+    window.addEventListener("beforeunload", onBeforeUnload)
+    return () => window.removeEventListener("beforeunload", onBeforeUnload)
+  }, [warnOnLeave])
+
   function canProceed(): boolean {
-    if (step === 1) {
-      // A weight choice is required; measurements stay optional.
-      if (form.weightChoice === "") return false
-      if (form.weightChoice === "new") {
-        const n = parseFloat(form.weight)
-        return Number.isFinite(n) && n > 0
-      }
-      return true
-    }
-    if (step === 2) {
-      if (form.painReported === "unset") return false
-      if (form.formReviewRequested === "unset") return false
-      // If they marked "yes" on pain, encourage them to write something — but
-      // not a hard block, so accept as long as painReported is set.
-      return true
-    }
-    if (step === 3) return form.sleepRating > 0 && form.energyRating > 0 && form.stressRating > 0 && form.recoveryRating > 0
-    if (step === 4) return form.nutritionStatus !== ""
-    return true
+    return checkInStepComplete(step, form)
   }
 
   function submit() {
@@ -574,6 +623,7 @@ export default function CheckInClient() {
           nutritionStatus: form.nutritionStatus || undefined,
           nutritionHelp: form.nutritionHelp || undefined,
           hunger: form.hunger || undefined,
+          nutritionNote: form.nutritionNote.trim() || undefined,
           // Weekly reflection
           weeklyWin: form.weeklyWin || undefined,
           weeklyChallenge: form.weeklyChallenge || undefined,
@@ -586,6 +636,7 @@ export default function CheckInClient() {
         const data = await res.json().catch(() => ({} as { error?: string }))
         throw new Error(data.error || "Something went wrong. Please try again.")
       }
+      if (draftKey) clearCheckInDraft(browserDraftStorage(), draftKey)
       setSubmitted(true)
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.")
@@ -663,6 +714,12 @@ export default function CheckInClient() {
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "clamp(1.6rem, 5.5vw, 2rem)", fontWeight: 700, color: black, margin: 0 }}>Check-In</h1>
       </div>
+
+      {restoredDraft && (
+        <p role="status" style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", color: black, background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6, padding: "10px 14px", margin: "0 0 1.25rem", lineHeight: 1.5 }}>
+          I kept your answers from earlier, so you can pick up where you left off.
+        </p>
+      )}
 
       {/* Progress dots */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "1.5rem", flexWrap: "wrap" }}>
@@ -857,7 +914,7 @@ export default function CheckInClient() {
                       onUpdate={(patch) => updateFormReview(r.key, patch)}
                       onRemove={() => removeFormReview(r.key)}
                       onPickVideos={(files) => handleReviewVideoPick(r.key, files)}
-                      onRemoveVideo={(previewUrl) => removeReviewVideo(r.key, previewUrl)}
+                      onRemoveVideo={(videoId) => removeReviewVideo(r.key, videoId)}
                       remainingVideoBudget={MAX_FORM_REVIEW_VIDEOS - form.formReviews.reduce((acc, x) => acc + x.videos.length, 0)}
                     />
                   ))}
@@ -933,21 +990,12 @@ export default function CheckInClient() {
               </div>
             </fieldset>
 
+            <TextBlock id="checkin-nutrition-note" label="Anything about your eating this week?" value={form.nutritionNote} onChange={set("nutritionNote")}
+              hint="What went well, what was hard, whether you stuck to your plan, or anything you'd like me to know."
+              placeholder="" maxLength={NUTRITION_NOTE_MAX} />
+
             <TextBlock label="Anything you'd like help with?" value={form.nutritionHelp} onChange={set("nutritionHelp")}
               placeholder="Hunger, protein, meal timing, food choices, hitting macros, travel, digestion, anything else…" />
-
-            <Link
-              href="/my-coaching/nutrition"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "#faf8f5", border: `1px solid ${border}`, borderRadius: 6,
-                padding: "10px 14px", textDecoration: "none",
-                fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 600, color: black,
-              }}
-            >
-              <span style={{ color: accent }}>→</span>
-              Want feedback on a meal or a day of eating? Send it to me
-            </Link>
           </div>
         )}
 
@@ -1075,7 +1123,7 @@ function FormReviewCard({
   onUpdate: (patch: Partial<Omit<FormReview, "videos">>) => void
   onRemove: () => void
   onPickVideos: (files: FileList | null) => void
-  onRemoveVideo: (previewUrl: string) => void
+  onRemoveVideo: (videoId: string) => void
   remainingVideoBudget: number
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
@@ -1116,18 +1164,24 @@ function FormReviewCard({
       {review.videos.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
           {review.videos.map((v) => (
-            <div key={v.previewUrl} style={{ display: "flex", alignItems: "center", gap: 10, background: white, border: `1px solid ${border}`, borderRadius: 6, padding: 8, position: "relative" }}>
-              <video src={v.previewUrl} muted playsInline preload="metadata"
-                style={{ width: 88, height: 60, objectFit: "cover", background: "#000", borderRadius: 4, flexShrink: 0 }} />
+            <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 10, background: white, border: `1px solid ${border}`, borderRadius: 6, padding: 8, position: "relative" }}>
+              {v.previewUrl ? (
+                <video src={v.previewUrl} muted playsInline preload="metadata"
+                  style={{ width: 88, height: 60, objectFit: "cover", background: "#000", borderRadius: 4, flexShrink: 0 }} />
+              ) : (
+                <div aria-hidden="true" style={{ width: 88, height: 60, background: "#000", borderRadius: 4, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7 5l8 5-8 5V5z" fill="#fff" /></svg>
+                </div>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: black, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {v.file.name}
+                  {v.name}
                 </p>
                 <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: v.error ? "#c14646" : muted, margin: "3px 0 0" }}>
-                  {v.error ? v.error : v.uploading ? `Uploading… ${v.progress}%` : "Ready"}
+                  {v.error ? v.error : v.uploading ? `Uploading… ${v.progress}%` : v.file ? "Ready" : "Uploaded earlier"}
                 </p>
               </div>
-              <button type="button" onClick={() => onRemoveVideo(v.previewUrl)} aria-label="Remove video"
+              <button type="button" onClick={() => onRemoveVideo(v.id)} aria-label="Remove video"
                 style={{ background: "none", border: "none", color: "#c14646", padding: "0 6px", cursor: "pointer", fontSize: "1.05rem", lineHeight: 1 }}>×</button>
             </div>
           ))}
