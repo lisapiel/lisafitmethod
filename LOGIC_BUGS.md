@@ -5,6 +5,29 @@ that stops each from recurring.
 
 ---
 
+## The check-in sent clients away and lost their answers
+**Date:** 2026-11-10
+**Area:** `src/app/my-coaching/check-in/page.client.tsx`, `src/lib/checkInDraft.ts`
+
+The Nutrition step had a link to the food log. Following it (or tapping any
+tab, reloading, or the phone closing the app) threw away every answer, because
+the check-in lived only in React state. Separately, the clean-up effect that
+revoked video preview URLs ran on every change to the form reviews, so typing a
+note revoked the previews of videos still in the form.
+
+**Fix:** the link is gone. The in-progress check-in autosaves to localStorage
+under `lfm:check-in-draft:v1:<email>:<last check-in submittedAt or "first">`,
+including uploaded form-review video keys, restores with a short note, clears
+after a successful submit, and drops drafts from older periods. A
+`beforeunload` warning covers reloads and closing the tab while answers are
+unsent. Previews are revoked only on unmount.
+
+**Rule:** a multi-step form that takes more than a minute keeps a local draft,
+and never links out of itself mid-flow. Cleanup effects that free resources run
+on unmount, not on every state change.
+
+---
+
 ## Bundle credit was a fixed $137, marked used without being applied, and could be faked
 **Date:** 2026-11-10
 **Area:** `src/lib/bundleCredit*.ts`, `src/lib/coachingCheckout.ts`, `src/app/api/stripe/webhook/route.ts`, `src/lib/customerHistory.ts`
