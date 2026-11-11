@@ -6,6 +6,8 @@ import AssessmentEditor from "@/components/coaching/admin/AssessmentEditor"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import { SignedVideo } from "@/components/coaching/SignedMedia.client"
+import { ProgressPhotoStrip } from "@/components/coaching/ProgressPhotoStrip.client"
+import { decodeProgressPhotos, type StoredPhoto } from "@/lib/progressPhotos"
 import { checkInWeightLine, hasFormReviewVideos, hungerLabel } from "@/lib/checkInAnswers"
 
 const gold = "var(--ca-accent-mark)"
@@ -52,6 +54,7 @@ type CheckIn = {
   // v2 — Form review
   formReviewRequested: boolean | null
   formReviews: FormReview[]
+  progressPhotos: StoredPhoto[]
   // v2 — Recovery
   recoveryRating: number | null
   // v2 — Nutrition
@@ -220,6 +223,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             painNotes: ci.painNotes ?? null,
             formReviewRequested: typeof ci.formReviewRequested === "boolean" ? ci.formReviewRequested : null,
             formReviews,
+            progressPhotos: decodeProgressPhotos(ci.progressPhotos),
             recoveryRating: ci.recoveryRating != null ? Number(ci.recoveryRating) : null,
             nutritionStatus: ci.nutritionStatus ?? null,
             nutritionHelp: ci.nutritionHelp ?? null,
@@ -272,6 +276,9 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
   if (checkIn.formReviewRequested === true) {
     const videoCount = checkIn.formReviews.reduce((n, r) => n + r.videoKeys.length, 0)
     chips.push({ label: `Form review requested${videoCount > 0 ? ` · ${videoCount} video${videoCount === 1 ? "" : "s"}` : ""}`, tone: "info" })
+  }
+  if (checkIn.progressPhotos.length > 0) {
+    chips.push({ label: `Progress photo${checkIn.progressPhotos.length === 1 ? "" : "s"} · ${checkIn.progressPhotos.length}`, tone: "info" })
   }
   const meaningfulAdjustments = checkIn.adjustmentAreas.filter((a) => a !== "none")
   if (meaningfulAdjustments.length > 0) chips.push({ label: "Program adjustment requested", tone: "info" })
@@ -362,6 +369,14 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
                     </div>
                   )
                 })()}
+              </Card>
+            )}
+
+            {checkIn.progressPhotos.length > 0 && (
+              <Card>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: gold, margin: "0 0 4px" }}>Progress photos</p>
+                <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: muted, margin: "0 0 12px" }}>Private coaching photos. Tap to enlarge.</p>
+                <ProgressPhotoStrip photos={checkIn.progressPhotos} viewer="admin" dark size={104} />
               </Card>
             )}
 

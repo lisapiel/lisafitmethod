@@ -5,6 +5,8 @@ import Link from "next/link"
 import WeekFromLisa from "@/components/portal/WeekFromLisa"
 import type { ClientAssessment } from "@/lib/coachingRecords"
 import { checkInWeightLine, hungerLabel } from "@/lib/checkInAnswers"
+import { ProgressPhotoStrip } from "@/components/coaching/ProgressPhotoStrip.client"
+import { decodeProgressPhotos, type StoredPhoto } from "@/lib/progressPhotos"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -46,6 +48,7 @@ type CheckIn = {
   // v2 — Form review
   formReviewRequested: boolean | null
   formReviews: FormReview[]
+  progressPhotos: StoredPhoto[]
   // v2 — Recovery (sleep/energy reuse legacy; stress/recovery are new for v2)
   stressLevel: number | null
   recoveryRating: number | null
@@ -197,6 +200,7 @@ export default function CheckInHistoryPage() {
               painNotes: (ci.painNotes as string | null) ?? null,
               formReviewRequested: typeof ci.formReviewRequested === "boolean" ? ci.formReviewRequested : null,
               formReviews,
+              progressPhotos: decodeProgressPhotos(ci.progressPhotos),
               stressLevel: ci.stressLevel != null ? Number(ci.stressLevel) : null,
               recoveryRating: ci.recoveryRating != null ? Number(ci.recoveryRating) : null,
               nutritionStatus: (ci.nutritionStatus as string | null) ?? null,
@@ -365,6 +369,13 @@ function V2Body({ ci }: { ci: CheckIn }) {
             <RatingBadge label="Stress management" value={ci.stressLevel} />
             <RatingBadge label="Recovery" value={ci.recoveryRating} />
           </div>
+        </div>
+      )}
+
+      {ci.progressPhotos.length > 0 && (
+        <div style={{ marginBottom: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: muted, margin: "0 0 6px" }}>Progress photos</p>
+          <ProgressPhotoStrip photos={ci.progressPhotos} viewer="client" size={88} />
         </div>
       )}
 

@@ -104,6 +104,7 @@ export function uploadOwnerFolder(sub: unknown): string | null {
 export const CLIENT_UPLOAD_KINDS = {
   "form-review": { prefix: "media/coaching-form-reviews/", typePrefix: "video/", maxBytes: 200 * 1024 * 1024 },
   "meal-photo": { prefix: "media/nutrition-messages/", typePrefix: "image/", maxBytes: 8 * 1024 * 1024 },
+  "progress-photo": { prefix: "media/coaching-progress-photos/", typePrefix: "image/", maxBytes: 15 * 1024 * 1024 },
 } as const
 
 export type ClientUploadKind = keyof typeof CLIENT_UPLOAD_KINDS
@@ -134,7 +135,8 @@ export function planClientUpload(
   const size = typeof input.size === "number" ? input.size : NaN
   if (!Number.isInteger(size) || size <= 0) return { error: "Invalid file size", status: 400 }
   if (size > rule.maxBytes) {
-    return { error: input.kind === "form-review" ? "Videos need to be under 200 MB." : "Photos need to be under 8 MB.", status: 413 }
+    const mb = Math.round(rule.maxBytes / (1024 * 1024))
+    return { error: input.kind === "form-review" ? `Videos need to be under ${mb} MB.` : `Photos need to be under ${mb} MB.`, status: 413 }
   }
   return { key: `${rule.prefix}${folder}/${now}-${rand}.${ext}`, contentType: input.contentType.toLowerCase(), size }
 }

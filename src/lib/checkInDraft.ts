@@ -2,6 +2,7 @@ import {
   ADJUSTMENT_AREAS, HUNGER_OPTIONS, NUTRITION_NOTE_MAX, NUTRITION_STATUSES, WEIGHT_STATUSES,
   type AdjustmentArea, type Hunger, type NutritionStatus, type WeightStatus,
 } from "./checkInAnswers"
+import { PHOTO_POSES, PROGRESS_PHOTO_PREFIX, type PhotoPose } from "./progressPhotos"
 
 // The in-progress check-in is kept in the browser so a reload, a tap on another
 // tab or a closed app never loses what the client typed. One draft per client
@@ -17,6 +18,7 @@ const MAX_TEXT = 4000
 // doesn't have to upload them again. A video still uploading is not kept.
 export type DraftVideo = { s3Key: string; name: string }
 export type DraftFormReview = { exercise: string; note: string; videos: DraftVideo[] }
+export type DraftPhoto = { pose: PhotoPose; s3Key: string; name: string }
 export type YesNo = "unset" | "no" | "yes"
 
 export type CheckInDraftAnswers = {
@@ -24,6 +26,8 @@ export type CheckInDraftAnswers = {
   weight: string
   weightUnit: "LBS" | "KG"
   measurements: Array<{ label: string; value: string; unit: string }>
+  // Uploaded progress photos only, one per pose.
+  progressPhotos: DraftPhoto[]
   trainingRating: number
   painReported: YesNo
   painNotes: string
@@ -88,6 +92,17 @@ export function sanitizeDraftAnswers(raw: unknown): CheckInDraftAnswers | null {
       return [{ exercise: str(x.exercise, 200), note: str(x.note), videos }]
     })
     : []
+  const progressPhotos: DraftPhoto[] = []
+  if (Array.isArray(r.progressPhotos)) {
+    for (const p of r.progressPhotos.slice(0, 10)) {
+      if (!p || typeof p !== "object") continue
+      const y = p as Record<string, unknown>
+      const pose = (PHOTO_POSES as readonly unknown[]).includes(y.pose) ? y.pose as PhotoPose : null
+      const s3Key = str(y.s3Key, 512)
+      if (!pose || !s3Key.startsWith(PROGRESS_PHOTO_PREFIX) || progressPhotos.some((x) => x.pose === pose)) continue
+      progressPhotos.push({ pose, s3Key, name: str(y.name, 200) || "Photo" })
+    }
+  }
   const adjustmentAreas = Array.isArray(r.adjustmentAreas)
     ? [...new Set(r.adjustmentAreas.filter((a): a is AdjustmentArea => (ADJUSTMENT_AREAS as readonly unknown[]).includes(a)))]
     : []
@@ -96,6 +111,7 @@ export function sanitizeDraftAnswers(raw: unknown): CheckInDraftAnswers | null {
     weight: str(r.weight, 20),
     weightUnit: r.weightUnit === "KG" ? "KG" : "LBS",
     measurements,
+    progressPhotos,
     trainingRating: rating(r.trainingRating),
     painReported: yesNo(r.painReported),
     painNotes: str(r.painNotes),

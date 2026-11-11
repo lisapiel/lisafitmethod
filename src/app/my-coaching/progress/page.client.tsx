@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { toLbs, fromLbs, normalizeUnit, type WeightUnit } from "@/lib/weight"
 import { buildWeightHistory, summarizeWeight, type WeightReading } from "@/lib/weightHistory"
+import { ProgressPhotoHistory } from "@/components/portal/ProgressPhotoHistory"
+import { decodeProgressPhotos, type StoredPhoto } from "@/lib/progressPhotos"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -166,6 +168,7 @@ export default function ProgressClient() {
   const [strengthPRs, setStrengthPRs] = useState<StrengthPR[]>([])
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [clientStartDate, setClientStartDate] = useState<string | null>(null)
+  const [photoEntries, setPhotoEntries] = useState<Array<{ id: string; date: string; photos: StoredPhoto[] }>>([])
 
   useEffect(() => {
     async function load() {
@@ -346,6 +349,10 @@ export default function ProgressClient() {
         const checkInRows: Snapshot[] = []
         if (checkInsRes.status === "fulfilled") {
           const all: Array<Record<string, unknown>> = checkInsRes.value.checkIns ?? []
+          setPhotoEntries(all
+            .map((ci) => ({ id: String(ci.id ?? ""), date: String(ci.submittedAt ?? ""), photos: decodeProgressPhotos(ci.progressPhotos) }))
+            .filter((e) => e.photos.length > 0 && e.date)
+            .sort((a, b) => b.date.localeCompare(a.date)))
           for (const ci of all) {
             const raw = ci.measurementSnapshot
             if (typeof raw !== "string" || !raw) continue
@@ -573,6 +580,8 @@ export default function ProgressClient() {
           </div>
         )}
       </div>
+
+      <ProgressPhotoHistory entries={photoEntries} />
 
       {/* Milestone timeline */}
       {milestones.length > 0 && (

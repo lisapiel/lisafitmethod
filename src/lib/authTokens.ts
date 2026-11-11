@@ -877,6 +877,17 @@ export interface CoachingCheckInRecord {
   adjustmentNotes?: string
   questionForLisa?: string
 
+  // ── Optional progress photos ─────────────────────────────────────────────
+  // JSON string: Array<{ pose: "front" | "side" | "back", key: string }>.
+  // Keys live under the private media/coaching-progress-photos/<sub>/ folder.
+  progressPhotos?: string
+
+  // ── Where the client was in their phase when they sent it ────────────────
+  // Stamped by the server from workout logs (absent on older check-ins).
+  phaseProgramId?: string
+  phaseWeek?: number
+  phaseWeeks?: number
+
   // ── Coach review (unchanged) ─────────────────────────────────────────────
   coachFeedback?: string
   reviewedAt?: string

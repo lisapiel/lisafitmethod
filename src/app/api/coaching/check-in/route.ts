@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { createCoachingCheckIn, listCoachingCheckIns, getCoachingClientRecord, hasCoachingAccess, type CoachingCheckInRecord } from "@/lib/authTokens"
+import { createCoachingCheckIn, listCoachingCheckIns, getCoachingClientRecord, getProgramRecord, hasCoachingAccess, listWorkoutLogRecords, type CoachingCheckInRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import { ADJUSTMENT_AREAS, NUTRITION_STATUSES, normalizeCheckInWeight, parseHunger, parseNutritionNote, type NutritionStatus } from "@/lib/checkInAnswers"
 import { isOwnClientKey } from "@/lib/mediaKeys"
+import { parseProgressPhotosInput, phaseProgress, photoMilestone, type PhaseProgress } from "@/lib/progressPhotos"
 
 export const dynamic = "force-dynamic"
 
@@ -32,11 +33,30 @@ async function getSessionIdentity(): Promise<{ email: string; sub: string } | nu
   })
 }
 
-export async function GET() {
+// Where the client is in their current phase, from their own workout logs.
+// Null when there's no current program or the lookup fails; photos and the
+// check-in itself never depend on it.
+async function currentPhase(email: string): Promise<PhaseProgress | null> {
+  try {
+    const client = await getCoachingClientRecord(email)
+    if (!client?.currentProgramId) return null
+    const [program, logs] = await Promise.all([getProgramRecord(client.currentProgramId), listWorkoutLogRecords(email)])
+    return phaseProgress(program, logs.map((l) => ({ programId: l.programId, weekNumber: Number(l.weekNumber), dayLabel: l.dayLabel, completedAt: l.completedAt })))
+  } catch {
+    return null
+  }
+}
+
+export async function GET(req: NextRequest) {
   const email = await getSessionEmail()
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const checkIns = await listCoachingCheckIns(email)
+  // The check-in form asks which friendly photo prompt to show, if any.
+  if (req.nextUrl.searchParams.get("photoPrompt") === "1") {
+    const photoPrompt = photoMilestone(await currentPhase(email), checkIns)
+    return NextResponse.json({ checkIns, photoPrompt })
+  }
   return NextResponse.json({ checkIns })
 }
 
@@ -116,6 +136,11 @@ export async function POST(req: NextRequest) {
     if (cleaned.length > 0) formReviewsJson = JSON.stringify(cleaned)
   }
 
+  // ── Optional progress photos: the caller's own, one per pose ────────────
+  const photosIn = parseProgressPhotosInput(isV2 ? body.progressPhotos : undefined, me.sub)
+  if (!photosIn.ok) return NextResponse.json({ error: photosIn.error }, { status: 400 })
+  const progressPhotos = photosIn.value
+
   // ── Nutrition status enum ───────────────────────────────────────────────
   let nutritionStatus: NutritionStatus | undefined
   if (isV2 && typeof body.nutritionStatus === "string" && NUTRITION_STATUSES.includes(body.nutritionStatus as NutritionStatus)) {
@@ -173,6 +198,7 @@ export async function POST(req: NextRequest) {
       ...(adjustmentAreas && { adjustmentAreas }),
       ...(toStr(body.adjustmentNotes) && { adjustmentNotes: toStr(body.adjustmentNotes) }),
       ...(toStr(body.questionForLisa) && { questionForLisa: toStr(body.questionForLisa) }),
+      ...(progressPhotos.length > 0 && { progressPhotos: JSON.stringify(progressPhotos) }),
     }
   } else {
     // Legacy v1 shape — retained verbatim so any cached old client keeps working.
@@ -193,11 +219,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const phase = await currentPhase(email)
   const checkIn = await createCoachingCheckIn({
     clientEmail: email.toLowerCase(),
     submittedAt: new Date().toISOString(),
     status: "PENDING",
     ...payload,
+    ...(phase && { phaseProgramId: phase.programId, phaseWeek: phase.week, phaseWeeks: phase.weeks }),
   })
 
   // ── Admin notification (non-blocking) ───────────────────────────────────
@@ -225,6 +253,7 @@ export async function POST(req: NextRequest) {
       flags.push("Program adjustment requested")
     }
     if (toStr(body.questionForLisa)) flags.push("Question for you")
+    if (progressPhotos.length > 0) flags.push(`Progress photo${progressPhotos.length === 1 ? "" : "s"} added`)
     const excerptParts: string[] = []
     if (flags.length > 0) excerptParts.push(flags.join(" · "))
     for (const text of [body.weeklyWin, body.weeklyChallenge, body.questionForLisa].filter(Boolean)) {

@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
     arm: data.arm,
     thigh: data.thigh,
     customMeasurements: data.customMeasurements,
-    photoS3Keys: data.photoS3Keys,
     notes: data.notes,
   })
   return NextResponse.json({ snapshot })

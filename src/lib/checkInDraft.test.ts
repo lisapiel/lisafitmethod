@@ -10,7 +10,7 @@ const SUB = "016b7530-80a1-70d0-c583-db882233b2bc"
 const VIDEO = `media/coaching-form-reviews/${SUB}/abc123.mp4`
 
 const blank: CheckInDraftAnswers = {
-  weightChoice: "", weight: "", weightUnit: "LBS", measurements: [], trainingRating: 0,
+  weightChoice: "", weight: "", weightUnit: "LBS", measurements: [], progressPhotos: [], trainingRating: 0,
   painReported: "unset", painNotes: "", formReviewRequested: "unset", formReviews: [],
   sleepRating: 0, energyRating: 0, stressRating: 0, recoveryRating: 0,
   nutritionStatus: "", nutritionHelp: "", nutritionNote: "", hunger: "",
@@ -148,4 +148,19 @@ test("the signature ignores key order", () => {
   const reordered = Object.fromEntries(Object.entries(blank).reverse()) as CheckInDraftAnswers
   assert.equal(draftSignature(reordered), draftSignature(blank))
   assert.notEqual(draftSignature({ ...blank, weeklyWin: "PR" }), draftSignature(blank))
+})
+
+test("uploaded progress photos are kept in the draft, one per pose, own prefix only", () => {
+  const PHOTO = `media/coaching-progress-photos/${SUB}/p1.jpg`
+  const a = sanitizeDraftAnswers({
+    ...blank,
+    progressPhotos: [
+      { pose: "front", s3Key: PHOTO, name: "front.jpg" },
+      { pose: "front", s3Key: PHOTO, name: "dupe.jpg" },
+      { pose: "side", s3Key: VIDEO, name: "wrong-folder.mp4" },
+      { pose: "top", s3Key: PHOTO, name: "bad-pose.jpg" },
+    ],
+  })
+  assert.deepEqual(a?.progressPhotos, [{ pose: "front", s3Key: PHOTO, name: "front.jpg" }])
+  assert.deepEqual(sanitizeDraftAnswers({ ...blank, progressPhotos: undefined })?.progressPhotos, [])
 })

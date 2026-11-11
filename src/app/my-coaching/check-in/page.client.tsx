@@ -12,6 +12,8 @@ import {
 } from "@/lib/checkInDraft"
 import { daysBetweenKeys, localDateKey } from "@/lib/localDate"
 import CheckInWeightChoice from "@/components/portal/CheckInWeightChoice"
+import { ProgressPhotosField, type PhotoSlot } from "@/components/portal/ProgressPhotosField"
+import { MAX_PHOTO_BYTES, type PhotoMilestone, type PhotoPose } from "@/lib/progressPhotos"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -38,11 +40,12 @@ type FormReview = {
   videos: ReviewVideo[]
 }
 
-type FormState = Omit<CheckInDraftAnswers, "formReviews"> & { formReviews: FormReview[] }
+type FormState = Omit<CheckInDraftAnswers, "formReviews" | "progressPhotos"> & { formReviews: FormReview[]; progressPhotos: PhotoSlot[] }
 
 const INITIAL: FormState = {
   weightChoice: "", weight: "", weightUnit: "LBS",
   measurements: [],
+  progressPhotos: [],
   trainingRating: 0,
   painReported: "unset", painNotes: "",
   formReviewRequested: "unset", formReviews: [],
@@ -104,6 +107,7 @@ function toDraftAnswers(form: FormState): CheckInDraftAnswers {
       note: r.note,
       videos: r.videos.flatMap((v) => (v.s3Key && !v.error ? [{ s3Key: v.s3Key, name: v.name }] : [])),
     })),
+    progressPhotos: form.progressPhotos.flatMap((p) => (p.s3Key && !p.error && !p.uploading ? [{ pose: p.pose, s3Key: p.s3Key, name: p.name }] : [])),
   }
 }
 
@@ -116,6 +120,7 @@ function fromDraftAnswers(a: CheckInDraftAnswers): FormState {
       note: r.note,
       videos: r.videos.map((v) => ({ id: randomId(), file: null, name: v.name, previewUrl: null, s3Key: v.s3Key, progress: 100, error: null, uploading: false })),
     })),
+    progressPhotos: a.progressPhotos.map((p) => ({ pose: p.pose, name: p.name, previewUrl: null, s3Key: p.s3Key, progress: 100, uploading: false, error: null })),
   }
 }
 
@@ -296,6 +301,7 @@ export default function CheckInClient() {
   // form looked like before the client touched it (so only real answers count).
   const [draftKey, setDraftKey] = useState<string | null>(null)
   const [restoredDraft, setRestoredDraft] = useState(false)
+  const [photoPrompt, setPhotoPrompt] = useState<PhotoMilestone>(null)
   const baselineRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -316,7 +322,7 @@ export default function CheckInClient() {
         // Check-in history (already submitted this week?) and every weigh-in,
         // from check-ins and Progress logs, for the weight step.
         const [ciRes, snapRes] = await Promise.all([
-          fetch("/api/coaching/check-in"),
+          fetch("/api/coaching/check-in?photoPrompt=1"),
           fetch("/api/coaching/progress").catch(() => null),
         ])
         let lastCheckInIso: string | null = null
@@ -324,6 +330,7 @@ export default function CheckInClient() {
         if (ciRes.ok) {
           const data = await ciRes.json()
           checkIns = data.checkIns ?? []
+          if (data.photoPrompt === "start" || data.photoPrompt === "final") setPhotoPrompt(data.photoPrompt)
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
           if (checkIns.some((ci) => new Date(ci.submittedAt) > weekAgo)) { submittedThisWeek = true; setAlreadySubmitted(true) }
           const sortedAll = [...checkIns].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
@@ -422,6 +429,34 @@ export default function CheckInClient() {
     setForm((f) => ({ ...f, measurements: f.measurements.filter((_, i) => i !== idx) }))
   }
 
+  // ── Progress photos ─────────────────────────────────────────────────────
+  function patchPhoto(pose: PhotoPose, patch: Partial<PhotoSlot>) {
+    setForm((f) => ({ ...f, progressPhotos: f.progressPhotos.map((p) => p.pose === pose ? { ...p, ...patch } : p) }))
+  }
+  async function handlePhotoPick(pose: PhotoPose, file: File) {
+    setErrorMsg(null)
+    if (!/^image\/(jpeg|png)$/i.test(file.type)) { setErrorMsg("Please choose a JPEG or PNG photo."); return }
+    if (file.size > MAX_PHOTO_BYTES) { setErrorMsg("Photos need to be under 15 MB."); return }
+    const slot: PhotoSlot = { pose, name: file.name, previewUrl: URL.createObjectURL(file), s3Key: null, progress: 0, uploading: true, error: null }
+    setForm((f) => {
+      f.progressPhotos.forEach((p) => { if (p.pose === pose && p.previewUrl) URL.revokeObjectURL(p.previewUrl) })
+      return { ...f, progressPhotos: [...f.progressPhotos.filter((p) => p.pose !== pose), slot] }
+    })
+    try {
+      const upload = await requestClientUpload("progress-photo", extForFile(file), file.type, file.size)
+      await putToSignedUrl(upload, file, (pct) => patchPhoto(pose, { progress: pct }))
+      patchPhoto(pose, { s3Key: upload.key, uploading: false, progress: 100 })
+    } catch {
+      patchPhoto(pose, { uploading: false, error: "Didn't upload. Tap × and try again." })
+    }
+  }
+  function removePhoto(pose: PhotoPose) {
+    setForm((f) => {
+      f.progressPhotos.forEach((p) => { if (p.pose === pose && p.previewUrl) URL.revokeObjectURL(p.previewUrl) })
+      return { ...f, progressPhotos: f.progressPhotos.filter((p) => p.pose !== pose) }
+    })
+  }
+
   // ── Form-review helpers ─────────────────────────────────────────────────
   function addFormReview() {
     setForm((f) => ({ ...f, formReviews: [...f.formReviews, { key: randomId(), exercise: "", note: "", videos: [] }] }))
@@ -513,8 +548,11 @@ export default function CheckInClient() {
   // would break the previews of videos that are still in the form.
   const formReviewsRef = useRef(form.formReviews)
   formReviewsRef.current = form.formReviews
+  const photosRef = useRef(form.progressPhotos)
+  photosRef.current = form.progressPhotos
   useEffect(() => () => {
     formReviewsRef.current.forEach((r) => r.videos.forEach((v) => { if (v.previewUrl) URL.revokeObjectURL(v.previewUrl) }))
+    photosRef.current.forEach((p) => { if (p.previewUrl) URL.revokeObjectURL(p.previewUrl) })
   }, [])
 
   // ── Draft autosave ──────────────────────────────────────────────────────
@@ -542,11 +580,12 @@ export default function CheckInClient() {
   }
 
   const anyVideoUploading = form.formReviews.some((r) => r.videos.some((v) => v.uploading))
+  const anyPhotoUploading = form.progressPhotos.some((p) => p.uploading)
 
   // Leaving the page (reload, closing the tab, typing another address) with
   // unsent answers gets the browser's own warning. Moving around the portal
   // doesn't, because the draft above already keeps the answers.
-  const warnOnLeave = (dirty || anyVideoUploading) && !submitted && !alreadySubmitted
+  const warnOnLeave = (dirty || anyVideoUploading || anyPhotoUploading) && !submitted && !alreadySubmitted
   useEffect(() => {
     if (!warnOnLeave) return
     const onBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = "" }
@@ -561,6 +600,7 @@ export default function CheckInClient() {
   function submit() {
     if (!canProceed() || submitLockRef.current) return
     if (anyVideoUploading) { setErrorMsg("Please wait for your videos to finish uploading."); return }
+    if (anyPhotoUploading) { setErrorMsg("Please wait for your photos to finish uploading."); return }
     if (latestReading && form.weightChoice === "new" && form.weight.trim()) {
       const change = relativeChange(
         { value: latestReading.lbs, unit: "LBS" },
@@ -604,6 +644,7 @@ export default function CheckInClient() {
             weightConfirmedFrom: { lbs: latestReading.lbs, unit: latestReading.unit, at: latestReading.at, source: latestReading.source },
           }),
           measurements: form.measurements.filter((m) => m.label.trim() && m.value.trim()),
+          progressPhotos: form.progressPhotos.flatMap((p) => (p.s3Key && !p.error ? [{ pose: p.pose, key: p.s3Key }] : [])),
           // Training
           workoutsCompleted: autoWorkouts.completed,
           workoutsPlanned: autoWorkouts.planned,
@@ -875,6 +916,8 @@ export default function CheckInClient() {
                 + Add custom measurement
               </button>
             </div>
+
+            <ProgressPhotosField photos={form.progressPhotos} prompt={photoPrompt} onPick={handlePhotoPick} onRemove={removePhoto} />
           </div>
         )}
 
