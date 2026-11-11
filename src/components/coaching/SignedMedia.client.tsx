@@ -50,11 +50,13 @@ export function SignedImage({
   viewer,
   alt = "",
   style,
+  loading,
 }: {
   s3Key: string
   viewer: MediaViewer
   alt?: string
   style?: React.CSSProperties
+  loading?: "lazy" | "eager"
 }) {
   const { url, error } = useSignedUrl(viewer, s3Key)
   if (error) {
@@ -67,6 +69,6 @@ export function SignedImage({
   if (!url) return <div style={{ ...style, background: "#f5f2ee" }} />
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt={alt} style={style} />
+    <img src={url} alt={alt} style={style} loading={loading} decoding="async" />
   )
 }

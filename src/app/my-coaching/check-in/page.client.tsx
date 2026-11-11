@@ -307,9 +307,16 @@ export default function CheckInClient() {
   useEffect(() => {
     async function init() {
       try {
+        // Every request starts now; each is used below in the same order as before.
+        const accessP = fetch("/api/member/access").catch(() => null)
+        const ciP = fetch("/api/coaching/check-in?photoPrompt=1")
+        const snapP = fetch("/api/coaching/progress").catch(() => null)
+        const progP = fetch("/api/coaching/program?view=plan").catch(() => null)
+        const logP = fetch("/api/coaching/workout-log").catch(() => null)
+
         // Session email
         let sessionEmail = ""
-        const accessRes = await fetch("/api/member/access").catch(() => null)
+        const accessRes = await accessP
         if (accessRes?.ok) {
           const d = await accessRes.json()
           if (d.email) sessionEmail = String(d.email)
@@ -321,10 +328,7 @@ export default function CheckInClient() {
 
         // Check-in history (already submitted this week?) and every weigh-in,
         // from check-ins and Progress logs, for the weight step.
-        const [ciRes, snapRes] = await Promise.all([
-          fetch("/api/coaching/check-in?photoPrompt=1"),
-          fetch("/api/coaching/progress").catch(() => null),
-        ])
+        const [ciRes, snapRes] = await Promise.all([ciP, snapP])
         let lastCheckInIso: string | null = null
         let checkIns: Array<Record<string, unknown> & { submittedAt: string }> = []
         if (ciRes.ok) {
@@ -370,10 +374,7 @@ export default function CheckInClient() {
         setPreselectedFromProgress(preselected)
 
         // Load program + workout log for the auto training summary
-        const [progRes, logRes] = await Promise.all([
-          fetch("/api/coaching/program").catch(() => null),
-          fetch("/api/coaching/workout-log").catch(() => null),
-        ])
+        const [progRes, logRes] = await Promise.all([progP, logP])
         let weeks: ProgramWeek[] = []
         let currentProgramId: string | undefined
         if (progRes?.ok) {

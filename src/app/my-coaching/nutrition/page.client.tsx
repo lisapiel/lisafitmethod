@@ -85,13 +85,13 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/coaching/program")
+        // Profile and food logs load together rather than one after the other.
+        const [res] = await Promise.all([fetch("/api/coaching/program?view=client"), loadLogs()])
         if (res.ok) {
           const data = await res.json() as Loaded
           setState(data)
         }
       } catch { /* ignore */ }
-      await loadLogs()
       setLoading(false)
     }
     load()

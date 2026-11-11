@@ -1,4 +1,4 @@
-import { getExerciseRecord, type CoachingProgramRecord } from "./authTokens"
+import { getExerciseRecord, type CoachingProgramRecord, type ExerciseRecord } from "./authTokens"
 
 // Minimal shapes — mirrors the ProgramExercise / Day / Week schema
 // serialized into CoachingProgramRecord.weeks. Deliberately narrow so
@@ -35,7 +35,12 @@ type HydWeek = { days?: HydDay[]; [k: string]: unknown }
  * an intentional custom videoS3Key override in the source record is
  * preserved on disk even though the response uses the library value.
  */
-export async function hydrateProgramVideos(program: CoachingProgramRecord | null): Promise<CoachingProgramRecord | null> {
+export async function hydrateProgramVideos(
+  program: CoachingProgramRecord | null,
+  // When given, every library record looked up is added here, so a caller
+  // that also needs exercise details doesn't read them a second time.
+  records?: Map<string, ExerciseRecord>,
+): Promise<CoachingProgramRecord | null> {
   if (!program || !program.weeks) return program
 
   let weeks: HydWeek[]
@@ -60,6 +65,7 @@ export async function hydrateProgramVideos(program: CoachingProgramRecord | null
   // Batch fetch — same pattern the exercise-info API uses.
   const entries = await Promise.all([...ids].map(async (id) => {
     const rec = await getExerciseRecord(id)
+    if (rec && records) records.set(id, rec)
     return [id, rec?.videoS3Key ?? ""] as const
   }))
   const lib = new Map(entries)

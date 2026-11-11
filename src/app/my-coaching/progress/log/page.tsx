@@ -53,7 +53,7 @@ export default function LogMeasurementsPage() {
   useEffect(() => {
     async function init() {
       try {
-        const res = await fetch("/api/coaching/program")
+        const res = await fetch("/api/coaching/program?view=client")
         if (res.ok) {
           const data = await res.json()
           if (data.client?.weightUnit) setWeightUnit(data.client.weightUnit as "LBS" | "KG")

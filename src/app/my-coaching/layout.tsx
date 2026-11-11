@@ -35,15 +35,21 @@ export default async function MyCoachingLayout({ children }: { children: React.R
     redirect("/login?redirect=/my-coaching")
   }
 
-  const hasAccess = await hasCoachingAccess(email as string)
+  // Both reads of the client's access record run at once; the checks below
+  // are unchanged. Admin emails read their versions only if they need them.
+  const adminEmail = isAdminEmail(email as string)
+  const [hasAccess, clientVersions] = await Promise.all([
+    hasCoachingAccess(email as string),
+    adminEmail ? Promise.resolve(undefined) : getCoachingAccessVersions(email as string),
+  ])
   if (!hasAccess) {
     redirect("/account")
   }
 
-  const isAdmin = isAdminEmail(email as string) && (await adminMfaSatisfied(email as string))
+  const isAdmin = adminEmail && (await adminMfaSatisfied(email as string))
   let needsReaccept = false
   if (!isAdmin) {
-    const versions = await getCoachingAccessVersions(email as string)
+    const versions = clientVersions !== undefined ? clientVersions : await getCoachingAccessVersions(email as string)
     needsReaccept = !versions
       || !termsAcceptanceCurrent(versions.acceptedTermsVersion)
       || versions.acceptedWaiverVersion !== LIABILITY_WAIVER_VERSION

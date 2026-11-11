@@ -100,8 +100,17 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
   const pathname = usePathname()
   const router = useRouter()
   const [access, setAccess] = useState<AccessState | null>(null)
+  // The drawer starts closed, so its account details load after the page's
+  // own data (about 2 seconds in), or straight away if it's opened first.
+  const [wanted, setWanted] = useState(false)
+  useEffect(() => {
+    if (open) { setWanted(true); return }
+    const t = setTimeout(() => setWanted(true), 2000)
+    return () => clearTimeout(t)
+  }, [open])
 
   useEffect(() => {
+    if (!wanted) return
     fetch("/api/member/access")
       .then((r) => r.json())
       .then((d) =>
@@ -130,7 +139,7 @@ export default function MemberDrawer({ open, onClose }: { open: boolean; onClose
           access: { training: false, nutrition: false, tracker: false, coaching: false },
         })
       )
-  }, [])
+  }, [wanted])
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : ""

@@ -51,12 +51,13 @@ export async function GET(req: NextRequest) {
   const email = await getSessionEmail()
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const checkIns = await listCoachingCheckIns(email)
-  // The check-in form asks which friendly photo prompt to show, if any.
+  // The check-in form asks which friendly photo prompt to show, if any. The
+  // phase lookup runs alongside the check-in list rather than after it.
   if (req.nextUrl.searchParams.get("photoPrompt") === "1") {
-    const photoPrompt = photoMilestone(await currentPhase(email), checkIns)
-    return NextResponse.json({ checkIns, photoPrompt })
+    const [checkIns, phase] = await Promise.all([listCoachingCheckIns(email), currentPhase(email)])
+    return NextResponse.json({ checkIns, photoPrompt: photoMilestone(phase, checkIns) })
   }
+  const checkIns = await listCoachingCheckIns(email)
   return NextResponse.json({ checkIns })
 }
 

@@ -89,7 +89,7 @@ export default function MyCoachingHomeClient() {
       try {
         const day = localDateKey()
         const [programRes, logsRes, goalsRes, ciRes, snapRes, asRes, foodRes] = await Promise.allSettled([
-          fetch("/api/coaching/program").then((r) => r.json()),
+          fetch("/api/coaching/program?view=plan").then((r) => r.json()),
           fetch("/api/coaching/workout-log").then((r) => r.json()),
           fetch("/api/coaching/goals").then((r) => r.json()),
           fetch("/api/coaching/check-in").then((r) => r.json()),

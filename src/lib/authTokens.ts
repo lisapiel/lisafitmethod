@@ -1,8 +1,8 @@
 import { adminMfaSatisfied } from "./adminBypass"
+import { sharedDocClient } from "@/lib/dynamoClient"
 import { coachThreadId } from "@/lib/coachThreadKey"
 import { randomBytes } from "crypto"
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
+import { GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 import { scanAll } from "./dynamoScan"
 import { saveWorkoutLogOnce } from "./workoutLogSave"
 
@@ -25,15 +25,7 @@ export interface AuthToken {
 }
 
 function makeDb() {
-  return DynamoDBDocumentClient.from(
-    new DynamoDBClient({
-      region: process.env.COGNITO_REGION ?? "us-east-2",
-      credentials: {
-        accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-      },
-    })
-  )
+  return sharedDocClient()
 }
 
 export function generateAuthToken(): string {
@@ -780,9 +772,11 @@ export async function listAllCoachingMessages(): Promise<CoachingMessageRecord[]
     .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
 }
 
-export async function markCoachingMessagesRead(threadId: string, toEmail: string): Promise<void> {
+// Pass the thread's messages when the caller has just listed them, to skip
+// reading the whole thread a second time.
+export async function markCoachingMessagesRead(threadId: string, toEmail: string, known?: CoachingMessageRecord[]): Promise<void> {
   const db = makeDb()
-  const messages = await listCoachingMessages(threadId)
+  const messages = known ?? await listCoachingMessages(threadId)
   const now = new Date().toISOString()
   const unread = messages.filter((m) => m.toEmail.toLowerCase() === toEmail.toLowerCase() && !m.readAt)
   await Promise.all(

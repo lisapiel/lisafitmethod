@@ -177,7 +177,7 @@ export default function ProgressClient() {
           fetch("/api/coaching/check-in").then((r) => r.json()),
           fetch("/api/coaching/progress").then((r) => r.json()),
           fetch("/api/coaching/workout-log").then((r) => r.json()),
-          fetch("/api/coaching/program").then((r) => r.json()),
+          fetch("/api/coaching/program?view=client").then((r) => r.json()),
         ])
 
         const startDate = progRes.status === "fulfilled" ? (progRes.value.client?.startDate ?? null) : null

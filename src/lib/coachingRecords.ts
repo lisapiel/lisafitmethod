@@ -2,8 +2,8 @@
 // change history and check-in assessments. All additive: no existing record is
 // migrated, and older app versions simply ignore these record types.
 import { randomBytes } from "crypto"
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
+import { sharedDocClient } from "@/lib/dynamoClient"
+import { GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 import { scanAll } from "./dynamoScan"
 import { sortNewestFirst, type StartingWeightChangeRecord } from "./startingWeight"
 import { isProfileRequestLockStale, sortRequestsNewestFirst, type ProfileChangeRequest, type ProfileRequestLock } from "./profileRequests"
@@ -11,15 +11,7 @@ import { isProfileRequestLockStale, sortRequestsNewestFirst, type ProfileChangeR
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
 function makeDb() {
-  return DynamoDBDocumentClient.from(
-    new DynamoDBClient({
-      region: process.env.COGNITO_REGION ?? "us-east-2",
-      credentials: {
-        accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-      },
-    })
-  )
+  return sharedDocClient()
 }
 
 const strip = <T extends Record<string, unknown>>(o: T): T => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T

@@ -53,7 +53,7 @@ export default function SetupClient() {
     }
     async function load() {
       try {
-        const res = await fetch("/api/coaching/program")
+        const res = await fetch("/api/coaching/program?view=client")
         if (!res.ok) { await suggestGoal(); return }
         const data = await res.json() as { client?: { sex?: Sex; age?: number; heightInches?: number; activityLevel?: number; nutritionGoal?: NutritionGoal; startingWeight?: number } }
         const c = data.client

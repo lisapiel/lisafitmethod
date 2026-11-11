@@ -265,7 +265,7 @@ function WarmupCooldownDisplay({
                     {videoKey ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={cdnThumb(videoKey)} onError={thumbFallback} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={cdnThumb(videoKey)} onError={thumbFallback} alt={ex.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.18)" }}>
                           <div style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>
@@ -728,14 +728,16 @@ export default function WorkoutLoggerClient() {
 
   const load = useCallback(async () => {
     try {
-      const attrs = await fetchUserAttributes()
-      const userEmail = attrs.email ?? ""
-      setEmail(userEmail)
-
-      const [programRes, logsRes] = await Promise.allSettled([
-        fetch("/api/coaching/program").then((r) => r.json()),
+      // One round: who's signed in, the program (with each exercise's
+      // details, read once on the server) and the workout history.
+      const [attrsRes, programRes, logsRes] = await Promise.allSettled([
+        fetchUserAttributes(),
+        fetch("/api/coaching/program?info=1").then((r) => r.json()),
         fetch("/api/coaching/workout-log").then((r) => r.json()),
       ])
+      if (attrsRes.status === "fulfilled") setEmail(attrsRes.value.email ?? "")
+      const bundledInfo = programRes.status === "fulfilled" ? (programRes.value.exerciseInfo as Record<string, ExerciseInfo> | undefined) : undefined
+      if (bundledInfo) setExerciseInfo(bundledInfo)
 
       let prog: Record<string, unknown> | null = null
       if (programRes.status === "fulfilled") {
@@ -941,7 +943,9 @@ export default function WorkoutLoggerClient() {
         ...targetDay.exercises.map((e) => e.exerciseId),
         ...(targetDay.cooldown?.exercises ?? []).map((e) => e.exerciseId),
       ].filter(Boolean)))
-      if (ids.length > 0) {
+      // Only when the program request didn't already bring them (the server looked
+      // up every exercise in the program, so a missing one has no library record).
+      if (ids.length > 0 && !bundledInfo) {
         try {
           const infoRes = await fetch("/api/coaching/exercise-info", {
             method: "POST",

@@ -43,7 +43,7 @@ export async function GET() {
 
   const threadId = coachThreadId(email)
   const messages = await listCoachingMessages(threadId)
-  await markCoachingMessagesRead(threadId, email)
+  await markCoachingMessagesRead(threadId, email, messages)
 
   return NextResponse.json({ messages })
 }

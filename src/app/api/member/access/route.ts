@@ -1,9 +1,9 @@
 import { adminMfaSatisfied } from "@/lib/adminBypass"
+import { sharedDocClient } from "@/lib/dynamoClient"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { fetchAuthSession } from "aws-amplify/auth/server"
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb"
+import { GetCommand } from "@aws-sdk/lib-dynamodb"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import {
   hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess, hasMasterclassAccess,
@@ -28,15 +28,7 @@ const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 // their admin capability, so an admin who hasn't purchased Training
 // Foundations shows Training as "Available to add" rather than "Active".
 function makeDb() {
-  return DynamoDBDocumentClient.from(
-    new DynamoDBClient({
-      region: process.env.COGNITO_REGION ?? "us-east-2",
-      credentials: {
-        accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-      },
-    })
-  )
+  return sharedDocClient()
 }
 
 async function ownsRecord(prefix: string, email: string): Promise<boolean> {

@@ -30,7 +30,7 @@ export function ProgressPhotoStrip({ photos, viewer, dark = false, size = 96 }: 
             aria-label={`View ${POSE_LABEL[p.pose].toLowerCase()} photo full size`}
             style={{ position: "relative", width: size, aspectRatio: "3 / 4", padding: 0, border: `1px solid ${dark ? "#2a2a2a" : "#e8e2dc"}`, borderRadius: 6, overflow: "hidden", background: dark ? "#111" : "#f5f2ee", cursor: "zoom-in" }}
           >
-            <SignedImage s3Key={p.key} viewer={viewer} alt={`${POSE_LABEL[p.pose]} progress photo`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <SignedImage s3Key={p.key} viewer={viewer} loading="lazy" alt={`${POSE_LABEL[p.pose]} progress photo`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             <span style={{ position: "absolute", left: 4, bottom: 4, fontFamily: sans, fontSize: "0.7rem", fontWeight: 600, color: "#fff", background: "rgba(10,10,10,0.6)", borderRadius: 4, padding: "1px 6px" }}>{POSE_LABEL[p.pose]}</span>
           </button>
         ))}

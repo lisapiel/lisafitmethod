@@ -99,12 +99,11 @@ export default function MessagesClient() {
 
   useEffect(() => {
     async function init() {
-      try {
-        const res = await fetch("/api/member/access")
-        const data = await res.json()
-        if (data.email) setMyEmail(data.email)
-      } catch { /* ignore */ }
+      // Who's signed in and the messages load together.
+      const access = fetch("/api/member/access").then((r) => r.json()).catch(() => ({}))
       await loadMessages()
+      const data = await access as { email?: string }
+      if (data.email) setMyEmail(data.email)
       setLoading(false)
     }
     init()
@@ -112,10 +111,19 @@ export default function MessagesClient() {
 
   useEffect(() => {
     if (!myEmail) return
-    const interval = setInterval(loadMessages, 30_000)
-    const onFocus = () => loadMessages()
-    window.addEventListener("focus", onFocus)
-    return () => { clearInterval(interval); window.removeEventListener("focus", onFocus) }
+    // Check every 30 seconds only while the page is on screen, and right away
+    // when the client comes back to it. Nothing runs in a background tab.
+    const tick = () => { if (document.visibilityState === "visible") loadMessages() }
+    const interval = setInterval(tick, 30_000)
+    let last = Date.now()
+    const onReturn = () => {
+      if (document.visibilityState !== "visible" || Date.now() - last < 2000) return
+      last = Date.now()
+      loadMessages()
+    }
+    window.addEventListener("focus", onReturn)
+    document.addEventListener("visibilitychange", onReturn)
+    return () => { clearInterval(interval); window.removeEventListener("focus", onReturn); document.removeEventListener("visibilitychange", onReturn) }
   }, [myEmail, loadMessages])
 
   async function send(text: string) {

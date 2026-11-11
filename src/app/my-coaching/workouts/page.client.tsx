@@ -29,7 +29,7 @@ export default function WorkoutsClient() {
     ;(async () => {
       try {
         const [programRes, logsRes] = await Promise.allSettled([
-          fetch("/api/coaching/program").then((r) => r.json()),
+          fetch("/api/coaching/program?view=plan").then((r) => r.json()),
           fetch("/api/coaching/workout-log").then((r) => r.json()),
         ])
         if (!alive) return
