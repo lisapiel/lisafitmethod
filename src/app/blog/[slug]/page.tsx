@@ -26,7 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       images: post.coverImage
         ? [{ url: post.coverImage, width: 1200, height: 630 }]
         : [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
+      siteName: "Lisa Fit Method",
+      locale: "en_US",
     },
+    alternates: { canonical: `https://lisafitmethod.com/blog/${post.slug}` },
   }
 }
 
@@ -45,8 +48,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     datePublished: post.date,
     dateModified: post.date,
     image: { "@type": "ImageObject", url: post.coverImage ?? "https://lisafitmethod.com/hero.png", width: 1200, height: 800 },
-    author: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
-    publisher: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com", logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png", width: 1200, height: 800 } },
+    author: { "@type": "Person", "@id": "https://lisafitmethod.com/about#lisa-mcpherson", name: "Lisa McPherson", jobTitle: "NASM Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
+    publisher: { "@type": "Organization", "@id": "https://lisafitmethod.com/#organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com", logo: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png", width: 1200, height: 800 } },
     url: `https://lisafitmethod.com/blog/${post.slug}`,
     mainEntityOfPage: { "@type": "WebPage", "@id": `https://lisafitmethod.com/blog/${post.slug}` },
   }

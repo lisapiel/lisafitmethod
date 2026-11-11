@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     title: "Free Training Guide — The 5 Foundation Movements",
     description: "The five movement patterns every strong body is built on. Free from Lisa Fit Method.",
   },
+  alternates: { canonical: "https://lisafitmethod.com/free-guide" },
 }
 
 export default function FreeGuidePage() {
