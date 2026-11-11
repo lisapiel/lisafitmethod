@@ -2,22 +2,25 @@
 
 import { useEffect, useState } from "react"
 import type { AssessmentRecord } from "@/lib/coachingRecords"
+import { FORM_FEEDBACK_MAX } from "@/lib/checkInAnswers"
 
-type Form = { wentWell: string; toImprove: string; changes: string; priorities: [string, string, string]; privateNote: string; emailRequested: boolean }
-const EMPTY: Form = { wentWell: "", toImprove: "", changes: "", priorities: ["", "", ""], privateNote: "", emailRequested: false }
+type Form = { wentWell: string; toImprove: string; changes: string; formFeedback: string; priorities: [string, string, string]; privateNote: string; emailRequested: boolean }
+const EMPTY: Form = { wentWell: "", toImprove: "", changes: "", formFeedback: "", priorities: ["", "", ""], privateNote: "", emailRequested: false }
 
 function fromRecord(a: AssessmentRecord): Form {
   const p = [...(a.priorities ?? []), "", "", ""].slice(0, 3) as [string, string, string]
-  return { wentWell: a.wentWell ?? "", toImprove: a.toImprove ?? "", changes: a.changes ?? "", priorities: p, privateNote: a.privateNote ?? "", emailRequested: !!a.emailRequested }
+  return { wentWell: a.wentWell ?? "", toImprove: a.toImprove ?? "", changes: a.changes ?? "", formFeedback: a.formFeedback ?? "", priorities: p, privateNote: a.privateNote ?? "", emailRequested: !!a.emailRequested }
 }
 
 const when = (iso?: string) => (iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "")
 
-export default function AssessmentEditor({ token, checkInId, clientFirstName, legacyFeedback, onSent }: {
+export default function AssessmentEditor({ token, checkInId, clientFirstName, legacyFeedback, formReviewRequested = false, onSent }: {
   token: string
   checkInId: string
   clientFirstName: string
   legacyFeedback: string | null
+  // True when the check-in has form-review videos; only then is there a Form feedback part.
+  formReviewRequested?: boolean
   onSent: () => void
 }) {
   const [rec, setRec] = useState<AssessmentRecord | null>(null)
@@ -41,8 +44,8 @@ export default function AssessmentEditor({ token, checkInId, clientFirstName, le
 
   const sent = rec?.status === "sent"
   const set = <K extends keyof Form>(k: K, v: Form[K]) => { setForm((f) => ({ ...f, [k]: v })); setStatus("") }
-  const payload = () => ({ ...form, priorities: form.priorities.map((p) => p.trim()).filter(Boolean) })
-  const empty = !form.wentWell.trim() && !form.toImprove.trim() && !form.changes.trim() && form.priorities.every((p) => !p.trim())
+  const payload = () => ({ ...form, formFeedback: formReviewRequested ? form.formFeedback : "", priorities: form.priorities.map((p) => p.trim()).filter(Boolean) })
+  const empty = !form.wentWell.trim() && !form.toImprove.trim() && !form.changes.trim() && !(formReviewRequested && form.formFeedback.trim()) && form.priorities.every((p) => !p.trim())
 
   async function save(): Promise<AssessmentRecord | null> {
     setBusy("save"); setError("")
@@ -82,10 +85,10 @@ export default function AssessmentEditor({ token, checkInId, clientFirstName, le
 
   if (!loaded) return <section className="ca-assess"><p className="ca-assess-muted">Loading assessment…</p></section>
 
-  const field = (k: "wentWell" | "toImprove" | "changes", label: string, hint: string) => (
+  const field = (k: "wentWell" | "toImprove" | "changes" | "formFeedback", label: string, hint: string, maxLength?: number) => (
     <div className="ca-assess-field">
       <label htmlFor={`as-${k}`}>{label}</label>
-      <textarea id={`as-${k}`} rows={3} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={hint} />
+      <textarea id={`as-${k}`} rows={3} value={form[k]} maxLength={maxLength} onChange={(e) => set(k, e.target.value)} placeholder={hint} />
     </div>
   )
 
@@ -98,10 +101,11 @@ export default function AssessmentEditor({ token, checkInId, clientFirstName, le
       {legacyFeedback && !rec && (
         <div className="ca-assess-legacy"><b>Earlier feedback on this check-in</b><p>{legacyFeedback}</p></div>
       )}
-      <p className="ca-assess-shared">The four parts below are shared with {clientFirstName || "your client"} when you send.</p>
+      <p className="ca-assess-shared">The {formReviewRequested ? "five" : "four"} parts below are shared with {clientFirstName || "your client"} when you send.</p>
       {field("wentWell", "What's going well", "Wins worth naming")}
       {field("toImprove", "What to improve", "One or two things, kindly")}
       {field("changes", "What we're changing", "Or \"nothing yet\"")}
+      {formReviewRequested && field("formFeedback", "Form feedback", "Technique notes on the videos they sent", FORM_FEEDBACK_MAX)}
       <fieldset className="ca-assess-field">
         <legend>Priorities for next week <span>They can tick these off</span></legend>
         {form.priorities.map((p, i) => (
@@ -145,7 +149,7 @@ export default function AssessmentEditor({ token, checkInId, clientFirstName, le
         <details className="ca-assess-history">
           <summary>Earlier versions ({rec.versions.length})</summary>
           {[...rec.versions].reverse().map((v) => (
-            <div key={v.version}><b>Version {v.version} · {when(v.sentAt)}</b><p>{[v.wentWell, v.toImprove, v.changes].filter(Boolean).join(" / ")}</p></div>
+            <div key={v.version}><b>Version {v.version} · {when(v.sentAt)}</b><p>{[v.wentWell, v.toImprove, v.changes, v.formFeedback].filter(Boolean).join(" / ")}</p></div>
           ))}
         </details>
       )}

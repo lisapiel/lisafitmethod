@@ -41,3 +41,14 @@ test("assessment emails go out at most once per version", () => {
   assert.equal(shouldEmailAssessment({ emailRequested: true, emailedVersion: 1, version: 2 }, true), true)
   assert.equal(shouldEmailAssessment({ emailRequested: true, emailedVersion: 2, version: 2 }, true), false)
 })
+
+test("form feedback reaches the client, the plain copy and the email only when written", () => {
+  assert.equal("formFeedback" in toClientAssessment(base)!, false)
+  assert.equal("formFeedback" in toClientAssessment({ ...base, formFeedback: "  " })!, false)
+  const withForm = { ...base, formFeedback: "Brace before you lower." }
+  assert.equal(toClientAssessment(withForm)!.formFeedback, "Brace before you lower.")
+  assert.ok(assessmentPlainText(withForm).includes("Form feedback\nBrace before you lower."))
+  assert.ok(!assessmentPlainText(base).includes("Form feedback"))
+  assert.ok(assessmentEmailHtml(withForm, "Marco", "https://x").includes("Form feedback"))
+  assert.ok(!assessmentEmailHtml(base, "Marco", "https://x").includes("Form feedback"))
+})

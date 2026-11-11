@@ -6,7 +6,7 @@ import AssessmentEditor from "@/components/coaching/admin/AssessmentEditor"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import { SignedVideo } from "@/components/coaching/SignedMedia.client"
-import { checkInWeightLine, hungerLabel } from "@/lib/checkInAnswers"
+import { checkInWeightLine, hasFormReviewVideos, hungerLabel } from "@/lib/checkInAnswers"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -528,6 +528,7 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
           checkInId={id}
           clientFirstName={(clientName || "").split(" ")[0]}
           legacyFeedback={checkIn.coachFeedback}
+          formReviewRequested={hasFormReviewVideos(checkIn.formReviews)}
           onSent={() => setCheckIn((prev) => prev ? { ...prev, status: "REVIEWED", reviewedAt: new Date().toISOString() } : prev)}
         />
       </div>

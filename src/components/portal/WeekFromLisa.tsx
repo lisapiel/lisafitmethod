@@ -40,7 +40,7 @@ export default function WeekFromLisa({ checkInId, initial, compact = false }: { 
   }
 
   const sent = new Date(a.sentAt).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
-  const parts: Array<[string, string]> = [["What's going well", a.wentWell], ["What to improve", a.toImprove], ["What we're changing", a.changes]]
+  const parts: Array<[string, string]> = [["What's going well", a.wentWell], ["What to improve", a.toImprove], ["What we're changing", a.changes], ["Form feedback", a.formFeedback ?? ""]]
   const doneCount = a.priorities.filter((_, i) => a.priorityChecks[String(i)]).length
 
   return (

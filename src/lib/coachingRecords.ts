@@ -282,6 +282,9 @@ export interface AssessmentShared {
   toImprove: string
   changes: string
   priorities: string[]
+  // Technique feedback on the client's form-review videos. Only written for a
+  // check-in that has videos; absent on every other assessment.
+  formFeedback?: string
 }
 
 export interface AssessmentRecord extends AssessmentShared {
@@ -344,6 +347,7 @@ export function toClientAssessment(a: AssessmentRecord | null): ClientAssessment
     toImprove: a.toImprove,
     changes: a.changes,
     priorities: a.priorities ?? [],
+    ...(a.formFeedback && a.formFeedback.trim() && { formFeedback: a.formFeedback }),
     sentAt: a.sentAt,
     version: a.version,
     priorityChecks: a.priorityChecks ?? {},
@@ -357,6 +361,7 @@ export function assessmentPlainText(s: AssessmentShared): string {
     s.wentWell && `What's going well\n${s.wentWell}`,
     s.toImprove && `What to improve\n${s.toImprove}`,
     s.changes && `What we're changing\n${s.changes}`,
+    s.formFeedback && `Form feedback\n${s.formFeedback}`,
     s.priorities.length > 0 && `Priorities this week\n${s.priorities.map((p, i) => `${i + 1}. ${p}`).join("\n")}`,
   ].filter(Boolean).join("\n\n")
 }
@@ -378,7 +383,7 @@ export function assessmentEmailHtml(s: AssessmentShared, firstName: string, link
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:4px;">
 <tr><td style="background:#0a0a0a;padding:24px 32px;"><p style="margin:0;font-family:Georgia,serif;font-size:20px;color:#f5f2ee;">Lisa Fit Method</p></td></tr>
 <tr><td style="padding:32px 32px 8px;"><p style="margin:0 0 6px;font-family:Georgia,serif;font-size:24px;color:#1a1a1a;">Hi ${esc(firstName || "there")},</p><p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#3a3633;">I've gone through your check-in. Here's my feedback for the week ahead.</p></td></tr>
-<tr><td style="padding:0 32px;"><table width="100%" cellpadding="0" cellspacing="0">${section("What's going well", s.wentWell)}${section("What to improve", s.toImprove)}${section("What we're changing", s.changes)}${list}</table></td></tr>
+<tr><td style="padding:0 32px;"><table width="100%" cellpadding="0" cellspacing="0">${section("What's going well", s.wentWell)}${section("What to improve", s.toImprove)}${section("What we're changing", s.changes)}${section("Form feedback", s.formFeedback ?? "")}${list}</table></td></tr>
 <tr><td style="padding:4px 32px 32px;"><table cellpadding="0" cellspacing="0"><tr><td style="background:#c8a97e;border-radius:2px;"><a href="${esc(link)}" style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:700;color:#0a0a0a;text-decoration:none;">Open your week</a></td></tr></table>
 <p style="margin:22px 0 0;font-size:15px;line-height:1.6;color:#3a3633;">Talk soon,<br />Lisa</p></td></tr>
 </table></td></tr></table></body></html>`

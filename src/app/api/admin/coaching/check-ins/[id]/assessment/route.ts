@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import { verifyAdminRequest } from "@/lib/adminAuth"
 import { createCoachingMessage, getCoachingCheckIn, getCoachingClientRecord, updateCoachingCheckIn } from "@/lib/authTokens"
 import { coachThreadId } from "@/lib/coachThreadKey"
+import { hasFormReviewVideos, parseFormFeedback } from "@/lib/checkInAnswers"
 import {
   assessmentEmailHtml, assessmentPlainText, getAssessment, putAssessment, shouldEmailAssessment,
   type AssessmentRecord, type AssessmentShared,
@@ -33,10 +34,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const checkIn = await getCoachingCheckIn(id)
   if (!checkIn) return NextResponse.json({ error: "Check-in not found" }, { status: 404 })
   const body = await req.json().catch(() => ({})) as Record<string, unknown>
-  const next = readShared(body)
+  const formFeedback = parseFormFeedback(body.formFeedback, hasFormReviewVideos(checkIn.formReviews))
+  if (!formFeedback.ok) return NextResponse.json({ error: formFeedback.error }, { status: 400 })
+  const next = { ...readShared(body), formFeedback: formFeedback.value || undefined }
   const now = new Date().toISOString()
   const prev = await getAssessment(id)
-  const changedShared = !!prev && prev.status === "sent" && (prev.wentWell !== next.wentWell || prev.toImprove !== next.toImprove || prev.changes !== next.changes || JSON.stringify(prev.priorities) !== JSON.stringify(next.priorities))
+  const changedShared = !!prev && prev.status === "sent" && (prev.wentWell !== next.wentWell || prev.toImprove !== next.toImprove || prev.changes !== next.changes || (prev.formFeedback ?? "") !== (next.formFeedback ?? "") || JSON.stringify(prev.priorities) !== JSON.stringify(next.priorities))
   const rec: AssessmentRecord = {
     ...(prev ?? { checkInId: id, clientEmail: checkIn.clientEmail.toLowerCase(), status: "draft", version: 0, createdAt: now }),
     ...next,
@@ -45,7 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     snapshot: body.snapshot && typeof body.snapshot === "object" && JSON.stringify(body.snapshot).length < 4000 ? body.snapshot as Record<string, unknown> : prev?.snapshot,
   } as AssessmentRecord
   if (changedShared && prev) {
-    rec.versions = [...(prev.versions ?? []), { wentWell: prev.wentWell, toImprove: prev.toImprove, changes: prev.changes, priorities: prev.priorities, version: prev.version, sentAt: prev.sentAt ?? prev.updatedAt }]
+    rec.versions = [...(prev.versions ?? []), { wentWell: prev.wentWell, toImprove: prev.toImprove, changes: prev.changes, priorities: prev.priorities, ...(prev.formFeedback && { formFeedback: prev.formFeedback }), version: prev.version, sentAt: prev.sentAt ?? prev.updatedAt }]
     rec.version = prev.version + 1
     // Priorities changed: their old ticks no longer match.
     if (JSON.stringify(prev.priorities) !== JSON.stringify(next.priorities)) rec.priorityChecks = {}
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const now = new Date().toISOString()
 
   if (body.send && rec.status !== "sent") {
-    if (!rec.wentWell && !rec.toImprove && !rec.changes && rec.priorities.length === 0) return NextResponse.json({ error: "Write at least one part before sending." }, { status: 400 })
+    if (!rec.wentWell && !rec.toImprove && !rec.changes && !rec.formFeedback && rec.priorities.length === 0) return NextResponse.json({ error: "Write at least one part before sending." }, { status: 400 })
     rec.status = "sent"
     rec.sentAt = now
     rec.sentBy = admin.toLowerCase()
