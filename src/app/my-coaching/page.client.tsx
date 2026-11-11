@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { fetchUserAttributes } from "aws-amplify/auth"
 import { workoutDraftKey, legacyWorkoutDraftKey } from "@/lib/workoutDraftKey"
 import Link from "next/link"
 import { resolveMacrosFor } from "@/lib/nutrition"
@@ -12,6 +11,12 @@ import UpNextCard from "@/components/portal/UpNextCard"
 import CoachNote from "@/components/portal/CoachNote"
 import HomeGlance from "@/components/portal/HomeGlance"
 import WeekFromLisa from "@/components/portal/WeekFromLisa"
+import HomeCheckIns from "@/components/portal/HomeCheckIns"
+import HomeGoals from "@/components/portal/HomeGoals"
+import { toHomeGoal, type HomeGoal } from "@/lib/goalsView"
+import { localDateKey } from "@/lib/localDate"
+import type { ClientAssessment } from "@/lib/coachingRecords"
+import type { NutritionLogRecord } from "@/lib/authTokens"
 import { ChevronRight } from "@/components/portal/PortalIcons"
 
 
@@ -53,18 +58,6 @@ type WorkoutLog = {
   coachFeedbackAt?: string
 }
 
-type Goal = {
-  id: string
-  type: string
-  label: string | null
-  startValue: number | null
-  targetValue: number | null
-  currentValue: number | null
-  unit: string | null
-  status: string | null
-}
-
-
 function HomeSkeleton() {
   return (
     <div className="pt pt-home" role="status" aria-label="Loading your plan">
@@ -75,22 +68,15 @@ function HomeSkeleton() {
   )
 }
 
-function goalProgressPct(g: Goal): number | null {
-  if (g.startValue == null || g.targetValue == null || g.currentValue == null) return null
-  const span = g.targetValue - g.startValue
-  if (span === 0) return g.currentValue === g.targetValue ? 100 : 0
-  const traveled = g.currentValue - g.startValue
-  const pct = (traveled / span) * 100
-  return Math.max(0, Math.min(100, Math.round(pct)))
-}
-
 export default function MyCoachingHomeClient() {
   const [loading, setLoading] = useState(true)
-  const [, setEmail] = useState("")
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null)
   const [program, setProgram] = useState<ProgramInfo | null>(null)
   const [logs, setLogs] = useState<WorkoutLog[]>([])
-  const [primaryGoal, setPrimaryGoal] = useState<Goal | null>(null)
+  const [goals, setGoals] = useState<HomeGoal[]>([])
+  // Fetched with everything else so these cards don't wait for a second round.
+  const [assessment, setAssessment] = useState<ClientAssessment | null | undefined>(undefined)
+  const [todayFood, setTodayFood] = useState<NutritionLogRecord[] | null>(null)
   const [weighIns, setWeighIns] = useState<WeightReading[]>([])
   const [checkInDates, setCheckInDates] = useState<string[]>([])
   // Set to true if the logger persisted an in-progress draft for today's
@@ -101,17 +87,20 @@ export default function MyCoachingHomeClient() {
   useEffect(() => {
     async function load() {
       try {
-        const attrs = await fetchUserAttributes()
-        const userEmail = attrs.email ?? ""
-        setEmail(userEmail)
-
-        const [programRes, logsRes, goalsRes, ciRes, snapRes] = await Promise.allSettled([
+        const day = localDateKey()
+        const [programRes, logsRes, goalsRes, ciRes, snapRes, asRes, foodRes] = await Promise.allSettled([
           fetch("/api/coaching/program").then((r) => r.json()),
           fetch("/api/coaching/workout-log").then((r) => r.json()),
           fetch("/api/coaching/goals").then((r) => r.json()),
           fetch("/api/coaching/check-in").then((r) => r.json()),
           fetch("/api/coaching/progress").then((r) => r.json()),
+          fetch("/api/coaching/assessments").then((r) => (r.ok ? r.json() : { assessments: [] })),
+          fetch(`/api/coaching/nutrition-logs?from=${day}&to=${day}`).then((r) => (r.ok ? r.json() : { logs: [] })),
         ])
+        // Same rule WeekFromLisa used on its own: on Home, only feedback from the last 3 weeks.
+        const newest = asRes.status === "fulfilled" ? ((asRes.value.assessments ?? []) as ClientAssessment[])[0] : undefined
+        setAssessment(newest && Date.now() - Date.parse(newest.sentAt) <= 21 * 864e5 ? newest : null)
+        setTodayFood(foodRes.status === "fulfilled" ? ((foodRes.value.logs ?? []) as NutritionLogRecord[]).filter((l) => l.date === day) : [])
 
         if (programRes.status === "fulfilled") {
           const c = programRes.value.client
@@ -161,21 +150,7 @@ export default function MyCoachingHomeClient() {
           })))
         }
 
-        if (goalsRes.status === "fulfilled") {
-          const goals: Goal[] = (goalsRes.value.goals ?? []).map((g: Record<string, unknown>) => ({
-            id: g.id as string,
-            type: g.type as string,
-            label: (g.label as string | null) ?? null,
-            startValue: g.startValue != null ? Number(g.startValue) : null,
-            targetValue: g.targetValue != null ? Number(g.targetValue) : null,
-            currentValue: g.currentValue != null ? Number(g.currentValue) : null,
-            unit: (g.unit as string | null) ?? null,
-            status: (g.status as string | null) ?? null,
-          }))
-          // Pick first non-achieved or first one as the headline goal
-          const headline = goals.find((g) => g.status !== "ACHIEVED") ?? goals[0] ?? null
-          setPrimaryGoal(headline)
-        }
+        if (goalsRes.status === "fulfilled") setGoals(((goalsRes.value.goals ?? []) as Array<Record<string, unknown>>).map(toHomeGoal))
 
         if (ciRes.status === "fulfilled") setCheckInDates((ciRes.value.checkIns ?? []).map((ci: Record<string, unknown>) => ci.submittedAt as string))
         setWeighIns(buildWeightHistory({
@@ -241,7 +216,6 @@ export default function MyCoachingHomeClient() {
   const weight = summarizeWeight(weighIns, clientInfo?.weightUnit === "KG" ? "KG" : "LBS")
   const weightDelta = weight.change
   const weightUnit = weight.unit === "KG" ? "kg" : "lb"
-  const goalPct = primaryGoal ? goalProgressPct(primaryGoal) : null
 
   const nutritionMissing = !!clientInfo && (clientInfo.heightInches == null || clientInfo.age == null || clientInfo.sex == null)
   const macros = clientInfo ? resolveMacrosFor(clientInfo) : null
@@ -273,10 +247,9 @@ export default function MyCoachingHomeClient() {
 
   const progressBits = [
     weightDelta != null && weightDelta !== 0 ? `${weightDelta < 0 ? "Down" : "Up"} ${Math.abs(weightDelta)} ${weightUnit} since your first weigh-in` : null,
-    primaryGoal && goalPct !== null ? `${goalPct}% of the way to ${primaryGoal.label || "your goal"}` : null,
     streak > 1 ? `${streak} weeks in a row` : null,
   ].filter(Boolean) as string[]
-  if (progressBits.length === 0 && program) progressBits.push("Measurements, photos and your goals")
+  if (progressBits.length === 0 && program) progressBits.push("Measurements, photos and strength")
 
   return (
     <div className="pt pt-home">
@@ -315,13 +288,14 @@ export default function MyCoachingHomeClient() {
       </div>
 
       <div className="pt-home-side">
-        <WeekFromLisa compact />
+        {assessment && <WeekFromLisa compact initial={assessment} />}
 
         <HomeGlance
           week={weekStrip}
           checkIn={checkIn}
           target={macros ? { calories: macros.calories, protein: macros.protein } : null}
           setupNeeded={nutritionMissing}
+          todayLogs={todayFood}
         />
 
         {progressBits.length > 0 && (
@@ -335,6 +309,9 @@ export default function MyCoachingHomeClient() {
         )}
 
         {clientInfo?.coachMessage && <CoachNote text={clientInfo.coachMessage} updatedAt={clientInfo.coachMessageUpdatedAt} />}
+
+        <HomeCheckIns submittedAt={checkInDates} />
+        <HomeGoals goals={goals} />
       </div>
     </div>
   )

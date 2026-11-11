@@ -53,6 +53,16 @@ export function checkInStatus(submittedAt: string[], now = Date.now()) {
   return { due: daysAgo >= 7, daysAgo }
 }
 
+// Same rolling 7-day rule as checkInStatus and the check-in page: the next
+// one is due 7 days after the latest submitted check-in.
+export function nextCheckInDue(submittedAt: string[], now = Date.now()): { last: Date | null; next: Date | null; due: boolean } {
+  const valid = submittedAt.filter((s) => Number.isFinite(Date.parse(s)))
+  if (valid.length === 0) return { last: null, next: null, due: true }
+  const last = new Date([...valid].sort().pop() as string)
+  const next = new Date(last.getTime() + 7 * 86_400_000)
+  return { last, next, due: checkInStatus(valid, now).due }
+}
+
 export function weekProgress(week: PortalWeek, done: Map<string, string>) {
   const total = week.days.length
   const finished = week.days.filter((d) => done.has(dayKey(week.weekNumber, d.dayLabel))).length

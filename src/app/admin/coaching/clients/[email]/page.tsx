@@ -7,8 +7,30 @@ import Link from "next/link"
 import type { CoachingClientRecord } from "@/lib/authTokens"
 import { IntakeCard } from "@/components/coaching/admin/IntakeCard"
 import { PaymentSummaryPanel } from "@/components/coaching/admin/PaymentSummary.client"
+import GoalForm, { EMPTY_GOAL, type GoalFormValues } from "@/components/coaching/admin/GoalForm"
 
 const gold = "var(--ca-accent-mark)"
+type AdminGoal = { id: string; type: string; label: string | null; startValue: number | null; targetValue: number | null; currentValue: number | null; unit: string | null; status: string | null; targetDate: string | null; notes: string | null }
+const toAdminGoal = (g: Record<string, unknown>): AdminGoal => ({
+  id: g.id as string,
+  type: g.type as string,
+  label: (g.label as string | null) ?? null,
+  startValue: g.startValue != null ? Number(g.startValue) : null,
+  targetValue: g.targetValue != null ? Number(g.targetValue) : null,
+  currentValue: g.currentValue != null ? Number(g.currentValue) : null,
+  unit: (g.unit as string | null) ?? null,
+  status: (g.status as string | null) ?? null,
+  targetDate: typeof g.targetDate === "string" && g.targetDate ? g.targetDate : null,
+  notes: typeof g.notes === "string" && g.notes ? g.notes : null,
+})
+const goalToForm = (g: AdminGoal): GoalFormValues => ({
+  type: g.type || "custom", label: g.label ?? "", unit: g.unit ?? "", notes: g.notes ?? "", targetDate: (g.targetDate ?? "").slice(0, 10),
+  startValue: g.startValue != null ? String(g.startValue) : "", currentValue: g.currentValue != null ? String(g.currentValue) : "", targetValue: g.targetValue != null ? String(g.targetValue) : "",
+})
+const formToBody = (v: GoalFormValues) => ({
+  type: v.type, label: v.label.trim(), unit: v.unit.trim(), notes: v.notes.trim(), targetDate: v.targetDate,
+  startValue: v.startValue.trim(), currentValue: v.currentValue.trim(), targetValue: v.targetValue.trim(),
+})
 const border = "var(--ca-line)"
 
 type ClientData = CoachingClientRecord
@@ -67,10 +89,9 @@ export default function ClientProfilePage() {
   const [editingCoachMessage, setEditingCoachMessage] = useState(false)
   const [savingCoachMessage, setSavingCoachMessage] = useState(false)
   // Goals
-  const [goals, setGoals] = useState<Array<{ id: string; type: string; label: string | null; startValue: number | null; targetValue: number | null; currentValue: number | null; unit: string | null; status: string | null }>>([])
+  const [goals, setGoals] = useState<AdminGoal[]>([])
   const [showAddGoal, setShowAddGoal] = useState(false)
-  const [newGoal, setNewGoal] = useState({ type: "body-composition", label: "", startValue: "", targetValue: "", currentValue: "", unit: "" })
-  const [savingGoal, setSavingGoal] = useState(false)
+  const [editingGoal, setEditingGoal] = useState<string | null>(null)
   // Commitment confirmation (for legacy clients)
   const [commitmentForm, setCommitmentForm] = useState({ commitmentType: "", approvedPriceInCents: "", subscriptionStartDate: "" })
   const [savingCommitment, setSavingCommitment] = useState(false)
@@ -142,14 +163,7 @@ export default function ClientProfilePage() {
       if (goalsRes.ok) {
         const data = await goalsRes.json()
         setGoals((data.goals ?? []).map((g: Record<string, unknown>) => ({
-          id: g.id as string,
-          type: g.type as string,
-          label: (g.label as string | null) ?? null,
-          startValue: g.startValue != null ? Number(g.startValue) : null,
-          targetValue: g.targetValue != null ? Number(g.targetValue) : null,
-          currentValue: g.currentValue != null ? Number(g.currentValue) : null,
-          unit: (g.unit as string | null) ?? null,
-          status: (g.status as string | null) ?? null,
+          ...toAdminGoal(g),
         })))
       }
 
@@ -204,42 +218,40 @@ export default function ClientProfilePage() {
     setDeleting(false)
   }
 
-  async function addGoal() {
-    if (!newGoal.label.trim()) return
-    setSavingGoal(true)
+  async function goalRequest(url: string, method: "POST" | "PATCH", body: Record<string, unknown>): Promise<Record<string, unknown> | null> {
     const session = await fetchAuthSession()
     const token = session.tokens?.accessToken?.toString() ?? ""
-    const res = await fetch("/api/admin/coaching/goals", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        clientEmail: emailParam,
-        type: newGoal.type,
-        label: newGoal.label.trim(),
-        startValue: newGoal.startValue || undefined,
-        targetValue: newGoal.targetValue || undefined,
-        currentValue: newGoal.currentValue || newGoal.startValue || undefined,
-        unit: newGoal.unit.trim() || undefined,
-        status: "ON_TRACK",
-      }),
+    const res = await fetch(url, { method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(body) })
+    if (!res.ok) return null
+    return await res.json().catch(() => ({}))
+  }
+
+  async function addGoal(v: GoalFormValues): Promise<boolean> {
+    const b = formToBody(v)
+    const data = await goalRequest("/api/admin/coaching/goals", "POST", {
+      clientEmail: emailParam,
+      type: b.type,
+      label: b.label,
+      startValue: b.startValue || undefined,
+      targetValue: b.targetValue || undefined,
+      currentValue: b.currentValue || b.startValue || undefined,
+      unit: b.unit || undefined,
+      targetDate: b.targetDate || undefined,
+      notes: b.notes || undefined,
+      status: "ON_TRACK",
     })
-    if (res.ok) {
-      const data = await res.json()
-      const g = data.goal
-      setGoals((prev) => [...prev, {
-        id: g.id,
-        type: g.type,
-        label: g.label ?? null,
-        startValue: g.startValue != null ? Number(g.startValue) : null,
-        targetValue: g.targetValue != null ? Number(g.targetValue) : null,
-        currentValue: g.currentValue != null ? Number(g.currentValue) : null,
-        unit: g.unit ?? null,
-        status: g.status ?? "ON_TRACK",
-      }])
-      setNewGoal({ type: "body-composition", label: "", startValue: "", targetValue: "", currentValue: "", unit: "" })
-      setShowAddGoal(false)
-    }
-    setSavingGoal(false)
+    if (!data?.goal) return false
+    setGoals((prev) => [...prev, toAdminGoal(data.goal as Record<string, unknown>)])
+    setShowAddGoal(false)
+    return true
+  }
+
+  async function saveGoalEdit(id: string, v: GoalFormValues): Promise<boolean> {
+    const data = await goalRequest(`/api/admin/coaching/goals/${id}`, "PATCH", formToBody(v))
+    if (!data?.goal) return false
+    setGoals((prev) => prev.map((g) => g.id === id ? toAdminGoal(data.goal as Record<string, unknown>) : g))
+    setEditingGoal(null)
+    return true
   }
 
   async function deleteGoal(id: string) {
@@ -632,7 +644,7 @@ export default function ClientProfilePage() {
       </div>
 
       {/* Goals */}
-      <div style={{ marginTop: "1rem" }}>
+      <div id="goals" style={{ marginTop: "1rem", scrollMarginTop: 80 }}>
         <SectionCard
           title="Goals"
           action={
@@ -658,8 +670,11 @@ export default function ClientProfilePage() {
                       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.82rem", color: "var(--ca-text)", margin: 0, fontWeight: 600 }}>{g.label}</p>
                       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-muted)", margin: "3px 0 0" }}>
                         {g.startValue ?? "—"} → {g.targetValue ?? "—"} {g.unit ?? ""}
+                        {g.targetDate ? ` · by ${new Date(`${g.targetDate.slice(0, 10)}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : ""}
                       </p>
+                      {g.notes && <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: "var(--ca-text)", margin: "4px 0 0", whiteSpace: "pre-wrap" }}>{g.notes}</p>}
                     </div>
+                    <button onClick={() => setEditingGoal(editingGoal === g.id ? null : g.id)} aria-label={`Edit ${g.label ?? "goal"}`} style={{ background: "none", border: "none", color: gold, cursor: "pointer", padding: "2px 6px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>Edit</button>
                     <button onClick={() => deleteGoal(g.id)} style={{ background: "none", border: "none", color: "var(--ca-muted)", cursor: "pointer", padding: "2px 6px", fontSize: "1rem", flexShrink: 0 }}>×</button>
                   </div>
                   {/* Current + status row — wraps on mobile */}
@@ -669,6 +684,7 @@ export default function ClientProfilePage() {
                       <input
                         type="text"
                         inputMode="decimal"
+                        key={`cur-${g.id}-${g.currentValue ?? ""}`}
                         defaultValue={g.currentValue ?? ""}
                         onBlur={(e) => updateGoalCurrent(g.id, e.target.value, g.status ?? "ON_TRACK")}
                         placeholder="—"
@@ -685,42 +701,14 @@ export default function ClientProfilePage() {
                       <option value="ACHIEVED">Achieved</option>
                     </select>
                   </div>
+                  {editingGoal === g.id && (
+                    <GoalForm key={`edit-${g.id}`} heading="Edit goal" initial={goalToForm(g)} saveLabel="Save goal" onSave={(v) => saveGoalEdit(g.id, v)} onCancel={() => setEditingGoal(null)} />
+                  )}
                 </div>
               ))}
 
               {showAddGoal && (
-                <div style={{ marginTop: 14, padding: "14px", background: "var(--ca-bg)", border: `1px solid ${border}` }}>
-                  <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", color: gold, letterSpacing: "0.12em", textTransform: "uppercase", margin: "0 0 10px" }}>New Goal</p>
-                  {/* Type + Label — stacks on narrow */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8, marginBottom: 8 }}>
-                    <select value={newGoal.type} onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }}>
-                      <option value="body-composition">Body Composition</option>
-                      <option value="strength">Strength</option>
-                      <option value="habit">Habit</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="Goal name (e.g. Lose 15 lbs)"
-                      value={newGoal.label}
-                      onChange={(e) => setNewGoal({ ...newGoal, label: e.target.value })}
-                      style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 12px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" }}
-                    />
-                  </div>
-                  {/* Numeric fields — 2 per row on narrow, 4 on wider */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 8, marginBottom: 10 }}>
-                    <input placeholder="Start" inputMode="decimal" value={newGoal.startValue} onChange={(e) => setNewGoal({ ...newGoal, startValue: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                    <input placeholder="Current" inputMode="decimal" value={newGoal.currentValue} onChange={(e) => setNewGoal({ ...newGoal, currentValue: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                    <input placeholder="Target" inputMode="decimal" value={newGoal.targetValue} onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                    <input placeholder="Unit (lbs, reps)" value={newGoal.unit} onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })} style={{ background: "var(--ca-raised)", border: `1px solid ${border}`, color: "var(--ca-text)", padding: "9px 10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", outline: "none", boxSizing: "border-box" }} />
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={addGoal} disabled={!newGoal.label.trim() || savingGoal} style={{ background: newGoal.label.trim() ? gold : "var(--ca-line)", color: newGoal.label.trim() ? "var(--ca-bg)" : "var(--ca-muted)", border: "none", padding: "9px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", cursor: newGoal.label.trim() ? "pointer" : "not-allowed", flex: "1 1 auto" }}>
-                      {savingGoal ? "Adding…" : "Add Goal"}
-                    </button>
-                    <button onClick={() => setShowAddGoal(false)} style={{ background: "none", border: `1px solid ${border}`, color: "var(--ca-muted)", padding: "9px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.75rem", cursor: "pointer" }}>Cancel</button>
-                  </div>
-                </div>
+                <GoalForm heading="New goal" initial={EMPTY_GOAL} saveLabel="Add goal" onSave={addGoal} onCancel={() => setShowAddGoal(false)} />
               )}
             </>
           )}

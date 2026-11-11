@@ -424,6 +424,13 @@ function ExerciseInfoCard({ info }: { info: ExerciseInfo | undefined }) {
             </div>
           )}
 
+          {(info.primaryMuscle || info.secondaryMuscles.length > 0) && (
+            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", color: "#4a4540", margin: "0 0 12px", lineHeight: 1.5 }}>
+              <span style={{ fontWeight: 700, color: black }}>Muscles worked: </span>
+              {[info.primaryMuscle, ...info.secondaryMuscles.filter((m) => m && m !== info.primaryMuscle)].filter(Boolean).join(", ")}
+            </p>
+          )}
+
           {/* Instructions */}
           {info.execution && (
             <div style={{ marginBottom: 12 }}>
@@ -437,7 +444,7 @@ function ExerciseInfoCard({ info }: { info: ExerciseInfo | undefined }) {
           {/* Coaching cues */}
           {info.coachingCues.length > 0 && (
             <div style={{ marginBottom: 12 }}>
-              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: accent, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>Coaching Cues</p>
+              <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, color: accent, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 4px" }}>Technique tips</p>
               <ul style={{ margin: 0, padding: "0 0 0 16px", color: "#4a4540" }}>
                 {info.coachingCues.map((c, i) => (
                   <li key={i} style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", marginBottom: 3, lineHeight: 1.5 }}>{c}</li>

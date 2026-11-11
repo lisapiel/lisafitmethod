@@ -12,17 +12,22 @@ type Props = {
   checkIn: { due: boolean; daysAgo: number | null }
   target: { calories: number; protein: number } | null
   setupNeeded: boolean
+  // Today's food logs when the page already loaded them; null while loading.
+  todayLogs?: NutritionLogRecord[] | null
 }
 
-export default function HomeGlance({ week, checkIn, target, setupNeeded }: Props) {
-  const [today, setToday] = useState<NutritionLogRecord[] | null>(null)
+export default function HomeGlance({ week, checkIn, target, setupNeeded, todayLogs }: Props) {
+  const [fetched, setToday] = useState<NutritionLogRecord[] | null>(null)
+  const provided = todayLogs !== undefined
+  const today = provided ? todayLogs : fetched
   useEffect(() => {
+    if (provided) return
     const key = localDateKey()
     fetch(`/api/coaching/nutrition-logs?from=${key}&to=${key}`)
       .then((r) => (r.ok ? r.json() : { logs: [] }))
       .then((d: { logs?: NutritionLogRecord[] }) => setToday((d.logs ?? []).filter((l) => l.date === key)))
       .catch(() => setToday([]))
-  }, [])
+  }, [provided])
 
   const kcal = today?.reduce((a, l) => a + (l.calories || 0), 0) ?? 0
   const proteinKnown = !!today && today.length > 0 && today.every((l) => typeof l.protein === "number")
@@ -79,9 +84,6 @@ export default function HomeGlance({ week, checkIn, target, setupNeeded }: Props
         </Link>
       )}
 
-      {!checkIn.due && checkIn.daysAgo != null && (
-        <p className="pt-caught-up">Check-in done {checkIn.daysAgo === 0 ? "today" : `${checkIn.daysAgo} ${checkIn.daysAgo === 1 ? "day" : "days"} ago`}. You&apos;re all caught up.</p>
-      )}
     </div>
   )
 }

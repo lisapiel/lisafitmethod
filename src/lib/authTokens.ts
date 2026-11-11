@@ -1422,19 +1422,29 @@ export async function listGoalRecords(clientEmail?: string): Promise<CoachingGoa
   return items as CoachingGoalRecord[]
 }
 
-export async function updateGoalRecord(id: string, updates: Partial<CoachingGoalRecord>): Promise<void> {
+// Updates an existing goal only (never creates one) and returns it, or null
+// if there's no such goal.
+export async function updateGoalRecord(id: string, updates: Partial<Record<keyof CoachingGoalRecord, unknown>>): Promise<CoachingGoalRecord | null> {
   const db = makeDb()
   const expr = buildUpdateExpression(updates)
-  if (!expr) return
-  await db.send(
-    new UpdateCommand({
-      TableName: TABLE,
-      Key: { userId: `coaching_goal_${id}` },
-      UpdateExpression: expr.expression,
-      ExpressionAttributeNames: expr.names,
-      ExpressionAttributeValues: expr.values,
-    })
-  )
+  if (!expr) return null
+  try {
+    const res = await db.send(
+      new UpdateCommand({
+        TableName: TABLE,
+        Key: { userId: `coaching_goal_${id}` },
+        UpdateExpression: expr.expression,
+        ConditionExpression: "attribute_exists(userId)",
+        ExpressionAttributeNames: expr.names,
+        ExpressionAttributeValues: expr.values,
+        ReturnValues: "ALL_NEW",
+      })
+    )
+    return (res.Attributes as CoachingGoalRecord | undefined) ?? null
+  } catch (e) {
+    if ((e as { name?: string }).name === "ConditionalCheckFailedException") return null
+    throw e
+  }
 }
 
 // ── Coach Tasks ───────────────────────────────────────────────────────────────

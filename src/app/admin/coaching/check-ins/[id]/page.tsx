@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react"
 import CheckInContext from "@/components/coaching/admin/CheckInContext"
 import AssessmentEditor from "@/components/coaching/admin/AssessmentEditor"
+import CheckInGoals from "@/components/coaching/admin/CheckInGoals"
 import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import { SignedVideo } from "@/components/coaching/SignedMedia.client"
@@ -537,6 +538,8 @@ export default function AdminCheckInReviewPage({ params }: { params: Promise<{ i
             )}
           </div>
         </div>
+
+        <CheckInGoals token={token} clientEmail={checkIn.clientEmail} />
 
         <AssessmentEditor
           token={token}

@@ -276,3 +276,24 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 .pt-week-lisa-part { display: grid; gap: 2px; }
 .pt-week-lisa-part b { font-size: 0.875rem; }
 .pt-week-lisa-part p { margin: 0; font-size: 0.9375rem; line-height: 1.55; white-space: pre-wrap; }
+
+/* Compact Home sections: check-ins and goals. Quiet cards near the bottom. */
+.pt-mini { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 16px; padding: 14px 16px 6px; display: grid; gap: 8px; }
+.pt-mini h2 { margin: 0; font-size: 0.9375rem; font-weight: 700; }
+.pt-mini-text { margin: 0 0 8px; font-size: 0.875rem; line-height: 1.5; color: var(--pt-muted); }
+.pt-mini-facts { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pt-mini-facts div { min-width: 0; }
+.pt-mini-facts dt { font-size: 0.75rem; color: var(--pt-muted); }
+.pt-mini-facts dd { margin: 0; font-size: 0.9375rem; font-weight: 600; }
+.pt-mini-goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.pt-mini-goals li { display: grid; gap: 4px; min-width: 0; }
+.pt-mini-goal-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.pt-mini-goal-top b { font-size: 0.9375rem; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.pt-mini-goal-top span { flex: none; font-size: 0.8125rem; font-weight: 600; color: var(--pt-muted); font-variant-numeric: tabular-nums; }
+.pt-mini-goal-top .pt-mini-done { color: #3e7a4c; }
+.pt-mini-bar { display: block; height: 6px; border-radius: 3px; background: var(--pt-stone); overflow: hidden; }
+.pt-mini-bar i { display: block; height: 100%; border-radius: 3px; background: var(--pt-gold); }
+.pt-mini-sub { font-size: 0.8125rem; color: var(--pt-muted); }
+.pt-mini-sub:empty { display: none; }
+.pt-mini-link { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin: 0 -16px; padding: 0 16px; border-top: 1px solid #f1ece6; text-decoration: none; color: var(--pt-gold-ink); font-size: 0.875rem; font-weight: 700; }
+.pt-mini-link .pt-chev, .pt-mini-link svg { color: var(--pt-gold-ink); }

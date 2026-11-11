@@ -227,10 +227,10 @@ export default function GoalsClient() {
             </svg>
           </div>
           <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.4rem", fontWeight: 700, color: black, margin: "0 0 10px" }}>
-            I&apos;ll set your goals after your first coaching review.
+            We haven&apos;t set your coaching goals yet.
           </p>
           <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.9rem", color: muted, margin: "0 0 24px", lineHeight: 1.6, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
-            I&apos;m going through your check-in so your goals fit where you are now and where you want to go. If you already have specific goals in mind, tell me.
+            We&apos;ll build them together based on what you&apos;re working toward. If you already have something in mind, tell me.
           </p>
           <Link href="/my-coaching/messages" style={{ display: "inline-block", background: accent, color: black, padding: "13px 26px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.06em", textDecoration: "none", borderRadius: 4 }}>
             Message me
@@ -311,7 +311,7 @@ export default function GoalsClient() {
                 {/* Target date */}
                 {goal.targetDate && (
                   <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.7rem", color: muted, margin: "8px 0 0" }}>
-                    Target date: {new Date(goal.targetDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    Target date: {new Date(`${goal.targetDate.slice(0, 10)}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                   </p>
                 )}
 
