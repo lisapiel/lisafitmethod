@@ -22,7 +22,7 @@ const STORY_PARAGRAPHS = [
   "About seven years ago, I started taking strength training seriously for the first time. That's when everything changed. Within months, I realized what had been missing all along: structure, progressive overload, and real programming. My body started changing in a way it never had before, and I became obsessed with understanding how fitness actually works.",
   "But I also made the mistake a lot of people make once they finally start seeing progress. I pushed heavier weights before building the foundation to support them. Warm-ups felt optional. Mobility work wasn't even on my radar. Eventually, my back gave out.",
   "For almost a year, I dealt with serious pain. That period forced me to slow down, relearn movement mechanics, and completely rethink the way I approached training.",
-  "I rebuilt everything from the ground up: movement quality, mobility, recovery, warm-ups, and programming. I became a certified personal trainer because I genuinely needed to understand what I had been missing all along.",
+  "I rebuilt everything from the ground up: movement quality, mobility, recovery, warm-ups, and programming. I became a NASM Certified Personal Trainer because I genuinely needed to understand what I had been missing all along.",
   "I came back pain-free, stronger than before, and with a completely different perspective on fitness.",
   "That's why Lisa Fit Method exists: to help people build strength the right way from the beginning through movement quality, intelligent programming, and training that actually lasts.",
   "Whether you're completely new to lifting or you've been winging it for years, this is the approach I wish someone had handed me from the start.",

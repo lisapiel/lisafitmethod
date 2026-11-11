@@ -99,11 +99,16 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Person",
+              "@id": "https://lisafitmethod.com/about#lisa-mcpherson",
               name: "Lisa McPherson",
-              jobTitle: "Certified Personal Trainer",
+              jobTitle: "NASM Certified Personal Trainer",
               url: "https://lisafitmethod.com/about",
-              description: "Certified personal trainer and founder of Lisa Fit Method. Specializes in foundational strength training for beginners.",
+              image: "https://lisafitmethod.com/lisa-about-hero.jpg",
+              description: "NASM Certified Personal Trainer and founder of Lisa Fit Method. Specializes in foundational strength training for beginners and returners.",
               sameAs: ["https://www.instagram.com/lisafitmethod"],
+              worksFor: { "@type": "Organization", "@id": "https://lisafitmethod.com/#organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+              knowsAbout: ["Strength Training", "Beginner Weightlifting", "Movement Correction", "Corrective Exercise", "Progressive Overload", "Core Stability"],
+              hasCredential: { "@type": "EducationalOccupationalCredential", credentialCategory: "Certification", name: "NASM Certified Personal Trainer (CPT)" },
             }).replace(/</g, "\\u003c"),
           }}
         />

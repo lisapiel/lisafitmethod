@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     title: "Free Nutrition Guide — The 5 Principles That Actually Work",
     description: "Stop searching for shortcuts. The 5 nutrition principles behind every real body transformation. Free from Lisa Fit Method.",
   },
+  alternates: { canonical: "https://lisafitmethod.com/free-guide-nutrition" },
 }
 
 export default function NutritionGuidePage() {
