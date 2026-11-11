@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     description:
       "Everything you need to know before you start. Courses, coaching, training, nutrition, equipment, results, and access. Honest answers from a certified personal trainer.",
   },
+  alternates: { canonical: "https://lisafitmethod.com/faq" },
 }
 
 const ALL_ITEMS = FAQ_CATEGORIES.flatMap((c) => c.items)

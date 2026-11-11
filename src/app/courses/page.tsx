@@ -12,7 +12,11 @@ export const metadata: Metadata = {
     title: "Courses | Lisa Fit Method",
     description: "Two structured courses. Training Foundations and Nutrition Foundations. One-time payment, yours to keep.",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630, type: "image/jpeg", alt: "Lisa Fit Method" }],
+    siteName: "Lisa Fit Method",
+    type: "website",
+    locale: "en_US",
   },
+  alternates: { canonical: "https://lisafitmethod.com/courses" },
 }
 
 export default async function CoursesPage() {
@@ -29,8 +33,8 @@ export default async function CoursesPage() {
     description: "A complete strength training foundation. Learn the five foundational movement patterns, follow a structured program, and build a base that supports your training for life.",
     image: { "@type": "ImageObject", url: "https://lisafitmethod.com/hero.png", width: 1200, height: 800 },
     url: "https://lisafitmethod.com/courses",
-    provider: { "@type": "Organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
-    instructor: { "@type": "Person", name: "Lisa McPherson", jobTitle: "Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
+    provider: { "@type": "Organization", "@id": "https://lisafitmethod.com/#organization", name: "Lisa Fit Method", url: "https://lisafitmethod.com" },
+    instructor: { "@type": "Person", "@id": "https://lisafitmethod.com/about#lisa-mcpherson", name: "Lisa McPherson", jobTitle: "NASM Certified Personal Trainer", url: "https://lisafitmethod.com/about" },
     courseMode: "online",
     educationalLevel: "Beginner",
     timeRequired: "P4W",
