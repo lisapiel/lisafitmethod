@@ -1,0 +1,137 @@
+/* Client exercise logging card. Portal register from DESIGN.md: white card,
+   hairline border, Playfair title, DM Sans body, gold for marks only and
+   green only for "done". Sized for one-handed use on 320–430px phones. */
+
+.xc {
+  --xc-line: #e8e2dc;
+  --xc-ink: #0a0a0a;
+  --xc-text: #1a1a1a;
+  --xc-muted: #6b6560;
+  --xc-ph: #a39b92;
+  --xc-gold: #c8a97e;
+  --xc-gold-ink: #a8895e;
+  --xc-stone: #f5f2ee;
+  --xc-strip: #fdfbf7;
+  --xc-field: #faf8f5;
+  --xc-done: #5c9e6a;
+  --xc-done-ink: #3e7a4c;
+  --xc-done-bg: #f8fdf8;
+  --xc-done-field: #f0faf0;
+  --xc-done-line: #c8e6c8;
+  container-type: inline-size;
+  background: #fff;
+  border: 1px solid var(--xc-line);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  color: var(--xc-text);
+  font-family: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+}
+.xc *, .xc *::before, .xc *::after { box-sizing: border-box; }
+.xc[data-done] { border-color: var(--xc-done-line); }
+.xc button { font: inherit; -webkit-tap-highlight-color: transparent; }
+.xc :focus-visible { outline: 2px solid var(--xc-gold-ink); outline-offset: 2px; }
+
+.xc-in { padding: 16px 16px 6px; }
+.xc-head { display: flex; align-items: flex-start; gap: 12px; }
+.xc-name { flex: 1; min-width: 0; margin: 0; font-family: var(--font-playfair), "Playfair Display", Georgia, serif; font-weight: 700; font-size: 1.22rem; line-height: 1.22; color: var(--xc-ink); text-wrap: balance; overflow-wrap: anywhere; }
+.xc-count { flex-shrink: 0; margin-top: 2px; font-size: 0.82rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; color: var(--xc-muted); background: var(--xc-stone); border-radius: 999px; padding: 6px 10px; }
+.xc[data-done] .xc-count { color: var(--xc-done-ink); background: var(--xc-done-field); }
+.xc-rule { display: block; width: 28px; height: 2px; border-radius: 1px; background: var(--xc-gold); margin: 10px 0 14px; }
+
+/* Video keeps its own proportions: the column shrinks to the image, capped
+   at about half the card so Best, Cues and Last time keep room to read. */
+.xc-media { display: grid; grid-template-columns: fit-content(52%) minmax(0, 1fr); gap: 14px; align-items: start; }
+.xc-vid { position: relative; display: grid; place-items: center; min-width: 104px; min-height: 80px; padding: 0; border: 0; border-radius: 8px; overflow: hidden; background: #1a1a1a; cursor: pointer; line-height: 0; transition: transform 0.15s ease; }
+.xc-vid img { display: block; width: auto; height: auto; max-width: 100%; max-height: 190px; }
+.xc-vid::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.15); transition: background 0.15s ease; }
+.xc-vid:hover::after { background: rgba(0, 0, 0, 0.24); }
+.xc-vid:active { transform: scale(0.98); }
+.xc-vid:disabled { cursor: default; background: var(--xc-stone); }
+.xc-vid:disabled::after { display: none; }
+.xc-play { position: absolute; z-index: 1; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(0, 0, 0, 0.55); display: grid; place-items: center; }
+.xc-play svg { margin-left: 2px; }
+.xc-vid:disabled .xc-play { background: transparent; border: 1.5px solid #ccc; }
+
+.xc-perf { min-width: 0; display: grid; gap: 10px; align-content: start; }
+.xc-stat { display: flex; gap: 8px; align-items: flex-start; }
+.xc-stat svg { flex-shrink: 0; margin-top: 2px; color: var(--xc-gold-ink); }
+.xc-lbl { display: block; font-size: 0.75rem; font-weight: 600; line-height: 1.2; letter-spacing: 0.1em; text-transform: uppercase; color: var(--xc-muted); margin-bottom: 3px; }
+.xc-val { display: block; font-size: 0.98rem; font-weight: 600; line-height: 1.3; color: var(--xc-ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.xc-val > span { display: block; }
+.xc-nw { white-space: nowrap; }
+.xc-sub { display: block; font-size: 0.8rem; color: var(--xc-muted); margin-top: 3px; }
+.xc-quiet { margin: 0; font-size: 0.86rem; line-height: 1.4; color: var(--xc-muted); }
+.xc-sep { height: 1px; background: var(--xc-line); }
+.xc-cuebtn { justify-self: start; max-width: 100%; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px 0 10px; border: 1px solid var(--xc-line); background: var(--xc-strip); border-radius: 8px; font-size: 0.92rem; font-weight: 600; color: var(--xc-ink); cursor: pointer; }
+.xc-chev { color: var(--xc-muted); transition: transform 0.2s ease; }
+[aria-expanded="true"] > .xc-chev { transform: rotate(180deg); }
+.xc-cues { margin: 12px 0 0; padding: 12px 14px; background: var(--xc-strip); border: 1px solid var(--xc-line); border-left: 2px solid var(--xc-gold); border-radius: 6px; max-height: 10em; overflow-y: auto; }
+.xc-cues b { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--xc-gold-ink); margin-bottom: 4px; }
+.xc-cues p { margin: 0; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
+
+/* Sets */
+.xc-sets { margin-top: 16px; }
+.xc-grid { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; gap: 8px; align-items: center; }
+.xc-th { background: var(--xc-strip); border-radius: 6px; margin: 0 -8px; padding: 8px 8px 6px; }
+.xc-th > span { display: flex; align-items: center; justify-content: center; gap: 2px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--xc-muted); white-space: nowrap; }
+.xc-info { position: relative; width: 22px; height: 22px; padding: 0; border: 0; background: none; color: var(--xc-muted); cursor: pointer; display: grid; place-items: center; }
+.xc-info::after { content: ""; position: absolute; inset: -11px; }
+.xc-row { margin: 2px -8px 0; padding: 7px 8px; border-radius: 6px; }
+.xc-row[data-done] { background: var(--xc-done-bg); }
+.xc-num { width: 28px; height: 28px; border-radius: 50%; background: var(--xc-stone); display: grid; place-items: center; font-size: 0.85rem; font-weight: 600; color: var(--xc-muted); }
+.xc-row[data-done] .xc-num { background: var(--xc-done-field); color: var(--xc-done-ink); }
+/* 16px keeps iOS from zooming the page when a field is tapped. */
+.xc-field { width: 100%; min-width: 0; height: 44px; margin: 0; border: 1px solid var(--xc-line); background: var(--xc-field); border-radius: 6px; padding: 0 4px; text-align: center; font: 600 16px var(--font-dm-sans), "DM Sans", system-ui, sans-serif; color: var(--xc-ink); font-variant-numeric: tabular-nums; appearance: none; -webkit-appearance: none; }
+.xc-field::placeholder { color: var(--xc-ph); font-weight: 500; opacity: 1; }
+.xc-field:focus { border-color: var(--xc-gold-ink); outline: none; }
+.xc-row[data-done] .xc-field { background: var(--xc-done-field); border-color: var(--xc-done-line); }
+.xc-sel { position: relative; display: block; }
+.xc-sel select { padding-right: 18px; cursor: pointer; }
+.xc-sel select[data-empty] { color: var(--xc-ph); font-weight: 500; }
+.xc-sel svg { position: absolute; right: 7px; top: 50%; margin-top: -3px; pointer-events: none; color: var(--xc-muted); }
+/* "8–12/side" won't fit on one line in a narrow box, so the target shows on two. */
+.xc-rw { position: relative; display: block; }
+.xc-ov { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; color: var(--xc-ph); font-size: 16px; font-weight: 500; line-height: 1.05; }
+.xc-ov small { display: block; font-size: 12px; }
+.xc-rw .xc-field:not(:placeholder-shown) + .xc-ov, .xc-rw .xc-field:focus + .xc-ov { display: none; }
+.xc-done { position: relative; justify-self: center; width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 2px solid var(--xc-line); background: #fff; display: grid; place-items: center; cursor: pointer; }
+.xc-done::after { content: ""; position: absolute; inset: -4px; }
+.xc-done svg { opacity: 0; }
+.xc-row[data-done] .xc-done { background: var(--xc-done); border-color: var(--xc-done); }
+.xc-row[data-done] .xc-done svg { opacity: 1; }
+.xc-rest { display: flex; align-items: center; gap: 6px; margin: 10px 0 4px; font-size: 0.86rem; color: var(--xc-muted); }
+.xc-howto { margin-top: 10px; }
+
+@container (max-width: 300px) {
+  .xc-in { padding-inline: 14px; }
+  .xc-media { grid-template-columns: fit-content(46%) minmax(0, 1fr); gap: 12px; }
+  .xc-cuebtn { padding: 0 10px; gap: 6px; }
+  .xc-cuebtn > svg:first-child { display: none; }
+  .xc-sel svg { display: none; }
+  .xc-sel select { padding-right: 4px; }
+  .xc-field { padding: 0 2px; }
+  .xc-field::placeholder, .xc-sel select[data-empty], .xc-ov { font-size: 14px; }
+  .xc-th > span { font-size: 0.7rem; letter-spacing: 0.03em; }
+}
+
+/* Help sheets for Weight and RPE */
+.xc-scrim { position: fixed; inset: 0; z-index: 1000; background: rgba(10, 10, 10, 0.45); display: flex; align-items: flex-end; justify-content: center; }
+.xc-sheet { width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; background: #fff; color: #1a1a1a; border-radius: 16px 16px 0 0; padding: 10px 20px calc(20px + env(safe-area-inset-bottom)); font-family: var(--font-dm-sans), "DM Sans", system-ui, sans-serif; animation: xc-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+@media (min-width: 640px) { .xc-scrim { align-items: center; } .xc-sheet { border-radius: 12px; } }
+@keyframes xc-up { from { transform: translateY(24px); opacity: 0; } }
+.xc-grab { width: 36px; height: 4px; border-radius: 2px; background: #e8e2dc; margin: 0 auto 14px; }
+.xc-sheet .xc-k { margin: 0 0 4px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #a8895e; }
+.xc-sheet h2 { margin: 0 0 10px; font-family: var(--font-playfair), "Playfair Display", Georgia, serif; font-weight: 700; font-size: 1.25rem; line-height: 1.25; color: #0a0a0a; text-wrap: balance; }
+.xc-sheet p { margin: 0 0 10px; font-size: 1rem; line-height: 1.5; }
+.xc-sheet ul { margin: 0 0 12px; padding-left: 1.1rem; display: grid; gap: 6px; font-size: 1rem; line-height: 1.45; }
+.xc-eg { margin: 0 0 10px; padding: 10px 12px; background: #fdfbf7; border: 1px solid #e8e2dc; border-radius: 8px; font-size: 0.95rem; }
+.xc-rpe { margin: 4px 0 14px; }
+.xc-rpe div { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid #e8e2dc; font-size: 0.98rem; }
+.xc-rpe b { font-family: var(--font-playfair), "Playfair Display", Georgia, serif; font-size: 1.05rem; color: #0a0a0a; }
+.xc-ok { width: 100%; min-height: 48px; margin-top: 4px; border: 0; border-radius: 8px; background: #0a0a0a; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .xc-sheet { animation: none; }
+  .xc-vid, .xc-chev { transition: none; }
+}

@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
     execution: string | null
     coachingCues: string[]
     commonMistakes: string[]
+    category: string | null
+    thumbnailS3Key: string | null
   }> = {}
 
   await Promise.all((ids as string[]).slice(0, 100).map(async (id) => {
@@ -59,6 +61,8 @@ export async function POST(req: NextRequest) {
       execution: ex.execution ?? null,
       coachingCues: parseArr(ex.coachingCues),
       commonMistakes: parseArr(ex.commonMistakes),
+      category: ex.category ?? null,
+      thumbnailS3Key: ex.thumbnailS3Key ?? null,
     }
   }))
 

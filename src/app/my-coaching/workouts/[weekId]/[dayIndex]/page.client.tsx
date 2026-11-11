@@ -11,6 +11,9 @@ import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
 import RunnerNotes from "@/components/portal/RunnerNotes"
 import SportDayForm from "@/components/portal/SportDayForm"
 import { sportSummary } from "@/lib/sportDay"
+import { ExerciseLogCard } from "@/components/portal/workout/ExerciseLogCard"
+import { HelpSheet, type HelpTopic } from "@/components/portal/workout/HelpSheet"
+import { weightGuide, weightGuideKind } from "@/lib/weightGuide"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -109,6 +112,8 @@ type ExerciseInfo = {
   execution: string | null
   coachingCues: string[]
   commonMistakes: string[]
+  category?: string | null
+  thumbnailS3Key?: string | null
 }
 
 // Canonical library first; fall back to the embedded program value so a
@@ -184,55 +189,6 @@ function Spinner() {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4rem" }}>
       <div style={{ width: 24, height: 24, border: `3px solid ${border}`, borderTop: `3px solid ${accent}`, borderRadius: "50%", animation: "spin 0.7s linear infinite" }}>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    </div>
-  )
-}
-
-function RpeInfoModal({ onClose }: { onClose: () => void }) {
-  const rows: Array<{ n: string; label: string; desc: string }> = [
-    { n: "10", label: "Maximum effort", desc: "You couldn't do another rep. This is failure." },
-    { n: "9", label: "Very hard", desc: "You could maybe squeeze out 1 more rep." },
-    { n: "8", label: "Hard", desc: "You could do 2 more reps with good form." },
-    { n: "7", label: "Challenging", desc: "You could do 3 more reps. A solid working weight." },
-    { n: "5–6", label: "Moderate", desc: "You're working, with 4 to 5 reps left in the tank." },
-    { n: "1–4", label: "Easy", desc: "Warm-up or activation effort." },
-  ]
-  return (
-    <div
-      onClick={onClose}
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{ background: white, borderRadius: 8, padding: "1.5rem 1.5rem 1.25rem", maxWidth: 420, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.35)" }}
-      >
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: accent, margin: "0 0 6px" }}>
-          What is RPE?
-        </p>
-        <h3 style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1.35rem", fontWeight: 700, color: black, margin: "0 0 10px" }}>
-          Rate of Perceived Exertion
-        </h3>
-        <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.82rem", color: muted, lineHeight: 1.5, margin: "0 0 14px" }}>
-          How hard the set felt, from 1 to 10. Be honest. It tells me if the weight is right and when you&apos;re ready for more.
-        </p>
-        <div style={{ border: `1px solid ${border}`, borderRadius: 6, overflow: "hidden" }}>
-          {rows.map((r, i) => (
-            <div key={r.n} style={{ display: "grid", gridTemplateColumns: "56px 1fr", borderTop: i === 0 ? "none" : `1px solid ${border}`, padding: "8px 12px", background: i % 2 === 0 ? "#faf8f5" : "#fff" }}>
-              <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.85rem", fontWeight: 700, color: accent }}>{r.n}</div>
-              <div>
-                <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.78rem", fontWeight: 600, color: black }}>{r.label}</div>
-                <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: muted, lineHeight: 1.4 }}>{r.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={onClose}
-          style={{ marginTop: 16, width: "100%", background: black, color: white, border: "none", padding: "12px 20px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.06em", cursor: "pointer", borderRadius: 4 }}
-        >
-          Got it
-        </button>
       </div>
     </div>
   )
@@ -416,143 +372,6 @@ function VideoModal({ videoKey, name, onClose }: { videoKey: string; name: strin
 
 type ExtendedSetEntry = SetEntry & { _prevWeight?: string; _prevReps?: string; _prevRpe?: string }
 
-function SetRow({
-  setNum,
-  entry,
-  prescribed,
-  onChange,
-  onRpeInfoClick,
-}: {
-  setNum: number
-  entry: ExtendedSetEntry
-  prescribed: { reps: string; weight: string; rpe: string }
-  onChange: (updated: SetEntry) => void
-  onRpeInfoClick?: () => void
-}) {
-  const hint = (val: string) => (
-    <div style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", color: val ? accent : "transparent", fontWeight: 600, marginBottom: 2, height: 12 }}>
-      {val ? `Last: ${val}` : "—"}
-    </div>
-  )
-  return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "32px 1fr 1fr 1fr 44px",
-      gap: 8,
-      alignItems: "end",
-      padding: "8px 0",
-      borderBottom: `1px solid ${entry.completed ? "#e8f4e8" : border}`,
-      background: entry.completed ? "#f8fdf8" : "transparent",
-      borderRadius: entry.completed ? 4 : 0,
-      paddingLeft: entry.completed ? 8 : 0,
-      paddingRight: entry.completed ? 8 : 0,
-    }}>
-      {/* Set number */}
-      <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 600, color: entry.completed ? "#5c9e6a" : muted, textAlign: "center", paddingBottom: 8 }}>
-        {setNum}
-      </span>
-
-      {/* Weight */}
-      <div>
-        {hint(entry._prevWeight ?? "")}
-        <div className="pt-sr">Set {setNum} weight</div>
-        <input
-          type="text"
-          inputMode="decimal"
-          value={entry.weight}
-          onChange={(e) => onChange({ ...entry, weight: e.target.value })}
-          aria-label={`Set ${setNum} weight`}
-          placeholder={entry._prevWeight || prescribed.weight || "—"}
-          style={{
-            width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
-            fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
-          }}
-        />
-      </div>
-
-      {/* Reps */}
-      <div>
-        {hint(entry._prevReps ?? "")}
-        <div className="pt-sr">Set {setNum} reps</div>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={entry.reps}
-          onChange={(e) => onChange({ ...entry, reps: e.target.value })}
-          aria-label={`Set ${setNum} reps`}
-          placeholder={entry._prevReps || prescribed.reps || "—"}
-          style={{
-            width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: black, padding: "8px 10px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
-            fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
-          }}
-        />
-      </div>
-
-      {/* RPE (dropdown with info icon) */}
-      <div>
-        {hint(entry._prevRpe ?? "")}
-        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
-          <span className="pt-sr">Set {setNum} RPE</span>
-          {setNum === 1 && <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); onRpeInfoClick?.() }}
-            aria-label="What is RPE?"
-            style={{
-              width: 14, height: 14, borderRadius: "50%", background: "transparent",
-              border: `1px solid ${muted}`, color: muted, cursor: "pointer",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.55rem", fontStyle: "italic",
-              padding: 0, lineHeight: 1,
-            }}
-          >
-            i
-          </button>}
-        </div>
-        <select
-          value={entry.rpe}
-          onChange={(e) => onChange({ ...entry, rpe: e.target.value })}
-          aria-label={`Set ${setNum} RPE`}
-          style={{
-            width: "100%", background: entry.completed ? "#f0faf0" : "#faf8f5", border: `1px solid ${entry.completed ? "#c8e6c8" : border}`,
-            color: entry.rpe ? black : "#aaa", padding: "8px 8px", fontFamily: "var(--font-dm-sans), sans-serif", fontSize: 16,
-            fontWeight: 600, outline: "none", borderRadius: 4, boxSizing: "border-box",
-            appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
-            backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>\")",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "right 8px center",
-            paddingRight: 22,
-          }}
-        >
-          <option value="">—</option>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-            <option key={n} value={String(n)}>{n}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Complete toggle */}
-      <button
-        onClick={() => onChange({ ...entry, completed: !entry.completed })}
-        style={{
-          width: 36, height: 36, borderRadius: "50%",
-          background: entry.completed ? "#5c9e6a" : "transparent",
-          border: `2px solid ${entry.completed ? "#5c9e6a" : border}`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", flexShrink: 0, marginBottom: 4,
-        }}
-      >
-        {entry.completed && (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7l3 3.5 6-7" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </button>
-    </div>
-  )
-}
-
 function ExerciseInfoCard({ info }: { info: ExerciseInfo | undefined }) {
   const [open, setOpen] = useState(false)
   if (!info) return null
@@ -659,19 +478,21 @@ function SupersetBlock({
   setMaps,
   info,
   prevByExercise,
+  historyByExercise,
   weightUnit,
   onSetChange,
   onVideoClick,
-  onRpeInfoClick,
+  onHelp,
 }: {
   group: SupersetGroup
   setMaps: ExerciseSetMap
   info: Record<string, ExerciseInfo>
   prevByExercise: PrevByExercise
+  historyByExercise: Record<string, PrevSetData>
   weightUnit: "LBS" | "KG"
   onSetChange: (exIdx: number, setIdx: number, updated: SetEntry) => void
   onVideoClick: (key: string, name: string) => void
-  onRpeInfoClick: () => void
+  onHelp: (topic: HelpTopic) => void
 }) {
   const letters = ["A", "B", "C", "D", "E", "F"]
   const rounds = Math.max(
@@ -698,7 +519,7 @@ function SupersetBlock({
         background: white,
         border: `2px solid ${accent}`,
         borderRadius: 8,
-        padding: "16px 18px 18px",
+        padding: "16px clamp(10px, 3vw, 18px) 18px",
         marginBottom: "1rem",
       }}
     >
@@ -754,15 +575,16 @@ function SupersetBlock({
           </p>
           <ExerciseBlock
             ex={ex}
-            exIdx={index}
             sets={(setMaps[index] ?? []) as ExtendedSetEntry[]}
             info={exInfo}
             videoKey={videoKey}
             prev={prevByExercise[ex.exerciseId]}
+            history={historyByExercise[ex.exerciseId]}
             weightUnit={weightUnit}
+            showRest={false}
             onSetChange={(si, updated) => onSetChange(index, si, updated)}
             onVideoClick={() => videoKey && onVideoClick(videoKey, ex.name)}
-            onRpeInfoClick={onRpeInfoClick}
+            onHelp={onHelp}
           />
         </div>
         )
@@ -780,159 +602,61 @@ function SupersetBlock({
   )
 }
 
+// Library thumbnail first; programs whose video came from somewhere else
+// fall back to the .jpg that sits beside the video.
+function thumbFor(videoKey: string, info?: ExerciseInfo): string {
+  if (!videoKey) return ""
+  if (info?.thumbnailS3Key && info.videoS3Key === videoKey) return cdnUrl(CDN, info.thumbnailS3Key)
+  return cdnThumb(videoKey)
+}
+
 function ExerciseBlock({
   ex,
   sets,
   info,
   videoKey,
   prev,
+  history,
   weightUnit,
+  showRest,
   onSetChange,
   onVideoClick,
-  onRpeInfoClick,
+  onHelp,
 }: {
   ex: ProgramExercise
-  exIdx?: number
   sets: ExtendedSetEntry[]
   info?: ExerciseInfo
-  // Library-resolved video key. Caller runs videoKeyFor(ex, info) so
-  // this component doesn't have to know about the resolution rule.
   videoKey: string
-  // Previous-performance summary for THIS exercise — comes from the most
-  // recent prior log that captured any set for this exerciseId, across
-  // all programs. May be undefined (no prior performance → no comparison
-  // rendered).
+  // Most recent earlier session with this exercise, across all programs.
   prev?: PrevExerciseSummary
-  // Client's preferred display unit — appended to the summary so "185"
-  // reads as "185 lb" / "185 kg". Values are kept as-is; nothing is
-  // converted.
+  // Every earlier logged set for this exercise, for the personal best.
+  history?: PrevSetData
+  // Display label only; logged values are never converted.
   weightUnit: "LBS" | "KG"
+  showRest: boolean
   onSetChange: (setIdx: number, updated: SetEntry) => void
   onVideoClick: () => void
-  onRpeInfoClick?: () => void
+  onHelp: (topic: HelpTopic) => void
 }) {
-  const completedCount = sets.filter((s) => s.completed).length
-  const allDone = completedCount === sets.length
-
-  // Build the "Last session" summary line. Only rendered when at least
-  // one previous set has a non-empty weight OR non-empty reps — otherwise
-  // the line is noise (e.g. the client logged completion without numbers).
-  const prevSummary = (() => {
-    if (!prev || prev.sets.length === 0) return null
-    const sorted = [...prev.sets].sort((a, b) => a.setNumber - b.setNumber)
-    const anyWeight = sorted.some((s) => s.weight)
-    const anyReps = sorted.some((s) => s.reps)
-    if (!anyWeight && !anyReps) return null
-    const weightsLine = sorted.map((s) => s.weight || "—").join(" / ")
-    const repsLine = sorted.map((s) => s.reps || "—").join(" / ")
-    const unitShort = weightUnit === "KG" ? "kg" : "lb"
-    return { weightsLine, repsLine, unitShort, sessionRpe: prev.sessionRpe, anyWeight }
-  })()
-
+  const unit = weightUnit === "KG" ? "kg" : "lb"
   return (
-    <div style={{ background: white, border: `1px solid ${allDone ? "#c8e6c8" : border}`, borderRadius: 8, marginBottom: "1rem", overflow: "hidden" }}>
-      {/* Exercise header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 18px", background: allDone ? "#f8fdf8" : "transparent", borderBottom: `1px solid ${allDone ? "#d4ead4" : border}` }}>
-        {/* Thumbnail */}
-        <button
-          type="button"
-          disabled={!videoKey}
-          aria-label={videoKey ? `Play ${ex.name} demonstration` : `${ex.name} (no video)`}
-          onClick={videoKey ? onVideoClick : undefined}
-          style={{ width: 52, height: 52, padding: 0, border: 0, borderRadius: 6, overflow: "hidden", background: "#f5f2ee", flexShrink: 0, cursor: videoKey ? "pointer" : "default", position: "relative" }}
-        >
-          {videoKey ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cdnThumb(videoKey)} onError={thumbFallback} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.15)" }}>
-                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#ddd" strokeWidth="1.2" /><path d="M6.5 5.5l6 3.5-6 3.5V5.5Z" fill="#ddd" /></svg>
-            </div>
-          )}
-        </button>
-
-        {/* Name + prescription */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: "var(--font-playfair), serif", fontSize: "1rem", fontWeight: 700, color: black, margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {ex.name}
-          </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted }}>{ex.sets} sets × {ex.reps} reps</span>
-            {ex.weight && <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted }}>@ {ex.weight}</span>}
-            {ex.rpe && <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted }}>RPE {ex.rpe}</span>}
-            {ex.rest && <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", color: muted }}>Rest {ex.rest}</span>}
-          </div>
-          {ex.coachNotes && (
-            <p style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.72rem", color: accent, margin: "4px 0 0", fontStyle: "italic" }}>
-              {ex.coachNotes}
-            </p>
-          )}
-        </div>
-
-        {/* Progress badge */}
-        <div style={{ flexShrink: 0, textAlign: "right" }}>
-          <span style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.75rem", fontWeight: 700, color: allDone ? "#5c9e6a" : muted }}>
-            {completedCount}/{sets.length}
-          </span>
-        </div>
-      </div>
-
-      {/* Last-session summary — compact "Last time: 185 / 185 / 180 lb × 10 / 10 / 8 · Previous session RPE 7".
-          Pulled live from CoachingWorkoutLogRecord.setData for this exerciseId; the per-set hint strip
-          below each weight/reps/RPE input stays as the micro, set-by-set reference. */}
-      {prevSummary && (
-        <div style={{
-          padding: "10px 18px",
-          background: "#fdfbf7",
-          borderBottom: `1px solid ${border}`,
-          fontFamily: "var(--font-dm-sans), sans-serif",
-          fontSize: "0.72rem",
-          color: muted,
-          lineHeight: 1.5,
-        }}>
-          <span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: accent, marginRight: 8 }}>
-            Last time
-          </span>
-          <strong style={{ color: black, fontWeight: 600 }}>{prevSummary.weightsLine}{prevSummary.anyWeight ? ` ${prevSummary.unitShort}` : ""}</strong>
-          <span style={{ margin: "0 6px" }}>×</span>
-          <strong style={{ color: black, fontWeight: 600 }}>{prevSummary.repsLine}</strong>
-          {prevSummary.sessionRpe != null && (
-            <span style={{ marginLeft: 10 }}>· Previous session RPE <strong style={{ color: black, fontWeight: 600 }}>{prevSummary.sessionRpe}</strong></span>
-          )}
-        </div>
-      )}
-
-      {/* Set rows */}
-      <div style={{ padding: "4px 18px 12px" }}>
-        {/* Column headers */}
-        <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 1fr 1fr 44px", gap: 8, paddingTop: 10, marginBottom: 2 }}>
-          <span></span>
-          {["Weight", "Reps", "RPE", "Done"].map((h) => (
-            <span key={h} style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.6rem", fontWeight: 600, color: "#bbb", letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</span>
-          ))}
-        </div>
-        {sets.map((s, si) => (
-          <SetRow
-            key={si}
-            setNum={si + 1}
-            entry={s}
-            prescribed={{ reps: ex.reps, weight: ex.weight, rpe: ex.rpe }}
-            onChange={(updated) => onSetChange(si, updated)}
-            onRpeInfoClick={onRpeInfoClick}
-          />
-        ))}
-      </div>
-
-      {/* Collapsible exercise info */}
-      <ExerciseInfoCard info={info} />
-    </div>
+    <ExerciseLogCard
+      ex={ex}
+      sets={sets}
+      thumbUrl={thumbFor(videoKey, info)}
+      canPlay={!!videoKey}
+      onThumbError={thumbFallback}
+      history={history ?? []}
+      lastSets={prev?.sets ?? null}
+      sessionRpe={prev?.sessionRpe}
+      unit={unit}
+      showRest={showRest}
+      onSetChange={onSetChange}
+      onVideoClick={onVideoClick}
+      onWeightInfo={() => onHelp({ kind: "weight", guide: weightGuide(weightGuideKind(info?.category, info?.equipment), unit) })}
+      onRpeInfo={() => onHelp({ kind: "rpe" })}
+      howTo={<ExerciseInfoCard info={info} />}
+    />
   )
 }
 
@@ -971,7 +695,11 @@ export default function WorkoutLoggerClient() {
   const [submissionId, setSubmissionId] = useState("")
   const [alreadyLogged, setAlreadyLogged] = useState(false)
   const [existingFeedback, setExistingFeedback] = useState<{ text: string; at: string } | null>(null)
-  const [showRpeInfo, setShowRpeInfo] = useState(false)
+  const [help, setHelp] = useState<HelpTopic | null>(null)
+  const closeHelp = useCallback(() => setHelp(null), [])
+  // Every earlier logged set for each of today's exercises, across all
+  // programs, for the personal best.
+  const [historyByExercise, setHistoryByExercise] = useState<Record<string, PrevSetData>>({})
   // Per-exercise summary of the client's last logged performance for the
   // exercises on this day. Keyed by exerciseId. Rendered by each
   // ExerciseBlock as a one-line "Last time …" strip at the top of the card.
@@ -1137,6 +865,17 @@ export default function WorkoutLoggerClient() {
         }
         prevSetData = hintsByExercise
         setPrevByExercise(summaryByExercise)
+        const todayIds = new Set(targetDay.exercises.map((e) => e.exerciseId).filter(Boolean))
+        const history: Record<string, PrevSetData> = {}
+        for (const log of allLogs) {
+          for (const s of parseLogSets(log)) {
+            if (!todayIds.has(s.exerciseId)) continue
+            const list = history[s.exerciseId] ?? []
+            list.push(s)
+            history[s.exerciseId] = list
+          }
+        }
+        setHistoryByExercise(history)
       }
 
       // Init set map — start from prescribed sets with last-week hints...
@@ -1517,10 +1256,11 @@ export default function WorkoutLoggerClient() {
                 setMaps={setMap}
                 info={exerciseInfo}
                 prevByExercise={prevByExercise}
+                historyByExercise={historyByExercise}
                 weightUnit={clientWeightUnit}
                 onSetChange={updateSet}
                 onVideoClick={(key, name) => setVideoModal({ key, name })}
-                onRpeInfoClick={() => setShowRpeInfo(true)}
+                onHelp={setHelp}
               />
             )
           }
@@ -1532,15 +1272,16 @@ export default function WorkoutLoggerClient() {
             <ExerciseBlock
               key={`solo-${i}`}
               ex={ex}
-              exIdx={i}
               sets={(setMap[i] ?? []) as ExtendedSetEntry[]}
               info={exInfo}
               videoKey={videoKey}
               prev={prevByExercise[ex.exerciseId]}
+              history={historyByExercise[ex.exerciseId]}
               weightUnit={clientWeightUnit}
+              showRest
               onSetChange={(si, updated) => updateSet(i, si, updated)}
               onVideoClick={() => videoKey && setVideoModal({ key: videoKey, name: ex.name })}
-              onRpeInfoClick={() => setShowRpeInfo(true)}
+              onHelp={setHelp}
             />
           )
         })
@@ -1565,7 +1306,7 @@ export default function WorkoutLoggerClient() {
               <label style={{ fontFamily: "var(--font-dm-sans), sans-serif", fontSize: "0.65rem", color: muted }}>Overall RPE (1–10)</label>
               <button
                 type="button"
-                onClick={() => setShowRpeInfo(true)}
+                onClick={() => setHelp({ kind: "rpe" })}
                 aria-label="What is RPE?"
                 style={{
                   width: 14, height: 14, borderRadius: "50%", background: "transparent",
@@ -1655,9 +1396,7 @@ export default function WorkoutLoggerClient() {
       )}
 
       {/* RPE info modal */}
-      {showRpeInfo && (
-        <RpeInfoModal onClose={() => setShowRpeInfo(false)} />
-      )}
+      {help && <HelpSheet topic={help} onClose={closeHelp} />}
     </div>
   )
 }
