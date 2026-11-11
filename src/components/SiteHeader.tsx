@@ -34,17 +34,19 @@ export default function SiteHeader() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [access, setAccess] = useState<AccessState | null>(null)
+  // Direction D pages carry their own navigation and footer.
+  const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p)) || usesOwnChrome(pathname)
 
+  // Only look up the signed-in member when this header is actually shown.
   useEffect(() => {
+    if (hidden || access) return
     fetch("/api/member/access")
       .then((r) => r.json())
       .then((d) => setAccess({ email: d.email ?? null }))
       .catch(() => setAccess({ email: null }))
-  }, [])
+  }, [hidden, access])
 
-  if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null
-  // Direction D pages carry their own navigation and footer.
-  if (usesOwnChrome(pathname)) return null
+  if (hidden) return null
 
   const close = () => setMenuOpen(false)
 
