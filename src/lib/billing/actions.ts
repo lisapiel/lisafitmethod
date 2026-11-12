@@ -366,7 +366,11 @@ export async function clientCancelComplimentary(d: Deps, input: { email: string 
 
   const sub = loaded.subs.linked
   const running = !!sub && sub.status !== "canceled" && sub.status !== "incomplete_expired"
-  const effective = complimentaryCancellationDate({ periodEnd: running ? sub!.currentPeriodEnd : null, currentEndsAt: comp.endsAt, grantStart: comp.since, now: nowDate(d) })
+  const effective = complimentaryCancellationDate({ hasRunningSubscription: running, periodEnd: running ? sub!.currentPeriodEnd : null, currentEndsAt: comp.endsAt, grantStart: comp.since, now: nowDate(d) })
+  if (!effective) {
+    // Never guess an end date: refuse, change nothing, send nothing.
+    return { ok: false, status: 409, message: "We couldn't work out your end date, so nothing was changed. Please try again later or message me." }
+  }
 
   let op: BillingOp
   try {

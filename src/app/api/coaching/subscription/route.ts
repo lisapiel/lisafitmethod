@@ -78,6 +78,8 @@ export async function GET(req: NextRequest) {
     // If a complimentary client cancels now, the date coaching would end (the
     // same calculation the cancellation itself uses).
     complimentaryCancelDate: string | null
+    // The client's cancellation is confirmed and its confirmation was sent.
+    complimentaryCancelNotified: boolean
   } = {
     approvedPriceInCents: client.approvedPriceInCents ?? null,
     commitmentType: client.commitmentType ?? null,
@@ -97,6 +99,7 @@ export async function GET(req: NextRequest) {
     complimentaryEndsAt: null,
     complimentaryCancelled: false,
     complimentaryCancelDate: null,
+    complimentaryCancelNotified: false,
   }
 
   const billing = await readState(sharedDocClient(), email).catch(() => null)
@@ -105,6 +108,7 @@ export async function GET(req: NextRequest) {
     result.complimentary = true
     result.complimentaryEndsAt = comp.endsAt
     result.complimentaryCancelled = comp.endsBecause === "client-cancelled"
+    result.complimentaryCancelNotified = !!billing?.compCancelNotifiedAt
   }
 
   // Compute commitment end date
@@ -115,6 +119,9 @@ export async function GET(req: NextRequest) {
     result.commitmentFulfilled = true
   }
 
+  // Whether a linked Stripe subscription is running, ended, or couldn't be read.
+  let stripeSub: "none" | "running" | "ended" | "unknown" = client.stripeSubscriptionId ? "unknown" : "none"
+
   // Fetch live billing data from Stripe if we have a subscription ID
   if (client.stripeSubscriptionId) {
     try {
@@ -124,13 +131,16 @@ export async function GET(req: NextRequest) {
       result.currentPeriodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null
       result.cancelAtPeriodEnd = sub.cancel_at_period_end
       result.cancelAt = sub.cancel_at ? new Date(sub.cancel_at * 1000).toISOString() : null
+      stripeSub = sub.status === "canceled" || sub.status === "incomplete_expired" ? "ended" : "running"
     } catch (err) {
       console.error("GET /api/coaching/subscription: Stripe retrieve failed", err)
     }
   }
 
-  if (comp.state === "active") {
-    result.complimentaryCancelDate = complimentaryCancellationDate({ periodEnd: result.currentPeriodEnd, currentEndsAt: comp.endsAt, grantStart: comp.since, now: new Date() })
+  // The date a cancellation would take effect, or null if it can't be
+  // established right now (then the client isn't offered to cancel).
+  if (comp.state === "active" && stripeSub !== "unknown") {
+    result.complimentaryCancelDate = complimentaryCancellationDate({ hasRunningSubscription: stripeSub === "running", periodEnd: result.currentPeriodEnd, currentEndsAt: comp.endsAt, grantStart: comp.since, now: new Date() })
   }
 
   return NextResponse.json({ subscription: result })

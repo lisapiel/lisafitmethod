@@ -3,7 +3,7 @@ import assert from "node:assert/strict"
 import { FakeTable } from "@/lib/testing/fakeDynamo"
 import { makeComplimentary, voidOutstandingInvoice, recordPaid, reconcile, manageView, setComplimentaryEnd, endComplimentary, clientCancelComplimentary, cancelPausedSubscription, SETTLE_AFTER_MS, type Deps } from "./actions"
 import { coachingAccessDecision, complimentaryStatus, isComplimentaryActive, paysForCoaching } from "./entitlement"
-import { readState, readOp, listOps } from "./store"
+import { readState, readOp, listOps, claimCancelNotice, releaseCancelNotice } from "./store"
 import { decideOnSubscriptionDeleted } from "./revocation"
 import type { StripeLike } from "./stripeOps"
 import type { StripeInvoiceLike, StripeSubscriptionLike } from "./snapshot"
@@ -557,4 +557,55 @@ test("client with no Stripe subscription cancels: coaching runs to the complimen
   const r = await clientCancelComplimentary(d, { email: EMAIL })
   assert.equal(r.ok && r.effectiveDate, "2026-12-12T15:00:00.000Z")
   assert.equal((await readState(table, EMAIL))?.compEndReason, "client-cancelled")
+})
+
+// ── Approved 2026-11-12: never guess an end date; confirmation email only once, after confirmation ──
+
+test("client cancel: if Stripe's current period can't be established, nothing changes and nothing is sent", async () => {
+  const { d, stripe, table } = setup()
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  const item = stripe.subs.get("sub_1")?.items?.data?.[0] as { current_period_end?: number | null } | undefined
+  assert.ok(item)
+  item.current_period_end = null
+  const writes = stripe.writes.length
+  const r = await clientCancelComplimentary(d, { email: EMAIL })
+  assert.ok(!r.ok && r.status === 409 && /couldn't work out your end date/.test(r.message))
+  assert.equal(stripe.writes.length, writes, "no Stripe call")
+  const state = await readState(table, EMAIL)
+  assert.equal(state?.compEndReason ?? null, null, "no cancellation recorded")
+  assert.equal(await claimCancelNotice(table, EMAIL), null, "nothing to email")
+})
+
+test("cancellation notice: claimable only after the cancellation is confirmed, and only once", async () => {
+  const { d, table } = setup()
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  assert.equal(await claimCancelNotice(table, EMAIL), null, "not before a cancellation")
+  await clientCancelComplimentary(d, { email: EMAIL })
+  const first = await claimCancelNotice(table, EMAIL, "2026-11-12T15:01:00.000Z")
+  assert.equal(first?.compEndsAt, "2026-12-08T01:04:51.000Z", "the confirmed end date comes with the claim")
+  assert.equal(await claimCancelNotice(table, EMAIL), null, "second claim refused")
+  assert.equal((await readState(table, EMAIL))?.compCancelNotifiedAt, "2026-11-12T15:01:00.000Z")
+})
+
+test("cancellation notice: not claimable while Stripe hasn't confirmed; the retry finishes and claims it once", async () => {
+  const { d, table, stripe } = setup()
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  stripe.failNext = "timeout-after"
+  const pending = await clientCancelComplimentary(d, { email: EMAIL })
+  assert.ok(!pending.ok && pending.uncertain)
+  assert.equal(await claimCancelNotice(table, EMAIL), null, "nothing to send while unconfirmed")
+  // The client's "check again" calls the cancellation again: it reconciles from Stripe and reports the confirmed date.
+  const again = await clientCancelComplimentary(d, { email: EMAIL })
+  assert.ok(again.ok && again.effectiveDate === "2026-12-08T01:04:51.000Z", JSON.stringify(again))
+  assert.ok(await claimCancelNotice(table, EMAIL), "now claimable, once")
+  assert.equal(await claimCancelNotice(table, EMAIL), null)
+})
+
+test("cancellation notice: a failed email releases the claim so a retry can send it", async () => {
+  const { d, table } = setup()
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  await clientCancelComplimentary(d, { email: EMAIL })
+  assert.ok(await claimCancelNotice(table, EMAIL))
+  await releaseCancelNotice(table, EMAIL)
+  assert.ok(await claimCancelNotice(table, EMAIL), "claimable again after release")
 })

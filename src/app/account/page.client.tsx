@@ -68,6 +68,7 @@ interface LiveSubData {
   complimentaryEndsAt: string | null
   complimentaryCancelled: boolean
   complimentaryCancelDate: string | null
+  complimentaryCancelNotified: boolean
 }
 
 function CoachingBillingSection({ client }: { client: CoachingClientData }) {
@@ -90,7 +91,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) throw new Error("fetch failed")
-        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean; complimentaryEndsAt?: string | null; complimentaryCancelled?: boolean; complimentaryCancelDate?: string | null } | null }
+        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean; complimentaryEndsAt?: string | null; complimentaryCancelled?: boolean; complimentaryCancelDate?: string | null; complimentaryCancelNotified?: boolean } | null }
         if (!cancelled && data.subscription) {
           setLiveSub({
             currentPeriodEnd: data.subscription.currentPeriodEnd,
@@ -100,6 +101,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
             complimentaryEndsAt: data.subscription.complimentaryEndsAt ?? null,
             complimentaryCancelled: data.subscription.complimentaryCancelled === true,
             complimentaryCancelDate: data.subscription.complimentaryCancelDate ?? null,
+            complimentaryCancelNotified: data.subscription.complimentaryCancelNotified === true,
           })
         }
       } catch { /* live data optional */ }
@@ -246,7 +248,22 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
         {!client.commitmentNeedsConfirmation && (
           <>
             {/* Already scheduled — offer reactivation */}
-            {isScheduledToCancel && !isReactivationDone && complimentary && (
+            {/* Complimentary cancellation recorded but not yet confirmed and emailed: offer a safe retry. */}
+            {complimentary && liveSub?.complimentaryCancelled && !liveSub.complimentaryCancelNotified && !isCancellationDone && (
+              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4, display: "grid", gap: 10 }}>
+                <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
+                  Your cancellation is being confirmed. Please check back in a few minutes.
+                </p>
+                <button
+                  onClick={handleCancel}
+                  disabled={submitting}
+                  style={{ justifySelf: "start", background: "transparent", border: `1px solid ${border}`, color: gold, padding: "8px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: submitting ? "not-allowed" : "pointer" }}
+                >
+                  {submitting ? "Checking…" : "Check again"}
+                </button>
+              </div>
+            )}
+            {isScheduledToCancel && !isReactivationDone && complimentary && (liveSub?.complimentaryCancelNotified || isCancellationDone) && (
               <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
                 <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
                   Your coaching is scheduled to end. If you&apos;d like to keep going, message me and we&apos;ll sort it out.
@@ -319,10 +336,16 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
 
                 {/* Schedule cancellation heading + effective date */}
                 {complimentary ? (
-                  <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
-                    <strong style={{ color: "#aaa" }}>Cancel coaching</strong><br />
-                    Your coaching continues through {compCancelDate ? formatDate(compCancelDate) : "your current period"} and then ends. Nothing is charged.
-                  </p>
+                  compCancelDate ? (
+                    <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
+                      <strong style={{ color: "#aaa" }}>Cancel coaching</strong><br />
+                      Your coaching continues through {formatDate(compCancelDate)} and then ends. Nothing is charged.
+                    </p>
+                  ) : (
+                    <p style={{ fontSize: "0.72rem", color: "#ff9080", lineHeight: 1.7, marginBottom: 12 }}>
+                      I can&apos;t show your end date right now, so cancelling isn&apos;t available at the moment. Please try again later or message me.
+                    </p>
+                  )
                 ) : client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate ? (
                   <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
                     <strong style={{ color: "#aaa" }}>Schedule cancellation</strong><br />
@@ -369,8 +392,8 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
                   </button>
                   <button
                     onClick={handleCancel}
-                    disabled={submitting}
-                    style={{ flex: "0 0 auto", background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.6 : 1 }}
+                    disabled={submitting || (complimentary && !compCancelDate)}
+                    style={{ flex: "0 0 auto", background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: submitting || (complimentary && !compCancelDate) ? "not-allowed" : "pointer", opacity: submitting || (complimentary && !compCancelDate) ? 0.4 : 1 }}
                   >
                     {submitting ? "Scheduling…" : "Confirm scheduled cancellation"}
                   </button>

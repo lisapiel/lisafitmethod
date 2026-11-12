@@ -5,7 +5,7 @@ import { Resend } from "resend"
 import { getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import { sharedDocClient } from "@/lib/dynamoClient"
-import { readState as readBillingState } from "@/lib/billing/store"
+import { claimCancelNotice, readState as readBillingState, releaseCancelNotice } from "@/lib/billing/store"
 import { isComplimentaryActive } from "@/lib/billing/entitlement"
 import { clientCancelComplimentary } from "@/lib/billing/actions"
 import { billingDeps } from "@/lib/billing/server"
@@ -245,11 +245,26 @@ export async function POST(req: NextRequest) {
 }
 
 // A complimentary client's own cancellation: no commitment, nothing charged.
+// The confirmation email is sent once, and only after Stripe confirmed the
+// cancellation and its end date. Anything less is reported as pending, with a
+// safe retry ("check again" calls this route again and finishes the job).
 async function cancelComplimentary(email: string, displayName: string, body: { reason?: string; feedback?: string }): Promise<NextResponse> {
   const r = await clientCancelComplimentary(billingDeps(), { email })
-  if (!r.ok) return NextResponse.json({ error: r.message }, { status: r.status })
-  const effectiveDate = r.effectiveDate ?? new Date().toISOString()
+  if (!r.ok) return NextResponse.json({ error: r.message, pending: r.uncertain === true }, { status: r.status })
+
+  const db = sharedDocClient()
   const now = new Date().toISOString()
+  const confirmed = await claimCancelNotice(db, email, now)
+  if (!confirmed) {
+    const state = await readBillingState(db, email).catch(() => null)
+    if (state?.compCancelNotifiedAt && state.compEndReason === "client-cancelled" && state.compEndsAt) {
+      // Already confirmed and emailed earlier.
+      return NextResponse.json({ ok: true, effectiveDate: state.compEndsAt, inCommitment: false, complimentary: true })
+    }
+    return NextResponse.json({ error: "Your cancellation is being confirmed. Please check back in a few minutes.", pending: true }, { status: 202 })
+  }
+  const effectiveDate = confirmed.compEndsAt!
+
   await updateCoachingClientRecord(email, {
     cancellationScheduledAt: now,
     cancellationEffectiveDate: effectiveDate,
@@ -276,14 +291,15 @@ async function cancelComplimentary(email: string, displayName: string, body: { r
   }).catch(() => {})
 
   const mail = complimentaryCancellationEmail({ firstName: displayName.split(" ")[0], effectiveDateLabel: formatDate(effectiveDate) })
-  const resend = new Resend(process.env.RESEND_API_KEY ?? "")
-  await resend.emails.send({
-    from: "Lisa Fit Method <noreply@lisafitmethod.com>",
-    replyTo: "contact@lisafitmethod.com",
-    to: email,
-    subject: mail.subject,
-    html: mail.html,
-  }).catch((err) => console.error("Complimentary cancellation email failed:", err))
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+    const sent = await resend.emails.send({ from: "Lisa Fit Method <noreply@lisafitmethod.com>", replyTo: "contact@lisafitmethod.com", to: email, subject: mail.subject, html: mail.html, text: mail.text })
+    if (sent?.error) throw new Error(sent.error.message ?? "email not sent")
+  } catch (err) {
+    // The cancellation itself is confirmed; let a later "check again" resend the email.
+    console.error("Complimentary cancellation email failed:", err instanceof Error ? err.message : err)
+    await releaseCancelNotice(db, email).catch(() => {})
+  }
 
   return NextResponse.json({ ok: true, effectiveDate, inCommitment: false, complimentary: true })
 }

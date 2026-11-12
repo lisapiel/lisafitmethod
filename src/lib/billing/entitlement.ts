@@ -113,14 +113,24 @@ export function nextMonthlyAnniversary(start: string, now: Date): string {
 // current monthly period, never past an end date Lisa already set, and no
 // paid commitment applies. The period is Stripe's when there's a running
 // subscription; otherwise it's the complimentary arrangement's own monthly
-// cycle, counted from the day it was granted. It is never made up from a
-// Stripe billing date that doesn't exist.
-export function complimentaryCancellationDate(input: { periodEnd: string | null; currentEndsAt: string | null; grantStart: string | null; now: Date }): string {
-  const future = (d: string | null) => !!d && Date.parse(d) > input.now.getTime()
-  const period = future(input.periodEnd) ? input.periodEnd! : input.grantStart ? nextMonthlyAnniversary(input.grantStart, input.now) : null
-  const candidates = [period, input.currentEndsAt].filter((d): d is string => future(d))
-  if (candidates.length === 0) return input.now.toISOString()
-  return candidates.reduce((a, b) => (Date.parse(a) <= Date.parse(b) ? a : b))
+// cycle, counted from the day it was granted.
+//
+// Returns null when the date can't be established (a running subscription
+// whose current period can't be read, or no subscription and no grant date).
+// Callers must then refuse the cancellation rather than guess a date.
+export function complimentaryCancellationDate(input: {
+  hasRunningSubscription: boolean
+  periodEnd: string | null
+  currentEndsAt: string | null
+  grantStart: string | null
+  now: Date
+}): string | null {
+  const future = (d: string | null | undefined): d is string => !!d && Number.isFinite(Date.parse(d)) && Date.parse(d) > input.now.getTime()
+  const period = input.hasRunningSubscription
+    ? (future(input.periodEnd) ? input.periodEnd : null)
+    : (input.grantStart && Number.isFinite(Date.parse(input.grantStart)) ? nextMonthlyAnniversary(input.grantStart, input.now) : null)
+  if (!period) return null
+  return future(input.currentEndsAt) && Date.parse(input.currentEndsAt) < Date.parse(period) ? input.currentEndsAt : period
 }
 
 // Validates an admin-chosen end date: absent (indefinite) or a real date in the future.

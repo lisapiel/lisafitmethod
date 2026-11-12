@@ -55,6 +55,10 @@ export type BillingState = {
   // The paid commitment in place when the client was made complimentary. It
   // doesn't apply while complimentary; kept so the record shows what was waived.
   compCommitment?: { type: string | null; endDate: string | null } | null
+  // When the client's cancellation confirmation email was claimed for sending.
+  // Set once, so the email goes out exactly once, and only after Stripe
+  // confirmed the cancellation and its end date.
+  compCancelNotifiedAt?: string | null
   rev: number
   pendingOpId?: string | null
   pendingKind?: OpKind | null
@@ -250,4 +254,30 @@ export async function markPending(db: Sender, op: BillingOp, status: OpStatus, n
   const current = await readState(db, op.email)
   if (!current || current.pendingOpId !== op.id) return
   await writeState(db, { ...current, pendingStatus: status, rev: current.rev + 1, updatedAt: now }, current.rev)
+}
+
+// Claims the right to send a complimentary client's cancellation confirmation.
+// Succeeds only once, only when the cancellation is confirmed (client-cancelled
+// with an end date recorded), and never while another billing change holds the
+// lock. Returns the confirmed state, or null if there's nothing to send yet.
+export async function claimCancelNotice(db: Sender, email: string, now = new Date().toISOString()): Promise<BillingState | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const s = await readState(db, email)
+    if (!s || s.mode !== "complimentary" || s.compEndReason !== "client-cancelled" || !s.compEndsAt || s.compCancelNotifiedAt || s.pendingOpId) return null
+    try {
+      await writeState(db, { ...s, compCancelNotifiedAt: now, rev: s.rev + 1, updatedAt: now }, s.rev)
+      return s
+    } catch (e) {
+      if (e instanceof BillingConflictError) continue
+      throw e
+    }
+  }
+  return null
+}
+
+// Undoes a claim when the email couldn't be sent, so a later retry sends it.
+export async function releaseCancelNotice(db: Sender, email: string, now = new Date().toISOString()): Promise<void> {
+  const s = await readState(db, email)
+  if (!s?.compCancelNotifiedAt) return
+  await writeState(db, { ...s, compCancelNotifiedAt: null, rev: s.rev + 1, updatedAt: now }, s.rev).catch(() => {})
 }
