@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { fetchAuthSession } from "aws-amplify/auth"
 import AccountDropdown from "@/components/AccountDropdown.client"
+import { CoachingCancelFlow, type CancelOutcome, type PlannedPayment } from "@/components/account/CoachingCancelFlow.client"
 import {
   COURSE_PRICE_DISPLAY, COURSE_REGULAR_PRICE_DISPLAY,
   NUTRITION_COURSE_PRICE_DISPLAY, NUTRITION_COURSE_REGULAR_PRICE_DISPLAY,
@@ -69,20 +70,17 @@ interface LiveSubData {
   complimentaryCancelled: boolean
   complimentaryCancelDate: string | null
   complimentaryCancelNotified: boolean
+  cancellationRequestedAt: string | null
+  paidCancel: { endsAt: string; commitmentEndsAt: string | null; remainingPayments: PlannedPayment[] } | null
+  paidCancelPending: boolean
+  paidCancelRemaining: PlannedPayment[]
 }
 
 function CoachingBillingSection({ client }: { client: CoachingClientData }) {
   const [liveSub, setLiveSub] = useState<LiveSubData | null>(null)
   const [loadingLive, setLoadingLive] = useState(true)
-  const [cancelStep, setCancelStep] = useState<"idle" | "confirm">("idle")
-  const [cancelReason, setCancelReason] = useState("")
-  const [cancelFeedback, setCancelFeedback] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [done, setDone] = useState<"cancelled" | "reactivated" | null>(null)
-  // The end date the server confirmed for the cancellation just made, so it
-  // shows straight away instead of only after a reload.
-  const [confirmedEndDate, setConfirmedEndDate] = useState<string | null>(null)
-  const [err, setErr] = useState<string | null>(null)
+  // What the client just did on this page, so the result shows without a reload.
+  const [outcome, setOutcome] = useState<CancelOutcome | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -94,17 +92,22 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) throw new Error("fetch failed")
-        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean; complimentaryEndsAt?: string | null; complimentaryCancelled?: boolean; complimentaryCancelDate?: string | null; complimentaryCancelNotified?: boolean } | null }
-        if (!cancelled && data.subscription) {
+        const data = await res.json() as { subscription?: Partial<LiveSubData> | null }
+        const s = data.subscription
+        if (!cancelled && s) {
           setLiveSub({
-            currentPeriodEnd: data.subscription.currentPeriodEnd,
-            cancelAtPeriodEnd: data.subscription.cancelAtPeriodEnd,
-            cancelAt: data.subscription.cancelAt,
-            complimentary: data.subscription.complimentary === true,
-            complimentaryEndsAt: data.subscription.complimentaryEndsAt ?? null,
-            complimentaryCancelled: data.subscription.complimentaryCancelled === true,
-            complimentaryCancelDate: data.subscription.complimentaryCancelDate ?? null,
-            complimentaryCancelNotified: data.subscription.complimentaryCancelNotified === true,
+            currentPeriodEnd: s.currentPeriodEnd ?? null,
+            cancelAtPeriodEnd: s.cancelAtPeriodEnd === true,
+            cancelAt: s.cancelAt ?? null,
+            complimentary: s.complimentary === true,
+            complimentaryEndsAt: s.complimentaryEndsAt ?? null,
+            complimentaryCancelled: s.complimentaryCancelled === true,
+            complimentaryCancelDate: s.complimentaryCancelDate ?? null,
+            complimentaryCancelNotified: s.complimentaryCancelNotified === true,
+            cancellationRequestedAt: s.cancellationRequestedAt ?? null,
+            paidCancel: s.paidCancel ?? null,
+            paidCancelPending: s.paidCancelPending === true,
+            paidCancelRemaining: s.paidCancelRemaining ?? [],
           })
         }
       } catch { /* live data optional */ }
@@ -121,77 +124,32 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
 
   const commitmentFulfilled = commitmentEndDate ? new Date() >= new Date(commitmentEndDate) : client.commitmentType === "MONTH_TO_MONTH"
 
-  const isCancellationDone = done === "cancelled"
-  const isReactivationDone = done === "reactivated"
+  const complimentary = liveSub?.complimentary === true
 
-  // A complimentary cancellation that isn't confirmed and emailed yet: only the
-  // pending message shows, never "scheduled" or an end date as if final.
-  const compPending = liveSub?.complimentary === true && liveSub.complimentaryCancelled && !liveSub.complimentaryCancelNotified && !isCancellationDone
+  // Where any cancellation stands, from the server. "Pending" means the request
+  // is recorded but its end date isn't confirmed and emailed yet: then no date
+  // or "scheduled" is shown as if final.
+  const serverStatus: "none" | "pending" | "scheduled" = (() => {
+    if (!liveSub) return client.cancellationScheduledAt ? "scheduled" : "none"
+    if (complimentary) {
+      if (liveSub.complimentaryCancelled && liveSub.complimentaryCancelNotified) return "scheduled"
+      return liveSub.complimentaryCancelled || liveSub.cancellationRequestedAt ? "pending" : "none"
+    }
+    if (liveSub.paidCancelPending) return "pending"
+    return liveSub.cancelAtPeriodEnd || liveSub.cancelAt ? "scheduled" : "none"
+  })()
+  const status = outcome ? (outcome.kind === "kept" ? "none" : outcome.kind) : serverStatus
 
-  const isScheduledToCancel =
-    isCancellationDone ||
-    (!compPending && !isReactivationDone && !isCancellationDone && Boolean(client.cancellationScheduledAt || liveSub?.cancelAtPeriodEnd || liveSub?.cancelAt))
-
-  const effectiveDate = (isCancellationDone ? confirmedEndDate : null) ?? (client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.cancelAtPeriodEnd ? (client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.currentPeriodEnd) : null)
+  const scheduledEnd =
+    outcome?.kind === "scheduled" ? outcome.endsAt
+    : complimentary ? liveSub?.complimentaryEndsAt ?? null
+    : liveSub?.cancelAt ?? (liveSub?.cancelAtPeriodEnd ? liveSub.currentPeriodEnd : null) ?? client.cancellationEffectiveDate ?? null
+  const scheduledRemaining = outcome?.kind === "scheduled" ? outcome.remainingPayments : liveSub?.paidCancelRemaining ?? []
   const nextBilling = liveSub?.currentPeriodEnd
 
-  async function handleCancel() {
-    setSubmitting(true)
-    setErr(null)
-    try {
-      const session = await fetchAuthSession()
-      const token = session.tokens?.accessToken?.toString() ?? ""
-      const res = await fetch("/api/coaching/cancel", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        // The time zone lets the confirmation email show the same end date this page shows.
-        body: JSON.stringify({ reason: cancelReason || undefined, feedback: cancelFeedback || undefined, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
-      })
-      const data = await res.json() as { ok?: boolean; error?: string; effectiveDate?: string }
-      if (!res.ok || !data.ok) {
-        setErr(data.error ?? "Something went wrong. Please contact contact@lisafitmethod.com.")
-      } else {
-        setConfirmedEndDate(data.effectiveDate ?? null)
-        setDone("cancelled")
-        setCancelStep("idle")
-      }
-    } catch {
-      setErr("Something went wrong. Please try again.")
-    }
-    setSubmitting(false)
-  }
-
-  async function handleReactivate() {
-    setSubmitting(true)
-    setErr(null)
-    try {
-      const session = await fetchAuthSession()
-      const token = session.tokens?.accessToken?.toString() ?? ""
-      const res = await fetch("/api/coaching/reactivate", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      })
-      const data = await res.json() as { ok?: boolean; error?: string }
-      if (!res.ok || !data.ok) {
-        setErr(data.error ?? "Something went wrong. Please contact contact@lisafitmethod.com.")
-      } else {
-        setDone("reactivated")
-      }
-    } catch {
-      setErr("Something went wrong. Please try again.")
-    }
-    setSubmitting(false)
-  }
-
-  const complimentary = liveSub?.complimentary === true
   // A complimentary client is never shown a price, a billing date or a paid
   // commitment, because nothing is collected and no commitment applies.
   const compEndsAt = liveSub?.complimentaryEndsAt ?? null
-  // If a complimentary client cancels: the date the server calculates with the
-  // same rule the cancellation uses (end of the current period, the
-  // arrangement's own monthly cycle without a Stripe period, or an earlier end date).
-  const compCancelDate = liveSub?.complimentaryCancelDate ?? null
   const priceDisplay = complimentary
     ? compEndsAt && !liveSub?.complimentaryCancelled
       ? `Your coaching is complimentary through ${formatDate(compEndsAt)}. No payments are being collected.`
@@ -206,15 +164,14 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
       <div style={{ background: "#111", border: `1px solid ${border}`, borderLeft: `3px solid ${gold}`, padding: "20px 24px" }}>
         <p style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: gold, marginBottom: 8 }}>
           1:1 Coaching
-          {isScheduledToCancel && !isReactivationDone && (
+          {status === "scheduled" && (
             <span style={{ marginLeft: 10, color: "#d97460", letterSpacing: "0.1em" }}>· Cancellation scheduled</span>
           )}
-          {isReactivationDone && (
+          {outcome?.kind === "kept" && (
             <span style={{ marginLeft: 10, color: "#5c9e6a", letterSpacing: "0.1em" }}>· Active</span>
           )}
         </p>
 
-        {/* Price + commitment summary */}
         <div style={{ display: "grid", gap: 6, marginBottom: 16 }}>
           {priceDisplay && (
             <p style={{ fontSize: "0.8rem", color: "#f0e6d3", margin: 0 }}>{priceDisplay}</p>
@@ -222,12 +179,12 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           {!complimentary && client.commitmentType === "THREE_MONTH_MINIMUM" && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>
               {commitmentFulfilled
-                ? "Initial 3-month commitment completed — now month-to-month"
+                ? "Initial 3-month commitment completed, now month-to-month"
                 : "3-month minimum commitment"}
             </p>
           )}
           {!complimentary && client.commitmentType === "MONTH_TO_MONTH" && (
-            <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>Month-to-month · Cancel anytime before your next billing date</p>
+            <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>Month-to-month · Cancel any time online</p>
           )}
           {!client.commitmentType && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>1:1 Coaching</p>
@@ -237,192 +194,34 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
               Commitment ends: {formatDate(commitmentEndDate)}
             </p>
           )}
-          {!loadingLive && nextBilling && !isScheduledToCancel && !complimentary && (
+          {!loadingLive && nextBilling && status !== "scheduled" && !complimentary && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>
               Next billing date: {formatDate(nextBilling)}
             </p>
           )}
-          {!loadingLive && isScheduledToCancel && !isReactivationDone && effectiveDate && (
+          {!loadingLive && status === "scheduled" && scheduledEnd && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>
-              Access active through: {formatDate(effectiveDate)}
+              Access active through: {formatDate(scheduledEnd)}
             </p>
           )}
         </div>
 
-        {err && (
-          <p style={{ fontSize: "0.72rem", color: "#ff9080", marginBottom: 12 }}>{err}</p>
+        {outcome?.kind === "kept" && (
+          <p style={{ fontSize: "0.75rem", color: "#5c9e6a", margin: "0 0 8px" }}>
+            You&apos;re staying. Your coaching continues unchanged.
+          </p>
         )}
 
-        {/* Manage / cancel section */}
-        {!client.commitmentNeedsConfirmation && (
-          <>
-            {/* Already scheduled — offer reactivation */}
-            {/* Complimentary cancellation recorded but not yet confirmed and emailed: offer a safe retry. */}
-            {compPending && (
-              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4, display: "grid", gap: 10 }}>
-                <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
-                  Your cancellation is being confirmed. Please check back in a few minutes.
-                </p>
-                <button
-                  onClick={handleCancel}
-                  disabled={submitting}
-                  style={{ justifySelf: "start", background: "transparent", border: `1px solid ${border}`, color: gold, padding: "8px 16px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: submitting ? "not-allowed" : "pointer" }}
-                >
-                  {submitting ? "Checking…" : "Check again"}
-                </button>
-              </div>
-            )}
-            {isScheduledToCancel && !isReactivationDone && complimentary && (liveSub?.complimentaryCancelNotified || isCancellationDone) && (
-              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
-                <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
-                  Your coaching is scheduled to end. If you&apos;d like to keep going, message me and we&apos;ll sort it out.
-                </p>
-              </div>
-            )}
-            {isScheduledToCancel && !isReactivationDone && !complimentary && (
-              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
-                <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
-                  Your coaching is scheduled to end. If you&apos;d like to continue, you can remove the cancellation at any time before your access expires.
-                </p>
-                <button
-                  onClick={handleReactivate}
-                  disabled={submitting}
-                  style={{ background: gold, border: "none", color: "#0a0a0a", padding: "10px 20px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.6 : 1 }}
-                >
-                  {submitting ? "Updating…" : "Keep my coaching →"}
-                </button>
-              </div>
-            )}
-
-            {/* Reactivation confirmed */}
-            {isReactivationDone && (
-              <p style={{ fontSize: "0.75rem", color: "#5c9e6a", marginTop: 8 }}>
-                You&apos;re staying. Subscription continues unchanged.
-              </p>
-            )}
-
-            {/* Cancellation confirmed */}
-            {isCancellationDone && (
-              <p style={{ fontSize: "0.75rem", color: "#888", marginTop: 8 }}>
-                Cancellation scheduled. You&apos;ll receive a confirmation email.
-              </p>
-            )}
-
-            {/* Not yet scheduled — show manage link */}
-            {!isScheduledToCancel && !isCancellationDone && !compPending && cancelStep === "idle" && (
-              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
-                <button
-                  onClick={() => setCancelStep("confirm")}
-                  style={{ background: "transparent", border: "none", color: "#666", fontSize: "0.7rem", cursor: "pointer", padding: 0, textDecoration: "underline", fontFamily: "var(--font-montserrat), sans-serif" }}
-                >
-                  Manage or cancel coaching →
-                </button>
-              </div>
-            )}
-
-            {/* Cancel confirmation step */}
-            {cancelStep === "confirm" && !isScheduledToCancel && (
-              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
-                {/* Retention copy */}
-                <div style={{ background: "#0d0d0d", border: `1px solid ${border}`, padding: "14px 16px", marginBottom: 16 }}>
-                  <p style={{ fontSize: "0.7rem", fontWeight: 600, color: gold, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 8px" }}>Talk to Lisa about options</p>
-                  <p style={{ fontSize: "0.75rem", color: "#888", lineHeight: 1.7, margin: "0 0 8px" }}>
-                    If cost, schedule, an injury, your program, or something else is making coaching difficult right now, reach out. I may be able to help.
-                  </p>
-                  <a href="mailto:contact@lisafitmethod.com" style={{ fontSize: "0.75rem", color: gold, textDecoration: "none" }}>contact@lisafitmethod.com</a>
-                </div>
-
-                {/* In-commitment message */}
-                {!complimentary && client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate && (
-                  <div style={{ background: "#130d00", border: `1px solid #4a3820`, padding: "12px 16px", marginBottom: 16, borderRadius: 2 }}>
-                    <p style={{ fontSize: "0.72rem", color: "#c8a97e", lineHeight: 1.7, margin: 0 }}>
-                      <strong>Your initial 3-month commitment ends on {formatDate(commitmentEndDate)}.</strong>
-                      {" "}You committed to three monthly payments when you enrolled. Any remaining payments in your 3-month commitment will still be processed as scheduled.
-                      You will continue receiving coaching and retain access through {formatDate(commitmentEndDate)}.
-                    </p>
-                  </div>
-                )}
-
-                {/* Schedule cancellation heading + effective date */}
-                {complimentary ? (
-                  compCancelDate ? (
-                    <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
-                      <strong style={{ color: "#aaa" }}>Cancel coaching</strong><br />
-                      Your coaching continues through {formatDate(compCancelDate)} and then ends. Nothing is charged.
-                    </p>
-                  ) : (
-                    <p style={{ fontSize: "0.72rem", color: "#ff9080", lineHeight: 1.7, marginBottom: 12 }}>
-                      I can&apos;t show your end date right now, so cancelling isn&apos;t available at the moment. Please try again later or message me.
-                    </p>
-                  )
-                ) : client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate ? (
-                  <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
-                    <strong style={{ color: "#aaa" }}>Schedule cancellation</strong><br />
-                    Your coaching will remain active through {formatDate(commitmentEndDate)} and will not renew after your initial commitment.
-                  </p>
-                ) : (
-                  <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
-                    <strong style={{ color: "#aaa" }}>Cancel coaching</strong><br />
-                    Your access remains through {nextBilling ? formatDate(nextBilling) : "your current billing period"} — no further renewals after that.
-                  </p>
-                )}
-
-                {/* Optional reason */}
-                <p style={{ fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#555", marginBottom: 8 }}>Why are you leaving? (optional)</p>
-                <div style={{ display: "grid", gap: 6, marginBottom: 12 }}>
-                  {["Cost", "Schedule / not enough time", "Program isn't the right fit", "Not seeing the results I expected", "Injury or health reason", "Personal circumstances", "Other"].map((reason) => (
-                    <label key={reason} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-                      <input
-                        type="radio"
-                        name="cancel-reason"
-                        value={reason}
-                        checked={cancelReason === reason}
-                        onChange={(e) => setCancelReason(e.target.value)}
-                        style={{ accentColor: gold }}
-                      />
-                      <span style={{ fontSize: "0.75rem", color: "#888" }}>{reason}</span>
-                    </label>
-                  ))}
-                </div>
-                <textarea
-                  placeholder="Anything else you'd like me to know? (optional)"
-                  value={cancelFeedback}
-                  onChange={(e) => setCancelFeedback(e.target.value)}
-                  rows={3}
-                  style={{ width: "100%", background: "#0a0a0a", border: `1px solid ${border}`, color: "#888", padding: "10px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 14 }}
-                />
-
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <button
-                    onClick={() => { setCancelStep("idle"); setCancelReason(""); setCancelFeedback("") }}
-                    style={{ flex: "0 0 auto", background: "transparent", border: `1px solid ${border}`, color: "#888", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: "pointer" }}
-                  >
-                    Keep my coaching
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    disabled={submitting || (complimentary && !compCancelDate)}
-                    style={{ flex: "0 0 auto", background: "transparent", border: `1px solid #d97460`, color: "#d97460", padding: "10px 18px", fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", cursor: submitting || (complimentary && !compCancelDate) ? "not-allowed" : "pointer", opacity: submitting || (complimentary && !compCancelDate) ? 0.4 : 1 }}
-                  >
-                    {submitting ? "Scheduling…" : "Confirm scheduled cancellation"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Legacy: commitment not yet confirmed by admin */}
-        {client.commitmentNeedsConfirmation && (
-          <div style={{ borderTop: `1px solid ${border}`, paddingTop: 14, marginTop: 4 }}>
-            <p style={{ fontSize: "0.7rem", color: "#666", lineHeight: 1.7, margin: 0 }}>
-              To manage or cancel your coaching subscription, please contact{" "}
-              <a href="mailto:contact@lisafitmethod.com" style={{ color: gold, textDecoration: "none" }}>
-                contact@lisafitmethod.com
-              </a>
-              .
-            </p>
-          </div>
+        {!loadingLive && (
+          <CoachingCancelFlow
+            complimentary={complimentary}
+            status={status}
+            requestedAt={outcome?.kind === "pending" ? outcome.requestedAt : liveSub?.cancellationRequestedAt ?? null}
+            endsAt={status === "scheduled" ? scheduledEnd : complimentary ? liveSub?.complimentaryCancelDate ?? null : liveSub?.paidCancel?.endsAt ?? null}
+            commitmentEndsAt={liveSub?.paidCancel?.commitmentEndsAt ?? null}
+            remainingPayments={status === "scheduled" ? scheduledRemaining : liveSub?.paidCancel?.remainingPayments ?? []}
+            onChange={setOutcome}
+          />
         )}
       </div>
     </div>
