@@ -10,8 +10,6 @@ const mockCustomersList = jest.fn()
 const mockSubsList = jest.fn()
 const mockSubsRetrieve = jest.fn()
 const mockInvoicesList = jest.fn()
-const mockSubsListForLink = jest.fn()
-
 jest.mock("stripe", () => {
   return jest.fn().mockImplementation(() => ({
     customers: { list: mockCustomersList },
