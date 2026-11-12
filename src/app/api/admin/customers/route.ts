@@ -11,6 +11,7 @@ export interface CustomerRow {
   email: string
   product: "training" | "nutrition" | "tracker"
   grantedAt: string
+  grantType: string
 }
 
 function makeDb() {
@@ -60,6 +61,7 @@ export async function GET() {
           email: rowEmail,
           product,
           grantedAt: (item.grantedAt as string | undefined) ?? "",
+          grantType: (item.grantType as string | undefined) ?? "unknown",
         })
       }
       lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined

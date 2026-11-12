@@ -30,9 +30,15 @@ export async function GET(req: NextRequest) {
 
   try {
     const db = makeDynamo()
-    const result = await db.send(new ScanCommand({ TableName: "lfm-leads" }))
-    const leads = (result.Items ?? []).sort((a, b) =>
-      (b.createdAt ?? "").localeCompare(a.createdAt ?? "")
+    let lastKey: Record<string, unknown> | undefined
+    const allItems: Record<string, unknown>[] = []
+    do {
+      const result = await db.send(new ScanCommand({ TableName: "lfm-leads", ExclusiveStartKey: lastKey }))
+      allItems.push(...(result.Items ?? []))
+      lastKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+    } while (lastKey)
+    const leads = allItems.sort((a, b) =>
+      ((b.createdAt as string) ?? "").localeCompare((a.createdAt as string) ?? "")
     )
     return NextResponse.json({ leads })
   } catch (err) {

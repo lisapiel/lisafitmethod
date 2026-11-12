@@ -1,42 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
-import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
-import { isAdminEmail, listCoachingClientRecords, createCoachingClientRecord } from "@/lib/authTokens"
-import { adminMfaOk } from "@/lib/adminMfa"
+import { verifyAdminRequest } from "@/lib/adminAuth"
+import { listCoachingClientRecords } from "@/lib/authTokens"
 
 export const dynamic = "force-dynamic"
 
-async function verifyAdmin(req: NextRequest): Promise<boolean> {
-  const auth = req.headers.get("authorization")
-  if (!auth?.startsWith("Bearer ")) return false
-  try {
-    const cognito = new CognitoIdentityProviderClient({
-      region: process.env.COGNITO_REGION ?? "us-east-2",
-      credentials: {
-        accessKeyId: process.env.COGNITO_AWS_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.COGNITO_AWS_SECRET_ACCESS_KEY ?? "",
-      },
-    })
-    const result = await cognito.send(new GetUserCommand({ AccessToken: auth.slice(7) }))
-    const callerEmail = result.UserAttributes?.find((a) => a.Name === "email")?.Value
-    return callerEmail != null && isAdminEmail(callerEmail) && adminMfaOk(result)
-  } catch {
-    return false
-  }
-}
-
 export async function GET(req: NextRequest) {
-  if (!(await verifyAdmin(req))) {
+  const adminEmail = await verifyAdminRequest(req)
+  if (!adminEmail) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const clients = await listCoachingClientRecords()
-  return NextResponse.json({ clients })
-}
-
-export async function POST(req: NextRequest) {
-  if (!(await verifyAdmin(req))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-  const data = await req.json()
-  await createCoachingClientRecord(data)
-  return NextResponse.json({ ok: true })
+  const records = await listCoachingClientRecords()
+  return NextResponse.json({
+    clients: records.map((r) => ({
+      email: r.email,
+      name: r.displayName ?? null,
+      startedAt: r.createdAt ?? r.startDate ?? null,
+    })),
+  })
 }
