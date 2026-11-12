@@ -36,8 +36,12 @@ set-password email counted as sent. There was no record of handled event ids,
 so a repeated delivery re-sent emails. Cancellation stored the time the webhook
 ran as the effective date. A late cancellation of an old subscription could end
 a restarted client's access. Payment-failed emails read the subscription from
-one payload location only. A lost dispute whose charge could not be fetched was
-treated as "no charge".
+one payload location only (`invoice.subscription`). The live endpoint uses API
+version `2026-04-22.dahlia`, where that field no longer exists, so every
+`invoice.payment_failed` event was acknowledged and ignored. Neither the
+client's payment-problem email nor the admin alert was ever sent (confirmed
+2026-11-12 against the endpoint settings). A lost dispute whose charge could not
+be fetched was treated as "no charge".
 
 Making failures retryable exposed retry hazards, also fixed: nutrition and
 masterclass provisioning treated any existing login as ready, so a retry after
