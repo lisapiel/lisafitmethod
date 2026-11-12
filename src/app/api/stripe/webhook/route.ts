@@ -15,7 +15,7 @@ import { notifyAdmin } from "@/lib/notifyAdmin"
 import {
   generateAuthToken, storeAuthToken,
   grantTrainingAccess, grantTrackerAccess, grantNutritionAccess,
-  grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess,
+  grantMasterclassAccess, renewMasterclassAccess, revokeMasterclassAccess, getMasterclassSubscriptionId,
   grantCoachingAccess, revokeCoachingAccess, updateCoachingApplication, createCoachingClientRecord,
   getCoachingClientRecord, updateCoachingClientRecord,
   stampCoachingAccessVersions, TERMS_VERSION, LIABILITY_WAIVER_VERSION,
@@ -23,6 +23,9 @@ import {
 import {
   recordBundlePaymentFromIntent, syncBundleCreditFromCharge, settleBundleCreditFromInvoice, releaseBundleCreditForSession,
 } from "@/lib/bundleCreditWebhook"
+import { runEventOnce } from "@/lib/stripeEventLedger"
+import { invoiceSubscriptionId, isStaleCancellation, subscriptionEndedAt, type InvoiceLike } from "@/lib/stripeWebhookFields"
+import { sendOrThrow } from "@/lib/sendOrThrow"
 
 export const dynamic = "force-dynamic"
 
@@ -327,7 +330,7 @@ async function provisionNutritionUser(email: string) {
   await grantNutritionAccess(email)
 
   if (userExists) {
-    await resend.emails.send({
+    await sendOrThrow(resend, {
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: email,
@@ -354,7 +357,7 @@ async function provisionNutritionUser(email: string) {
   } catch (error) {
     if (!(error instanceof UsernameExistsException)) throw error
     await grantNutritionAccess(email)
-    await resend.emails.send({
+    await sendOrThrow(resend, {
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: email,
@@ -368,7 +371,7 @@ async function provisionNutritionUser(email: string) {
   await storeAuthToken(token, email, "setup")
   const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/nutrition-foundations")}`
 
-  await resend.emails.send({
+  await sendOrThrow(resend, {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
@@ -379,7 +382,7 @@ async function provisionNutritionUser(email: string) {
 
 async function sendTrackerConfirmationEmail(email: string) {
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
-  await resend.emails.send({
+  await sendOrThrow(resend, {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
@@ -457,7 +460,7 @@ async function provisionUser(email: string) {
   const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/training-foundations")}`
 
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
-  await resend.emails.send({
+  await sendOrThrow(resend, {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
@@ -622,7 +625,7 @@ async function provisionMasterclassUser(
   await grantMasterclassAccess(email, stripeSubscriptionId, normalizedPlan, periodEndIso)
 
   if (userExists) {
-    await resend.emails.send({
+    await sendOrThrow(resend, {
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: email,
@@ -654,7 +657,7 @@ async function provisionMasterclassUser(
   await storeAuthToken(token, email, "setup")
   const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/masterclass")}`
 
-  await resend.emails.send({
+  await sendOrThrow(resend, {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
@@ -801,7 +804,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   }
 
   if (hasUsableLogin) {
-    await resend.emails.send({
+    await sendOrThrow(resend, {
       from: "Lisa Fit Method <noreply@lisafitmethod.com>",
       replyTo: "contact@lisafitmethod.com",
       to: email,
@@ -874,7 +877,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   // course he hadn't bought.
   const setPasswordUrl = `https://lisafitmethod.com/set-password?token=${token}&redirect=${encodeURIComponent("/my-coaching")}`
 
-  await resend.emails.send({
+  await sendOrThrow(resend, {
     from: "Lisa Fit Method <noreply@lisafitmethod.com>",
     replyTo: "contact@lisafitmethod.com",
     to: email,
@@ -977,7 +980,7 @@ async function recordPurchase(intent: Stripe.PaymentIntent) {
   })
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   const stripe = makeStripe()
   const body = await request.text()
   const signature = request.headers.get("stripe-signature") ?? ""
@@ -993,6 +996,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
+  return runEventOnce(event, () => handleEvent(event))
+}
+
+async function retrieveChargeOrNull(stripe: Stripe, chargeId: string | undefined): Promise<Stripe.Charge | null> {
+  if (!chargeId) return null
+  try {
+    return await stripe.charges.retrieve(chargeId)
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeInvalidRequestError && err.code === "resource_missing") return null
+    throw err
+  }
+}
+
+async function handleEvent(event: Stripe.Event): Promise<NextResponse> {
   // ── One-time course purchases ─────────────────────────────────────────────
   if (event.type === "payment_intent.succeeded") {
     const intent = event.data.object as Stripe.PaymentIntent
@@ -1001,6 +1018,8 @@ export async function POST(request: NextRequest) {
     const includesTracker = intent.metadata?.includesTracker === "true"
 
     if (email) {
+      // Set inside a callback, so TypeScript must not narrow it to null.
+      let bundleRecordError = null as string | null
       try {
         if (product === "tracker") {
           await grantTrackerAccess(email)
@@ -1012,6 +1031,7 @@ export async function POST(request: NextRequest) {
           // works, and the coaching credit depends on this record.
           await recordBundlePaymentFromIntent(intent).catch((err) => {
             const detail = err instanceof Error ? err.message : String(err)
+            bundleRecordError = detail
             console.error("recordBundlePayment failed:", detail)
             notifyAdmin({
               kind: "webhook-failure",
@@ -1031,6 +1051,7 @@ export async function POST(request: NextRequest) {
             await grantTrackerAccess(email)
           }
         }
+        // Stays best-effort: production has no Purchase table, so this always fails today.
         await recordPurchase(intent).catch((err) =>
           console.error("recordPurchase failed:", err)
         )
@@ -1038,6 +1059,11 @@ export async function POST(request: NextRequest) {
         const detail = error instanceof Error ? error.message : String(error)
         console.error("Purchase fulfillment failed:", detail)
         return NextResponse.json({ error: "Account setup failed", detail }, { status: 500 })
+      }
+      // Provisioning above is safe to repeat, and without this record the
+      // coaching credit is never offered, so ask Stripe to try again.
+      if (bundleRecordError) {
+        return NextResponse.json({ error: "Bundle purchase not recorded", detail: bundleRecordError }, { status: 500 })
       }
     }
   }
@@ -1070,7 +1096,7 @@ export async function POST(request: NextRequest) {
           await updateCoachingApplication(applicationId, {
             status: "PAID",
             stripeSubscriptionId: subscriptionId,
-          }).catch((err) => console.error("updateCoachingApplication failed:", err))
+          })
         }
       } else if (product === "masterclass") {
         const plan = session.metadata?.plan ?? "monthly"
@@ -1142,22 +1168,8 @@ export async function POST(request: NextRequest) {
   // Still handles renewals AND acts as a fallback if
   // checkout.session.completed didn't fire for the first payment.
   if (event.type === "invoice.paid") {
-    const invoice = event.data.object as unknown as {
-      subscription?: string
-      billing_reason?: string
-      parent?: { subscription_details?: { subscription?: string | { id?: string } } }
-      lines?: { data?: Array<{ subscription?: string | { id?: string } }> }
-    }
-    // The subscription reference lives in different places depending on
-    // Stripe API version. Try them all.
-    const subscriptionId =
-      (typeof invoice.subscription === "string" ? invoice.subscription : "") ||
-      (typeof invoice.parent?.subscription_details?.subscription === "string"
-        ? invoice.parent.subscription_details.subscription
-        : invoice.parent?.subscription_details?.subscription?.id ?? "") ||
-      (invoice.lines?.data?.map((l) =>
-        typeof l.subscription === "string" ? l.subscription : l.subscription?.id
-      ).find(Boolean) ?? "")
+    const invoice = event.data.object as unknown as InvoiceLike & { billing_reason?: string }
+    const subscriptionId = invoiceSubscriptionId(invoice)
 
     if (!subscriptionId) return creditSettlementError ? settlementFailed() : NextResponse.json({ received: true })
 
@@ -1186,7 +1198,7 @@ export async function POST(request: NextRequest) {
             await updateCoachingApplication(applicationId, {
               status: "PAID",
               stripeSubscriptionId: subscriptionId,
-            }).catch((err) => console.error("updateCoachingApplication failed:", err))
+            })
           }
         }
       }
@@ -1203,17 +1215,18 @@ export async function POST(request: NextRequest) {
     const product = subscription.metadata?.product
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
     if (product === "masterclass" && email) {
-      await revokeMasterclassAccess(email).catch((err) =>
-        console.error("revokeMasterclassAccess failed:", err)
-      )
+      const current = await getMasterclassSubscriptionId(email)
+      if (isStaleCancellation(current, subscription.id)) {
+        console.warn(`[webhook] ignored masterclass cancellation of ${subscription.id}; access now comes from ${current}`)
+      } else {
+        await revokeMasterclassAccess(email)
+      }
     }
     // coaching subscriptions handled in the coaching block below
   }
 
   if (event.type === "checkout.session.expired") {
-    await releaseBundleCreditForSession(makeStripe(), event.data.object).catch((err) =>
-      console.error("bundle credit release failed:", err)
-    )
+    await releaseBundleCreditForSession(makeStripe(), event.data.object)
     return NextResponse.json({ received: true })
   }
 
@@ -1230,10 +1243,8 @@ export async function POST(request: NextRequest) {
     if (event.type === "charge.dispute.created") {
       const dispute = event.data.object as Stripe.Dispute
       const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
-      const charge = chargeId ? await stripe.charges.retrieve(chargeId).catch(() => null) : null
-      await syncBundleCreditFromCharge(stripe, charge, { dispute: "open" }).catch((err) =>
-        console.error("bundle credit dispute update failed:", err)
-      )
+      const charge = await retrieveChargeOrNull(stripe, chargeId)
+      await syncBundleCreditFromCharge(stripe, charge, { dispute: "open" })
       notifyAdmin({
         kind: "dispute-opened",
         subject: `Payment disputed — $${(dispute.amount / 100).toFixed(2)}`,
@@ -1266,17 +1277,15 @@ export async function POST(request: NextRequest) {
       if (dispute.status !== "lost") {
         // Won or withdrawn — the money stays with us and so does their access.
         const closedChargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
-        const closedCharge = closedChargeId ? await stripe.charges.retrieve(closedChargeId).catch(() => null) : null
-        await syncBundleCreditFromCharge(stripe, closedCharge, { dispute: "closed" }).catch((err) =>
-          console.error("bundle credit dispute update failed:", err)
-        )
+        const closedCharge = await retrieveChargeOrNull(stripe, closedChargeId)
+        await syncBundleCreditFromCharge(stripe, closedCharge, { dispute: "closed" })
         return NextResponse.json({ received: true })
       }
       lostDispute = true
       stripeId = dispute.id
       idempotencyKey = dispute.id
       const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id
-      charge = chargeId ? await stripe.charges.retrieve(chargeId).catch(() => null) : null
+      charge = await retrieveChargeOrNull(stripe, chargeId)
     } else {
       charge = event.data.object as Stripe.Charge
       stripeId = charge.id
@@ -1360,8 +1369,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === "invoice.payment_failed") {
-    const invoice = event.data.object as unknown as { subscription?: string }
-    const subscriptionId = invoice.subscription
+    const subscriptionId = invoiceSubscriptionId(event.data.object as unknown as InvoiceLike)
     if (!subscriptionId) return NextResponse.json({ received: true })
     const stripe = makeStripe()
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
@@ -1371,24 +1379,24 @@ export async function POST(request: NextRequest) {
 
     if (product === "masterclass") {
       const resend = new Resend(process.env.RESEND_API_KEY ?? "")
-      await resend.emails.send({
+      await sendOrThrow(resend, {
         from: "Lisa Fit Method <noreply@lisafitmethod.com>",
         replyTo: "contact@lisafitmethod.com",
         to: email,
         subject: "Action needed: Masterclass payment issue",
         html: masterclassDunningEmail(email),
-      }).catch((err) => console.error("Dunning email failed:", err))
+      })
     }
 
     if (product === "coaching") {
       const resend = new Resend(process.env.RESEND_API_KEY ?? "")
-      await resend.emails.send({
+      await sendOrThrow(resend, {
         from: "Lisa Fit Method <noreply@lisafitmethod.com>",
         replyTo: "contact@lisafitmethod.com",
         to: email,
         subject: "Action needed: Coaching payment issue",
         html: coachingPaymentFailedEmail(email),
-      }).catch((err) => console.error("Coaching dunning email failed:", err))
+      })
       notifyAdmin({
         kind: "payment-failed",
         subject: `Coaching payment failed — ${email}`,
@@ -1406,18 +1414,33 @@ export async function POST(request: NextRequest) {
     if (subscription.metadata?.product !== "coaching") return NextResponse.json({ received: true })
     const email = (subscription.metadata?.customerEmail ?? "").toLowerCase()
     if (email) {
-      // Revoke coaching portal access (sets coaching_access_.active = false)
-      await revokeCoachingAccess(email).catch((err) =>
-        console.error("revokeCoachingAccess failed:", err)
-      )
-      // Mark coaching client record as INACTIVE and record the effective date
+      const clientRecord = await getCoachingClientRecord(email)
+      if (isStaleCancellation(clientRecord?.stripeSubscriptionId, subscription.id)) {
+        notifyAdmin({
+          kind: "cancellation",
+          subject: `Old coaching subscription ended — ${clientRecord?.displayName ?? email}`,
+          headline: "An older coaching subscription ended; current access was left alone",
+          body: [
+            `Email: ${email}`,
+            `Ended subscription: ${subscription.id}`,
+            `Current subscription on file: ${clientRecord?.stripeSubscriptionId ?? ""}`,
+            "",
+            "Nothing was changed. If the current subscription should also end, cancel it in Stripe.",
+          ].join("\n"),
+          ctaLabel: "View client profile",
+          ctaHref: `https://lisafitmethod.com/admin/coaching/clients/${encodeURIComponent(email)}`,
+          meta: { email, endedSubscriptionId: subscription.id, currentSubscriptionId: clientRecord?.stripeSubscriptionId ?? "" },
+        }).catch(() => {})
+        return NextResponse.json({ received: true, stale: true })
+      }
+
+      const endedAt = subscriptionEndedAt(subscription, event.created)
+      await revokeCoachingAccess(email)
       await updateCoachingClientRecord(email, {
         status: "INACTIVE",
-        cancellationEffectiveDate: new Date().toISOString(),
-      }).catch((err) => console.error("updateCoachingClientRecord INACTIVE failed:", err))
+        cancellationEffectiveDate: endedAt,
+      })
 
-      // Notify admin — coaching ended
-      const clientRecord = await getCoachingClientRecord(email).catch(() => null)
       notifyAdmin({
         kind: "cancellation",
         subject: `Coaching ended — ${clientRecord?.displayName ?? email}`,
@@ -1427,7 +1450,7 @@ export async function POST(request: NextRequest) {
           clientRecord?.approvedPriceInCents
             ? `Monthly price: $${(clientRecord.approvedPriceInCents / 100).toFixed(clientRecord.approvedPriceInCents % 100 === 0 ? 0 : 2)}/month`
             : "",
-          `Effective: ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
+          `Effective: ${new Date(endedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`,
           `Stripe subscription: ${subscription.id}`,
           "Coaching access has been revoked. Cognito account and all purchased products preserved.",
         ].filter(Boolean).join("\n"),

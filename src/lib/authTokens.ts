@@ -209,6 +209,15 @@ export async function revokeMasterclassAccess(email: string): Promise<void> {
   )
 }
 
+export async function getMasterclassSubscriptionId(email: string): Promise<string | undefined> {
+  const db = makeDb()
+  const result = await db.send(
+    new GetCommand({ TableName: TABLE, Key: { userId: `masterclass_access_${email.toLowerCase()}` } })
+  )
+  const id = result.Item?.stripeSubscriptionId
+  return typeof id === "string" && id ? id : undefined
+}
+
 export async function hasMasterclassAccess(email: string): Promise<boolean> {
   if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
