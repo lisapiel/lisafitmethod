@@ -121,9 +121,13 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
   const isCancellationDone = done === "cancelled"
   const isReactivationDone = done === "reactivated"
 
+  // A complimentary cancellation that isn't confirmed and emailed yet: only the
+  // pending message shows, never "scheduled" or an end date as if final.
+  const compPending = liveSub?.complimentary === true && liveSub.complimentaryCancelled && !liveSub.complimentaryCancelNotified && !isCancellationDone
+
   const isScheduledToCancel =
     isCancellationDone ||
-    (!isReactivationDone && !isCancellationDone && Boolean(client.cancellationScheduledAt || liveSub?.cancelAtPeriodEnd || liveSub?.cancelAt))
+    (!compPending && !isReactivationDone && !isCancellationDone && Boolean(client.cancellationScheduledAt || liveSub?.cancelAtPeriodEnd || liveSub?.cancelAt))
 
   const effectiveDate = client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.cancelAtPeriodEnd ? (client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.currentPeriodEnd) : null
   const nextBilling = liveSub?.currentPeriodEnd
@@ -250,7 +254,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           <>
             {/* Already scheduled — offer reactivation */}
             {/* Complimentary cancellation recorded but not yet confirmed and emailed: offer a safe retry. */}
-            {complimentary && liveSub?.complimentaryCancelled && !liveSub.complimentaryCancelNotified && !isCancellationDone && (
+            {compPending && (
               <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4, display: "grid", gap: 10 }}>
                 <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
                   Your cancellation is being confirmed. Please check back in a few minutes.
@@ -301,7 +305,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
             )}
 
             {/* Not yet scheduled — show manage link */}
-            {!isScheduledToCancel && !isCancellationDone && cancelStep === "idle" && (
+            {!isScheduledToCancel && !isCancellationDone && !compPending && cancelStep === "idle" && (
               <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
                 <button
                   onClick={() => setCancelStep("confirm")}
