@@ -1,12 +1,20 @@
-import { planComplimentary, voidCheck, collectionView, type BillingMode, type CollectionView, type ComplimentaryPlan } from "./rules"
+import { planComplimentary, voidCheck, collectionView, type BillingMode, type CollectionView, type Commitment, type ComplimentaryPlan } from "./rules"
 import {
   BillingBusyError, BillingConflictError, beginOp, finishState, initialMode, listOps, markPending, readOp, readState, setOpStatus, stripeKeyFor,
-  type BillingOp, type BillingState, type Sender,
+  type BillingOp, type BillingState, type GrantPatch, type Sender,
 } from "./store"
-import { classifyStripeError, loadBilling, pauseForComplimentary, previewNext, readInvoice, readSubscription, voidInvoice, type LoadedBilling, type StripeLike } from "./stripeOps"
+import {
+  classifyStripeError, loadBilling, pauseForComplimentary, previewNext, readInvoice, readSubscription, scheduleEndAtPeriodEnd, voidInvoice,
+  type LoadedBilling, type StripeLike,
+} from "./stripeOps"
+import { complimentaryCancellationDate, complimentaryStatus, isComplimentaryActive, parseEndDate, type ComplimentaryStatus } from "./entitlement"
 import type { InvoiceSnapshot } from "./snapshot"
 
-export type ClientFacts = { stripeSubscriptionId?: string | null; accessType?: string | null; cancellationScheduledAt?: string | null } | null
+export type ClientFacts = {
+  stripeSubscriptionId?: string | null
+  cancellationScheduledAt?: string | null
+  commitment?: Commitment | null
+} | null
 
 export type Deps = {
   db: Sender
@@ -19,10 +27,13 @@ export type Deps = {
 // operation Stripe never applied is closed as failed.
 export const SETTLE_AFTER_MS = 15 * 60 * 1000
 
-const nowIso = (d: Deps) => (d.now ? d.now() : new Date()).toISOString()
+export const MAX_REASON = 500
+
+const nowDate = (d: Deps) => (d.now ? d.now() : new Date())
+const nowIso = (d: Deps) => nowDate(d).toISOString()
 
 export type ActionResult =
-  | { ok: true; message: string; opId?: string }
+  | { ok: true; message: string; opId?: string; effectiveDate?: string }
   | { ok: false; status: number; message: string; blockers?: { code: string; message: string }[]; uncertain?: boolean; opId?: string }
 
 // ── Reconciliation ─────────────────────────────────────────────────────────
@@ -64,8 +75,36 @@ export async function reconcile(d: Deps, email: string): Promise<string | null> 
   }
 }
 
-function targetState(op: BillingOp): { mode?: BillingMode; referencePriceCents?: number | null } {
-  if (op.kind === "MAKE_COMPLIMENTARY") return { mode: "complimentary", referencePriceCents: (op.target.referencePriceCents as number | null) ?? null }
+const str = (v: unknown) => (typeof v === "string" && v ? v : null)
+
+// The record change each operation stands for, rebuilt from the operation
+// itself so an interrupted change finishes with exactly what was confirmed.
+export function targetState(op: BillingOp): { mode?: BillingMode; referencePriceCents?: number | null; grant?: GrantPatch } {
+  const t = op.target
+  if (op.kind === "MAKE_COMPLIMENTARY") {
+    const endsAt = str(t.endsAt)
+    return {
+      mode: "complimentary",
+      referencePriceCents: (t.referencePriceCents as number | null) ?? null,
+      grant: {
+        modeSince: op.requestedAt,
+        modeBy: op.requestedBy,
+        compReason: str(t.reason),
+        compEndsAt: endsAt,
+        compEndReason: endsAt ? "end-date" : null,
+        compEndedAt: null,
+        compEndedBy: null,
+        compEndNote: null,
+        compCommitment: str(t.commitmentEndDate) ? { type: str(t.commitmentType), endDate: str(t.commitmentEndDate) } : null,
+      },
+    }
+  }
+  if (op.kind === "SET_COMPLIMENTARY_END") {
+    const endsAt = str(t.endsAt)
+    return { grant: { compEndsAt: endsAt, compEndReason: endsAt ? "end-date" : null } }
+  }
+  if (op.kind === "END_COMPLIMENTARY") return { grant: { compEndedAt: op.requestedAt, compEndedBy: op.requestedBy, compEndNote: str(t.note) } }
+  if (op.kind === "CLIENT_CANCEL_COMPLIMENTARY") return { grant: { compEndsAt: str(t.endsAt), compEndReason: "client-cancelled" } }
   if (op.kind === "RECORD_PAID") return { mode: "paid" }
   return {}
 }
@@ -81,6 +120,11 @@ async function stripeShowsApplied(d: Deps, op: BillingOp): Promise<"yes" | "no" 
       if (!op.invoiceId) return "no"
       return (await readInvoice(d.stripe, op.invoiceId)).status === "void" ? "yes" : "no"
     }
+    if (op.kind === "CLIENT_CANCEL_COMPLIMENTARY") {
+      if (!op.subscriptionId) return "yes"
+      const sub = await readSubscription(d.stripe, op.subscriptionId)
+      return sub.cancelAtPeriodEnd || !!sub.cancelAt || sub.status === "canceled" ? "yes" : "no"
+    }
     return "yes"
   } catch {
     return "unknown"
@@ -94,6 +138,9 @@ export type ManageView = {
   mode: BillingMode
   modeSince: string | null
   modeBy: string | null
+  comp: ComplimentaryStatus
+  // The paid commitment waived when the client was made complimentary, if any.
+  waivedCommitment: Commitment | null
   referencePriceCents: number | null
   collection: CollectionView
   linkedSubscriptionId: string | null
@@ -111,17 +158,21 @@ export async function manageView(d: Deps, email: string): Promise<ManageView> {
   const client = await d.readClient(email)
   const linkedId = client?.stripeSubscriptionId ?? null
   const [state, loaded, ops] = await Promise.all([readState(d.db, email), loadBilling(d.stripe, email, linkedId), listOps(d.db, email)])
-  const mode = state?.mode ?? initialMode(client)
+  const mode = state?.mode ?? initialMode()
+  const now = nowDate(d)
+  const comp = complimentaryStatus(state, now)
   const sub = loaded.subs.linked
   const preview = sub && sub.status !== "canceled" && !sub.pause && mode === "paid" ? await previewNext(d.stripe, sub) : null
-  const complimentary = planComplimentary({ mode, subs: loaded.subs, invoices: loaded.invoices })
+  const complimentary = planComplimentary({ mode, grantActive: comp.state === "active", subs: loaded.subs, invoices: loaded.invoices, commitment: client?.commitment ?? null, now })
   return {
     email,
     mode,
     modeSince: state?.modeSince ?? null,
     modeBy: state?.modeBy ?? null,
+    comp,
+    waivedCommitment: state?.compCommitment ?? null,
     referencePriceCents: state?.referencePriceCents ?? sub?.unitAmountCents ?? null,
-    collection: collectionView({ mode, sub, preview }),
+    collection: collectionView({ mode, sub, preview, comp }),
     linkedSubscriptionId: linkedId,
     complimentary,
     outstanding: complimentary.outstanding,
@@ -140,7 +191,7 @@ async function freshFacts(d: Deps, email: string): Promise<{ client: ClientFacts
   const client = await d.readClient(email)
   const loaded = await loadBilling(d.stripe, email, client?.stripeSubscriptionId ?? null)
   const state = await readState(d.db, email)
-  return { client, state, loaded, mode: state?.mode ?? initialMode(client) }
+  return { client, state, loaded, mode: state?.mode ?? initialMode() }
 }
 
 function busy(e: unknown): ActionResult | null {
@@ -148,13 +199,24 @@ function busy(e: unknown): ActionResult | null {
   return null
 }
 
+const cleanReason = (v: unknown) => (typeof v === "string" ? v.trim().slice(0, MAX_REASON) : "")
+
 // Make Complimentary. `confirm` is what the admin saw when they confirmed;
 // if Stripe now looks different, nothing happens and they review again.
-export async function makeComplimentary(d: Deps, input: { email: string; admin: string; confirm: { subscriptionId: string | null } }): Promise<ActionResult> {
+// A reason is required; an end date is optional (none means until changed).
+export async function makeComplimentary(
+  d: Deps,
+  input: { email: string; admin: string; confirm: { subscriptionId: string | null }; reason: string; endsAt?: string | null },
+): Promise<ActionResult> {
   const email = input.email.trim().toLowerCase()
-  const { client, loaded, mode } = await freshFacts(d, email)
+  const reason = cleanReason(input.reason)
+  if (!reason) return { ok: false, status: 400, message: "Add a short reason, for the record." }
+  const end = parseEndDate(input.endsAt, nowDate(d))
+  if (!end.ok) return { ok: false, status: 400, message: end.message }
+
+  const { client, state, loaded, mode } = await freshFacts(d, email)
   if (!client) return { ok: false, status: 404, message: "Client not found." }
-  const plan = planComplimentary({ mode, subs: loaded.subs, invoices: loaded.invoices })
+  const plan = planComplimentary({ mode, grantActive: isComplimentaryActive(state, nowDate(d)), subs: loaded.subs, invoices: loaded.invoices, commitment: client.commitment ?? null, now: nowDate(d) })
   if (plan.kind === "blocked") return { ok: false, status: 409, message: "This client can't be made complimentary yet.", blockers: plan.blockers }
 
   const subId = plan.kind === "pause" ? plan.subscription.id : null
@@ -163,6 +225,7 @@ export async function makeComplimentary(d: Deps, input: { email: string; admin: 
   }
 
   const referencePriceCents = plan.kind === "pause" ? plan.referencePriceCents : loaded.subs.linked?.unitAmountCents ?? null
+  const commitment = client.commitment ?? null
   let op: BillingOp
   try {
     ;({ op } = await beginOp(d.db, {
@@ -170,8 +233,8 @@ export async function makeComplimentary(d: Deps, input: { email: string; admin: 
       kind: "MAKE_COMPLIMENTARY",
       requestedBy: input.admin,
       subscriptionId: subId,
-      before: { mode, collectingCents: plan.kind === "pause" ? referencePriceCents : null },
-      target: { mode: "complimentary", referencePriceCents },
+      before: { mode, collectingCents: plan.kind === "pause" ? referencePriceCents : null, commitmentType: commitment?.type ?? null, commitmentEndDate: commitment?.endDate ?? null },
+      target: { mode: "complimentary", referencePriceCents, reason, endsAt: end.endsAt, commitmentType: commitment?.type ?? null, commitmentEndDate: commitment?.endDate ?? null },
       initial: mode,
       now: nowIso(d),
     }))
@@ -187,7 +250,7 @@ export async function makeComplimentary(d: Deps, input: { email: string; admin: 
       if (after.pause?.behavior !== "void" || after.pause.resumesAt) {
         op = await setOpStatus(d.db, op, "FAILED", { error: "Stripe answered without pausing collection.", now: nowIso(d) })
         await finishState(d.db, op, { now: nowIso(d) })
-        return { ok: false, status: 502, message: "Stripe didn't pause collection. Nothing was changed here.", opId: op.id }
+        return { ok: false, status: 502, message: "Stripe didn't pause collection. Nothing was changed.", opId: op.id }
       }
       op = await setOpStatus(d.db, op, "APPLIED", { stripeResult: `pause_collection=void on ${after.id}, status ${after.status}`, now: nowIso(d) })
     } catch (e) {
@@ -206,18 +269,134 @@ export async function makeComplimentary(d: Deps, input: { email: string; admin: 
   }
 
   try {
-    await finishState(d.db, op, { mode: "complimentary", referencePriceCents, now: nowIso(d) })
+    await finishState(d.db, op, { ...targetState(op), now: nowIso(d) })
     await setOpStatus(d.db, op, "COMPLETED", { now: nowIso(d) })
   } catch {
     return { ok: true, opId: op.id, message: "Stripe has stopped collecting. Saving that here didn't finish; it completes automatically the next time billing loads." }
   }
+  const until = end.endsAt ? ` until ${end.endsAt.slice(0, 10)}` : " with no end date"
   return {
     ok: true,
     opId: op.id,
     message: plan.kind === "pause"
-      ? "Complimentary. Stripe has stopped collecting; the subscription stays active and their coaching is unchanged."
-      : "Recorded as complimentary. Their coaching is unchanged.",
+      ? `Complimentary${until}. Stripe has stopped collecting; the subscription stays active and their coaching is unchanged.`
+      : `Recorded as complimentary${until}. Their coaching is unchanged.`,
   }
+}
+
+// Record-only change to an active complimentary grant, written through the
+// same operation log as every other billing change, so it is audited and
+// can't collide with another change.
+async function grantChange(
+  d: Deps,
+  email: string,
+  input: { kind: "SET_COMPLIMENTARY_END" | "END_COMPLIMENTARY"; admin: string; before: BillingOp["before"]; target: BillingOp["target"] },
+): Promise<{ ok: true; op: BillingOp } | { ok: false; result: ActionResult }> {
+  let op: BillingOp
+  try {
+    ;({ op } = await beginOp(d.db, { email, kind: input.kind, requestedBy: input.admin, before: input.before, target: input.target, initial: "complimentary", now: nowIso(d) }))
+  } catch (e) {
+    const b = busy(e)
+    if (b) return { ok: false, result: b }
+    throw e
+  }
+  op = await setOpStatus(d.db, op, "APPLIED", { stripeResult: "No Stripe change", now: nowIso(d) })
+  try {
+    await finishState(d.db, op, { ...targetState(op), now: nowIso(d) })
+    await setOpStatus(d.db, op, "COMPLETED", { now: nowIso(d) })
+  } catch {
+    // The change is applied; the record catches up on the next billing load.
+  }
+  return { ok: true, op }
+}
+
+// Change (or remove) the end date of an active complimentary grant.
+export async function setComplimentaryEnd(d: Deps, input: { email: string; admin: string; endsAt: string | null }): Promise<ActionResult> {
+  const email = input.email.trim().toLowerCase()
+  await reconcile(d, email)
+  const state = await readState(d.db, email)
+  const comp = complimentaryStatus(state, nowDate(d))
+  if (comp.state !== "active") return { ok: false, status: 409, message: "This client doesn't have active complimentary coaching." }
+  const end = parseEndDate(input.endsAt, nowDate(d))
+  if (!end.ok) return { ok: false, status: 400, message: end.message }
+  if (comp.endsBecause === "client-cancelled" && (!end.endsAt || Date.parse(end.endsAt) > Date.parse(comp.endsAt ?? ""))) {
+    return { ok: false, status: 409, message: "The client cancelled, and their coaching ends on the date they chose. It can be brought forward, not extended." }
+  }
+  const r = await grantChange(d, email, { kind: "SET_COMPLIMENTARY_END", admin: input.admin, before: { endsAt: comp.endsAt }, target: { endsAt: end.endsAt } })
+  if (!r.ok) return r.result
+  return { ok: true, opId: r.op.id, message: end.endsAt ? `Complimentary coaching now ends ${end.endsAt.slice(0, 10)}.` : "Complimentary coaching now has no end date." }
+}
+
+// End complimentary coaching now. Coaching access ends. Stripe is left as it
+// is: collection stays paused and paid billing is never resumed by this.
+export async function endComplimentary(d: Deps, input: { email: string; admin: string; note: string }): Promise<ActionResult> {
+  const email = input.email.trim().toLowerCase()
+  const note = cleanReason(input.note)
+  if (!note) return { ok: false, status: 400, message: "Add a short note, for the record." }
+  await reconcile(d, email)
+  const state = await readState(d.db, email)
+  const comp = complimentaryStatus(state, nowDate(d))
+  if (comp.state !== "active") return { ok: false, status: 409, message: "This client doesn't have active complimentary coaching." }
+  const r = await grantChange(d, email, { kind: "END_COMPLIMENTARY", admin: input.admin, before: { endsAt: comp.endsAt }, target: { note } })
+  if (!r.ok) return r.result
+  return { ok: true, opId: r.op.id, message: "Complimentary coaching has ended and their coaching access is closed. Stripe stays paused and nothing is charged; paid billing was not resumed." }
+}
+
+// A complimentary client cancels their own coaching. No paid commitment
+// applies: coaching continues to the end of the current monthly period (or an
+// earlier end date Lisa set), and the paused subscription is set to end then.
+export async function clientCancelComplimentary(d: Deps, input: { email: string }): Promise<ActionResult> {
+  const email = input.email.trim().toLowerCase()
+  const { client, state, loaded } = await freshFacts(d, email)
+  if (!client) return { ok: false, status: 404, message: "Coaching record not found." }
+  const comp = complimentaryStatus(state, nowDate(d))
+  if (comp.state !== "active") return { ok: false, status: 409, message: "Complimentary coaching isn't active for this account." }
+  if (comp.endsBecause === "client-cancelled") return { ok: true, message: "Your cancellation is already scheduled.", effectiveDate: comp.endsAt ?? undefined }
+
+  const sub = loaded.subs.linked
+  const running = !!sub && sub.status !== "canceled" && sub.status !== "incomplete_expired"
+  const effective = complimentaryCancellationDate({ periodEnd: running ? sub!.currentPeriodEnd : null, currentEndsAt: comp.endsAt, now: nowDate(d) })
+
+  let op: BillingOp
+  try {
+    ;({ op } = await beginOp(d.db, {
+      email,
+      kind: "CLIENT_CANCEL_COMPLIMENTARY",
+      requestedBy: "client",
+      subscriptionId: running ? sub!.id : null,
+      before: { endsAt: comp.endsAt },
+      target: { endsAt: effective },
+      initial: "complimentary",
+      now: nowIso(d),
+    }))
+  } catch (e) {
+    if (e instanceof BillingBusyError) return { ok: false, status: 409, message: "Your account is being updated. Please try again in a minute." }
+    throw e
+  }
+
+  if (running && !(sub!.cancelAtPeriodEnd || sub!.cancelAt)) {
+    try {
+      await scheduleEndAtPeriodEnd(d.stripe, sub!.id, stripeKeyFor(op.id))
+    } catch (e) {
+      const c = classifyStripeError(e)
+      if (c.kind === "definitive") {
+        op = await setOpStatus(d.db, op, "FAILED", { error: c.message, now: nowIso(d) })
+        await finishState(d.db, op, { now: nowIso(d) })
+        return { ok: false, status: 502, message: "We couldn't schedule your cancellation. Nothing was changed. Please try again or message me.", opId: op.id }
+      }
+      op = await setOpStatus(d.db, op, "UNCERTAIN", { error: c.message, now: nowIso(d) })
+      await markPending(d.db, op, "UNCERTAIN", nowIso(d)).catch(() => {})
+      return { ok: false, status: 202, uncertain: true, message: "Your cancellation is being confirmed. Please check back in a few minutes.", opId: op.id }
+    }
+  }
+  op = await setOpStatus(d.db, op, "APPLIED", { stripeResult: running ? `cancel_at_period_end on ${sub!.id}` : "No running Stripe subscription", now: nowIso(d) })
+  try {
+    await finishState(d.db, op, { ...targetState(op), now: nowIso(d) })
+    await setOpStatus(d.db, op, "COMPLETED", { now: nowIso(d) })
+  } catch {
+    // Stripe has it scheduled; the record catches up on the next billing load.
+  }
+  return { ok: true, opId: op.id, effectiveDate: effective, message: `Your complimentary coaching ends ${effective.slice(0, 10)}.` }
 }
 
 export async function voidOutstandingInvoice(d: Deps, input: { email: string; admin: string; invoiceId: string; confirmAmountCents: number }): Promise<ActionResult> {

@@ -4,6 +4,8 @@ import Stripe from "stripe"
 import { Resend } from "resend"
 import { getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
+import { sharedDocClient } from "@/lib/dynamoClient"
+import { readState as readBillingState } from "@/lib/billing/store"
 
 export const dynamic = "force-dynamic"
 
@@ -45,6 +47,12 @@ export async function POST(req: NextRequest) {
 
   const client = await getCoachingClientRecord(email)
   if (!client) return NextResponse.json({ error: "Coaching record not found" }, { status: 404 })
+  // Complimentary coaching is Lisa's to extend: a complimentary client's
+  // cancellation isn't undone here (it would also leave the grant's end date in place).
+  const billing = await readBillingState(sharedDocClient(), email).catch(() => null)
+  if (billing?.mode === "complimentary") {
+    return NextResponse.json({ error: "Your coaching is complimentary. Message me and I'll take care of it." }, { status: 409 })
+  }
   if (!client.stripeSubscriptionId) return NextResponse.json({ error: "No Stripe subscription on record" }, { status: 400 })
   if (!client.cancellationScheduledAt) return NextResponse.json({ error: "No scheduled cancellation to reverse" }, { status: 400 })
 

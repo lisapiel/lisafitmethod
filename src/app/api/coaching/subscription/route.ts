@@ -4,6 +4,7 @@ import Stripe from "stripe"
 import { getCoachingClientRecord } from "@/lib/authTokens"
 import { sharedDocClient } from "@/lib/dynamoClient"
 import { readState } from "@/lib/billing/store"
+import { complimentaryStatus } from "@/lib/billing/entitlement"
 
 export const dynamic = "force-dynamic"
 
@@ -68,8 +69,12 @@ export async function GET(req: NextRequest) {
     cancellationScheduledAt: string | null
     cancellationEffectiveDate: string | null
     status: string
-    // Nothing is being collected: complimentary here, or collection paused in Stripe.
+    // Complimentary coaching granted by Lisa (the grant is the only source).
     complimentary: boolean
+    // When complimentary coaching ends, if it has an end date; and whether that
+    // end is the client's own cancellation.
+    complimentaryEndsAt: string | null
+    complimentaryCancelled: boolean
   } = {
     approvedPriceInCents: client.approvedPriceInCents ?? null,
     commitmentType: client.commitmentType ?? null,
@@ -86,10 +91,17 @@ export async function GET(req: NextRequest) {
     cancellationEffectiveDate: client.cancellationEffectiveDate ?? null,
     status: client.status ?? "ACTIVE",
     complimentary: false,
+    complimentaryEndsAt: null,
+    complimentaryCancelled: false,
   }
 
   const billing = await readState(sharedDocClient(), email).catch(() => null)
-  if (billing?.mode === "complimentary") result.complimentary = true
+  const comp = complimentaryStatus(billing, new Date())
+  if (comp.state === "active") {
+    result.complimentary = true
+    result.complimentaryEndsAt = comp.endsAt
+    result.complimentaryCancelled = comp.endsBecause === "client-cancelled"
+  }
 
   // Compute commitment end date
   if (client.subscriptionStartDate && client.commitmentMonths && client.commitmentMonths > 0) {
@@ -108,7 +120,6 @@ export async function GET(req: NextRequest) {
       result.currentPeriodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null
       result.cancelAtPeriodEnd = sub.cancel_at_period_end
       result.cancelAt = sub.cancel_at ? new Date(sub.cancel_at * 1000).toISOString() : null
-      if (sub.pause_collection?.behavior === "void" && !sub.pause_collection.resumes_at) result.complimentary = true
     } catch (err) {
       console.error("GET /api/coaching/subscription: Stripe retrieve failed", err)
     }

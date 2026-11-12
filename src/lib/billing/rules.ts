@@ -1,4 +1,5 @@
 import type { InvoiceSnapshot, SubSnapshot } from "./snapshot"
+import type { ComplimentaryStatus } from "./entitlement"
 
 // The billing rules, kept pure so every case can be read and tested.
 
@@ -30,16 +31,30 @@ export type ComplimentaryPlan =
   | { kind: "record-only"; reason: "no-subscription" | "already-paused"; warnings: string[]; outstanding: InvoiceSnapshot[] }
   | { kind: "pause"; subscription: SubSnapshot; referencePriceCents: number | null; warnings: string[]; outstanding: InvoiceSnapshot[] }
 
+// The paid commitment a client signed up to, as far as the client record says.
+export type Commitment = { type: string | null; endDate: string | null }
+
+export function commitmentNotice(c: Commitment | null | undefined, now: Date): string | null {
+  if (!c?.endDate || c.type !== "THREE_MONTH_MINIMUM" || Date.parse(c.endDate) <= now.getTime()) return null
+  return `This client is inside a 3-month commitment until ${c.endDate.slice(0, 10)}. Complimentary coaching isn't subject to it: no further payments are collected and no cancellation terms apply while they're complimentary. The original commitment stays on record and isn't changed in Stripe.`
+}
+
 // What "Make Complimentary" would do for this client right now. Anything
 // unusual stops it with a reason rather than guessing.
-export function planComplimentary(input: { mode: BillingMode; subs: CoachingSubs; invoices: InvoiceSnapshot[] }): ComplimentaryPlan {
+export function planComplimentary(input: { mode: BillingMode; grantActive: boolean; subs: CoachingSubs; invoices: InvoiceSnapshot[]; commitment?: Commitment | null; now?: Date }): ComplimentaryPlan {
   const { subs } = input
   const blockers: Blocker[] = []
   const warnings: string[] = []
 
-  if (input.mode === "complimentary" && subs.linked?.pause?.behavior === "void") {
+  // Already complimentary: nothing to do, unless Stripe has started collecting
+  // again (out of sync), in which case pausing collection again is offered.
+  const linkedNow = subs.linked
+  const collecting = !!linkedNow && isRunning(linkedNow) && !linkedNow.pause
+  if (input.grantActive && !collecting) {
     return { kind: "blocked", blockers: [{ code: "already", message: "This client is already complimentary." }], warnings, outstanding: [] }
   }
+  const notice = commitmentNotice(input.commitment, input.now ?? new Date())
+  if (notice) warnings.push(notice)
 
   const unlinkedRunning = subs.running.filter((s) => s.id !== subs.linkedId)
   if (unlinkedRunning.length > 0) {
@@ -131,6 +146,7 @@ export type CollectionView = {
   // What the badge says.
   state:
     | "complimentary"
+    | "complimentary-ended"
     | "paid"
     | "no-subscription"
     | "cancelling"
@@ -156,11 +172,26 @@ export function collectionView(input: {
   sub: SubSnapshot | null
   // Stripe's own preview of the next invoice, when one was fetched.
   preview: { amountDueCents: number; date: string | null } | null
+  comp?: ComplimentaryStatus
 }): CollectionView {
   const { sub, mode } = input
   const reference = sub?.unitAmountCents ?? null
   const paused = sub?.pause?.behavior === "void" && !sub.pause.resumesAt
   const running = !!sub && isRunning(sub)
+
+  if (mode === "complimentary" && input.comp?.state === "ended") {
+    const why = input.comp.why === "client-cancelled" ? "after the client cancelled" : input.comp.why === "ended-by-admin" ? "by an admin" : "on its end date"
+    return {
+      state: "complimentary-ended",
+      label: `Complimentary ended ${input.comp.endedAt.slice(0, 10)} · no coaching access`,
+      collectedPerMonthCents: running && sub && !sub.pause ? reference : 0,
+      referencePriceCents: reference,
+      nextCollection: null,
+      warning: running && sub && !sub.pause
+        ? "Complimentary coaching has ended, but Stripe is collecting again. Check the subscription in Stripe."
+        : `Complimentary coaching ended ${why}. Paid billing was not resumed and nothing is charged.${running ? " The Stripe subscription is still there, paused; cancel it in Stripe if coaching is over, or use Resume Paid Coaching when that's available." : ""}`,
+    }
+  }
 
   if (mode === "complimentary") {
     if (running && sub && !sub.pause) {
@@ -173,10 +204,12 @@ export function collectionView(input: {
         warning: "This client is marked complimentary, but Stripe is still set to charge them. Pause collection again, or record them as paid.",
       }
     }
-    const endsAt = sub && running && (sub.cancelAtPeriodEnd || sub.cancelAt) ? (sub.cancelAt ?? sub.currentPeriodEnd) : null
+    const grantEnd = input.comp?.state === "active" ? input.comp.endsAt : null
+    const stripeEnd = sub && running && (sub.cancelAtPeriodEnd || sub.cancelAt) ? (sub.cancelAt ?? sub.currentPeriodEnd) : null
+    const endsAt = [grantEnd, stripeEnd].filter((d): d is string => !!d).sort()[0] ?? null
     return {
       state: "complimentary",
-      label: `Complimentary · $0 collected/month${endsAt ? ` · ends ${endsAt.slice(0, 10)}` : ""}`,
+      label: `Complimentary · $0 collected/month · ${endsAt ? `until ${endsAt.slice(0, 10)}` : "no end date"}`,
       collectedPerMonthCents: 0,
       referencePriceCents: reference,
       nextCollection: null,

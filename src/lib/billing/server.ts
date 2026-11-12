@@ -14,10 +14,23 @@ export function billingDeps(): Deps {
     readClient: async (email) => {
       const c = await getCoachingClientRecord(email)
       if (!c) return null
-      const r = c as { stripeSubscriptionId?: string; accessType?: string; cancellationScheduledAt?: string }
-      return { stripeSubscriptionId: r.stripeSubscriptionId ?? null, accessType: r.accessType ?? null, cancellationScheduledAt: r.cancellationScheduledAt ?? null }
+      return {
+        stripeSubscriptionId: c.stripeSubscriptionId ?? null,
+        cancellationScheduledAt: c.cancellationScheduledAt ?? null,
+        commitment: commitmentOf(c),
+      }
     },
   }
+}
+
+// The paid commitment from the client record: subscription start plus N
+// calendar months, the same calculation the cancel and subscription routes use.
+export function commitmentOf(c: { commitmentType?: string | null; subscriptionStartDate?: string | null; commitmentMonths?: number | null }): { type: string | null; endDate: string | null } | null {
+  if (!c.commitmentType) return null
+  if (!c.subscriptionStartDate || !c.commitmentMonths || c.commitmentMonths <= 0) return { type: c.commitmentType, endDate: null }
+  const d = new Date(c.subscriptionStartDate)
+  d.setMonth(d.getMonth() + c.commitmentMonths)
+  return { type: c.commitmentType, endDate: d.toISOString() }
 }
 
 export function actionResponse(r: ActionResult): NextResponse {

@@ -26,6 +26,11 @@ import {
 } from "@/lib/bundleCreditWebhook"
 import { runEventOnce } from "@/lib/stripeEventLedger"
 import { invoiceSubscriptionId, isStaleCancellation, subscriptionEndedAt, type InvoiceLike } from "@/lib/stripeWebhookFields"
+import { decideOnSubscriptionDeleted } from "@/lib/billing/revocation"
+import { readState as readBillingState } from "@/lib/billing/store"
+import { isComplimentaryActive } from "@/lib/billing/entitlement"
+import { toSubSnapshot, type StripeSubscriptionLike } from "@/lib/billing/snapshot"
+import { sharedDocClient } from "@/lib/dynamoClient"
 import { sendOrThrow } from "@/lib/sendOrThrow"
 
 export const dynamic = "force-dynamic"
@@ -1443,6 +1448,30 @@ async function handleEvent(event: Stripe.Event): Promise<NextResponse> {
           meta: { email, endedSubscriptionId: subscription.id, currentSubscriptionId: clientRecord?.stripeSubscriptionId ?? "" },
         }).catch(() => {})
         return NextResponse.json({ received: true, stale: true })
+      }
+
+      // Complimentary coaching ends only when the client (or Lisa) asked for
+      // it to end, or the grant has already ended. Any other deletion keeps
+      // access and asks Lisa to look. If the billing record can't be read,
+      // this throws, so Stripe retries the event instead of access ending on
+      // incomplete information.
+      const billing = await readBillingState(sharedDocClient(), email)
+      const decision = decideOnSubscriptionDeleted({
+        deleted: toSubSnapshot(subscription as unknown as StripeSubscriptionLike),
+        client: clientRecord ? { stripeSubscriptionId: clientRecord.stripeSubscriptionId ?? null, cancellationScheduledAt: clientRecord.cancellationScheduledAt ?? null } : null,
+        billing: billing ? { mode: billing.mode, grantActive: isComplimentaryActive(billing, new Date()), pendingKind: billing.pendingKind ?? null, pendingStatus: billing.pendingStatus ?? null } : null,
+      })
+      if (decision.action === "keep") {
+        notifyAdmin({
+          kind: "cancellation",
+          subject: `Complimentary coaching kept — ${clientRecord?.displayName ?? email}`,
+          headline: "A Stripe subscription ended, but this client's complimentary coaching was kept",
+          body: [`Email: ${email}`, `Ended subscription: ${subscription.id}`, "", decision.detail].join("\n"),
+          ctaLabel: "View client profile",
+          ctaHref: `https://lisafitmethod.com/admin/coaching/clients/${encodeURIComponent(email)}`,
+          meta: { email, endedSubscriptionId: subscription.id, reason: decision.reason },
+        }).catch(() => {})
+        return NextResponse.json({ received: true, kept: decision.reason })
       }
 
       const endedAt = subscriptionEndedAt(subscription, event.created)

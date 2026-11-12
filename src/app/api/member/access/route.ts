@@ -7,7 +7,7 @@ import { GetCommand } from "@aws-sdk/lib-dynamodb"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import {
   hasTrainingAccess, hasNutritionAccess, hasTrackerAccess, hasCoachingAccess, hasMasterclassAccess,
-  isAdminEmail, ownsCoachingRaw,
+  isAdminEmail, ownsCoachingRaw, paysForCoachingRaw,
 } from "@/lib/authTokens"
 import {
   COURSE_PRICE_CENTS, COURSE_PRICE_DISPLAY,
@@ -81,7 +81,7 @@ export async function GET() {
   //  - offers.coachingClient: the same raw check drives client-price
   //    eligibility so the drawer + sales pages can render preferred pricing
   //    without duplicating logic. Pricing is authoritative on the server
-  //    (Stripe PaymentIntent routes re-check ownsCoachingRaw) — this payload
+  //    (Stripe PaymentIntent routes re-check paysForCoachingRaw) — this payload
   //    is display metadata only.
   const [training, nutrition, tracker, coaching, masterclass, ownsTraining, ownsNutrition, ownsTracker, ownsCoachingReal, ownsMasterclass] = await Promise.all([
     hasTrainingAccess(email),
@@ -96,7 +96,9 @@ export async function GET() {
     ownsRecord("masterclass_access", email),
   ])
 
-  const coachingClientEligible = ownsCoachingReal
+  // Coaching-client prices are for paying coaching clients only; complimentary
+  // coaching still shows as owned in the drawer but doesn't unlock them.
+  const coachingClientEligible = ownsCoachingReal && await paysForCoachingRaw(email)
   const productOffer = (
     regularCents: number, regularDisplay: string,
     clientCents: number, clientDisplay: string,

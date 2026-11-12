@@ -4,6 +4,12 @@ import Stripe from "stripe"
 import { Resend } from "resend"
 import { getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
+import { sharedDocClient } from "@/lib/dynamoClient"
+import { readState as readBillingState } from "@/lib/billing/store"
+import { isComplimentaryActive } from "@/lib/billing/entitlement"
+import { clientCancelComplimentary } from "@/lib/billing/actions"
+import { billingDeps } from "@/lib/billing/server"
+import { complimentaryCancellationEmail } from "@/lib/billing/clientEmails"
 
 export const dynamic = "force-dynamic"
 
@@ -64,6 +70,15 @@ export async function POST(req: NextRequest) {
   const client = await getCoachingClientRecord(email)
   if (!client) return NextResponse.json({ error: "Coaching record not found" }, { status: 404 })
   if (client.status !== "ACTIVE") return NextResponse.json({ error: "No active coaching subscription" }, { status: 400 })
+
+  // Complimentary coaching has its own cancellation rule: no paid commitment
+  // applies and nothing is charged; coaching continues to the end of the
+  // current period (or an earlier end date Lisa set). See billing/actions.ts.
+  const billing = await readBillingState(sharedDocClient(), email).catch(() => null)
+  if (isComplimentaryActive(billing, new Date())) {
+    return cancelComplimentary(email, client.displayName, body)
+  }
+
   if (!client.stripeSubscriptionId) return NextResponse.json({ error: "No Stripe subscription on record" }, { status: 400 })
 
   // Block self-service cancellation if commitment metadata is unconfirmed
@@ -227,4 +242,48 @@ export async function POST(req: NextRequest) {
   }).catch((err) => console.error("Cancellation confirmation email failed:", err))
 
   return NextResponse.json({ ok: true, effectiveDate, inCommitment })
+}
+
+// A complimentary client's own cancellation: no commitment, nothing charged.
+async function cancelComplimentary(email: string, displayName: string, body: { reason?: string; feedback?: string }): Promise<NextResponse> {
+  const r = await clientCancelComplimentary(billingDeps(), { email })
+  if (!r.ok) return NextResponse.json({ error: r.message }, { status: r.status })
+  const effectiveDate = r.effectiveDate ?? new Date().toISOString()
+  const now = new Date().toISOString()
+  await updateCoachingClientRecord(email, {
+    cancellationScheduledAt: now,
+    cancellationEffectiveDate: effectiveDate,
+    cancellationReason: body.reason ?? undefined,
+    cancellationFeedback: body.feedback ?? undefined,
+  })
+
+  notifyAdmin({
+    kind: "cancellation",
+    subject: `Complimentary coaching cancellation — ${displayName}`,
+    headline: `${displayName} has cancelled their complimentary coaching`,
+    body: [
+      `Name: ${displayName}`,
+      `Email: ${email}`,
+      "Billing: complimentary (no commitment applies, nothing is charged)",
+      `Cancellation requested: ${formatDate(now)}`,
+      `Coaching active through: ${formatDate(effectiveDate)}`,
+      body.reason ? `Reason: ${body.reason}` : "",
+      body.feedback ? `Feedback: ${body.feedback}` : "",
+    ].filter(Boolean).join("\n"),
+    ctaLabel: "View client profile",
+    ctaHref: `https://lisafitmethod.com/admin/coaching/clients/${encodeURIComponent(email)}`,
+    meta: { email },
+  }).catch(() => {})
+
+  const mail = complimentaryCancellationEmail({ firstName: displayName.split(" ")[0], effectiveDateLabel: formatDate(effectiveDate) })
+  const resend = new Resend(process.env.RESEND_API_KEY ?? "")
+  await resend.emails.send({
+    from: "Lisa Fit Method <noreply@lisafitmethod.com>",
+    replyTo: "contact@lisafitmethod.com",
+    to: email,
+    subject: mail.subject,
+    html: mail.html,
+  }).catch((err) => console.error("Complimentary cancellation email failed:", err))
+
+  return NextResponse.json({ ok: true, effectiveDate, inCommitment: false, complimentary: true })
 }

@@ -6,7 +6,7 @@ import { runWithAmplifyServerContext } from "@/lib/amplify-server"
 import { getPromoCodes } from "@/lib/promoCodes"
 import {
   hasTrainingAccess, hasNutritionAccess,
-  ownsCoachingRaw, ownsTrainingRaw, ownsNutritionRaw, ownsTrackerRaw,
+  paysForCoachingRaw, ownsTrainingRaw, ownsNutritionRaw, ownsTrackerRaw,
 } from "@/lib/authTokens"
 import {
   NUTRITION_COURSE_PRICE_CENTS,
@@ -115,9 +115,10 @@ export async function POST(request: NextRequest) {
     // ── Coaching-client pricing eligibility ──────────────────────────────
     // Determined SERVER-SIDE from the authenticated Cognito session, never
     // from anything the client sends. Admin auto-grant is deliberately
-    // bypassed (ownsCoachingRaw). The Bundle is excluded per business rule.
+    // bypassed, and complimentary coaching doesn't qualify (paysForCoachingRaw).
+    // The Bundle is excluded per business rule.
     const coachingClientEligible = sessionEmail != null && !isBundle
-      ? await ownsCoachingRaw(sessionEmail)
+      ? await paysForCoachingRaw(sessionEmail)
       : false
 
     const regularBasePrice = isBundle ? BUNDLE_PRICE_CENTS : isNutrition ? NUTRITION_COURSE_PRICE_CENTS : TRAINING_BASE_PRICE_CENTS

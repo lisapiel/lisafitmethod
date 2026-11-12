@@ -12,7 +12,14 @@ const gold = "var(--ca-accent-mark)"
 const money = (c: number | null | undefined) => (c == null ? "—" : c % 100 === 0 ? `$${c / 100}` : `$${(c / 100).toFixed(2)}`)
 const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—")
 
-const KIND: Record<string, string> = { MAKE_COMPLIMENTARY: "Made complimentary", VOID_INVOICE: "Voided invoice", RECORD_PAID: "Recorded as paid" }
+const KIND: Record<string, string> = {
+  MAKE_COMPLIMENTARY: "Made complimentary",
+  VOID_INVOICE: "Voided invoice",
+  RECORD_PAID: "Recorded as paid",
+  SET_COMPLIMENTARY_END: "Changed complimentary end date",
+  END_COMPLIMENTARY: "Ended complimentary",
+  CLIENT_CANCEL_COMPLIMENTARY: "Client cancelled (complimentary)",
+}
 const STATUS_COLOR: Record<string, string> = { COMPLETED: "var(--ca-ok)", FAILED: "var(--ca-warn)", UNCERTAIN: "var(--ca-warn)", PENDING: "var(--ca-muted)", APPLIED: "var(--ca-muted)" }
 
 async function token(): Promise<string> {
@@ -39,7 +46,12 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
   const [loadError, setLoadError] = useState("")
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
-  const [confirming, setConfirming] = useState<null | "complimentary" | "record-paid" | { invoice: InvoiceSnapshot }>(null)
+  const [confirming, setConfirming] = useState<null | "complimentary" | "record-paid" | "edit-end" | "end-now" | { invoice: InvoiceSnapshot }>(null)
+  // Make Complimentary inputs: a reason is required; the end date is optional.
+  const [reason, setReason] = useState("")
+  const [endsAt, setEndsAt] = useState("")
+  const [newEnd, setNewEnd] = useState("")
+  const [endNote, setEndNote] = useState("")
   const [understood, setUnderstood] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
@@ -70,6 +82,10 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
     setBusy(false)
     setConfirming(null)
     setUnderstood(false)
+    setReason("")
+    setEndsAt("")
+    setNewEnd("")
+    setEndNote("")
     await load()
     onChanged?.()
   }
@@ -87,6 +103,8 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
   const c = view.collection
   const plan = view.complimentary
   const comp = view.mode === "complimentary"
+  const grant = view.comp.state === "active" ? view.comp : null
+  const today = new Date().toISOString().slice(0, 10)
   const canComplimentary = plan.kind === "pause" || plan.kind === "record-only"
   const compLabel = c.state === "out-of-sync-paused" ? "Record as complimentary" : c.state === "out-of-sync-collecting" ? "Pause collection again" : "Make complimentary"
   const outstanding = view.outstanding.filter((i) => i.status === "open" || i.status === "draft")
@@ -113,7 +131,18 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
             {c.nextCollection.note && <> · {c.nextCollection.note}</>}
           </p>
         )}
-        {comp && view.modeSince && <p style={text("0.72rem", "var(--ca-muted)")}>Complimentary since {day(view.modeSince)}{view.modeBy ? ` · by ${view.modeBy}` : ""}</p>}
+        {grant && (
+          <div style={{ display: "grid", gap: 2 }}>
+            <p style={text("0.72rem", "var(--ca-muted)")}>Complimentary since {day(grant.since)}{grant.by ? ` · by ${grant.by}` : ""}</p>
+            {grant.reason && <p style={text("0.72rem", "var(--ca-muted)")}>Reason: {grant.reason}</p>}
+            <p style={text("0.72rem", "var(--ca-muted)")}>
+              {grant.endsAt
+                ? grant.endsBecause === "client-cancelled" ? `Client cancelled · coaching ends ${day(grant.endsAt)}` : `Ends ${day(grant.endsAt)}`
+                : "No end date · complimentary until you change it"}
+            </p>
+            {view.waivedCommitment?.endDate && <p style={text("0.72rem", "var(--ca-muted)")}>Paid commitment (until {day(view.waivedCommitment.endDate)}) doesn&apos;t apply while complimentary.</p>}
+          </div>
+        )}
         {c.warning && <p role="alert" style={text("0.75rem", "var(--ca-warn)")}>⚠ {c.warning}</p>}
         {view.notice && <p style={text("0.75rem", "var(--ca-muted)")}>ℹ {view.notice}</p>}
         {view.pending && <p style={text("0.75rem", "var(--ca-warn)")}>A change ({KIND[view.pending.kind] ?? view.pending.kind}) started {day(view.pending.since)} is still being confirmed with Stripe. New changes wait until it settles.</p>}
@@ -155,12 +184,17 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
             <p style={text("0.78rem")}>{plan.reason === "already-paused" ? "Stripe is already not collecting. This records them as complimentary here; nothing is sent to Stripe." : "There's no running Stripe subscription. This records them as complimentary; nothing is sent to Stripe."}</p>
           )}
           {plan.warnings.map((w, i) => <p key={i} style={text("0.75rem", "var(--ca-warn)")}>⚠ {w}</p>)}
+          <label htmlFor="comp-reason" style={text("0.75rem")}>Reason (for the record)</label>
+          <input id="comp-reason" type="text" value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} placeholder="For example: family member, staff, goodwill" style={{ ...text("0.8rem"), padding: "6px 8px", border: `1px solid ${border}`, background: "var(--ca-surface)" }} />
+          <label htmlFor="comp-end" style={text("0.75rem")}>End date (optional)</label>
+          <input id="comp-end" type="date" value={endsAt} min={today} onChange={(e) => setEndsAt(e.target.value)} style={{ ...text("0.8rem"), padding: "6px 8px", border: `1px solid ${border}`, background: "var(--ca-surface)", justifySelf: "start" }} />
+          <p style={text("0.72rem", "var(--ca-muted)")}>{endsAt ? `Coaching access ends after ${day(`${endsAt}T12:00:00Z`)}. Paid billing won't restart on its own.` : "Leave empty to keep them complimentary until you change it."}</p>
           <label style={{ ...text("0.75rem"), display: "flex", gap: 8, alignItems: "flex-start" }}>
             <input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} style={{ marginTop: 3 }} />
-            I understand Stripe will stop collecting from this client until I resume paid coaching.
+            I understand Stripe will stop collecting from this client, and payments only restart if I set up paid coaching again.
           </label>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="button" disabled={!understood || busy} onClick={() => post("/api/admin/coaching/billing/complimentary", { confirm: { subscriptionId: plan.kind === "pause" ? plan.subscription.id : null } })} style={button(true, understood && !busy)}>
+            <button type="button" disabled={!understood || !reason.trim() || busy} onClick={() => post("/api/admin/coaching/billing/complimentary", { reason, endsAt, confirm: { subscriptionId: plan.kind === "pause" ? plan.subscription.id : null } })} style={button(true, understood && !!reason.trim() && !busy)}>
               {busy ? "Confirming with Stripe…" : compLabel}
             </button>
             <button type="button" disabled={busy} onClick={() => setConfirming(null)} style={button(false, !busy)}>Cancel</button>
@@ -173,6 +207,37 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
           <div style={{ display: "flex", gap: 8 }}>
             <button type="button" disabled={busy} onClick={() => post("/api/admin/coaching/billing/record-paid", {})} style={button(true, !busy)}>Record as paid</button>
             <button type="button" disabled={busy} onClick={() => setConfirming(null)} style={button(false, !busy)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Change or end an active complimentary grant (no Stripe change, never resumes billing) */}
+      {grant && confirming !== "edit-end" && confirming !== "end-now" && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button type="button" disabled={busy || !!view.pending} onClick={() => { setConfirming("edit-end"); setNewEnd(grant.endsAt ? grant.endsAt.slice(0, 10) : ""); setResult(null) }} style={button(false, !busy && !view.pending)}>Change end date</button>
+          <button type="button" disabled={busy || !!view.pending} onClick={() => { setConfirming("end-now"); setEndNote(""); setResult(null) }} style={button(false, !busy && !view.pending)}>End complimentary now…</button>
+        </div>
+      )}
+      {grant && confirming === "edit-end" && (
+        <div style={{ border: `1px solid ${border}`, padding: 14, display: "grid", gap: 8, background: "var(--ca-bg)" }}>
+          <label htmlFor="comp-new-end" style={text("0.78rem")}>New end date</label>
+          <input id="comp-new-end" type="date" value={newEnd} min={today} onChange={(e) => setNewEnd(e.target.value)} style={{ ...text("0.8rem"), padding: "6px 8px", border: `1px solid ${border}`, background: "var(--ca-surface)", justifySelf: "start" }} />
+          <p style={text("0.72rem", "var(--ca-muted)")}>{grant.endsBecause === "client-cancelled" ? "The client cancelled; the end date can be brought forward, not extended." : "Leave empty for no end date. Nothing changes in Stripe."}</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" disabled={busy} onClick={() => post("/api/admin/coaching/billing/complimentary-end", { action: "set-end-date", endsAt: newEnd })} style={button(true, !busy)}>{newEnd ? "Save end date" : "Remove end date"}</button>
+            <button type="button" disabled={busy} onClick={() => setConfirming(null)} style={button(false, !busy)}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {grant && confirming === "end-now" && (
+        <div style={{ border: `1px solid ${border}`, padding: 14, display: "grid", gap: 8, background: "var(--ca-bg)" }}>
+          <p style={{ ...text("0.85rem"), fontWeight: 700 }}>End complimentary coaching now?</p>
+          <p style={text("0.78rem")}>Their coaching access ends now. Their data stays. Stripe stays paused and nothing is charged; paid billing is not resumed.</p>
+          <label htmlFor="comp-end-note" style={text("0.75rem")}>Note (for the record)</label>
+          <input id="comp-end-note" type="text" value={endNote} maxLength={500} onChange={(e) => setEndNote(e.target.value)} style={{ ...text("0.8rem"), padding: "6px 8px", border: `1px solid ${border}`, background: "var(--ca-surface)" }} />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" disabled={busy || !endNote.trim()} onClick={() => post("/api/admin/coaching/billing/complimentary-end", { action: "end-now", note: endNote })} style={button(true, !busy && !!endNote.trim())}>End complimentary</button>
+            <button type="button" disabled={busy} onClick={() => setConfirming(null)} style={button(false, !busy)}>Keep it</button>
           </div>
         </div>
       )}

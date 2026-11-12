@@ -122,6 +122,12 @@ export async function pauseForComplimentary(stripe: StripeLike, subId: string, o
   return toSubSnapshot(updated)
 }
 
+// A complimentary client's own cancellation: the paused subscription ends at
+// the end of its current period. Nothing else on it changes.
+export async function scheduleEndAtPeriodEnd(stripe: StripeLike, subId: string, idempotencyKey: string): Promise<SubSnapshot> {
+  return toSubSnapshot(await stripe.subscriptions.update(subId, { cancel_at_period_end: true }, { idempotencyKey }))
+}
+
 export async function voidInvoice(stripe: StripeLike, invoiceId: string, idempotencyKey: string): Promise<InvoiceSnapshot> {
   return toInvoiceSnapshot(await stripe.invoices.voidInvoice(invoiceId, {}, { idempotencyKey }))
 }

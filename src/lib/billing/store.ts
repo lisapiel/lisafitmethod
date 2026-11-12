@@ -22,7 +22,15 @@ export const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
 export type Sender = { send(command: unknown): Promise<unknown> }
 
-export type OpKind = "MAKE_COMPLIMENTARY" | "VOID_INVOICE" | "RECORD_PAID"
+export type OpKind =
+  | "MAKE_COMPLIMENTARY"
+  | "VOID_INVOICE"
+  | "RECORD_PAID"
+  // Complimentary grant changes. None of these touch Stripe except the
+  // client's own cancellation, which only schedules the subscription to end.
+  | "SET_COMPLIMENTARY_END"
+  | "END_COMPLIMENTARY"
+  | "CLIENT_CANCEL_COMPLIMENTARY"
 export type OpStatus = "PENDING" | "APPLIED" | "UNCERTAIN" | "COMPLETED" | "FAILED"
 
 export type BillingState = {
@@ -31,8 +39,20 @@ export type BillingState = {
   mode: BillingMode
   // The subscription's own price when collection was paused, kept for reference.
   referencePriceCents?: number | null
+  // For complimentary: when and by whom it was granted.
   modeSince?: string
   modeBy?: string
+  // The complimentary grant (see entitlement.ts). Written only by admin actions,
+  // apart from a client's own cancellation, which can only bring the end closer.
+  compReason?: string | null
+  compEndsAt?: string | null
+  compEndReason?: "end-date" | "client-cancelled" | null
+  compEndedAt?: string | null
+  compEndedBy?: string | null
+  compEndNote?: string | null
+  // The paid commitment in place when the client was made complimentary. It
+  // doesn't apply while complimentary; kept so the record shows what was waived.
+  compCommitment?: { type: string | null; endDate: string | null } | null
   rev: number
   pendingOpId?: string | null
   pendingKind?: OpKind | null
@@ -87,10 +107,14 @@ export async function readState(db: Sender, email: string): Promise<BillingState
   return r.Item ?? null
 }
 
-// The mode before any billing record exists: what Phase 1 set by hand, or paid.
-export function initialMode(client: { accessType?: string | null } | null): BillingMode {
-  return client?.accessType === "complimentary" ? "complimentary" : "paid"
+// The mode before any billing record exists is always paid. Complimentary is
+// only ever set by the Make Complimentary action; the client record's
+// `accessType` field was never reliably written, so it isn't read here.
+export function initialMode(): BillingMode {
+  return "paid"
 }
+
+export type GrantPatch = Partial<Pick<BillingState, "modeSince" | "modeBy" | "compReason" | "compEndsAt" | "compEndReason" | "compEndedAt" | "compEndedBy" | "compEndNote" | "compCommitment">>
 
 async function writeState(db: Sender, next: BillingState, expectedRev: number | null): Promise<void> {
   try {
@@ -197,7 +221,7 @@ export async function setOpStatus(
 export async function finishState(
   db: Sender,
   op: BillingOp,
-  change: { mode?: BillingMode; referencePriceCents?: number | null; now?: string } = {},
+  change: { mode?: BillingMode; referencePriceCents?: number | null; grant?: GrantPatch; now?: string } = {},
 ): Promise<BillingState> {
   const now = change.now ?? new Date().toISOString()
   const current = await readState(db, op.email)
@@ -206,6 +230,7 @@ export async function finishState(
     ...current,
     ...(change.mode && change.mode !== current.mode ? { mode: change.mode, modeSince: now, modeBy: op.requestedBy } : {}),
     ...(change.referencePriceCents !== undefined ? { referencePriceCents: change.referencePriceCents } : {}),
+    ...(change.grant ?? {}),
     pendingOpId: null,
     pendingKind: null,
     pendingStatus: null,

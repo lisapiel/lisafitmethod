@@ -5,6 +5,8 @@ import { randomBytes } from "crypto"
 import { GetCommand, PutCommand, UpdateCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb"
 import { scanAll } from "./dynamoScan"
 import { saveWorkoutLogOnce } from "./workoutLogSave"
+import { readState as readBillingState } from "./billing/store"
+import { coachingAccessDecision, paysForCoaching, type GrantFields } from "./billing/entitlement"
 
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 
@@ -250,33 +252,44 @@ export async function grantCoachingAccess(email: string, plan?: string, startDat
   )
 }
 
+// The two inputs to coaching access: the access switch (paid coaching) and
+// the billing record (an explicit complimentary grant). If the billing record
+// can't be read, the switch decides, as it always did.
+async function coachingEntitlementInputs(email: string): Promise<{ switchActive: boolean; billing: GrantFields | null }> {
+  const db = makeDb()
+  const [access, billing] = await Promise.all([
+    db.send(new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })),
+    readBillingState(db, email).catch(() => null),
+  ])
+  return { switchActive: access.Item?.active === true, billing }
+}
+
 export async function hasCoachingAccess(email: string): Promise<boolean> {
   if (isAdminEmail(email) && await adminMfaSatisfied(email)) return true
   try {
-    const db = makeDb()
-    const result = await db.send(
-      new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })
-    )
-    if (!result.Item) return false
-    return result.Item.active === true
+    return coachingAccessDecision({ ...(await coachingEntitlementInputs(email)), now: new Date() }).access
   } catch {
     return false
   }
 }
 
-// Raw active-coaching check with NO admin auto-grant. Use this anywhere the
-// question is "is this person actually paying for coaching right now?" —
-// specifically for coaching-client promotional pricing eligibility and for
-// the drawer's My Products Active/Available split. Admin capability must
-// never trigger the coaching-client price.
+// Raw active-coaching check with NO admin auto-grant: does this person have
+// coaching (paid or complimentary)? Used for the drawer's My Products
+// Active/Available split. For prices, use paysForCoachingRaw instead.
 export async function ownsCoachingRaw(email: string): Promise<boolean> {
   try {
-    const db = makeDb()
-    const result = await db.send(
-      new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })
-    )
-    if (!result.Item) return false
-    return result.Item.active === true
+    return coachingAccessDecision({ ...(await coachingEntitlementInputs(email)), now: new Date() }).access
+  } catch {
+    return false
+  }
+}
+
+// "Is this person actually paying for coaching right now?" Coaching-client
+// promotional pricing depends on this. Complimentary coaching and admin
+// capability never qualify.
+export async function paysForCoachingRaw(email: string): Promise<boolean> {
+  try {
+    return paysForCoaching({ ...(await coachingEntitlementInputs(email)), now: new Date() })
   } catch {
     return false
   }

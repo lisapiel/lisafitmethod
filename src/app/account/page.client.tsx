@@ -65,6 +65,8 @@ interface LiveSubData {
   cancelAtPeriodEnd: boolean
   cancelAt: string | null
   complimentary: boolean
+  complimentaryEndsAt: string | null
+  complimentaryCancelled: boolean
 }
 
 function CoachingBillingSection({ client }: { client: CoachingClientData }) {
@@ -87,13 +89,15 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) throw new Error("fetch failed")
-        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean } | null }
+        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean; complimentaryEndsAt?: string | null; complimentaryCancelled?: boolean } | null }
         if (!cancelled && data.subscription) {
           setLiveSub({
             currentPeriodEnd: data.subscription.currentPeriodEnd,
             cancelAtPeriodEnd: data.subscription.cancelAtPeriodEnd,
             cancelAt: data.subscription.cancelAt,
             complimentary: data.subscription.complimentary === true,
+            complimentaryEndsAt: data.subscription.complimentaryEndsAt ?? null,
+            complimentaryCancelled: data.subscription.complimentaryCancelled === true,
           })
         }
       } catch { /* live data optional */ }
@@ -168,9 +172,16 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
   }
 
   const complimentary = liveSub?.complimentary === true
-  // A complimentary client is never shown a price or a billing date, because nothing is collected.
+  // A complimentary client is never shown a price, a billing date or a paid
+  // commitment, because nothing is collected and no commitment applies.
+  const compEndsAt = liveSub?.complimentaryEndsAt ?? null
+  // If a complimentary client cancels, coaching runs to the end of the current
+  // period, or an earlier end date Lisa set.
+  const compCancelDate = [compEndsAt, nextBilling].filter((d): d is string => !!d).sort()[0] ?? null
   const priceDisplay = complimentary
-    ? "Your coaching is complimentary. No payments are being collected."
+    ? compEndsAt && !liveSub?.complimentaryCancelled
+      ? `Your coaching is complimentary through ${formatDate(compEndsAt)}. No payments are being collected.`
+      : "Your coaching is complimentary. No payments are being collected."
     : !loadingLive && client.approvedPriceInCents ? formatPrice(client.approvedPriceInCents) + "/month" : null
 
   return (
@@ -194,20 +205,20 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           {priceDisplay && (
             <p style={{ fontSize: "0.8rem", color: "#f0e6d3", margin: 0 }}>{priceDisplay}</p>
           )}
-          {client.commitmentType === "THREE_MONTH_MINIMUM" && (
+          {!complimentary && client.commitmentType === "THREE_MONTH_MINIMUM" && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>
               {commitmentFulfilled
                 ? "Initial 3-month commitment completed — now month-to-month"
                 : "3-month minimum commitment"}
             </p>
           )}
-          {client.commitmentType === "MONTH_TO_MONTH" && (
+          {!complimentary && client.commitmentType === "MONTH_TO_MONTH" && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>Month-to-month · Cancel anytime before your next billing date</p>
           )}
           {!client.commitmentType && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>1:1 Coaching</p>
           )}
-          {commitmentEndDate && !commitmentFulfilled && (
+          {!complimentary && commitmentEndDate && !commitmentFulfilled && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>
               Commitment ends: {formatDate(commitmentEndDate)}
             </p>
@@ -232,7 +243,14 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
         {!client.commitmentNeedsConfirmation && (
           <>
             {/* Already scheduled — offer reactivation */}
-            {isScheduledToCancel && !isReactivationDone && (
+            {isScheduledToCancel && !isReactivationDone && complimentary && (
+              <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
+                <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, margin: 0 }}>
+                  Your coaching is scheduled to end. If you&apos;d like to keep going, message me and we&apos;ll sort it out.
+                </p>
+              </div>
+            )}
+            {isScheduledToCancel && !isReactivationDone && !complimentary && (
               <div style={{ borderTop: `1px solid ${border}`, paddingTop: 16, marginTop: 4 }}>
                 <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
                   Your coaching is scheduled to end. If you&apos;d like to continue, you can remove the cancellation at any time before your access expires.
@@ -286,7 +304,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
                 </div>
 
                 {/* In-commitment message */}
-                {client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate && (
+                {!complimentary && client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate && (
                   <div style={{ background: "#130d00", border: `1px solid #4a3820`, padding: "12px 16px", marginBottom: 16, borderRadius: 2 }}>
                     <p style={{ fontSize: "0.72rem", color: "#c8a97e", lineHeight: 1.7, margin: 0 }}>
                       <strong>Your initial 3-month commitment ends on {formatDate(commitmentEndDate)}.</strong>
@@ -297,7 +315,12 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
                 )}
 
                 {/* Schedule cancellation heading + effective date */}
-                {client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate ? (
+                {complimentary ? (
+                  <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
+                    <strong style={{ color: "#aaa" }}>Cancel coaching</strong><br />
+                    Your coaching continues through {compCancelDate ? formatDate(compCancelDate) : "the end of this month"} and then ends. Nothing is charged.
+                  </p>
+                ) : client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate ? (
                   <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
                     <strong style={{ color: "#aaa" }}>Schedule cancellation</strong><br />
                     Your coaching will remain active through {formatDate(commitmentEndDate)} and will not renew after your initial commitment.

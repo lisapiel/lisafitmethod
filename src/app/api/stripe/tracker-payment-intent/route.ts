@@ -3,7 +3,7 @@ import { cookies } from "next/headers"
 import Stripe from "stripe"
 import { fetchAuthSession } from "aws-amplify/auth/server"
 import { runWithAmplifyServerContext } from "@/lib/amplify-server"
-import { ownsCoachingRaw, ownsTrackerRaw } from "@/lib/authTokens"
+import { paysForCoachingRaw, ownsTrackerRaw } from "@/lib/authTokens"
 import { COACHING_CLIENT_TRACKER_CENTS } from "@/lib/pricing"
 
 export const dynamic = "force-dynamic"
@@ -50,8 +50,9 @@ export async function POST(request: NextRequest) {
 
     // Coaching-client eligibility resolved from the authenticated Cognito
     // session — the buyer's typed email is irrelevant for pricing. Admin
-    // auto-grant is bypassed via ownsCoachingRaw.
-    const coachingClientEligible = sessionEmail != null ? await ownsCoachingRaw(sessionEmail) : false
+    // auto-grant is bypassed, and complimentary coaching doesn't qualify
+    // (paysForCoachingRaw).
+    const coachingClientEligible = sessionEmail != null ? await paysForCoachingRaw(sessionEmail) : false
     const amount = coachingClientEligible ? COACHING_CLIENT_TRACKER_CENTS : TRACKER_PRICE_CENTS
 
     const paymentIntent = await stripe.paymentIntents.create({

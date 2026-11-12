@@ -15,7 +15,7 @@ export const inv = (o: Partial<InvoiceSnapshot> = {}): InvoiceSnapshot => ({
 const subs = (linked: SubSnapshot | null, extra: SubSnapshot[] = []) => ({ linkedId: linked?.id ?? null, linked, running: [linked, ...extra].filter((s): s is SubSnapshot => !!s && ["active", "trialing", "past_due", "unpaid", "incomplete", "paused"].includes(s.status)) })
 
 test("a clean active $1 subscription: pause, keeping $1 as the reference price", () => {
-  const p = planComplimentary({ mode: "paid", subs: subs(sub()), invoices: [inv()] })
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub()), invoices: [inv()] })
   assert.equal(p.kind, "pause")
   assert.equal(p.kind === "pause" && p.referencePriceCents, 100)
   assert.deepEqual(p.warnings, [])
@@ -26,7 +26,7 @@ test("open and draft invoices are listed and warned about, never blocked or void
   const open = inv({ id: "in_open", status: "open", amountPaidCents: 0, amountRemainingCents: 100, nextPaymentAttempt: "2026-11-15T00:00:00.000Z" })
   const draft = inv({ id: "in_draft", status: "draft", amountPaidCents: 0, amountRemainingCents: 100 })
   const otherSub = inv({ id: "in_x", status: "open", subscriptionId: "sub_other" })
-  const p = planComplimentary({ mode: "paid", subs: subs(sub()), invoices: [open, draft, otherSub, inv()] })
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub()), invoices: [open, draft, otherSub, inv()] })
   assert.equal(p.kind, "pause")
   assert.deepEqual(p.outstanding.map((i) => i.id), ["in_open", "in_draft"])
   assert.match(p.warnings.join(" "), /2 invoices from before this change are still outstanding/)
@@ -46,46 +46,46 @@ test("everything unusual blocks with a reason", () => {
     ["bundle-credit", { discounts: [{ couponId: "c1", percentOff: null, amountOffCents: 4500, duration: "once", isBundleCredit: true }] }],
   ]
   for (const [code, o] of cases) {
-    const p = planComplimentary({ mode: "paid", subs: subs(sub(o)), invoices: [] })
+    const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub(o)), invoices: [] })
     assert.equal(p.kind, "blocked", code)
     assert.ok(p.kind === "blocked" && p.blockers.some((b) => b.code === code), `${code}: ${JSON.stringify(p)}`)
   }
 })
 
 test("an unlinked running coaching subscription blocks, because it would keep charging", () => {
-  const p = planComplimentary({ mode: "paid", subs: subs(sub(), [sub({ id: "sub_dupe" })]), invoices: [] })
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub(), [sub({ id: "sub_dupe" })]), invoices: [] })
   assert.ok(p.kind === "blocked" && p.blockers[0].code === "unlinked-subscription" && /sub_dupe/.test(p.blockers[0].message))
 })
 
 test("a linked subscription missing from Stripe blocks", () => {
-  const p = planComplimentary({ mode: "paid", subs: { linkedId: "sub_gone", linked: null, running: [] }, invoices: [] })
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: { linkedId: "sub_gone", linked: null, running: [] }, invoices: [] })
   assert.ok(p.kind === "blocked" && p.blockers[0].code === "linked-missing")
 })
 
 test("no subscription at all: record only; already paused in Stripe: record only", () => {
-  assert.deepEqual(planComplimentary({ mode: "paid", subs: subs(null), invoices: [] }).kind, "record-only")
-  assert.deepEqual(planComplimentary({ mode: "paid", subs: subs(sub({ status: "canceled" })), invoices: [] }).kind, "record-only")
-  const p = planComplimentary({ mode: "paid", subs: subs(sub({ pause: { behavior: "void", resumesAt: null } })), invoices: [] })
+  assert.deepEqual(planComplimentary({ mode: "paid", grantActive: false, subs: subs(null), invoices: [] }).kind, "record-only")
+  assert.deepEqual(planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub({ status: "canceled" })), invoices: [] }).kind, "record-only")
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub({ pause: { behavior: "void", resumesAt: null } })), invoices: [] })
   assert.ok(p.kind === "record-only" && p.reason === "already-paused")
 })
 
 test("already complimentary and paused: nothing to do", () => {
-  const p = planComplimentary({ mode: "complimentary", subs: subs(sub({ pause: { behavior: "void", resumesAt: null } })), invoices: [] })
+  const p = planComplimentary({ mode: "complimentary", grantActive: true, subs: subs(sub({ pause: { behavior: "void", resumesAt: null } })), invoices: [] })
   assert.ok(p.kind === "blocked" && p.blockers[0].code === "already")
 })
 
 test("marked complimentary but Stripe is collecting: offered as a fresh pause", () => {
-  assert.equal(planComplimentary({ mode: "complimentary", subs: subs(sub()), invoices: [] }).kind, "pause")
+  assert.equal(planComplimentary({ mode: "complimentary", grantActive: true, subs: subs(sub()), invoices: [] }).kind, "pause")
 })
 
 test("past due: allowed, with the reason shown", () => {
-  const p = planComplimentary({ mode: "paid", subs: subs(sub({ status: "past_due" })), invoices: [inv({ status: "open", amountPaidCents: 0, amountRemainingCents: 100 })] })
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub({ status: "past_due" })), invoices: [inv({ status: "open", amountPaidCents: 0, amountRemainingCents: 100 })] })
   assert.equal(p.kind, "pause")
   assert.match(p.warnings.join(" "), /past due/)
 })
 
 test("processing payments are flagged", () => {
-  const p = planComplimentary({ mode: "paid", subs: subs(sub()), invoices: [inv({ status: "open", amountPaidCents: 0, amountRemainingCents: 100, paymentProcessing: true })] })
+  const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub()), invoices: [inv({ status: "open", amountPaidCents: 0, amountRemainingCents: 100, paymentProcessing: true })] })
   assert.match(p.warnings.join(" "), /still processing/)
 })
 
@@ -118,7 +118,8 @@ test("display: complimentary shows $0 collected and keeps the reference price; n
 
 test("display: complimentary with a client cancellation shows when it ends", () => {
   const v = collectionView({ mode: "complimentary", sub: sub({ pause: { behavior: "void", resumesAt: null }, cancelAtPeriodEnd: true }), preview: null })
-  assert.match(v.label, /ends 2026-12-08/)
+  // Label changed with the grant model: "until <date>" (was "ends <date>").
+  assert.match(v.label, /until 2026-12-08/)
 })
 
 test("display: never shows a price as collected when the record and Stripe disagree", () => {
