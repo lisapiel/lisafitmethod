@@ -102,7 +102,6 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
 
   const c = view.collection
   const plan = view.complimentary
-  const comp = view.mode === "complimentary"
   const grant = view.comp.state === "active" ? view.comp : null
   const today = new Date().toISOString().slice(0, 10)
   const canComplimentary = plan.kind === "pause" || plan.kind === "record-only"
@@ -117,7 +116,7 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
       </div>
 
       <div style={{ display: "grid", gap: 4 }}>
-        <p style={{ ...text("0.95rem"), fontWeight: 700, color: comp ? gold : c.warning ? "var(--ca-warn)" : "var(--ca-text)" }}>{c.label}</p>
+        <p style={{ ...text("0.95rem"), fontWeight: 700, color: grant ? gold : c.warning ? "var(--ca-warn)" : "var(--ca-text)" }}>{c.label}</p>
         {c.collectedPerMonthCents != null && (
           <p style={text("0.75rem", "var(--ca-muted)")}>
             Collected each month: <strong style={{ color: "var(--ca-text)" }}>{money(c.collectedPerMonthCents)}</strong>
