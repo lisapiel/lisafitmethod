@@ -79,6 +79,9 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
   const [cancelFeedback, setCancelFeedback] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState<"cancelled" | "reactivated" | null>(null)
+  // The end date the server confirmed for the cancellation just made, so it
+  // shows straight away instead of only after a reload.
+  const [confirmedEndDate, setConfirmedEndDate] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => {
@@ -129,7 +132,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
     isCancellationDone ||
     (!compPending && !isReactivationDone && !isCancellationDone && Boolean(client.cancellationScheduledAt || liveSub?.cancelAtPeriodEnd || liveSub?.cancelAt))
 
-  const effectiveDate = client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.cancelAtPeriodEnd ? (client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.currentPeriodEnd) : null
+  const effectiveDate = (isCancellationDone ? confirmedEndDate : null) ?? (client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.cancelAtPeriodEnd ? (client.cancellationEffectiveDate ?? liveSub?.cancelAt ?? liveSub?.currentPeriodEnd) : null)
   const nextBilling = liveSub?.currentPeriodEnd
 
   async function handleCancel() {
@@ -148,6 +151,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
       if (!res.ok || !data.ok) {
         setErr(data.error ?? "Something went wrong. Please contact contact@lisafitmethod.com.")
       } else {
+        setConfirmedEndDate(data.effectiveDate ?? null)
         setDone("cancelled")
         setCancelStep("idle")
       }
