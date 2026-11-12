@@ -4,7 +4,7 @@ import {
   type BillingOp, type BillingState, type GrantPatch, type Sender,
 } from "./store"
 import {
-  classifyStripeError, loadBilling, pauseForComplimentary, previewNext, readInvoice, readSubscription, scheduleEndAtPeriodEnd, voidInvoice,
+  cancelNow, classifyStripeError, loadBilling, pauseForComplimentary, previewNext, readInvoice, readSubscription, scheduleEndAtPeriodEnd, voidInvoice,
   type LoadedBilling, type StripeLike,
 } from "./stripeOps"
 import { complimentaryCancellationDate, complimentaryStatus, isComplimentaryActive, parseEndDate, type ComplimentaryStatus } from "./entitlement"
@@ -125,6 +125,10 @@ async function stripeShowsApplied(d: Deps, op: BillingOp): Promise<"yes" | "no" 
       const sub = await readSubscription(d.stripe, op.subscriptionId)
       return sub.cancelAtPeriodEnd || !!sub.cancelAt || sub.status === "canceled" ? "yes" : "no"
     }
+    if (op.kind === "CANCEL_PAUSED_SUBSCRIPTION") {
+      if (!op.subscriptionId) return "no"
+      return (await readSubscription(d.stripe, op.subscriptionId)).status === "canceled" ? "yes" : "no"
+    }
     return "yes"
   } catch {
     return "unknown"
@@ -151,6 +155,8 @@ export type ManageView = {
   notice: string | null
   history: Array<Pick<BillingOp, "id" | "kind" | "status" | "requestedBy" | "requestedAt" | "before" | "target" | "stripeResult" | "error">>
   linkedCustomerOutsideEmail: string | null
+  // After complimentary has ended: the paused subscription an admin may choose to cancel.
+  cancelPausedSubscription: { subscriptionId: string } | null
 }
 
 export async function manageView(d: Deps, email: string): Promise<ManageView> {
@@ -181,7 +187,12 @@ export async function manageView(d: Deps, email: string): Promise<ManageView> {
     notice,
     history: ops.map(({ id, kind, status, requestedBy, requestedAt, before, target, stripeResult, error }) => ({ id, kind, status, requestedBy, requestedAt, before, target, stripeResult: stripeResult ?? null, error: error ?? null })),
     linkedCustomerOutsideEmail: loaded.linkedCustomerOutsideEmail,
+    cancelPausedSubscription: pausedAfterEnd(comp, sub) ? { subscriptionId: sub!.id } : null,
   }
+}
+
+function pausedAfterEnd(comp: ComplimentaryStatus, sub: LoadedBilling["subs"]["linked"]): boolean {
+  return comp.state === "ended" && !!sub && sub.status !== "canceled" && sub.status !== "incomplete_expired" && sub.pause?.behavior === "void" && !sub.pause.resumesAt
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
@@ -355,7 +366,7 @@ export async function clientCancelComplimentary(d: Deps, input: { email: string 
 
   const sub = loaded.subs.linked
   const running = !!sub && sub.status !== "canceled" && sub.status !== "incomplete_expired"
-  const effective = complimentaryCancellationDate({ periodEnd: running ? sub!.currentPeriodEnd : null, currentEndsAt: comp.endsAt, now: nowDate(d) })
+  const effective = complimentaryCancellationDate({ periodEnd: running ? sub!.currentPeriodEnd : null, currentEndsAt: comp.endsAt, grantStart: comp.since, now: nowDate(d) })
 
   let op: BillingOp
   try {
@@ -480,4 +491,55 @@ export async function recordPaid(d: Deps, input: { email: string; admin: string 
   await finishState(d.db, op, { mode: "paid", now: nowIso(d) })
   await setOpStatus(d.db, op, "COMPLETED", { now: nowIso(d) })
   return { ok: true, opId: op.id, message: "Recorded as paid, matching Stripe." }
+}
+
+// After complimentary has ended, an admin may choose to end the paused Stripe
+// subscription. Never automatic, never while a grant is active, and only for
+// the exact subscription the admin reviewed. Outstanding invoices are left as
+// they are (they're handled separately). Coaching access doesn't change here:
+// it already ended with the grant.
+export async function cancelPausedSubscription(d: Deps, input: { email: string; admin: string; confirm: { subscriptionId: string } }): Promise<ActionResult> {
+  const email = input.email.trim().toLowerCase()
+  const { client, state, loaded } = await freshFacts(d, email)
+  if (!client) return { ok: false, status: 404, message: "Client not found." }
+  const comp = complimentaryStatus(state, nowDate(d))
+  if (comp.state !== "ended") return { ok: false, status: 409, message: comp.state === "active" ? "Complimentary coaching is still active. End it first." : "This is only for a client whose complimentary coaching has ended." }
+  const sub = loaded.subs.linked
+  if (!pausedAfterEnd(comp, sub)) return { ok: false, status: 409, message: "There's no paused Stripe subscription to cancel for this client." }
+  if (sub!.id !== input.confirm.subscriptionId) return { ok: false, status: 409, message: "The billing details changed since you opened this. Review them again before confirming." }
+
+  let op: BillingOp
+  try {
+    ;({ op } = await beginOp(d.db, { email, kind: "CANCEL_PAUSED_SUBSCRIPTION", requestedBy: input.admin, subscriptionId: sub!.id, before: { subscription: sub!.id, status: sub!.status }, target: { status: "canceled" }, initial: "complimentary", now: nowIso(d) }))
+  } catch (e) {
+    const b = busy(e)
+    if (b) return b
+    throw e
+  }
+  try {
+    const after = await cancelNow(d.stripe, sub!.id, stripeKeyFor(op.id))
+    if (after.status !== "canceled") {
+      op = await setOpStatus(d.db, op, "FAILED", { error: `Subscription is ${after.status}, not canceled.`, now: nowIso(d) })
+      await finishState(d.db, op, { now: nowIso(d) })
+      return { ok: false, status: 502, message: "Stripe didn't cancel the subscription. Nothing was changed.", opId: op.id }
+    }
+    op = await setOpStatus(d.db, op, "APPLIED", { stripeResult: `subscription ${after.id} canceled`, now: nowIso(d) })
+  } catch (e) {
+    const c = classifyStripeError(e)
+    if (c.kind === "definitive") {
+      op = await setOpStatus(d.db, op, "FAILED", { error: c.message, now: nowIso(d) })
+      await finishState(d.db, op, { now: nowIso(d) })
+      return { ok: false, status: 502, message: `Stripe refused: ${c.message} Nothing was changed.`, opId: op.id }
+    }
+    op = await setOpStatus(d.db, op, "UNCERTAIN", { error: c.message, now: nowIso(d) })
+    await markPending(d.db, op, "UNCERTAIN", nowIso(d)).catch(() => {})
+    return { ok: false, status: 202, uncertain: true, message: "Stripe didn't answer in time. Reload billing in a minute to see whether the subscription was cancelled.", opId: op.id }
+  }
+  try {
+    await finishState(d.db, op, { now: nowIso(d) })
+    await setOpStatus(d.db, op, "COMPLETED", { now: nowIso(d) })
+  } catch {
+    // Stripe has cancelled it; the record catches up on the next load.
+  }
+  return { ok: true, opId: op.id, message: "The paused Stripe subscription is cancelled. Nothing was charged or refunded; any outstanding invoices are unchanged." }
 }

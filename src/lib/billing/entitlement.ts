@@ -61,28 +61,64 @@ export function complimentaryStatus(state: GrantFields | null | undefined, now: 
 
 export const isComplimentaryActive = (state: GrantFields | null | undefined, now: Date) => complimentaryStatus(state, now).state === "active"
 
+export type AccessInputs = {
+  switchActive: boolean
+  // When the access switch was last turned on (coaching_access.grantedAt).
+  switchGrantedAt?: string | null
+  billing: GrantFields | null
+  now: Date
+}
+
 // Coaching access for one person.
-//   - Complimentary record: the grant decides, whatever the access switch says.
-//     An unexpected Stripe deletion can switch access off; the grant keeps it.
+//   - Active complimentary grant: the grant decides, whatever the access
+//     switch says. An unexpected Stripe deletion can switch access off; the
+//     grant keeps it.
+//   - Ended complimentary grant: no access, unless another entitlement was
+//     granted independently after it ended (the access switch turned on again
+//     after the end, for example by a new paid sign-up). The switch staying on
+//     from before, because the paused subscription still exists, doesn't count.
 //   - Everyone else (paid, or no billing record): the access switch, as before.
-export function coachingAccessDecision(input: { switchActive: boolean; billing: GrantFields | null; now: Date }): { access: boolean; basis: "paid" | "complimentary" | "none" } {
+export function coachingAccessDecision(input: AccessInputs): { access: boolean; basis: "paid" | "complimentary" | "none" } {
   if (input.billing?.mode === "complimentary") {
-    return isComplimentaryActive(input.billing, input.now) ? { access: true, basis: "complimentary" } : { access: false, basis: "none" }
+    const s = complimentaryStatus(input.billing, input.now)
+    if (s.state === "active") return { access: true, basis: "complimentary" }
+    if (s.state === "ended" && input.switchActive && input.switchGrantedAt && Date.parse(input.switchGrantedAt) > Date.parse(s.endedAt)) {
+      return { access: true, basis: "paid" }
+    }
+    return { access: false, basis: "none" }
   }
   return input.switchActive ? { access: true, basis: "paid" } : { access: false, basis: "none" }
 }
 
 // "Is this person paying for coaching?" Paid-client benefits (the coaching
 // client prices) depend on this. Complimentary coaching never qualifies.
-export function paysForCoaching(input: { switchActive: boolean; billing: GrantFields | null; now: Date }): boolean {
+export function paysForCoaching(input: AccessInputs): boolean {
   return coachingAccessDecision(input).basis === "paid"
+}
+
+// The next monthly anniversary of `start` that falls after `now`, keeping the
+// day of the month (clamped to the month's last day).
+export function nextMonthlyAnniversary(start: string, now: Date): string {
+  const s = new Date(start)
+  for (let i = 1; i < 1200; i++) {
+    const d = new Date(Date.UTC(s.getUTCFullYear(), s.getUTCMonth() + i, 1, s.getUTCHours(), s.getUTCMinutes(), s.getUTCSeconds()))
+    const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate()
+    d.setUTCDate(Math.min(s.getUTCDate(), lastDay))
+    if (d.getTime() > now.getTime()) return d.toISOString()
+  }
+  return now.toISOString()
 }
 
 // When a complimentary client cancels, coaching continues to the end of the
 // current monthly period, never past an end date Lisa already set, and no
-// paid commitment applies.
-export function complimentaryCancellationDate(input: { periodEnd: string | null; currentEndsAt: string | null; now: Date }): string {
-  const candidates = [input.periodEnd, input.currentEndsAt].filter((d): d is string => !!d && Date.parse(d) > input.now.getTime())
+// paid commitment applies. The period is Stripe's when there's a running
+// subscription; otherwise it's the complimentary arrangement's own monthly
+// cycle, counted from the day it was granted. It is never made up from a
+// Stripe billing date that doesn't exist.
+export function complimentaryCancellationDate(input: { periodEnd: string | null; currentEndsAt: string | null; grantStart: string | null; now: Date }): string {
+  const future = (d: string | null) => !!d && Date.parse(d) > input.now.getTime()
+  const period = future(input.periodEnd) ? input.periodEnd! : input.grantStart ? nextMonthlyAnniversary(input.grantStart, input.now) : null
+  const candidates = [period, input.currentEndsAt].filter((d): d is string => future(d))
   if (candidates.length === 0) return input.now.toISOString()
   return candidates.reduce((a, b) => (Date.parse(a) <= Date.parse(b) ? a : b))
 }

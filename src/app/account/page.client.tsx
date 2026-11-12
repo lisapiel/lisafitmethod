@@ -67,6 +67,7 @@ interface LiveSubData {
   complimentary: boolean
   complimentaryEndsAt: string | null
   complimentaryCancelled: boolean
+  complimentaryCancelDate: string | null
 }
 
 function CoachingBillingSection({ client }: { client: CoachingClientData }) {
@@ -89,7 +90,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) throw new Error("fetch failed")
-        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean; complimentaryEndsAt?: string | null; complimentaryCancelled?: boolean } | null }
+        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean; complimentaryEndsAt?: string | null; complimentaryCancelled?: boolean; complimentaryCancelDate?: string | null } | null }
         if (!cancelled && data.subscription) {
           setLiveSub({
             currentPeriodEnd: data.subscription.currentPeriodEnd,
@@ -98,6 +99,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
             complimentary: data.subscription.complimentary === true,
             complimentaryEndsAt: data.subscription.complimentaryEndsAt ?? null,
             complimentaryCancelled: data.subscription.complimentaryCancelled === true,
+            complimentaryCancelDate: data.subscription.complimentaryCancelDate ?? null,
           })
         }
       } catch { /* live data optional */ }
@@ -175,9 +177,10 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
   // A complimentary client is never shown a price, a billing date or a paid
   // commitment, because nothing is collected and no commitment applies.
   const compEndsAt = liveSub?.complimentaryEndsAt ?? null
-  // If a complimentary client cancels, coaching runs to the end of the current
-  // period, or an earlier end date Lisa set.
-  const compCancelDate = [compEndsAt, nextBilling].filter((d): d is string => !!d).sort()[0] ?? null
+  // If a complimentary client cancels: the date the server calculates with the
+  // same rule the cancellation uses (end of the current period, the
+  // arrangement's own monthly cycle without a Stripe period, or an earlier end date).
+  const compCancelDate = liveSub?.complimentaryCancelDate ?? null
   const priceDisplay = complimentary
     ? compEndsAt && !liveSub?.complimentaryCancelled
       ? `Your coaching is complimentary through ${formatDate(compEndsAt)}. No payments are being collected.`
@@ -318,7 +321,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
                 {complimentary ? (
                   <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>
                     <strong style={{ color: "#aaa" }}>Cancel coaching</strong><br />
-                    Your coaching continues through {compCancelDate ? formatDate(compCancelDate) : "the end of this month"} and then ends. Nothing is charged.
+                    Your coaching continues through {compCancelDate ? formatDate(compCancelDate) : "your current period"} and then ends. Nothing is charged.
                   </p>
                 ) : client.commitmentType === "THREE_MONTH_MINIMUM" && !commitmentFulfilled && commitmentEndDate ? (
                   <p style={{ fontSize: "0.72rem", color: "#888", lineHeight: 1.7, marginBottom: 12 }}>

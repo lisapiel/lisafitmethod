@@ -14,6 +14,7 @@ export type StripeLike = {
     list(p: Record<string, unknown>): Promise<List<StripeSubscriptionLike>>
     retrieve(id: string, p?: Record<string, unknown>): Promise<StripeSubscriptionLike>
     update(id: string, p: Record<string, unknown>, o?: Opts): Promise<StripeSubscriptionLike>
+    cancel(id: string, p?: Record<string, unknown>, o?: Opts): Promise<StripeSubscriptionLike>
   }
   invoices: {
     list(p: Record<string, unknown>): Promise<List<StripeInvoiceLike>>
@@ -126,6 +127,12 @@ export async function pauseForComplimentary(stripe: StripeLike, subId: string, o
 // the end of its current period. Nothing else on it changes.
 export async function scheduleEndAtPeriodEnd(stripe: StripeLike, subId: string, idempotencyKey: string): Promise<SubSnapshot> {
   return toSubSnapshot(await stripe.subscriptions.update(subId, { cancel_at_period_end: true }, { idempotencyKey }))
+}
+
+// After complimentary has ended, and only when an admin confirms: end the
+// paused subscription now. No final invoice, no proration, nothing refunded.
+export async function cancelNow(stripe: StripeLike, subId: string, idempotencyKey: string): Promise<SubSnapshot> {
+  return toSubSnapshot(await stripe.subscriptions.cancel(subId, { invoice_now: false, prorate: false }, { idempotencyKey }))
 }
 
 export async function voidInvoice(stripe: StripeLike, invoiceId: string, idempotencyKey: string): Promise<InvoiceSnapshot> {

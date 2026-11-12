@@ -4,7 +4,7 @@ import Stripe from "stripe"
 import { getCoachingClientRecord } from "@/lib/authTokens"
 import { sharedDocClient } from "@/lib/dynamoClient"
 import { readState } from "@/lib/billing/store"
-import { complimentaryStatus } from "@/lib/billing/entitlement"
+import { complimentaryCancellationDate, complimentaryStatus } from "@/lib/billing/entitlement"
 
 export const dynamic = "force-dynamic"
 
@@ -75,6 +75,9 @@ export async function GET(req: NextRequest) {
     // end is the client's own cancellation.
     complimentaryEndsAt: string | null
     complimentaryCancelled: boolean
+    // If a complimentary client cancels now, the date coaching would end (the
+    // same calculation the cancellation itself uses).
+    complimentaryCancelDate: string | null
   } = {
     approvedPriceInCents: client.approvedPriceInCents ?? null,
     commitmentType: client.commitmentType ?? null,
@@ -93,6 +96,7 @@ export async function GET(req: NextRequest) {
     complimentary: false,
     complimentaryEndsAt: null,
     complimentaryCancelled: false,
+    complimentaryCancelDate: null,
   }
 
   const billing = await readState(sharedDocClient(), email).catch(() => null)
@@ -123,6 +127,10 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       console.error("GET /api/coaching/subscription: Stripe retrieve failed", err)
     }
+  }
+
+  if (comp.state === "active") {
+    result.complimentaryCancelDate = complimentaryCancellationDate({ periodEnd: result.currentPeriodEnd, currentEndsAt: comp.endsAt, grantStart: comp.since, now: new Date() })
   }
 
   return NextResponse.json({ subscription: result })

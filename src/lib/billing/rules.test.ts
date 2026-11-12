@@ -22,14 +22,18 @@ test("a clean active $1 subscription: pause, keeping $1 as the reference price",
   assert.deepEqual(p.outstanding, [])
 })
 
-test("open and draft invoices are listed and warned about, never blocked or voided automatically", () => {
+test("open and draft invoices block Make Complimentary until handled separately; they're never voided automatically", () => {
+  // Rule of 2026-11-12: outstanding invoices are handled first, each with its own confirmation,
+  // so "nothing is charged" never implies an existing invoice was forgiven. (Was: warn only.)
   const open = inv({ id: "in_open", status: "open", amountPaidCents: 0, amountRemainingCents: 100, nextPaymentAttempt: "2026-11-15T00:00:00.000Z" })
   const draft = inv({ id: "in_draft", status: "draft", amountPaidCents: 0, amountRemainingCents: 100 })
   const otherSub = inv({ id: "in_x", status: "open", subscriptionId: "sub_other" })
   const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub()), invoices: [open, draft, otherSub, inv()] })
-  assert.equal(p.kind, "pause")
-  assert.deepEqual(p.outstanding.map((i) => i.id), ["in_open", "in_draft"])
-  assert.match(p.warnings.join(" "), /2 invoices from before this change are still outstanding/)
+  assert.equal(p.kind, "blocked")
+  assert.ok(p.kind === "blocked" && p.blockers.some((b) => b.code === "outstanding-invoices" && /2 invoices from before this change are still outstanding/.test(b.message) && /draft/.test(b.message)))
+  assert.deepEqual(p.outstanding.map((i) => i.id), ["in_open", "in_draft"], "shown so they can be handled")
+  // Once the open and draft invoices are gone (voided or paid), it goes ahead.
+  assert.equal(planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub()), invoices: [otherSub, inv()] }).kind, "pause")
 })
 
 test("everything unusual blocks with a reason", () => {
@@ -78,9 +82,10 @@ test("marked complimentary but Stripe is collecting: offered as a fresh pause", 
   assert.equal(planComplimentary({ mode: "complimentary", grantActive: true, subs: subs(sub()), invoices: [] }).kind, "pause")
 })
 
-test("past due: allowed, with the reason shown", () => {
+test("past due: blocked while its unpaid invoice is outstanding, with the reason shown", () => {
+  // Was "allowed with a warning"; under the 2026-11-12 rule the unpaid invoice is handled first.
   const p = planComplimentary({ mode: "paid", grantActive: false, subs: subs(sub({ status: "past_due" })), invoices: [inv({ status: "open", amountPaidCents: 0, amountRemainingCents: 100 })] })
-  assert.equal(p.kind, "pause")
+  assert.ok(p.kind === "blocked" && p.blockers.some((b) => b.code === "outstanding-invoices"))
   assert.match(p.warnings.join(" "), /past due/)
 })
 

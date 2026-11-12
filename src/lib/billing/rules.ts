@@ -114,13 +114,20 @@ export function planComplimentary(input: { mode: BillingMode; grantActive: boole
     })
   }
 
+  // Outstanding invoices are handled first, separately and with their own
+  // confirmation (void below, or let them be paid). Otherwise "nothing is
+  // charged" would be untrue: Stripe keeps retrying invoices that already
+  // exist, and making someone complimentary doesn't forgive them.
+  if (outstanding.length > 0) {
+    const n = outstanding.length
+    const drafts = outstanding.filter((i) => i.status === "draft").length
+    blockers.push({
+      code: "outstanding-invoices",
+      message: `${n === 1 ? "1 invoice from before this change is" : `${n} invoices from before this change are`} still outstanding. Void ${n === 1 ? "it" : "them"} below (each needs its own confirmation) or let ${n === 1 ? "it" : "them"} be paid, then make them complimentary.${drafts ? " A draft invoice can only be voided once Stripe finalizes it, usually within an hour." : ""}`,
+    })
+  }
   if (outstanding.some((i) => i.paymentProcessing)) {
     warnings.push("A payment on an outstanding invoice is still processing. It may complete; it won't be voided or refunded by this change.")
-  }
-  if (outstanding.length > 0) {
-    warnings.push(
-      `${outstanding.length === 1 ? "1 invoice from before this change is" : `${outstanding.length} invoices from before this change are`} still outstanding. Pausing collection doesn't stop Stripe retrying ${outstanding.length === 1 ? "it" : "them"}. You can void ${outstanding.length === 1 ? "it" : "them"} separately.`,
-    )
   }
   if (sub.status === "past_due") warnings.push("The subscription is past due because of an unpaid invoice.")
 
@@ -189,7 +196,7 @@ export function collectionView(input: {
       nextCollection: null,
       warning: running && sub && !sub.pause
         ? "Complimentary coaching has ended, but Stripe is collecting again. Check the subscription in Stripe."
-        : `Complimentary coaching ended ${why}. Paid billing was not resumed and nothing is charged.${running ? " The Stripe subscription is still there, paused; cancel it in Stripe if coaching is over, or use Resume Paid Coaching when that's available." : ""}`,
+        : `Complimentary coaching ended ${why}. Paid billing was not resumed and nothing is charged.${running ? " The Stripe subscription is still there, paused. You can cancel it below if coaching is over, or use Resume Paid Coaching when that's available." : ""}`,
     }
   }
 

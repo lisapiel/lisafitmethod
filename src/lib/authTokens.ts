@@ -255,13 +255,13 @@ export async function grantCoachingAccess(email: string, plan?: string, startDat
 // The two inputs to coaching access: the access switch (paid coaching) and
 // the billing record (an explicit complimentary grant). If the billing record
 // can't be read, the switch decides, as it always did.
-async function coachingEntitlementInputs(email: string): Promise<{ switchActive: boolean; billing: GrantFields | null }> {
+async function coachingEntitlementInputs(email: string): Promise<{ switchActive: boolean; switchGrantedAt: string | null; billing: GrantFields | null }> {
   const db = makeDb()
   const [access, billing] = await Promise.all([
     db.send(new GetCommand({ TableName: TABLE, Key: { userId: `coaching_access_${email.toLowerCase()}` } })),
     readBillingState(db, email).catch(() => null),
   ])
-  return { switchActive: access.Item?.active === true, billing }
+  return { switchActive: access.Item?.active === true, switchGrantedAt: typeof access.Item?.grantedAt === "string" ? access.Item.grantedAt : null, billing }
 }
 
 export async function hasCoachingAccess(email: string): Promise<boolean> {

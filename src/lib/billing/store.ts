@@ -31,6 +31,8 @@ export type OpKind =
   | "SET_COMPLIMENTARY_END"
   | "END_COMPLIMENTARY"
   | "CLIENT_CANCEL_COMPLIMENTARY"
+  // After complimentary ends, an admin may choose to end the paused Stripe subscription.
+  | "CANCEL_PAUSED_SUBSCRIPTION"
 export type OpStatus = "PENDING" | "APPLIED" | "UNCERTAIN" | "COMPLETED" | "FAILED"
 
 export type BillingState = {

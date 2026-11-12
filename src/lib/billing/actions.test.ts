@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { FakeTable } from "@/lib/testing/fakeDynamo"
-import { makeComplimentary, voidOutstandingInvoice, recordPaid, reconcile, manageView, setComplimentaryEnd, endComplimentary, clientCancelComplimentary, SETTLE_AFTER_MS, type Deps } from "./actions"
+import { makeComplimentary, voidOutstandingInvoice, recordPaid, reconcile, manageView, setComplimentaryEnd, endComplimentary, clientCancelComplimentary, cancelPausedSubscription, SETTLE_AFTER_MS, type Deps } from "./actions"
 import { coachingAccessDecision, complimentaryStatus, isComplimentaryActive, paysForCoaching } from "./entitlement"
 import { readState, readOp, listOps } from "./store"
 import { decideOnSubscriptionDeleted } from "./revocation"
@@ -57,6 +57,12 @@ class FakeStripe {
             if (params.metadata) s.metadata = { ...s.metadata, ...(params.metadata as Record<string, string>) }
             if ("cancel_at_period_end" in params) s.cancel_at_period_end = params.cancel_at_period_end as boolean
           })
+          return structuredClone(s)
+        },
+        cancel: async (id, params, o) => {
+          this.writes.push({ call: "subscriptions.cancel", id, params: params ?? {}, key: o?.idempotencyKey })
+          const s = this.subs.get(id)!
+          this.maybeFail(() => { s.status = "canceled" })
           return structuredClone(s)
         },
       },
@@ -237,12 +243,15 @@ test("client with no subscription: recorded as complimentary without Stripe", as
   assert.equal((await readState(table, EMAIL))?.mode, "complimentary")
 })
 
-test("outstanding invoices are shown, never voided by Make Complimentary, and voided only on request", async () => {
+test("outstanding invoices block Make Complimentary, are never voided by it, and are voided only on request", async () => {
   const { d, stripe, table } = setup()
   stripe.invoices.set("in_open", { id: "in_open", number: "A-2", status: "open", amount_due: 100, amount_paid: 0, amount_remaining: 100, created: 1765156000, parent: { subscription_details: { subscription: "sub_1" } } })
   const before = await manageView(d, EMAIL)
   assert.deepEqual(before.outstanding.map((i) => i.id), ["in_open"])
-  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  // Rule of 2026-11-12: Make Complimentary waits until outstanding invoices are handled separately.
+  const blocked = await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  assert.ok(!blocked.ok && blocked.blockers?.some((b) => b.code === "outstanding-invoices"))
+  assert.equal(stripe.writes.length, 0, "nothing sent to Stripe")
   assert.equal(stripe.invoices.get("in_open")!.status, "open", "not voided automatically")
 
   const wrong = await voidOutstandingInvoice(d, { email: EMAIL, admin: ADMIN, invoiceId: "in_open", confirmAmountCents: 999 })
@@ -253,7 +262,9 @@ test("outstanding invoices are shown, never voided by Make Complimentary, and vo
   assert.equal(r.ok, true, JSON.stringify(r))
   assert.equal(stripe.invoices.get("in_open")!.status, "void")
   assert.equal(stripe.invoices.get("in_paid")!.status, "paid")
-  assert.equal((await readState(table, EMAIL))?.mode, "complimentary", "voiding doesn't change the mode")
+  assert.equal((await readState(table, EMAIL))?.mode, "paid", "voiding doesn't change the mode")
+  // With nothing outstanding, Make Complimentary now goes ahead.
+  assert.equal((await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })).ok, true)
   const kinds = (await listOps(table, EMAIL)).map((o) => `${o.kind}:${o.status}`).sort()
   assert.deepEqual(kinds, ["MAKE_COMPLIMENTARY:COMPLETED", "VOID_INVOICE:COMPLETED"])
 })
@@ -495,4 +506,55 @@ test("webhook guard with the real record: an active grant keeps access; after it
   await endComplimentary(d, { email: EMAIL, admin: ADMIN, note: "Finished" })
   state = await readState(table, EMAIL)
   assert.deepEqual(decideOnSubscriptionDeleted({ deleted: del, client: { stripeSubscriptionId: "sub_1" }, billing: { mode: state!.mode, grantActive: isComplimentaryActive(state, now) } }), { action: "revoke", reason: "complimentary-already-ended" })
+})
+
+// ── Approved 2026-11-12: admin may cancel the paused subscription after complimentary ends ──
+
+test("cancel paused subscription: refused while complimentary is active, or for a paid client", async () => {
+  const { d, stripe } = setup()
+  assert.ok(!(await cancelPausedSubscription(d, { email: EMAIL, admin: ADMIN, confirm: { subscriptionId: "sub_1" } })).ok, "paid client")
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  const r = await cancelPausedSubscription(d, { email: EMAIL, admin: ADMIN, confirm: { subscriptionId: "sub_1" } })
+  assert.ok(!r.ok && /still active/.test(r.message))
+  assert.equal(stripe.writes.filter((w) => w.call === "subscriptions.cancel").length, 0)
+  assert.equal((await manageView(d, EMAIL)).cancelPausedSubscription, null, "not offered while active")
+})
+
+test("cancel paused subscription: offered after complimentary ends; cancels only that subscription, now, with no final invoice", async () => {
+  const { d, stripe, table } = setup()
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  await endComplimentary(d, { email: EMAIL, admin: ADMIN, note: "Finished" })
+  const view = await manageView(d, EMAIL)
+  assert.deepEqual(view.cancelPausedSubscription, { subscriptionId: "sub_1" })
+  assert.ok(!(await cancelPausedSubscription(d, { email: EMAIL, admin: ADMIN, confirm: { subscriptionId: "sub_other" } })).ok, "stale confirmation refused")
+  const r = await cancelPausedSubscription(d, { email: EMAIL, admin: ADMIN, confirm: { subscriptionId: "sub_1" } })
+  assert.ok(r.ok, JSON.stringify(r))
+  const w = stripe.writes.filter((x) => x.call === "subscriptions.cancel")
+  assert.equal(w.length, 1)
+  assert.deepEqual(w[0].params, { invoice_now: false, prorate: false })
+  assert.match(w[0].key ?? "", /^lfm-billing-/)
+  assert.equal(stripe.subs.get("sub_1")!.status, "canceled")
+  assert.equal((await readState(table, EMAIL))?.mode, "complimentary", "never switched to paid")
+  assert.ok((await listOps(table, EMAIL)).some((o) => o.kind === "CANCEL_PAUSED_SUBSCRIPTION" && o.status === "COMPLETED"))
+})
+
+test("cancel paused subscription: no answer from Stripe is confirmed from Stripe on the next load", async () => {
+  const { d, stripe, table } = setup()
+  await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })
+  await endComplimentary(d, { email: EMAIL, admin: ADMIN, note: "Finished" })
+  stripe.failNext = "timeout-after"
+  const r = await cancelPausedSubscription(d, { email: EMAIL, admin: ADMIN, confirm: { subscriptionId: "sub_1" } })
+  assert.ok(!r.ok && r.uncertain)
+  await manageView(d, EMAIL)
+  assert.ok((await listOps(table, EMAIL)).some((o) => o.kind === "CANCEL_PAUSED_SUBSCRIPTION" && o.status === "COMPLETED"))
+})
+
+test("client with no Stripe subscription cancels: coaching runs to the complimentary arrangement's own monthly cycle", async () => {
+  const { d, table, stripe } = setup({ client: { stripeSubscriptionId: null } })
+  stripe.subs.clear()
+  // Granted at the test clock (2026-11-12T15:00Z); next monthly cycle end: 2026-12-12T15:00Z.
+  assert.ok((await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm: { subscriptionId: null }, reason: REASON })).ok)
+  const r = await clientCancelComplimentary(d, { email: EMAIL })
+  assert.equal(r.ok && r.effectiveDate, "2026-12-12T15:00:00.000Z")
+  assert.equal((await readState(table, EMAIL))?.compEndReason, "client-cancelled")
 })

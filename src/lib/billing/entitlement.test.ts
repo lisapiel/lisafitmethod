@@ -68,14 +68,36 @@ test("paid-client benefits: paying clients only; complimentary never qualifies",
   assert.equal(paysForCoaching({ switchActive: false, billing: null, now: NOW }), false)
 })
 
-test("complimentary cancellation date: end of the current period, never past an end date already set", () => {
+test("complimentary cancellation date: end of the Stripe period, never past an end date already set", () => {
   // Period ends 8 Dec, no end date: 8 Dec.
-  assert.equal(complimentaryCancellationDate({ periodEnd: "2026-12-08T01:04:51.000Z", currentEndsAt: null, now: NOW }), "2026-12-08T01:04:51.000Z")
+  assert.equal(complimentaryCancellationDate({ periodEnd: "2026-12-08T01:04:51.000Z", currentEndsAt: null, grantStart: "2026-11-15T10:00:00.000Z", now: NOW }), "2026-12-08T01:04:51.000Z")
   // End date 1 Dec comes first: 1 Dec.
-  assert.equal(complimentaryCancellationDate({ periodEnd: "2026-12-08T01:04:51.000Z", currentEndsAt: "2026-12-01T23:59:59.000Z", now: NOW }), "2026-12-01T23:59:59.000Z")
-  // Nothing in the future (no subscription): it ends now.
-  assert.equal(complimentaryCancellationDate({ periodEnd: null, currentEndsAt: null, now: NOW }), NOW.toISOString())
-  assert.equal(complimentaryCancellationDate({ periodEnd: "2026-11-01T00:00:00.000Z", currentEndsAt: null, now: NOW }), NOW.toISOString())
+  assert.equal(complimentaryCancellationDate({ periodEnd: "2026-12-08T01:04:51.000Z", currentEndsAt: "2026-12-01T23:59:59.000Z", grantStart: "2026-11-15T10:00:00.000Z", now: NOW }), "2026-12-01T23:59:59.000Z")
+})
+
+test("no Stripe period (approved rule): the complimentary arrangement's own monthly cycle from the day it was granted", () => {
+  // Granted 15 Nov, now 20 Nov, no subscription: the cycle ends 15 Dec (not "now", not a made-up Stripe date).
+  assert.equal(complimentaryCancellationDate({ periodEnd: null, currentEndsAt: null, grantStart: "2026-11-15T10:00:00.000Z", now: NOW }), "2026-12-15T10:00:00.000Z")
+  // A Stripe period already in the past doesn't count either.
+  assert.equal(complimentaryCancellationDate({ periodEnd: "2026-11-01T00:00:00.000Z", currentEndsAt: null, grantStart: "2026-11-15T10:00:00.000Z", now: NOW }), "2026-12-15T10:00:00.000Z")
+  // Granted on the 31st: the next cycle end is clamped to the month's last day (30 Nov).
+  assert.equal(complimentaryCancellationDate({ periodEnd: null, currentEndsAt: null, grantStart: "2026-10-31T09:00:00.000Z", now: NOW }), "2026-11-30T09:00:00.000Z")
+  // An earlier end date still wins.
+  assert.equal(complimentaryCancellationDate({ periodEnd: null, currentEndsAt: "2026-12-01T23:59:59.000Z", grantStart: "2026-11-15T10:00:00.000Z", now: NOW }), "2026-12-01T23:59:59.000Z")
+  // Nothing to go on at all: it ends now.
+  assert.equal(complimentaryCancellationDate({ periodEnd: null, currentEndsAt: null, grantStart: null, now: NOW }), NOW.toISOString())
+})
+
+test("after complimentary ends, only an entitlement granted afterwards gives access", () => {
+  const ended = grant({ compEndedAt: "2026-11-18T09:00:00.000Z", compEndedBy: "coach@test.example" })
+  // The switch stayed on from before (the paused subscription still exists): no access.
+  assert.equal(coachingAccessDecision({ switchActive: true, switchGrantedAt: "2026-06-10T00:00:00.000Z", billing: ended, now: NOW }).access, false)
+  // Access turned on again after the end (e.g. a new paid sign-up): access, as paid.
+  assert.deepEqual(coachingAccessDecision({ switchActive: true, switchGrantedAt: "2026-11-19T12:00:00.000Z", billing: ended, now: NOW }), { access: true, basis: "paid" })
+  // Granted afterwards but switched off again: no access.
+  assert.equal(coachingAccessDecision({ switchActive: false, switchGrantedAt: "2026-11-19T12:00:00.000Z", billing: ended, now: NOW }).access, false)
+  // While the grant is active, the switch's grant time is irrelevant.
+  assert.equal(coachingAccessDecision({ switchActive: false, switchGrantedAt: null, billing: grant(), now: NOW }).basis, "complimentary")
 })
 
 test("end dates: empty means indefinite; a calendar date runs to the end of that day; past or invalid dates are refused", () => {

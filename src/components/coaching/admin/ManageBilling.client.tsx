@@ -19,6 +19,7 @@ const KIND: Record<string, string> = {
   SET_COMPLIMENTARY_END: "Changed complimentary end date",
   END_COMPLIMENTARY: "Ended complimentary",
   CLIENT_CANCEL_COMPLIMENTARY: "Client cancelled (complimentary)",
+  CANCEL_PAUSED_SUBSCRIPTION: "Cancelled paused subscription",
 }
 const STATUS_COLOR: Record<string, string> = { COMPLETED: "var(--ca-ok)", FAILED: "var(--ca-warn)", UNCERTAIN: "var(--ca-warn)", PENDING: "var(--ca-muted)", APPLIED: "var(--ca-muted)" }
 
@@ -46,7 +47,7 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
   const [loadError, setLoadError] = useState("")
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
-  const [confirming, setConfirming] = useState<null | "complimentary" | "record-paid" | "edit-end" | "end-now" | { invoice: InvoiceSnapshot }>(null)
+  const [confirming, setConfirming] = useState<null | "complimentary" | "record-paid" | "edit-end" | "end-now" | "cancel-sub" | { invoice: InvoiceSnapshot }>(null)
   // Make Complimentary inputs: a reason is required; the end date is optional.
   const [reason, setReason] = useState("")
   const [endsAt, setEndsAt] = useState("")
@@ -236,6 +237,21 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
           <input id="comp-end-note" type="text" value={endNote} maxLength={500} onChange={(e) => setEndNote(e.target.value)} style={{ ...text("0.8rem"), padding: "6px 8px", border: `1px solid ${border}`, background: "var(--ca-surface)" }} />
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button type="button" disabled={busy || !endNote.trim()} onClick={() => post("/api/admin/coaching/billing/complimentary-end", { action: "end-now", note: endNote })} style={button(true, !busy && !!endNote.trim())}>End complimentary</button>
+            <button type="button" disabled={busy} onClick={() => setConfirming(null)} style={button(false, !busy)}>Keep it</button>
+          </div>
+        </div>
+      )}
+
+      {/* After complimentary has ended: optionally cancel the paused Stripe subscription */}
+      {view.cancelPausedSubscription && confirming !== "cancel-sub" && (
+        <button type="button" disabled={busy || !!view.pending} onClick={() => { setConfirming("cancel-sub"); setResult(null) }} style={{ ...button(false, !busy && !view.pending), justifySelf: "start" }}>Cancel paused Stripe subscription…</button>
+      )}
+      {view.cancelPausedSubscription && confirming === "cancel-sub" && (
+        <div style={{ border: `1px solid ${border}`, padding: 14, display: "grid", gap: 8, background: "var(--ca-bg)" }}>
+          <p style={{ ...text("0.85rem"), fontWeight: 700 }}>Cancel the paused subscription?</p>
+          <p style={text("0.78rem")}>Stripe subscription {view.cancelPausedSubscription.subscriptionId} ends now. Nothing is charged or refunded. Outstanding invoices, if any, stay as they are and are handled separately.</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" disabled={busy} onClick={() => post("/api/admin/coaching/billing/complimentary-end", { action: "cancel-paused-subscription", confirm: { subscriptionId: view.cancelPausedSubscription!.subscriptionId } })} style={button(true, !busy)}>{busy ? "Confirming with Stripe…" : "Cancel subscription"}</button>
             <button type="button" disabled={busy} onClick={() => setConfirming(null)} style={button(false, !busy)}>Keep it</button>
           </div>
         </div>
