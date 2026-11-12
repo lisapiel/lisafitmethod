@@ -605,6 +605,14 @@ export interface CoachingClientRecord {
   cancellationEffectiveDate?: string
   cancellationReason?: string
   cancellationFeedback?: string
+  // When the client asked to cancel. Recorded first, before Stripe is asked,
+  // so a request is never lost even if its end date can't be confirmed yet.
+  cancellationRequestedAt?: string
+  // When Lisa was alerted that this request needs her (date couldn't be confirmed).
+  cancellationAlertedAt?: string
+  // The client's time zone when they asked, so a confirmation finished later
+  // (by "Check again" or by Lisa) names the same date their page showed.
+  cancellationTimeZone?: string
   // True for clients created before the commitment field was introduced;
   // cancellation self-service is disabled until admin confirms their terms
   commitmentNeedsConfirmation?: boolean
@@ -631,6 +639,20 @@ export async function createCoachingClientRecord(data: CoachingClientRecord): Pr
         status: data.status ?? "ACTIVE",
         createdAt: data.createdAt ?? new Date().toISOString(),
       },
+    })
+  )
+}
+
+// Removes every cancellation field from a coaching client record, for when the
+// client keeps their coaching. (The generic updater skips undefined values, so
+// it can't clear them.)
+export async function clearCoachingCancellation(email: string): Promise<void> {
+  const db = makeDb()
+  await db.send(
+    new UpdateCommand({
+      TableName: TABLE,
+      Key: { userId: `coaching_client_${email.toLowerCase()}` },
+      UpdateExpression: "REMOVE cancellationScheduledAt, cancellationEffectiveDate, cancellationReason, cancellationFeedback, cancellationRequestedAt, cancellationAlertedAt, cancellationTimeZone",
     })
   )
 }

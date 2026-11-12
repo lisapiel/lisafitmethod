@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import Stripe from "stripe"
 import { Resend } from "resend"
-import { getCoachingClientRecord, updateCoachingClientRecord } from "@/lib/authTokens"
+import { clearCoachingCancellation, getCoachingClientRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import { sharedDocClient } from "@/lib/dynamoClient"
-import { readState as readBillingState } from "@/lib/billing/store"
+import { clearPaidCancel, readState as readBillingState } from "@/lib/billing/store"
 
 export const dynamic = "force-dynamic"
 
@@ -53,8 +53,14 @@ export async function POST(req: NextRequest) {
   if (billing?.mode === "complimentary") {
     return NextResponse.json({ error: "Your coaching is complimentary. Message me and I'll take care of it." }, { status: 409 })
   }
-  if (!client.stripeSubscriptionId) return NextResponse.json({ error: "No Stripe subscription on record" }, { status: 400 })
-  if (!client.cancellationScheduledAt) return NextResponse.json({ error: "No scheduled cancellation to reverse" }, { status: 400 })
+  if (billing?.pendingOpId) return NextResponse.json({ error: "Your account is being updated. Please try again in a minute." }, { status: 409 })
+  if (!client.cancellationScheduledAt && !client.cancellationRequestedAt) return NextResponse.json({ error: "No scheduled cancellation to reverse" }, { status: 400 })
+  // A request still waiting for its end date has changed nothing in Stripe;
+  // keeping coaching just withdraws it.
+  if (!client.stripeSubscriptionId) {
+    await clearCoachingCancellation(email)
+    return NextResponse.json({ ok: true })
+  }
 
   const stripe = makeStripe()
   const sub = await stripe.subscriptions.retrieve(client.stripeSubscriptionId)
@@ -67,13 +73,10 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Clear the cancellation fields from our record
-  await updateCoachingClientRecord(email, {
-    cancellationScheduledAt: undefined,
-    cancellationEffectiveDate: undefined,
-    cancellationReason: undefined,
-    cancellationFeedback: undefined,
-  })
+  // Clear the cancellation from our records. (Setting fields to undefined
+  // doesn't remove them, which left "Cancellation scheduled" showing before.)
+  await clearCoachingCancellation(email)
+  await clearPaidCancel(sharedDocClient(), email)
 
   // Admin notification
   notifyAdmin({

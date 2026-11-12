@@ -3,7 +3,10 @@ import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-c
 import Stripe from "stripe"
 import { getCoachingClientRecord } from "@/lib/authTokens"
 import { sharedDocClient } from "@/lib/dynamoClient"
-import { readState } from "@/lib/billing/store"
+import { readOp, readState } from "@/lib/billing/store"
+import { paidCancelPreview, remainingPaymentsOf } from "@/lib/billing/actions"
+import { billingDeps } from "@/lib/billing/server"
+import type { PlannedPayment } from "@/lib/billing/cancellation"
 import { complimentaryCancellationDate, complimentaryStatus } from "@/lib/billing/entitlement"
 
 export const dynamic = "force-dynamic"
@@ -80,6 +83,16 @@ export async function GET(req: NextRequest) {
     complimentaryCancelDate: string | null
     // The client's cancellation is confirmed and its confirmation was sent.
     complimentaryCancelNotified: boolean
+    // When the client asked to cancel (recorded before anything else).
+    cancellationRequestedAt: string | null
+    // Paying clients: what cancelling now would mean, from the same plan the
+    // cancellation uses. Null when it can't be established (then a request is
+    // still accepted and stays pending until the date is confirmed).
+    paidCancel: { endsAt: string; commitmentEndsAt: string | null; remainingPayments: PlannedPayment[] } | null
+    // Paying clients: a request recorded but not yet confirmed and emailed.
+    paidCancelPending: boolean
+    // Paying clients with a confirmed cancellation: committed payments still to come.
+    paidCancelRemaining: PlannedPayment[]
   } = {
     approvedPriceInCents: client.approvedPriceInCents ?? null,
     commitmentType: client.commitmentType ?? null,
@@ -100,6 +113,10 @@ export async function GET(req: NextRequest) {
     complimentaryCancelled: false,
     complimentaryCancelDate: null,
     complimentaryCancelNotified: false,
+    cancellationRequestedAt: client.cancellationRequestedAt ?? null,
+    paidCancel: null,
+    paidCancelPending: false,
+    paidCancelRemaining: [],
   }
 
   const billing = await readState(sharedDocClient(), email).catch(() => null)
@@ -141,6 +158,21 @@ export async function GET(req: NextRequest) {
   // established right now (then the client isn't offered to cancel).
   if (comp.state === "active" && stripeSub !== "unknown") {
     result.complimentaryCancelDate = complimentaryCancellationDate({ hasRunningSubscription: stripeSub === "running", periodEnd: result.currentPeriodEnd, currentEndsAt: comp.endsAt, grantStart: comp.since, now: new Date() })
+  }
+
+  if (comp.state !== "active") {
+    const scheduledInStripe = result.cancelAtPeriodEnd || !!result.cancelAt
+    const notified = !billing?.paidCancelOpId || billing.paidCancelNotifiedOpId === billing.paidCancelOpId
+    result.paidCancelPending = !!client.cancellationRequestedAt && (!scheduledInStripe || !notified)
+    if (scheduledInStripe && billing?.paidCancelOpId) {
+      result.paidCancelRemaining = remainingPaymentsOf(await readOp(sharedDocClient(), billing.paidCancelOpId).catch(() => null))
+    }
+    if (!scheduledInStripe && stripeSub === "running") {
+      const plan = await paidCancelPreview(billingDeps(), email).catch(() => null)
+      if (plan && (plan.kind === "period-end" || plan.kind === "commitment-end")) {
+        result.paidCancel = { endsAt: plan.endsAt, commitmentEndsAt: plan.commitmentEndsAt, remainingPayments: plan.remainingPayments }
+      }
+    }
   }
 
   return NextResponse.json({ subscription: result })

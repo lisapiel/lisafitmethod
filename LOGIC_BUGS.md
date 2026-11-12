@@ -5,6 +5,26 @@ that stops each from recurring.
 
 ---
 
+## "Keep my coaching" left the cancellation on the client record
+**Date:** 2026-11-12 (found in review; fix on `feat/billing-cancel-rca`, not yet live)
+**Area:** `src/app/api/coaching/reactivate/route.ts`, `src/lib/authTokens.ts`
+
+After a paying client scheduled a cancellation and then chose "Keep my
+coaching", Stripe's cancellation was removed, but the route cleared the client
+record by setting the cancellation fields to `undefined`.
+`updateCoachingClientRecord` skips undefined values, so nothing was removed.
+On the next visit the account page could again show "Cancellation scheduled"
+while Stripe kept renewing, and the client had no way to cancel from the page.
+
+**Fix:** `clearCoachingCancellation` removes the fields with a DynamoDB
+`REMOVE`, and the billing record's confirmed cancellation is cleared too
+(`clearPaidCancel`). The page reads "scheduled" from Stripe, not from the
+old record field.
+
+**Rule:** never clear a stored field by passing `undefined` to
+`updateCoachingClientRecord`; use a `REMOVE` helper. When a page shows billing
+state, take it from Stripe or the billing record, not a copy that can go stale.
+
 ## The client's weekly food averages were judged against today's target
 **Date:** 2026-11-12
 **Area:** `src/components/portal/FoodWeek.tsx` (before), `src/lib/nutritionAnalytics.ts`
