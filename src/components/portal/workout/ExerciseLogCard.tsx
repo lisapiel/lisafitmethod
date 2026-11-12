@@ -3,6 +3,7 @@
 import { useId, useState, type ReactNode } from "react"
 import { bestSet, lastTimeSummary, withUnit, type LoggedSet } from "@/lib/exercisePerformance"
 import "./exercise-card.css"
+import { thumbSources } from "@/lib/thumbImage"
 
 export type CardExercise = {
   name: string
@@ -62,7 +63,7 @@ export function ExerciseLogCard({ ex, sets, thumbUrl, canPlay, onThumbError, his
         <div className="xc-media">
           <button type="button" className="xc-vid" disabled={!canPlay} onClick={canPlay ? onVideoClick : undefined} aria-label={canPlay ? `Play the ${ex.name} video` : `${ex.name} (no video)`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {canPlay && thumbUrl ? <img src={thumbUrl} onError={onThumbError} alt="" loading="lazy" decoding="async" /> : null}
+            {canPlay && thumbUrl ? <img {...thumbSources(thumbUrl, { w: 240, h: 190 })} onError={onThumbError} alt="" loading="lazy" decoding="async" /> : null}
             <span className="xc-play" aria-hidden="true">
               <svg width="13" height="13" viewBox="0 0 8 8"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill={canPlay ? "#fff" : "#ccc"} /></svg>
             </span>

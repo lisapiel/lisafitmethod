@@ -1,4 +1,6 @@
 import type { NextConfig } from "next"
+import { allowedImageSources, RESIZE_QUALITY } from "./src/lib/imageSources"
+import { MEDIA_BUCKET_DEFAULT } from "./src/lib/mediaKeys"
 
 // Amplify WEB_COMPUTE doesn't pass non-NEXT_PUBLIC_ env vars to the SSR Lambda
 // runtime. We embed them into the server bundle at build time using DefinePlugin,
@@ -51,20 +53,12 @@ const nextConfig: NextConfig = {
     }))
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "*.s3.us-east-2.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "*.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "*.cloudfront.net",
-      },
-    ],
+    remotePatterns: allowedImageSources({
+      exerciseCdnUrl: process.env.NEXT_PUBLIC_AMBRISA_CDN_URL || process.env.AMBRISA_CDN_URL,
+      mediaBucket: process.env.MEDIA_BUCKET || MEDIA_BUCKET_DEFAULT,
+      region: process.env.COGNITO_REGION || "us-east-2",
+    }),
+    qualities: [RESIZE_QUALITY],
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   webpack(config, { isServer, webpack: wp }: { isServer: boolean; webpack: any }) {

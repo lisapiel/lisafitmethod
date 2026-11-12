@@ -5,6 +5,7 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import Link from "next/link"
 import type { ScannedExercise } from "@/app/api/admin/coaching/exercises/scan/route"
 import { thumbFallback } from "@/lib/cdnUrl"
+import { thumbSources } from "@/lib/thumbImage"
 
 const gold = "#c9a96e"
 const border = "#2a2a2a"
@@ -365,7 +366,7 @@ function ExerciseCard({ exercise: ex, onPreview }: { exercise: Exercise; onPrevi
       >
         {thumb ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumb} onError={thumbFallback} alt={ex.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img {...thumbSources(thumb, { w: 400, h: 140 })} onError={thumbFallback} alt={ex.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.6rem", color: "#333" }}>No video</span>

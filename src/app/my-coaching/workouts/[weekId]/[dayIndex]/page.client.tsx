@@ -14,6 +14,7 @@ import { sportSummary } from "@/lib/sportDay"
 import { ExerciseLogCard } from "@/components/portal/workout/ExerciseLogCard"
 import { HelpSheet, type HelpTopic } from "@/components/portal/workout/HelpSheet"
 import { weightGuide, weightGuideKind } from "@/lib/weightGuide"
+import { thumbSources } from "@/lib/thumbImage"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -265,7 +266,7 @@ function WarmupCooldownDisplay({
                     {videoKey ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={cdnThumb(videoKey)} onError={thumbFallback} alt={ex.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img {...thumbSources(cdnThumb(videoKey), { w: 44, h: 44 })} onError={thumbFallback} alt={ex.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.18)" }}>
                           <div style={{ width: 16, height: 16, borderRadius: "50%", background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 1l5.5 3-5.5 3V1Z" fill="white" /></svg>

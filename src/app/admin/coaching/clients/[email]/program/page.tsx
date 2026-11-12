@@ -5,6 +5,7 @@ import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
+import { thumbSources } from "@/lib/thumbImage"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -126,7 +127,7 @@ export default function ClientProgramPage() {
                   <div key={i} style={{ background: "var(--ca-surface)", border: `1px solid ${border}`, padding: "14px 18px", marginBottom: 8, display: "flex", alignItems: "center", gap: 14 }}>
                     <div style={{ width: 40, height: 40, flexShrink: 0 }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      {ex.videoS3Key && <img src={cdnUrl(CDN, ex.videoS3Key.replace(/\.mp4$/i, ".jpg"))} onError={thumbFallback} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                      {ex.videoS3Key && <img {...thumbSources(cdnUrl(CDN, ex.videoS3Key.replace(/\.mp4$/i, ".jpg")), { w: 40, h: 40 })} onError={thumbFallback} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                     </div>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.8rem", fontWeight: 600, color: "var(--ca-text)", margin: "0 0 6px" }}>{ex.name}</p>

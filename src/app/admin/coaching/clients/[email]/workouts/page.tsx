@@ -6,6 +6,7 @@ import { sportLogSummary, type SportLogFields } from "@/lib/sportDay"
 import { fetchAuthSession } from "aws-amplify/auth"
 import { useParams } from "next/navigation"
 import { cdnUrl, thumbFallback } from "@/lib/cdnUrl"
+import { thumbSources } from "@/lib/thumbImage"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -479,7 +480,7 @@ function WorkoutCard({
                   {p?.videoS3Key && (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                      src={cdnUrl(CDN, p.videoS3Key.replace(/\.mp4$/i, ".jpg"))} onError={thumbFallback}
+                      {...thumbSources(cdnUrl(CDN, p.videoS3Key.replace(/\.mp4$/i, ".jpg")), { w: 32, h: 32 })} onError={thumbFallback}
                       alt=""
                       style={{ width: 32, height: 32, objectFit: "cover", flexShrink: 0 }}
                     />
