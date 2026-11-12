@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import type { ManageView } from "@/lib/billing/actions"
 import type { InvoiceSnapshot } from "@/lib/billing/snapshot"
+import { CancellationDetails } from "./CancellationDetails.client"
 
 const font = "var(--font-montserrat), sans-serif"
 const border = "var(--ca-line)"
@@ -20,6 +21,7 @@ const KIND: Record<string, string> = {
   END_COMPLIMENTARY: "Ended complimentary",
   CLIENT_CANCEL_COMPLIMENTARY: "Client cancelled (complimentary)",
   CANCEL_PAUSED_SUBSCRIPTION: "Cancelled paused subscription",
+  CLIENT_CANCEL_PAID: "Client cancelled",
 }
 const STATUS_COLOR: Record<string, string> = { COMPLETED: "var(--ca-ok)", FAILED: "var(--ca-warn)", UNCERTAIN: "var(--ca-warn)", PENDING: "var(--ca-muted)", APPLIED: "var(--ca-muted)" }
 
@@ -147,6 +149,8 @@ export function ManageBilling({ email, onChanged }: { email: string; onChanged?:
         {view.notice && <p style={text("0.75rem", "var(--ca-muted)")}>ℹ {view.notice}</p>}
         {view.pending && <p style={text("0.75rem", "var(--ca-warn)")}>A change ({KIND[view.pending.kind] ?? view.pending.kind}) started {day(view.pending.since)} is still being confirmed with Stripe. New changes wait until it settles.</p>}
       </div>
+
+      <CancellationDetails c={view.cancellation} busy={busy || !!view.pending} onFinish={() => post("/api/admin/coaching/billing/finish-cancel", {})} />
 
       {result && (
         <div role="status" style={{ borderLeft: `3px solid ${result.ok ? "var(--ca-ok)" : "var(--ca-warn)"}`, padding: "8px 12px", background: "var(--ca-bg)" }}>
