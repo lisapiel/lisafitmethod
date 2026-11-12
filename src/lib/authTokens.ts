@@ -586,6 +586,12 @@ export interface CoachingClientRecord {
   // True for clients created before the commitment field was introduced;
   // cancellation self-service is disabled until admin confirms their terms
   commitmentNeedsConfirmation?: boolean
+  // "paid" = active Stripe subscription; "complimentary" = access granted without billing.
+  // The customer.subscription.deleted webhook checks this before revoking access.
+  accessType?: "paid" | "complimentary"
+  complimentaryGrantedAt?: string
+  complimentaryGrantedBy?: string
+  complimentaryNotes?: string
 }
 
 export async function createCoachingClientRecord(data: CoachingClientRecord): Promise<void> {

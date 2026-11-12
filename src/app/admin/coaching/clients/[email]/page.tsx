@@ -7,6 +7,7 @@ import Link from "next/link"
 import type { CoachingClientRecord } from "@/lib/authTokens"
 import { IntakeCard } from "@/components/coaching/admin/IntakeCard"
 import { PaymentSummaryPanel } from "@/components/coaching/admin/PaymentSummary.client"
+import { BillingPanel } from "@/components/coaching/admin/BillingPanel.client"
 import GoalForm, { EMPTY_GOAL, type GoalFormValues } from "@/components/coaching/admin/GoalForm"
 
 const gold = "var(--ca-accent-mark)"
@@ -82,6 +83,9 @@ export default function ClientProfilePage() {
   const [notes, setNotes] = useState("")
   const [savingNotes, setSavingNotes] = useState(false)
   const [showAssignProgram, setShowAssignProgram] = useState(false)
+  const [linkingSubscription, setLinkingSubscription] = useState(false)
+  const [linkSubError, setLinkSubError] = useState("")
+  const [linkSubDone, setLinkSubDone] = useState(false)
   const [savingProgram, setSavingProgram] = useState(false)
   const [selectedProgramId, setSelectedProgramId] = useState("")
   // Coach message (shown on client home page)
@@ -210,12 +214,46 @@ export default function ClientProfilePage() {
       if (res.ok) {
         router.push("/admin/coaching/clients")
       } else {
-        setDeleteError("Delete failed. Try again.")
+        const errData = await res.json().catch(() => ({})) as { error?: string; code?: string }
+        if (errData.code === "active_stripe_subscription") {
+          setDeleteError(errData.error ?? "Cannot delete — active Stripe subscription exists.")
+        } else if (errData.code === "stripe_check_failed") {
+          setDeleteError("Cannot verify Stripe billing status. Check Stripe manually before deleting.")
+        } else {
+          setDeleteError(errData.error ?? "Delete failed. Try again.")
+        }
       }
     } catch {
       setDeleteError("Delete failed. Try again.")
     }
     setDeleting(false)
+  }
+
+  async function handleLinkSubscription() {
+    if (!client) return
+    setLinkingSubscription(true)
+    setLinkSubError("")
+    try {
+      const session = await fetchAuthSession()
+      const token = session.tokens?.accessToken?.toString() ?? ""
+      // Use the safe link-only endpoint — this stores only the subscription ID and
+      // does NOT create Cognito accounts, send emails, change access, or update applications.
+      const res = await fetch("/api/admin/coaching/billing/link-subscription", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: client.email }),
+      })
+      const data = await res.json() as { ok?: boolean; subscriptionId?: string; error?: string }
+      if (!res.ok || !data.ok) {
+        setLinkSubError(data.error ?? "Could not link subscription")
+      } else {
+        setLinkSubDone(true)
+        setClient((c) => c ? { ...c, stripeSubscriptionId: data.subscriptionId } : c)
+      }
+    } catch {
+      setLinkSubError("Request failed")
+    }
+    setLinkingSubscription(false)
   }
 
   async function goalRequest(url: string, method: "POST" | "PATCH", body: Record<string, unknown>): Promise<Record<string, unknown> | null> {
@@ -851,6 +889,31 @@ export default function ClientProfilePage() {
       <div style={{ marginTop: "1rem" }}>
         <SectionCard title="Payments &amp; Bundle Credit">
           <PaymentSummaryPanel email={client.email} />
+        </SectionCard>
+      </div>
+
+      {/* Billing overview — Stripe subscriptions, invoice history, manual subscription linking */}
+      <div style={{ marginTop: "1rem" }}>
+        <SectionCard title="Billing">
+          <BillingPanel
+            email={client.email}
+            onLinkSubscription={!client.stripeSubscriptionId && !linkSubDone ? handleLinkSubscription : undefined}
+          />
+          {linkingSubscription && (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-muted)", marginTop: 10 }}>
+              Searching Stripe for active coaching subscription…
+            </p>
+          )}
+          {linkSubDone && (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-ok)", marginTop: 10 }}>
+              Subscription linked successfully.
+            </p>
+          )}
+          {linkSubError && (
+            <p style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.72rem", color: "var(--ca-warn)", marginTop: 10 }}>
+              {linkSubError}
+            </p>
+          )}
         </SectionCard>
       </div>
 
