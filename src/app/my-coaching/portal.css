@@ -172,6 +172,7 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 .pt-food-toggle button { min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--pt-muted); font: 600 0.875rem/1 var(--pt-sans); white-space: nowrap; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .pt-food-toggle button[aria-pressed="true"] { background: var(--pt-black); color: #f5f2ee; }
 .pt-food-panel { display: grid; justify-items: center; gap: 6px; width: 100%; }
+.pt-food-panel[data-view="week"] .pt-food-macro { align-content: start; }
 .pt-food-panel .pt-food-foot { text-align: center; max-width: 36ch; margin-top: 8px; text-wrap: balance; }
 .pt-food-empty { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 32px 8px 28px; font-size: 0.875rem; color: var(--pt-muted); }
 .pt-food-empty p { margin: 0; max-width: 32ch; }

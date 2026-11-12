@@ -3,6 +3,9 @@
 import { calorieRange, type AverageVsTarget, type PeriodAverages } from "@/lib/nutritionAnalytics"
 import FoodRings, { type FoodMacroKey } from "./FoodRings"
 
+// On the narrowest phones the label wraps as "logged / 1 of 2 days", never splitting the count.
+const keepTogether = (t: string) => t.replace(/ /g, "\u00a0")
+
 const pctOf = (a: AverageVsTarget) => (a.target > 0 ? Math.round((a.avg / a.target) * 100) : null)
 
 export default function FoodWeekAverage({ averages, loggedDays, windowDays, setByLisa }: { averages: PeriodAverages; loggedDays: number; windowDays: number; setByLisa: boolean }) {
@@ -45,7 +48,7 @@ export default function FoodWeekAverage({ averages, loggedDays, windowDays, setB
           k: m.k, name: m.name, value: a.avg, target: a.target,
           center: p == null ? "–" : `${p}%`,
           detail: `${a.avg} of ${a.target} g`,
-          foot: a.days < loggedDays ? `on ${a.days} of ${loggedDays} days` : m.goal,
+          foot: a.days < loggedDays ? `logged ${keepTogether(`${a.days} of ${loggedDays} days`)}` : m.goal,
           label: `${m.name} daily average ${a.avg} of ${a.target} grams, ${p} percent, over ${a.days} ${a.days === 1 ? "day" : "days"}`,
         }
       })}
