@@ -1,9 +1,7 @@
 "use client"
 
-import type { DailyTotals, PeriodSummary } from "@/lib/nutritionAnalytics"
+import type { DailyTotals } from "@/lib/nutritionAnalytics"
 import ProgressRing from "./ProgressRing"
-
-type Target = { calories: number; protein: number }
 
 function dayName(key: string, isToday: boolean) {
   if (isToday) return "Today"
@@ -11,13 +9,16 @@ function dayName(key: string, isToday: boolean) {
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "short" })
 }
 
-export default function FoodWeek({ days, summary, target, todayKey, selected, onSelect }: { days: DailyTotals[]; summary: PeriodSummary; target: Target; todayKey: string; selected?: string; onSelect?: (date: string) => void }) {
-  const n = summary.loggedDays
-  const missing = days.filter((d) => !d.logged && d.date !== todayKey).length
-  const pDays = summary.avgDays.protein
+// Compact history: one ring per day, tap a day to list its food. The weekly
+// averages live in the summary card's "Last 7 days" view.
+export default function FoodWeek({ days, targetCalories, todayKey, selected, onSelect }: { days: DailyTotals[]; targetCalories: number; todayKey: string; selected?: string; onSelect?: (date: string) => void }) {
+  const logged = days.filter((d) => d.logged).length
   return (
-    <section className="pt-food-week" aria-label="Last 7 days">
-      <h2>Last 7 days</h2>
+    <section className="pt-food-week" aria-label="Days logged">
+      <div className="pt-food-week-head">
+        <h2>Days logged</h2>
+        <span>{logged} of {days.length}</span>
+      </div>
       <ol className="pt-food-days">
         {days.map((d) => {
           const today = d.date === todayKey
@@ -25,29 +26,13 @@ export default function FoodWeek({ days, summary, target, todayKey, selected, on
           return (
             <li key={d.date}>
               <button type="button" className="pt-day-pick" aria-pressed={selected === d.date} aria-label={`${label}. Show this day`} onClick={() => onSelect?.(d.date)}>
-                <ProgressRing size={36} stroke={4} tone="calories" state={d.logged ? "logged" : "unknown"} value={d.logged ? d.calories : null} target={d.target?.calories ?? target.calories} label={label} />
+                <ProgressRing size={36} stroke={4} tone="calories" state={d.logged ? "logged" : "unknown"} value={d.logged ? d.calories : null} target={d.target?.calories ?? targetCalories} label={label} />
                 <span style={today ? { color: "#1a1a1a", fontWeight: 700 } : undefined}>{dayName(d.date, today)}</span>
               </button>
             </li>
           )
         })}
       </ol>
-      {n === 0 ? (
-        <p className="pt-food-foot">Nothing logged in the last 7 days yet.</p>
-      ) : (
-        <>
-          <div className="pt-food-avgs">
-            <div><b>{summary.avg!.calories.toLocaleString()} kcal</b><span>average · {Math.round((summary.avg!.calories / target.calories) * 100)}% of target</span></div>
-            <div>{pDays > 0
-              ? <><b>{summary.avg!.protein} g</b><span>protein · {Math.round((summary.avg!.protein / target.protein) * 100)}% of goal</span></>
-              : <><b>Protein</b><span>not logged</span></>}</div>
-          </div>
-          <p className="pt-food-foot">
-            Based on {n} reported {n === 1 ? "day" : "days"}{pDays > 0 && pDays < n ? `, protein on ${pDays} of them` : ""}.
-            {missing > 0 ? ` ${missing} ${missing === 1 ? "day has" : "days have"} nothing logged, so ${missing === 1 ? "it isn't" : "they aren't"} counted.` : ""}
-          </p>
-        </>
-      )}
     </section>
   )
 }

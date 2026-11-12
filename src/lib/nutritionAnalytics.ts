@@ -223,6 +223,54 @@ export function summarizePeriod(args: {
   }
 }
 
+// The client's calorie range: target ± 10%, rounded to the nearest 10 kcal.
+export function calorieRange(targetCalories: number): { low: number; high: number } {
+  const round10 = (n: number) => Math.round(n / 10) * 10
+  return { low: round10(targetCalories * 0.9), high: round10(targetCalories * 1.1) }
+}
+
+export interface AverageVsTarget {
+  avg: number     // same value as PeriodSummary.avg
+  target: number  // mean of the targets that applied on the days behind `avg`
+  days: number    // same value as PeriodSummary.avgDays
+}
+
+export interface PeriodAverages {
+  calories: AverageVsTarget | null
+  protein: AverageVsTarget | null
+  carbs: AverageVsTarget | null
+  fat: AverageVsTarget | null
+  // True when any logged day was scored against a target other than today's.
+  targetChanged: boolean
+}
+
+// Pairs each period average with the target it should be judged by. A day
+// keeps the target snapshotted when it was logged, so if Lisa changes the
+// target mid-week, earlier days are not measured against the new number.
+// The comparison target is the mean of those per-day targets over exactly the
+// days that feed the average (for a macro, only days where it is known).
+export function averagesAgainstTargets(args: {
+  dailies: DailyTotals[]
+  summary: PeriodSummary
+  currentTarget: MacroTarget
+}): PeriodAverages {
+  const { dailies, summary, currentTarget } = args
+  const logged = dailies.filter((d) => d.logged)
+  const targetOf = (d: DailyTotals) => d.target ?? currentTarget
+  const pick = (k: "calories" | "protein" | "carbs" | "fat"): AverageVsTarget | null => {
+    if (!summary.avg) return null
+    const days = k === "calories" ? logged : logged.filter((d) => d.known?.[k] ?? true)
+    if (days.length === 0) return null
+    const target = Math.round(days.reduce((a, d) => a + targetOf(d)[k], 0) / days.length)
+    return { avg: summary.avg[k], target, days: days.length }
+  }
+  const targetChanged = logged.some((d) => {
+    const t = targetOf(d)
+    return t.calories !== currentTarget.calories || t.protein !== currentTarget.protein || t.carbs !== currentTarget.carbs || t.fat !== currentTarget.fat
+  })
+  return { calories: pick("calories"), protein: pick("protein"), carbs: pick("carbs"), fat: pick("fat"), targetChanged }
+}
+
 export function periodWindow(timeframe: "7D" | "30D" | "90D" | "ALL", todayKey: LocalDateKey, firstLogDate?: LocalDateKey): {
   from: LocalDateKey; to: LocalDateKey
 } {

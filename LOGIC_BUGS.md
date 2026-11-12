@@ -5,6 +5,26 @@ that stops each from recurring.
 
 ---
 
+## The client's weekly food averages were judged against today's target
+**Date:** 2026-11-12
+**Area:** `src/components/portal/FoodWeek.tsx` (before), `src/lib/nutritionAnalytics.ts`
+
+The Food page's "Last 7 days" boxes divided the weekly calorie and protein
+averages by the client's current target. If Lisa changed the target during
+the week, days logged under the old target were scored against the new one.
+For example, five days averaging 1,978 kcal under targets that averaged 1,970
+showed as 107% and over target against a new 1,850.
+
+**Fix:** `averagesAgainstTargets` pairs each average with the mean of the
+per-day `targetAtLog` snapshots over exactly the days behind that average.
+For a macro, those are only the days where it was logged. The weekly view says
+when targets changed. Averages themselves still come from `summarizePeriod`.
+
+**Rule:** any comparison of past intake with a target uses the target
+snapshotted on those days (`DailyTotals.target`), never the current target alone.
+
+---
+
 ## The check-in sent clients away and lost their answers
 **Date:** 2026-11-10
 **Area:** `src/app/my-coaching/check-in/page.client.tsx`, `src/lib/checkInDraft.ts`

@@ -11,9 +11,11 @@ import { ChevronDown, ChevronRight } from "@/components/portal/PortalIcons"
 import LogFoodModal from "@/components/coaching/LogFoodModal.client"
 import FoodToday from "@/components/portal/FoodToday"
 import FoodWeek from "@/components/portal/FoodWeek"
+import FoodWeekAverage from "@/components/portal/FoodWeekAverage"
+import FoodSummary from "@/components/portal/FoodSummary"
 import FoodEntries from "@/components/portal/FoodEntries"
 import { localDateKey, addDaysToKey, type LocalDateKey } from "@/lib/localDate"
-import { buildDailyTotals, summarizePeriod, recentRepeatedMeals, type DailyTotals, type MacroTarget, type RepeatedMeal } from "@/lib/nutritionAnalytics"
+import { buildDailyTotals, summarizePeriod, averagesAgainstTargets, recentRepeatedMeals, type DailyTotals, type MacroTarget, type RepeatedMeal } from "@/lib/nutritionAnalytics"
 
 const accent = "#c8a97e"
 const black = "#0a0a0a"
@@ -118,6 +120,10 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
 
   const weekDailies = useMemo(() => buildDailyTotals({ logs, from: weekFrom, to: todayKey, currentTarget }), [logs, weekFrom, todayKey, currentTarget])
   const weekSummary = useMemo(() => summarizePeriod({ dailies: weekDailies, today: todayKey }), [weekDailies, todayKey])
+  const weekAverages = useMemo(
+    () => (currentTarget ? averagesAgainstTargets({ dailies: weekDailies, summary: weekSummary, currentTarget }) : null),
+    [weekDailies, weekSummary, currentTarget],
+  )
 
 
   // Recent/repeated meals — top 4 from the last 14 days (we already fetched
@@ -204,7 +210,10 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
         <p className="pt-date">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
       </header>
 
-      <FoodToday logs={todayLogs} totals={todayTotals} target={{ calories: macros.calories, protein: macros.protein, carbs: macros.carbs, fat: macros.fat }} setByLisa={macros.source === "override"} />
+      <FoodSummary
+        today={<FoodToday logs={todayLogs} totals={todayTotals} target={{ calories: macros.calories, protein: macros.protein, carbs: macros.carbs, fat: macros.fat }} setByLisa={macros.source === "override"} />}
+        week={weekAverages && <FoodWeekAverage averages={weekAverages} loggedDays={weekSummary.loggedDays} windowDays={weekDailies.length} setByLisa={macros.source === "override"} />}
+      />
 
       <FoodEntries
         title={selectedDay === todayKey ? "Today's food" : new Date(`${selectedDay}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
@@ -216,7 +225,7 @@ export default function NutritionClient({ ownsNutritionCourse }: NutritionClient
         busyId={deletingId}
       />
 
-      <FoodWeek days={weekDailies} summary={weekSummary} target={{ calories: macros.calories, protein: macros.protein }} todayKey={todayKey} selected={selectedDay} onSelect={setSelectedDay} />
+      <FoodWeek days={weekDailies} targetCalories={macros.calories} todayKey={todayKey} selected={selectedDay} onSelect={setSelectedDay} />
 
       {repeats.length > 0 && (
         <section className="pt-recent" aria-label="Recent meals">

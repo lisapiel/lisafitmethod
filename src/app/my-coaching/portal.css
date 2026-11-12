@@ -168,6 +168,14 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 
 /* Food: rings for today, a 7-day strip below. */
 .pt-food-today { background: var(--pt-surface); border: 1px solid var(--pt-line); border-radius: 22px; padding: 18px 16px 16px; display: grid; justify-items: center; gap: 6px; margin-bottom: 12px; }
+.pt-food-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 3px; border-radius: 999px; background: var(--pt-stone); border: 1px solid var(--pt-line); margin-bottom: 8px; }
+.pt-food-toggle button { min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--pt-muted); font: 600 0.875rem/1 var(--pt-sans); white-space: nowrap; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.pt-food-toggle button[aria-pressed="true"] { background: var(--pt-black); color: #f5f2ee; }
+.pt-food-panel { display: grid; justify-items: center; gap: 6px; width: 100%; }
+.pt-food-panel .pt-food-foot { text-align: center; max-width: 36ch; margin-top: 8px; text-wrap: balance; }
+.pt-food-empty { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 32px 8px 28px; font-size: 0.875rem; color: var(--pt-muted); }
+.pt-food-empty p { margin: 0; max-width: 32ch; }
+.pt-food-empty .pt-food-empty-title { color: var(--pt-ink); font-weight: 700; font-size: 0.9375rem; }
 .pt-food-status { margin: 4px 0 0; font-weight: 600; font-size: 0.9375rem; }
 .pt-food-range { margin: 0; font-size: 0.8125rem; color: var(--pt-muted); text-align: center; }
 .pt-food-macros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100%; margin-top: 10px; }
@@ -179,10 +187,8 @@ textarea.pt-input { resize: vertical; min-height: 88px; }
 .pt-food-week h2 { margin: 0; font-size: 0.9375rem; font-weight: 700; }
 .pt-food-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; }
 .pt-food-days li { display: grid; justify-items: center; gap: 2px; font-size: 0.6875rem; color: var(--pt-muted); }
-.pt-food-avgs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.pt-food-avgs div { background: var(--pt-bg); border-radius: 12px; padding: 10px 12px; display: grid; }
-.pt-food-avgs b { font-size: 1.0625rem; }
-.pt-food-avgs span { font-size: 0.75rem; color: var(--pt-muted); }
+.pt-food-week-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.pt-food-week-head span { font-size: 0.8125rem; color: var(--pt-muted); }
 .pt-food-foot { margin: 0; font-size: 0.75rem; color: var(--pt-muted); line-height: 1.5; }
 
 /* Bottom bar icons: drawn on a 16-unit grid, shown at 22px; the active tab gets a soft pill. */
