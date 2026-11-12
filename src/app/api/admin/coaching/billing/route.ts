@@ -3,6 +3,9 @@ import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-c
 import Stripe from "stripe"
 import { isAdminEmail, getCoachingClientRecord } from "@/lib/authTokens"
 import { adminMfaOk } from "@/lib/adminMfa"
+import { sharedDocClient } from "@/lib/dynamoClient"
+import { readState as readBillingState } from "@/lib/billing/store"
+import { isComplimentaryActive } from "@/lib/billing/entitlement"
 
 export const dynamic = "force-dynamic"
 
@@ -275,9 +278,12 @@ export async function GET(req: NextRequest) {
   const invoices = Array.from(invoiceMap.values())
     .sort((a, b) => (b.paidAt ?? "").localeCompare(a.paidAt ?? ""))
 
+  // "Complimentary" here follows the one authoritative grant (Manage billing),
+  // never the old client-record accessType field.
+  const billingState = await readBillingState(sharedDocClient(), email).catch(() => null)
   const overview: BillingOverview = {
     email,
-    accessType: (client as { accessType?: "paid" | "complimentary" }).accessType ?? "unknown",
+    accessType: isComplimentaryActive(billingState, new Date()) ? "complimentary" : "unknown",
     stripeCustomerId,
     subscriptions: allSubscriptions,
     multipleActiveWarning,
