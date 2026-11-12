@@ -81,7 +81,7 @@ describe("duplicate deliveries", () => {
   test("the ledger stores only the event id, type and state", async () => {
     await runEventOnce(EVT, ok, opts())
     const keys = Object.keys(table.items.get(ledgerKey(EVT.id)) ?? {}).sort()
-    assert.deepEqual(keys, ["eventId", "eventType", "processedAt", "status", "token", "userId"])
+    assert.deepEqual(keys, ["claimToken", "eventId", "eventType", "processedAt", "status", "userId"])
   })
 })
 
@@ -330,5 +330,28 @@ describe("email sending", () => {
     await sendOrThrow({ emails: { send: async () => ({ error: null }) } }, mail("Hello"))
     const failing: EmailSender = { emails: { send: async () => ({ error: { message: "rate limited" } }) } }
     await assert.rejects(sendOrThrow(failing, mail("Hello")), (err: Error) => !err.message.includes("client@x.test"))
+  })
+})
+
+describe("DynamoDB expression rules (the fake enforces what the real service enforces)", () => {
+  test("a bare reserved word in a condition is rejected, as real DynamoDB rejects it", async () => {
+    const { PutCommand } = await import("@aws-sdk/lib-dynamodb")
+    await assert.rejects(
+      table.send(new PutCommand({ TableName: "t", Item: { userId: "x" }, ConditionExpression: "token = :t", ExpressionAttributeValues: { ":t": "a" } })),
+      /reserved keyword: token/
+    )
+  })
+
+  test("complete, release and takeover all succeed against the strict fake", async () => {
+    const claim = await claimEvent(EVT.id, EVT.type, db, clock)
+    assert.equal(claim.kind, "claimed")
+    const failed = await runEventOnce({ id: "evt_test_2", type: EVT.type }, fail, opts())
+    assert.equal(failed.status, 500)
+    assert.equal(await table.send(new (await import("@aws-sdk/lib-dynamodb")).GetCommand({ TableName: "t", Key: { userId: ledgerKey("evt_test_2") } })).then((r) => r.Item), undefined)
+    clock += LEASE_MS + 1
+    const taken = await runEventOnce(EVT, ok, opts())
+    assert.equal(taken.status, 200)
+    const again = await runEventOnce(EVT, ok, opts())
+    assert.equal(again.status, 200)
   })
 })

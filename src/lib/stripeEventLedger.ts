@@ -52,7 +52,7 @@ export async function claimEvent(
     eventId,
     eventType,
     status: "processing",
-    token,
+    claimToken: token,
     claimedAt: new Date(now).toISOString(),
     leaseUntil: now + LEASE_MS,
   }
@@ -73,8 +73,10 @@ export async function claimEvent(
     await db.send(new PutCommand({
       TableName: TABLE,
       Item: fresh,
-      ConditionExpression: "token = :old",
-      ExpressionAttributeValues: { ":old": existing.token },
+      // "token" is a DynamoDB reserved word, so the attribute is claimToken and is always referenced by a placeholder.
+      ConditionExpression: "#ct = :old",
+      ExpressionAttributeNames: { "#ct": "claimToken" },
+      ExpressionAttributeValues: { ":old": existing.claimToken },
     }))
     return { kind: "claimed", eventId, token }
   } catch (err) {
@@ -96,10 +98,11 @@ export async function completeEvent(
       eventId: claim.eventId,
       eventType,
       status: "done",
-      token: claim.token,
+      claimToken: claim.token,
       processedAt: new Date(now).toISOString(),
     },
-    ConditionExpression: "token = :token",
+    ConditionExpression: "#ct = :token",
+    ExpressionAttributeNames: { "#ct": "claimToken" },
     ExpressionAttributeValues: { ":token": claim.token },
   }))
 }
@@ -233,7 +236,8 @@ export async function releaseEvent(
     await db.send(new DeleteCommand({
       TableName: TABLE,
       Key: { userId: ledgerKey(claim.eventId) },
-      ConditionExpression: "token = :token",
+      ConditionExpression: "#ct = :token",
+      ExpressionAttributeNames: { "#ct": "claimToken" },
       ExpressionAttributeValues: { ":token": claim.token },
     }))
   } catch (err) {
