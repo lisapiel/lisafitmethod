@@ -64,6 +64,7 @@ interface LiveSubData {
   currentPeriodEnd: string | null
   cancelAtPeriodEnd: boolean
   cancelAt: string | null
+  complimentary: boolean
 }
 
 function CoachingBillingSection({ client }: { client: CoachingClientData }) {
@@ -86,12 +87,13 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!res.ok) throw new Error("fetch failed")
-        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null } | null }
+        const data = await res.json() as { subscription?: { currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; cancelAt: string | null; complimentary?: boolean } | null }
         if (!cancelled && data.subscription) {
           setLiveSub({
             currentPeriodEnd: data.subscription.currentPeriodEnd,
             cancelAtPeriodEnd: data.subscription.cancelAtPeriodEnd,
             cancelAt: data.subscription.cancelAt,
+            complimentary: data.subscription.complimentary === true,
           })
         }
       } catch { /* live data optional */ }
@@ -165,7 +167,11 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
     setSubmitting(false)
   }
 
-  const priceDisplay = client.approvedPriceInCents ? formatPrice(client.approvedPriceInCents) + "/month" : null
+  const complimentary = liveSub?.complimentary === true
+  // A complimentary client is never shown a price or a billing date, because nothing is collected.
+  const priceDisplay = complimentary
+    ? "Your coaching is complimentary. No payments are being collected."
+    : !loadingLive && client.approvedPriceInCents ? formatPrice(client.approvedPriceInCents) + "/month" : null
 
   return (
     <div style={{ marginBottom: 40 }}>
@@ -206,7 +212,7 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
               Commitment ends: {formatDate(commitmentEndDate)}
             </p>
           )}
-          {!loadingLive && nextBilling && !isScheduledToCancel && (
+          {!loadingLive && nextBilling && !isScheduledToCancel && !complimentary && (
             <p style={{ fontSize: "0.75rem", color: "#888", margin: 0 }}>
               Next billing date: {formatDate(nextBilling)}
             </p>

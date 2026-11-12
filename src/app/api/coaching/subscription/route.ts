@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { CognitoIdentityProviderClient, GetUserCommand } from "@aws-sdk/client-cognito-identity-provider"
 import Stripe from "stripe"
 import { getCoachingClientRecord } from "@/lib/authTokens"
+import { sharedDocClient } from "@/lib/dynamoClient"
+import { readState } from "@/lib/billing/store"
 
 export const dynamic = "force-dynamic"
 
@@ -66,6 +68,8 @@ export async function GET(req: NextRequest) {
     cancellationScheduledAt: string | null
     cancellationEffectiveDate: string | null
     status: string
+    // Nothing is being collected: complimentary here, or collection paused in Stripe.
+    complimentary: boolean
   } = {
     approvedPriceInCents: client.approvedPriceInCents ?? null,
     commitmentType: client.commitmentType ?? null,
@@ -81,7 +85,11 @@ export async function GET(req: NextRequest) {
     cancellationScheduledAt: client.cancellationScheduledAt ?? null,
     cancellationEffectiveDate: client.cancellationEffectiveDate ?? null,
     status: client.status ?? "ACTIVE",
+    complimentary: false,
   }
+
+  const billing = await readState(sharedDocClient(), email).catch(() => null)
+  if (billing?.mode === "complimentary") result.complimentary = true
 
   // Compute commitment end date
   if (client.subscriptionStartDate && client.commitmentMonths && client.commitmentMonths > 0) {
@@ -100,6 +108,7 @@ export async function GET(req: NextRequest) {
       result.currentPeriodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null
       result.cancelAtPeriodEnd = sub.cancel_at_period_end
       result.cancelAt = sub.cancel_at ? new Date(sub.cancel_at * 1000).toISOString() : null
+      if (sub.pause_collection?.behavior === "void" && !sub.pause_collection.resumes_at) result.complimentary = true
     } catch (err) {
       console.error("GET /api/coaching/subscription: Stripe retrieve failed", err)
     }

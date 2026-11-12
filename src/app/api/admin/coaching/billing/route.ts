@@ -48,6 +48,8 @@ export interface BillingSubscription {
   discountPercent: number | null
   // The actual amount the next invoice will charge, after any coupon
   effectiveAmountCents: number | null
+  // Stripe isn't collecting payments while this is set (see Manage billing).
+  pauseBehavior: string | null
   warning?: string
 }
 
@@ -122,6 +124,7 @@ function subFromStripe(
     isPrimary,
     discountPercent,
     effectiveAmountCents,
+    pauseBehavior: sub.pause_collection?.behavior ?? null,
   }
 }
 

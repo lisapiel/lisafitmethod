@@ -833,7 +833,7 @@ export default function ClientProfilePage() {
                       to display a price nobody is being charged. */}
                   <p style={{ fontSize: "0.75rem", color: "var(--ca-muted)", marginTop: 6, lineHeight: 1.5 }}>
                     {client.stripeSubscriptionId
-                      ? "Locked — this client has a live Stripe subscription. Changing this would show them a price Stripe isn't charging."
+                      ? "Locked: this client has a live Stripe subscription. Change what they pay under Manage billing, so Stripe and this record stay the same."
                       : "Shown to the client in their portal. This does not create or change any billing."}
                   </p>
                 </div>

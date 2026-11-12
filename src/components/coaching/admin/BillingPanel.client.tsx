@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { fetchAuthSession } from "aws-amplify/auth"
 import type { BillingOverview, BillingSubscription, BillingInvoice } from "@/app/api/admin/coaching/billing/route"
+import { ManageBilling } from "./ManageBilling.client"
 
 const gold = "var(--ca-accent-mark)"
 const border = "var(--ca-line)"
@@ -40,7 +41,8 @@ function StatusPill({ status }: { status: string }) {
 
 function SubscriptionRow({ sub }: { sub: BillingSubscription }) {
   const isActive = sub.status === "active" || sub.status === "trialing"
-  const willRenew = isActive && !sub.cancelAtPeriodEnd && !sub.cancelAt
+  const paused = sub.pauseBehavior != null
+  const willRenew = isActive && !sub.cancelAtPeriodEnd && !sub.cancelAt && !paused
   const hasDiscount = sub.discountPercent != null && sub.discountPercent > 0
 
   return (
@@ -58,6 +60,11 @@ function SubscriptionRow({ sub }: { sub: BillingSubscription }) {
           {sub.isPrimary && (
             <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", letterSpacing: "0.1em", color: gold, textTransform: "uppercase" }}>
               linked
+            </span>
+          )}
+          {paused && (
+            <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: "0.65rem", letterSpacing: "0.1em", color: gold, textTransform: "uppercase" }}>
+              collection paused
             </span>
           )}
           {sub.cancelAtPeriodEnd && (
@@ -80,7 +87,7 @@ function SubscriptionRow({ sub }: { sub: BillingSubscription }) {
               <span style={{ marginLeft: 6, fontSize: "0.65rem" }}>({sub.discountPercent}% off)</span>
             </>
           ) : (
-            <>{fmtMoney(sub.unitAmountCents)}/{sub.interval}</>
+            <>{fmtMoney(sub.unitAmountCents)}/{sub.interval}{paused && " price · not collected"}</>
           )}
           {sub.trialEnd && <> · trial ends {fmt(sub.trialEnd)}</>}
           {willRenew && <> · renews {fmt(sub.currentPeriodEnd)}</>}
@@ -195,6 +202,8 @@ export function BillingPanel({ email, onLinkSubscription }: BillingPanelProps) {
 
   return (
     <div>
+      <ManageBilling email={email} onChanged={load} />
+
       {/* Access type */}
       <div style={{ marginBottom: 16 }}>
         {isComplimentary ? (
@@ -219,7 +228,7 @@ export function BillingPanel({ email, onLinkSubscription }: BillingPanelProps) {
 
       {/* Linked subscription details */}
       {billing.approvedPriceInCents != null && row(
-        "Approved price",
+        "Agreed price",
         <span style={{ fontVariantNumeric: "tabular-nums" }}>{fmtMoney(billing.approvedPriceInCents)}/mo</span>
       )}
       {billing.commitmentType && row(
