@@ -9,7 +9,7 @@ import { claimCancelNotice, readState as readBillingState, releaseCancelNotice }
 import { isComplimentaryActive } from "@/lib/billing/entitlement"
 import { clientCancelComplimentary } from "@/lib/billing/actions"
 import { billingDeps } from "@/lib/billing/server"
-import { complimentaryCancellationEmail } from "@/lib/billing/clientEmails"
+import { clientDateLabel, complimentaryCancellationEmail } from "@/lib/billing/clientEmails"
 
 export const dynamic = "force-dynamic"
 
@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({})) as {
     reason?: string
     feedback?: string
+    timeZone?: string
   }
 
   const client = await getCoachingClientRecord(email)
@@ -248,7 +249,7 @@ export async function POST(req: NextRequest) {
 // The confirmation email is sent once, and only after Stripe confirmed the
 // cancellation and its end date. Anything less is reported as pending, with a
 // safe retry ("check again" calls this route again and finishes the job).
-async function cancelComplimentary(email: string, displayName: string, body: { reason?: string; feedback?: string }): Promise<NextResponse> {
+async function cancelComplimentary(email: string, displayName: string, body: { reason?: string; feedback?: string; timeZone?: string }): Promise<NextResponse> {
   const r = await clientCancelComplimentary(billingDeps(), { email })
   if (!r.ok) return NextResponse.json({ error: r.message, pending: r.uncertain === true }, { status: r.status })
 
@@ -290,7 +291,7 @@ async function cancelComplimentary(email: string, displayName: string, body: { r
     meta: { email },
   }).catch(() => {})
 
-  const mail = complimentaryCancellationEmail({ firstName: displayName.split(" ")[0], effectiveDateLabel: formatDate(effectiveDate) })
+  const mail = complimentaryCancellationEmail({ firstName: displayName.split(" ")[0], effectiveDateLabel: clientDateLabel(effectiveDate, body.timeZone) })
   try {
     const resend = new Resend(process.env.RESEND_API_KEY ?? "")
     const sent = await resend.emails.send({ from: "Lisa Fit Method <noreply@lisafitmethod.com>", replyTo: "contact@lisafitmethod.com", to: email, subject: mail.subject, html: mail.html, text: mail.text })

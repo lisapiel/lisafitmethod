@@ -137,7 +137,8 @@ function CoachingBillingSection({ client }: { client: CoachingClientData }) {
       const res = await fetch("/api/coaching/cancel", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: cancelReason || undefined, feedback: cancelFeedback || undefined }),
+        // The time zone lets the confirmation email show the same end date this page shows.
+        body: JSON.stringify({ reason: cancelReason || undefined, feedback: cancelFeedback || undefined, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
       })
       const data = await res.json() as { ok?: boolean; error?: string; effectiveDate?: string }
       if (!res.ok || !data.ok) {

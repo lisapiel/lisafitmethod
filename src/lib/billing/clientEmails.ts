@@ -35,3 +35,16 @@ export function complimentaryCancellationEmail(input: { firstName: string; effec
 </body></html>`
   return { subject: "Your coaching cancellation is confirmed", html, text: [`Got it, ${input.firstName}.`, ...lines, "Lisa"].join("\n\n") }
 }
+
+// The end date as the client's own account page shows it (their time zone),
+// so the email and the page always name the same day. Without a valid time
+// zone the date is given in UTC and says so, rather than guessing.
+export function clientDateLabel(iso: string, timeZone?: string): string {
+  const opts = { month: "long", day: "numeric", year: "numeric" } as const
+  if (timeZone) {
+    try {
+      return new Date(iso).toLocaleDateString("en-US", { ...opts, timeZone })
+    } catch { /* invalid time zone: fall through */ }
+  }
+  return `${new Date(iso).toLocaleDateString("en-US", { ...opts, timeZone: "UTC" })} (UTC)`
+}
