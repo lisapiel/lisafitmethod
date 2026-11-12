@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Playfair_Display, DM_Sans, Cormorant_Garamond, Montserrat } from "next/font/google"
 import Script from "next/script"
 import { AmplifyProvider } from "@/components/AmplifyProvider"
+import { gaBootstrapScript } from "@/lib/analyticsPrivacy"
 import SiteHeader from "@/components/SiteHeader"
 import SiteFooter from "@/components/SiteFooter"
 import "./globals.css"
@@ -112,16 +113,7 @@ export default function RootLayout({
             }).replace(/</g, "\\u003c"),
           }}
         />
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-BZWMNEQ83F"
-          strategy="beforeInteractive"
-        />
-        <Script id="ga4-init" strategy="beforeInteractive">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-BZWMNEQ83F');
-        `}</Script>
+        <Script id="ga4-init" strategy="beforeInteractive">{gaBootstrapScript()}</Script>
       </head>
       <body>
         <AmplifyProvider>

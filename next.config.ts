@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 import { allowedImageSources, RESIZE_QUALITY } from "./src/lib/imageSources"
 import { MEDIA_BUCKET_DEFAULT } from "./src/lib/mediaKeys"
+import { ANALYTICS_EXCLUDED_PREFIXES } from "./src/lib/analyticsPrivacy"
 
 // Amplify WEB_COMPUTE doesn't pass non-NEXT_PUBLIC_ env vars to the SSR Lambda
 // runtime. We embed them into the server bundle at build time using DefinePlugin,
@@ -42,15 +43,27 @@ const CACHED_PAGES = [
 
 const nextConfig: NextConfig = {
   async headers() {
-    return CACHED_PAGES.map((source) => ({
-      source,
-      headers: [
-        {
-          key: "Cache-Control",
-          value: "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
-        },
-      ],
-    }))
+    // Later rules override earlier ones for the same header, so the strict
+    // policy on sensitive routes wins over the site-wide default. "same-origin"
+    // gives other sites no referrer at all, while same-site requests keep a
+    // real Origin header; "no-referrer" can make browsers send "Origin: null",
+    // which Next.js rejects for server actions.
+    return [
+      { source: "/:path*", headers: [{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" }] },
+      ...ANALYTICS_EXCLUDED_PREFIXES.map((prefix) => ({
+        source: `${prefix}/:path*`,
+        headers: [{ key: "Referrer-Policy", value: "same-origin" }],
+      })),
+      ...CACHED_PAGES.map((source) => ({
+        source,
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
+          },
+        ],
+      })),
+    ]
   },
   images: {
     remotePatterns: allowedImageSources({
