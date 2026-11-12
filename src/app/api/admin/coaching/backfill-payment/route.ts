@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { email: rawEmail } = await req.json()
+  const { email: rawEmail, suppressEmail: suppressEmailFlag } = await req.json() as { email?: string; suppressEmail?: boolean }
   if (!rawEmail) return NextResponse.json({ error: "email required" }, { status: 400 })
 
   const email = rawEmail.toLowerCase().trim()
@@ -131,8 +131,8 @@ export async function POST(req: NextRequest) {
     console.error("Failed to update application:", err)
   }
 
-  // 5. Send confirmation email (only to non-admin so we don't email Lisa about her own test)
-  if (!isAdminEmail(email)) {
+  // 5. Send confirmation email (only to non-admin, and not when caller passes suppressEmail: true)
+  if (!isAdminEmail(email) && !suppressEmailFlag) {
     const cognito = makeCognito()
     const resend = new Resend(process.env.RESEND_API_KEY ?? "")
     const firstName = displayName.split(" ")[0] || "there"
