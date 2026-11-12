@@ -358,14 +358,14 @@ test("grant: an optional end date is stored to the end of that day; a past date 
   assert.ok(!bad.ok && bad.status === 400)
   assert.equal(stripe.writes.length, 0)
   const ok = await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON, endsAt: "2027-02-28" })
-  assert.ok(ok.ok && /until 2027-02-28/.test(ok.message))
+  assert.ok(ok.ok && /until Feb 28, 2027/.test(ok.message))
   assert.equal((await readState(table, EMAIL))?.compEndsAt, "2027-02-28T23:59:59.000Z")
 })
 
 test("commitment: shown before confirming, recorded as waived, and never changed in Stripe", async () => {
   const { d, table, stripe } = setup({ client: COMMITTED })
   const view = await manageView(d, EMAIL)
-  assert.ok(view.complimentary.warnings.some((w) => /3-month commitment until 2027-01-08/.test(w) && /isn't subject to it/.test(w)))
+  assert.ok(view.complimentary.warnings.some((w) => /3-month commitment until Jan 7, 2027/.test(w) && /isn't subject to it/.test(w)))
   assert.equal((await makeComplimentary(d, { email: EMAIL, admin: ADMIN, confirm, reason: REASON })).ok, true)
   // Only the pause and our markers were sent: no cancel_at, no change to the commitment in Stripe.
   assert.deepEqual(Object.keys(stripe.writes[0].params).sort(), ["metadata", "pause_collection"])

@@ -124,7 +124,7 @@ test("display: complimentary shows $0 collected and keeps the reference price; n
 test("display: complimentary with a client cancellation shows when it ends", () => {
   const v = collectionView({ mode: "complimentary", sub: sub({ pause: { behavior: "void", resumesAt: null }, cancelAtPeriodEnd: true }), preview: null })
   // Label changed with the grant model: "until <date>" (was "ends <date>").
-  assert.match(v.label, /until 2026-12-08/)
+  assert.match(v.label, /until Dec 7, 2026/)
 })
 
 test("display: never shows a price as collected when the record and Stripe disagree", () => {

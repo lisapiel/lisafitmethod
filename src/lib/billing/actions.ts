@@ -1,4 +1,4 @@
-import { planComplimentary, voidCheck, collectionView, type BillingMode, type CollectionView, type Commitment, type ComplimentaryPlan } from "./rules"
+import { adminDay, planComplimentary, voidCheck, collectionView, type BillingMode, type CollectionView, type Commitment, type ComplimentaryPlan } from "./rules"
 import {
   BillingBusyError, BillingConflictError, beginOp, finishState, initialMode, listOps, markPending, readOp, readState, setOpStatus, stripeKeyFor,
   type BillingOp, type BillingState, type GrantPatch, type Sender,
@@ -338,7 +338,7 @@ export async function makeComplimentary(
   } catch {
     return { ok: true, opId: op.id, message: "Stripe has stopped collecting. Saving that here didn't finish; it completes automatically the next time billing loads." }
   }
-  const until = end.endsAt ? ` until ${end.endsAt.slice(0, 10)}` : " with no end date"
+  const until = end.endsAt ? ` until ${adminDay(end.endsAt)}` : " with no end date"
   return {
     ok: true,
     opId: op.id,
@@ -388,7 +388,7 @@ export async function setComplimentaryEnd(d: Deps, input: { email: string; admin
   }
   const r = await grantChange(d, email, { kind: "SET_COMPLIMENTARY_END", admin: input.admin, before: { endsAt: comp.endsAt }, target: { endsAt: end.endsAt } })
   if (!r.ok) return r.result
-  return { ok: true, opId: r.op.id, message: end.endsAt ? `Complimentary coaching now ends ${end.endsAt.slice(0, 10)}.` : "Complimentary coaching now has no end date." }
+  return { ok: true, opId: r.op.id, message: end.endsAt ? `Complimentary coaching now ends ${adminDay(end.endsAt)}.` : "Complimentary coaching now has no end date." }
 }
 
 // End complimentary coaching now. Coaching access ends. Stripe is left as it
@@ -464,7 +464,7 @@ export async function clientCancelComplimentary(d: Deps, input: { email: string 
   } catch {
     // Stripe has it scheduled; the record catches up on the next billing load.
   }
-  return { ok: true, opId: op.id, effectiveDate: effective, message: `Your complimentary coaching ends ${effective.slice(0, 10)}.` }
+  return { ok: true, opId: op.id, effectiveDate: effective, message: `Your complimentary coaching ends ${adminDay(effective)}.` }
 }
 
 // What a paying client would see if they cancelled now. The cancellation uses

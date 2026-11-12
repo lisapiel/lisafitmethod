@@ -31,12 +31,19 @@ export type ComplimentaryPlan =
   | { kind: "record-only"; reason: "no-subscription" | "already-paused"; warnings: string[]; outstanding: InvoiceSnapshot[] }
   | { kind: "pause"; subscription: SubSnapshot; referencePriceCents: number | null; warnings: string[]; outstanding: InvoiceSnapshot[] }
 
+// Dates in Lisa's admin views and messages: her time zone, written out
+// ("Feb 7, 2027"), so every line names the same day the client sees.
+export function adminDay(iso: string | null | undefined): string {
+  if (!iso || Number.isNaN(Date.parse(iso))) return "an unknown date"
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" })
+}
+
 // The paid commitment a client signed up to, as far as the client record says.
 export type Commitment = { type: string | null; endDate: string | null }
 
 export function commitmentNotice(c: Commitment | null | undefined, now: Date): string | null {
   if (!c?.endDate || c.type !== "THREE_MONTH_MINIMUM" || Date.parse(c.endDate) <= now.getTime()) return null
-  return `This client is inside a 3-month commitment until ${c.endDate.slice(0, 10)}. Complimentary coaching isn't subject to it: no further payments are collected and no cancellation terms apply while they're complimentary. The original commitment stays on record and isn't changed in Stripe.`
+  return `This client is inside a 3-month commitment until ${adminDay(c.endDate)}. Complimentary coaching isn't subject to it: no further payments are collected and no cancellation terms apply while they're complimentary. The original commitment stays on record and isn't changed in Stripe.`
 }
 
 // What "Make Complimentary" would do for this client right now. Anything
@@ -84,7 +91,7 @@ export function planComplimentary(input: { mode: BillingMode; grantActive: boole
     blockers.push({
       code: "other-pause",
       message: sub.pause.behavior === "void"
-        ? `Collection is already paused until ${sub.pause.resumesAt?.slice(0, 10)}. Clear that pause in Stripe before making this permanent.`
+        ? `Collection is already paused until ${adminDay(sub.pause.resumesAt)}. Clear that pause in Stripe before making this permanent.`
         : `Collection is already paused in Stripe with "${sub.pause.behavior}", which still creates invoices. Clear it in Stripe first.`,
     })
   }
@@ -97,7 +104,7 @@ export function planComplimentary(input: { mode: BillingMode; grantActive: boole
   if (sub.cancelAtPeriodEnd || sub.cancelAt) {
     blockers.push({
       code: "cancellation-scheduled",
-      message: `A cancellation is scheduled for ${(sub.cancelAt ?? sub.currentPeriodEnd ?? "").slice(0, 10)}. Decide whether coaching is ending first: remove the cancellation, or let it end without changing billing.`,
+      message: `A cancellation is scheduled for ${adminDay(sub.cancelAt ?? sub.currentPeriodEnd ?? "")}. Decide whether coaching is ending first: remove the cancellation, or let it end without changing billing.`,
     })
   }
   if (sub.collectionMethod === "send_invoice") {
@@ -190,7 +197,7 @@ export function collectionView(input: {
     const why = input.comp.why === "client-cancelled" ? "after the client cancelled" : input.comp.why === "ended-by-admin" ? "by an admin" : "on its end date"
     return {
       state: "complimentary-ended",
-      label: `Complimentary ended ${input.comp.endedAt.slice(0, 10)} · no coaching access`,
+      label: `Complimentary ended ${adminDay(input.comp.endedAt)} · no coaching access`,
       collectedPerMonthCents: running && sub && !sub.pause ? reference : 0,
       referencePriceCents: reference,
       nextCollection: null,
@@ -216,11 +223,11 @@ export function collectionView(input: {
     const endsAt = [grantEnd, stripeEnd].filter((d): d is string => !!d).sort()[0] ?? null
     return {
       state: "complimentary",
-      label: `Complimentary · $0 collected/month · ${endsAt ? `until ${endsAt.slice(0, 10)}` : "no end date"}`,
+      label: `Complimentary · $0 collected/month · ${endsAt ? `until ${adminDay(endsAt)}` : "no end date"}`,
       collectedPerMonthCents: 0,
       referencePriceCents: reference,
       nextCollection: null,
-      warning: sub?.pause && !paused ? `Collection is paused in Stripe with "${sub.pause.behavior}"${sub.pause.resumesAt ? ` and resumes ${sub.pause.resumesAt.slice(0, 10)}` : ""}.` : null,
+      warning: sub?.pause && !paused ? `Collection is paused in Stripe with "${sub.pause.behavior}"${sub.pause.resumesAt ? ` and resumes ${adminDay(sub.pause.resumesAt)}` : ""}.` : null,
     }
   }
 
@@ -259,7 +266,7 @@ export function collectionView(input: {
   if (sub.cancelAtPeriodEnd || sub.cancelAt) {
     return {
       state: "cancelling",
-      label: `Ends ${(sub.cancelAt ?? sub.currentPeriodEnd ?? "").slice(0, 10)}`,
+      label: `Ends ${adminDay(sub.cancelAt ?? sub.currentPeriodEnd ?? "")}`,
       collectedPerMonthCents: reference,
       referencePriceCents: reference,
       nextCollection: null,
@@ -270,7 +277,7 @@ export function collectionView(input: {
     return { state: "past-due", label: "Past due", collectedPerMonthCents: reference, referencePriceCents: reference, nextCollection: next, warning: "The latest invoice hasn't been paid." }
   }
   if (sub.status === "trialing") {
-    return { state: "trialing", label: `${reference != null ? money(reference) : "?"}/month from ${(sub.currentPeriodEnd ?? "").slice(0, 10)}`, collectedPerMonthCents: reference, referencePriceCents: reference, nextCollection: next, warning: null }
+    return { state: "trialing", label: `${reference != null ? money(reference) : "?"}/month from ${adminDay(sub.currentPeriodEnd ?? "")}`, collectedPerMonthCents: reference, referencePriceCents: reference, nextCollection: next, warning: null }
   }
   return {
     state: "paid",
