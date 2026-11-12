@@ -1,18 +1,10 @@
-// Client-facing email for a complimentary client's own cancellation. Kept
-// apart from the paid emails, which talk about payments and commitments.
+// Client-facing cancellation emails. Kept apart from the older paid emails.
 // Copy follows COPY_GUIDELINES.md: Lisa's voice, short, no em dashes.
 
 const escape = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!)
 
-export function complimentaryCancellationEmail(input: { firstName: string; effectiveDateLabel: string }): { subject: string; html: string; text: string } {
-  const name = escape(input.firstName)
-  const date = escape(input.effectiveDateLabel)
-  const lines = [
-    `Your coaching with me continues through ${date}, and then it will end.`,
-    "Your coaching was complimentary, so nothing is charged and there's nothing else you need to do.",
-    "If you change your mind or have any questions, just reply to this email.",
-  ]
-  const html = `<!DOCTYPE html>
+function emailShell(name: string, lines: string[]): string {
+  return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" /></head>
 <body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
@@ -33,7 +25,41 @@ export function complimentaryCancellationEmail(input: { firstName: string; effec
     </td></tr>
   </table>
 </body></html>`
-  return { subject: "Your coaching cancellation is confirmed", html, text: [`Got it, ${input.firstName}.`, ...lines, "Lisa"].join("\n\n") }
+}
+
+export function complimentaryCancellationEmail(input: { firstName: string; effectiveDateLabel: string }): { subject: string; html: string; text: string } {
+  const name = escape(input.firstName)
+  const date = escape(input.effectiveDateLabel)
+  const lines = [
+    `Your coaching with me continues through ${date}, and then it will end.`,
+    "Your coaching was complimentary, so nothing is charged and there's nothing else you need to do.",
+    "If you change your mind or have any questions, just reply to this email.",
+  ]
+  return { subject: "Your coaching cancellation is confirmed", html: emailShell(name, lines), text: [`Got it, ${input.firstName}.`, ...lines, "Lisa"].join("\n\n") }
+}
+
+export function moneyLabel(cents: number): string {
+  const dollars = cents / 100
+  return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`
+}
+
+// A paying client's cancellation. Names the end date and, inside a 3-month
+// minimum, each remaining committed payment, so nothing comes as a surprise.
+export function paidCancellationEmail(input: { firstName: string; effectiveDateLabel: string; remainingPayments: { dateLabel: string; amountCents: number | null }[] }): { subject: string; html: string; text: string } {
+  const name = escape(input.firstName)
+  const date = escape(input.effectiveDateLabel)
+  const payments = input.remainingPayments.map((p) => `${p.amountCents != null ? moneyLabel(p.amountCents) : "the amount on your invoice"} on ${escape(p.dateLabel)}`)
+  const lines = [
+    `Your coaching with me continues through ${date}, and then it will end.`,
+    ...(payments.length
+      ? [
+          `Because you started with a 3-month minimum, ${payments.length === 1 ? "your last committed payment" : "your remaining committed payments"} will still be charged: ${payments.join(", ")}.`,
+          "After that, your subscription won't renew and nothing more will be charged.",
+        ]
+      : ["That time is already paid for. Your subscription won't renew and nothing more will be charged."]),
+    "If you change your mind before then, you can keep your coaching from your account page, or just reply to this email.",
+  ]
+  return { subject: "Your coaching cancellation is confirmed", html: emailShell(name, lines), text: [`Got it, ${input.firstName}.`, ...lines, "Lisa"].join("\n\n") }
 }
 
 // The end date as the client's own account page shows it (their time zone),

@@ -129,6 +129,13 @@ export async function scheduleEndAtPeriodEnd(stripe: StripeLike, subId: string, 
   return toSubSnapshot(await stripe.subscriptions.update(subId, { cancel_at_period_end: true }, { idempotencyKey }))
 }
 
+// A paying client inside a minimum commitment: the subscription ends on the
+// renewal date that completes the commitment. Nothing is prorated, so no
+// credit or extra invoice is created by scheduling it.
+export async function scheduleEndAt(stripe: StripeLike, subId: string, endsAt: string, idempotencyKey: string): Promise<SubSnapshot> {
+  return toSubSnapshot(await stripe.subscriptions.update(subId, { cancel_at: Math.floor(Date.parse(endsAt) / 1000), proration_behavior: "none" }, { idempotencyKey }))
+}
+
 // After complimentary has ended, and only when an admin confirms: end the
 // paused subscription now. No final invoice, no proration, nothing refunded.
 export async function cancelNow(stripe: StripeLike, subId: string, idempotencyKey: string): Promise<SubSnapshot> {

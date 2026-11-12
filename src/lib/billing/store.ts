@@ -33,6 +33,9 @@ export type OpKind =
   | "CLIENT_CANCEL_COMPLIMENTARY"
   // After complimentary ends, an admin may choose to end the paused Stripe subscription.
   | "CANCEL_PAUSED_SUBSCRIPTION"
+  // A paying client's own cancellation: schedules the subscription to end at
+  // the confirmed date (period end, or the renewal that completes a commitment).
+  | "CLIENT_CANCEL_PAID"
 export type OpStatus = "PENDING" | "APPLIED" | "UNCERTAIN" | "COMPLETED" | "FAILED"
 
 export type BillingState = {
@@ -59,6 +62,12 @@ export type BillingState = {
   // Set once, so the email goes out exactly once, and only after Stripe
   // confirmed the cancellation and its end date.
   compCancelNotifiedAt?: string | null
+  // A paying client's confirmed cancellation: the end date Stripe has
+  // scheduled, and the operation that scheduled it. Cleared if they keep
+  // their coaching. The confirmation email is claimed once per operation.
+  paidCancelEndsAt?: string | null
+  paidCancelOpId?: string | null
+  paidCancelNotifiedOpId?: string | null
   rev: number
   pendingOpId?: string | null
   pendingKind?: OpKind | null
@@ -120,7 +129,7 @@ export function initialMode(): BillingMode {
   return "paid"
 }
 
-export type GrantPatch = Partial<Pick<BillingState, "modeSince" | "modeBy" | "compReason" | "compEndsAt" | "compEndReason" | "compEndedAt" | "compEndedBy" | "compEndNote" | "compCommitment">>
+export type GrantPatch = Partial<Pick<BillingState, "modeSince" | "modeBy" | "compReason" | "compEndsAt" | "compEndReason" | "compEndedAt" | "compEndedBy" | "compEndNote" | "compCommitment" | "paidCancelEndsAt" | "paidCancelOpId">>
 
 async function writeState(db: Sender, next: BillingState, expectedRev: number | null): Promise<void> {
   try {
@@ -280,4 +289,42 @@ export async function releaseCancelNotice(db: Sender, email: string, now = new D
   const s = await readState(db, email)
   if (!s?.compCancelNotifiedAt) return
   await writeState(db, { ...s, compCancelNotifiedAt: null, rev: s.rev + 1, updatedAt: now }, s.rev).catch(() => {})
+}
+
+// Claims the right to send a paying client's cancellation confirmation: once
+// per confirmed cancellation, and only after Stripe has scheduled it.
+export async function claimPaidCancelNotice(db: Sender, email: string, now = new Date().toISOString()): Promise<BillingState | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const s = await readState(db, email)
+    if (!s || s.mode !== "paid" || !s.paidCancelEndsAt || !s.paidCancelOpId || s.paidCancelNotifiedOpId === s.paidCancelOpId || s.pendingOpId) return null
+    try {
+      await writeState(db, { ...s, paidCancelNotifiedOpId: s.paidCancelOpId, rev: s.rev + 1, updatedAt: now }, s.rev)
+      return s
+    } catch (e) {
+      if (e instanceof BillingConflictError) continue
+      throw e
+    }
+  }
+  return null
+}
+
+export async function releasePaidCancelNotice(db: Sender, email: string, now = new Date().toISOString()): Promise<void> {
+  const s = await readState(db, email)
+  if (!s?.paidCancelNotifiedOpId) return
+  await writeState(db, { ...s, paidCancelNotifiedOpId: null, rev: s.rev + 1, updatedAt: now }, s.rev).catch(() => {})
+}
+
+// The client kept their coaching: forget the confirmed paid cancellation.
+export async function clearPaidCancel(db: Sender, email: string, now = new Date().toISOString()): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const s = await readState(db, email)
+    if (!s || (!s.paidCancelEndsAt && !s.paidCancelOpId)) return
+    try {
+      await writeState(db, { ...s, paidCancelEndsAt: null, paidCancelOpId: null, paidCancelNotifiedOpId: null, rev: s.rev + 1, updatedAt: now }, s.rev)
+      return
+    } catch (e) {
+      if (e instanceof BillingConflictError) continue
+      throw e
+    }
+  }
 }

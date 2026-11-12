@@ -18,6 +18,16 @@ export function billingDeps(): Deps {
         stripeSubscriptionId: c.stripeSubscriptionId ?? null,
         cancellationScheduledAt: c.cancellationScheduledAt ?? null,
         commitment: commitmentOf(c),
+        commitmentNeedsConfirmation: c.commitmentNeedsConfirmation === true,
+        approvedPriceInCents: c.approvedPriceInCents ?? null,
+        cancellation: {
+          requestedAt: c.cancellationRequestedAt ?? null,
+          reason: c.cancellationReason ?? null,
+          feedback: c.cancellationFeedback ?? null,
+          alertedAt: c.cancellationAlertedAt ?? null,
+          scheduledAt: c.cancellationScheduledAt ?? null,
+          effectiveDate: c.cancellationEffectiveDate ?? null,
+        },
       }
     },
   }
