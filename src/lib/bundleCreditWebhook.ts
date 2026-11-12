@@ -96,7 +96,13 @@ export async function settleBundleCreditFromInvoice(stripe: WebhookStripe, invoi
 // coupon is still the one holding it.
 export async function releaseBundleCreditForSession(stripe: WebhookStripe, session: unknown, db?: CreditDb): Promise<boolean> {
   for (const couponId of couponIdsOfSession(session)) {
-    const coupon = await stripe.coupons.retrieve(couponId).catch(() => null)
+    // A coupon that no longer exists has nothing to hand back; any other
+    // failure is passed up so the webhook is retried instead of the hold
+    // silently staying in place.
+    const coupon = await stripe.coupons.retrieve(couponId).catch((err: unknown) => {
+      if (isObj(err) && err.code === "resource_missing") return null
+      throw err
+    })
     if (!isObj(coupon) || !isObj(coupon.metadata) || coupon.metadata.bundleCredit !== "true") continue
     const email = str(coupon.metadata.bundleCreditEmail)
     const applicationId = str(coupon.metadata.applicationId)

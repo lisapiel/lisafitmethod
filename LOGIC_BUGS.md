@@ -23,6 +23,41 @@ when targets changed. Averages themselves still come from `summarizePeriod`.
 **Rule:** any comparison of past intake with a target uses the target
 snapshotted on those days (`DailyTotals.target`), never the current target alone.
 
+## Stripe webhook acknowledged failures and repeated work
+**Date:** 2026-11-11
+**Area:** `src/app/api/stripe/webhook/route.ts`, `src/lib/stripeEventLedger.ts`, `src/lib/sendOrThrow.ts`, `src/lib/entitlementAudit.ts`, `src/lib/bundleCreditWebhook.ts`
+
+Several steps caught their own errors and the webhook still answered 200, so
+Stripe never retried them: cancellation revokes, marking an application paid,
+the bundle purchase record, credit release for an expired checkout, and the
+dispute credit sync. No code read Resend's result, and Resend reports most
+failures in the result rather than throwing, so a failed welcome or
+set-password email counted as sent. There was no record of handled event ids,
+so a repeated delivery re-sent emails. Cancellation stored the time the webhook
+ran as the effective date. A late cancellation of an old subscription could end
+a restarted client's access. Payment-failed emails read the subscription from
+one payload location only. A lost dispute whose charge could not be fetched was
+treated as "no charge".
+
+Making failures retryable exposed retry hazards, also fixed: nutrition and
+masterclass provisioning treated any existing login as ready, so a retry after
+a failed welcome would send an email with no set-password link; a coaching
+retry stopped at "already active" and never sent the welcome; a repeated refund
+revocation overwrote its audit row with an empty previous grant.
+
+**Fix:** an event ledger (`stripe_event_<id>`) runs each event once, releases
+it on failure and is retried before giving up on "done", with an admin alert if
+it never records. Customer emails throw on a Resend error and are sent at most
+once per event. State-changing failures return 500. Cancellation uses Stripe's
+`ended_at`, ignores a subscription other than the one on file, and payment
+failures use the shared invoice lookup. Provisioning checks for a CONFIRMED
+login, coaching keeps a `welcomeEmailPending` marker until the welcome is sent,
+and the revocation audit row is write-once.
+
+**Rule:** a webhook answers 2xx only when every state change it is responsible
+for has happened. Every external send has its result checked. Any step that can
+run twice on a retry must be safe to run twice, and that is tested.
+
 ---
 
 ## The check-in sent clients away and lost their answers

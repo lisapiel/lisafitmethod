@@ -20,6 +20,10 @@ const accessKey = (e: CourseEntitlement, email: string) => `${e}_access_${email.
 
 export type AccessRecord = { grantedAt?: string; grantType?: string } | null
 
+export interface AuditDb {
+  send(command: PutCommand | DeleteCommand): Promise<unknown>
+}
+
 export async function readAccessRecord(email: string, e: CourseEntitlement): Promise<AccessRecord> {
   try {
     const db = makeDb()
@@ -40,23 +44,30 @@ export async function revokeEntitlement(input: {
   reason: string
   stripeId: string
   previous: AccessRecord
-}): Promise<void> {
-  const db = makeDb()
+}, db: AuditDb = makeDb()): Promise<void> {
   const now = new Date().toISOString()
-  await db.send(new PutCommand({
-    TableName: TABLE,
-    Item: {
-      userId: `entitlement_audit_${input.stripeId}_${input.entitlement}`,
-      email: input.email.toLowerCase(),
-      entitlement: input.entitlement,
-      action: "revoked",
-      reason: input.reason,
-      stripeId: input.stripeId,
-      revokedAt: now,
-      previousGrantedAt: input.previous?.grantedAt ?? null,
-      previousGrantType: input.previous?.grantType ?? null,
-    },
-  }))
+  // The first audit row is the true record of what was taken away. A retry
+  // after the access row is already gone would otherwise overwrite it with an
+  // empty "previous" grant.
+  try {
+    await db.send(new PutCommand({
+      TableName: TABLE,
+      ConditionExpression: "attribute_not_exists(userId)",
+      Item: {
+        userId: `entitlement_audit_${input.stripeId}_${input.entitlement}`,
+        email: input.email.toLowerCase(),
+        entitlement: input.entitlement,
+        action: "revoked",
+        reason: input.reason,
+        stripeId: input.stripeId,
+        revokedAt: now,
+        previousGrantedAt: input.previous?.grantedAt ?? null,
+        previousGrantType: input.previous?.grantType ?? null,
+      },
+    }))
+  } catch (err) {
+    if (!(err instanceof Error && err.name === "ConditionalCheckFailedException")) throw err
+  }
   await db.send(new DeleteCommand({ TableName: TABLE, Key: { userId: accessKey(input.entitlement, input.email) } }))
 }
 

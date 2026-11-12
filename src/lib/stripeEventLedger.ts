@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb"
-import { randomBytes } from "crypto"
+import { AsyncLocalStorage } from "async_hooks"
+import { createHash, randomBytes } from "crypto"
 
 const TABLE = process.env.DYNAMODB_TABLE ?? "lfm-user-progress"
 const PREFIX = "stripe_event_"
@@ -107,16 +108,43 @@ function errorText(err: unknown): string {
   return err instanceof Error ? err.message : String(err)
 }
 
+type EventScope = { eventId: string; db: LedgerDb }
+const eventScope = new AsyncLocalStorage<EventScope>()
+
+export type LedgerFailure = { eventId: string; eventType: string; error: string }
+
+export type RunOptions = {
+  db?: LedgerDb
+  now?: () => number
+  // Called when an event was handled but could not be recorded as done.
+  onLedgerFailure?: (failure: LedgerFailure) => Promise<void> | void
+  completeAttempts?: number
+  retryDelayMs?: number
+}
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 // Stripe can deliver the same event more than once, and retries a delivery
 // until it gets a 2xx. A repeat of a handled event is acknowledged without
 // running again; an event whose handling failed is released so Stripe's next
 // retry runs it in full.
+//
+// If the work succeeded but recording "done" keeps failing, the answer to
+// Stripe is still 200. A 500 would make Stripe redeliver and repeat work that
+// has already happened. The cost of answering 200 is narrower: the claim is
+// left "processing", so only a later redelivery of this same event could run
+// it again, after the lease, and emails already sent by this event are still
+// skipped because they are recorded separately.
 export async function runEventOnce(
   event: { id: string; type: string },
   handle: () => Promise<Response>,
-  db: LedgerDb = makeDb(),
-  now: () => number = Date.now
+  options: RunOptions = {}
 ): Promise<Response> {
+  const db = options.db ?? makeDb()
+  const now = options.now ?? Date.now
+  const attempts = Math.max(1, options.completeAttempts ?? 3)
+  const delay = options.retryDelayMs ?? 150
+
   let claim: Claim
   try {
     claim = await claimEvent(event.id, event.type, db, now())
@@ -129,20 +157,71 @@ export async function runEventOnce(
 
   let response: Response
   try {
-    response = await handle()
+    response = await eventScope.run({ eventId: event.id, db }, handle)
   } catch (err) {
     console.error(`[webhook] ${event.type} ${event.id} failed:`, errorText(err))
     response = Response.json({ error: "Webhook handling failed", detail: errorText(err) }, { status: 500 })
   }
 
+  if (response.status < 200 || response.status >= 300) {
+    try {
+      await releaseEvent(claim, db)
+    } catch (err) {
+      // The lease expires on its own, so Stripe's retry still runs after it.
+      console.error(`[webhook] could not release ${event.type} ${event.id}:`, errorText(err))
+    }
+    return response
+  }
+
+  let lastError = ""
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await completeEvent(claim, event.type, db, now())
+      return response
+    } catch (err) {
+      // Another run took the event over after our lease ran out; it owns the outcome.
+      if (err instanceof Error && err.name === "ConditionalCheckFailedException") return response
+      lastError = errorText(err)
+      if (i < attempts - 1) await pause(delay * (i + 1))
+    }
+  }
+  console.error(`[webhook] handled ${event.type} ${event.id} but could not record it as done:`, lastError)
   try {
-    if (response.status >= 200 && response.status < 300) await completeEvent(claim, event.type, db, now())
-    else await releaseEvent(claim, db)
-  } catch (err) {
-    // The work itself is settled; a stale claim only delays a duplicate by one lease.
-    console.error(`[webhook] ledger update failed for ${event.type} ${event.id}:`, errorText(err))
+    await options.onLedgerFailure?.({ eventId: event.id, eventType: event.type, error: lastError })
+  } catch {
+    // Alerting is best effort; the response below is what matters to Stripe.
   }
   return response
+}
+
+function mailKey(eventId: string, recipient: string, subject: string): string {
+  const digest = createHash("sha256").update(`${recipient.trim().toLowerCase()}\n${subject}`).digest("hex").slice(0, 24)
+  return `${ledgerKey(eventId)}__mail_${digest}`
+}
+
+// Sends at most once per Stripe event: when an earlier attempt of the same
+// event already delivered this email, a retry skips it. Outside a webhook
+// event it simply sends. The marker holds a hash, never the address.
+export async function sendOncePerEvent(recipient: string, subject: string, send: () => Promise<void>): Promise<"sent" | "skipped"> {
+  const scope = eventScope.getStore()
+  if (!scope) {
+    await send()
+    return "sent"
+  }
+  const key = mailKey(scope.eventId, recipient, subject)
+  const existing = (await scope.db.send(new GetCommand({ TableName: TABLE, Key: { userId: key } }))).Item
+  if (existing?.status === "sent") return "skipped"
+  await send()
+  try {
+    await scope.db.send(new PutCommand({
+      TableName: TABLE,
+      Item: { userId: key, eventId: scope.eventId, status: "sent", sentAt: new Date().toISOString() },
+    }))
+  } catch (err) {
+    // The email went out; failing the event now would only send it again.
+    console.error(`[webhook] email sent but not recorded for ${scope.eventId}:`, errorText(err))
+  }
+  return "sent"
 }
 
 // Frees the event so Stripe's next retry can run it straight away.

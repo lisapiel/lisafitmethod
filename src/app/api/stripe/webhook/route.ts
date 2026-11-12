@@ -5,6 +5,7 @@ import {
   AdminCreateUserCommand,
   AdminGetUserCommand,
   UsernameExistsException,
+  UserNotFoundException,
 } from "@aws-sdk/client-cognito-identity-provider"
 import { Resend } from "resend"
 import { decideRefund } from "@/lib/refundPolicy"
@@ -309,23 +310,27 @@ function nutritionAccessGrantedEmail(): string {
 </html>`
 }
 
+async function hasConfirmedLogin(cognito: ReturnType<typeof makeCognito>, email: string): Promise<boolean> {
+  try {
+    const user = await cognito.send(new AdminGetUserCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
+      Username: email,
+    }))
+    return user.UserStatus === "CONFIRMED"
+  } catch (err) {
+    if (err instanceof UserNotFoundException) return false
+    throw err
+  }
+}
+
 async function provisionNutritionUser(email: string) {
   const cognito = makeCognito()
   const resend = new Resend(process.env.RESEND_API_KEY ?? "")
 
-  // Check if user already exists
-  let userExists = false
-  try {
-    await cognito.send(
-      new AdminGetUserCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-        Username: email,
-      })
-    )
-    userExists = true
-  } catch {
-    // User does not exist
-  }
+  // Only a confirmed login can be told to "just sign in". A login that exists
+  // but was never given a password (pre-created, or created by an earlier
+  // attempt whose email failed) needs the set-password link.
+  const userExists = await hasConfirmedLogin(cognito, email)
 
   await grantNutritionAccess(email)
 
@@ -356,15 +361,6 @@ async function provisionNutritionUser(email: string) {
     )
   } catch (error) {
     if (!(error instanceof UsernameExistsException)) throw error
-    await grantNutritionAccess(email)
-    await sendOrThrow(resend, {
-      from: "Lisa Fit Method <noreply@lisafitmethod.com>",
-      replyTo: "contact@lisafitmethod.com",
-      to: email,
-      subject: "Nutrition Foundations: your course is ready",
-      html: nutritionAccessGrantedEmail(),
-    })
-    return
   }
 
   const token = generateAuthToken()
@@ -608,19 +604,10 @@ async function provisionMasterclassUser(
   const periodEndIso = new Date(currentPeriodEnd * 1000).toISOString()
   const normalizedPlan = (plan === "monthly" || plan === "6month" || plan === "annual") ? plan : "monthly"
 
-  // Check if user already exists
-  let userExists = false
-  try {
-    await cognito.send(
-      new AdminGetUserCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-        Username: email,
-      })
-    )
-    userExists = true
-  } catch {
-    // User does not exist
-  }
+  // Only a confirmed login can be told to "just sign in". A login that exists
+  // but was never given a password (pre-created, or created by an earlier
+  // attempt whose email failed) needs the set-password link.
+  const userExists = await hasConfirmedLogin(cognito, email)
 
   await grantMasterclassAccess(email, stripeSubscriptionId, normalizedPlan, periodEndIso)
 
@@ -711,6 +698,17 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   // fully provision and the second (or a retry) to be a no-op — no duplicate
   // welcome emails, no duplicate admin notifications.
   const preexisting = await getCoachingClientRecord(email)
+  const welcomeKey = subscriptionId || "no-subscription"
+  if (
+    preexisting?.status === "ACTIVE" &&
+    preexisting.welcomeEmailPending &&
+    preexisting.welcomeEmailPending === welcomeKey
+  ) {
+    // Activation finished on an earlier attempt but its welcome email did not.
+    await sendCoachingWelcome(email, firstName, cognito, resend)
+    await updateCoachingClientRecord(email, { welcomeEmailPending: "" })
+    return
+  }
   if (preexisting?.status === "ACTIVE") {
     // A second, DIFFERENT subscription for someone already active means two
     // payments got through — two tabs, two sessions, or a webhook replay that
@@ -758,6 +756,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   // Store commitment fields on the client record — these come from Stripe session metadata
   // which was populated at admin approval time, never derived from price.
   const commitmentUpdates = {
+    welcomeEmailPending: welcomeKey,
     ...(subscriptionId ? { stripeSubscriptionId: subscriptionId } : {}),
     ...(subscriptionStartDate ? { subscriptionStartDate } : {}),
     ...(commitmentType ? {
@@ -785,6 +784,16 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
     meta: { email },
   }).catch(() => {})
 
+  await sendCoachingWelcome(email, firstName, cognito, resend)
+  await updateCoachingClientRecord(email, { welcomeEmailPending: "" })
+}
+
+async function sendCoachingWelcome(
+  email: string,
+  firstName: string,
+  cognito: ReturnType<typeof makeCognito>,
+  resend: Resend,
+) {
   // Distinguish "confirmed account with a real password" from "silently
   // pre-created account that was never delivered credentials." The approval
   // flow always pre-creates the Cognito account with MessageAction: SUPPRESS,
@@ -792,16 +801,7 @@ async function provisionCoachingSubscriber(email: string, name: string, subscrip
   // until they set a password. Treat FORCE_CHANGE_PASSWORD as new-user so we
   // send them the set-password link instead of telling them to log in with
   // credentials they never received.
-  let hasUsableLogin = false
-  try {
-    const user = await cognito.send(new AdminGetUserCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-      Username: email,
-    }))
-    hasUsableLogin = user.UserStatus === "CONFIRMED"
-  } catch {
-    hasUsableLogin = false
-  }
+  const hasUsableLogin = await hasConfirmedLogin(cognito, email)
 
   if (hasUsableLogin) {
     await sendOrThrow(resend, {
@@ -996,7 +996,18 @@ export async function POST(request: NextRequest): Promise<Response> {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  return runEventOnce(event, () => handleEvent(event))
+  return runEventOnce(event, () => handleEvent(event), {
+    onLedgerFailure: ({ eventId, eventType, error }) =>
+      notifyAdmin({
+        kind: "webhook-failure",
+        subject: `Stripe event handled but not recorded: ${eventType}`,
+        headline: "A Stripe event was processed, but marking it done failed",
+        body: `Event ${eventId} (${eventType}) was handled successfully and Stripe was told so. Recording it as done failed:\n\n${error}\n\nNothing needs doing unless Stripe sends this same event again, in which case it could run a second time after a few minutes. Emails it already sent will not be repeated.`,
+        ctaLabel: "Open in Stripe",
+        ctaHref: `https://dashboard.stripe.com/events/${eventId}`,
+        meta: { eventId, eventType },
+      }),
+  })
 }
 
 async function retrieveChargeOrNull(stripe: Stripe, chargeId: string | undefined): Promise<Stripe.Charge | null> {

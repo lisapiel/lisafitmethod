@@ -601,6 +601,9 @@ export interface CoachingClientRecord {
   complimentaryGrantedAt?: string
   complimentaryGrantedBy?: string
   complimentaryNotes?: string
+  // Subscription whose welcome email has not been confirmed sent yet. Lets a
+  // webhook retry finish the welcome without re-running activation.
+  welcomeEmailPending?: string
 }
 
 export async function createCoachingClientRecord(data: CoachingClientRecord): Promise<void> {
