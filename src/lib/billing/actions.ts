@@ -4,7 +4,7 @@ import {
   type BillingOp, type BillingState, type GrantPatch, type Sender,
 } from "./store"
 import {
-  cancelNow, classifyStripeError, loadBilling, pauseForComplimentary, previewNext, readInvoice, readSubscription, scheduleEndAt, scheduleEndAtPeriodEnd, voidInvoice,
+  cancelNow, classifyStripeError, loadBilling, pauseForComplimentary, previewNext, readInvoice, readSubscription, removeScheduledEnd, scheduleEndAt, scheduleEndAtPeriodEnd, voidInvoice,
   type LoadedBilling, type StripeLike,
 } from "./stripeOps"
 import { complimentaryCancellationDate, complimentaryStatus, isComplimentaryActive, parseEndDate, type ComplimentaryStatus } from "./entitlement"
@@ -112,6 +112,7 @@ export function targetState(op: BillingOp): { mode?: BillingMode; referencePrice
   if (op.kind === "CLIENT_CANCEL_COMPLIMENTARY") return { grant: { compEndsAt: str(t.endsAt), compEndReason: "client-cancelled" } }
   if (op.kind === "RECORD_PAID") return { mode: "paid" }
   if (op.kind === "CLIENT_CANCEL_PAID") return { grant: { paidCancelEndsAt: str(t.endsAt), paidCancelOpId: op.id } }
+  if (op.kind === "CLIENT_KEEP_COACHING") return { grant: { paidCancelEndsAt: null, paidCancelOpId: null } }
   return {}
 }
 
@@ -137,6 +138,11 @@ async function stripeShowsApplied(d: Deps, op: BillingOp): Promise<"yes" | "no" 
       const endsAt = str(op.target.endsAt)
       if (sub.cancelAt) return endsAt && Math.abs(Date.parse(sub.cancelAt) - Date.parse(endsAt)) < 60_000 ? "yes" : "no"
       return sub.cancelAtPeriodEnd && op.target.via === "period-end" ? "yes" : "no"
+    }
+    if (op.kind === "CLIENT_KEEP_COACHING") {
+      if (!op.subscriptionId) return "no"
+      const sub = await readSubscription(d.stripe, op.subscriptionId)
+      return !sub.cancelAtPeriodEnd && !sub.cancelAt ? "yes" : "no"
     }
     if (op.kind === "CANCEL_PAUSED_SUBSCRIPTION") {
       if (!op.subscriptionId) return "no"
@@ -184,6 +190,9 @@ export type CancellationView = {
   remainingPayments: PlannedPayment[]
   approvedPriceCents: number | null
   commitment: Commitment | null
+  // For a request still waiting: the next renewal. Under the current Terms, a
+  // charge after a cancellation request would have to be refunded, so finish first.
+  nextRenewalAt: string | null
   // A request recorded but not confirmed: Lisa can finish it once whatever
   // blocked it (for example an unconfirmed commitment) is sorted out.
   canFinish: boolean
@@ -207,6 +216,7 @@ function cancellationView(client: ClientFacts, comp: ComplimentaryStatus, sub: L
     remainingPayments: paidScheduled ? remainingPaymentsOf(op) : [],
     approvedPriceCents: client?.approvedPriceInCents ?? null,
     commitment: client?.commitment ?? null,
+    nextRenewalAt: status === "requested" && running && !sub!.pause && !sub!.cancelAtPeriodEnd && !sub!.cancelAt ? sub!.currentPeriodEnd : null,
     canFinish: status === "requested" && !state?.pendingOpId,
   }
 }
@@ -553,6 +563,55 @@ export async function clientCancelPaid(d: Deps, input: { email: string; requeste
     // Stripe has it scheduled; the record catches up on the next billing load.
   }
   return { ok: true, endsAt, remainingPayments, commitmentEndsAt, already: plan.kind === "already-scheduled", opId: op.id }
+}
+
+export type KeepResult = { ok: true; changedStripe: boolean } | { ok: false; status: number; message: string; uncertain?: boolean }
+
+// A paying client keeps their coaching. Removes the scheduled end in Stripe and
+// checks Stripe's answer before anything is recorded as kept. Price, billing
+// date and any commitment are unchanged.
+export async function clientKeepCoaching(d: Deps, input: { email: string }): Promise<KeepResult> {
+  const email = input.email.trim().toLowerCase()
+  const { client, state, loaded } = await freshFacts(d, email)
+  if (!client) return { ok: false, status: 404, message: "Coaching record not found." }
+  if (isComplimentaryActive(state, nowDate(d))) return { ok: false, status: 409, message: "Your coaching is complimentary. Message me and I'll take care of it." }
+  const sub = loaded.subs.linked
+  const running = !!sub && sub.status !== "canceled" && sub.status !== "incomplete_expired"
+  if (!running || (!sub!.cancelAtPeriodEnd && !sub!.cancelAt)) return { ok: true, changedStripe: false }
+
+  let op: BillingOp
+  try {
+    ;({ op } = await beginOp(d.db, { email, kind: "CLIENT_KEEP_COACHING", requestedBy: "client", subscriptionId: sub!.id, before: { cancelAtPeriodEnd: sub!.cancelAtPeriodEnd, cancelAt: sub!.cancelAt }, target: {}, initial: "paid", now: nowIso(d) }))
+  } catch (e) {
+    if (e instanceof BillingBusyError) return { ok: false, status: 409, message: "Your account is being updated. Please try again in a minute." }
+    throw e
+  }
+  try {
+    const after = await removeScheduledEnd(d.stripe, sub!, stripeKeyFor(op.id))
+    if (after.cancelAtPeriodEnd || after.cancelAt) {
+      op = await setOpStatus(d.db, op, "FAILED", { error: "Stripe still shows an end date.", now: nowIso(d) })
+      await finishState(d.db, op, { now: nowIso(d) })
+      return { ok: false, status: 502, message: "Your cancellation couldn't be removed. Nothing was changed. Please try again or message me." }
+    }
+  } catch (e) {
+    const c = classifyStripeError(e)
+    if (c.kind === "definitive") {
+      op = await setOpStatus(d.db, op, "FAILED", { error: c.message, now: nowIso(d) })
+      await finishState(d.db, op, { now: nowIso(d) })
+      return { ok: false, status: 502, message: "Your cancellation couldn't be removed. Nothing was changed. Please try again or message me." }
+    }
+    op = await setOpStatus(d.db, op, "UNCERTAIN", { error: c.message, now: nowIso(d) })
+    await markPending(d.db, op, "UNCERTAIN", nowIso(d)).catch(() => {})
+    return { ok: false, status: 202, uncertain: true, message: "Your change is being confirmed. Please check back in a few minutes." }
+  }
+  op = await setOpStatus(d.db, op, "APPLIED", { stripeResult: `scheduled end removed on ${sub!.id}`, now: nowIso(d) })
+  try {
+    await finishState(d.db, op, { ...targetState(op), now: nowIso(d) })
+    await setOpStatus(d.db, op, "COMPLETED", { now: nowIso(d) })
+  } catch {
+    // Stripe has it; the record catches up on the next billing load.
+  }
+  return { ok: true, changedStripe: true }
 }
 
 export function remainingPaymentsOf(op: BillingOp | null): PlannedPayment[] {

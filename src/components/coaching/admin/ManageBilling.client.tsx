@@ -22,6 +22,7 @@ const KIND: Record<string, string> = {
   CLIENT_CANCEL_COMPLIMENTARY: "Client cancelled (complimentary)",
   CANCEL_PAUSED_SUBSCRIPTION: "Cancelled paused subscription",
   CLIENT_CANCEL_PAID: "Client cancelled",
+  CLIENT_KEEP_COACHING: "Client kept their coaching",
 }
 const STATUS_COLOR: Record<string, string> = { COMPLETED: "var(--ca-ok)", FAILED: "var(--ca-warn)", UNCERTAIN: "var(--ca-warn)", PENDING: "var(--ca-muted)", APPLIED: "var(--ca-muted)" }
 

@@ -36,6 +36,8 @@ export type OpKind =
   // A paying client's own cancellation: schedules the subscription to end at
   // the confirmed date (period end, or the renewal that completes a commitment).
   | "CLIENT_CANCEL_PAID"
+  // A paying client keeps their coaching: the scheduled end is removed in Stripe.
+  | "CLIENT_KEEP_COACHING"
 export type OpStatus = "PENDING" | "APPLIED" | "UNCERTAIN" | "COMPLETED" | "FAILED"
 
 export type BillingState = {

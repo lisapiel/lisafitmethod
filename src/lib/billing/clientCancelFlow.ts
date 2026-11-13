@@ -1,10 +1,10 @@
 import { Resend } from "resend"
-import { getCoachingClientRecord, updateCoachingClientRecord, type CoachingClientRecord } from "@/lib/authTokens"
+import { clearCoachingCancellation, getCoachingClientRecord, updateCoachingClientRecord, type CoachingClientRecord } from "@/lib/authTokens"
 import { notifyAdmin } from "@/lib/notifyAdmin"
 import { sharedDocClient } from "@/lib/dynamoClient"
-import { claimCancelNotice, claimPaidCancelNotice, readState as readBillingState, releaseCancelNotice, releasePaidCancelNotice } from "./store"
+import { claimCancelNotice, claimPaidCancelNotice, clearPaidCancel, readState as readBillingState, releaseCancelNotice, releasePaidCancelNotice } from "./store"
 import { isComplimentaryActive } from "./entitlement"
-import { clientCancelComplimentary, clientCancelPaid } from "./actions"
+import { clientCancelComplimentary, clientCancelPaid, clientKeepCoaching } from "./actions"
 import { unknownReasonForAdmin, type PlannedPayment, type UnknownReason } from "./cancellation"
 import { billingDeps } from "./server"
 import { clientDateLabel, complimentaryCancellationEmail, moneyLabel, paidCancellationEmail } from "./clientEmails"
@@ -73,7 +73,7 @@ async function pending(email: string, client: CoachingClientRecord, detail: stri
         client.cancellationReason ? `Reason: ${client.cancellationReason}` : "",
         client.cancellationFeedback ? `Comments: ${client.cancellationFeedback}` : "",
         "",
-        "Their coaching continues. Nothing has been changed in Stripe, and the client has been told their request is recorded and being confirmed. Open their billing panel to finish it.",
+        "Their coaching continues. Nothing has been changed in Stripe, and the client has been told their request is recorded and being confirmed. Open their billing panel to finish it, before their next renewal: under your Terms, a charge after their request would have to be refunded.",
       ].filter(Boolean).join("\n"),
       ctaLabel: "Open billing panel",
       ctaHref: profileLink(email),
@@ -181,4 +181,64 @@ async function cancelComplimentary(email: string, client: CoachingClientRecord, 
   const mail = complimentaryCancellationEmail({ firstName: client.displayName.split(" ")[0] ?? "", effectiveDateLabel: clientDateLabel(effectiveDate, body.timeZone) })
   if (!(await sendClientEmail(email, mail))) await releaseCancelNotice(db, email).catch(() => {})
   return reply({ ok: true, effectiveDate, remainingPayments: [], complimentary: true })
+}
+
+// Keep My Coaching: the client withdraws their cancellation (or a request still
+// waiting for its end date). Stripe is changed and checked first; only then
+// are the records cleared, Lisa notified and the client emailed.
+export async function runKeepCoaching(email: string): Promise<FlowResult> {
+  const client = await getCoachingClientRecord(email)
+  if (!client) return reply({ error: "Coaching record not found" }, { status: 404 })
+  // Even with nothing on our record, Stripe may still have an end set (for
+  // example by the old flow); the action removes it if so.
+  const r = await clientKeepCoaching(billingDeps(), { email })
+  if (!r.ok) return reply({ error: r.message, pending: r.uncertain === true }, { status: r.status })
+  if (!r.changedStripe && !client.cancellationScheduledAt && !client.cancellationRequestedAt) return reply({ error: "No scheduled cancellation to reverse" }, { status: 400 })
+
+  await clearCoachingCancellation(email)
+  await clearPaidCancel(sharedDocClient(), email)
+
+  notifyAdmin({
+    kind: "cancellation-reversed",
+    subject: `Coaching cancellation reversed: ${client.displayName}`,
+    headline: `${client.displayName} has decided to keep their coaching`,
+    body: `${client.displayName} (${email}) chose Keep my coaching. ${r.changedStripe ? "The scheduled end has been removed in Stripe" : "Their cancellation request was withdrawn before anything changed in Stripe"}; their subscription continues unchanged.`,
+    ctaLabel: "Open billing panel",
+    ctaHref: profileLink(email),
+    meta: { email },
+  }).catch(() => {})
+
+  const firstName = client.displayName.split(" ")[0] ?? ""
+  // Existing live email, unchanged.
+  await sendClientEmail(email, {
+    subject: "You're staying — coaching subscription continues | Lisa Fit Method",
+    text: [`You're staying, ${firstName}.`, "Your scheduled cancellation has been removed. Your coaching subscription continues exactly as before — same price, same billing date, nothing changes.", "If anything prompted you to consider cancelling, I'd love to hear about it — reply to this email or reach me at contact@lisafitmethod.com.", "Lisa"].join("\n\n"),
+    html: `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f5f2ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ee;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+        <tr><td align="center" style="padding-bottom:32px;">
+          <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#1a1a1a;">Lisa <span style="color:#c8a97e;">Fit Method</span></span>
+        </td></tr>
+        <tr><td style="background:#fff;padding:44px 40px;border-radius:4px;border-left:4px solid #c8a97e;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:#c8a97e;">1:1 Coaching</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:#1a1a1a;line-height:1.3;">You're staying, ${firstName}.</h1>
+          <p style="margin:0 0 16px;font-size:15px;color:#4a4a4a;line-height:1.7;">
+            Your scheduled cancellation has been removed. Your coaching subscription continues exactly as before — same price, same billing date, nothing changes.
+          </p>
+          <p style="margin:0 0 24px;font-size:13px;color:#888;line-height:1.7;">
+            If anything prompted you to consider cancelling, I'd love to hear about it — reply to this email or reach me at contact@lisafitmethod.com.
+          </p>
+          <p style="margin:0;font-size:15px;color:#1a1a1a;">
+            <span style="font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#c8a97e;">Lisa</span>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`,
+  })
+  return reply({ ok: true })
 }

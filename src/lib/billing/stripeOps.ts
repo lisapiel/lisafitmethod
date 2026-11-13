@@ -136,6 +136,14 @@ export async function scheduleEndAt(stripe: StripeLike, subId: string, endsAt: s
   return toSubSnapshot(await stripe.subscriptions.update(subId, { cancel_at: Math.floor(Date.parse(endsAt) / 1000), proration_behavior: "none" }, { idempotencyKey }))
 }
 
+// A paying client keeps their coaching: remove the scheduled end. Only the
+// setting that is actually set is sent (Stripe fills cancel_at in when
+// cancel_at_period_end is set, and clearing that flag clears both).
+export async function removeScheduledEnd(stripe: StripeLike, sub: SubSnapshot, idempotencyKey: string): Promise<SubSnapshot> {
+  const params = sub.cancelAtPeriodEnd ? { cancel_at_period_end: false } : { cancel_at: "" }
+  return toSubSnapshot(await stripe.subscriptions.update(sub.id, params, { idempotencyKey }))
+}
+
 // After complimentary has ended, and only when an admin confirms: end the
 // paused subscription now. No final invoice, no proration, nothing refunded.
 export async function cancelNow(stripe: StripeLike, subId: string, idempotencyKey: string): Promise<SubSnapshot> {

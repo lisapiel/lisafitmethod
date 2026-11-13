@@ -31,6 +31,11 @@ export function CancellationDetails({ c, busy, onFinish }: { c: CancellationView
             The client has been told their request is recorded and being confirmed. Their coaching continues and nothing has changed in Stripe.
             {c.alertedAt ? ` You were alerted ${day(c.alertedAt)}.` : ""} If their commitment wasn&apos;t confirmed, confirm it first, then finish the request here.
           </p>
+          {c.nextRenewalAt && (
+            <p style={{ ...text("var(--ca-warn)"), fontWeight: 600 }}>
+              Their next renewal is {day(c.nextRenewalAt)}. Finish this before then: under your Terms, a charge after their request would have to be refunded.
+            </p>
+          )}
           {c.canFinish && (
             <button type="button" onClick={onFinish} disabled={busy} style={{ justifySelf: "start", background: "none", border: "1px solid var(--ca-line)", color: busy ? "var(--ca-muted)" : "var(--ca-accent-mark)", padding: "8px 14px", fontFamily: font, fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: busy ? "not-allowed" : "pointer" }}>
               Finish cancellation request

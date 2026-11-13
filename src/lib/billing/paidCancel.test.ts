@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { FakeTable } from "@/lib/testing/fakeDynamo"
-import { clientCancelPaid, manageView, paidCancelPreview, SETTLE_AFTER_MS, type Deps } from "./actions"
+import { clientCancelPaid, clientKeepCoaching, manageView, paidCancelPreview, SETTLE_AFTER_MS, type Deps } from "./actions"
 import { claimPaidCancelNotice, clearPaidCancel, readState, releasePaidCancelNotice } from "./store"
 import type { StripeLike } from "./stripeOps"
 import type { StripeSubscriptionLike } from "./snapshot"
@@ -18,7 +18,7 @@ class PaidStripe {
   constructor(o: { anchor: string; periodEnd: string; price?: number }) {
     this.sub = {
       id: "sub_paid", status: "active", customer: "cus_paid", cancel_at_period_end: false, cancel_at: null, pause_collection: null, schedule: null,
-      billing_cycle_anchor: sec(o.anchor), collection_method: "charge_automatically", default_payment_method: "pm_1", metadata: { product: "coaching" }, discounts: [],
+      billing_cycle_anchor: sec(o.anchor), start_date: sec(o.anchor), collection_method: "charge_automatically", default_payment_method: "pm_1", metadata: { product: "coaching" }, discounts: [],
       items: { data: [{ id: "si_1", quantity: 1, current_period_end: sec(o.periodEnd), price: { unit_amount: o.price ?? 39700, product: "prod_1", currency: "usd", recurring: { interval: "month" } } }] },
     }
   }
@@ -173,4 +173,46 @@ test("preview and the cancellation agree; the admin view shows the scheduled end
   assert.equal(v.cancellation.status, "scheduled")
   assert.equal(v.cancellation.endsAt, "2027-01-08T01:04:51.000Z")
   assert.deepEqual(v.cancellation.remainingPayments, [{ date: "2026-12-08T01:04:51.000Z", amountCents: 39700 }])
+})
+
+test("Keep my coaching, month-to-month: only the period-end setting is removed, and Stripe's answer is checked", async () => {
+  const { d, stripe, table } = setup()
+  await clientCancelPaid(d, { email: EMAIL })
+  const k = await clientKeepCoaching(d, { email: EMAIL })
+  assert.deepEqual(k, { ok: true, changedStripe: true })
+  assert.deepEqual(stripe.writes[1]!.params, { cancel_at_period_end: false })
+  assert.match(stripe.writes[1]!.key ?? "", /^lfm-billing-/)
+  const s = await readState(table, EMAIL)
+  assert.equal(s?.paidCancelEndsAt, null)
+  assert.equal(s?.pendingOpId, null)
+  const again = await clientCancelPaid(d, { email: EMAIL })
+  assert.equal(again.ok, true, "they can cancel again later")
+  assert.ok(await claimPaidCancelNotice(table, EMAIL), "and get a confirmation for the new cancellation")
+})
+
+test("Keep my coaching inside a 3-month minimum: the commitment end date is removed", async () => {
+  const { d, stripe } = setup({ commitment: { type: "THREE_MONTH_MINIMUM", endDate: "2027-01-08T01:04:51.000Z" } })
+  await clientCancelPaid(d, { email: EMAIL })
+  const k = await clientKeepCoaching(d, { email: EMAIL })
+  assert.equal(k.ok, true)
+  assert.deepEqual(stripe.writes[1]!.params, { cancel_at: "" })
+  assert.ok(!stripe.sub.cancel_at)
+})
+
+test("Keep my coaching with nothing scheduled in Stripe changes nothing there", async () => {
+  const { d, stripe } = setup()
+  assert.deepEqual(await clientKeepCoaching(d, { email: EMAIL }), { ok: true, changedStripe: false })
+  assert.equal(stripe.writes.length, 0)
+})
+
+test("Keep my coaching when Stripe refuses: still scheduled, nothing recorded as kept", async () => {
+  const { d, stripe, table } = setup()
+  await clientCancelPaid(d, { email: EMAIL })
+  stripe.failNext = "definitive"
+  const k = await clientKeepCoaching(d, { email: EMAIL })
+  assert.equal(k.ok, false)
+  assert.equal(stripe.sub.cancel_at_period_end, true)
+  const s = await readState(table, EMAIL)
+  assert.equal(s?.paidCancelEndsAt, "2026-12-08T01:04:51.000Z")
+  assert.equal(s?.pendingOpId, null)
 })
