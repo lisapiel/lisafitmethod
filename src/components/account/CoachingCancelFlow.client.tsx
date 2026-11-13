@@ -47,7 +47,8 @@ export function formatMoney(cents: number): string {
 }
 
 export function paymentList(payments: PlannedPayment[]): string {
-  return payments.map((p) => `${p.amountCents != null ? formatMoney(p.amountCents) : "the amount on your invoice"} on ${formatDate(p.date)}`).join(", ")
+  const items = payments.map((p) => `${p.amountCents != null ? formatMoney(p.amountCents) : "the amount on your invoice"} on ${formatDate(p.date)}`)
+  return items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`
 }
 
 async function authHeaders(): Promise<Record<string, string>> {

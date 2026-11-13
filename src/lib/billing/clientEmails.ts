@@ -38,6 +38,11 @@ export function complimentaryCancellationEmail(input: { firstName: string; effec
   return { subject: "Your coaching cancellation is confirmed", html: emailShell(name, lines), text: [`Got it, ${input.firstName}.`, ...lines, "Lisa"].join("\n\n") }
 }
 
+// "a", "a and b", "a, b and c"
+export function listWithAnd(items: string[]): string {
+  return items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`
+}
+
 export function moneyLabel(cents: number): string {
   const dollars = cents / 100
   return dollars % 1 === 0 ? `$${dollars}` : `$${dollars.toFixed(2)}`
@@ -53,7 +58,7 @@ export function paidCancellationEmail(input: { firstName: string; effectiveDateL
     `Your coaching with me continues through ${date}, and then it will end.`,
     ...(payments.length
       ? [
-          `Because you started with a 3-month minimum, ${payments.length === 1 ? "your last committed payment" : "your remaining committed payments"} will still be charged: ${payments.join(", ")}.`,
+          `Because you started with a 3-month minimum, ${payments.length === 1 ? "your last committed payment" : "your remaining committed payments"} will still be charged: ${listWithAnd(payments)}.`,
           "After that, your subscription won't renew and nothing more will be charged.",
         ]
       : ["That time is already paid for. Your subscription won't renew and nothing more will be charged."]),
