@@ -18,6 +18,8 @@ export type SubSnapshot = {
   currentPeriodEnd: string | null
   // Stripe's billing anchor: renewals fall on this day and time each month.
   billingCycleAnchor: string | null
+  // When Stripe started the subscription (its first billing period).
+  startDate: string | null
   cancelAtPeriodEnd: boolean
   cancelAt: string | null
   pause: { behavior: PauseBehavior; resumesAt: string | null } | null
@@ -80,6 +82,7 @@ export type StripeSubscriptionLike = {
   customer: Ref
   cancel_at_period_end?: boolean | null
   billing_cycle_anchor?: number | null
+  start_date?: number | null
   cancel_at?: number | null
   ended_at?: number | null
   pause_collection?: { behavior?: string | null; resumes_at?: number | null } | null
@@ -117,6 +120,7 @@ export function toSubSnapshot(sub: StripeSubscriptionLike): SubSnapshot {
     itemCount: items.length,
     currentPeriodEnd: iso(item?.current_period_end),
     billingCycleAnchor: iso(sub.billing_cycle_anchor),
+    startDate: iso(sub.start_date),
     cancelAtPeriodEnd: sub.cancel_at_period_end === true,
     cancelAt: iso(sub.cancel_at),
     pause:

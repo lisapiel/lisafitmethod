@@ -5,7 +5,7 @@ import type { InvoiceSnapshot, SubSnapshot } from "./snapshot"
 
 export const sub = (o: Partial<SubSnapshot> = {}): SubSnapshot => ({
   id: "sub_1", status: "active", customerId: "cus_1", itemId: "si_1", productId: "prod_1", unitAmountCents: 100, currency: "usd", interval: "month",
-  quantity: 1, itemCount: 1, currentPeriodEnd: "2026-12-08T01:04:51.000Z", billingCycleAnchor: "2026-10-08T01:04:51.000Z", cancelAtPeriodEnd: false, cancelAt: null, pause: null, scheduleId: null,
+  quantity: 1, itemCount: 1, currentPeriodEnd: "2026-12-08T01:04:51.000Z", billingCycleAnchor: "2026-10-08T01:04:51.000Z", startDate: "2026-10-08T01:04:51.000Z", cancelAtPeriodEnd: false, cancelAt: null, pause: null, scheduleId: null,
   collectionMethod: "charge_automatically", hasDefaultPaymentMethod: true, discounts: [], metadata: { product: "coaching" }, cancellationReason: null, endedAt: null, ...o,
 })
 export const inv = (o: Partial<InvoiceSnapshot> = {}): InvoiceSnapshot => ({

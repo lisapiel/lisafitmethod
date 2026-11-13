@@ -24,6 +24,7 @@ export type PaidCancelPlan =
 export type UnknownReason =
   | "commitment-unconfirmed"
   | "commitment-dates-missing"
+  | "commitment-dates-disagree"
   | "no-running-subscription"
   | "collection-paused"
   | "not-monthly"
@@ -37,6 +38,8 @@ const ALIGN_TOLERANCE_MS = 3 * 864e5
 const MATCH_TOLERANCE_MS = 60 * 60 * 1000
 const MAX_REMAINING_PAYMENTS = 3
 const RUNNING = new Set(["active", "trialing", "past_due"])
+// A "3-month minimum" is the first three monthly payments.
+const MINIMUM_MONTHS = 3
 
 // Stripe's monthly renewal n months after the anchor: same day and time (UTC),
 // or the last day of a shorter month.
@@ -75,9 +78,15 @@ export function planPaidCancellation(input: {
 
   const periodEnd = sub.currentPeriodEnd
   const hasMinimum = commitment?.type === "THREE_MONTH_MINIMUM"
-  if (hasMinimum && !commitment?.endDate) return { kind: "unknown", reason: "commitment-dates-missing" }
-  const commitmentEnd = hasMinimum ? commitment!.endDate! : null
-  if (commitmentEnd && Number.isNaN(Date.parse(commitmentEnd))) return { kind: "unknown", reason: "commitment-dates-missing" }
+  // The commitment is the first three monthly payments, so Stripe's own start
+  // date fixes when it ends. The client record's date is a cross-check: if the
+  // two disagree, the date is unknown until Lisa checks which is right.
+  const recordEnd = hasMinimum ? commitment?.endDate ?? null : null
+  if (recordEnd && Number.isNaN(Date.parse(recordEnd))) return { kind: "unknown", reason: "commitment-dates-missing" }
+  const stripeEnd = hasMinimum && sub.startDate ? monthlyBoundary(sub.startDate, MINIMUM_MONTHS) : null
+  if (hasMinimum && !recordEnd && !stripeEnd) return { kind: "unknown", reason: "commitment-dates-missing" }
+  if (recordEnd && stripeEnd && Math.abs(Date.parse(recordEnd) - Date.parse(stripeEnd)) > ALIGN_TOLERANCE_MS) return { kind: "unknown", reason: "commitment-dates-disagree" }
+  const commitmentEnd = hasMinimum ? stripeEnd ?? recordEnd : null
 
   if (!commitmentEnd || Date.parse(commitmentEnd) <= Date.parse(periodEnd) + ALIGN_TOLERANCE_MS) {
     return { kind: "period-end", endsAt: periodEnd, commitmentEndsAt: commitmentEnd, remainingPayments: [] }
@@ -106,7 +115,8 @@ export function planPaidCancellation(input: {
 export function unknownReasonForAdmin(r: UnknownReason): string {
   switch (r) {
     case "commitment-unconfirmed": return "Their commitment terms haven't been confirmed in their client record yet."
-    case "commitment-dates-missing": return "They're on a 3-month minimum, but the start date or commitment length is missing."
+    case "commitment-dates-missing": return "They're on a 3-month minimum, but neither their client record nor Stripe gives a start date."
+    case "commitment-dates-disagree": return "Their 3-month minimum ends on different dates in their client record and in Stripe (subscription start). Check which is right and correct the record, then finish the request."
     case "no-running-subscription": return "There's no running Stripe subscription linked to them."
     case "collection-paused": return "Stripe collection is paused on their subscription."
     case "not-monthly": return "Their Stripe subscription isn't billed monthly."
